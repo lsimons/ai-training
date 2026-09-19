@@ -95,7 +95,7 @@ development tools, LLM observability and evaluations (deterministic,
 model-based, human; tools), AI-assisted coding tools (Claude Code, Codex,
 Cursor, Devin, Replit, Gemini).
 
-Overlap with our map ([spec 002](../../spec/002-topic-map.md)): most of
+Overlap with our map ([spec S02](../../spec/S02-topic-map.md)): most of
 our `concepts` topics, all of `building-agents`, `customizing-agents/mcp`,
 and the security half of `safety`. Not present anywhere on roadmap.sh: our
 knowledge-worker material (responsible use, verifying output, delegating,
@@ -205,7 +205,7 @@ Community Solutions.
 
 ## What to take from it
 
-Decision 2026-09-20: items 2, 4, 5 and 8 applied to specs 001 and 002.
+Decision 2026-09-20: items 2, 4, 5 and 8 applied to specs S01 and S02.
 Items 1, 3, 6 and 7 declined for now.
 
 1. **The drawer pattern for topic nodes.** Click a node, get content,
@@ -229,7 +229,7 @@ Items 1, 3, 6 and 7 declined for now.
    should expose the same verbs per topic and per lesson, driven by our
    concept definitions and behaviours rather than a general prompt.
 6. **Generated lesson anatomy as a checklist.** Their generated lessons
-   contain the same parts our spec 001 lesson has (sections, callouts, an
+   contain the same parts our spec S01 lesson has (sections, callouts, an
    inline check, a summary, recall questions, a next card) plus a
    step-through widget. Confirms the lesson shape; also a warning that a
    competent generated lesson is now cheap, so our value is in the

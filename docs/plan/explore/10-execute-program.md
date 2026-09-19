@@ -112,14 +112,14 @@ Review, Reset.
 ## What to take from it
 
 Decision 2026-09-19: all eight items below applied. `predict` and the CI
-rule are in spec 001; the rhythm, lesson graph and reference filter in specs
-001 and 002; spaced review is [spec 003](../../spec/003-spaced-review.md).
+rule are in spec S01; the rhythm, lesson graph and reference filter in specs
+S01 and S02; spaced review is [spec S03](../../spec/S03-spaced-review.md).
 
 1. **Prediction as the core checkpoint for code.** Show real code, ask for
    the value, run it to grade. This is the `repair` and `choice` interaction
    types' better sibling for anything executable: it is not multiple choice,
    it cannot be guessed, and grading is exact. Add `predict` to the
-   interaction types in spec 001, with an honour-system variant for
+   interaction types in spec S01, with an honour-system variant for
    non-executable cases (predict what the agent will do, then run it).
 2. **Never reveal the answer in a lesson; hints are diagnostic questions.**
    Matches the CS50 Duck finding and the Anthropic modules. Give Up exists
@@ -131,7 +131,7 @@ rule are in spec 001; the rhythm, lesson graph and reference filter in specs
    let a lesson build one artefact; the note stops confusion.
 5. **The course page is the graph.** Levels with locked tiers and dotted
    prerequisite edges is a good rendering for our per-course lesson view and
-   fits the three-lane path idea in spec 002.
+   fits the three-lane path idea in spec S02.
 6. **Spaced review is the retention mechanism**, and it needs a scheduler and
    a place to surface "review available". With local-storage progress we can
    do this per browser: store an interval per checkpoint, surface due
@@ -142,7 +142,7 @@ rule are in spec 001; the rhythm, lesson graph and reference filter in specs
    and topic reference pages could be assembled the same way.
 8. **Every example is executable and tested.** For code lessons we should do
    the same: examples run in CI, expected outputs asserted. For agent
-   lessons it is harder; the fixture-repository rule in spec 001 is the
+   lessons it is harder; the fixture-repository rule in spec S01 is the
    nearest equivalent.
 
 Not adopted: the subscription and lock-step level gating as a business

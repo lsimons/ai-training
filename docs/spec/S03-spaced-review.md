@@ -1,0 +1,171 @@
+# S03 - Spaced review
+
+**Purpose:** Define how the site brings a learner back to what they learned,
+without a backend: which items are reviewed, on what schedule, where reviews
+surface, and what is stored.
+
+**Status:** Draft
+
+## Introduction
+
+Vocabulary is per the [project dictionary](S01-dictionary.md): a
+**checkpoint** becomes a **review item** when its lesson is finished, a
+**review** is a short session of the items due today, and everything is kept
+in the **progress record** in browser local storage. The course page and the
+routing rules that reviews feed are in the
+[topic map](S02-topic-map.md).
+
+### Why
+
+Retention is the point of a training site, and interactive lessons alone
+produce recognition, not recall. Every source studied except Diátaxis has a
+repetition mechanism:
+
+| Source                                              | Mechanism                                                                                                                          |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| CS50                                                | Weekly quizzes and problem sets                                                                                                    |
+| Anthropic's interactive training modules            | Cumulative tasks spanning a module                                                                                                 |
+| The `/teach` tutor skill in *agent-engineer-course* | A spaced-recall queue; one recall question before each new lesson                                                                  |
+| Execute Program                                     | Scheduled reviews of a lesson's examples the next day and then at growing intervals; they say reviews take under 10% of study time |
+
+### The model: Execute Program's reviews
+
+The mechanics here copy Execute Program's because they work, adapted to a
+site with no server:
+
+- Finishing a lesson schedules some of its examples for review the next day,
+  then at growing intervals.
+- A review is a short page of prediction items from finished lessons, one at
+  a time, each with **Run**, **Hint** and **Give Up**. Hint is diagnostic.
+  Give Up is disabled until at least one attempt.
+- After an answer the item shows a link to its lesson, a strip of five pills
+  marking its position in the schedule, and a control to see it sooner or
+  less often.
+- The course page announces "New review available". Pacing is suggested, not
+  enforced: the site may suggest stopping for the day but never hard-limits
+  lessons.
+
+## What is reviewed
+
+- Every **checkpoint** in a lesson becomes a **review item** when the lesson
+  is finished, regardless of whether it was passed or skipped in the lesson.
+- Reviewable interaction types: `predict`, `choice`, `match`, `sort`,
+  `order`, `scenario`.
+- Not reviewed: `repair`, `self-grade`, `exercise` and `reflection`. They
+  are too long or not gradable.
+- Authors may mark a checkpoint `review: false` (a one-off that does not
+  bear repeating) or supply **variants**: alternative stems with the same
+  answer, or alternative option orders, so a review tests the idea rather
+  than recognition of the wording.
+
+## Schedule
+
+Five stages, shown to the learner as five pills.
+
+| Stage | Due after last pass |
+| ----- | ------------------- |
+| 1     | 1 day               |
+| 2     | 3 days              |
+| 3     | 7 days              |
+| 4     | 21 days             |
+| 5     | 60 days, then done  |
+
+| Event                 | Effect                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Lesson finished       | Each of its checkpoints enters at stage 1, due one day later                                                    |
+| Pass                  | Item moves up one stage. Passing stage 5 retires the item (`done`); it stays visible in the learner's reference |
+| Fail or Give Up       | Item drops to stage 1, due tomorrow                                                                             |
+| "See this sooner"     | Item drops one stage                                                                                            |
+| "See this less often" | Item rises one stage                                                                                            |
+| Comfort level `less`  | New items enter at stage 1 and are due in the learner's next session, even the same day                         |
+| Comfort level `more`  | New items enter at stage 2                                                                                      |
+
+- The frequency control is the only manual knob, and it is per item, offered
+  after answering.
+- Comfort level has no other coupling to reviews.
+- Due items are capped at **12 per session**, oldest due first. The page
+  says how many remain.
+- There is no daily limit on lessons, only a suggestion after two lessons in
+  one sitting.
+
+## Where reviews surface
+
+| Place                      | Surface                                                                                                                                                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Course page                | A "Review due: N items" card above the lesson graph when N > 0, leading to the review page for that course. Also a small count in the sidebar group header.                                                              |
+| Landing page and path page | One line per course with due items                                                                                                                                                                                       |
+| Tutor mode                 | At session start, if items are due, one recall question is asked before anything else. The tutor reads the exported progress file if the learner has exported it, otherwise it asks the learner to open the review page. |
+| Routing                    | Per the topic map: an item failed twice in a row marks its objective "behind" in the path lanes and offers the section that teaches it                                                                                   |
+
+## The review page
+
+One page per course at `/<area>/<course>/review/`.
+
+1. A short reminder of answer formats for this course.
+2. Items one at a time, each showing the stem, the interaction, **Run** or
+   **Check**, **Hint**, **Give Up**.
+   - Hint is the checkpoint's diagnostic hint, never the answer.
+   - Give Up is enabled after one attempt, shows the answer and rationale,
+     and counts as a fail. Give Up exists only here, never in lessons.
+3. After each answer: the lesson link, the five-pill stage, and the frequency
+   control.
+4. **Finish review** returns to the course page.
+
+A header progress bar counts items in this session.
+
+## Storage
+
+Inside the progress record, keyed by checkpoint id:
+
+```json
+"reviews": {
+  "using-agents/delegating/writes-a-brief#fix-the-brief": {
+    "stage": 2,
+    "due": "2026-09-23",
+    "last": "pass",
+    "history": ["fail", "pass", "pass"]
+  }
+}
+```
+
+| Field     | Meaning                                                                                |
+| --------- | -------------------------------------------------------------------------------------- |
+| `stage`   | 1 to 5, or `done`                                                                      |
+| `due`     | ISO calendar day in the learner's local time zone; the item is due when `due <= today` |
+| `last`    | `pass` or `fail` (Give Up records `fail`)                                              |
+| `history` | Results, oldest first, capped at the last 20                                           |
+
+- The whole record sits inside the single versioned local-storage key and
+  the export/import JSON file, so reviews move with the learner between
+  browsers by hand.
+- No server, no notifications, no email. A learner who does not come back is
+  not reminded. This is a known limit; tutor mode is the only active
+  reminder, and only when the learner opens a session.
+
+## Content changes
+
+| Change                              | Effect                                                                                                             |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| A checkpoint's id changes           | Its review item is orphaned and dropped silently on next load. Authors keep checkpoint ids stable for this reason. |
+| A checkpoint's answer changes       | Authors bump a `revision` field on the checkpoint; items with an older revision reset to stage 1                   |
+| Progress storage key version bumped | All reviews reset. Do it only when the schema changes, never for content.                                          |
+
+## Related specs
+
+- [S01 Project dictionary](S01-dictionary.md): checkpoint, review, review
+  item, progress record, comfort level, interaction types.
+- [S02 Topic map and competencies](S02-topic-map.md): the course page that
+  shows the review due card; the routing rule for items failed twice.
+
+## Open questions
+
+1. Whether skipped-in-lesson checkpoints should enter review at all, or first
+   require a pass in the lesson. Leaning: enter, because skipping is often "I
+   know this", and a review is how we find out.
+2. Whether Foundations courses should review at all, given knowledge-worker
+   learners may take one course and leave. Leaning: yes, but keep sessions
+   to five items for Foundations.
+3. Whether to allow reviewing across courses in one session. Leaning: no
+   until there are learners with more than one course finished.
+4. Intervals and the pass rule are first guesses, to tune once there are
+   learners.

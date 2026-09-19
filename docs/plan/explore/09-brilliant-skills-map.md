@@ -171,7 +171,7 @@ code).
 
 ## 4. Comparison with our specs
 
-| Brilliant                         | Ours ([spec 001](../../spec/001-dictionary.md), [spec 002](../../spec/002-topic-map.md)) | Note                                                                                                                           |
+| Brilliant                         | Ours ([spec S01](../../spec/S01-dictionary.md), [spec S02](../../spec/S02-topic-map.md)) | Note                                                                                                                           |
 | --------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | Tier                              | Group / area                                                                             | Theirs are thematic bands; ours are audience bands. Both are three to six.                                                     |
 | Big idea (noun)                   | Topic                                                                                    | Same register. Theirs carry a one-sentence "why now" summary; ours carry concepts and edges.                                   |
@@ -183,7 +183,7 @@ code).
 
 ## 5. Implications
 
-Decision 2026-09-19: 1, 3, 4, 5 and 7 applied in spec 002; 2 (short codes)
+Decision 2026-09-19: 1, 3, 4, 5 and 7 applied in spec S02; 2 (short codes)
 and 6 (shorter lessons) declined. Slugs stay the only identifiers, and 10 to
 25 minute lessons are fine for professional learners and cheaper to produce.
 Item 7 is applied as routing: one exercise per lesson with a stretch goal,
@@ -215,7 +215,7 @@ routing default.
    with `building-agents/production` and `evaluation`.
 6. **Lesson length.** Their 5 to 10 minute unit with a skills check argues
    for splitting our lessons into sections that each end in a checkpoint,
-   which spec 001 already allows; keep an eye on total lesson length.
+   which spec S01 already allows; keep an eye on total lesson length.
 7. **Differentiation model.** Their "three learners in parallel in one
    graph" is the comfort-level idea done through the map rather than through
    alternate content: prerequisite review, current objective, extension.
