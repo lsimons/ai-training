@@ -90,7 +90,7 @@ verbatim and must include the base path.
 - `mise run ci` must pass before you push. It is the same list the CI job
   runs, in the same order.
 - Code examples in lessons are real and their shown output is asserted in
-  CI (spec S01, Rules). Until the example-runner exists, an example that
+  CI (spec S03, Examples). Until the example-runner exists, an example that
   cannot run must say so in the page.
 - Internal links are root-relative; the rehype plugin adds the base path.
   `starlight-links-validator` fails `mise run docs-build` on a dead one, so
