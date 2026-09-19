@@ -1,8 +1,9 @@
 name: Deploy to GitHub Pages
 
+# Disabled on push while the repo is private (GitHub Pages is unavailable
+# there). Re-enable the push trigger when the repo goes public; see
+# docs/plan/README.md, "Repo visibility".
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
