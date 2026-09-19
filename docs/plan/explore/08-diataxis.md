@@ -47,7 +47,7 @@ learners at work and stay outside courses and paths.
    - Visible results early and often; every step produces something the
      learner can see.
    - Maintain the narrative of the expected: show expected output, flag the
-     likely signs of going wrong. Our watch-out sections are this, kept
+     likely signs of going wrong. Our pitfall sections are this, kept
      short.
    - Minimise explanation; link to an explanation page or short instead.
    - One path, no choices or alternatives. Hence comfort levels apply to
