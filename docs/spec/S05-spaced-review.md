@@ -1,4 +1,4 @@
-# S03 - Spaced review
+# S05 - Spaced review
 
 **Purpose:** Define how the site brings a learner back to what they learned,
 without a backend: which items are reviewed, on what schedule, where reviews
@@ -8,42 +8,16 @@ surface, and what is stored.
 
 ## Introduction
 
-Vocabulary is per the [project dictionary](S01-dictionary.md): a
-**checkpoint** becomes a **review item** when its lesson is finished, a
-**review** is a short session of the items due today, and everything is kept
-in the **progress record** in browser local storage. The course page and the
-routing rules that reviews feed are in the
-[topic map](S02-topic-map.md).
-
-### Why
+Terms are per the [project dictionary](S01-dictionary.md): a **checkpoint**
+becomes a **review item** when its lesson is finished, and a **review** is a
+short session of the items due today. The course page and the routing rules
+that reviews feed are in the [topic map](S02-topic-map.md); the review
+schedule is stored in the [progress record](S04-progress-record.md).
 
 Retention is the point of a training site, and interactive lessons alone
-produce recognition, not recall. Every source studied except Diátaxis has a
-repetition mechanism:
-
-| Source                                              | Mechanism                                                                                                                          |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| CS50                                                | Weekly quizzes and problem sets                                                                                                    |
-| Anthropic's interactive training modules            | Cumulative tasks spanning a module                                                                                                 |
-| The `/teach` tutor skill in *agent-engineer-course* | A spaced-recall queue; one recall question before each new lesson                                                                  |
-| Execute Program                                     | Scheduled reviews of a lesson's examples the next day and then at growing intervals; they say reviews take under 10% of study time |
-
-### The model: Execute Program's reviews
-
-The mechanics here copy Execute Program's because they work, adapted to a
-site with no server:
-
-- Finishing a lesson schedules some of its examples for review the next day,
-  then at growing intervals.
-- A review is a short page of prediction items from finished lessons, one at
-  a time, each with **Run**, **Hint** and **Give Up**. Hint is diagnostic.
-  Give Up is disabled until at least one attempt.
-- After an answer the item shows a link to its lesson, a strip of five pills
-  marking its position in the schedule, and a control to see it sooner or
-  less often.
-- The course page announces "New review available". Pacing is suggested, not
-  enforced: the site may suggest stopping for the day but never hard-limits
-  lessons.
+produce recognition, not recall. Reviews re-ask a lesson's checkpoints at
+growing intervals after the lesson is finished, take a few minutes, and are
+the only mechanism that brings a learner back to old material.
 
 ## What is reviewed
 
@@ -115,18 +89,8 @@ A header progress bar counts items in this session.
 
 ## Storage
 
-Inside the progress record, keyed by checkpoint id:
-
-```json
-"reviews": {
-  "using-agents/delegating/writes-a-brief#fix-the-brief": {
-    "stage": 2,
-    "due": "2026-09-23",
-    "last": "pass",
-    "history": ["fail", "pass", "pass"]
-  }
-}
-```
+The schedule lives in the progress record's `reviews` map, keyed by
+checkpoint id, with the shape shown in the progress record spec.
 
 | Field     | Meaning                                                                                |
 | --------- | -------------------------------------------------------------------------------------- |
@@ -135,27 +99,28 @@ Inside the progress record, keyed by checkpoint id:
 | `last`    | `pass` or `fail` (Give Up records `fail`)                                              |
 | `history` | Results, oldest first, capped at the last 20                                           |
 
-- The whole record sits inside the single versioned local-storage key and
-  the export/import JSON file, so reviews move with the learner between
-  browsers by hand.
+- Because the schedule is inside the progress record, it moves with the
+  learner by export and import, and it resets when the record resets.
 - No server, no notifications, no email. A learner who does not come back is
   not reminded. This is a known limit; tutor mode is the only active
   reminder, and only when the learner opens a session.
 
 ## Content changes
 
-| Change                              | Effect                                                                                                             |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| A checkpoint's id changes           | Its review item is orphaned and dropped silently on next load. Authors keep checkpoint ids stable for this reason. |
-| A checkpoint's answer changes       | Authors bump a `revision` field on the checkpoint; items with an older revision reset to stage 1                   |
-| Progress storage key version bumped | All reviews reset. Do it only when the schema changes, never for content.                                          |
+| Change                         | Effect                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------ |
+| A checkpoint's id changes      | Its review item is orphaned and dropped silently on next load, as for every progress entry       |
+| A checkpoint's answer changes  | Authors bump a `revision` field on the checkpoint; items with an older revision reset to stage 1 |
+| Progress record version bumped | All reviews reset with the rest of the record                                                    |
 
 ## Related specs
 
 - [S01 Project dictionary](S01-dictionary.md): checkpoint, review, review
-  item, progress record, comfort level, interaction types.
+  item, comfort level, interaction types.
 - [S02 Topic map and competencies](S02-topic-map.md): the course page that
   shows the review due card; the routing rule for items failed twice.
+- [S04 Progress record](S04-progress-record.md): where the schedule is
+  stored and how it moves between browsers.
 
 ## Open questions
 

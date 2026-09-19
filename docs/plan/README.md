@@ -107,7 +107,7 @@ See the `explore/` reports for detail on each.
    [explore/10](./explore/10-execute-program.md) (Execute Program's
    prediction examples, lesson graph and spaced reviews; all applied:
    `predict` in spec S01, graph and rhythm in spec S02, and
-   [spec S03](../spec/S03-spaced-review.md) for spaced review, and
+   [spec S05](../spec/S05-spaced-review.md) for spaced review, and
    [explore/11](./explore/11-roadmap-sh.md) (roadmap.sh: drawn topic maps,
    per-node drawer with status and AI actions, generated courses and
    quizzes, project specs; applied: node status and milestone bar,
@@ -120,6 +120,6 @@ See the `explore/` reports for detail on each.
    model.
 6. Design tutor mode. Must include the node-scoped verbs from spec S01
    (explain, key points, ELI5, why it matters, quiz me, test me) and the
-   spaced-review recall question from spec S03.
+   spaced-review recall question from spec S05.
 7. Replace the template pages under `docs/src/content/docs/` with real
    content, area by area.

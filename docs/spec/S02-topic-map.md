@@ -3,7 +3,7 @@
 **Purpose:** Name what the site teaches (topics and their concepts, per area,
 with prerequisite links), name what a learner should be able to do afterwards
 (competencies, their learning objectives and behaviours), say how the map
-differentiates between learners, and pick the release-1 thin slice.
+differentiates between learners.
 
 **Status:** Draft
 
@@ -14,21 +14,21 @@ Vocabulary is per the [project dictionary](S01-dictionary.md). In short:
 **learning objectives** and **behaviours** are what a learner can do afterwards
 and point into the map; **lessons** cover topics and serve objectives.
 
-The shape borrows from four places:
-
-| Source                                 | What this spec takes                                                                                                                                                                         |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A competency-map project of the author | "Cheap tree, rich leaves": a folder tree for structure and one data file per leaf; typed links `prerequisite`, `related`, `specialization`; three levels as structured criteria, not prose.  |
-| Brilliant's coding skills map          | Four levels of noun-phrase big idea, verb-phrase objective and one-sentence claim with why and example; an alignment layer to external frameworks; differentiation by position in one graph. |
-| Execute Program                        | The course page as a graph of lessons drawn in levels with dotted prerequisite edges, with a completion ring and an About panel beside it.                                                   |
-| roadmap.sh                             | Node status written back onto the map as styling; a milestone bar above the map; one deep-linkable page per node that opens in a drawer without leaving the map.                             |
-
-Deliberately not taken: Brilliant's short codes (slugs stay the only
-identifiers), Execute Program's locked levels (paths are advisory) and
-roadmap.sh's drawing-as-map with no prerequisite semantics (edges here are
-data).
-
 ## Shape
+
+### Areas
+
+| Group       | Area               | Slug                 | Audience           |
+| ----------- | ------------------ | -------------------- | ------------------ |
+| Foundations | Concepts           | `concepts`           | Everyone           |
+| Foundations | Safety             | `safety`             | Everyone           |
+| Foundations | Using agents       | `using-agents`       | Everyone           |
+| Engineering | Coding with agents | `coding-with-agents` | Software engineers |
+| Engineering | Customizing agents | `customizing-agents` | Software engineers |
+| Engineering | Building agents    | `building-agents`    | Software engineers |
+
+An area owns three to seven topics and two to four competencies. A lesson
+covers one topic and teaches one to five of its concepts.
 
 ### What is taught and what is learned
 
@@ -72,9 +72,9 @@ Tutor mode cites these URLs when it points a learner somewhere.
 
 ### Rendering rules
 
-- Concept definitions follow the dictionary: one plain paragraph of about
-  80 words, no lists or links, readable both in the glossary and as hover
-  text on the map.
+- Concept definitions are one plain paragraph of at most about 80 words,
+  no lists or links inside, readable both in the glossary and as hover text
+  on the map. Depth belongs in the topic page prose and in cited sources.
 - No short codes. A reference from one behaviour to another uses the
   objective slug.
 - The topic map colours each topic by the state of the lessons that cover
@@ -223,7 +223,7 @@ Learning objectives:
 | `judges-agent-risk`   | `names-blast-radius`    | base   | Names what an agent action can reach and break                    |
 | `judges-agent-risk`   | `chooses-human-in-loop` | base   | Chooses where a human must approve                                |
 | `judges-agent-risk`   | `recognises-injection`  | base   | Recognises prompt injection and data exfiltration paths           |
-| `judges-agent-risk`   | `sets-oversight`        | lead   | Sets policy, logging and escalation for agents in an organisation |
+| `judges-agent-risk`   | `sets-oversight`        | expert | Sets policy, logging and escalation for agents in an organisation |
 
 ### Area `using-agents`: Using agents
 
@@ -306,7 +306,7 @@ Learning objectives:
 | `works-in-team`       | `attributes-honestly`        | base   | Attributes agent work honestly in commits and reviews                      |
 | `works-in-team`       | `follows-team-norms`         | base   | Follows the team's review and CI norms for agent changes                   |
 | `works-in-team`       | `runs-parallel-work`         | expert | Runs several agent sessions without losing coherence                       |
-| `works-in-team`       | `sets-team-practice`         | lead   | Sets the team's practice for agent use                                     |
+| `works-in-team`       | `sets-team-practice`         | expert | Sets the team's practice for agent use                                     |
 
 ### Area `customizing-agents`: Customizing agents
 
@@ -479,7 +479,7 @@ All routing reads the map and the local progress record; nothing else.
 
 ### Worked example
 
-The thin-slice lesson *Your first session with a coding agent*:
+Take the lesson *Your first session with a coding agent*:
 
 | Field        | Value                                                                                                                                          |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -488,13 +488,6 @@ The thin-slice lesson *Your first session with a coding agent*:
 | extends-to   | *Plan, implement, verify*; a short on permission modes                                                                                         |
 | checkpoint 1 | Fix a weak brief. A fail routes to the Delegating section; a clean run offers the extensions.                                                  |
 | exercise     | A scripted change in the fixture repository. Stretch goal: "now ask the agent for a refactor you choose, and review it the same way".          |
-
-### Limits in release 1
-
-Routing needs the objective graph to be real and needs somewhere to route
-to. With six lessons there is little of either. The mechanism is designed
-now so the data model and components allow for it; it becomes useful as the
-graph fills in.
 
 ## Cross-area edges
 
@@ -517,33 +510,6 @@ competencies are not confined to their area's topics.
 | `engineer`         | Software engineers        | Foundations, then coding-with-agents, then customizing-agents                                       | `ships-with-agent` and `configures-agent` at `base`  |
 | `agent-builder`    | Engineers building agents | Foundations (agent and safety parts), building-agents/tool-use through evaluation, then customizing | `builds-agent-loop` and `evaluates-agents` at `base` |
 
-## Release-1 thin slice
-
-The first public release is one lesson per area, chosen so the shape is
-visible end to end and each lesson exercises a different interaction type.
-
-| Area               | Lesson (working title)                 | Mode        | Covers topic                     | Serves objectives                                                                  | Basis                                       | Interaction to prove     |
-| ------------------ | -------------------------------------- | ----------- | -------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------ |
-| concepts           | How a language model works             | explanation | concepts/how-models-work         | `explains-models/explains-generation`, `names-failure-modes`                       | new; `AEC-02` first half                    | `choice`, widget         |
-| safety             | Why agent safety is different          | explanation | safety/agent-risk                | `judges-agent-risk/names-blast-radius`, `chooses-human-in-loop`                    | `AEC-10` first half, rewritten for everyone | `scenario`, pitfall      |
-| using-agents       | Delegating a task to an agent          | tutorial    | using-agents/delegating          | `delegates-and-checks/writes-a-brief`, `chooses-autonomy`, `reviews-against-brief` | new; a real delegation in a sandbox         | `sort` (autonomy levels) |
-| coding-with-agents | Your first session with a coding agent | tutorial    | coding-with-agents/first-session | `ships-with-agent/runs-a-session`, `gives-the-right-context`                       | `AEC-12` public rewrite; fixture repository | `predict`, `exercise`    |
-| customizing-agents | Project instructions: AGENTS.md        | tutorial    | customizing-agents/instructions  | `configures-agent/writes-project-instructions`                                     | `AEC-15` with the builder widget            | `repair`, widget         |
-| building-agents    | Building your first agent              | tutorial    | building-agents/agent-loop       | `builds-agent-loop/defines-a-tool`, `implements-the-loop`                          | `AEC-13`                                    | `predict`, `order`       |
-
-Every slice lesson has:
-
-- served, assumed and extends-to objectives in frontmatter;
-- one pitfall, one checkpoint per served objective, one exercise with a
-  stretch goal, and a recap;
-- in tutorial mode, the paragraph-then-example rhythm, `predict` for every
-  example that runs, and a resettable fixture.
-
-Finishing any slice lesson schedules its checkpoints for review, so the
-review mechanism is exercised by release 1 too. The sidebar shows only these
-six areas' real lessons; no stub pages. Tutor mode is tested against these
-six.
-
 ## Related specs
 
 - [S01 Project dictionary](S01-dictionary.md): every term used here.
@@ -555,11 +521,10 @@ six.
    version in Foundations because knowledge workers meet RAG-based products
    daily.
 2. Whether `safety/governance` is worth a Foundations lesson or only the
-   `lead` objective `sets-oversight`. Leaning: one short lesson.
+   `expert` objective `sets-oversight`. Leaning: one short lesson.
 3. Naming of `hooks-permissions`; it is Claude Code specific where the rest
    is not. Decide when writing the lesson.
-4. Whether Foundations should carry any `expert` or `lead` objectives at
-   all. Two are drafted above (`keeps-a-check-habit`, `sets-oversight`);
+4. Whether Foundations should carry any `expert` objectives at all. Two are drafted above (`keeps-a-check-habit`, `sets-oversight`);
    drop them if Foundations stops at `base` by design.
 5. Whether `coding-with-agents/specification` deserves a competency of its
    own or folds into `ships-with-agent`. Kept separate for now because

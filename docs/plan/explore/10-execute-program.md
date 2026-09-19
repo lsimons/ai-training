@@ -113,7 +113,7 @@ Review, Reset.
 
 Decision 2026-09-19: all eight items below applied. `predict` and the CI
 rule are in spec S01; the rhythm, lesson graph and reference filter in specs
-S01 and S02; spaced review is [spec S03](../../spec/S03-spaced-review.md).
+S01 and S02; spaced review is [spec S05](../../spec/S05-spaced-review.md).
 
 1. **Prediction as the core checkpoint for code.** Show real code, ask for
    the value, run it to grade. This is the `repair` and `choice` interaction
