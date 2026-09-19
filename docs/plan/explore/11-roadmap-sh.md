@@ -205,6 +205,9 @@ Community Solutions.
 
 ## What to take from it
 
+Decision 2026-09-20: items 2, 4, 5 and 8 applied to specs 001 and 002.
+Items 1, 3, 6 and 7 declined for now.
+
 1. **The drawer pattern for topic nodes.** Click a node, get content,
    status, and actions in a side panel without leaving the map. This is how
    our topic map should open a topic: definition, concepts, lessons that

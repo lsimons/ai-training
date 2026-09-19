@@ -44,6 +44,15 @@ apart and linked.
   per competency render from these files; concept definitions render as a
   generated glossary. Lesson lists per topic and objective are derived from
   lesson frontmatter, not stored twice.
+- **Stable URLs.** Topic pages live at `/topics/<area>/<topic>/`,
+  competency pages at `/competencies/<area>/<competency>/`, the glossary at
+  `/glossary/#<concept>`. Clicking a node on the map opens the same page in
+  a side drawer without leaving the map, and the URL updates so the view is
+  shareable. Tutor mode cites these URLs when it points a learner somewhere.
+- **Concept definitions are one plain paragraph**, at most about 80 words,
+  no lists or links, written so they read well both in the glossary and as
+  the hover text on the map. Depth belongs in the topic page prose and in
+  sources.
 - No short codes. Slugs are the identifiers; a reference from one behaviour
   to another uses the objective slug.
 
@@ -52,9 +61,16 @@ apart and linked.
 Each course renders as a graph, not a list: lessons are boxes placed in
 **levels** (rows of lessons that share a depth in the prerequisite order),
 joined by dotted edges from the lessons they assume to the lessons that
-assume them. Finished lessons are filled, available lessons are outlined,
+assume them. Node styling shows the learner's state from the progress
+record: **finished** filled, **in progress** (read, not finished) outlined
+with a partial ring, **skipped** struck through and grey, untouched plain;
 lessons whose assumed objectives are not yet passed are dimmed but never
-locked; paths are advisory. Beside the graph: a completion ring (lessons and
+locked; paths are advisory. A **milestone bar** above the graph shows
+percent of lessons finished with four labelled stops (getting started,
+halfway, almost there, complete); skipped lessons count toward neither.
+The topic map colours each topic by the state of the lessons that cover
+it, so the same three states read the same way on both maps.
+Beside the graph: a completion ring (lessons and
 checkpoints done), a "review due" card when spec 003 has items due, and the
 About panel (goals, counts, prerequisites). The graph is derived from lesson
 frontmatter (`assumes`) at build time; nothing is stored twice.
