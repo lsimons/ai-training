@@ -117,7 +117,7 @@ temperature / top-p / maximum length.
 Little text, a few patterns, and a source for the prompting slice of the
 concept register.
 
-Decision 2026-09-20: items 2 to 6 adopted and written into spec 001 (Rules
+Decision 2026-09-20: items 2 to 6 adopted and written into spec S01 (Rules
 and the Walkthrough entry). Item 1 rejected: Learn Prompting is not a
 content source. The prompting concepts are written from the original papers
 and a web search, with Learn Prompting used for vocabulary only, so no
@@ -140,7 +140,7 @@ mattering.
    concept register's "one paragraph plus sources" shape.
 3. **Glossary tooltips from the concept register.** `%%text|term%%` or a
    `<Term>` component that renders the register definition on hover is the
-   natural rendering of spec 001's concept register inside lessons. Their
+   natural rendering of spec S01's concept register inside lessons. Their
    two implementations show it can be a remark plugin, not a component, so
    plain Markdown stays plain.
 4. **Prompt and response as a styled pair.** Adopt an `AIInput` /
@@ -149,7 +149,7 @@ mattering.
    should carry the model and date, since their undated davinci-003 outputs
    are the main reason the pages aged badly.
 5. **Do not embed a third-party playground.** Two generations of live embeds
-   died with the vendors. Our spec 001 rule that examples run in CI and show
+   died with the vendors. Our spec S01 rule that examples run in CI and show
    asserted output is the right answer; a static recorded output beats a dead
    iframe.
 6. **The walkthrough shape.** The Applied Prompting pages (LSAT multiple
@@ -157,7 +157,7 @@ mattering.
    show the failure, add one technique, reorder, reword, compare. That arc
    is a reusable lesson template for the Using agents area and is CC BY.
 7. **Takeaways box: no.** Their two or three "you will learn" bullets at
-   the top of each page are exactly what spec 001 forbids for learning
+   the top of each page are exactly what spec S01 forbids for learning
    objectives; the lesson opener ("In this lesson we will...") and the recap
    already carry that role. Noted only so it is not proposed again.
 

@@ -90,7 +90,7 @@ See the `explore/` reports for detail on each.
 
 1. ~~Interview Leo on project approach and goals.~~ Done 2026-09-19, see above.
 2. ~~Build a topic map.~~ First draft 2026-09-19 in
-   [spec 002](../spec/002-topic-map.md): topics and concepts per area,
+   [spec S02](../spec/S02-topic-map.md): topics and concepts per area,
    verb-led competencies with draft base behaviours,
    prerequisite edges, three paths, and the release-1 thin slice. Behaviours
    and definitions still to write.
@@ -102,12 +102,12 @@ See the `explore/` reports for detail on each.
    in the repo and still need fetching. Added later the same day:
    [explore/08](./explore/08-diataxis.md) (Diátaxis) and
    [explore/09](./explore/09-brilliant-skills-map.md) (Brilliant's coding
-   skills map and standards alignment; applied to spec 002 except short
+   skills map and standards alignment; applied to spec S02 except short
    codes and shorter lessons, both declined), and
    [explore/10](./explore/10-execute-program.md) (Execute Program's
    prediction examples, lesson graph and spaced reviews; all applied:
-   `predict` in spec 001, graph and rhythm in spec 002, and
-   [spec 003](../spec/003-spaced-review.md) for spaced review, and
+   `predict` in spec S01, graph and rhythm in spec S02, and
+   [spec S03](../spec/S03-spaced-review.md) for spaced review, and
    [explore/11](./explore/11-roadmap-sh.md) (roadmap.sh: drawn topic maps,
    per-node drawer with status and AI actions, generated courses and
    quizzes, project specs; applied: node status and milestone bar,
@@ -115,11 +115,11 @@ See the `explore/` reports for detail on each.
    pages; declined: drawer-only content, typed link badges, lesson-anatomy
    checklist, project template).
 4. ~~Write the dictionary / taxonomy spec.~~ Draft 2026-09-19 in
-   [spec 001](../spec/001-dictionary.md).
+   [spec S01](../spec/S01-dictionary.md).
 5. Design the interactive lesson component set and the local-storage progress
    model.
-6. Design tutor mode. Must include the node-scoped verbs from spec 001
+6. Design tutor mode. Must include the node-scoped verbs from spec S01
    (explain, key points, ELI5, why it matters, quiz me, test me) and the
-   spaced-review recall question from spec 003.
+   spaced-review recall question from spec S03.
 7. Replace the template pages under `docs/src/content/docs/` with real
    content, area by area.

@@ -52,8 +52,9 @@ verbatim and must include the base path.
     base-link plugin.
 - `docs/plan/` - the rough plan (`README.md`) and exploration notes on the
   source material (`explore/`). Not part of the site.
-- `docs/spec/` - numbered specs (`NNN-title.md`, each with Purpose and
-  Status). 001 is the project dictionary; use its terms everywhere.
+- `docs/spec/` - numbered specs (`SNN-title.md`, each with Purpose and
+  Status; `000-specs.md` is the index). S01 is the project dictionary; use
+  its terms everywhere. Specs are standalone and never link to `docs/plan/`.
 - `docs/agents/` - agent-facing process docs (issue tracker).
 - `.mise.toml` - pinned tools and the dev/build tasks.
 - `prek.toml` - git hooks (mdformat, markdownlint, lychee, gitleaks,
@@ -89,7 +90,7 @@ verbatim and must include the base path.
 - `mise run ci` must pass before you push. It is the same list the CI job
   runs, in the same order.
 - Code examples in lessons are real and their shown output is asserted in
-  CI (spec 001, Rules). Until the example-runner exists, an example that
+  CI (spec S01, Rules). Until the example-runner exists, an example that
   cannot run must say so in the page.
 - Internal links are root-relative; the rehype plugin adds the base path.
   `starlight-links-validator` fails `mise run docs-build` on a dead one, so

@@ -84,8 +84,8 @@ learners at work and stay outside courses and paths.
 
 ## Where it landed
 
-- [spec 001](../../spec/001-dictionary.md): kinds and compass, lesson mode,
+- [spec S01](../../spec/S01-dictionary.md): kinds and compass, lesson mode,
   `how-to` and `reference` page kinds, objective placement, comfort-level
   scope, the sandbox rule.
-- [spec 002](../../spec/002-topic-map.md): mode per thin-slice lesson,
+- [spec S02](../../spec/S02-topic-map.md): mode per thin-slice lesson,
   alternative exercises per comfort level, YAML rendered as reference.
