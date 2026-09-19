@@ -21,8 +21,9 @@ definitions are not written yet; this fixes the node set and the edges.
   "cheap tree, rich leaves" as in career-model. Fields: `name`, `definition`,
   `concepts[] {id, name, definition}`, `behaviours {base[], expert[], lead[]}`,
   `links {prerequisites[], related[], specializations[]}`, `lessons[]`,
-  `sources[]`. The map page renders from these files; lessons reference
-  competency ids in frontmatter.
+  `sources[]`. The map page and one reference page per competency render
+  from these files, structured like the tree; concept definitions render as
+  a generated glossary. Lessons reference competency ids in frontmatter.
 
 ## Foundations
 
@@ -115,18 +116,20 @@ definitions are not written yet; this fixes the node set and the edges.
 One lesson per area, chosen so the shape is visible end to end and each
 lesson exercises a different interaction type.
 
-| Area               | Lesson (working title)                 | Competency                       | Basis                                     | Interaction to prove      |
-| ------------------ | -------------------------------------- | -------------------------------- | ----------------------------------------- | ------------------------- |
-| concepts           | How a language model works             | concepts/how-models-work         | new, AEC 02 first half                    | `choice`, widget          |
-| safety             | Why agent safety is different          | safety/agent-risk                | AEC 10 first half, rewritten for everyone | `scenario`, watch-out     |
-| using-agents       | Delegating a task to an agent          | using-agents/delegating          | new                                       | `sort` (autonomy levels)  |
-| coding-with-agents | Your first session with a coding agent | coding-with-agents/first-session | AEC 12 public rewrite                     | `exercise` + `self-grade` |
-| customizing-agents | Project instructions: AGENTS.md        | customizing-agents/instructions  | AEC 15 with the builder widget            | `repair`, widget          |
-| building-agents    | Building your first agent              | building-agents/agent-loop       | AEC 13                                    | `order`, `exercise`       |
+| Area               | Lesson (working title)                 | Mode        | Competency                       | Basis                                     | Interaction to prove      |
+| ------------------ | -------------------------------------- | ----------- | -------------------------------- | ----------------------------------------- | ------------------------- |
+| concepts           | How a language model works             | explanation | concepts/how-models-work         | new, AEC 02 first half                    | `choice`, widget          |
+| safety             | Why agent safety is different          | explanation | safety/agent-risk                | AEC 10 first half, rewritten for everyone | `scenario`, watch-out     |
+| using-agents       | Delegating a task to an agent          | tutorial    | using-agents/delegating          | new; a real delegation in a sandbox       | `sort` (autonomy levels)  |
+| coding-with-agents | Your first session with a coding agent | tutorial    | coding-with-agents/first-session | AEC 12 public rewrite; fixture repository | `exercise` + `self-grade` |
+| customizing-agents | Project instructions: AGENTS.md        | tutorial    | customizing-agents/instructions  | AEC 15 with the builder widget            | `repair`, widget          |
+| building-agents    | Building your first agent              | tutorial    | building-agents/agent-loop       | AEC 13                                    | `order`, `exercise`       |
 
-Each slice lesson gets learning objectives, one watch-out, one checkpoint
-per objective, a recap, and comfort levels where in Engineering. Tutor mode
-is tested against these six.
+Each slice lesson gets learning objectives in frontmatter, one watch-out,
+one checkpoint per objective and a recap. The four Engineering lessons get a
+`less` and a `more` comfortable exercise. Tutorial-mode lessons run in a
+resettable fixture. The sidebar shows only these six areas' real lessons; no
+stub pages. Tutor mode is tested against these six.
 
 ## Open questions
 

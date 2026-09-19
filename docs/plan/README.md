@@ -21,9 +21,13 @@ should cover, in roughly this order:
 Most content is for engineers. The basic content (concepts, safety, using
 agents) is for general knowledge work.
 
-It is public, open source and open content. Decided 2026-09-19: everything
-(content and code, including the parts lifted from `lsimons-template-doc`) is
-**CC BY-NC-SA 4.0**, chosen so CS50 material can be adapted directly. It replaces two earlier attempts:
+It is public, open source and open content. Decided 2026-09-19: content is
+**CC BY-SA 4.0** and code is **Apache-2.0** (including the parts lifted from
+`lsimons-template-doc`). An earlier same-day choice of CC BY-NC-SA, made so
+CS50 text could be adapted, was reversed: the CC-licensed CS50 material
+barely overlaps the six areas, the NC term makes corporate internal training
+an ambiguous use, and BY-SA lets Diátaxis, Apache, CC BY and CC BY-SA
+material be adapted freely. It replaces two earlier attempts:
 
 - `archive/lsimons-ai-training`: private, Schuberg Philis specific, never got
   past scaffolding. See [explore/01](./explore/01-prior-sbp-training-and-course-compare.md).
@@ -33,13 +37,14 @@ It is public, open source and open content. Decided 2026-09-19: everything
 
 ## Sources and what may be done with each
 
-| Source                         | License                | Use here                                                                                                                                                                                         |
-| ------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `agent-engineer-course` (fork) | Apache-2.0             | Integrate the best content, with attribution to Addy Osmani, Ivar Soares Urdalen and Leo Simons in `NOTICE.md`.                                                                                  |
-| `ai-cs50` (CS50 AI, workshops) | CC BY-NC-SA 4.0        | Same license as this project, so text and structure may be adapted with attribution and a note of changes. Workshop talk transcripts are YouTube captions and not licensed; do not redistribute. |
-| `ai-anthropic-partners`        | Anthropic, proprietary | Reference and link only, preferring public `academy.claude.com` URLs.                                                                                                                            |
-| `ai-deep-learning`             | DeepLearning.AI, paid  | Inspiration for topic coverage and sequencing only. Embed nothing.                                                                                                                               |
-| `archive/career-model`         | Apache-2.0 (own)       | Reuse the competency data model and the idea of a visual map.                                                                                                                                    |
+| Source                         | License                | Use here                                                                                                                                                                                                                                         |
+| ------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `agent-engineer-course` (fork) | Apache-2.0             | Integrate the best content, with attribution to Addy Osmani, Ivar Soares Urdalen and Leo Simons in `NOTICE.md`.                                                                                                                                  |
+| `ai-cs50` (CS50 AI, workshops) | CC BY-NC-SA 4.0        | Ideas, structure and vocabulary with citation. Text may not be adapted into this BY-SA work; a page may be included verbatim, marked with its own license. Workshop talk transcripts are YouTube captions and not licensed; do not redistribute. |
+| Diátaxis                       | CC BY-SA 4.0           | Adopt the four kinds and the compass; text may be adapted with attribution. See [explore/08](./explore/08-diataxis.md).                                                                                                                          |
+| `ai-anthropic-partners`        | Anthropic, proprietary | Reference and link only, preferring public `academy.claude.com` URLs.                                                                                                                                                                            |
+| `ai-deep-learning`             | DeepLearning.AI, paid  | Inspiration for topic coverage and sequencing only. Embed nothing.                                                                                                                                                                               |
+| `archive/career-model`         | Apache-2.0 (own)       | Reuse the competency data model and the idea of a visual map.                                                                                                                                                                                    |
 
 See the `explore/` reports for detail on each.
 
