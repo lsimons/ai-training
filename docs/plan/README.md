@@ -2,8 +2,8 @@
 
 Status: **draft, captured at project setup on 2026-09-19; interview decisions
 added the same day**. This is the brief as given, the first exploration
-round, and the decisions from the approach interview. Next this file is
-superseded by proper specs.
+round, and the decisions from the approach interview. Specs live in `docs/spec/`;
+this file is superseded as they land.
 
 ## What this is
 
@@ -83,14 +83,18 @@ See the `explore/` reports for detail on each.
 ## Next steps
 
 1. ~~Interview Leo on project approach and goals.~~ Done 2026-09-19, see above.
-2. Explore the course content in more detail and build a topic map.
+2. ~~Build a topic map.~~ First draft 2026-09-19 in
+   [spec 002](../spec/002-topic-map.md): competencies and concepts per area,
+   prerequisite edges, three paths, and the release-1 thin slice. Behaviours
+   and definitions still to write.
 3. ~~Agents explore the source projects in more depth.~~ Done 2026-09-19:
    [explore/06](./explore/06-lesson-inventory.md) (lesson inventories,
    `/teach` skill) and
    [explore/07](./explore/07-scorm-interactions-and-duck-tutor.md) (SCORM
    interaction catalogue, CS50 Duck tutor design). The Duck papers are not
    in the repo and still need fetching.
-4. Write the dictionary / taxonomy spec.
+4. ~~Write the dictionary / taxonomy spec.~~ Draft 2026-09-19 in
+   [spec 001](../spec/001-dictionary.md).
 5. Design the interactive lesson component set and the local-storage progress
    model.
 6. Design tutor mode.

@@ -52,13 +52,16 @@ verbatim and must include the base path.
     base-link plugin.
 - `docs/plan/` - the rough plan (`README.md`) and exploration notes on the
   source material (`explore/`). Not part of the site.
+- `docs/spec/` - numbered specs (`NNN-title.md`, each with Purpose and
+  Status). 001 is the project dictionary; use its terms everywhere.
 - `docs/agents/` - agent-facing process docs (issue tracker).
 - `.mise.toml` - pinned tools and the dev/build tasks.
 - `prek.toml` - git hooks (mdformat, markdownlint, lychee, gitleaks,
   commitlint); `prek install -t pre-commit -t commit-msg` once per clone.
 - `.github/workflows/ci.yml` lints, astro-checks and builds on push/PR;
-  `deploy.yml` publishes `docs/dist` to GitHub Pages on push to `main`. CI
-  does not run Quarto; slide outputs are committed.
+  `deploy.yml` publishes `docs/dist` to GitHub Pages, currently on manual
+  dispatch only while the repo is private. CI does not run Quarto; slide
+  outputs are committed.
 
 ## Guidelines
 
