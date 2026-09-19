@@ -29,9 +29,9 @@ a group's `items`:
 
 ```js
 {
-	label: 'Guides',
+	label: 'Authoring',
 	items: [
-		{ slug: 'guides/getting-started', label: 'Getting started' },
+		{ slug: 'guides/writing-pages', label: 'Writing pages' },
 		{ slug: 'guides/my-page', label: 'My page' },
 	],
 },
@@ -42,11 +42,11 @@ a group's `items`:
 Write internal links and image sources **root-relative**
 (`/guides/my-page/`, `/diagram.png`) rather than with the deploy base path.
 A small rehype plugin in `astro.config.mjs` prepends the base path
-(`/lsimons-template-doc`) at render time, so the same Markdown works in local
+(`/ai-training`) at render time, so the same Markdown works in local
 dev and on GitHub Pages.
 
 ```markdown
-See the [getting started guide](/guides/getting-started/).
+See the [contributing page](/contributing/).
 
 ![A diagram](/diagram.png)
 ```

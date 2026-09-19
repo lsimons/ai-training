@@ -31,10 +31,6 @@ zizmor = "1.30.1"
 actionlint = "1.7.12"
 shellcheck = "0.11.0"
 
-[tasks.init]
-description = "Rename this template to a new project (see scripts/init.mjs)"
-run = "bun run scripts/init.mjs"
-
 # Deliberately NOT --frozen-lockfile: this is the task you run while
 # actually changing dependencies, and it is allowed to update bun.lock.
 # `docs-install-frozen` is the one the gate uses.
@@ -105,7 +101,7 @@ description = "Build, serve, and screenshot a page (args: [out] [path]). Needs `
 dir = "docs"
 run = """
 out="{{arg(name='out', default='out.png')}}"
-path="{{arg(name='path', default='/lsimons-template-doc/')}}"
+path="{{arg(name='path', default='/ai-training/')}}"
 bun run build
 bun run preview --port 4321 > /tmp/astro-preview.log 2>&1 &
 sleep 4

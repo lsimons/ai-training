@@ -5,7 +5,7 @@ description: How the site and slide decks are built and how to contribute.
 
 This site is built with [Astro Starlight](https://starlight.astro.build/) and
 published to GitHub Pages. Contributions are welcome - see
-[CONTRIBUTING.md](https://github.com/lsimons/lsimons-template-doc/blob/main/CONTRIBUTING.md)
+[CONTRIBUTING.md](https://github.com/lsimons/ai-training/blob/main/CONTRIBUTING.md)
 in the repository root.
 
 ## The site

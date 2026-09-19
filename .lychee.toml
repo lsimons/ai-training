@@ -7,7 +7,7 @@
 # into `docs/astro.config.mjs`, is what validates internal links, and it fails
 # `mise run docs-build` when one is dead. lychee's job here is external URLs
 # only.
-base_url = "https://lsimons.github.io/lsimons-template-doc/"
+base_url = "https://lsimons.github.io/ai-training/"
 
 # 429 (rate limited) and 403 (bot-protected) are not broken links; accept them
 # so the pre-commit hook does not flake on external hosts.

@@ -1,62 +1,63 @@
 ---
-title: Template Docs
-description: A template for building documentation sites with Astro Starlight.
+title: AI Training
+description: An open training suite for getting started with AI, from concepts and safety to using, customizing and building AI agents.
 template: splash
 hero:
-  tagline: A starting point for documentation sites - Astro Starlight, the LSD Warm theme, and Quarto slide decks, ready to publish to GitHub Pages.
+  tagline: Getting started with AI, for knowledge workers and software engineers. Open content, interactive lessons, progress kept in your browser.
   actions:
-    - text: Get started
+    - text: Read the plan
       # hero action links are used verbatim, so this one includes the deploy base
-      link: /lsimons-template-doc/guides/getting-started/
+      link: https://github.com/lsimons/ai-training/blob/main/docs/plan/README.md
       icon: right-arrow
       variant: primary
     - text: View on GitHub
-      link: https://github.com/lsimons/lsimons-template-doc
+      link: https://github.com/lsimons/ai-training
       icon: external
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## What's in the box
+## Six areas
 
 <CardGrid>
-	<a class="card-link" href="/lsimons-template-doc/guides/getting-started/">
-		<Card title="Getting started" icon="rocket">
-			Install the toolchain, run the dev server, and rename the template to your
-			own project with a single command.
-		</Card>
-	</a>
-	<a class="card-link" href="/lsimons-template-doc/guides/writing-pages/">
-		<Card title="Writing pages" icon="pencil">
-			Add Markdown pages, wire them into the sidebar, and use portable
-			root-relative links that work under the deploy base path.
-		</Card>
-	</a>
-	<a class="card-link" href="/lsimons-template-doc/guides/slides/">
-		<Card title="Slide decks" icon="open-book">
-			Author slide decks in Quarto and render them to HTML and PDF, styled to
-			match the site theme.
-		</Card>
-	</a>
-	<a class="card-link" href="https://github.com/lsimons/lsimons-template-doc">
-		<Card title="Publish" icon="github">
-			A push to `main` builds and deploys the site to GitHub Pages via GitHub
-			Actions.
-		</Card>
-	</a>
+	<Card title="AI concepts" icon="open-book">
+		What generative AI is and is not, how language models behave, and the
+		vocabulary you need to reason about them. For everyone.
+	</Card>
+	<Card title="AI safety" icon="warning">
+		Confidentiality, hallucination, prompt injection, over-reliance, and
+		the habits that keep AI use safe at work. For everyone.
+	</Card>
+	<Card title="Using AI agents" icon="rocket">
+		Working with agents day to day: delegation, description, discernment
+		and diligence. For everyone.
+	</Card>
+	<Card title="AI-assisted software engineering" icon="laptop">
+		Coding agents in a real engineering workflow: explore, plan, code,
+		review, ship. For engineers.
+	</Card>
+	<Card title="Customizing AI agents" icon="setting">
+		Instructions, skills, subagents, hooks and MCP servers: shaping an agent
+		to your codebase and team. For engineers.
+	</Card>
+	<Card title="Building AI agents" icon="puzzle">
+		The agent loop, tools, memory, evaluation and production concerns, with
+		the Claude API and Agent SDK. For engineers.
+	</Card>
 </CardGrid>
 
-## About this template
+## Status
 
-This is a project template, not a finished site. It gives you a themed
-[Astro Starlight](https://starlight.astro.build/) site with a landing page, a
-[Quarto](https://quarto.org/) slide-deck setup, and the CI/CD wiring to publish
-to GitHub Pages - all under the shared "LSD Warm" theme used across
-[lsimons.github.io](https://lsimons.github.io).
+This project was set up on 2026-09-19 and has no lesson content yet. The
+[rough plan](https://github.com/lsimons/ai-training/blob/main/docs/plan/README.md)
+describes what is coming: interactive lessons in the browser, a topic map, a
+project dictionary based on the CS50 approach to teaching, and a tutor mode
+that runs the site locally from a Claude Code session.
 
-Run `mise run init` once to rename `lsimons-template-doc` and `Template Docs`
-throughout the repo to your own project, then replace this landing page and the
-guides with your content. See the
-[getting started guide](/lsimons-template-doc/guides/getting-started/) for the
-full walkthrough.
+## Origins
+
+A rebuild of [agent-engineer-course](https://github.com/lsimons/agent-engineer-course),
+itself a fork of Addy Osmani's [agent-engineer](https://github.com/addyosmani/agent-engineer)
+course. It adopts the pedagogy of Harvard's [CS50](https://cs50.harvard.edu/)
+and references the public courses on [Claude Academy](https://academy.claude.com/).

@@ -4,10 +4,8 @@ import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
 
 // This is a *project* site: it deploys under a subpath of https://lsimons.github.io
-// (e.g. https://lsimons.github.io/lsimons-template-doc/), so it sets `base`.
-// `init` (see scripts/init.mjs) rewrites `lsimons-template-doc` and
-// `Template Docs` throughout the repo when you adopt the template.
-const base = '/lsimons-template-doc';
+// (e.g. https://lsimons.github.io/ai-training/), so it sets `base`.
+const base = '/ai-training';
 
 /**
  * Content links and image sources are written root-relative (`/guides/foo/`,
@@ -63,8 +61,8 @@ export default defineConfig({
 			// job here: root-relative links resolve against the published
 			// lsimons.github.io origin, which .lychee.toml excludes.
 			plugins: [starlightLinksValidator()],
-			title: 'Template Docs',
-			description: 'A template for building documentation sites with Astro Starlight.',
+			title: 'AI Training',
+			description: 'An open training suite for getting started with AI: concepts, safety, using agents, AI-assisted software engineering, customizing and building agents.',
 			favicon: '/favicon.svg',
 			head: [
 				{
@@ -90,15 +88,14 @@ export default defineConfig({
 				},
 			],
 			social: [
-				{ icon: 'github', label: 'GitHub', href: 'https://github.com/lsimons/lsimons-template-doc' },
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/lsimons/ai-training' },
 			],
-			editLink: { baseUrl: 'https://github.com/lsimons/lsimons-template-doc/edit/main/docs/' },
+			editLink: { baseUrl: 'https://github.com/lsimons/ai-training/edit/main/docs/' },
 			customCss: ['./src/styles/custom.css'],
 			sidebar: [
 				{
-					label: 'Guides',
+					label: 'Authoring',
 					items: [
-						{ slug: 'guides/getting-started', label: 'Getting started' },
 						{ slug: 'guides/writing-pages', label: 'Writing pages' },
 						{ slug: 'guides/slides', label: 'Slide decks with Quarto' },
 					],
