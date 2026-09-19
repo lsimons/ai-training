@@ -69,18 +69,20 @@ course > lesson > section.
 ## Knowledge model
 
 These describe what the site teaches, independent of how it is laid out.
-They are the nodes and edges of the topic map ([spec 002](./002-topic-map.md)).
+Topics and concepts are the nodes and edges of the topic map; competencies
+sit beside it and point into it ([spec 002](./002-topic-map.md)).
 
-| Term                   | Definition                                                                                                                                                                                                                                                       | Do not use                       |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| **Concept**            | A named idea a learner can understand and explain, e.g. *context window*, *prompt injection*. Smallest node. A lesson teaches one to five concepts.                                                                                                              | topic, term, idea, notion        |
-| **Competency**         | Something a learner can *do*, described by behaviours at three levels. Groups concepts. An area owns three to seven competencies.                                                                                                                                | skill, capability, ability       |
-| **Level**              | `base`, `expert`, `lead`: base can do it with guidance and knows the vocabulary; expert does it reliably and explains the trade-offs; lead sets the practice for others and judges when not to use it.                                                           | grade, rank, seniority, maturity |
-| **Behaviour**          | One observable statement under a competency level, e.g. "reviews an agent's diff before merging". The unit the evaluation field and the checkpoints point at.                                                                                                    | indicator, criterion             |
-| **Learning objective** | A per-lesson "can now..." statement kept in frontmatter. Maps to exactly one competency at one level. Checkpoints map to objectives; tutor mode quizzes from them; the recap states them to the learner. Not printed as "you will learn" at the top of a lesson. | goal, outcome, aim               |
-| **Goal**               | A learner-chosen destination expressed as a competency level, e.g. "Building agents: base". Paths are the routes to goals.                                                                                                                                       | objective, target                |
-| **Link**               | A typed edge between competencies or concepts: `prerequisite` (learn this first), `related` (see also), `specialization` (a narrower, deeper version).                                                                                                           | dependency, relation, tag        |
-| **Source**             | An external resource a lesson or competency points to: `book`, `course`, `reference`, `video`. Carries license notes when the material may not be copied.                                                                                                        | link, resource, reading          |
+| Term                   | Definition                                                                                                                                                                                                                                                       | Do not use                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| **Concept**            | A named idea a learner can understand and explain, e.g. *context window*, *prompt injection*. Smallest node. Belongs to exactly one topic. A lesson teaches one to five concepts.                                                                                | term, idea, notion                 |
+| **Topic**              | A named cluster of two to six concepts inside an area, e.g. *Prompting*, *Tool use*. A noun. The unit a lesson covers and the node that carries links. An area owns three to seven topics.                                                                       | subject, module, theme, competency |
+| **Competency**         | Something a learner can *do*, stated as a verb phrase, e.g. *Verifies AI output before relying on it*, with behaviours at three levels. Draws on one or more topics, possibly across areas. An area owns two to four. Never a noun naming a subject.             | skill, capability, ability, topic  |
+| **Level**              | `base`, `expert`, `lead`: base can do it with guidance and knows the vocabulary; expert does it reliably and explains the trade-offs; lead sets the practice for others and judges when not to use it.                                                           | grade, rank, seniority, maturity   |
+| **Behaviour**          | One observable statement under a competency level, e.g. "reviews an agent's diff before merging". The unit the evaluation field and the checkpoints point at.                                                                                                    | indicator, criterion               |
+| **Learning objective** | A per-lesson "can now..." statement kept in frontmatter. Maps to exactly one competency at one level. Checkpoints map to objectives; tutor mode quizzes from them; the recap states them to the learner. Not printed as "you will learn" at the top of a lesson. | goal, outcome, aim                 |
+| **Goal**               | A learner-chosen destination expressed as a competency level, e.g. "Building agents: base". Paths are the routes to goals.                                                                                                                                       | objective, target                  |
+| **Link**               | A typed edge between topics: `prerequisite` (learn this first), `related` (see also), `specialization` (a narrower, deeper version). Concepts inherit their topic's links.                                                                                       | dependency, relation, tag          |
+| **Source**             | An external resource a lesson or competency points to: `book`, `course`, `reference`, `video`. Carries license notes when the material may not be copied.                                                                                                        | link, resource, reading            |
 
 ## Interaction types
 
@@ -113,8 +115,9 @@ Checkpoint kinds available to authors. Names are the component names.
 - Area slugs: `concepts`, `safety`, `using-agents`, `coding-with-agents`,
   `customizing-agents`, `building-agents`.
 - Lesson id: `<area>/<course>/<lesson>` slug path, equal to the page route.
-- Competency id: `<area>/<competency>`. Concept id: `<concept>` (global,
-  unique).
+- Topic id: `<area>/<topic>`, a noun slug. Competency id:
+  `<area>/<competency>`, a verb-led slug such as `safety/verifies-output`.
+  Concept id: `<concept>` (global, unique).
 - Checkpoint id: `<lesson id>#<section slug>`.
 - Progress storage key: `ai-training-progress-v<N>`; bump `N` when the
   meaning of stored fields changes, not when content is added.

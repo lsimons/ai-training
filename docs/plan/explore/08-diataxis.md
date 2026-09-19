@@ -61,8 +61,8 @@ learners at work and stay outside courses and paths.
    `reference` (austere, mirrors the structure of what it describes). No
    how-to or reference section is created until there is a page to put in
    it.
-4. **The topic map and glossary are reference.** Competency YAML renders as
-   reference pages structured like the competency tree, and concept
+4. **The topic map and glossary are reference.** Topic and competency YAML
+   render as reference pages structured like the topic tree, and concept
    definitions render as a generated glossary.
 5. **Tutor mode is the absent instructor.** Diátaxis notes that a written
    tutorial's teacher is "required to be present but condemned to be

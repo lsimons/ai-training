@@ -89,7 +89,8 @@ See the `explore/` reports for detail on each.
 
 1. ~~Interview Leo on project approach and goals.~~ Done 2026-09-19, see above.
 2. ~~Build a topic map.~~ First draft 2026-09-19 in
-   [spec 002](../spec/002-topic-map.md): competencies and concepts per area,
+   [spec 002](../spec/002-topic-map.md): topics and concepts per area,
+   verb-led competencies with draft base behaviours,
    prerequisite edges, three paths, and the release-1 thin slice. Behaviours
    and definitions still to write.
 3. ~~Agents explore the source projects in more depth.~~ Done 2026-09-19:
