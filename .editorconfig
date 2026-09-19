@@ -1,0 +1,31 @@
+# https://editorconfig.org/
+# Keeps editors in line with what the prek hooks (mdformat, markdownlint,
+# end-of-file-fixer, trailing-whitespace) already enforce.
+#
+# Only conventions that actually hold across the committed tree are listed.
+# JSON is deliberately absent: this repo's .json files are not consistent
+# with each other, and an .editorconfig that disagrees with the tree is
+# worse than none.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# The site sources are tab-indented; astro.config.mjs and index.mdx are the
+# reference. Detabbing them would churn the whole site for no gain.
+[*.{mjs,js,ts,mdx,css,scss}]
+indent_style = tab
+
+[*.{md,mdx}]
+# Two trailing spaces are a hard line break in Markdown; the prek
+# trailing-whitespace hook excludes these files for the same reason.
+trim_trailing_whitespace = false
+
+[*.{svg,qmd}]
+# Excluded from the end-of-file-fixer hook; keep the two in agreement.
+insert_final_newline = false

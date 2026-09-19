@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mise run init)",
+      "Bash(mise run init *)",
+      "Bash(mise run docs-install)",
+      "Bash(mise run docs-build)",
+      "Bash(mise run docs-check)",
+      "Bash(mise run docs-clean)",
+      "Bash(mise run docs-slides)",
+      "Bash(mise run docs-slides *)",
+      "Bash(mise run docs-favicon)",
+      "Bash(mise run lint)",
+      "Bash(mise run links)",
+      "Bash(mise run ci)",
+      "Bash(mise run audit)",
+      "Bash(mise run ci-watch)"
+    ]
+  }
+}

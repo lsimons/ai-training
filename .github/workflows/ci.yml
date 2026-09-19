@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Supersede in-flight runs for the same branch/PR; never cancel main.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    name: Lint, check and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # `mise run lint` includes the gitleaks hook, which scans git
+          # history. At the default fetch-depth of 1 it would see a single
+          # commit, so CI would run a far weaker check than a developer
+          # does locally while the README advertises them as the same one.
+          fetch-depth: 0
+
+      - name: Set up mise
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          install: true
+          cache: true
+
+      - name: Cache bun install cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('docs/bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: Cache prek hook environments
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/prek
+          key: ${{ runner.os }}-prek-${{ hashFiles('prek.toml') }}
+          restore-keys: ${{ runner.os }}-prek-
+
+      # These are the same steps, in the same order, as `mise run ci`. They
+      # are spelled out rather than run as one `mise run ci` so a failure
+      # names itself in the job summary. Keep the two lists in sync.
+      - name: Install
+        run: mise run docs-install-frozen
+
+      - name: Lint
+        run: mise run lint
+
+      - name: Check (Astro type/content check)
+        run: mise run docs-check
+
+      - name: Build
+        run: mise run docs-build
+
+  zizmor:
+    name: Zizmor (GitHub Actions audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Audit GitHub Actions workflows (zizmor)
+        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        with:
+          advanced-security: false
+          # Pin the version: the action's default is "latest", so a zizmor
+          # release could turn CI red on its own. Keep in step with
+          # `zizmor` in .mise.toml, which is what `mise run audit` uses.
+          version: "1.30.1"
+          # `collect` is deliberately unset. The action's default already
+          # covers workflows, composite actions, .github/dependabot.yml and
+          # .pre-commit-config.yaml, while honouring .gitignore. Do not set
+          # `collect: all` — that means "and stop honouring .gitignore",
+          # which sweeps in every vendored workflow under docs/node_modules
+          # and reports dozens of findings about other people's repos.

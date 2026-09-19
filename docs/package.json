@@ -1,0 +1,30 @@
+{
+  "name": "lsimons-template-doc",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "7.3.1",
+    "@astrojs/starlight": "0.42.0",
+    "astro": "7.3.2",
+    "sharp": "0.35.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "playwright": "1.63.0",
+    "starlight-links-validator": "0.26.0",
+    "typescript": "6.0.3"
+  },
+  "overrides": {
+    "fast-uri": "3.1.7",
+    "nanoid": "3.3.19",
+    "js-yaml": "4.3.2"
+  }
+}
