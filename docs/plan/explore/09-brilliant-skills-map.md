@@ -183,6 +183,13 @@ code).
 
 ## 5. Implications
 
+Decision 2026-09-19: 1, 3, 4, 5 and 7 applied in spec 002; 2 (short codes)
+and 6 (shorter lessons) declined. Slugs stay the only identifiers, and 10 to
+25 minute lessons are fine for professional learners and cheaper to produce.
+Item 7 is applied as routing: one exercise per lesson with a stretch goal,
+prerequisite and extension routing from checkpoints, comfort level as a
+routing default.
+
 1. **Adopt the skill triple.** Each behaviour under a competency should be a
    one-sentence claim, a short why, and one concrete example. This is what
    makes the map usable by authors and by tutor mode. It also gives
