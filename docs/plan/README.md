@@ -1,9 +1,9 @@
 # Rough plan: ai-training
 
-Status: **draft, captured at project setup on 2026-09-19**. This is the brief
-as given plus what the first exploration round found. The next step is an
-interview to firm up approach and goals; after that this file is superseded by
-proper specs.
+Status: **draft, captured at project setup on 2026-09-19; interview decisions
+added the same day**. This is the brief as given, the first exploration
+round, and the decisions from the approach interview. Next this file is
+superseded by proper specs.
 
 ## What this is
 
@@ -68,24 +68,28 @@ See the `explore/` reports for detail on each.
 - **Video**, if any is recorded, goes to YouTube as unlisted content and is
   embedded or linked from lessons.
 
-## Decisions still open (for the interview)
+## Decisions (interview 2026-09-19)
 
-- Title of the site and the naming of the six areas.
-- Repo visibility: it is private now; GitHub Pages on a private repo needs a
-  paid plan, so publishing likely means going public. When?
-- Audience split: two comfort levels per lesson (CS50 style) or separate
-  tracks per audience?
-- What "done" looks like for a first public release: which areas, how many
-  lessons, which interactive elements.
-- Tutor mode: a Claude Code skill in this repo, a plugin, or both?
-- Where learner progress lives beyond local storage (export/import file?).
+| Question                      | Decision                                                                                                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Site title                    | **AI Training**                                                                                                                                                   |
+| Area naming                   | Two sidebar groups: **Foundations** (Concepts, Safety, Using agents) and **Engineering** (Coding with agents, Customizing agents, Building agents).               |
+| Audience split                | Foundations is written at one level for everyone. Engineering continues after Foundations and has two comfort levels per lesson (CS50 "less / more comfortable"). |
+| First public release ("done") | One thin slice through all six areas: one or two lessons each so the shape is visible end to end, then deepen.                                                    |
+| Tutor mode                    | A skill in this repo (`.claude/skills/`), used by running the site locally inside a Claude Code session. Plugin packaging can follow later.                       |
+| Repo visibility               | Stays private until Leo explicitly decides it is ready. Going public is a separate, explicit decision, not tied to a milestone.                                   |
+| Learner progress              | Browser local storage plus export/import of a JSON file. No backend.                                                                                              |
 
 ## Next steps
 
-1. Interview Leo on project approach and goals (the open decisions above).
+1. ~~Interview Leo on project approach and goals.~~ Done 2026-09-19, see above.
 2. Explore the course content in more detail and build a topic map.
-3. In parallel, agents keep exploring the source projects: full lesson
-   inventories, the SCORM interaction catalogue, the CS50 duck papers.
+3. ~~Agents explore the source projects in more depth.~~ Done 2026-09-19:
+   [explore/06](./explore/06-lesson-inventory.md) (lesson inventories,
+   `/teach` skill) and
+   [explore/07](./explore/07-scorm-interactions-and-duck-tutor.md) (SCORM
+   interaction catalogue, CS50 Duck tutor design). The Duck papers are not
+   in the repo and still need fetching.
 4. Write the dictionary / taxonomy spec.
 5. Design the interactive lesson component set and the local-storage progress
    model.
