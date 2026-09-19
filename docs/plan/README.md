@@ -106,7 +106,10 @@ See the `explore/` reports for detail on each.
    [explore/10](./explore/10-execute-program.md) (Execute Program's
    prediction examples, lesson graph and spaced reviews; all applied:
    `predict` in spec 001, graph and rhythm in spec 002, and
-   [spec 003](../spec/003-spaced-review.md) for spaced review).
+   [spec 003](../spec/003-spaced-review.md) for spaced review, and
+   [explore/11](./explore/11-roadmap-sh.md) (roadmap.sh: drawn topic maps,
+   per-node drawer with status and AI actions, generated courses and
+   quizzes, project specs; implications not yet applied).
 4. ~~Write the dictionary / taxonomy spec.~~ Draft 2026-09-19 in
    [spec 001](../spec/001-dictionary.md).
 5. Design the interactive lesson component set and the local-storage progress
