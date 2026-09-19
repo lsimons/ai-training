@@ -69,13 +69,15 @@ verbatim and must include the base path.
 
 - This is a public, open-content project. No company names, internal URLs or
   confidential material.
-- Everything here is CC BY-NC-SA 4.0 (`LICENSE`). Source material has
-  different terms; `docs/plan/README.md` has the table. In short:
-  `agent-engineer-course` (Apache-2.0) and CS50 (CC BY-NC-SA) content may be
-  integrated with attribution and an entry in `NOTICE.md`; Anthropic Academy
-  and DeepLearning.AI material may only be linked or used as inspiration,
-  never copied. Prefer public
-  `academy.claude.com` URLs when linking Anthropic courses.
+- Content is CC BY-SA 4.0 (`LICENSE`); code is Apache-2.0 (`LICENSE-CODE`).
+  Source material has different terms; `docs/plan/README.md` has the table.
+  In short: `agent-engineer-course` (Apache-2.0) and Diátaxis (CC BY-SA)
+  content may be adapted with attribution and an entry in `NOTICE.md`; CS50
+  (CC BY-NC-SA) may be cited and its ideas used, but its text may not be
+  adapted (verbatim inclusion only, marked per page); Anthropic Academy and
+  DeepLearning.AI material may only be linked or used as inspiration, never
+  copied. Prefer public `academy.claude.com` URLs when linking Anthropic
+  courses.
 - Interactive widgets in lesson pages must sit in `class="not-content"`
   containers. Never emit a literal `</script>` or `</pre>` inside widget JS
   strings; it breaks mdformat and the renderer.
