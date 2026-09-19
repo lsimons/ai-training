@@ -1,0 +1,28 @@
+{
+  "config": {
+    "MD013": false,
+    "MD024": false,
+    "MD033": false,
+    // The .mjs/.mdx/.ts/.css sources in this repo are tab-indented (see
+    // .editorconfig), so code samples quoting them are tab-indented too.
+    // Detabbing the samples would make the docs disagree with the files
+    // they show. This lists exactly those languages rather than using
+    // `code_blocks: false`: a hard tab in a bash, yaml, toml or json
+    // sample is almost always a mistake and stays an error, as do tabs in
+    // prose.
+    "MD010": {
+      "ignore_code_languages": ["js", "jsx", "ts", "tsx", "astro", "css"]
+    },
+    // Starlight pages carry their title in frontmatter, so the body has no
+    // leading H1.
+    "MD041": false,
+    "MD026": false,
+    "MD028": false,
+    "MD036": false,
+    "MD040": false,
+    // mdformat is the formatter of record and emits `*emphasis*` / `**strong**`;
+    // don't let markdownlint fight it over underscore-vs-asterisk style.
+    "MD049": false,
+    "MD050": false
+  }
+}

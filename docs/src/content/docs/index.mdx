@@ -1,0 +1,62 @@
+---
+title: Template Docs
+description: A template for building documentation sites with Astro Starlight.
+template: splash
+hero:
+  tagline: A starting point for documentation sites - Astro Starlight, the LSD Warm theme, and Quarto slide decks, ready to publish to GitHub Pages.
+  actions:
+    - text: Get started
+      # hero action links are used verbatim, so this one includes the deploy base
+      link: /lsimons-template-doc/guides/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/lsimons/lsimons-template-doc
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## What's in the box
+
+<CardGrid>
+	<a class="card-link" href="/lsimons-template-doc/guides/getting-started/">
+		<Card title="Getting started" icon="rocket">
+			Install the toolchain, run the dev server, and rename the template to your
+			own project with a single command.
+		</Card>
+	</a>
+	<a class="card-link" href="/lsimons-template-doc/guides/writing-pages/">
+		<Card title="Writing pages" icon="pencil">
+			Add Markdown pages, wire them into the sidebar, and use portable
+			root-relative links that work under the deploy base path.
+		</Card>
+	</a>
+	<a class="card-link" href="/lsimons-template-doc/guides/slides/">
+		<Card title="Slide decks" icon="open-book">
+			Author slide decks in Quarto and render them to HTML and PDF, styled to
+			match the site theme.
+		</Card>
+	</a>
+	<a class="card-link" href="https://github.com/lsimons/lsimons-template-doc">
+		<Card title="Publish" icon="github">
+			A push to `main` builds and deploys the site to GitHub Pages via GitHub
+			Actions.
+		</Card>
+	</a>
+</CardGrid>
+
+## About this template
+
+This is a project template, not a finished site. It gives you a themed
+[Astro Starlight](https://starlight.astro.build/) site with a landing page, a
+[Quarto](https://quarto.org/) slide-deck setup, and the CI/CD wiring to publish
+to GitHub Pages - all under the shared "LSD Warm" theme used across
+[lsimons.github.io](https://lsimons.github.io).
+
+Run `mise run init` once to rename `lsimons-template-doc` and `Template Docs`
+throughout the repo to your own project, then replace this landing page and the
+guides with your content. See the
+[getting started guide](/lsimons-template-doc/guides/getting-started/) for the
+full walkthrough.
