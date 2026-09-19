@@ -109,11 +109,16 @@ See the `explore/` reports for detail on each.
    [spec 003](../spec/003-spaced-review.md) for spaced review, and
    [explore/11](./explore/11-roadmap-sh.md) (roadmap.sh: drawn topic maps,
    per-node drawer with status and AI actions, generated courses and
-   quizzes, project specs; implications not yet applied).
+   quizzes, project specs; applied: node status and milestone bar,
+   one-paragraph concept definitions, tutor verbs, deep-linkable topic
+   pages; declined: drawer-only content, typed link badges, lesson-anatomy
+   checklist, project template).
 4. ~~Write the dictionary / taxonomy spec.~~ Draft 2026-09-19 in
    [spec 001](../spec/001-dictionary.md).
 5. Design the interactive lesson component set and the local-storage progress
    model.
-6. Design tutor mode.
+6. Design tutor mode. Must include the node-scoped verbs from spec 001
+   (explain, key points, ELI5, why it matters, quiz me, test me) and the
+   spaced-review recall question from spec 003.
 7. Replace the template pages under `docs/src/content/docs/` with real
    content, area by area.
