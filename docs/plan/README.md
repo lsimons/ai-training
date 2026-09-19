@@ -98,7 +98,11 @@ See the `explore/` reports for detail on each.
    `/teach` skill) and
    [explore/07](./explore/07-scorm-interactions-and-duck-tutor.md) (SCORM
    interaction catalogue, CS50 Duck tutor design). The Duck papers are not
-   in the repo and still need fetching.
+   in the repo and still need fetching. Added later the same day:
+   [explore/08](./explore/08-diataxis.md) (Diátaxis) and
+   [explore/09](./explore/09-brilliant-skills-map.md) (Brilliant's coding
+   skills map and standards alignment; implications for spec 002 not yet
+   applied).
 4. ~~Write the dictionary / taxonomy spec.~~ Draft 2026-09-19 in
    [spec 001](../spec/001-dictionary.md).
 5. Design the interactive lesson component set and the local-storage progress
