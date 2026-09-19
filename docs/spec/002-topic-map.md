@@ -119,13 +119,13 @@ lesson exercises a different interaction type.
 | Area               | Lesson (working title)                 | Mode        | Competency                       | Basis                                     | Interaction to prove      |
 | ------------------ | -------------------------------------- | ----------- | -------------------------------- | ----------------------------------------- | ------------------------- |
 | concepts           | How a language model works             | explanation | concepts/how-models-work         | new, AEC 02 first half                    | `choice`, widget          |
-| safety             | Why agent safety is different          | explanation | safety/agent-risk                | AEC 10 first half, rewritten for everyone | `scenario`, watch-out     |
+| safety             | Why agent safety is different          | explanation | safety/agent-risk                | AEC 10 first half, rewritten for everyone | `scenario`, pitfall       |
 | using-agents       | Delegating a task to an agent          | tutorial    | using-agents/delegating          | new; a real delegation in a sandbox       | `sort` (autonomy levels)  |
 | coding-with-agents | Your first session with a coding agent | tutorial    | coding-with-agents/first-session | AEC 12 public rewrite; fixture repository | `exercise` + `self-grade` |
 | customizing-agents | Project instructions: AGENTS.md        | tutorial    | customizing-agents/instructions  | AEC 15 with the builder widget            | `repair`, widget          |
 | building-agents    | Building your first agent              | tutorial    | building-agents/agent-loop       | AEC 13                                    | `order`, `exercise`       |
 
-Each slice lesson gets learning objectives in frontmatter, one watch-out,
+Each slice lesson gets learning objectives in frontmatter, one pitfall,
 one checkpoint per objective and a recap. The four Engineering lessons get a
 `less` and a `more` comfortable exercise. Tutorial-mode lessons run in a
 resettable fixture. The sidebar shows only these six areas' real lessons; no
