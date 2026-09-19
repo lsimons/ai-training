@@ -1,8 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mise run init)",
-      "Bash(mise run init *)",
       "Bash(mise run docs-install)",
       "Bash(mise run docs-build)",
       "Bash(mise run docs-check)",
