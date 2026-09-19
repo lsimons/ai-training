@@ -81,13 +81,13 @@ frontmatter (`assumes`) at build time; nothing is stored twice.
 
 Topics:
 
-| Topic id                    | Name                     | Concepts                                                                                      | Prerequisites     | Existing material                           |
-| --------------------------- | ------------------------ | --------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------- |
-| `concepts/how-models-work`  | How language models work | token, context window, training vs inference, model family and size, sampling and temperature | -                 | AEC 02 first half; DL.AI 2, 6 (inspiration) |
-| `concepts/prompting`        | Prompting                | instruction, example (few-shot), role and system prompt, iteration, structured output         | how-models-work   | DL.AI 1, 3 (inspiration)                    |
-| `concepts/limits`           | Capabilities and limits  | hallucination, knowledge cutoff, non-determinism, sycophancy, cost and latency                | how-models-work   | DL.AI 3 (sycophancy); new                   |
-| `concepts/what-is-an-agent` | What an agent is         | model vs agent, tool, agent loop, degree of autonomy, harness                                 | prompting, limits | AEC 01 (KW-ready), DL.AI 11 M1              |
-| `concepts/grounding`        | Grounding and memory     | retrieval (RAG), grounding, short- and long-term memory, context rot                          | what-is-an-agent  | AEC 05 (KW parts), AEC 08 intro             |
+| Topic id                    | Name                     | Concepts                                                                                      | Prerequisites     | Existing material                                                                                                               |
+| --------------------------- | ------------------------ | --------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `concepts/how-models-work`  | How language models work | token, context window, training vs inference, model family and size, sampling and temperature | -                 | AEC 02 first half; DL.AI 2, 6 (inspiration)                                                                                     |
+| `concepts/prompting`        | Prompting                | instruction, example (few-shot), role and system prompt, iteration, structured output         | how-models-work   | DL.AI 1, 3 (inspiration); definitions written from the papers plus web search, Learn Prompting for vocabulary only (explore/12) |
+| `concepts/limits`           | Capabilities and limits  | hallucination, knowledge cutoff, non-determinism, sycophancy, cost and latency                | how-models-work   | DL.AI 3 (sycophancy); new                                                                                                       |
+| `concepts/what-is-an-agent` | What an agent is         | model vs agent, tool, agent loop, degree of autonomy, harness                                 | prompting, limits | AEC 01 (KW-ready), DL.AI 11 M1                                                                                                  |
+| `concepts/grounding`        | Grounding and memory     | retrieval (RAG), grounding, short- and long-term memory, context rot                          | what-is-an-agent  | AEC 05 (KW parts), AEC 08 intro                                                                                                 |
 
 Competencies and objectives (all `base` unless marked):
 
