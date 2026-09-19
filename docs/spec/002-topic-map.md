@@ -47,6 +47,18 @@ apart and linked.
 - No short codes. Slugs are the identifiers; a reference from one behaviour
   to another uses the objective slug.
 
+## Course page as lesson graph
+
+Each course renders as a graph, not a list: lessons are boxes placed in
+**levels** (rows of lessons that share a depth in the prerequisite order),
+joined by dotted edges from the lessons they assume to the lessons that
+assume them. Finished lessons are filled, available lessons are outlined,
+lessons whose assumed objectives are not yet passed are dimmed but never
+locked; paths are advisory. Beside the graph: a completion ring (lessons and
+checkpoints done), a "review due" card when spec 003 has items due, and the
+About panel (goals, counts, prerequisites). The graph is derived from lesson
+frontmatter (`assumes`) at build time; nothing is stored twice.
+
 ## Foundations
 
 ### Area `concepts`: Concepts
@@ -381,6 +393,10 @@ variants of a page. Content is written once.
 - **Paths render three lanes:** behind (assumed objectives not yet passed),
   on target (the path's next lesson), ahead (extensions). "You are here"
   marks the learner.
+- **Reviews feed routing.** A review item failed twice in a row marks its
+  objective as "behind" in the path lanes and offers the section that
+  teaches it, exactly like a failed checkpoint. See
+  [spec 003](./003-spaced-review.md).
 - **Tutor mode routes the same way:** on a wrong answer it asks a diagnostic
   question, and if the gap is upstream it points at the upstream section
   rather than re-explaining.
@@ -432,18 +448,21 @@ becomes useful as the graph fills in.
 One lesson per area, chosen so the shape is visible end to end and each
 lesson exercises a different interaction type.
 
-| Area               | Lesson (working title)                 | Mode        | Covers topic                     | Serves objectives                                                                  | Basis                                     | Interaction to prove      |
-| ------------------ | -------------------------------------- | ----------- | -------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------- |
-| concepts           | How a language model works             | explanation | concepts/how-models-work         | `explains-models/explains-generation`, `names-failure-modes`                       | new, AEC 02 first half                    | `choice`, widget          |
-| safety             | Why agent safety is different          | explanation | safety/agent-risk                | `judges-agent-risk/names-blast-radius`, `chooses-human-in-loop`                    | AEC 10 first half, rewritten for everyone | `scenario`, pitfall       |
-| using-agents       | Delegating a task to an agent          | tutorial    | using-agents/delegating          | `delegates-and-checks/writes-a-brief`, `chooses-autonomy`, `reviews-against-brief` | new; a real delegation in a sandbox       | `sort` (autonomy levels)  |
-| coding-with-agents | Your first session with a coding agent | tutorial    | coding-with-agents/first-session | `ships-with-agent/runs-a-session`, `gives-the-right-context`                       | AEC 12 public rewrite; fixture repository | `exercise` + `self-grade` |
-| customizing-agents | Project instructions: AGENTS.md        | tutorial    | customizing-agents/instructions  | `configures-agent/writes-project-instructions`                                     | AEC 15 with the builder widget            | `repair`, widget          |
-| building-agents    | Building your first agent              | tutorial    | building-agents/agent-loop       | `builds-agent-loop/defines-a-tool`, `implements-the-loop`                          | AEC 13                                    | `order`, `exercise`       |
+| Area               | Lesson (working title)                 | Mode        | Covers topic                     | Serves objectives                                                                  | Basis                                     | Interaction to prove     |
+| ------------------ | -------------------------------------- | ----------- | -------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------ |
+| concepts           | How a language model works             | explanation | concepts/how-models-work         | `explains-models/explains-generation`, `names-failure-modes`                       | new, AEC 02 first half                    | `choice`, widget         |
+| safety             | Why agent safety is different          | explanation | safety/agent-risk                | `judges-agent-risk/names-blast-radius`, `chooses-human-in-loop`                    | AEC 10 first half, rewritten for everyone | `scenario`, pitfall      |
+| using-agents       | Delegating a task to an agent          | tutorial    | using-agents/delegating          | `delegates-and-checks/writes-a-brief`, `chooses-autonomy`, `reviews-against-brief` | new; a real delegation in a sandbox       | `sort` (autonomy levels) |
+| coding-with-agents | Your first session with a coding agent | tutorial    | coding-with-agents/first-session | `ships-with-agent/runs-a-session`, `gives-the-right-context`                       | AEC 12 public rewrite; fixture repository | `predict`, `exercise`    |
+| customizing-agents | Project instructions: AGENTS.md        | tutorial    | customizing-agents/instructions  | `configures-agent/writes-project-instructions`                                     | AEC 15 with the builder widget            | `repair`, widget         |
+| building-agents    | Building your first agent              | tutorial    | building-agents/agent-loop       | `builds-agent-loop/defines-a-tool`, `implements-the-loop`                          | AEC 13                                    | `predict`, `order`       |
 
 Each slice lesson gets served, assumed and extends-to objectives in
 frontmatter, one pitfall, one checkpoint per served objective, one exercise
-with a stretch goal, and a recap. Tutorial-mode lessons run in a resettable
+with a stretch goal, and a recap. Tutorial-mode lessons follow the
+paragraph-then-example rhythm and use `predict` for every example that
+runs. Finishing any slice lesson schedules its checkpoints for review, so
+spec 003 is exercised by release 1 too. Tutorial-mode lessons run in a resettable
 fixture. The sidebar shows only these six areas' real lessons; no stub
 pages. Tutor mode is tested against these six.
 

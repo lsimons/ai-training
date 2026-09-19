@@ -104,8 +104,9 @@ See the `explore/` reports for detail on each.
    skills map and standards alignment; applied to spec 002 except short
    codes and shorter lessons, both declined), and
    [explore/10](./explore/10-execute-program.md) (Execute Program's
-   prediction examples, lesson graph and spaced reviews; implications not
-   yet applied).
+   prediction examples, lesson graph and spaced reviews; all applied:
+   `predict` in spec 001, graph and rhythm in spec 002, and
+   [spec 003](../spec/003-spaced-review.md) for spaced review).
 4. ~~Write the dictionary / taxonomy spec.~~ Draft 2026-09-19 in
    [spec 001](../spec/001-dictionary.md).
 5. Design the interactive lesson component set and the local-storage progress

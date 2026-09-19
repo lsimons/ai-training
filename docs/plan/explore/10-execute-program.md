@@ -111,6 +111,10 @@ Review, Reset.
 
 ## What to take from it
 
+Decision 2026-09-19: all eight items below applied. `predict` and the CI
+rule are in spec 001; the rhythm, lesson graph and reference filter in specs
+001 and 002; spaced review is [spec 003](../../spec/003-spaced-review.md).
+
 1. **Prediction as the core checkpoint for code.** Show real code, ask for
    the value, run it to grade. This is the `repair` and `choice` interaction
    types' better sibling for anything executable: it is not multiple choice,
