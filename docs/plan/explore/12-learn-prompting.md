@@ -117,6 +117,13 @@ temperature / top-p / maximum length.
 Little text, a few patterns, and a source for the prompting slice of the
 concept register.
 
+Decision 2026-09-20: items 2 to 6 adopted and written into spec 001 (Rules
+and the Walkthrough entry). Item 1 rejected: Learn Prompting is not a
+content source. The prompting concepts are written from the original papers
+and a web search, with Learn Prompting used for vocabulary only, so no
+`NOTICE.md` entry is needed and the CC BY branch distinction stops
+mattering.
+
 1. **Seed prompting concepts from the CC BY branch, with attribution.** The
    short intermediate pages (chain of thought, zero-shot CoT,
    self-consistency, generated knowledge), the standard prompt and exemplar
