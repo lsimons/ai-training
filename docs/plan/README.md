@@ -101,8 +101,8 @@ See the `explore/` reports for detail on each.
    in the repo and still need fetching. Added later the same day:
    [explore/08](./explore/08-diataxis.md) (Diátaxis) and
    [explore/09](./explore/09-brilliant-skills-map.md) (Brilliant's coding
-   skills map and standards alignment; implications for spec 002 not yet
-   applied).
+   skills map and standards alignment; applied to spec 002 except short
+   codes and shorter lessons, both declined).
 4. ~~Write the dictionary / taxonomy spec.~~ Draft 2026-09-19 in
    [spec 001](../spec/001-dictionary.md).
 5. Design the interactive lesson component set and the local-storage progress
