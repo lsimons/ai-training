@@ -1,0 +1,109 @@
+# 001 - Project dictionary
+
+**Purpose:** Fix the words this project uses for its content, its knowledge
+model and its learners, so pages, the sidebar, the topic map, the progress
+model and tutor mode all mean the same thing by the same name. Based on the
+CS50 vocabulary ([explore/03](../plan/explore/03-cs50-pedagogy.md)), the
+Anthropic module structure
+([explore/07](../plan/explore/07-scorm-interactions-and-duck-tutor.md)) and
+the career-model competency schema
+([explore/05](../plan/explore/05-career-model-and-deeplearning-ai.md)).
+
+**Status:** Draft, 2026-09-19. Supersedes the "Taxonomy / project
+dictionary" bullet in [the plan](../plan/README.md).
+
+## Rules
+
+- One word per idea. Synonyms listed under "do not use" are banned in
+  content, code, frontmatter and the sidebar.
+- **Skill is reserved for agent skills** (Claude Code skills, the Agent Skills
+  spec), which are a subject taught here. A learner's ability is always a
+  **competency**, never a skill.
+- Every unit below with an identifier uses a lowercase kebab-case **slug**
+  that never changes once published. Display names may change; slugs do not.
+
+## Content units
+
+These describe what the site contains. Nesting is strict: group > area >
+course > lesson > section.
+
+| Term              | Definition                                                                                                                                                                                                    | CS50 / Anthropic analogue           | Do not use                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------- |
+| **Site**          | The whole thing: *AI Training*.                                                                                                                                                                               | CS50x                               | portal, academy, suite              |
+| **Group**         | One of two top-level sidebar groups: **Foundations** (for everyone, one level) and **Engineering** (for software engineers, two comfort levels).                                                              | -                                   | part, half, tier                    |
+| **Area**          | One of six subjects: Concepts, Safety, Using agents (Foundations); Coding with agents, Customizing agents, Building agents (Engineering). An area owns competencies in the topic map and one or more courses. | Course (CS50AI)                     | topic, module, track, domain        |
+| **Course**        | An ordered sequence of lessons inside one area, with stated goals, an end quiz and optionally a project. Release 1 has one course per area.                                                                   | CS50 week series; Anthropic module  | module, training, class             |
+| **Lesson**        | One page, 10 to 25 minutes, with learning objectives at the top, sections in the body, and a recap at the end. The unit of progress and of tutor mode.                                                        | Lecture chunk; Anthropic screen set | chapter, unit, page, module         |
+| **Section**       | An H2 of a lesson. Every section has a **kind**: `teaching`, `watch-out`, `checkpoint`, `exercise`, `recap`.                                                                                                  | Anthropic screen                    | screen, step, slide                 |
+| **Watch-out**     | A section that shows a realistic failure mode right after the teaching it belongs to: setup, what went wrong, the rule.                                                                                       | Anthropic Watch Out screen          | pitfall box, warning, gotcha        |
+| **Checkpoint**    | A graded interaction inside a lesson (see interaction types below). Can be passed or skipped; skipping is recorded and is not a pass. Every checkpoint maps to one learning objective.                        | Anthropic checkpoint                | question, quiz, test, assessment    |
+| **Exercise**      | A hands-on task the learner does outside the page (in a terminal, an editor, a chat), then self-grades against a model answer. Honour system.                                                                 | Lab, practice problem               | assignment, homework, task          |
+| **Project**       | A larger exercise closing a course, with a specification and a walkthrough. Optional in release 1.                                                                                                            | Problem set, final project          | capstone, assignment                |
+| **Quiz**          | The end-of-course set of checkpoint questions. Pass means all objectives touched with at most one miss.                                                                                                       | CS50 weekly quiz; Anthropic quiz    | exam, test                          |
+| **Recap**         | The closing section of a lesson: numbered takeaways, sources, what comes next.                                                                                                                                | Key takeaways                       | summary, conclusion, TL;DR          |
+| **Short**         | An optional standalone page going deeper on one concept, linked from a lesson, not in the course sequence.                                                                                                    | CS50 short                          | appendix, deep dive, aside          |
+| **Walkthrough**   | A worked example, step by step, either as a section or as the guided solution of a project.                                                                                                                   | CS50 walkthrough                    | tutorial, demo                      |
+| **Widget**        | An interactive teaching element with no grade (explorer, simulator, builder). Sits in a `not-content` container.                                                                                              | Anthropic tab strip, hotspot, cards | interactive, applet, demo           |
+| **Deck**          | A Quarto slide deck in `public/presentations/`, for delivering a lesson live.                                                                                                                                 | Lecture slides                      | slides, presentation                |
+| **Path**          | An ordered list of lessons across courses for one audience or goal, shown as a map with "you are here". Examples: *Knowledge worker*, *Engineer*, *Agent builder*.                                            | Anthropic learning path             | track, journey, roadmap, curriculum |
+| **Comfort level** | `less` or `more` comfortable. Engineering lessons mark sections and exercises with a level; the learner picks one and can switch. Foundations has no levels.                                                  | CS50 less / more comfortable        | difficulty, beginner/advanced       |
+
+## Knowledge model
+
+These describe what the site teaches, independent of how it is laid out.
+They are the nodes and edges of the topic map ([spec 002](./002-topic-map.md)).
+
+| Term                   | Definition                                                                                                                                                                                             | Do not use                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
+| **Concept**            | A named idea a learner can understand and explain, e.g. *context window*, *prompt injection*. Smallest node. A lesson teaches one to five concepts.                                                    | topic, term, idea, notion        |
+| **Competency**         | Something a learner can *do*, described by behaviours at three levels. Groups concepts. An area owns three to seven competencies.                                                                      | skill, capability, ability       |
+| **Level**              | `base`, `expert`, `lead`: base can do it with guidance and knows the vocabulary; expert does it reliably and explains the trade-offs; lead sets the practice for others and judges when not to use it. | grade, rank, seniority, maturity |
+| **Behaviour**          | One observable statement under a competency level, e.g. "reviews an agent's diff before merging". The unit the evaluation field and the checkpoints point at.                                          | indicator, criterion             |
+| **Learning objective** | A per-lesson "you will be able to..." statement. Maps to exactly one competency at one level. Checkpoints map to objectives; tutor mode quizzes from them.                                             | goal, outcome, aim               |
+| **Goal**               | A learner-chosen destination expressed as a competency level, e.g. "Building agents: base". Paths are the routes to goals.                                                                             | objective, target                |
+| **Link**               | A typed edge between competencies or concepts: `prerequisite` (learn this first), `related` (see also), `specialization` (a narrower, deeper version).                                                 | dependency, relation, tag        |
+| **Source**             | An external resource a lesson or competency points to: `book`, `course`, `reference`, `video`. Carries license notes when the material may not be copied.                                              | link, resource, reading          |
+
+## Interaction types
+
+Checkpoint kinds available to authors. Names are the component names.
+
+| Type           | Behaviour                                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `choice`       | Single-select multiple choice. Rationale per option; wrong picks show their own rationale, never the answer. Unlimited retries. |
+| `multi-choice` | Select exactly N correct items with no false positives.                                                                         |
+| `match`        | Assign one option to each statement row. Per-row feedback, rationale on full pass.                                              |
+| `sort`         | Place chips into labelled buckets, click-to-select then click-a-bucket. Keyboard operable.                                      |
+| `order`        | Put steps in sequence. A `sort` with one ordered bucket.                                                                        |
+| `scenario`     | A short situation plus a decision as `choice`, with consequences shown per option.                                              |
+| `repair`       | Fix a broken artefact in a textarea, reveal the model answer, then `self-grade`.                                                |
+| `self-grade`   | After a reveal: pass, partial, retry. Only pass counts.                                                                         |
+| `reflection`   | Free text prompt, saved locally, never graded. Not a checkpoint; a `teaching` section element.                                  |
+
+## Learners and roles
+
+| Term           | Definition                                                                                                                                                                                                                                     | Do not use              |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| **Learner**    | The person using the site.                                                                                                                                                                                                                     | student, user, reader   |
+| **Author**     | Someone writing or editing lessons.                                                                                                                                                                                                            | teacher, instructor     |
+| **Tutor**      | Claude acting in tutor mode inside Claude Code, with the site running locally. Hints, not answers.                                                                                                                                             | assistant, duck, bot    |
+| **Maintainer** | Someone with commit rights on this repo.                                                                                                                                                                                                       | admin, owner            |
+| **Progress**   | The learner's local record: per lesson `read`, per checkpoint `passed`, `skipped` or `attempted`, per quiz score, chosen comfort level, chosen goals. Browser local storage under a versioned key, exportable and importable as one JSON file. | state, history, profile |
+
+## Identifiers
+
+- Area slugs: `concepts`, `safety`, `using-agents`, `coding-with-agents`,
+  `customizing-agents`, `building-agents`.
+- Lesson id: `<area>/<course>/<lesson>` slug path, equal to the page route.
+- Competency id: `<area>/<competency>`. Concept id: `<concept>` (global,
+  unique).
+- Checkpoint id: `<lesson id>#<section slug>`.
+- Progress storage key: `ai-training-progress-v<N>`; bump `N` when the
+  meaning of stored fields changes, not when content is added.
+
+## Open questions
+
+- Whether "Foundations" and "Engineering" appear in URLs or only in the
+  sidebar. Leaning: sidebar only, area slugs stay flat.
+- Whether a lesson can belong to more than one path. Leaning: yes; paths are
+  lists of lesson ids, nothing more.
