@@ -14,21 +14,26 @@ the terminal.
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css" />
   <style>
     /* Widen this page only: hide the right rail's reserved space. */
-    :root:has(#spike-term-root) { --sl-content-width: 72rem; }
+    :root:has(#spike-term-root) { --sl-content-width: 96rem; }
     :root:has(#spike-term-root) .right-sidebar-container { display: none; }
     #spike-term-toolbar { display: flex; gap: .5rem; margin: .5rem 0; flex-wrap: wrap; align-items: center; }
     #spike-term-toolbar button, #spike-term-toolbar select { padding: .35rem .8rem; cursor: pointer; font: inherit; font-size: .9em; }
     #spike-term-status { font-size: .85em; opacity: .75; margin-left: auto; }
     #spike-term-session { font-size: .85em; opacity: .75; }
+    #spike-layout { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: 1rem; align-items: start; }
+    @media (max-width: 72rem) { #spike-layout { grid-template-columns: 1fr; } }
     #spike-term { height: 70vh; min-height: 480px; border-radius: 8px; padding: 8px 0 0 8px; box-sizing: border-box; }
     #spike-term .xterm { height: 100%; }
     #spike-term.light { background: #ffffff; border: 1px solid #ddd; }
     #spike-term.dark { background: #1e1e1e; }
     #spike-coach {
-      margin-top: .75rem; padding: .8rem 1rem; border-radius: 8px; display: none;
-      background: var(--sl-color-gray-6); border-left: 4px solid var(--sl-color-accent);
+      position: sticky; top: 5rem; padding: .8rem 1rem; border-radius: 8px; max-height: 70vh; overflow: auto;
+      background: var(--sl-color-gray-6); border-left: 4px solid var(--sl-color-accent); font-size: .95em;
     }
-    #spike-coach.show { display: block; }
+    #spike-coach .empty { opacity: .6; font-style: italic; }
+    #spike-coach .entry { padding-bottom: .6rem; margin-bottom: .6rem; border-bottom: 1px solid var(--sl-color-gray-5); }
+    #spike-coach .entry:last-child { border-bottom: 0; }
+    #spike-coach .entry.old { opacity: .55; }
     #spike-coach .who { font-weight: 700; font-size: .8em; text-transform: uppercase; letter-spacing: .05em; color: var(--sl-color-accent); }
     #spike-coach .tip { margin: .3rem 0; }
     #spike-coach .prompt { font-family: var(--__sl-font-mono); font-size: .9em; opacity: .85; margin: .3rem 0; }
@@ -48,8 +53,10 @@ the terminal.
     <span id="spike-term-session"></span>
     <span id="spike-term-status">connecting…</span>
   </div>
-  <div id="spike-term"></div>
-  <div id="spike-coach"><div class="who">Coach</div><div class="tip"></div><div class="prompt" hidden></div><button class="use" hidden>Type this prompt for me</button><button class="dismiss">Dismiss</button></div>
+  <div id="spike-layout">
+    <div id="spike-term"></div>
+    <aside id="spike-coach"><div class="who">Coach</div><div id="spike-coach-entries"><div class="empty">Waiting: ask, or pause for 20 seconds after a reply.</div></div></aside>
+  </div>
   <pre id="spike-screen-dump" hidden></pre>
   <script type="module">
     import { Terminal } from 'https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/+esm';
@@ -108,16 +115,21 @@ the terminal.
     $('btn-token').onclick = () => { token = $('spike-token-input').value.trim(); sessionStorage.setItem('spike-token', token); connect(); };
     connect();
     // --- coach panel (docked, never covers the terminal) ----------------------
-    const coach = $('spike-coach');
-    function showCoach(m) {
-      coach.querySelector('.tip').textContent = m.tip; suggested = m.suggestedPrompt || null;
-      const p = coach.querySelector('.prompt'); p.hidden = !suggested; p.textContent = suggested ? '❯ ' + suggested : '';
-      coach.querySelector('.use').hidden = !suggested; coach.classList.add('show');
-    }
-    coach.querySelector('.dismiss').onclick = () => coach.classList.remove('show');
     // Typing never presses Enter: the learner reads the prompt and sends it.
     const typeFor = (text) => { send({ type: 'type-for-me', text, submit: false }); term.focus(); };
-    coach.querySelector('.use').onclick = () => typeFor(suggested);
+    const entries = $('spike-coach-entries');
+    function showCoach(m) {
+      entries.querySelector('.empty')?.remove();
+      for (const e of entries.children) e.classList.add('old');
+      suggested = m.suggestedPrompt || null;
+      const e = document.createElement('div'); e.className = 'entry';
+      const tip = document.createElement('div'); tip.className = 'tip'; tip.textContent = m.tip; e.append(tip);
+      if (suggested) {
+        const p = document.createElement('div'); p.className = 'prompt'; p.textContent = '❯ ' + suggested; e.append(p);
+        const b = document.createElement('button'); b.textContent = 'Type this prompt for me'; b.onclick = () => typeFor(suggested); e.append(b);
+      }
+      entries.prepend(e);
+    }
     $('btn-type').onclick = () => typeFor(suggested || 'Explain in two sentences what this directory is for. Do not change any files.');
     $('btn-coach').onclick = () => send({ type: 'coach' });
     $('btn-conv').onclick = () => send({ type: 'conversation' });

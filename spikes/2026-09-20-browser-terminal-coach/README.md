@@ -144,6 +144,20 @@ node spikes/2026-09-20-browser-terminal-coach/server-attach.mjs   # foreground: 
 claude stop <id>                                                   # the session outlives the page
 ```
 
+Round 3 (variance control + layout): sessions now start with
+`--safe-mode --permission-mode manual --model claude-fable-5-1 --effort low --strict-mcp-config --no-chrome` (override with `SPIKE_CLAUDE_FLAGS`). Safe mode
+disables CLAUDE.md, skills, plugins, hooks, MCP and agents, and Claude Code says
+so in a banner the learner sees. Manual mode means every tool call asks, which
+is what a first-time learner should experience and what the coach can comment
+on. The coach panel moved to a sticky column right of the terminal, keeps a
+history with older tips dimmed, and the terminal narrows to ~82 columns at
+1440px, which Claude Code handles fine. Other flags reviewed and not used:
+`--restricted` (removes Bash entirely, too much for a Claude Code lesson),
+`--bare` (also skips auth keychain reads), `--disable-slash-commands`
+(learners should meet `/help`), `--append-system-prompt` (tempting for lesson
+framing; left for a later spike), `--max-budget-usd` (worth adding for
+learners on their own keys).
+
 Gotcha found: blank lines inside the widget's `<div>` end the Markdown HTML
 block and the rest of the script renders as a code figure. Keep widget blocks
 free of blank lines.

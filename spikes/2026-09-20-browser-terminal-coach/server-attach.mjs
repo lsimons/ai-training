@@ -34,6 +34,8 @@ const PORT = Number(process.env.PORT || 4400);
 const IDLE_MS = Number(process.env.COACH_IDLE_MS || 20000);
 const SHELL = process.env.SHELL || '/bin/zsh';
 const CWD = process.env.SPIKE_CWD || process.cwd();
+const SESSION_FLAGS = (process.env.SPIKE_CLAUDE_FLAGS ||
+  '--safe-mode --permission-mode manual --model claude-fable-5-1 --effort low --strict-mcp-config --no-chrome').split(/\s+/).filter(Boolean);
 const NAME = process.env.SPIKE_NAME || 'AI training: spike/terminal'; // one session per lesson, found by name
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a);
 
@@ -52,11 +54,14 @@ function findSession() {
 function ensureSession() {
   let s = findSession();
   if (!s) {
-    const out = claude(['--bg', '--name', NAME]);
+    // Controlled start: fixed model/effort, manual permissions, and every
+    // customisation off, so all learners see the same Claude Code.
+    const out = claude(['--bg', '--name', NAME, ...SESSION_FLAGS]);
     log('started', out.split('\n')[0].trim());
     for (let i = 0; i < 20 && !s; i++) { execFileSync('sleep', ['0.5']); s = findSession(); }
   }
   if (!s) throw new Error('could not start/find a background claude session');
+  log('session flags:', SESSION_FLAGS.join(' '));
   log(`background session "${s.name}" ${s.id} (${s.sessionId}) in ${s.cwd}`);
   return s;
 }
