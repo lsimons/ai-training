@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
 /**
- * Example runner (spec S03 "Examples", S06 open question 2): every `<Predict
- * run="..." answer="...">` in a lesson names a fixture under site/examples/.
- * This runs each fixture and fails if its stdout is not the answer shown to
- * the learner. `.sh` fixtures run with bash, `.py` with python3.
+ * Example runner (spec S03 "Examples"): every `<Predict run="..."
+ * answer="...">` in a lesson names a fixture under site/examples/. This runs
+ * each fixture and fails if its stdout is not the answer shown to the
+ * learner. Every fixture is a Python script run with python3; any other
+ * file type fails the run.
  *
  * `bun scripts/check-examples.mjs --self-test` runs the tag parser against a
  * few hand-written cases instead of the lesson tree.
@@ -72,19 +73,18 @@ export function parseProps(attrs) {
 function runFixture(run) {
 	const fixture = join(examplesDir, run);
 	const ext = extname(fixture);
-	const cmd = ext === '.sh' ? ['bash', fixture] : ext === '.py' ? ['python3', fixture] : null;
-	if (!cmd) return { error: `unsupported fixture type ${ext}` };
-	const res = spawnSync(cmd[0], cmd.slice(1), { encoding: 'utf8', env: { ...process.env, PYTHON_COLORS: '0', NO_COLOR: '1' } });
+	if (ext !== '.py') return { error: `unsupported fixture type ${ext}; fixtures are Python scripts (S03 "Examples")` };
+	const res = spawnSync('python3', [fixture], { encoding: 'utf8', env: { ...process.env, PYTHON_COLORS: '0', NO_COLOR: '1' } });
 	return { status: res.status, stdout: (res.stdout ?? '').trimEnd(), stderr: res.stderr };
 }
 
 function selfTest() {
 	const cases = [
-		['plain', '<Predict id="a" answer="x" run="r.sh">', { id: 'a', answer: 'x', run: 'r.sh' }],
-		['gt in attr', '<Predict id="a" answer="a > b" run="r.sh">', { answer: 'a > b', run: 'r.sh' }],
-		['template literal', '<Predict id="a"\n  answer={`1. > x\n2. y`} run="r.sh">', { answer: '1. > x\n2. y', run: 'r.sh' }],
-		['brace with gt', '<Predict id="a" answer={`${1 > 0}`} run="r.sh">', { run: 'r.sh' }],
-		['self-closing', '<Predict id="a" run="r.sh" />', { id: 'a', run: 'r.sh' }],
+		['plain', '<Predict id="a" answer="x" run="r.py">', { id: 'a', answer: 'x', run: 'r.py' }],
+		['gt in attr', '<Predict id="a" answer="a > b" run="r.py">', { answer: 'a > b', run: 'r.py' }],
+		['template literal', '<Predict id="a"\n  answer={`1. > x\n2. y`} run="r.py">', { answer: '1. > x\n2. y', run: 'r.py' }],
+		['brace with gt', '<Predict id="a" answer={`${1 > 0}`} run="r.py">', { run: 'r.py' }],
+		['self-closing', '<Predict id="a" run="r.py" />', { id: 'a', run: 'r.py' }],
 		['no run', '<Predict id="a" answer="x">', { id: 'a', answer: 'x', run: undefined }],
 	];
 	let bad = 0;
@@ -96,8 +96,8 @@ function selfTest() {
 			if (got !== v) { bad++; console.error(`self-test ${label}: ${k}=${JSON.stringify(got)}, want ${JSON.stringify(v)}`); }
 		}
 	}
-	const many = findPredictTags('<Predict id="a" answer="1>2"> body </Predict>\n<Predict id="b" run="x.sh">');
-	if (many.length !== 2 || many[1].props.get('run') !== 'x.sh') { bad++; console.error('self-test multi: wrong tags', many.map(t => [...t.props])); }
+	const many = findPredictTags('<Predict id="a" answer="1>2"> body </Predict>\n<Predict id="b" run="x.py">');
+	if (many.length !== 2 || many[1].props.get('run') !== 'x.py') { bad++; console.error('self-test multi: wrong tags', many.map(t => [...t.props])); }
 	if (bad) { console.error(`self-test: ${bad} failure(s)`); process.exit(1); }
 	console.log('self-test: ok');
 }
