@@ -71,7 +71,16 @@ competencies:
       - id: safety/judges-agent-risk/recognises-injection
         statement: Recognises prompt injection and data exfiltration paths
         level: base
-        behaviours: []
+        behaviours:
+          - claim: The learner treats everything an agent reads (web pages, emails, files, calendar entries) as text the model may follow as an instruction.
+            why: A model has one stream of text and no separate channel for "orders from my user"; a planted sentence looks like any other instruction.
+            example: Before pointing an agent at a bookmarked page, the learner asks what the page could tell the agent to do with the access it has.
+          - claim: Given an agent's permissions, the learner can name the path a planted instruction would use to get data out.
+            why: Exfiltration needs only two ordinary abilities, read and send, and the attack is the combination, not either step.
+            example: An agent that can read mail and fetch URLs can be told to put a password into a URL; the learner spots that the fetch is the way out.
+          - claim: The learner shrinks or gates the outbound ability rather than trying to filter what the agent reads.
+            why: You cannot vet every input, but an agent that cannot send, or must ask before sending, cannot carry data out unnoticed.
+            example: For a summarising task the learner removes the agent's mail and network-post tools, leaving read-only access.
       - id: safety/judges-agent-risk/sets-oversight
         statement: Sets policy, logging and escalation for agents in an organisation
         level: expert

@@ -43,7 +43,7 @@ concepts:
       hook or a permission setting that enforces it mechanically. A capability
       the agent lacks belongs in a tool or a skill, not in a longer paragraph.
 links:
-  prerequisites: [coding-with-agents/context]
+  prerequisites: []
   related: [coding-with-agents/context]
   specializations: []
 sources: [AEC-15]
