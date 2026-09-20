@@ -94,8 +94,7 @@ describe('normalize', () => {
 					done: review({ stage: 'done' }),
 					badStage: review({ stage: 7 }),
 					badLast: review({ last: 'meh' as never }),
-					badHistory: review({ history: [{ at: DAY, result: 'pass' }, 'pass' as never] }),
-					badTraceDay: review({ history: [{ at: 'today', result: 'pass' }] }),
+					badHistory: review({ history: 'x' as never }),
 					badRevision: review({ revision: 'one' as never }),
 				},
 				quizzes: 'nope',
@@ -110,9 +109,25 @@ describe('normalize', () => {
 		expect(warnings).toEqual([
 			{ field: 'lessons', kind: 'dropped', count: 2 },
 			{ field: 'checkpoints', kind: 'dropped', count: 1 },
-			{ field: 'reviews', kind: 'dropped', count: 5 },
+			{ field: 'reviews', kind: 'dropped', count: 4 },
 			{ field: 'quizzes', kind: 'not-object', count: 1 },
 		]);
+	});
+	it('drops a malformed history trace but keeps the item, and says so', () => {
+		const warnings: NormalizeWarning[] = [];
+		const r = normalize(
+			{
+				version: VERSION,
+				reviews: {
+					a: review({ history: [{ at: DAY, result: 'pass' }, 'pass' as never, { at: 'today', result: 'pass' }] }),
+					b: review({ history: [{ at: DAY, result: 'meh' as never }] }),
+				},
+			},
+			warnings,
+		);
+		expect(r?.reviews.a?.history).toEqual([{ at: DAY, result: 'pass' }]);
+		expect(r?.reviews.b).toEqual(review({ history: [] }));
+		expect(warnings).toEqual([{ field: 'reviews.history', kind: 'dropped', count: 3 }]);
 	});
 	it('keeps a valid quiz entry', () => {
 		const r = normalize({ version: VERSION, quizzes: { q: { score: 3, at: DAY } } });
@@ -370,8 +385,12 @@ describe('migrate from version 1', () => {
 		expect(out.reviews.bad).toMatchObject({ history: [{ at: '2026-03-10', result: 'pass' }, 7] });
 		const warnings: NormalizeWarning[] = [];
 		const r = normalize({ version: 1, reviews: { odd: 'x', bad: v1({ history: ['pass', 7] }), ok: v1({}) } }, warnings);
-		expect(Object.keys(r?.reviews ?? {})).toEqual(['ok']);
-		expect(warnings).toEqual([{ field: 'reviews', kind: 'dropped', count: 2 }]);
+		expect(Object.keys(r?.reviews ?? {})).toEqual(['bad', 'ok']);
+		expect(r?.reviews.bad?.history).toEqual([{ at: '2026-03-10', result: 'pass' }]);
+		expect(warnings).toEqual([
+			{ field: 'reviews.history', kind: 'dropped', count: 1 },
+			{ field: 'reviews', kind: 'dropped', count: 1 },
+		]);
 	});
 	it('normalize and parseImport accept a version 1 record and keep its schedule', () => {
 		const doc = { version: 1, reviews: { c: v1({}) } };
@@ -379,6 +398,14 @@ describe('migrate from version 1', () => {
 		expect(r?.version).toBe(VERSION);
 		expect(r?.reviews.c).toMatchObject({ stage: 2, due: '2026-03-13', last: 'pass', revision: 1 });
 		expect(parseImport(JSON.stringify(doc))).toEqual({ ok: true, record: r, warnings: [] });
+	});
+	it('stops when a step does not move the version forward', () => {
+		// A step that leaves the version where it was, or returns no record, must not loop; `migrate` gives the doc back.
+		const doc = { version: 1 };
+		expect(migrate(doc, { 1: (d) => d })).toBe(doc);
+		expect(migrate(doc, { 1: () => ({ version: 0 }) })).toBe(doc);
+		expect(migrate(doc, { 1: () => 'x' as never })).toBe(doc);
+		expect(normalize(doc)).not.toBeNull();
 	});
 	it('a version without a migration step is returned as it came', () => {
 		expect(migrate({ version: 0, reviews: {} })).toEqual({ version: 0, reviews: {} });

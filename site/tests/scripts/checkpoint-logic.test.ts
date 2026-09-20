@@ -1,6 +1,7 @@
 import {
 	answersMatch,
 	choiceFeedback,
+	historyDisplay,
 	isSequential,
 	matchVerdict,
 	multiChoiceVerdict,
@@ -115,5 +116,19 @@ describe('matchVerdict', () => {
 		expect(matchVerdict(0, 2, 'r').feedback.text).toBe('2 rows wrong. Each row says which.');
 		expect(matchVerdict(0, 0, 'Because.')).toEqual({ ok: true, feedback: { kind: 'ok', text: 'Correct. Because.' } });
 		expect(matchVerdict(0, 0, '').feedback.text).toBe('Correct.');
+	});
+});
+
+describe('historyDisplay', () => {
+	it('says when an item was never answered', () => {
+		expect(historyDisplay([])).toBe('not answered yet');
+	});
+	it('counts the answers and names the last one with its day', () => {
+		expect(
+			historyDisplay([
+				{ at: '2026-03-08', result: 'fail' },
+				{ at: '2026-03-10', result: 'pass' },
+			]),
+		).toBe('2 answered, last pass on 2026-03-10');
 	});
 });

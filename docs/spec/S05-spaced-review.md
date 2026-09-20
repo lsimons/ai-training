@@ -119,7 +119,7 @@ checkpoint id, with the structure shown in the progress record spec.
 | ------------------------------ | ------------------------------------------------------------------------------------------------ |
 | A checkpoint's id changes      | Its review item is orphaned and dropped silently on next load, as for every progress entry       |
 | A checkpoint's answer changes  | Authors bump a `revision` field on the checkpoint; items with an older revision reset to stage 1 |
-| Progress record version bumped | Reviews migrate with the rest of the record (S04 "Storage"); the schedule is unchanged           |
+| Progress record version bumped | Reviews migrate with the rest of the record (S04 "Storage") and the schedule is unchanged        |
 
 ## Related specs
 

@@ -1,6 +1,7 @@
 ---
 /** The progress page (spec S04 "Export and import"): overview per course, export, import, reset, and the raw record. */
 import { buildCatalog } from '@lib/catalog';
+import { STORAGE_KEY } from '@scripts/progress-model';
 
 const catalog = await buildCatalog();
 ---
@@ -10,7 +11,7 @@ const catalog = await buildCatalog();
 
 	<h2 id="export-import-reset">Export, import, reset</h2>
 	<p>
-		Progress is stored in this browser only, under the local-storage key <code>ai-training-progress-v2</code>. Nothing is sent
+		Progress is stored in this browser only, under the local-storage key <code>{STORAGE_KEY}</code>. Nothing is sent
 		anywhere. Export it to move to another browser or to show a tutor; import replaces what is here.
 	</p>
 	<div class="progress-actions">

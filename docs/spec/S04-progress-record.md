@@ -95,9 +95,11 @@ which both the overall bar and the course graph import.
   later 2 to 3) on load and on import. When nothing is stored under the
   current key, load reads the newest older key that has a migration,
   migrates the record and writes it under the current key. The old key is
-  left in place for a manual export. A record of a version with no
-  migration (a future one, or one older than the chain reaches) starts
-  fresh, and its key is left in place too.
+  left in place for a manual export until a reset, which removes every
+  key. Once the current key holds a record it wins, and the old key is
+  never read again. A record of a version with no migration (a future one,
+  or one older than the chain reaches) starts fresh, and its key is left in
+  place too.
 - Version 1 to 2: a review `history` entry was a bare `"pass"` or `"fail"`
   and becomes `{ "at", "result" }`. The `at` day is worked back from the
   item's `due` and `stage`: a pass at stage `n` was due `n`'s interval

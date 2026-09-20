@@ -50,6 +50,9 @@ function warnWriteOnce(err: unknown) {
 	console.warn('progress: could not write to local storage; progress will not persist in this browser', err);
 }
 
+/** Set once a migration has run in this page, so a failed write (private mode) does not log it on every load. */
+let migrationLogged = false;
+
 function parseStored(raw: string): ProgressRecord | null {
 	const warnings: model.NormalizeWarning[] = [];
 	const record = model.normalize(JSON.parse(raw), warnings);
@@ -60,8 +63,9 @@ function parseStored(raw: string): ProgressRecord | null {
 /**
  * The stored record (spec S04 "Storage"). With nothing under this version's
  * key, the newest older key with a migration is read, migrated and written
- * under this key; the old key is left in place. A record of an unknown
- * version, or one that does not parse, starts fresh.
+ * under this key; the old key is left in place until a reset and is not read
+ * again once this key holds a record. A record of an unknown version, or one
+ * that does not parse, starts fresh.
  */
 export function load(): ProgressRecord {
 	try {
@@ -72,7 +76,8 @@ export function load(): ProgressRecord {
 			if (!old) continue;
 			const record = parseStored(old);
 			if (!record) return model.emptyRecord();
-			console.info(`progress: migrated the record under "${key}" to version ${model.VERSION}`);
+			if (!migrationLogged) console.info(`progress: migrated the record under "${key}" to version ${model.VERSION}`);
+			migrationLogged = true;
 			try {
 				localStorage.setItem(model.STORAGE_KEY, JSON.stringify(record));
 			} catch (err) {
@@ -96,9 +101,11 @@ export function save(record: ProgressRecord): void {
 	document.dispatchEvent(new CustomEvent(EVENT));
 }
 
+/** Removes this version's key and every older key, so a reset does not resurrect a migrated record on the next load. */
 export function reset(): void {
 	try {
 		localStorage.removeItem(model.STORAGE_KEY);
+		for (const key of model.priorStorageKeys()) localStorage.removeItem(key);
 	} catch (err) {
 		warnWriteOnce(err);
 	}
