@@ -29,7 +29,7 @@ const atLeast = (n) => (v) => Number(v) >= n;
 await page.goto(`${B}/concepts/how-models-work/`);
 await page.locator('[data-sampler] input[type=range]').fill('0.1');
 expect(await page.locator('[data-sampler] .bar span:last-child').first().textContent(), nonEmpty, 'sampler top');
-expect(await page.locator('.recap-next a').getAttribute('href'), `/ai-training/safety/`, 'last lesson of a course: next is the next course');
+expect(await page.locator('.site-footer a[rel=next]').getAttribute('href'), `/ai-training/safety/`, 'last lesson of a course: next is the next course');
 let cp = page.locator('#what-the-model-does');
 expect(await page.locator('[data-finish]').isDisabled(), true, 'finish disabled before checkpoints passed');
 await cp.locator('label').nth(2).click(); await cp.locator('.cp-check').first().click();
@@ -73,7 +73,7 @@ expect((await page.locator('[data-finish-note]').textContent()).trim(), 'Pass or
 expect(await page.locator('.recap-sources').count(), 0, 'no sources block on the lesson');
 expect(await page.locator('#predict-tool-call .cp-after').isHidden(), true, 'review-only block hidden on the lesson');
 expect(await page.locator('#predict-tool-call .cp-stage').isHidden(), true, 'stage pills hidden on the lesson');
-expect(await page.locator('.recap-next a').getAttribute('href'), `/ai-training/map/`, 'last course: next is the topic map');
+expect(await page.locator('.recap-next').count(), 0, 'no Next box in the recap');
 cp = page.locator('#predict-tool-call'); await cp.locator('textarea').fill('27°C, rain'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Not quite. Trace it once more.', 'predict wrong');
 await cp.locator('textarea').fill(' 27°c, sun'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Correct. That is exactly the output.', 'predict right (normalised)');
 cp = page.locator('#predict-loop'); await cp.locator('textarea').fill('It is 14°C, rain there.'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Correct. That is exactly the output.', 'predict2');
