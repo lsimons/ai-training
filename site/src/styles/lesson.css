@@ -63,6 +63,7 @@
 .cp-match-row select { font: inherit; font-size: 0.9rem; padding: 0.25rem 0.4rem; border: 1px solid var(--sl-color-gray-4); border-radius: 4px; background: var(--sl-color-bg); color: var(--sl-color-text); max-width: 100%; }
 .cp-match-row[data-state='right'] { border-color: var(--at-done); }
 .cp-match-row[data-state='wrong'] { border-color: var(--at-warn); }
+.cp-match-row[data-state='revealed'] { outline: 2px solid var(--sl-color-gray-3); outline-offset: 2px; }
 .cp-row-feedback { grid-column: 1 / -1; font-size: 0.85rem; }
 .cp-row-feedback:empty { display: none; }
 .cp-match-row[data-state='right'] .cp-row-feedback { color: var(--at-done-text); }
