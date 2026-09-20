@@ -65,14 +65,15 @@ const first = catalog.flatMap((c) => c.lessons)[0];
 			skippedEl.textContent = `${o.skipped} skipped`;
 			skippedEl.hidden = o.skipped === 0;
 			if (text) text.textContent = o.any
-				? `${o.finished} of ${o.lessons} lessons finished${o.skipped ? `, ${o.skipped} skipped` : ''}${o.started ? `, ${o.started} in progress` : ''}; ${o.passed} of ${o.checkpoints} checkpoints passed.`
+				? `${o.finished} of ${o.lessons} lessons finished${o.started ? `, ${o.started} in progress` : ''}; ${o.passed} of ${o.checkpoints} checkpoints passed.`
 				: `${o.lessons} lessons and ${o.checkpoints} checkpoints across six courses. Nothing started yet.`;
-			if (o.any && o.next) {
-				cont.href = `${base}/${o.next.id}/`;
-				cont.textContent = `Continue with: ${o.next.title}`;
-			} else if (o.any && o.firstSkipped) {
-				// Nothing unfinished, something skipped: offer the first skipped lesson.
-				cont.href = `${base}/${o.firstSkipped.id}/`;
+			// Spec S04 "Progress display": the next unfinished lesson; with none left, the first skipped one.
+			const target = o.next ?? o.firstSkipped;
+			if (o.any && target && (o.next || o.finished === 0)) {
+				cont.href = `${base}/${target.id}/`;
+				cont.textContent = `Continue with: ${target.title}`;
+			} else if (o.any && target) {
+				cont.href = `${base}/${target.id}/`;
 				cont.textContent = `All lessons finished, ${o.skipped} skipped`;
 			} else if (o.any) {
 				cont.href = `${base}/map/`;

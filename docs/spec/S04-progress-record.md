@@ -64,16 +64,20 @@ milestone bar always show the same number for the same record.
 - **Lessons only.** A lesson is `finished` only when every checkpoint is
   passed or skipped, so a checkpoint isn't a separate unit and doesn't add to
   the count.
-- **Skipped** lessons and checkpoints are out of both sides of the percent.
-  A surface that shows the percent shows skipped as a separate count
-  ("2 skipped") when it isn't zero.
+- **Skipped** lessons are out of both sides of the percent. A surface that
+  shows the percent shows skipped as a separate count ("2 skipped") when it
+  isn't zero.
 - **Per-lesson node ring** on the lesson graph stays passed checkpoints /
   that lesson's checkpoints. That is detail within one lesson and isn't a
   progress unit.
 - **Continue button**: it links to the first lesson in path order that is
-  neither finished nor skipped. When every lesson is finished or skipped and
-  at least one is skipped, it says "All lessons finished, N skipped" and links
-  to the first skipped lesson. When none is skipped, it links to the topic map.
+  neither finished nor skipped. Path order is the order of the course plan
+  file (`site/src/data/courses/<area>.yaml`), courses in site order. When no
+  such lesson is left and at least one is finished and one is skipped, it says
+  "All lessons finished, N skipped" and links to the first skipped lesson. When
+  every lesson is skipped and none finished, it offers the first skipped lesson
+  as the normal next lesson. When every lesson is finished and none skipped, it
+  links to the topic map.
 - **Review stage** doesn't feed any progress number. It surfaces on the
   review due card only ([S05](S05-spaced-review.md)).
 
