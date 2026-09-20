@@ -75,6 +75,85 @@ export const topics: TopicFixture[] = [
 		id: 'safety/risk',
 		data: { id: 'safety/risk', area: 'safety', name: 'Risk', links: { prerequisites: ['concepts/models'] } },
 	},
+	// No lesson covers it and no plan entry names it: the topic map's gap state.
+	{
+		id: 'safety/governance',
+		data: { id: 'safety/governance', area: 'safety', name: 'Governance', links: { prerequisites: [] } },
+	},
+];
+
+export interface CourseFixture {
+	id: string;
+	data: {
+		area: string;
+		lessons: {
+			id: string;
+			title: string;
+			covers: string;
+			serves: string[];
+			status: 'planned' | 'drafting' | 'live';
+			issue?: number;
+			minutes: number;
+			after: string[];
+		}[];
+	};
+}
+
+/** Course plans matching `docs`, plus one planned lesson in safety. */
+export const courses: CourseFixture[] = [
+	{
+		id: 'concepts',
+		data: {
+			area: 'concepts',
+			lessons: [
+				{
+					id: 'concepts/how-models-work',
+					title: 'How a language model works',
+					covers: 'concepts/models',
+					serves: ['o1'],
+					status: 'live',
+					minutes: 20,
+					after: [],
+				},
+			],
+		},
+	},
+	{
+		id: 'safety',
+		data: {
+			area: 'safety',
+			lessons: [
+				{
+					id: 'safety/agent-risk',
+					title: 'Why agent safety is different',
+					covers: 'safety/risk',
+					serves: ['o1'],
+					status: 'live',
+					minutes: 20,
+					after: [],
+				},
+				{
+					id: 'safety/deeper',
+					title: 'Deeper',
+					covers: 'safety/risk',
+					serves: [],
+					status: 'live',
+					minutes: 15,
+					after: [],
+				},
+				{
+					id: 'safety/coming',
+					title: 'Coming soon',
+					covers: 'safety/risk',
+					serves: [],
+					status: 'planned',
+					issue: 42,
+					minutes: 15,
+					after: ['safety/deeper'],
+				},
+			],
+		},
+	},
 ];
 
 export const competencies = [
@@ -95,10 +174,13 @@ export const competencies = [
 	},
 ];
 
-export function mockContent(overrides: { docs?: DocFixture[]; topics?: TopicFixture[] } = {}) {
+export function mockContent(
+	overrides: { docs?: DocFixture[]; topics?: TopicFixture[]; courses?: CourseFixture[] } = {},
+) {
 	const collections: Record<string, unknown[]> = {
 		docs: overrides.docs ?? docs,
 		topics: overrides.topics ?? topics,
+		courses: overrides.courses ?? courses,
 		competencies,
 	};
 	return {

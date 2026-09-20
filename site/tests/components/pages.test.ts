@@ -26,11 +26,28 @@ describe('CourseGraph', () => {
 		expect(html).toContain('data-node="safety/deeper"');
 		expect(html).not.toContain('data-node="concepts/how-models-work"');
 		// deeper assumes agent-risk within the course; the cross-course edge is dropped.
+		// The planned lesson's edge comes from its `after` in the plan.
 		const edges = JSON.parse(/data-edges>([^<]*)</.exec(html)?.[1] ?? '[]');
-		expect(edges).toEqual([{ from: 'safety/agent-risk', to: 'safety/deeper' }]);
-		expect(html).toContain('2 lessons, 1 checkpoint');
+		expect(edges).toEqual([
+			{ from: 'safety/agent-risk', to: 'safety/deeper' },
+			{ from: 'safety/deeper', to: 'safety/coming' },
+		]);
+		expect(html).toContain('2 lessons, 1 checkpoint, 1 more coming');
 		expect(html).toContain('href="/ai-training/safety/review/"');
 		expect(html).toContain('Review: nothing due yet');
+	});
+	it('renders a planned lesson as a coming node without a link, outside the progress node list', async () => {
+		const html = await container.renderToString(CourseGraph, { props: { area: 'safety' } });
+		expect(html).toMatch(/<span class="course-node" data-node="safety\/coming" data-state="coming"/);
+		expect(html).not.toContain('href="/ai-training/safety/coming/"');
+		expect(html).toContain('Coming soon');
+		const nodes = JSON.parse(/data-nodes="([^"]*)"/.exec(html)?.[1]?.replace(/&quot;/g, '"') ?? '[]');
+		expect(nodes.map((n: { id: string }) => n.id)).toEqual(['safety/agent-risk', 'safety/deeper']);
+	});
+	it('rejects an area without a plan file', async () => {
+		await expect(container.renderToString(CourseGraph, { props: { area: 'using-agents' } })).rejects.toThrow(
+			/No course plan/,
+		);
 	});
 	it('lists competencies as goals and prerequisites from other areas', async () => {
 		const html = await container.renderToString(CourseGraph, { props: { area: 'concepts' } });
@@ -50,6 +67,9 @@ describe('TopicMap', () => {
 		expect(html).toContain('data-topic="concepts/models"');
 		expect(html).toMatch(/data-topic="concepts\/models"[^>]*data-has-lesson="true"/);
 		expect(html).toMatch(/data-topic="safety\/risk"[^>]*data-has-lesson="false"/);
+		// A planned entry covers safety/risk; nothing at all names safety/governance.
+		expect(html).toMatch(/data-topic="safety\/risk"[^>]*data-planned="true"/);
+		expect(html).toMatch(/data-topic="safety\/governance"[^>]*data-has-lesson="false"[^>]*data-planned="false"/);
 		expect(html).toContain('href="/ai-training/topics/safety/risk/"');
 		const edges = JSON.parse(/data-edges>([^<]*)</.exec(html)?.[1] ?? '[]');
 		expect(edges).toEqual([{ from: 'concepts/models', to: 'safety/risk', cross: true }]);

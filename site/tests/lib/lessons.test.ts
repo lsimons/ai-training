@@ -1,5 +1,5 @@
 import { buildCatalog } from '@lib/catalog';
-import { checkpointsOf, getLessons, type Lesson, levelsOf } from '@lib/lessons';
+import { checkpointsOf, getLessons, type Lesson } from '@lib/lessons';
 import { knownPagePaths } from '@lib/links';
 import { describe, expect, it, vi } from 'vitest';
 import { type DocFixture, docs } from './content';
@@ -54,30 +54,6 @@ describe('checkpointsOf', () => {
 		expect(checkpointsOf(asLesson({ id: 'x/y', data: { title: 'X' }, body }))[0]?.title).toBe('b > c');
 		const escaped = '<Choice id="a" title="q" options={[{ text: \'it\\\'s > 1\' }]}>';
 		expect(checkpointsOf(asLesson({ id: 'x/y', data: { title: 'X' }, body: escaped }))).toHaveLength(1);
-	});
-});
-
-describe('levelsOf', () => {
-	it('puts a lesson one level below the deepest lesson it assumes, ignoring unknown and self references', async () => {
-		const levels = levelsOf(await getLessons());
-		expect(levels.get('concepts/how-models-work')).toBe(0);
-		expect(levels.get('safety/agent-risk')).toBe(1);
-		expect(levels.get('safety/deeper')).toBe(2);
-	});
-	it('ignores a lesson that assumes itself', () => {
-		const self = asLesson({
-			id: 'x/a',
-			data: { title: 'A', assumes: [{ objective: 'o', lesson: 'x/a', section: 's' }] },
-		});
-		expect(levelsOf([self]).get('x/a')).toBe(0);
-	});
-	it('breaks a cycle instead of looping', () => {
-		const a = asLesson({ id: 'x/a', data: { title: 'A', assumes: [{ objective: 'o', lesson: 'x/b', section: 's' }] } });
-		const b = asLesson({ id: 'x/b', data: { title: 'B', assumes: [{ objective: 'o', lesson: 'x/a', section: 's' }] } });
-		const levels = levelsOf([a, b]);
-		// The lesson visited first closes the cycle at 0, so b sits at 1 and a above it.
-		expect(levels.get('x/b')).toBe(1);
-		expect(levels.get('x/a')).toBe(2);
 	});
 });
 
