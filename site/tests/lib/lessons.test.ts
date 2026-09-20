@@ -135,6 +135,7 @@ describe('checkpointsOf', () => {
 	it('falls back to the id as title and handles a missing body', () => {
 		const l = body('<Choice id="only-id" concepts={["c"]} options={[]}>\n</Choice>');
 		expect(checkpointsOf(l)[0]?.title).toBe('only-id');
+		expect(checkpointsOf(l)[0]?.objective).toBe('');
 		expect(checkpointsOf(asLesson({ id: 'x/y', data: { title: 'X' } }))).toEqual([]);
 	});
 	it('rejects a tag without an id, a bad review value, a bad revision and an unterminated tag', () => {
