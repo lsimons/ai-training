@@ -35,6 +35,14 @@ publishes them.
 The reports quote the flagged sentences on purpose, so `mise run prose`
 skips `docs/prose/reports/`.
 
+A *metric* package (Readability) is a different shape: each rule computes
+one score per file and Vale reports only the files over the threshold, at
+line 1, with nothing to point at. For those, step 1 also runs
+`mise run prose-metrics -- <package>`, which scores every file on every
+rule into `reports/<package>/scores.tsv`, and step 2 is a distribution per
+area plus the longest sentences of the outlier files instead of per-rule
+example reports.
+
 ## Decisions
 
 | Package    | Rule                                                                                                                                                                        | Where        | Why                                                                                                          |
