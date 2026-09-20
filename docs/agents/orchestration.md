@@ -11,10 +11,10 @@ queue, and writes the summary. Everything else is delegated.
 
 ## Roles
 
-| Role        | How many                           | Lives in                                 | Model and effort            |
-| ----------- | ---------------------------------- | ---------------------------------------- | --------------------------- |
-| Coordinator | one                                | the main checkout, on `main`             | the session's own           |
-| Builder     | one per issue                      | its own worktree and branch              | Fable, low reasoning effort |
+| Role        | How many                            | Lives in                                 | Model and effort            |
+| ----------- | ----------------------------------- | ---------------------------------------- | --------------------------- |
+| Coordinator | one                                 | the main checkout, on `main`             | the session's own           |
+| Builder     | one per issue                       | its own worktree and branch              | Fable, low reasoning effort |
 | Reviewer    | one per pull request, sometimes two | its own worktree, detached at the PR tip | Fable, default effort       |
 
 A builder owns one issue, one branch and one pull request from start to
