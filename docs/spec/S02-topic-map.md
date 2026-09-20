@@ -15,6 +15,10 @@ in the bibliography and the topic YAML (2026-09-20).
 Every `DLAI-N` key carries its verified public course page URL in the
 bibliography and the table below (2026-09-20).
 Deferred: the map's side drawer, path lanes, and quizzes.
+Since 2026-09-20 each checkpoint names the concepts it exercises by id
+(S03 "Checkpoints"), and the build rejects an unknown id. A concept id is
+a public identifier like a topic id, and renaming one means updating the
+checkpoints that name it.
 
 ## Introduction
 
