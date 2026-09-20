@@ -3,14 +3,14 @@
 Which check catches what, so a new assertion lands in the layer that can
 hold it. Every layer runs from `mise run ci` and from the CI workflow.
 
-| Layer      | Task                 | Runs                                                                | Catches                                                                                                                   |
-| ---------- | -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Lint       | `mise run site-lint` | Biome over `site/` (`site/biome.json`)                              | Unused imports and variables, `any`, non-house formatting, import order                                                   |
-| Types      | `mise run site-check` | `astro check`                                                      | Type errors in `.ts` and `.astro` files, template errors, content schema mismatches                                       |
-| Unit       | `mise run site-test` | Vitest, `site/tests/**/*.test.ts`, with the coverage floor          | Wrong logic in `site/src/lib`, `site/src/scripts` and `site/scripts/lib`, in isolation                                    |
-| Component  | `mise run site-test` | The same Vitest run; `site/tests/components/` renders `.astro` files | Wrong server-rendered markup: a missing `data-` attribute, a bad prop check, a wrong link                                  |
-| Examples   | `mise run examples`  | `site/scripts/check-examples.mjs`                                   | A `<Predict run= answer=>` whose fixture prints something else than the lesson shows                                      |
-| e2e        | `mise run site-e2e`  | Playwright, `site/e2e/*.spec.ts`, against the built site            | The scripts and the markup disagreeing, a page error, a console error, a flow that only works with real navigation        |
+| Layer     | Task                  | Runs                                                                 | Catches                                                                                                            |
+| --------- | --------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Lint      | `mise run site-lint`  | Biome over `site/` (`site/biome.json`)                               | Unused imports and variables, `any`, non-house formatting, import order                                            |
+| Types     | `mise run site-check` | `astro check`                                                        | Type errors in `.ts` and `.astro` files, template errors, content schema mismatches                                |
+| Unit      | `mise run site-test`  | Vitest, `site/tests/**/*.test.ts`, with the coverage floor           | Wrong logic in `site/src/lib`, `site/src/scripts` and `site/scripts/lib`, in isolation                             |
+| Component | `mise run site-test`  | The same Vitest run; `site/tests/components/` renders `.astro` files | Wrong server-rendered markup: a missing `data-` attribute, a bad prop check, a wrong link                          |
+| Examples  | `mise run examples`   | `site/scripts/check-examples.mjs`                                    | A `<Predict run= answer=>` whose fixture prints something else than the lesson shows                               |
+| e2e       | `mise run site-e2e`   | Playwright, `site/e2e/*.spec.ts`, against the built site             | The scripts and the markup disagreeing, a page error, a console error, a flow that only works with real navigation |
 
 ## Where a new assertion belongs
 
@@ -37,8 +37,7 @@ hold it. Every layer runs from `mise run ci` and from the CI workflow.
   `site/e2e/`, one spec file per mechanism. Seed progress with the `seed`
   fixture instead of clicking through an earlier flow, and use auto-waiting
   `expect(locator)` assertions rather than sleeps.
-- **A code example's output** needs no test: `<Predict run="..."
-  answer="...">` names the fixture and `mise run examples` asserts it.
+- **A code example's output** needs no test: `<Predict run="..." answer="...">` names the fixture and `mise run examples` asserts it.
 
 ## Coverage
 
