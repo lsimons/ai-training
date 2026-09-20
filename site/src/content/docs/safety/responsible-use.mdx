@@ -22,8 +22,8 @@ import { Choice, Scenario, Sort, Repair, Pitfall, Exercise, Recap } from '@compo
 Most people who use an AI tool at work picked it themselves. It was free,
 or a colleague recommended it, or it came with a product they already had.
 Nobody asked, and nobody reviewed it. Security teams call this **shadow
-AI**, and the term sounds like an accusation. It isn't one. It is a
-description of how most tools arrive. The risk is in what goes into them.
+AI**. The term sounds like an accusation, but it only describes how most
+tools arrive. The risk is in what goes into them.
 In this lesson we follow a prompt
 from your screen to the places it ends up. We then sort the data you handle
 into four tiers, and we set the two boundaries that separate trying a tool
@@ -36,19 +36,20 @@ asks you to look four facts up in it.
 
 ## Can I...?
 
-Start with your gut. Sort these requests before reading on, and come back
-after the lesson to see whether you would move any of them.
+Start with your gut. Assume the tool is one your organization has already
+approved. Sort these requests before reading on, and come back after the
+lesson to see whether you would move any of them.
 
 <Sort id="can-i-sort" objective="safety/handles-data-safely/decides-what-to-share"
   title="Can I...?" hint="Whose information is it, and can it be taken back once it has been sent?"
-  buckets={['Yes', 'Only with approval', 'Never']}
+  buckets={['Yes', 'Only with their approval', 'Never']}
   items={[
     { text: 'Review my own draft report with it', bucket: 0 },
     { text: 'Discuss how our team plans its work', bucket: 0 },
     { text: 'Mention a colleague by name and work email', bucket: 0 },
     { text: 'Paste a document a customer gave us in confidence', bucket: 1 },
     { text: 'Describe a customer\'s internal systems in detail', bucket: 1 },
-    { text: 'Paste a password or an API key', bucket: 2 },
+    { text: 'Paste a password or an API key (a password a program uses)', bucket: 2 },
     { text: 'Upload an HR file, medical note or identity number', bucket: 2 },
     { text: 'Send the output to a customer without reading it', bucket: 2 },
   ]} />
@@ -57,12 +58,12 @@ The rest of the lesson explains why the answers fall where they do.
 
 ## Where a prompt goes
 
-When you press enter, the text of your prompt leaves your computer and is
-processed on the provider's servers, in a region the provider chooses. The
-response comes back the same way. So far that is like sending an email. The
-differences are in what happens afterwards, and they are set by the terms
-of the tool, so the facts below are things to look up for your own tool
-rather than facts this lesson can state for you.
+Unless the tool runs on your own computer, the text of your prompt leaves
+it when you press enter and is processed on the provider's servers, in a
+region the provider chooses. The response comes back the same way. So far
+that is like sending an email. The differences are in what happens
+afterwards, and the terms of the tool set them, so look each of the facts
+below up for your own tool.
 
 **Retention.** The provider keeps the conversation for some time. It may be
 thirty days for abuse checks, or as long as your account exists, or until
@@ -87,8 +88,8 @@ The vendor list is usually published as "subprocessors".
 **Web search.** When an assistant searches the web for you, it writes a
 short query derived from your prompt and sends that to a search provider,
 which is often a fourth company with its own terms. The search provider
-never sees your whole prompt, but it sees enough to know what you were
-asking about. Keep sensitive detail out of prompts that trigger search, or
+usually sees only that query rather than your whole prompt, but it sees
+enough to know what you were asking about. Keep sensitive detail out of prompts that trigger search, or
 turn search off for that conversation.
 
 There is one more thing to notice about "where it goes". The prompt is more
@@ -137,10 +138,11 @@ unless the tool is approved for that kind of data. A useful test is
 whether you would put the same text in an email to a colleague who has no
 reason to see it.
 
-**Secrets.** Passwords, API keys, tokens, certificates. Never, in any tool,
-at any tier. Replace them with placeholders such as `<API_KEY>`. A secret
-that has been pasted into a conversation has to be treated as leaked and
-rotated, whoever pasted it and however trusted the tool.
+**Secrets.** Passwords, API keys, tokens, certificates. Secrets never go
+in, whatever the tool and whatever the tier. Replace them with placeholders
+such as `<API_KEY>`. A secret that has been pasted into a conversation has
+to be treated as leaked and replaced (security teams say "rotated"),
+whoever pasted it and however trusted the tool.
 
 There is a personal version of this too. Many people ask an assistant
 about their health, their mental state or their relationships. That is
@@ -234,7 +236,9 @@ customer, and it would be a perfect test. What do you do?
 At some point a tool moves from experimenting to real use, and someone has
 to ask the vendor questions. They apply just as well to the person in your
 organization who approved a tool, and the answers belong in a place the
-whole team can find.
+whole team can find. Some of the terms below are vendor vocabulary. Bring
+them to the vendor as written, and look up the ones you don't know in the
+[glossary](/glossary/).
 
 1. What data is shared with you when I use the AI features, and does the
    AI bypass any of the permissions I already have?
@@ -244,10 +248,12 @@ whole team can find.
 4. Is my data used to train models? Where is that written?
 5. Which certifications cover the AI features specifically, and in which
    role do you act, processor or controller?
-6. How is intellectual property protected: indemnity, citations, content
-   credentials on generated media?
-7. How do you reduce over-reliance on wrong answers: grounding in my own
-   data, citations, confidence signals?
+6. How is intellectual property protected: indemnity (you cover my legal
+   costs if the output infringes), citations, content credentials (a
+   signed label saying who made an image or video and how) on generated
+   media?
+7. How do you reduce over-reliance on wrong answers: grounding (answers
+   built from my own documents), citations, confidence signals?
 8. How do you detect and handle prompt injection, both in what I type and
    in the documents the AI reads?
 
@@ -293,7 +299,7 @@ The second output habit is checking what the model may have copied.
 
 Material you give a model and material it produces both carry
 obligations. Feeding in text or code you may not redistribute doesn't
-launder it. Output that reproduces a source needs the attribution the
+remove the restriction on it. Output that reproduces a source needs the attribution the
 source demands, and code output can reproduce public code closely enough
 that its license applies. Some coding assistants offer a filter that blocks
 suggestions matching public code. Without it there is a chance of
@@ -302,10 +308,10 @@ output is unsettled. The honest summary is that nobody can promise you the
 output is free of other people's work, so the check is yours.
 
 The habit is small. Keep track of where your inputs came from. When output
-looks copied, unusually specific or polished in a way the rest isn't, or a
-block of code that arrived complete with someone else's comments, search
-for a phrase from it. If it matches a source, credit it as the source
-demands or replace it.
+looks copied, when it is unusually specific or polished in a way the rest
+isn't, or when a block of code arrives complete with someone else's
+comments, search for a phrase from it. If it matches a source, credit it
+as the source demands or replace it.
 
 <Choice id="the-suspiciously-complete-function" objective="safety/handles-data-safely/respects-licenses"
   title="The function that arrived finished" hint="What does the presence of someone else's comments tell you about where the text came from?"
