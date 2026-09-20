@@ -133,7 +133,7 @@ and justifies the area split.
    topic map.
 4. Ng puts evals and error analysis early and repeatedly; `agent-engineer-course`
    defers them to lesson 09.
-5. Safety is not a first-class track anywhere; area 2 needs original material.
+5. Safety isn't a first-class track anywhere; area 2 needs original material.
 6. Skills and MCP each carry a 2 h hands-on course; area 5 can go deeper.
 7. DL.AI units are 3-25 min. Split the 950+ line lessons (09, 10, 18) into
    screen-sized units.

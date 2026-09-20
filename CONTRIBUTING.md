@@ -7,7 +7,7 @@ Any contributions you make are governed by our licenses: content under
 
 Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) to keep our community approachable and respectable.
 
-Do not report a security problem in a public issue. Use the "Report a
+Don't report a security problem in a public issue. Use the "Report a
 vulnerability" button under the repository's Security tab instead.
 
 You could read the [open source contribution guide](https://opensource.guide/how-to-contribute/) for general advice on how to contribute.
@@ -59,4 +59,4 @@ prek install -t pre-commit -t commit-msg
 `mise run lint` runs the same hooks over every file, so CI catches what an
 uninstalled hook would have missed.
 
-Since this is a small hobby project, we may not notice your contribution for a while if we are busy elsewhere. Sorry!
+Since this is a small hobby project, we may not notice your contribution for a while if we're busy elsewhere. Sorry!

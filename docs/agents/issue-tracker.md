@@ -23,7 +23,7 @@ gh issue edit <number> --add-label ready-for-agent --remove-label needs-triage
 | needs-info      | Waiting on reporter for more information       | #e6e6fa |
 | ready-for-agent | Fully specified, ready for an autonomous agent | #e6e6fa |
 | ready-for-human | Requires human implementation                  | #e6e6fa |
-| wontfix         | This will not be worked on                     | #ffffff |
+| wontfix         | This won't be worked on                        | #ffffff |
 
 GitHub's default labels (`duplicate`, `good first issue`, `help wanted`,
 `invalid`, `question`, `accessibility`) also exist and may be used.
@@ -35,6 +35,6 @@ GitHub's default labels (`duplicate`, `good first issue`, `help wanted`,
    (`needs-info`), closes it (`wontfix`), or specifies it fully.
 3. The maintainer labels a fully specified issue `ready-for-agent` when an
    autonomous agent can implement it, or `ready-for-human` when it needs
-   judgment, design or access an agent does not have.
+   judgment, design or access an agent doesn't have.
 4. Agents only pick up `ready-for-agent` issues. Reference the issue number in
    the branch name and the PR.

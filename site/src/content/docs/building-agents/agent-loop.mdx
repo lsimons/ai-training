@@ -23,7 +23,7 @@ import { Predict, Order, Pitfall, Exercise, Recap } from '@components/lesson';
 An agent is a model in a loop with tools. That sentence is the whole
 architecture; in this lesson we make it concrete. We define one tool,
 write the loop, and watch a model use the tool to answer a question it
-could not answer alone.
+couldn't answer alone.
 
 Every example below runs against a fixture: a fake model that behaves
 deterministically, so you can predict what happens and check yourself. The
@@ -32,9 +32,9 @@ the repository; swapping in a real model changes one function.
 
 ## A tool is a function plus a description
 
-The model cannot run code. What it can do is emit text that says "call
+The model can't run code. What it can do is emit text that says "call
 this function with these arguments". So a tool has two halves: the
-function you will run, and the description the model reads to decide when
+function you run, and the description the model reads to decide when
 to ask for it.
 
 ```python
@@ -70,8 +70,8 @@ wrong times and with the wrong arguments.
 
 <Pitfall title="Describing the implementation instead of the use">
 A first draft often reads "Calls the OpenWeather API with an HTTP GET".
-The model does not care how; it needs to know *when* and *with what*.
-Rule: write the description for the caller, name each argument and its
+The model doesn't care how; it needs to know *when* and *with what*.
+Rule: write the description for the caller; name each argument and its
 type, and say what comes back.
 </Pitfall>
 
@@ -91,7 +91,7 @@ def fake_model(messages):
     return {"answer": "I can only help with weather."}
 ```
 
-And the loop itself. Read it slowly; every agent framework you will ever
+And the loop itself. Read it slowly; every agent framework you ever
 use is this with more error handling.
 
 ```python

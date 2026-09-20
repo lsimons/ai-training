@@ -1,8 +1,8 @@
-# S03 - Lesson authoring
+# Lesson authoring (S03)
 
 **Purpose:** Fix the rules every lesson page follows: how its kind is chosen,
-what it contains and declares, how examples, citations, terms and prompts are
-written, and how checkpoints, exercises and widgets behave.
+what it contains and declares, how examples, citations, terms, and prompts are
+written, and how checkpoints, exercises, and widgets behave.
 
 **Status:** Draft. Changed after the release 1 review: checkpoints are "at
 least one per served objective" instead of exactly one, because tutorial
@@ -40,15 +40,15 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 | Part        | Rule                                                                                                                   |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------- |
 | Length      | 10 to 25 minutes.                                                                                                      |
-| Opener      | Where we are going: "In this lesson we will...". Never "you will learn...".                                            |
+| Opener      | Where we're going, in the present tense: "In this lesson we build...". Never `you will learn`.                         |
 | Sections    | H2s, each with a section kind. Body sections alternate teaching with pitfalls and checkpoints.                         |
 | Pitfall     | At least one, placed right after the teaching it belongs to: setup, what went wrong, the rule. Short in tutorial mode. |
 | Checkpoints | At least one per served objective; a checkpoint's `objective` names the one objective it evidences.                    |
 | Exercise    | Exactly one.                                                                                                           |
 | Recap       | Numbered takeaways, the served objectives as "You can now...", the sources cited on the page, and what comes next.     |
 
-Objectives are frontmatter data that drive checkpoints, routing and tutor
-mode. They are never printed as a "you will learn" list; the opener and the
+Objectives are frontmatter data that drive checkpoints, routing, and tutor
+mode. They're never printed as a `you will learn` list; the opener and the
 recap carry that role.
 
 ### Frontmatter
@@ -60,7 +60,7 @@ recap carry that role.
 | `covers`     | The topic ids the lesson teaches                                                                     |
 | `serves`     | The learning objective ids the lesson teaches toward; each gets at least one checkpoint              |
 | `assumes`    | The learning objective ids the lesson relies on, each pointing at the lesson section that teaches it |
-| `extends-to` | Where a confident learner goes next: the next lesson, a specialization topic or a short              |
+| `extends-to` | Where a confident learner goes next: the next lesson, a specialization topic, or a short             |
 
 ## Tutorial mode
 
@@ -81,7 +81,7 @@ Tutorial-mode lessons follow these rules:
 
 ## Explanation mode
 
-Explanation-mode lessons may discuss, compare and hold opinions. Their
+Explanation-mode lessons may discuss, compare, and hold opinions. Their
 checkpoints test understanding, not recall; `choice` and `scenario` are
 allowed because nothing runs. The anatomy above still applies, including the
 pitfall and the exercise.
@@ -89,9 +89,9 @@ pitfall and the exercise.
 ## Examples
 
 - **Every code example is real.** It runs, and its shown output is asserted
-  in CI. An example that cannot run (an agent transcript, a screenshot) is
+  in CI. An example that can't run (an agent transcript, a screenshot) is
   marked as such in the page. Until the example runner exists the rule still
-  holds: an example that cannot run says so.
+  holds: an example that can't run says so.
 - **Prefer `predict`** for any example that runs. Use `choice` only where
   nothing runs.
 - **Prompts and responses are recorded, never live.** A prompt block and
@@ -113,7 +113,7 @@ pitfall and the exercise.
 
 - **Every source is cited by key.** `(@key)` in Markdown resolves against
   one bibliography file in the repo and renders as a numbered reference
-  with a per-page sources list. Concept definitions, recaps and behaviors
+  with a per-page sources list. Concept definitions, recaps, and behaviors
   cite papers and vendor documentation this way, never as bare inline URLs.
 - **The first mention of a concept is a term.** It is marked in Markdown by
   a remark plugin, not a component, so plain Markdown stays plain. The term
@@ -135,7 +135,7 @@ pitfall and the exercise.
 
 ## Exercises
 
-- Done outside the page: in a terminal, an editor or a chat.
+- Done outside the page: in a terminal, an editor, or a chat.
 - Runs in a contrived, resettable setting (a fixture repository, a
   sandbox), never in the learner's own project.
 - The learner self-grades against a model answer. Honor system.

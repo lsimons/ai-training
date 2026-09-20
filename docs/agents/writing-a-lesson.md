@@ -36,12 +36,12 @@ import { Choice, Predict, Order, Sort, Scenario, Repair, Pitfall, Exercise, Reca
 ```
 
 `assumes` may be empty for a first lesson. `extends-to` hrefs may point at
-pages that do not exist yet; they render as plain text until they do.
+pages that don't exist yet; they render as plain text until they do.
 
 ## Anatomy
 
-Opener paragraph(s), then H2 sections. Teaching prose is plain Markdown.
-Components go between paragraphs, never inside list items or tables.
+One or more opener paragraphs, then H2 sections. Teaching prose is plain Markdown.
+Components go between paragraphs and never inside list items or tables.
 Every served objective gets at least one checkpoint with
 `objective="<that id>"`; each checkpoint names the one objective it
 evidences. One `<Pitfall>`, one `<Exercise>`, one `<Recap>`
@@ -83,7 +83,7 @@ print(TOOLS["get_weather"]["fn"]("Lisbon"))
 ````
 
 `run` names a file under `site/examples/`. `mise run examples` executes it
-and fails if its stdout is not `answer`. The file holds the complete,
+and fails if its stdout isn't `answer`. The file holds the complete,
 runnable program; the page shows only the part the learner needs. Omit
 `run` only for the honor-system variant (predict what an agent does), and
 then say in the stem that the learner checks it themselves.
@@ -161,7 +161,7 @@ page must also say so in prose next to it.
 
 `Recap` appends "You can now..." from the served objectives, the sources
 from frontmatter, what comes next from `extends-to`, and the finish button.
-Do not write those by hand.
+Don't write those by hand.
 
 Widgets are their own components under `site/src/components/widgets/` and
 are imported by name. They teach and never grade.

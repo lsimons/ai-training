@@ -8,7 +8,7 @@ built as an [Astro Starlight](https://starlight.astro.build/) site and
 published to GitHub Pages. Basic material is for knowledge workers; the rest
 is for software engineers. The plan is in `docs/plan/README.md`.
 
-## Quick Reference
+## Quick reference
 
 Every repo task lives in `.mise.toml`; `mise tasks` lists them. Run `mise trust`
 and `mise install` once per clone.
@@ -26,7 +26,7 @@ and `mise install` once per clone.
 | `mise run prose-sync`             | Fetch the pinned Vale style package (network)                        |
 | `mise run prose`                  | Vale prose lint; misspellings gate, style warnings advise            |
 | `mise run spell`                  | cspell, American English; names and jargon in `cspell-words.txt`     |
-| `mise run prose-extended`         | Vale with the passive-voice rule too; advisory, run now and then     |
+| `mise run prose-extended`         | Vale with the passive-voice rule too; advisory; run now and then     |
 | `mise run prose-eval -- <pkg>`    | Every hit of a Vale package as JSON, for deciding rule by rule       |
 | `mise run prose-metrics -- <pkg>` | Every file's score on a Vale metric package (Readability)            |
 | `mise run ci`                     | Full gate: install + lint + prose + spell + examples + check + build |
@@ -44,13 +44,13 @@ Also available: `site-preview`, `site-browser`, and
 ### Astro 7 dev server
 
 `astro dev` (what `mise run site-dev` runs) detaches into a background
-daemon. Killing the shell that started it does **not** stop it, and a stale
+daemon. Killing the shell that started it **doesn't** stop it, and a stale
 daemon keeps serving old content and old config, which looks like an edit
 "not taking". Manage it with the CLI, from `site/`:
 
 | Command                 | What it does                                  |
 | ----------------------- | --------------------------------------------- |
-| `bunx astro dev status` | Is a daemon running, on which port and pid    |
+| `bunx astro dev status` | Is a daemon running (and its port and pid)    |
 | `bunx astro dev logs`   | Its log                                       |
 | `bunx astro dev stop`   | Stop it; do this before restarting or leaving |
 
@@ -103,13 +103,14 @@ verbatim and must include the base path.
 - `docs/agents/` - agent-facing process docs (issue tracker).
 - `.mise.toml` - pinned tools and the dev/build tasks.
 - `.vale.ini` - Vale prose lint config; `.vale/styles/config/vocabularies/`
-  holds the accepted-terms list. The `write-good` package it pins is fetched
-  by `mise run prose-sync` and gitignored.
+  holds the accepted-terms list and `.vale/styles/House/` the project's own
+  rules. The style packages it pins are fetched by `mise run prose-sync` and
+  gitignored.
 - `prek.toml` - git hooks (mdformat, markdownlint, lychee, gitleaks,
   commitlint); `prek install -t pre-commit -t commit-msg` once per clone.
 - `.github/workflows/ci.yml` lints, astro-checks and builds on push/PR;
-  `deploy.yml` publishes `site/dist` to GitHub Pages, currently on manual
-  dispatch only while the repo is private. CI does not run Quarto; slide
+  `deploy.yml` publishes `site/dist` to GitHub Pages, on manual
+  dispatch only while the repo is private. CI doesn't run Quarto; slide
   outputs are committed.
 
 ## Guidelines
@@ -140,32 +141,43 @@ verbatim and must include the base path.
 - Code examples in lessons are real and their shown output is asserted in
   CI (spec S03, Examples): `<Predict run="..." answer="...">` names a fixture
   under `site/examples/` and `mise run examples` fails on a mismatch. An
-  example that cannot run says so in the page (the component prints this
+  example that can't run says so in the page (the component prints this
   when `run` is absent).
 - Component-rendered links must use `href()` from `src/lib/url.ts`; the
   rehype base plugin only sees Markdown.
 - Internal links are root-relative; the rehype plugin adds the base path.
   `starlight-links-validator` fails `mise run site-build` on a dead one, so
-  the build is the check. Do not disable it.
+  the build is the check. Don't disable it.
 - Spelling is American English, checked by `mise run spell` (cspell) over
   every tracked `.md`/`.mdx` file and the YAML under `site/src/data/`. Add
   names and jargon to `cspell-words.txt`, grouped, one per line; never a
   British spelling. Inline code spans are skipped, so identifiers need no
   entry.
 - `mise run prose` (Vale) runs over every tracked `.md`/`.mdx` file and the
-  YAML under `site/src/data/`, minus `site/examples/`. Only errors fail:
-  wrongly cased names, a doubled word, and the proselint tripwires
-  (annotations left in text, slurs, redundant acronyms, date forms). Spelling is
-  cspell's job, not Vale's. The Vale vocabulary in
+  YAML under `site/src/data/`, minus `site/examples/` and the Code of
+  Conduct. Only errors fail: wrongly cased names, a doubled word, and the
+  tripwires (annotations left in text, slurs, redundant acronyms, date
+  forms, a spaced dash, internet slang). Spelling is cspell's job, not
+  Vale's. The Vale vocabulary in
   `.vale/styles/config/vocabularies/ai-training/accept.txt` holds the
-  canonical casing of names ("Quarto", "Anthropic") and the TooWordy
-  exemptions, nothing else. Style warnings (cliches, weasel words, wordy
-  phrases, "There is", gendered or corporate terms) print but never fail
-  the build. `mise run prose-extended` adds the passive-voice and
-  sentence-initial-"So" rules from `.vale-extended.ini`; most of their hits
-  are idiom, so run it now and then and rewrite only the sentences that
-  hide who does what. `docs/prose/README.md` records which rule runs where
-  and why, and how to evaluate a new style package.
+  canonical casing of names ("Quarto", "Anthropic"), the TooWordy
+  exemptions, the acronyms a lesson need not spell out, and the names that
+  may stay capitalized inside a heading; every entry also has its casing
+  enforced everywhere, so common words never go in. Style warnings print
+  but never fail the build; they're the house style, adopted from the
+  Google style guide rule by rule: present tense (no `will`), contractions
+  (`don't`, not `do not`), the Oxford comma, sentence-case headings, `for example` over `e.g.`, no `currently` or `latest`, no `!`, and the
+  project's own `House.Quotes`: a comma or period that isn't part of the
+  quoted text goes *outside* the closing quote, so a quoted prompt never
+  seems to end in punctuation the learner should type. Plus the older
+  ones: cliches, weasel words, wordy phrases, "There is", gendered or
+  corporate terms, and in lessons an acronym used without being spelled
+  out once. `mise run prose-extended` adds the passive-voice,
+  sentence-initial-"So", first-person ("we", "I") and semicolon rules from
+  `.vale-extended.ini`; most of their hits are idiom, so run it now and
+  then and rewrite only what hides who does what. `docs/prose/README.md`
+  records which rule runs where and why, and how to evaluate a new style
+  package.
 - `mise run links` (lychee) checks *external* URLs only. It is not part of
   `ci` because it is a network call that flakes.
 - Re-render and commit a deck's HTML/PDF whenever you change its `.qmd`.
@@ -208,7 +220,7 @@ Use GitHub Issues. See `docs/agents/issue-tracker.md`.
 Use needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See
 `docs/agents/issue-tracker.md`.
 
-## Commit Message Convention
+## Commit message convention
 
 Follow [Conventional Commits](https://conventionalcommits.org/):
 
@@ -216,12 +228,12 @@ Follow [Conventional Commits](https://conventionalcommits.org/):
 
 **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `build`, `ci`, `perf`, `revert`, `improvement`, `chore`
 
-## Session Completion
+## Session completion
 
-Work is not complete until every change is committed, pushed, and CI passes.
+Work isn't complete until every change is committed, pushed, and CI passes.
 
 1. `mise run ci` (or the tasks that changed)
-2. Commit everything; do not leave the working tree dirty
+2. Commit everything; don't leave the working tree dirty
 3. `git pull --rebase && git push`
 4. `mise run ci-watch`; on failure `gh run view --log-failed`, fix, repeat
 

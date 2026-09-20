@@ -1,4 +1,4 @@
-# S01 - Project dictionary
+# Project dictionary (S01)
 
 **Purpose:** Fix the words this project uses for its content, its knowledge
 model, its interactions and its learners, so that pages, the sidebar, the
@@ -23,8 +23,8 @@ specs.
 
 ## Rules
 
-1. **One word per idea.** Synonyms listed under "do not use" are banned in
-   content, code, frontmatter and the sidebar.
+1. **One word per idea.** Synonyms listed under "don't use" are banned in
+   content, code, frontmatter, and the sidebar.
 2. **Skill is reserved for agent skills** (Claude Code skills, the Agent
    Skills specification), which are a subject taught here. A learner's
    ability is a **competency**, never a skill.
@@ -46,32 +46,32 @@ Every page has one of four kinds, after Diátaxis. Lessons are only ever
 These describe what the site contains. Nesting is strict: group > area >
 course > lesson > section.
 
-| Term              | Definition                                                                                                                                                                                                                                                                                  | Do not use                             |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| **Site**          | The whole thing: *AI Training*.                                                                                                                                                                                                                                                             | portal, academy, suite                 |
-| **Group**         | One of two top-level sidebar groups: **Foundations** (for everyone, one level) and **Engineering** (for software engineers, two comfort levels).                                                                                                                                            | part, half, tier                       |
-| **Area**          | One of six subjects. Owns competencies in the topic map and one or more courses.                                                                                                                                                                                                            | topic, module, track, domain           |
-| **Course**        | An ordered sequence of lessons inside one area, with stated goals, an end quiz and optionally a project. Its page is the **lesson graph**.                                                                                                                                                  | module, training, class                |
-| **Lesson**        | One page, 10 to 25 minutes, of kind `tutorial` or `explanation`. The unit of progress and of tutor mode. See "Lesson".                                                                                                                                                                      | chapter, unit, page, module            |
-| **Section**       | An H2 of a lesson. Every section has a kind. See "Section kinds".                                                                                                                                                                                                                           | screen, step, slide                    |
-| **Pitfall**       | A section showing a realistic failure mode right after the teaching it belongs to: setup, what went wrong, the rule.                                                                                                                                                                        | watch-out, warning, gotcha, caution    |
-| **Checkpoint**    | A graded interaction inside a lesson, mapped to one learning objective. See "Checkpoint".                                                                                                                                                                                                   | question, quiz, test, assessment       |
-| **Exercise**      | A hands-on task the learner does outside the page, then self-grades against a model answer. See "Exercise".                                                                                                                                                                                 | assignment, homework, task, variant    |
-| **Project**       | A larger exercise closing a course, with a specification and a walkthrough.                                                                                                                                                                                                                 | capstone, assignment                   |
-| **Quiz**          | The end-of-course set of checkpoint questions. Pass means all objectives touched with at most one miss.                                                                                                                                                                                     | exam, test                             |
-| **Recap**         | The closing section of a lesson: numbered takeaways, sources, what comes next. See "Recap and the learner's reference".                                                                                                                                                                     | summary, conclusion, TL;DR             |
-| **Short**         | An optional standalone page of kind `explanation`, going deeper on one concept, linked from a lesson, not in the course sequence. Where `more` depth lives.                                                                                                                                 | appendix, deep dive, aside             |
-| **Walkthrough**   | A worked example, step by step, either as a section or as the guided solution of a project.                                                                                                                                                                                                 | demo                                   |
-| **Widget**        | An interactive teaching element with no grade (explorer, simulator, builder).                                                                                                                                                                                                               | interactive, applet, demo              |
-| **Prompt block**  | A prompt shown to the learner, paired with a **response block** holding the recorded model response, both naming the model and the month recorded. In release 1 both may instead be marked `illustrative`: written by the author, labeled as such by the component and in the page's prose. | chat transcript, example               |
-| **Deck**          | A Quarto slide deck for delivering a lesson live.                                                                                                                                                                                                                                           | slides, presentation                   |
-| **Path**          | An ordered list of lessons across courses for one audience or goal. See "Path".                                                                                                                                                                                                             | track, journey, roadmap, curriculum    |
-| **Comfort level** | `less` or `more` comfortable: a learner setting that changes routing, not content. See "Comfort level".                                                                                                                                                                                     | difficulty, beginner/advanced, variant |
+| Term              | Definition                                                                                                                                                                                                                                                                                | Don't use                              |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| **Site**          | The whole thing: *AI Training*.                                                                                                                                                                                                                                                           | portal, academy, suite                 |
+| **Group**         | One of two top-level sidebar groups: **Foundations** (for everyone, one level) and **Engineering** (for software engineers, two comfort levels).                                                                                                                                          | part, half, tier                       |
+| **Area**          | One of six subjects. Owns competencies in the topic map and one or more courses.                                                                                                                                                                                                          | topic, module, track, domain           |
+| **Course**        | An ordered sequence of lessons inside one area, with stated goals, an end quiz, and optionally a project. Its page is the **lesson graph**.                                                                                                                                               | module, training, class                |
+| **Lesson**        | One page, 10 to 25 minutes, of kind `tutorial` or `explanation`. The unit of progress and of tutor mode. See "Lesson".                                                                                                                                                                    | chapter, unit, page, module            |
+| **Section**       | An H2 of a lesson. Every section has a kind. See "Section kinds".                                                                                                                                                                                                                         | screen, step, slide                    |
+| **Pitfall**       | A section showing a realistic failure mode right after the teaching it belongs to: setup, what went wrong, the rule.                                                                                                                                                                      | watch-out, warning, gotcha, caution    |
+| **Checkpoint**    | A graded interaction inside a lesson, mapped to one learning objective. See "Checkpoint".                                                                                                                                                                                                 | question, quiz, test, assessment       |
+| **Exercise**      | A hands-on task the learner does outside the page, then self-grades against a model answer. See "Exercise".                                                                                                                                                                               | assignment, homework, task, variant    |
+| **Project**       | A larger exercise closing a course; it comes with a specification and a walkthrough.                                                                                                                                                                                                      | capstone, assignment                   |
+| **Quiz**          | The end-of-course set of checkpoint questions. Pass means all objectives touched with at most one miss.                                                                                                                                                                                   | exam, test                             |
+| **Recap**         | The closing section of a lesson: numbered takeaways, sources, what comes next. See "Recap and the learner's reference".                                                                                                                                                                   | summary, conclusion, `TL;DR`           |
+| **Short**         | An optional standalone page of kind `explanation`, going deeper on one concept, linked from a lesson, not in the course sequence. Where `more` depth lives.                                                                                                                               | appendix, deep dive, aside             |
+| **Walkthrough**   | A worked example, step by step, either as a section or as the guided solution of a project.                                                                                                                                                                                               | demo                                   |
+| **Widget**        | An interactive teaching element with no grade (explorer, simulator, builder).                                                                                                                                                                                                             | interactive, applet, demo              |
+| **Prompt block**  | A prompt shown to the learner, paired with a **response block** holding the recorded model response; both name the model and the month recorded. In release 1 both may instead be marked `illustrative`: written by the author, labeled as such by the component and in the page's prose. | chat transcript, example               |
+| **Deck**          | A Quarto slide deck for delivering a lesson live.                                                                                                                                                                                                                                         | slides, presentation                   |
+| **Path**          | An ordered list of lessons across courses for one audience or goal. See "Path".                                                                                                                                                                                                           | track, journey, roadmap, curriculum    |
+| **Comfort level** | `less` or `more` comfortable: a learner setting that changes routing, not content. See "Comfort level".                                                                                                                                                                                   | difficulty, beginner/advanced, variant |
 
 ### Lesson
 
 - One page, 10 to 25 minutes. Its **mode** is `tutorial` or `explanation`.
-- Opens with where we are going, has sections in the body and a recap at
+- Opens with where we're going, has sections in the body and a recap at
   the end.
 - **Covers** one topic and teaches one to five of its concepts. **Serves**
   the learning objectives it teaches toward, **assumes** the objectives it
@@ -79,24 +79,24 @@ course > lesson > section.
 
 ### Section kinds
 
-| Kind         | Purpose                                                                                |
-| ------------ | -------------------------------------------------------------------------------------- |
-| `teaching`   | Exposition. May hold widgets, reflections, terms, prompt blocks and runnable examples. |
-| `pitfall`    | A realistic failure mode right after the teaching it belongs to.                       |
-| `checkpoint` | One graded interaction, mapped to one learning objective.                              |
-| `exercise`   | The lesson's hands-on task, done outside the page.                                     |
-| `recap`      | Numbered takeaways, "You can now..." objectives, sources, what comes next.             |
+| Kind         | Purpose                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------- |
+| `teaching`   | Exposition. May hold widgets, reflections, terms, prompt blocks, and runnable examples. |
+| `pitfall`    | A realistic failure mode right after the teaching it belongs to.                        |
+| `checkpoint` | One graded interaction, mapped to one learning objective.                               |
+| `exercise`   | The lesson's hands-on task, done outside the page.                                      |
+| `recap`      | Numbered takeaways, "You can now..." objectives, sources, what comes next.              |
 
 ### Checkpoint
 
 - One graded interaction of one of the interaction types below, mapped to
   exactly one learning objective.
-- Can be **passed** or **skipped**. Skipping is recorded and is not a pass.
+- Can be **passed** or **skipped**. Skipping is recorded and isn't a pass.
 - Once its lesson is finished, a checkpoint becomes a **review item**.
 
 ### Exercise
 
-- Done outside the page: in a terminal, an editor or a chat. The learner
+- Done outside the page: in a terminal, an editor, or a chat. The learner
   self-grades against a model answer. Honor system.
 - One per lesson, written once. May end with a one-line **stretch goal** for
   confident learners. No variants.
@@ -123,7 +123,7 @@ Foundations has no comfort levels.
 
 ### Path
 
-- An ordered list of lesson ids across courses, for one audience or goal.
+- An ordered list of lesson ids across courses for one audience or goal.
   Examples: *Knowledge worker*, *Engineer*, *Agent builder*.
 - Rendered as a map with three lanes and a "you are here" marker. Paths are
   advisory; nothing is ever locked.
@@ -138,22 +138,22 @@ Foundations has no comfort levels.
 
 These describe what the site teaches, independent of how it is laid out.
 Topics and concepts are the nodes and edges of the **topic map**; they say
-what is taught. Competencies, learning objectives and behaviors say what a
+what's taught. Competencies, learning objectives, and behaviors say what a
 learner can do afterwards; they sit beside the map and point into it.
 
-| Term                   | Definition                                                                                                                                                                                           | Do not use                         |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| **Concept**            | A named idea a learner can understand and explain, e.g. *context window*, *prompt injection*. The smallest node. Belongs to exactly one topic. Has a one-paragraph definition and a glossary anchor. | idea, notion                       |
-| **Term**               | The marked first mention of a concept in a lesson. Shows the concept's definition on hover and links to its glossary anchor. Later mentions are plain text.                                          | keyword, tooltip                   |
-| **Topic**              | A named cluster of two to eight concepts inside an area, e.g. *Prompting*, *Tool use*. A noun. The unit a lesson covers and the node that carries links. Has its own reference page.                 | subject, module, theme, competency |
-| **Competency**         | Something a learner can *do*, stated as a verb phrase, e.g. *Verifies AI output before relying on it*. Draws on one or more topics, possibly across areas. Owns three to six learning objectives.    | skill, capability, ability, topic  |
-| **Learning objective** | A verb-phrase node under a competency, e.g. *Writes a task brief with goal, context and done-criteria*, tagged with one level. Owns behaviors. What lessons serve and assume and checkpoints prove.  | goal, outcome, aim, standard       |
-| **Behavior**           | One observable statement under a learning objective, written as a triple: claim, why, example. The unit a checkpoint question or a tutor question tests.                                             | indicator, criterion, skill        |
-| **Level**              | `base` or `expert`, tagged on a learning objective. See "Levels".                                                                                                                                    | grade, rank, seniority, maturity   |
-| **Goal**               | A learner-chosen destination expressed as a competency at a level, e.g. "Building agents: base". Paths are the routes to goals.                                                                      | objective, target                  |
-| **Link**               | A typed edge between topics. See "Links".                                                                                                                                                            | dependency, relation, tag          |
-| **Source**             | An external resource a lesson or competency points to, typed `book`, `course`, `reference` or `video`. Carries license notes when the material may not be copied.                                    | link, resource, reading            |
-| **Alignment**          | A row mapping an external framework's item (framework, code, what it asks) to the learning objectives here that address it. Kept per competency.                                                     | standard, crosswalk, mapping       |
+| Term                   | Definition                                                                                                                                                                                                  | Don't use                          |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| **Concept**            | A named idea a learner can understand and explain, for example *context window*, *prompt injection*. The smallest node. Belongs to exactly one topic. Has a one-paragraph definition and a glossary anchor. | idea, notion                       |
+| **Term**               | The marked first mention of a concept in a lesson. Shows the concept's definition on hover and links to its glossary anchor. Later mentions are plain text.                                                 | keyword, tooltip                   |
+| **Topic**              | A named cluster of two to eight concepts inside an area, for example *Prompting*, *Tool use*. A noun. The unit a lesson covers and the node that carries links. Has its own reference page.                 | subject, module, theme, competency |
+| **Competency**         | Something a learner can *do*, stated as a verb phrase, for example *Verifies AI output before relying on it*. Draws on one or more topics, possibly across areas. Owns three to six learning objectives.    | skill, capability, ability, topic  |
+| **Learning objective** | A verb-phrase node under a competency, for example *Writes a task brief with goal, context and done-criteria*, tagged with one level. Owns behaviors. What lessons serve and assume and checkpoints prove.  | goal, outcome, aim, standard       |
+| **Behavior**           | One observable statement under a learning objective, written as a triple: claim, why, example. The unit a checkpoint question or a tutor question tests.                                                    | indicator, criterion, skill        |
+| **Level**              | `base` or `expert`, tagged on a learning objective. See "Levels".                                                                                                                                           | grade, rank, seniority, maturity   |
+| **Goal**               | A learner-chosen destination expressed as a competency at a level, for example "Building agents: base". Paths are the routes to goals.                                                                      | objective, target                  |
+| **Link**               | A typed edge between topics. See "Links".                                                                                                                                                                   | dependency, relation, tag          |
+| **Source**             | An external resource a lesson or competency points to, typed `book`, `course`, `reference` or `video`. Carries license notes when the material may not be copied.                                           | link, resource, reading            |
+| **Alignment**          | A row mapping an external framework's item (framework, code, what it asks) to the learning objectives here that address it. Kept per competency.                                                            | standard, crosswalk, mapping       |
 
 ### Levels
 
@@ -168,7 +168,7 @@ learner can do afterwards; they sit beside the map and point into it.
 | ----------- | ----------------------------------------------------------- |
 | **Claim**   | One sentence stating what a competent person does or knows. |
 | **Why**     | A short reason the claim matters.                           |
-| **Example** | One concrete instance, ideally a before and after.          |
+| **Example** | One concrete instance (ideally a before and an after).      |
 
 ### Links
 
@@ -184,30 +184,30 @@ Concepts inherit their topic's links.
 
 Checkpoint kinds available to authors. Names are the component names.
 
-| Type           | Behavior                                                                                                                                                                                                                                                                                                                   |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `predict`      | Show real code or a real command, ask the learner to type what it evaluates to or outputs, then run it to grade. Wrong: mark only; Hint gives a diagnostic nudge, never the answer. Unlimited retries. **Preferred wherever code runs.** Honor-system variant: predict what the agent will do, then run it and self-grade. |
-| `choice`       | Single-select multiple choice. Rationale per option; wrong picks show their own rationale, never the answer. Unlimited retries. Use only where nothing runs.                                                                                                                                                               |
-| `multi-choice` | Select exactly N correct items with no false positives.                                                                                                                                                                                                                                                                    |
-| `match`        | Assign one option to each statement row. Per-row feedback, rationale on full pass.                                                                                                                                                                                                                                         |
-| `sort`         | Place chips into labeled buckets, click-to-select then click-a-bucket. Keyboard operable.                                                                                                                                                                                                                                  |
-| `order`        | Put steps in sequence. A `sort` with one ordered bucket.                                                                                                                                                                                                                                                                   |
-| `scenario`     | A short situation plus a decision as `choice`, with consequences shown per option.                                                                                                                                                                                                                                         |
-| `repair`       | Fix a broken artifact in a textarea, reveal the model answer, then `self-grade`.                                                                                                                                                                                                                                           |
-| `self-grade`   | After a reveal: pass, partial, retry. Only pass counts.                                                                                                                                                                                                                                                                    |
-| `reflection`   | Free text prompt, saved locally, never graded. Not a checkpoint; a `teaching` section element.                                                                                                                                                                                                                             |
+| Type           | Behavior                                                                                                                                                                                                                                                                                                                |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `predict`      | Show real code or a real command, ask the learner to type what it evaluates to or outputs, then run it to grade. Wrong: mark only; Hint gives a diagnostic nudge, never the answer. Unlimited retries. **Preferred wherever code runs.** Honor-system variant: predict what the agent does, then run it and self-grade. |
+| `choice`       | Single-select multiple choice. Rationale per option; wrong picks show their own rationale, never the answer. Unlimited retries. Use only where nothing runs.                                                                                                                                                            |
+| `multi-choice` | Select exactly N correct items with no false positives.                                                                                                                                                                                                                                                                 |
+| `match`        | Assign one option to each statement row. Per-row feedback, rationale on full pass.                                                                                                                                                                                                                                      |
+| `sort`         | Place chips into labeled buckets, click-to-select then click-a-bucket. Keyboard operable.                                                                                                                                                                                                                               |
+| `order`        | Put steps in sequence. A `sort` with one ordered bucket.                                                                                                                                                                                                                                                                |
+| `scenario`     | A short situation plus a decision as `choice`, with consequences shown per option.                                                                                                                                                                                                                                      |
+| `repair`       | Fix a broken artifact in a textarea, reveal the model answer, then `self-grade`.                                                                                                                                                                                                                                        |
+| `self-grade`   | After a reveal: pass, partial, retry. Only pass counts.                                                                                                                                                                                                                                                                 |
+| `reflection`   | Free text prompt, saved locally, never graded. Not a checkpoint; a `teaching` section element.                                                                                                                                                                                                                          |
 
 ## Learners and roles
 
-| Term            | Definition                                                                                                                                                                           | Do not use              |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
-| **Learner**     | The person using the site.                                                                                                                                                           | student, user, reader   |
-| **Author**      | Someone writing or editing lessons.                                                                                                                                                  | teacher, instructor     |
-| **Tutor**       | Claude acting in tutor mode inside Claude Code, with the site running locally. Hints, not answers. See "Tutor verbs".                                                                | assistant, duck, bot    |
-| **Maintainer**  | Someone with commit rights on this repo.                                                                                                                                             | admin, owner            |
-| **Progress**    | The learner's local record of lessons, checkpoints, quizzes, review schedule, comfort level and goals, kept in the browser and exportable as one file.                               | state, history, profile |
-| **Review**      | A short session of review items due today, reached from the course page or tutor mode. Items are checkpoints from finished lessons, re-asked. Has **Give Up**, which lessons do not. | recap, test, drill      |
-| **Review item** | One checkpoint in the review schedule, with a stage on a fixed interval ladder and a learner-adjustable frequency.                                                                   | card, flashcard         |
+| Term            | Definition                                                                                                                                                                          | Don't use               |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| **Learner**     | The person using the site.                                                                                                                                                          | student, user, reader   |
+| **Author**      | Someone writing or editing lessons.                                                                                                                                                 | teacher, instructor     |
+| **Tutor**       | Claude acting in tutor mode inside Claude Code, with the site running locally. Hints, not answers. See "Tutor verbs".                                                               | assistant, duck, bot    |
+| **Maintainer**  | Someone with commit rights on this repo.                                                                                                                                            | admin, owner            |
+| **Progress**    | The learner's local record of lessons, checkpoints, quizzes, review schedule, comfort level and goals, kept in the browser, and exportable as one file.                             | state, history, profile |
+| **Review**      | A short session of review items due today. Reached from the course page or tutor mode. Items are checkpoints from finished lessons, re-asked. Has **Give Up**, which lessons don't. | recap, test, drill      |
+| **Review item** | One checkpoint in the review schedule, with a stage on a fixed interval ladder and a learner-adjustable frequency.                                                                  | card, flashcard         |
 
 ### Tutor verbs
 
@@ -239,7 +239,7 @@ change once published; display names may. There are no short codes.
 | Topic      | `<area>/<topic>`, a noun slug                       | `concepts/prompting`                                   |
 | Competency | `<area>/<competency>`, verb-led                     | `safety/verifies-output`                               |
 | Objective  | `<competency id>/<objective>`, verb-led             | `safety/verifies-output/checks-claims`                 |
-| Concept    | `<concept>`, global and unique                      | `context-window`                                       |
+| Concept    | `<concept>`; global and unique                      | `context-window`                                       |
 
 ## Open questions
 

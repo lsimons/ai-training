@@ -8,13 +8,13 @@ Proprietary; structure and mechanics only, no lesson text reused.
 ## What it is
 
 An interactive course platform for professional programmers who already
-know one language: Python, TypeScript, SQL, JavaScript arrays and regular
+know one language: Python, TypeScript, SQL, JavaScript arrays, and regular
 expressions, and so on. As of this visit: 428 lessons and 3,735 code
 examples across the catalog; the Python for Programmers course has 66
 lessons and 882 examples and takes a median of 12 hours over 16 calendar
 days. Subscription, with 16 free lessons.
 
-Their pitch, in their words: reading or watching is not doing; free
+Their pitch, in their words: reading or watching isn't doing; free
 resources are passive, uneven and unmaintained; every code example is
 verified by two independent automated test systems and a third check in the
 browser. No multiple choice, no true/false anywhere.
@@ -96,7 +96,7 @@ was too easy, decrease reviews." Then **Finish Review** returns to the
 course page.
 
 Pacing, from the FAQ: EP sometimes suggests stopping for the day because
-cramming works badly, but does not hard-limit lessons per day. Most lessons
+cramming works badly, but doesn't hard-limit lessons per day. Most lessons
 take about 5 minutes. Their marketing table: interact 6 hours total as 30
 minutes a day for 12 days, then occasional reviews taking under 10% of total
 time, finishing the last review set about three months later.
@@ -112,13 +112,13 @@ Review, Reset.
 ## What to take from it
 
 Decision 2026-09-19: all eight items below applied. `predict` and the CI
-rule are in spec S01; the rhythm, lesson graph and reference filter in specs
+rule are in spec S01; the rhythm, lesson graph, and reference filter in specs
 S01 and S02; spaced review is [spec S05](../../spec/S05-spaced-review.md).
 
 1. **Prediction as the core checkpoint for code.** Show real code, ask for
    the value, run it to grade. This is the `repair` and `choice` interaction
    types' better sibling for anything executable: it is not multiple choice,
-   it cannot be guessed, and grading is exact. Add `predict` to the
+   it can't be guessed, and grading is exact. Add `predict` to the
    interaction types in spec S01, with an honor-system variant for
    non-executable cases (predict what the agent will do, then run it).
 2. **Never reveal the answer in a lesson; hints are diagnostic questions.**
@@ -147,5 +147,5 @@ S01 and S02; spaced review is [spec S05](../../spec/S05-spaced-review.md).
 
 Not adopted: the subscription and lock-step level gating as a business
 device; our content is open and paths are advisory. Also their "no multiple
-choice" absolutism: our Foundations material is not executable, so `choice`
+choice" absolutism: our Foundations material isn't executable, so `choice`
 and `scenario` stay, but prediction should be preferred wherever code runs.

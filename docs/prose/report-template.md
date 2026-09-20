@@ -27,7 +27,7 @@ decides.
    the sentence quoted with one line before and after where the sentence is
    cut. Choose them so that: every area with hits has at least one; the top
    five phrases each appear at least once; at least three are picked at
-   random from the rest (say which). Quote verbatim, do not trim inside the
+   random from the rest (say which). Quote verbatim, don't trim inside the
    sentence.
 4. **Concentration.** Which files carry the most hits (top five with
    counts), and whether the hits cluster in tables, headings, quoted

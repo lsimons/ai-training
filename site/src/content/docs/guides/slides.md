@@ -28,7 +28,7 @@ That runs `quarto render site/public/presentations/example.qmd`, which produces
 (Beamer); if it is missing, install it once with `quarto install tinytex`.
 
 The rendered outputs are committed to git, because decks change rarely and this
-keeps the deployed site a pure static build (CI does not run Quarto). Re-run
+keeps the deployed site a pure static build (CI doesn't run Quarto). Re-run
 `mise run site-slides` and commit the results whenever you edit a deck.
 
 ## Theme

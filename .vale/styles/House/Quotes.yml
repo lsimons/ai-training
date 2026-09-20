@@ -1,0 +1,15 @@
+# The project's own style: this repository uses logical quotation. A comma
+# or period that is not part of the quoted text goes after the closing
+# quote, so a quoted prompt or command never appears to end in punctuation
+# the learner should type ("summarize this page", not "summarize this
+# page,"). The inverse of Google.Quotes, which is off. A quoted text that
+# starts with a capital is a full sentence and may keep its own period
+# ("Write clean code."), and an ellipsis is not a period. Decided in
+# docs/prose/README.md.
+extends: existence
+message: "Commas and periods go outside quotation marks: %s"
+link: https://en.wikipedia.org/wiki/Quotation_marks_in_English#Order_of_punctuation
+level: warning
+nonword: true
+tokens:
+  - '"[a-z][^"\n]*(?<!\.)[.,]"'

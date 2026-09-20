@@ -1,4 +1,4 @@
-# S06 - Release 1
+# Release 1 (S06)
 
 **Purpose:** Define the first release: one lesson per area, chosen so the
 shape of the site is visible end to end and every mechanism is exercised at

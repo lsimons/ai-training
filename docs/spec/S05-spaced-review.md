@@ -1,8 +1,8 @@
-# S05 - Spaced review
+# Spaced review (S05)
 
 **Purpose:** Define how the site brings a learner back to what they learned,
 without a backend: which items are reviewed, on what schedule, where reviews
-surface, and what is stored.
+surface, and what's stored.
 
 **Status:** Draft
 
@@ -19,7 +19,7 @@ produce recognition, not recall. Reviews re-ask a lesson's checkpoints at
 growing intervals after the lesson is finished, take a few minutes, and are
 the only mechanism that brings a learner back to old material.
 
-## What is reviewed
+## What gets reviewed
 
 - Every **checkpoint** in a lesson becomes a **review item** when the lesson
   is finished, regardless of whether it was passed or skipped in the lesson.
@@ -27,7 +27,7 @@ the only mechanism that brings a learner back to old material.
   `order`, `scenario`.
 - Not reviewed: `repair`, `self-grade`, `exercise` and `reflection`. They
   are too long or not gradable.
-- Authors may mark a checkpoint `review: false` (a one-off that does not
+- Authors may mark a checkpoint `review: false` (a one-off that doesn't
   bear repeating) or supply **variants**: alternative stems with the same
   answer, or alternative option orders, so a review tests the idea rather
   than recognition of the wording.
@@ -105,7 +105,7 @@ checkpoint id, with the shape shown in the progress record spec.
 
 - Because the schedule is inside the progress record, it moves with the
   learner by export and import, and it resets when the record resets.
-- No server, no notifications, no email. A learner who does not come back is
+- No server, no notifications, no email. A learner who doesn't come back is
   not reminded. This is a known limit; tutor mode is the only active
   reminder, and only when the learner opens a session.
 

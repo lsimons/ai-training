@@ -20,8 +20,8 @@ sources: []
 
 import { Choice, Sort, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
 
-In this lesson we will delegate one small task to an agent and get a result
-we can check. We will write the brief, decide how much the agent may do
+In this lesson we delegate one small task to an agent and get a result
+we can check. We write the brief, decide how much the agent may do
 before it comes back to us, and then review what it produced against the
 brief rather than against a gut feeling. The task is deliberately small so
 you can run it as often as you like and throw the results away.
@@ -31,7 +31,7 @@ depends on a particular product.
 
 ## The task
 
-Here is the text you will hand over. It is fictional; read it once now so
+Here is the text you hand over. It is fictional; read it once now so
 that you can judge the agent's work later.
 
 > **Memo: office move, second floor to fourth floor**
@@ -40,10 +40,10 @@ that you can judge the agent's work later.
 > fourth. Desks on the fourth floor are being fitted out over the next three
 > weeks; the move itself is planned for the last Friday of the month, with
 > everyone working from home that day. Facilities will label and transport
-> monitors, chairs and personal crates. Each person gets one crate and packs
+> monitors, chairs, and personal crates. Each person gets one crate and packs
 > it by the Thursday evening before the move. Anything left on a desk after
-> that is recycled. The printer on the second floor stays where it is; the
-> fourth floor gets a new one in the week after the move. Lockers are not
+> that's recycled. The printer on the second floor stays where it is; the
+> fourth floor gets a new one in the week after the move. Lockers aren't
 > moving, so clear yours before the end of the month. Questions go to the
 > office manager, who will hold a short walk-through of the new floor next
 > Tuesday at ten. Attendance is optional but recommended for anyone who
@@ -52,38 +52,38 @@ that you can judge the agent's work later.
 The result you want is a one-page summary in this fixed format:
 
 1. A one-line title.
-2. Three bullets: what is happening, what you must do, and by when.
+2. Three bullets: what's happening, what you must do, and by when.
 3. One closing line naming who to ask.
 
 Before you write anything, predict: if you paste the memo and type
-"summarize this", what will you get back? Probably a paragraph. Possibly a
-decent one. Almost certainly not this format, and you will have no way to
+"summarize this", what do you get back? Probably a paragraph. Possibly a
+decent one. Almost certainly not this format, and you have no way to
 say whether it is right except that it reads well. That gap is what a brief
 closes.
 
 ## Writing the brief
 
 A brief has four parts: the goal, the context the work needs, the limits it
-must stay within, and how you will know it is done. The agent fills in
-whatever you leave unsaid with plausible defaults. That is why what it must
+must stay within, and how you know it is done. The agent fills in
+whatever you leave unsaid with plausible defaults. That's why what it must
 *not* do carries as much weight as what it must do, and why "summarize this"
 is a request but not a brief.
 
 Start with the goal and the limits together. The goal is the format above.
 The limits are the things a helpful agent would otherwise do for you:
-rephrase the dates, add advice the memo did not give, drop the printer
+rephrase the dates, add advice the memo didn't give, drop the printer
 because it seemed minor. Write the limits as plain prohibitions.
 
 Now the context. Tell the agent which information to use and where it is.
-Here that is easy: the memo, pasted in full, and nothing else. State it
+Here that's easy: the memo, pasted in full, and nothing else. State it
 anyway. An agent that has to guess its sources picks the most available
 one, not the right one, and "the latest information" is an invitation to
 invent.
 
 Last, the done-criteria, and write them before you send the task. Without
-them you will judge the result by feel and accept a plausible summary as a
+them you judge the result by feel and accept a plausible summary as a
 correct one. Good done-criteria are things you can tick: every date in the
-memo appears in the summary; no fact appears that is not in the memo; the
+memo appears in the summary; no fact appears that's not in the memo; the
 format has exactly the parts listed.
 
 Put together, the brief looks something like this. Send it to your agent
@@ -91,14 +91,14 @@ now, with the memo pasted underneath.
 
 <Prompt model="illustrative" recorded="illustrative">
 Summarize the memo below into this exact format: a one-line title; three
-bullets covering what is happening, what I must do, and by when; one closing
+bullets covering what's happening, what I must do, and by when; one closing
 line naming who to ask.
 
-Use only the memo as your source. Do not add advice, do not reword dates,
-and do not leave out any deadline.
+Use only the memo as your source. Don't add advice, don't reword dates,
+and don't leave out any deadline.
 
 Done when: every date or deadline in the memo appears in the summary, no
-fact appears that is not in the memo, and the output has exactly the five
+fact appears that's not in the memo, and the output has exactly the five
 lines described.
 
 [memo follows]
@@ -118,8 +118,8 @@ at ten.
 </Response>
 
 The response above is illustrative, written to show the shape of a good
-result rather than recorded from one model, and your result will differ in
-wording. That is fine; the brief did not fix the wording, it fixed the
+result rather than recorded from one model, and your result differs in
+wording. That's fine; the brief didn't fix the wording, it fixed the
 shape and the facts.
 
 <Repair id="fix-the-brief" objective="using-agents/delegates-and-checks/writes-a-brief"
@@ -142,12 +142,12 @@ them things you can tick, not adjectives.
 
 ## Choosing autonomy
 
-A brief says what to do. It does not yet say how far the agent may go
-before it checks in with you. For a summary that is barely a question; the
+A brief says what to do. It doesn't yet say how far the agent may go
+before it checks in with you. For a summary that's barely a question; the
 agent writes, you read. For anything that touches the world (sending,
 deleting, paying, publishing) it is the main question.
 
-That is the agent's **degree of autonomy**, and three settings cover most
+That's the agent's **degree of autonomy**, and three settings cover most
 tasks. At the first, **the human decides**: the agent gathers or drafts,
 and you take every action yourself. At the second, **the agent proposes and
 the human approves**: it prepares the action and waits for a yes before
@@ -164,7 +164,7 @@ with the agent at most laying out the options.
 Try it: rerun the task, but this time add one line to the brief that sets
 the degree. For example, "Draft the summary, then stop and show it to me
 before doing anything else." Notice that the agent behaves differently even
-though the task did not change.
+though the task didn't change.
 
 <Sort id="autonomy-levels" objective="using-agents/delegates-and-checks/chooses-autonomy"
   title="Who decides?" hint="For each item ask two things: how bad is a wrong action, and how easily can you undo it?"

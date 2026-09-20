@@ -1,7 +1,7 @@
 # Exploration: CS50 AI course and CS50 educator workshops
 
 Explored 2026-09-19 by a read-only agent. Source: `~/git/lsimons/ai-cs50`
-(fetched copies of cs50.harvard.edu pages; only `courses/*/notes.md` is
+(fetched copies of `cs50.harvard.edu` pages; only `courses/*/notes.md` is
 hand-written and those are still empty).
 
 ## 1. CS50 AI course structure
@@ -48,14 +48,14 @@ Dictionary seeds:
   (the programming assignment), **practice problems** (smaller, exit-ticket
   size), **lab**, **project** (final project), **specification** (what the code
   must do), **scaffolding**, **hints**, **walkthrough**, **lesson materials**,
-  **grading guidelines**, CS50 Handbook, cs50.tf (teaching resources).
+  **grading guidelines**, CS50 Handbook, `cs50.tf` (teaching resources).
 - **Comfort tracks**: **less comfortable / more comfortable** (and "in
   between"): three levels of instruction and, per week, alternative psets of
   different difficulty plus extra hints for the less comfortable.
-- **Tools**: cs50.dev (VS Code in the cloud), **check50** (automated
+- **Tools**: `cs50.dev` (VS Code in the cloud), **check50** (automated
   correctness tests), **style50** (formatting diff with an "Explain Changes"
   button), **design50** (qualitative design feedback), **submit50**,
-  **compare50** (similarity), submit.cs50.io, the **CS50 duck** (ddb), cs50.ai.
+  **compare50** (similarity), `submit.cs50.io`, the **CS50 duck** (ddb), `cs50.ai`.
 - **Grading**: three axes, **correctness**, **style**, **design** (design scored
   1-5); completion credit as a lighter option. Academic honesty philosophy:
   "be reasonable" with a 72-hour regret clause. The honesty page explicitly
@@ -72,8 +72,8 @@ Sources: `courses/cs50-workshop-2024/talks/06-teaching-cs50-with-ai.md`
 - Origin: rubber duck debugging made conversational. System prompt
   (abbreviated, as quoted in the talks): "You are a friendly and supportive
   teaching assistant for CS50. You are also a rubber duck. Answer student
-  questions only about CS50 in the field of computer science. Do not answer
-  questions about unrelated topics. Do not provide full answers to problem
+  questions only about CS50 in the field of computer science. Don't answer
+  questions about unrelated topics. Don't provide full answers to problem
   sets as this would violate academic honesty."
 - Guardrails: topic restriction, no full solutions, resistance to prompt
   injection, and **throttling** via regenerating hearts to stop question
@@ -97,8 +97,8 @@ pages: **CC BY-NC-SA 4.0**. Free to share and adapt with attribution (Harvard
 CS50, David J. Malan, Brian Yu), a link to the license and a note of changes;
 **non-commercial only**; derivatives must carry the same license.
 
-Implication for this project: CS50 material cannot be copied into a CC BY or
+Implication for this project: CS50 material can't be copied into a CC BY or
 CC BY-SA work. Ideas, structure and pedagogy can be adopted and cited;
-text, slides and quiz items cannot be reused. The workshop talk transcripts
-are YouTube captions and are not under the CC license at all; do not
+text, slides and quiz items can't be reused. The workshop talk transcripts
+are YouTube captions and aren't under the CC license at all; don't
 redistribute them.

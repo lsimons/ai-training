@@ -2,7 +2,7 @@
 
 Explored 2026-09-19 by a read-only agent.
 
-## 1. career-model (`~/git/lsimons/archive/career-model`)
+## 1. `career-model` (`~/git/lsimons/archive/career-model`)
 
 Vue 2 plus Vuetify plus D3 single-page app, monorepo, Apache-2.0, "interactive
 career path planner", once live at career.model.tools.
@@ -55,7 +55,7 @@ seniority ladder.
 `src/components/CompetencyGraph.vue`: a D3 v5 force simulation drawing circles
 into an inline SVG, pastel color per area, props for width, height, max level
 and category. Used on the home page (four small maps, one per category) and on
-category, area and competency views. Loading in `src/store/competencies.js`
+category, area, and competency views. Loading in `src/store/competencies.js`
 (papaparse plus the `yaml` package). Design sketches in
 `docs/design/competencies.drawio`.
 
@@ -72,7 +72,7 @@ not structured criteria, and most detail files are unwritten. Keep the
 "cheap tree, rich leaves" idea; the tree can just be folder structure. The D3
 force graph is inspiration only; Vue 2 and D3 v5 are end of life.
 
-## 2. ai-deep-learning (`~/git/lsimons/ai-deep-learning`)
+## 2. `ai-deep-learning` (`~/git/lsimons/ai-deep-learning`)
 
 Personal fetcher turning DeepLearning.AI courses into local Markdown. Also
 `the-batch/ai-engineering-skills-map.md` with Andrew Ng's AI Engineering Skills
@@ -88,15 +88,15 @@ customizing agents, BUILD = building agents):
 | #   | Course                                          | One line                                                                   | Topics           |
 | --- | ----------------------------------------------- | -------------------------------------------------------------------------- | ---------------- |
 | 1   | ChatGPT Prompt Engineering                      | Two prompting principles, then summarize/infer/transform/expand, a chatbot | AIC              |
-| 2   | Generative AI for Everyone                      | What genAI can and cannot do, how projects get built, societal impact      | AIC, SAFE        |
+| 2   | Generative AI for Everyone                      | What genAI can and can't do, how projects get built, societal impact       | AIC, SAFE        |
 | 3   | AI Prompting for Everyone                       | Power user: search and research, AI as thought partner, sycophancy         | AIC, USE, SAFE   |
 | 4   | AI Python for Beginners                         | Python from zero with an LLM as coding assistant                           | SWE (entry)      |
 | 5   | Claude Code: A Highly Agentic Coding Assistant  | Codebase comprehension, features, tests, refactoring, GitHub, hooks        | USE, SWE, CUST   |
 | 6   | Intro to Generative AI for Software Development | How LLMs work, pair coding, LLM-driven code analysis                       | AIC, SWE         |
 | 7   | Team Software Engineering with AI               | Testing, debugging, documentation, dependency management                   | SWE              |
 | 8   | AI-Powered Software and System Design           | Config-driven development, schema design, design patterns                  | SWE              |
-| 9   | MCP: Build Rich-Context AI Apps with Anthropic  | MCP servers and clients exposing tools, data and prompts                   | CUST, BUILD      |
-| 10  | Agent Skills with Anthropic                     | Packaging expertise as skills; skills vs tools, MCP and subagents          | CUST, BUILD      |
+| 9   | MCP: Build Rich-Context AI Apps with Anthropic  | MCP servers and clients exposing tools, data, and prompts                  | CUST, BUILD      |
+| 10  | Agent Skills with Anthropic                     | Packaging expertise as skills; skills vs tools, MCP, and subagents         | CUST, BUILD      |
 | 11  | Agentic AI                                      | Task decomposition, evals, reflection and tool-use patterns, autonomy      | BUILD, USE, SAFE |
 
 Sequencing shape: foundations without code, then programming with AI, then AI
