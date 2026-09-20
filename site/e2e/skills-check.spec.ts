@@ -55,6 +55,45 @@ test('comfort more: a pass in the card passes the body checkpoint and schedules 
 	await expect(card).toBeHidden();
 });
 
+test('comfort more: a repair copy (the non-reviewable fallback) grades and passes the body checkpoint', async ({
+	page,
+	seed,
+}) => {
+	await seed({ comfort: 'more' });
+	await page.goto('customizing-agents/instructions/');
+	const card = page.locator('[data-skills-check]');
+	await card.getByRole('button', { name: 'Answer 1 question' }).click();
+	const copy = card.locator('[data-skills-item="fix-the-instructions"]');
+	await copy.locator('.cp-reveal-btn').click();
+	await copy.locator('input[value=pass]').check();
+	await copy.locator('.cp-check').click();
+	await expect(copy.locator('.cp-feedback')).toHaveText('Recorded as a pass.');
+	await expect(copy).toHaveAttribute('data-state', 'passed');
+	const body = page.locator('#fix-the-instructions');
+	await expect(body).toHaveAttribute('data-state', 'passed');
+	await expect(body.locator('input[value=pass]')).not.toBeChecked();
+	const record = await storedRecord(page);
+	expect(record.checkpoints?.['customizing-agents/instructions#fix-the-instructions']).toEqual({
+		state: 'passed',
+		attempts: 1,
+	});
+	expect(record.reviews?.['customizing-agents/instructions#fix-the-instructions']).toBeUndefined();
+});
+
+test('comfort more: a checkpoint passed in the body after load is not asked', async ({ page, seed }) => {
+	await seed({ comfort: 'more' });
+	await page.goto(`${LESSON}/`);
+	const card = page.locator('[data-skills-check]');
+	await expect(card.getByRole('button', { name: 'Answer 2 questions' })).toBeVisible();
+	const body = page.locator(`#${FIRST}`);
+	await body.locator('textarea').fill('27°C, sun');
+	await body.locator('.cp-check').click();
+	await expect(body).toHaveAttribute('data-state', 'passed');
+	await card.getByRole('button', { name: 'Answer 1 question' }).click();
+	await expect(card.locator('[data-skills-item]')).toHaveCount(1);
+	await expect(card.locator(`[data-skills-item="${SECOND}"]`)).toBeVisible();
+});
+
 test('comfort more: the card skips passed checkpoints and stays hidden when all are passed', async ({ page, seed }) => {
 	await seed({
 		comfort: 'more',

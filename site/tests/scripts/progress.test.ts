@@ -135,12 +135,12 @@ describe('wrappers write through storage', () => {
 		expect(stored().lessons['a/x'].state).toBe('finished');
 		expect(stored().reviews['a/x#c'].stage).toBe(1);
 	});
-	it('scheduleReview saves only when it creates an item', () => {
+	it('a skills check pass writes the checkpoint and its review item in one save', () => {
 		const listener = vi.fn();
 		document.addEventListener(progress.EVENT, listener);
-		expect(progress.scheduleReview({ id: 'a/x#c', revision: 1 })).toBe(true);
+		progress.recordSkillsCheck('a/x#c', true, { id: 'a/x#c', revision: 1 });
+		expect(stored().checkpoints['a/x#c']).toEqual({ state: 'passed', attempts: 1 });
 		expect(stored().reviews['a/x#c'].stage).toBe(1);
-		expect(progress.scheduleReview({ id: 'a/x#c', revision: 1 })).toBe(false);
 		expect(listener).toHaveBeenCalledTimes(1);
 		document.removeEventListener(progress.EVENT, listener);
 	});

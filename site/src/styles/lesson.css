@@ -33,7 +33,7 @@
 .checkpoint textarea { width: 100%; font-family: var(--sl-font-mono); font-size: 0.9rem; padding: 0.4rem; border: 1px solid var(--sl-color-gray-4); border-radius: 4px; background: var(--sl-color-bg); color: var(--sl-color-text); }
 .checkpoint pre { background: var(--sl-color-gray-6); padding: 0.5rem 0.75rem; border-radius: 4px; font-size: 0.9rem; white-space: pre-wrap; }
 .cp-controls { margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.checkpoint button, .recap-actions button, .comfort button, .progress-actions button, .review-actions button {
+.checkpoint button, .recap-actions button, .comfort button, .progress-actions button, .review-actions button, .skills-actions button {
 	padding: 0.35rem 0.85rem; border-radius: 4px; border: 1px solid var(--sl-color-gray-4);
 	background: var(--sl-color-bg-nav); color: var(--sl-color-text); cursor: pointer; font: inherit; font-size: 0.9rem;
 }
@@ -115,11 +115,6 @@
 .skills-check { border-left: 4px solid var(--sl-color-accent); }
 .skills-note { margin: 0 0 0.5rem; font-size: 0.9rem; color: var(--sl-color-gray-2); }
 .skills-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.skills-actions button {
-	padding: 0.35rem 0.85rem; border-radius: 4px; border: 1px solid var(--sl-color-gray-4);
-	background: var(--sl-color-bg-nav); color: var(--sl-color-text); cursor: pointer; font: inherit; font-size: 0.9rem;
-}
-.skills-actions .cp-check { background: var(--sl-color-accent); color: var(--sl-color-black); border-color: transparent; font-weight: 600; }
 .skills-items .checkpoint { margin: 1rem 0 0; background: var(--sl-color-bg); }
 .skills-items .checkpoint:last-child { margin-bottom: 0.25rem; }
 

@@ -7,6 +7,7 @@ import {
 	applyLessonRead,
 	applyLessonSkipped,
 	applyReviewResult,
+	applySkillsCheckResult,
 	applyStageAdjust,
 	dayOf,
 	describeWarning,
@@ -213,6 +214,16 @@ describe('lessons', () => {
 		expect(r.reviews['a/x#new']).toEqual({ stage: 2, due: '2026-03-13', last: null, history: [], revision: 2 });
 		expect(scheduleReview(r, { id: 'a/x#old', revision: 1 }, DAY)).toBe(false);
 		expect(r.reviews['a/x#old']?.stage).toBe(3);
+	});
+	it('a skills check result counts an attempt and schedules the review only on a reviewable pass', () => {
+		const r = record({ checkpoints: { 'a/x#c': { state: 'attempted', attempts: 2 } } });
+		const cp = { id: 'a/x#c', revision: 1 };
+		expect(applySkillsCheckResult(r, 'a/x#c', false, cp, DAY)).toEqual({ state: 'attempted', attempts: 3 });
+		expect(r.reviews['a/x#c']).toBeUndefined();
+		expect(applySkillsCheckResult(r, 'a/x#c', true, cp, DAY)).toEqual({ state: 'passed', attempts: 4 });
+		expect(r.reviews['a/x#c']?.stage).toBe(1);
+		expect(applySkillsCheckResult(r, 'a/x#d', true, undefined, DAY)).toEqual({ state: 'passed', attempts: 1 });
+		expect(r.reviews['a/x#d']).toBeUndefined();
 	});
 });
 
