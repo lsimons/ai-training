@@ -172,6 +172,15 @@ it. `command opencode` is used in the PTY to bypass shell aliases/functions.
 Verified with `ui-opencode.png`: TUI attached, typed prompt visible in the
 API, coach tip produced. `?port=` in the page URL overrides the helper port.
 
+Round 5 (coach follows the agent): each adapter now has `coachAsk(system, user)`. Claude keeps `claude -p` (Haiku). opencode uses a **second session on
+the same server**, titled `AI training: spike/terminal (coach)`, called via the
+synchronous `POST /session/{id}/message` with `system`, `tools: {"*": false}`
+and the configured `small_model`. Same login as the learner, so a provider
+that is not connected fails visibly: the error now shows in the coach panel
+with a hint to run `/connect`. Verified in claude mode (tip in 8s, $0.014) and
+in opencode mode (coach session created, 403 from the unauthenticated provider
+rendered in the panel; `ui-opencode-coach.png`).
+
 Gotcha found: blank lines inside the widget's `<div>` end the Markdown HTML
 block and the rest of the script renders as a code figure. Keep widget blocks
 free of blank lines.

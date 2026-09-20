@@ -1,0 +1,11 @@
+06:06:25 claude session "AI training: spike/terminal" 64428071 in /Users/lsimons/git/lsimons/ai-training-spike-terminal
+06:06:25 helper listening on 127.0.0.1:4402 · claude session 64428071 (claude stop 64428071)
+
+Open this URL (the token is single-process; restart the helper to rotate it):
+
+  http://localhost:4322/ai-training/spike/terminal/?token=testtoken
+
+06:06:35 allowed: http://localhost:4322
+06:06:35 browser attached, pty 92990
+06:06:51 coach: You've got the project context. Next, ask the assistant to explore your spike directory and explain the current implementation—this will show you what's already built and where to focus your work.
+06:06:51 browser detached

@@ -118,7 +118,7 @@ the terminal.
         else if (m.type === 'session') { $('spike-term-session').textContent = m.agent + ' · “' + m.name + '” (' + m.id + ') · ' + m.cwd.replace(/^\/Users\/[^/]+/, '~'); window.__session = m; }
         else if (m.type === 'coach-start') status.textContent = 'coach is reading (' + m.reason + ')…';
         else if (m.type === 'coach') { status.textContent = 'coach: ' + Math.round(m.ms / 1000) + 's, $' + (m.cost ?? 0).toFixed(3) + ', ' + m.turns + ' turns'; showCoach(m); window.__lastCoach = m; }
-        else if (m.type === 'coach-error') status.textContent = 'coach error: ' + m.error;
+        else if (m.type === 'coach-error') { status.textContent = 'coach error'; showCoach({ tip: '⚠️ Coach could not answer: ' + m.error, suggestedPrompt: null }); }
         else if (m.type === 'screen') dump(m.text, 'lastScreen');
         else if (m.type === 'conversation') dump(m.turns.map((t) => t.role + ': ' + t.text).join('\n\n'), 'lastConv', m.turns);
         else if (m.type === 'exit') status.textContent = 'shell exited (' + m.exitCode + ')';

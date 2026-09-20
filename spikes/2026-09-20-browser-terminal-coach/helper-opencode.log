@@ -1,0 +1,14 @@
+06:07:06 started opencode serve on http://127.0.0.1:4499
+06:07:06 opencode session "AI training: spike/terminal" ses_f429b521affera3YtAk885TvQy in /Users/lsimons/git/lsimons/ai-training-spike-terminal
+06:07:06 helper listening on 127.0.0.1:4403 · opencode session ses_f429b521affera3YtAk885TvQy (the opencode server stops with this helper)
+
+Open this URL (the token is single-process; restart the helper to rotate it):
+
+  http://localhost:4322/ai-training/spike/terminal/?token=testtoken
+
+06:07:16 allowed: http://localhost:4322
+06:07:16 browser attached, pty 93393
+06:07:22 coach session ses_f4292d7ffffen470ebBRCX2f3M model litelm/azure/gpt-5-6-luna
+06:07:23 coach failed: APIError: Forbidden: request was blocked by a gateway or proxy. You may not have permission to access this resource — check your account and provider settings. (is the provider connected? try /connect in the terminal)
+06:07:23 browser detached
+06:07:23 stopping opencode serve

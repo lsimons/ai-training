@@ -87,6 +87,15 @@ const claudeAgent = {
     return turns.slice(-maxTurns);
   },
   status() { try { return this.find()?.status ?? 'gone'; } catch { return 'unknown'; } },
+  coachAsk(system, user) {
+    return new Promise((resolve, reject) => {
+      const child = spawn('claude', ['-p', '--output-format', 'json', '--system-prompt', system, '--model', 'claude-haiku-4-5-20251001', user],
+        { env: cleanEnv(), cwd: os.tmpdir(), stdio: ['ignore', 'pipe', 'pipe'] });
+      let out = '', err = '';
+      child.stdout.on('data', (d) => (out += d)); child.stderr.on('data', (d) => (err += d));
+      child.on('close', () => { try { const e = JSON.parse(out); resolve({ text: String(e.result), cost: e.total_cost_usd, ms: e.duration_ms }); } catch (x) { reject(new Error(x.message + ' ' + err.slice(0, 200))); } });
+    });
+  },
   shutdown() {},
   stopHint() { return `claude stop ${this.session.id}`; },
 };
@@ -127,6 +136,23 @@ const opencodeAgent = {
     try { const st = await this.api('/session/status'); this._status = st[this.session.id]?.type ?? 'idle'; } catch { this._status = 'unknown'; }
   },
   status() { return this._status ?? 'unknown'; },
+  // Coach = a second session on the same server: no tools, our system prompt,
+  // the configured small model when there is one. Same login as the learner.
+  async coachAsk(system, user) {
+    if (!this.coachSession) {
+      const all = await this.api('/session');
+      this.coachSession = all.find((x) => x.title === NAME + ' (coach)') ||
+        await this.api('/session', { method: 'POST', body: JSON.stringify({ title: NAME + ' (coach)' }) });
+      try { const cfg = await this.api('/config'); const m = (cfg.small_model || cfg.model || '').split('/'); if (m.length >= 2) this.coachModel = { providerID: m[0], modelID: m.slice(1).join('/') }; } catch {}
+      log('coach session', this.coachSession.id, 'model', this.coachModel ? `${this.coachModel.providerID}/${this.coachModel.modelID}` : '(default)');
+    }
+    const t0 = Date.now();
+    const body = { system, tools: { '*': false }, parts: [{ type: 'text', text: user }] };
+    if (this.coachModel) body.model = this.coachModel;
+    const r = await this.api(`/session/${this.coachSession.id}/message`, { method: 'POST', body: JSON.stringify(body) });
+    if (r.info?.error) throw new Error(`${r.info.error.name}: ${r.info.error.data?.message ?? ''} (is the provider connected? try /connect in the terminal)`);
+    return { text: r.parts.filter((p) => p.type === 'text').map((p) => p.text).join('\n'), cost: r.info.cost, ms: Date.now() - t0 };
+  },
   shutdown() { if (this.server) { log('stopping opencode serve'); this.server.kill(); } },
   stopHint() { return this.server ? 'the opencode server stops with this helper' : `opencode server on ${this.base()} was already running; left alone`; },
 };
@@ -188,19 +214,14 @@ If the conversation is empty, suggest a good first prompt for this directory.
 Respond with JSON only: {"tip": "...", "suggestedPrompt": "..." | null}. suggestedPrompt must be a prompt the learner could send verbatim, or null.`;
     const user = `Status: ${status}\nWorking directory: ${this.bg.cwd}\n\nConversation (${reason}):\n` +
       (conv.length ? conv.map((t) => `${t.role}: ${t.text}`).join('\n\n') : '(nothing yet)');
-    const child = spawn('claude', ['-p', '--output-format', 'json', '--system-prompt', system, '--model', 'claude-haiku-4-5-20251001', user],
-      { env: cleanEnv(), cwd: os.tmpdir(), stdio: ['ignore', 'pipe', 'pipe'] });
-    let out = '', err = '';
-    child.stdout.on('data', (d) => (out += d)); child.stderr.on('data', (d) => (err += d));
-    child.on('close', (code) => {
-      this.coaching = false;
-      try {
-        const env = JSON.parse(out), m = String(env.result).match(/\{[\s\S]*\}/);
-        const tip = m ? JSON.parse(m[0]) : { tip: env.result, suggestedPrompt: null };
-        log('coach:', tip.tip);
-        this.send({ type: 'coach', reason, ...tip, cost: env.total_cost_usd, ms: env.duration_ms, turns: conv.length, status });
-      } catch (e) { log('coach failed', code, err.slice(0, 200)); this.send({ type: 'coach-error', error: e.message }); }
-    });
+    try {
+      const r = await agent.coachAsk(system, user);
+      const m = r.text.match(/\{[\s\S]*\}/);
+      const tip = m ? JSON.parse(m[0]) : { tip: r.text, suggestedPrompt: null };
+      log('coach:', tip.tip);
+      this.send({ type: 'coach', reason, ...tip, cost: r.cost, ms: r.ms, turns: conv.length, status });
+    } catch (e) { log('coach failed:', e.message); this.send({ type: 'coach-error', error: e.message }); }
+    finally { this.coaching = false; }
   }
   async onMessage(raw) {
     const m = JSON.parse(raw);
