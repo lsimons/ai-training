@@ -96,3 +96,4 @@ mise.local.toml
 
 # Python bytecode from the scripts/ helpers
 __pycache__/
+.vale/styles/Google/
