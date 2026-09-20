@@ -1,5 +1,5 @@
 /** The settings page's review schedule and the review page (spec S05). */
-import { expect, storedRecord, test } from './fixtures';
+import { drag, expect, storedRecord, test } from './fixtures';
 
 const TODAY = new Date().toISOString().slice(0, 10);
 const ITEM = 'concepts/how-models-work#what-the-model-does';
@@ -77,4 +77,32 @@ test('the review page records one result per item: pass on Check, fail on Give U
 
 	await page.getByRole('button', { name: 'Next item' }).click();
 	await expect(page.locator('[data-status]')).toHaveText('Done: 2 items reviewed. 0 more remain due.');
+});
+
+test('the review page clones an order checkpoint that drags like the lesson copy', async ({ page, seed }) => {
+	const item = 'building-agents/agent-loop#order-the-loop';
+	await seed({
+		lessons: { 'building-agents/agent-loop': { state: 'finished', at: TODAY } },
+		reviews: { [item]: { stage: 1, due: '2000-01-01', last: null, history: [], revision: 1 } },
+	});
+	await page.goto('building-agents/review/');
+	const cp = page.locator('.review [data-checkpoint]');
+	await expect(cp).toHaveAttribute('data-kind', 'order');
+	const items = cp.locator('ol li');
+	await expect(items.first()).toHaveAttribute('draggable', 'true');
+	await expect(items.first()).toHaveCSS('cursor', 'grab');
+	const count = await items.count();
+	for (let pos = 1; pos <= count; pos++) {
+		const idx = await items.evaluateAll(
+			(lis, p) => lis.findIndex((l) => Number((l as HTMLElement).dataset.pos) === p),
+			pos,
+		);
+		if (idx === pos - 1) continue;
+		await drag(page, items.nth(idx), items.nth(pos - 1), 0.1);
+	}
+	await cp.locator('.cp-check').first().click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('Correct order.');
+	await expect(cp.locator('.cp-stage-label')).toHaveText('stage 2 of 5');
+	const record = await storedRecord(page);
+	expect((record.reviews?.[item] as { history: string[] } | undefined)?.history).toEqual(['pass']);
 });

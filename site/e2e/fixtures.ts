@@ -4,7 +4,7 @@
  * network), and any `pageerror` or console error fails the test. Specs
  * import `test` and `expect` from here instead of `@playwright/test`.
  */
-import { test as base, expect, type Page } from '@playwright/test';
+import { test as base, expect, type Locator, type Page } from '@playwright/test';
 import { STORAGE_KEY, storageKeyFor, VERSION } from '../src/scripts/progress-model';
 
 export { STORAGE_KEY, storageKeyFor, VERSION };
@@ -88,4 +88,29 @@ export async function answerChoice(page: Page, id: string) {
 	await cp.locator('label[data-correct]').click();
 	await cp.locator('.cp-check').click();
 	await expect(cp).toHaveAttribute('data-state', 'passed');
+}
+
+/**
+ * A native drag with the mouse. `Locator.dragTo` moves the pointer once, and
+ * Chromium then sometimes skips the `drop`, so this moves in steps and nudges
+ * once more over the target. `targetY` is the fraction of the target's height
+ * to point at: 0.5 is its middle, near 0 its top edge.
+ */
+export async function drag(page: Page, source: Locator, target: Locator, targetY = 0.5) {
+	// Both must be on screen at once: `page.mouse` works in viewport coordinates and a scroll mid-drag
+	// changes which element Chromium picks up. The sort test sets a tall viewport for this reason.
+	await target.scrollIntoViewIfNeeded();
+	await source.scrollIntoViewIfNeeded();
+	const s = await source.boundingBox();
+	const t = await target.boundingBox();
+	if (!s || !t) throw new Error('drag: source or target has no box');
+	const view = page.viewportSize();
+	if (!view || s.y < 0 || t.y < 0 || s.y + s.height > view.height || t.y + t.height > view.height) {
+		throw new Error('drag: source and target do not fit the viewport together');
+	}
+	await page.mouse.move(s.x + s.width / 2, s.y + s.height / 2);
+	await page.mouse.down();
+	await page.mouse.move(t.x + t.width / 2, t.y + t.height * targetY, { steps: 5 });
+	await page.mouse.move(t.x + t.width / 2 + 1, t.y + t.height * targetY, { steps: 2 });
+	await page.mouse.up();
 }

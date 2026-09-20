@@ -12,6 +12,7 @@ import type { CheckpointKind } from '@lib/checkpoint-rules';
 import {
 	answersMatch,
 	choiceFeedback,
+	dropPlacement,
 	type Feedback,
 	matchVerdict,
 	multiChoiceVerdict,
@@ -120,6 +121,64 @@ function bindPredict(el: HTMLElement): Grader {
 
 const posOf = (li: Element) => Number((li as HTMLElement).dataset.pos);
 
+/**
+ * Native HTML drag wiring shared by `order` and `sort`. The dragged element is
+ * kept in a closure, so a same-page move needs no `dataTransfer` payload
+ * (Firefox still wants `setData` called before it starts a drag). Every
+ * `dragover` inside a target calls `preventDefault()`, which is what allows
+ * the drop, and then `onOver`. `.cp-dragging` marks the moving item and
+ * `.cp-drop-hover` the target under the pointer. Drag events don't fire on
+ * most touch browsers, so each kind keeps its click path as the fallback.
+ */
+interface DragHandlers {
+	onStart?: (item: HTMLElement) => void;
+	onOver?: (target: HTMLElement, item: HTMLElement, ev: DragEvent) => void;
+	onDrop?: (target: HTMLElement, item: HTMLElement) => void;
+}
+function bindDrag(items: Iterable<HTMLElement>, targets: Iterable<HTMLElement>, handlers: DragHandlers): void {
+	let dragged: HTMLElement | null = null;
+	const targetList = [...targets];
+	const clearHover = () => {
+		for (const t of targetList) t.classList.remove('cp-drop-hover');
+	};
+	for (const item of items) {
+		item.draggable = true;
+		item.addEventListener('dragstart', (ev) => {
+			dragged = item;
+			item.classList.add('cp-dragging');
+			ev.dataTransfer?.setData('text/plain', item.textContent ?? '');
+			if (ev.dataTransfer) ev.dataTransfer.effectAllowed = 'move';
+			handlers.onStart?.(item);
+		});
+		item.addEventListener('dragend', () => {
+			item.classList.remove('cp-dragging');
+			clearHover();
+			dragged = null;
+		});
+	}
+	for (const target of targetList) {
+		target.addEventListener('dragover', (ev) => {
+			if (!dragged) return;
+			ev.preventDefault();
+			if (ev.dataTransfer) ev.dataTransfer.dropEffect = 'move';
+			clearHover();
+			target.classList.add('cp-drop-hover');
+			handlers.onOver?.(target, dragged, ev);
+		});
+		target.addEventListener('dragleave', (ev) => {
+			// Moving between a target's children fires leave and over in turn, so only a real exit clears it.
+			if (ev.relatedTarget instanceof Node && target.contains(ev.relatedTarget)) return;
+			target.classList.remove('cp-drop-hover');
+		});
+		target.addEventListener('drop', (ev) => {
+			if (!dragged) return;
+			ev.preventDefault();
+			clearHover();
+			handlers.onDrop?.(target, dragged);
+		});
+	}
+}
+
 function bindOrder(el: HTMLElement): Grader {
 	const list = $<HTMLOListElement>(el, 'ol.cp-order');
 	if (!list) return () => null;
@@ -134,6 +193,15 @@ function bindOrder(el: HTMLElement): Grader {
 			btn.focus();
 		});
 	}
+	// Drag a row over another and the list reflows as you go. The arrows stay as the keyboard and touch path.
+	const rows = list.querySelectorAll<HTMLElement>('li');
+	bindDrag(rows, rows, {
+		onOver: (over, dragged, ev) => {
+			if (over === dragged) return;
+			const placement = dropPlacement(ev.clientY, over.getBoundingClientRect());
+			list.insertBefore(dragged, placement === 'before' ? over : over.nextSibling);
+		},
+	});
 	return () => {
 		const ok = [...list.children].every((li, i) => posOf(li) === i + 1);
 		announce(el, orderFeedback(ok));
@@ -141,7 +209,7 @@ function bindOrder(el: HTMLElement): Grader {
 	};
 }
 
-/** Click a chip to select it, then click a bucket to place it. Keyboard: both are buttons. */
+/** Drag a chip to a bucket, or click it to select it and then click the bucket. Keyboard: chips and titles are buttons. */
 function bindSort(el: HTMLElement): Grader {
 	const pool = $(el, '.cp-pool');
 	if (!pool) return () => null;
@@ -152,25 +220,31 @@ function bindSort(el: HTMLElement): Grader {
 		selected = chip;
 		if (chip) chip.setAttribute('aria-pressed', 'true');
 	};
-	for (const chip of el.querySelectorAll<HTMLButtonElement>('.cp-chip')) {
+	const chips = el.querySelectorAll<HTMLButtonElement>('.cp-chip');
+	for (const chip of chips) {
 		chip.addEventListener('click', () => select(selected === chip ? null : chip));
 	}
-	for (const bucket of el.querySelectorAll<HTMLElement>('.cp-bucket')) {
-		const drop = $(bucket, '.cp-bucket-items');
-		$<HTMLButtonElement>(bucket, '.cp-bucket-target')?.addEventListener('click', () => {
+	// A drop zone is a whole bucket (title button and the dashed area under it) or the pool wrapper.
+	// A chip lands in the zone's items container, which is also what the grader reads.
+	const zones = [...el.querySelectorAll<HTMLElement>('.cp-bucket, .cp-pool-wrap')];
+	const containerOf = (zone: HTMLElement) => (zone.matches('.cp-bucket') ? $(zone, '.cp-bucket-items') : pool);
+	for (const zone of zones) {
+		zone.addEventListener('click', (ev) => {
+			if (ev.target instanceof Element && ev.target.closest('.cp-chip')) return;
 			if (!selected) {
 				announce(el, note('Select an item first, then a bucket.'));
 				return;
 			}
-			drop?.appendChild(selected);
+			containerOf(zone)?.appendChild(selected);
 			select(null);
 		});
 	}
-	$<HTMLButtonElement>(el, '.cp-pool-target')?.addEventListener('click', () => {
-		if (selected) {
-			pool.appendChild(selected);
+	bindDrag(chips, zones, {
+		onStart: (chip) => select(chip as HTMLButtonElement),
+		onDrop: (zone, chip) => {
+			containerOf(zone)?.appendChild(chip);
 			select(null);
-		}
+		},
 	});
 	return () => {
 		const left = pool.querySelectorAll('.cp-chip').length;

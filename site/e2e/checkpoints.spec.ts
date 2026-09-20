@@ -1,5 +1,5 @@
 /** Every checkpoint kind, graded in a lesson page (spec S01 "Interaction types", S03 "Checkpoints"). */
-import { expect, storedRecord, test } from './fixtures';
+import { drag, expect, storedRecord, test } from './fixtures';
 
 test('choice: a wrong pick shows its why, the right one passes', async ({ page }) => {
 	await page.goto('concepts/how-models-work/');
@@ -69,6 +69,34 @@ test('order: opens shuffled and passes once sorted', async ({ page }) => {
 	await expect(cp).toHaveAttribute('data-state', 'passed');
 });
 
+test('order: drag a row to its place, the arrows and the grader still agree', async ({ page }) => {
+	await page.goto('building-agents/agent-loop/');
+	const cp = page.locator('#order-the-loop');
+	const items = cp.locator('ol li');
+	await expect(items.first()).toHaveAttribute('draggable', 'true');
+	await expect(items.first()).toHaveCSS('cursor', 'grab');
+	await expect(items.first().locator('button[data-move=up]')).toHaveCSS('cursor', 'pointer');
+	const count = await items.count();
+	// Drag each row onto the row at its target slot: the top half of the row already there.
+	for (let pos = 1; pos <= count; pos++) {
+		const idx = await items.evaluateAll(
+			(lis, p) => lis.findIndex((l) => Number((l as HTMLElement).dataset.pos) === p),
+			pos,
+		);
+		if (idx === pos - 1) continue;
+		await drag(page, items.nth(idx), items.nth(pos - 1), 0.1);
+	}
+	await expect
+		.poll(() => items.evaluateAll((lis) => lis.map((l) => Number((l as HTMLElement).dataset.pos))))
+		.toEqual(Array.from({ length: count }, (_, i) => i + 1));
+	await cp.locator('.cp-check').click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('Correct order.');
+	// One drag out of place fails again.
+	await drag(page, items.first(), items.last(), 0.9);
+	await cp.locator('.cp-check').click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('Not the right order yet.');
+});
+
 test('sort: select a chip, then a bucket; all correct passes', async ({ page }) => {
 	await page.goto('using-agents/delegating/');
 	const cp = page.locator('#autonomy-levels');
@@ -83,6 +111,57 @@ test('sort: select a chip, then a bucket; all correct passes', async ({ page }) 
 		await chip.click();
 		await cp.locator(`.cp-bucket[data-bucket="${bucket}"] .cp-bucket-target`).click();
 	}
+	await cp.locator('.cp-check').click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('All placed correctly.');
+	await expect(cp).toHaveAttribute('data-state', 'passed');
+});
+
+test('sort: the dashed area places a selected chip, and chips drag between containers', async ({ page }) => {
+	// The whole checkpoint must fit: a scroll during a drag changes which chip Chromium picks up.
+	await page.setViewportSize({ width: 1280, height: 2000 });
+	await page.goto('safety/responsible-use/');
+	const cp = page.locator('#can-i-sort');
+	await expect(cp.locator('.cp-pool-target')).toHaveText(
+		'Unplaced (drag an item to a bucket, or select it and then click the bucket)',
+	);
+	const pool = cp.locator('.cp-pool');
+	const chips = cp.locator('.cp-pool .cp-chip');
+	const count = await chips.count();
+	await expect(chips.first()).toHaveCSS('cursor', 'grab');
+	await expect(chips.first()).toHaveAttribute('draggable', 'true');
+
+	// Click the empty area below the title, with and without a selection.
+	const items0 = cp.locator('.cp-bucket[data-bucket="0"] .cp-bucket-items');
+	await items0.click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('Select an item first, then a bucket.');
+	await chips.first().click();
+	await items0.click();
+	await expect(items0.locator('.cp-chip')).toHaveCount(1);
+	await expect(pool.locator('.cp-chip')).toHaveCount(count - 1);
+
+	// Drag: pool to bucket 1, bucket 1 to bucket 2, bucket 2 back to the pool.
+	const items1 = cp.locator('.cp-bucket[data-bucket="1"] .cp-bucket-items');
+	const items2 = cp.locator('.cp-bucket[data-bucket="2"] .cp-bucket-items');
+	const dragged = chips.first();
+	const text = await dragged.textContent();
+	await drag(page, dragged, items1);
+	await expect(items1.locator('.cp-chip')).toHaveText([text ?? '']);
+	await expect(cp.locator('.cp-chip[aria-pressed="true"]')).toHaveCount(0);
+	await drag(page, items1.locator('.cp-chip'), items2);
+	await expect(items2.locator('.cp-chip')).toHaveText([text ?? '']);
+	await expect(items1.locator('.cp-chip')).toHaveCount(0);
+	await drag(page, items2.locator('.cp-chip'), pool);
+	await expect(items2.locator('.cp-chip')).toHaveCount(0);
+	await expect(pool.locator('.cp-chip')).toHaveCount(count - 1);
+
+	// Drag the rest into their buckets and grade.
+	await drag(page, items0.locator('.cp-chip'), pool);
+	for (let i = 0; i < count; i++) {
+		const chip = chips.first();
+		const bucket = await chip.getAttribute('data-bucket');
+		await drag(page, chip, cp.locator(`.cp-bucket[data-bucket="${bucket}"] .cp-bucket-items`));
+	}
+	await expect(pool.locator('.cp-chip')).toHaveCount(0);
 	await cp.locator('.cp-check').click();
 	await expect(cp.locator('.cp-feedback')).toHaveText('All placed correctly.');
 	await expect(cp).toHaveAttribute('data-state', 'passed');

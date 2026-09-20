@@ -48,6 +48,9 @@ const q = <T extends Element = HTMLElement>(sel: string) => {
 	return el;
 };
 const click = (sel: string) => q<HTMLElement>(sel).click();
+/** A drag event as the browser fires it. happy-dom has no `DragEvent`, so a `MouseEvent` carries the pointer. */
+const drag = (el: Element, type: string, clientY = 0) =>
+	el.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, clientY }));
 const feedback = () => q('.cp-feedback').textContent;
 const state = () => q('[data-checkpoint]').dataset.state;
 
@@ -195,15 +198,50 @@ describe('order', () => {
 		expect(positions()).toEqual([3, 2, 1]);
 		vi.restoreAllMocks();
 	});
+	it('drags a row before or after the row under the pointer, then grades the result', () => {
+		vi.spyOn(Math, 'random').mockReturnValue(0.999);
+		bindCheckpoint(shell('order', 'o', body));
+		expect(positions()).toEqual([2, 3, 1]);
+		const rows = [...q('ol').children] as HTMLElement[];
+		for (const li of rows) {
+			expect(li.draggable).toBe(true);
+			li.getBoundingClientRect = () => ({ top: 100, height: 40 }) as DOMRect;
+		}
+		const [two, three, one] = rows as [HTMLElement, HTMLElement, HTMLElement];
+		drag(one, 'dragstart');
+		expect(one.classList.contains('cp-dragging')).toBe(true);
+		// Over itself: nothing moves. Top half of the first row: it goes before it.
+		drag(one, 'dragover', 105);
+		expect(positions()).toEqual([2, 3, 1]);
+		drag(two, 'dragover', 105);
+		expect(positions()).toEqual([1, 2, 3]);
+		// Bottom half of the last row: after it.
+		drag(three, 'dragover', 135);
+		expect(positions()).toEqual([2, 3, 1]);
+		drag(two, 'dragover', 105);
+		drag(two, 'drop');
+		drag(one, 'dragend');
+		expect(one.classList.contains('cp-dragging')).toBe(false);
+		expect(positions()).toEqual([1, 2, 3]);
+		click('.cp-check');
+		expect(feedback()).toBe('Correct order.');
+		expect(state()).toBe('passed');
+		// A dragover with no drag in progress is ignored.
+		drag(three, 'dragover', 105);
+		expect(positions()).toEqual([1, 2, 3]);
+		vi.restoreAllMocks();
+	});
 });
 
 describe('sort', () => {
 	const body = `
 		<div class="cp-sort">
-			<button class="cp-pool-target">Unplaced</button>
-			<div class="cp-pool">
-				<button class="cp-chip" data-bucket="0" aria-pressed="false">a</button>
-				<button class="cp-chip" data-bucket="1" aria-pressed="false">b</button>
+			<div class="cp-pool-wrap">
+				<button class="cp-pool-target">Unplaced</button>
+				<div class="cp-pool">
+					<button class="cp-chip" data-bucket="0" aria-pressed="false">a</button>
+					<button class="cp-chip" data-bucket="1" aria-pressed="false">b</button>
+				</div>
 			</div>
 			<div class="cp-bucket" data-bucket="0"><button class="cp-bucket-target">Left</button><div class="cp-bucket-items"></div></div>
 			<div class="cp-bucket" data-bucket="1"><button class="cp-bucket-target">Right</button><div class="cp-bucket-items"></div></div>
@@ -242,6 +280,64 @@ describe('sort', () => {
 		bucketTarget(0).click();
 		chip('b').click();
 		bucketTarget(1).click();
+		click('.cp-check');
+		expect(feedback()).toBe('All placed correctly.');
+		expect(state()).toBe('passed');
+	});
+	it('the dashed drop area places a selected chip too, and asks for a selection otherwise', () => {
+		bindCheckpoint(shell('sort', 's', body));
+		click('.cp-pool');
+		expect(feedback()).toBe('Select an item first, then a bucket.');
+		chip('a').click();
+		q<HTMLElement>('.cp-bucket[data-bucket="0"] .cp-bucket-items').click();
+		expect(q('.cp-bucket[data-bucket="0"] .cp-bucket-items').children).toHaveLength(1);
+		expect(chip('a').getAttribute('aria-pressed')).toBe('false');
+		// A click on a chip inside a bucket selects it rather than placing anything.
+		chip('a').click();
+		expect(chip('a').getAttribute('aria-pressed')).toBe('true');
+		click('.cp-pool');
+		expect(q('.cp-pool').children).toHaveLength(2);
+	});
+	it('drags a chip into a bucket, between buckets and back to the pool', () => {
+		bindCheckpoint(shell('sort', 's', body));
+		const bucketItems = (n: number) => q<HTMLElement>(`.cp-bucket[data-bucket="${n}"] .cp-bucket-items`);
+		expect(chip('a').draggable).toBe(true);
+		drag(chip('a'), 'dragstart');
+		expect(chip('a').getAttribute('aria-pressed')).toBe('true');
+		drag(bucketItems(1), 'dragover');
+		expect(q('.cp-bucket[data-bucket="1"]').classList.contains('cp-drop-hover')).toBe(true);
+		drag(bucketItems(1), 'drop');
+		drag(chip('a'), 'dragend');
+		expect(q('.cp-bucket[data-bucket="1"]').classList.contains('cp-drop-hover')).toBe(false);
+		expect(chip('a').getAttribute('aria-pressed')).toBe('false');
+		expect(bucketItems(1).children).toHaveLength(1);
+		// Between buckets, onto the title button this time.
+		drag(chip('a'), 'dragstart');
+		drag(bucketTarget(0), 'dragover');
+		drag(bucketTarget(0), 'drop');
+		drag(chip('a'), 'dragend');
+		expect(bucketItems(0).children).toHaveLength(1);
+		expect(bucketItems(1).children).toHaveLength(0);
+		// Back to the pool. Leaving the zone clears the highlight.
+		drag(chip('a'), 'dragstart');
+		drag(q('.cp-pool'), 'dragover');
+		expect(q('.cp-pool-wrap').classList.contains('cp-drop-hover')).toBe(true);
+		drag(q('.cp-pool'), 'dragleave');
+		expect(q('.cp-pool-wrap').classList.contains('cp-drop-hover')).toBe(false);
+		drag(q('.cp-pool'), 'dragover');
+		drag(q('.cp-pool'), 'drop');
+		drag(chip('a'), 'dragend');
+		expect(q('.cp-pool').children).toHaveLength(2);
+		// A drop with no drag in progress moves nothing.
+		drag(bucketItems(0), 'drop');
+		expect(q('.cp-pool').children).toHaveLength(2);
+		// Drag both into place and grade.
+		drag(chip('a'), 'dragstart');
+		drag(bucketItems(0), 'drop');
+		drag(chip('a'), 'dragend');
+		drag(chip('b'), 'dragstart');
+		drag(bucketItems(1), 'drop');
+		drag(chip('b'), 'dragend');
 		click('.cp-check');
 		expect(feedback()).toBe('All placed correctly.');
 		expect(state()).toBe('passed');
