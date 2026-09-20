@@ -7,16 +7,47 @@ competencies:
       - id: safety/handles-data-safely/decides-what-to-share
         statement: Decides what may go into a prompt and what may not
         level: base
-        behaviors: []
+        behaviors:
+          - claim: Before pasting, the learner asks who can see the prompt, how long it is kept, and whether it may train a model.
+            why: The answers differ between a consumer chat product, an enterprise plan and a local model, and the same paste is fine in one and a breach in another.
+            example: The learner checks that the company's approved tool has "no training on inputs" in its terms before pasting a customer list, and uses that tool, not a personal account.
+          - claim: The learner removes or replaces personal data and secrets the task does not need before sharing the rest.
+            why: Most tasks work as well on redacted data, and what is not sent cannot leak.
+            example: To ask for help with a spreadsheet formula, the learner replaces the names column with "Person 1, Person 2" and keeps the numbers.
+          - claim: When in doubt, the learner treats the prompt like an email to an outside company.
+            why: The rule is easy to apply and matches how most organizations classify data.
+            example: The learner would not email the unreleased quarterly numbers to a vendor, so they do not paste them either, and ask the data owner instead.
       - id: safety/handles-data-safely/discloses-ai-use
         statement: Discloses AI use where the audience expects it
         level: base
-        behaviors: []
+        behaviors:
+          - claim: The learner says that AI helped when the audience would judge the work differently knowing it.
+            why: Disclosure is about not misleading, and the test is what the reader would want to know.
+            example: A translated contract carries "machine-translated, reviewed by X"; a spell-checked email does not.
+          - claim: The learner follows the disclosure rule of the place the work goes to, and asks when there is none.
+            why: Journals, employers, schools and open-source projects have different rules, and breaking one costs more than the disclosure.
+            example: Before submitting to a conference, the learner reads the AI policy and adds the required statement.
+          - claim: Disclosure names what the AI did and what the person checked, not only that AI was used.
+            why: "\"Written with AI\" tells the reader nothing about what to trust, while \"drafted by AI, facts checked by me\" does."
+            example: A commit message says which agent wrote the code and that the author ran and read the tests.
       - id: safety/handles-data-safely/respects-licenses
         statement: Respects licenses and attribution in AI-assisted output
         level: base
-        behaviors: []
-    alignment: []
+        behaviors:
+          - claim: The learner treats AI output that reproduces a recognizable source the same as copying that source.
+            why: A model can repeat text or code it saw in training, and the license of the original still applies to the copy.
+            example: A generated function that matches a well-known library almost word for word gets the library's attribution, or gets rewritten.
+          - claim: When adapting licensed material with AI help, the learner keeps the original's license terms and attribution.
+            why: The transformation does not remove the obligation; the derived work carries it.
+            example: Rewriting a CC BY-SA tutorial with an assistant, the learner keeps the attribution and releases the result under the same license.
+          - claim: The learner knows the terms of the tool they use for who owns the output and what the tool may do with the input.
+            why: The terms differ between tools and plans, and the answer decides whether the output may go into a product.
+            example: Before shipping generated images in a brochure, the learner checks the image tool's commercial-use terms.
+    alignment:
+      - framework: Anthropic AI Fluency 4D
+        code: Diligence
+        asks: Use AI responsibly, transparently and with accountability for the result
+        objectives: [safety/handles-data-safely/decides-what-to-share, safety/handles-data-safely/discloses-ai-use, safety/handles-data-safely/respects-licenses, safety/judges-agent-risk/names-blast-radius, safety/judges-agent-risk/chooses-human-in-loop, coding-with-agents/works-in-team/attributes-honestly]
   - id: safety/verifies-output
     statement: Verifies AI output before relying on it
     topics: [safety/failure-modes, safety/verification]
@@ -24,20 +55,60 @@ competencies:
       - id: safety/verifies-output/checks-claims
         statement: Checks claims and sources on anything that leaves their desk
         level: base
-        behaviors: []
+        behaviors:
+          - claim: Every specific claim in AI output that leaves the learner's desk (a number, a date, a name, a quote, a citation) is checked against a source.
+            why: Specifics are what the model invents most convincingly and what the reader acts on.
+            example: Before sending a briefing the learner opens each of the three cited reports and finds one does not say what the summary claims.
+          - claim: The learner checks the source itself, not the model's description of it.
+            why: A model can produce a real title with an invented finding attached to it.
+            example: The paper exists, but the learner reads its abstract and sees it studied a different population than the summary says.
+          - claim: When a claim cannot be checked, the learner marks it as unverified or removes it.
+            why: An unverified claim that stays in looks like a verified one to the next reader.
+            example: The report keeps the market size figure but adds "(unverified, from the assistant)" until the analyst confirms it.
       - id: safety/verifies-output/spots-sycophancy
         statement: Spots agreement that is not evidence
         level: base
-        behaviors: []
+        behaviors:
+          - claim: The learner recognizes that a model agreeing with them is not evidence, because agreement is what it tends to produce.
+            why: The model's confirmation feels like a second opinion but comes from the framing the learner gave it.
+            example: After "my analysis shows we should cancel the project, right?" gets a yes, the learner asks the opposite and gets a yes too.
+          - claim: The learner asks for the strongest counter-argument before asking for confirmation.
+            why: A model asked to disagree does disagree, and the answer shows what the confirmation left out.
+            example: "\"Give me the three best reasons this plan fails\" comes before \"is this plan good?\"."
+          - claim: The learner strips their own opinion out of the question when they want an assessment.
+            why: A leading question produces a leading answer, and the fix is in the question.
+            example: "\"Here are two options, compare them on cost and risk\" instead of \"option A is better, agree?\"."
       - id: safety/verifies-output/calibrates-trust
         statement: Matches the depth of checking to the cost of being wrong
         level: base
-        behaviors: []
+        behaviors:
+          - claim: The learner sets the depth of checking from what happens if the output is wrong, not from how good it looks.
+            why: Fluency is constant and consequences are not, so the cost of a mistake is the only thing that should change the effort.
+            example: A brainstorm list gets no checking; a dosage table in a patient leaflet gets every value checked by a second person.
+          - claim: The learner checks harder when the output cannot be undone or goes to people who will not check it themselves.
+            why: An internal draft has readers who catch mistakes; a published page or a sent email does not.
+            example: An internal summary is skimmed; the same summary going to a customer is read line by line.
+          - claim: The learner treats a domain they cannot judge as high risk regardless of the task's size.
+            why: In an unfamiliar domain the learner cannot see the mistakes, so the checking has to come from a source or a person who can.
+            example: A one-paragraph legal clause goes to the legal team, even though it is short and reads well.
       - id: safety/verifies-output/keeps-a-check-habit
         statement: Builds verification into a team's routine rather than their own
         level: expert
-        behaviors: []
-    alignment: []
+        behaviors:
+          - claim: The learner puts the check in the process (a template field, a review step, a checklist item) so it happens whether or not anyone remembers.
+            why: A habit held by one person leaves with that person and fails on a busy day.
+            example: The team's report template gets a "sources checked by" line that the reviewer fills in.
+          - claim: The check is light enough that the team does it, and the learner measures whether it is done.
+            why: A heavy check gets skipped, and a skipped check is worse than a light one because everyone assumes it happened.
+            example: The learner samples three AI-assisted documents a month and looks for the checkbox filled in and a source named.
+          - claim: The learner makes it normal to report an AI mistake that was caught.
+            why: A team that hides caught mistakes learns nothing, and one that shares them refines its checks.
+            example: "A weekly note lists \"caught this week: an invented statute number, a wrong currency conversion\" without naming who let it through."
+    alignment:
+      - framework: Anthropic AI Fluency 4D
+        code: Discernment
+        asks: Judge the output, the process and the behavior of the AI critically
+        objectives: [concepts/explains-models/names-failure-modes, safety/verifies-output/checks-claims, safety/verifies-output/spots-sycophancy, safety/verifies-output/calibrates-trust, using-agents/delegates-and-checks/reviews-against-brief, coding-with-agents/verifies-agent-work/reviews-others-code]
   - id: safety/judges-agent-risk
     statement: Judges the risk of letting an agent act
     topics: [safety/agent-risk, safety/governance]
@@ -84,5 +155,21 @@ competencies:
       - id: safety/judges-agent-risk/sets-oversight
         statement: Sets policy, logging and escalation for agents in an organization
         level: expert
-        behaviors: []
-    alignment: []
+        behaviors:
+          - claim: The learner writes a policy that says which tasks an agent may do, with what data and which approvals, in terms a team can apply.
+            why: A policy that says "use AI responsibly" decides nothing, and every team then decides for itself.
+            example: "\"Agents may open pull requests in any repository; merging requires a human review; production credentials are never given to an agent.\""
+          - claim: Agent actions are logged where a person can read them later, and someone is named to read them.
+            why: Without a log there is no way to learn what happened after a problem, and a log nobody reads is decoration.
+            example: Every agent-sent message carries a tag, the tagged messages go to an audit channel, and the team lead reviews a sample weekly.
+          - claim: "The policy names the escalation path: what stops the agent, who is told, and who decides whether it restarts."
+            why: The first incident is the wrong time to find out who can revoke the agent's access.
+            example: "\"Any agent action on customer data outside office hours pages the on-call, who can revoke the token.\""
+          - claim: The learner treats a model or tool update as a change that needs a re-check of the agent's behavior.
+            why: The same prompt on a new model version can act differently, and a policy that assumed the old behavior no longer holds.
+            example: After the vendor's model upgrade, the learner reruns the agent on last month's tasks before letting it back on live work.
+    alignment:
+      - framework: Anthropic AI Fluency 4D
+        code: Diligence
+        asks: Use AI responsibly, transparently and with accountability for the result
+        objectives: [safety/handles-data-safely/decides-what-to-share, safety/handles-data-safely/discloses-ai-use, safety/handles-data-safely/respects-licenses, safety/judges-agent-risk/names-blast-radius, safety/judges-agent-risk/chooses-human-in-loop, coding-with-agents/works-in-team/attributes-honestly]
