@@ -210,3 +210,10 @@
 .review-progress > div { height: 100%; width: 0; background: var(--at-done); transition: width 0.3s; }
 .review-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
 .review-empty { padding: 1rem; border: 1px dashed var(--sl-color-gray-4); border-radius: 6px; }
+
+/* ---- citations and terms (remark plugins, spec S03 "Citations and terms") ---- */
+.sl-markdown-content a.citation { font-size: 0.75em; vertical-align: super; line-height: 0; text-decoration: none; margin-left: 0.1em; }
+.sl-markdown-content ol.references { font-size: 0.9rem; }
+.sl-markdown-content ol.references li:target { background: color-mix(in srgb, var(--sl-color-accent) 15%, transparent); }
+.sl-markdown-content a.term { color: inherit; text-decoration: underline dotted var(--sl-color-accent); text-decoration-thickness: 1.5px; text-underline-offset: 0.2em; cursor: help; }
+.sl-markdown-content a.term:hover { text-decoration-style: solid; }

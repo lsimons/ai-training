@@ -5,6 +5,8 @@ import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 import starlightLinksValidator from 'starlight-links-validator';
 import { parse as parseYaml } from 'yaml';
+import { remarkCitations } from './plugins/remark-citations.mjs';
+import { remarkTerms } from './plugins/remark-terms.mjs';
 
 // This is a *project* site: it deploys under a subpath of https://lsimons.github.io
 // (e.g. https://lsimons.github.io/ai-training/), so it sets `base`.
@@ -66,27 +68,42 @@ const AREA_NAMES = {
 	'customizing-agents': 'Customizing agents',
 	'building-agents': 'Building agents',
 };
-function topicSidebar() {
+/** Every topic's YAML, parsed, in area order then by name. */
+function loadTopics() {
 	const root = new URL('./src/data/topics/', import.meta.url);
-	return AREA_ORDER.map((area) => {
+	return AREA_ORDER.flatMap((area) => {
 		const dir = new URL(`${area}/`, root);
-		const topics = readdirSync(dir)
+		return readdirSync(dir)
 			.filter((f) => f.endsWith('.yaml'))
 			.map((f) => parseYaml(readFileSync(new URL(f, dir), 'utf8')))
 			.sort((a, b) => a.name.localeCompare(b.name));
-		return {
-			label: AREA_NAMES[area] ?? area,
-			collapsed: true,
-			items: topics.map((t) => ({ label: t.name, link: `/topics/${t.id}/` })),
-		};
 	});
 }
+const topics = loadTopics();
+function topicSidebar() {
+	return AREA_ORDER.map((area) => ({
+		label: AREA_NAMES[area] ?? area,
+		collapsed: true,
+		items: topics.filter((t) => t.area === area).map((t) => ({ label: t.name, link: `/topics/${t.id}/` })),
+	}));
+}
+
+/**
+ * The bibliography (site/src/data/bibliography.yaml) for the citation plugin.
+ * The same file is a content collection, which validates its entries; here it
+ * is only read so `(@key)` can resolve at remark time.
+ */
+const bibliography = parseYaml(readFileSync(new URL('./src/data/bibliography.yaml', import.meta.url), 'utf8'));
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://lsimons.github.io',
 	base,
 	markdown: {
+		// Citations `(@key)` and first-mention terms (spec S03 "Citations and
+		// terms"). Both emit root-relative or in-page links, so they run before
+		// rehypeBaseLinks, which adds the deploy base.
+		remarkPlugins: [[remarkCitations, { bibliography }], [remarkTerms, { topics }]],
 		rehypePlugins: [rehypeBaseLinks],
 	},
 	// The Quarto slide deck is a static file at /presentations/example.html.
@@ -102,7 +119,19 @@ export default defineConfig({
 			// Fails the build on a dead internal link. lychee cannot do this
 			// job here: root-relative links resolve against the published
 			// lsimons.github.io origin, which .lychee.toml excludes.
-			plugins: [starlightLinksValidator()],
+			//
+			// The glossary anchors (`/glossary/#<concept>`) are rendered by the
+			// Glossary component, so the validator, which only reads Markdown
+			// headings, cannot see them and would reject every term link the
+			// remark-terms plugin emits. Those links are built from concept ids
+			// that exist in the topic YAML by construction, so the hash check on
+			// that one page is excluded rather than the links dropped. Every
+			// other link is still validated.
+			plugins: [
+				starlightLinksValidator({
+					exclude: ({ link }) => link.startsWith(`${base}/glossary/#`),
+				}),
+			],
 			title: 'AI Training',
 			description:
 				'An open training suite for getting started with AI: concepts, safety, using agents, AI-assisted software engineering, customizing and building agents.',
