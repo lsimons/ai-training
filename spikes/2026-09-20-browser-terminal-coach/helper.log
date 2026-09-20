@@ -1,10 +1,23 @@
-05:22:17 session flags: --safe-mode --permission-mode manual --model claude-fable-5-1 --effort low --strict-mcp-config --no-chrome
-05:22:17 background session "AI training: spike/terminal" 64428071 (64428071-446c-4be0-92a4-9e8538647c5f) in /Users/lsimons/git/lsimons/ai-training-spike-terminal
-05:22:17 helper listening on 127.0.0.1:4400 · claude session 64428071 (stays alive after you close the page: claude stop 64428071)
+05:24:34 session flags: --safe-mode --permission-mode manual --model claude-fable-5-1 --effort low --strict-mcp-config --no-chrome
+05:24:34 background session "AI training: spike/terminal" 64428071 (64428071-446c-4be0-92a4-9e8538647c5f) in /Users/lsimons/git/lsimons/ai-training-spike-terminal
+node:events:505
+    throw er; // Unhandled 'error' event
+    ^
 
-Open this URL (the token is single-process; restart the helper to rotate it):
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4400
+    at Server.setupListenHandle [as _listen2] (node:net:2324:16)
+    at listenInCluster (node:net:2433:12)
+    at node:net:2662:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on WebSocketServer instance at:
+    at Server.emit (node:events:514:28)
+    at emitErrorNT (node:net:2412:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '127.0.0.1',
+  port: 4400
+}
 
-  http://localhost:4322/ai-training/spike/terminal/?token=testtoken
-
-
->>> Page at http://localhost:4322 wants to attach to your Claude Code session. Allow? [y/N]
+Node.js v24.20.0

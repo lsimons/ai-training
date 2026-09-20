@@ -22,7 +22,7 @@ the terminal.
     #spike-term-session { font-size: .85em; opacity: .75; }
     #spike-layout { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: 1rem; align-items: start; }
     @media (max-width: 72rem) { #spike-layout { grid-template-columns: 1fr; } }
-    #spike-term { height: 70vh; min-height: 480px; border-radius: 8px; padding: 8px 0 0 8px; box-sizing: border-box; }
+    #spike-term { height: 70vh; min-height: 480px; border-radius: 8px; padding: 8px 4px 8px 8px; box-sizing: border-box; }
     #spike-term .xterm { height: 100%; }
     /* macOS overlay scrollbars float over the last text column; Claude Code manages its own scroll region anyway. */
     #spike-term .xterm-viewport { scrollbar-width: none; }
@@ -124,7 +124,10 @@ the terminal.
     }
     function dump(text, key, val) { const p = $('spike-screen-dump'); p.hidden = false; p.textContent = text; window['__' + key] = val ?? text; }
     term.onData((d) => send({ type: 'in', data: d }));
-    new ResizeObserver(() => { fit.fit(); send({ type: 'resize', cols: term.cols, rows: term.rows }); }).observe($('spike-term-wrap'));
+    const refit = () => { fit.fit(); send({ type: 'resize', cols: term.cols, rows: term.rows }); };
+    new ResizeObserver(refit).observe($('spike-term-wrap'));
+    // The web font arrives after the first fit; a stale cell height clips the last row.
+    document.fonts.ready.then(refit); setTimeout(refit, 1500);
     $('btn-token').onclick = () => { token = $('spike-token-input').value.trim(); sessionStorage.setItem('spike-token', token); connect(); };
     connect();
     // --- coach panel (docked, never covers the terminal) ----------------------
