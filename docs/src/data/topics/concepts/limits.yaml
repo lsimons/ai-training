@@ -5,8 +5,9 @@ definition: >-
   Language models are fluent and broadly knowledgeable, and they fail in
   predictable ways. This topic names the failures a user must expect:
   confident invention, knowledge that stops at a date, answers that vary
-  between runs, agreement that flatters instead of informs, and the cost and
-  delay that grow with every token.
+  between runs, agreement that flatters instead of informs, instructions that
+  fade as the context fills, and the cost and delay that grow with every
+  token.
 concepts:
   - id: hallucination
     name: Hallucination
@@ -48,6 +49,15 @@ concepts:
       with output length because tokens are produced one at a time. Cost and
       latency are why a smaller model or a shorter prompt is often the right
       engineering choice even when a larger one would answer slightly better.
+  - id: instruction-dilution
+    name: Instruction dilution
+    definition: >-
+      The weakening of an instruction as more text piles up after it in the
+      context window. A rule stated once at the start competes with
+      everything said since; in a long conversation or a long instruction
+      file the model follows some rules and quietly drops others. Dilution is
+      why short instruction files work better than long ones and why a rule
+      that must always hold belongs in a mechanical check, not in prose.
 links:
   prerequisites: [concepts/how-models-work]
   related: []

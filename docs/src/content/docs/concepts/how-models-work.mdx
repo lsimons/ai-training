@@ -33,9 +33,9 @@ number, and the model works only with those numbers.
 
 This has consequences you will notice. Models are bad at counting letters
 in a word, because they never saw the letters. They are priced per token,
-not per word. And code, rare names and non-English text cost more tokens
-than plain English, because the token vocabulary was built mostly from
-English prose.
+not per word. And rare names and non-English text often cost more tokens
+per character than common English, because the token vocabulary was built
+around the text that appears most often in training data.
 
 ## One token at a time
 
@@ -86,7 +86,7 @@ frequency-weighted and frozen at the training cutoff.
     { text: 'It looked the answer up, but the database is called the weights.', why: 'Weights are not a database. Nothing is stored as retrievable records; the network produces scores for next tokens.' },
     { text: 'It produced the answer token by token, each time scoring what text is likely to come next.', correct: true },
     { text: 'It searched the web and summarised the results.', why: 'Search is a separate tool some products add on top. The model itself only predicts tokens; it has no built-in search.' },
-    { text: 'It reasoned about the question first, then wrote the answer down.', why: 'There is no reasoning step separate from generation. Any reasoning happens as generated text, one token at a time.' },
+    { text: 'It picked the closest match from a library of pre-written answers.', why: 'There is no library. Nothing is stored as finished text; the answer is produced fresh, token by token, and even a model that thinks before answering does that thinking as generated text.' },
   ]}>
 
 A colleague says: "The model looked up the answer in its database and
