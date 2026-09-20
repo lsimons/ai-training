@@ -133,7 +133,7 @@ Setup, what went wrong, the rule. Two to five sentences.
 </Pitfall>
 
 <Exercise stretch="Now ask for a refactor you choose and review it the same way.">
-What to do, outside the page, in a resettable setting. Then what a good result looks like, so the learner can self-grade.
+What to do, outside the page, in a resettable setting, and how big the result is. One sentence on why. Then what a good result looks like, so the learner can self-grade, and one reflection question to close.
 </Exercise>
 
 <Prompt model="Claude Sonnet 4.6" recorded="2026-09">
