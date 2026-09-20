@@ -20,6 +20,7 @@ const first = catalog.flatMap((c) => c.lessons)[0];
 	<div class="overall-row">
 		<div class="overall-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-bar><div></div></div>
 		<strong data-percent>0%</strong>
+		<span class="overall-skipped" data-skipped hidden></span>
 	</div>
 	{!landing && <p class="overall-text" data-text>No progress yet.</p>}
 	<p class="overall-actions">
@@ -33,6 +34,7 @@ const first = catalog.flatMap((c) => c.lessons)[0];
 	.overall-row { display: flex; align-items: center; gap: 0.75rem; }
 	.overall-bar { flex: 1; height: 0.75rem; border-radius: 4px; background: var(--sl-color-gray-5); overflow: hidden; }
 	.overall-bar > div { height: 100%; width: 0; background: var(--at-done); transition: width 0.3s; }
+	.overall-skipped { color: var(--sl-color-gray-3); font-size: 0.9rem; }
 	.overall-text { margin: 0.4rem 0 0; color: var(--sl-color-gray-3); font-size: 0.9rem; }
 	.overall-actions { margin: 0.75rem 0 0; display: flex; flex-wrap: wrap; gap: 0.75rem; }
 	.overall-continue, .overall-map { display: inline-block; padding: 0.45rem 1rem; border-radius: 6px; font-weight: 600; text-decoration: none; }
@@ -50,6 +52,7 @@ const first = catalog.flatMap((c) => c.lessons)[0];
 		const bar = root.querySelector<HTMLElement>('[data-bar]')!;
 		const fill = bar.firstElementChild as HTMLElement;
 		const pct = root.querySelector<HTMLElement>('[data-percent]')!;
+		const skippedEl = root.querySelector<HTMLElement>('[data-skipped]')!;
 		const text = root.querySelector<HTMLElement>('[data-text]');
 		const cont = root.querySelector<HTMLAnchorElement>('[data-continue]')!;
 
@@ -58,13 +61,20 @@ const first = catalog.flatMap((c) => c.lessons)[0];
 			fill.style.width = `${o.percent}%`;
 			bar.setAttribute('aria-valuenow', String(o.percent));
 			pct.textContent = `${o.percent}%`;
+			// Spec S04 "Progress display": skipped is out of the percent and shown as its own count.
+			skippedEl.textContent = `${o.skipped} skipped`;
+			skippedEl.hidden = o.skipped === 0;
 			if (text) text.textContent = o.any
 				? `${o.finished} of ${o.lessons} lessons finished${o.skipped ? `, ${o.skipped} skipped` : ''}${o.started ? `, ${o.started} in progress` : ''}; ${o.passed} of ${o.checkpoints} checkpoints passed.`
 				: `${o.lessons} lessons and ${o.checkpoints} checkpoints across six courses. Nothing started yet.`;
 			if (o.any && o.next) {
 				cont.href = `${base}/${o.next.id}/`;
 				cont.textContent = `Continue with: ${o.next.title}`;
-			} else if (o.any && !o.next) {
+			} else if (o.any && o.firstSkipped) {
+				// Nothing unfinished, something skipped: offer the first skipped lesson.
+				cont.href = `${base}/${o.firstSkipped.id}/`;
+				cont.textContent = `All lessons finished, ${o.skipped} skipped`;
+			} else if (o.any) {
 				cont.href = `${base}/map/`;
 				cont.textContent = 'All lessons finished: see the topic map';
 			}

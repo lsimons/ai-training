@@ -4,8 +4,8 @@
 lives, how it is versioned, and how it moves between browsers.
 
 **Status:** In progress - the record, its storage key, lesson states, checkpoint
-states, the review map, comfort level, export, import and reset are
-implemented (2026-09-20). Deferred: goals and quizzes exist in the record
+states, the review map, comfort level, progress display, export, import and
+reset are implemented (2026-09-20). Deferred: goals and quizzes exist in the record
 shape only, with no page that writes them.
 
 ## Introduction
@@ -52,6 +52,33 @@ reads when the learner exports it.
 | `attempted` | Answered wrong at least once, not yet passed, or skipped |
 | `passed`    | Answered right                                           |
 | `skipped`   | Skip pressed; recorded, never counts as a pass           |
+
+### Progress display
+
+Every progress figure on the site comes from one rule, so that the landing
+page bar, the progress page, the course completion ring and the course
+milestone bar always show the same number for the same record.
+
+- **Percent** = finished lessons / (all lessons − skipped lessons), rounded
+  to a whole number. With no lessons left to count, it is 0.
+- **Lessons only.** A lesson is `finished` only when every checkpoint is
+  passed or skipped, so a checkpoint isn't a separate unit and doesn't add to
+  the count.
+- **Skipped** lessons and checkpoints are out of both sides of the percent.
+  A surface that shows the percent shows skipped as a separate count
+  ("2 skipped") when it isn't zero.
+- **Per-lesson node ring** on the lesson graph stays passed checkpoints /
+  that lesson's checkpoints. That is detail within one lesson and isn't a
+  progress unit.
+- **Continue button**: it links to the first lesson in path order that is
+  neither finished nor skipped. When every lesson is finished or skipped and
+  at least one is skipped, it says "All lessons finished, N skipped" and links
+  to the first skipped lesson. When none is skipped, it links to the topic map.
+- **Review stage** doesn't feed any progress number. It surfaces on the
+  review due card only ([S05](S05-spaced-review.md)).
+
+The shared computation is `progressPercent()` in `site/src/scripts/overview.ts`,
+which both the overall bar and the course graph import.
 
 ## Storage
 
