@@ -15,5 +15,8 @@
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
     "erasableSyntaxOnly": true
+    // exactOptionalPropertyTypes is deliberately not set: Astro passes an
+    // absent optional prop as `undefined`, which fails six CheckpointShell prop
+    // checks under that flag (docs/agents/testing.md, "Lint notes").
   }
 }
