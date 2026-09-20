@@ -5,8 +5,9 @@ definition: >-
   Running an agent for real means surrounding it with controls and treating
   its changes like any other risky deployment. This topic covers layered
   defenses, gating deploys on evaluation results, rolling changes out
-  gradually, managing cost, the security risks specific to agents, and the
-  protocols agents use to talk to tools and to each other.
+  gradually, managing cost, operating the model API itself, the security
+  risks specific to agents, and the protocols agents use to talk to tools
+  and to each other.
 concepts:
   - id: defense-layers
     name: Defense layers
@@ -42,6 +43,16 @@ concepts:
       turns, and a runaway loop or verbose tool can multiply it again. Track
       cost per run, set budgets that stop a run, cache what repeats, and
       route simple steps to smaller models.
+  - id: provider-operations
+    name: API operations
+    definition: >-
+      The mechanics of calling a model provider reliably. Pin a dated model
+      ID so behavior changes only when you choose. Use prompt caching so the
+      stable prefix of a long system prompt and tool list is paid for once.
+      Sort errors into retriable ones, such as rate limits and overload,
+      which get a backoff and a retry, and terminal ones, such as an invalid
+      request or a content refusal, which get surfaced. Set timeouts on
+      every call.
   - id: agent-specific-security-risks
     name: Agent-specific security risks
     definition: >-
