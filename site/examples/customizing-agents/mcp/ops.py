@@ -16,16 +16,28 @@ TOOLS = [
     ("docs_get_page", "read", "Fetch one page by id, as Markdown."),
     ("docs_list_children", "read", "List the pages under a parent page id."),
     ("docs_get_attachments", "read", "List the files attached to a page id."),
-    ("docs_create_page", "write", "Create a page under a parent id. Call docs_search first to find the parent."),
+    (
+        "docs_create_page",
+        "write",
+        "Create a page under a parent id. Call docs_search first to find the parent.",
+    ),
     ("docs_update_page", "write", "Replace the body of a page by id."),
     ("docs_add_comment", "write", "Add a comment to a page by id."),
     ("tasks_search", "read", "Search issues by text or filter. Returns issue keys."),
     ("tasks_get", "read", "Fetch one issue by key and return its fields and comments."),
     ("tasks_list_transitions", "read", "List the status transitions allowed for an issue key."),
-    ("tasks_create", "write", "Create an issue in a project. Requires a project key and a summary."),
+    (
+        "tasks_create",
+        "write",
+        "Create an issue in a project. Requires a project key and a summary.",
+    ),
     ("tasks_update", "write", "Change fields on an issue by key."),
     ("tasks_add_comment", "write", "Add a comment to an issue by key."),
-    ("tasks_transition", "write", "Move an issue to another status. Call tasks_list_transitions first."),
+    (
+        "tasks_transition",
+        "write",
+        "Move an issue to another status. Call tasks_list_transitions first.",
+    ),
     ("users_lookup", "read", "Find a user id by name or email."),
 ]
 
@@ -35,7 +47,7 @@ CANNOT = ["delete", "change permissions", "bulk edit", "export", "administer"]
 def inventory():
     reads = [t for t in TOOLS if t[1] == "read"]
     writes = [t for t in TOOLS if t[1] == "write"]
-    print("%d read, %d write, %d cannot" % (len(reads), len(writes), len(CANNOT)))
+    print(f"{len(reads)} read, {len(writes)} write, {len(CANNOT)} cannot")
 
 
 class WriteCap:
@@ -46,13 +58,14 @@ class WriteCap:
         self.calls = {}  # (user, minute) -> count
 
     def allow(self, user, tool, minute):
-        kind = dict((t[0], t[1]) for t in TOOLS)[tool]
+        kind = {name: kind for name, kind, _ in TOOLS}[tool]
         if kind != "write":
             return "ok"
         key = (user, minute)
         self.calls[key] = self.calls.get(key, 0) + 1
         if self.calls[key] > self.limit:
-            return "refused: %s is write call %d of %d allowed this minute" % (tool, self.calls[key], self.limit)
+            count = self.calls[key]
+            return f"refused: {tool} is write call {count} of {self.limit} allowed this minute"
         return "ok"
 
 
@@ -76,5 +89,5 @@ STEPS = {
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in STEPS:
-        sys.exit("usage: python3 ops.py <step>   step is one of: %s" % ", ".join(sorted(STEPS)))
+        sys.exit(f"usage: python3 ops.py <step>   step is one of: {', '.join(sorted(STEPS))}")
     STEPS[sys.argv[1]]()
