@@ -4,20 +4,6 @@ description: An open training suite for getting started with AI, from concepts a
 template: splash
 hero:
   tagline: Getting started with AI, for knowledge workers and software engineers. Open content, interactive lessons, progress kept in your browser.
-  actions:
-    - text: Start with Concepts
-      # hero action links are used verbatim, so this one includes the deploy base
-      link: /ai-training/concepts/
-      icon: right-arrow
-      variant: primary
-    - text: Topic map
-      link: /ai-training/map/
-      icon: puzzle
-      variant: secondary
-    - text: View on GitHub
-      link: https://github.com/lsimons/ai-training
-      icon: external
-      variant: minimal
 ---
 
 import { LinkCard, CardGrid } from '@astrojs/starlight/components';
@@ -25,7 +11,7 @@ import OverallProgress from '@components/OverallProgress.astro';
 
 ## Your progress
 
-<OverallProgress hero />
+<OverallProgress landing />
 
 ## Six areas
 
@@ -38,7 +24,6 @@ import OverallProgress from '@components/OverallProgress.astro';
 	<LinkCard title="Building agents" href="/ai-training/building-agents/" description="The agent loop, tools, memory, evaluation and production concerns. For engineers." />
 </CardGrid>
 
-
 ## Status
 
 Release 1: one lesson in each of the six areas, so the shape of the site is
@@ -47,10 +32,3 @@ visible end to end. Each course page is a lesson graph, the
 spaced-review schedule, stays in your browser (see [your progress](/progress/)).
 The [rough plan](https://github.com/lsimons/ai-training/blob/main/docs/plan/README.md)
 describes what comes next.
-
-## Origins
-
-A rebuild of [agent-engineer-course](https://github.com/lsimons/agent-engineer-course),
-itself a fork of Addy Osmani's [agent-engineer](https://github.com/addyosmani/agent-engineer)
-course. It adopts the pedagogy of Harvard's [CS50](https://cs50.harvard.edu/)
-and references the public courses on [Claude Academy](https://academy.claude.com/).
