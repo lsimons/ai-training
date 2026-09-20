@@ -5,9 +5,9 @@ parallel against the GitHub issues, and what a session of that looks like.
 Written after the session of 2026-09-20 that took twelve `ready-for-agent`
 issues to twelve merged pull requests.
 
-The coordinator never edits code itself. It triages, dispatches, relays
-review findings, decides what goes back to a builder, manages the merge
-queue, and writes the summary. Everything else is delegated.
+The coordinator never edits code itself. It triages the issues, dispatches the agents, relays review findings and
+decides what goes back to a builder, and it runs the merge queue. Everything
+else is delegated.
 
 ## Roles
 
@@ -17,8 +17,8 @@ queue, and writes the summary. Everything else is delegated.
 | Builder     | one per issue                       | its own worktree and branch              | Fable, low reasoning effort |
 | Reviewer    | one per pull request, sometimes two | its own worktree, detached at the PR tip | Fable, default effort       |
 
-A builder owns one issue, one branch and one pull request from start to
-merge, including every revision and rebase. A reviewer owns one review pass
+A builder takes one issue, one branch and one pull request from start to
+merge, including every revision and rebase. A reviewer does one review pass
 and posts it on the pull request. The coordinator reads both and talks to
 both, so the builder and the reviewer never talk to each other.
 
