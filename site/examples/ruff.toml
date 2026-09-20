@@ -1,6 +1,7 @@
 # Lesson example fixtures: the same rules as the repo (extend), but
-# targeting Python 3.9, the oldest interpreter a learner is likely to have.
-# Issue #29 is the CI run on 3.9 itself. The PTH exemption for this
-# directory is in the root pyproject.toml.
+# targeting Python 3.9, the oldest interpreter a learner is likely to have
+# (spec S03 "Examples"). `mise run examples` also runs every fixture on
+# Python 3.9 itself, the second `python` pin in .mise.toml. The PTH
+# exemption for this directory is in the root pyproject.toml.
 extend = "../../pyproject.toml"
 target-version = "py39"

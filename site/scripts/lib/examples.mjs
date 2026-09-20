@@ -3,6 +3,15 @@
  * run="..." answer="...">` in the lesson sources, run the fixture it names
  * under site/examples/ (a Python script), and compare stdout with the answer the
  * learner sees.
+ *
+ * Every fixture runs on two interpreters, `python3` (the current pin in
+ * .mise.toml) and `python3.9` (the floor pin), and both must print the
+ * answer. The floor exists because the fixture is what a learner runs on
+ * their own machine, and a stock Mac's `python3` is 3.9 (spec S03
+ * "Examples"). Each interpreter is asked for its version first, so a missing
+ * pin or a wrong `python3` on PATH fails loudly instead of testing one
+ * interpreter twice.
+ *
  * `scripts/check-examples.mjs` is the command-line entry; tests import this.
  */
 import { spawnSync } from 'node:child_process';
@@ -67,25 +76,81 @@ export function parseProps(attrs) {
 	return props;
 }
 
-/** Run one fixture. Every fixture is a Python script run with python3; any other file type is an error. */
-export function runFixture(examplesDir, run) {
-	const fixture = join(examplesDir, run);
-	const ext = extname(fixture);
-	if (ext !== '.py') return { error: `unsupported fixture type ${ext}; fixtures are Python scripts (S03 "Examples")` };
-	const res = spawnSync('python3', [fixture], {
-		encoding: 'utf8',
-		env: { ...process.env, PYTHON_COLORS: '0', NO_COLOR: '1' },
-	});
-	return { status: res.status, stdout: (res.stdout ?? '').trimEnd(), stderr: res.stderr };
+/** The Python floor for fixtures, as `major.minor` (spec S03 "Examples"). */
+export const FLOOR = '3.9';
+
+const fixtureEnv = { ...process.env, PYTHON_COLORS: '0', NO_COLOR: '1' };
+
+/** The error for a fixture name that is not a Python script, or `null`. */
+export function fixtureTypeError(run) {
+	const ext = extname(run);
+	if (ext === '.py') return null;
+	return `unsupported fixture type ${ext}; fixtures are Python scripts (S03 "Examples")`;
 }
 
 /**
- * Check the `<Predict>` tags of one lesson source. `run(name)` executes a
- * fixture (injectable for tests). Returns `{ found, checked, failures }`:
- * how many tags name a fixture, how many were run, and one message per
- * problem.
+ * `major.minor.micro` of the interpreter `cmd`, or `{ error }` if it can't
+ * run. `spawn` is injectable for tests.
  */
-export function checkSource(file, src, run) {
+export function pythonVersion(cmd, spawn = spawnSync) {
+	const res = spawn(cmd, ['-c', 'import sys; print("%d.%d.%d" % sys.version_info[:3])'], {
+		encoding: 'utf8',
+		env: fixtureEnv,
+	});
+	if (res.error) return { error: res.error.message };
+	if (res.status !== 0) return { error: (res.stderr ?? '').trim() || `exited ${res.status}` };
+	return { version: (res.stdout ?? '').trim() };
+}
+
+/**
+ * The interpreters every fixture must pass on, as `{ label, cmd }`: the
+ * current pin (`python3`) and the floor (`python3.9`), both installed by
+ * `mise install` from .mise.toml [tools]. Returns `{ list }` or `{ error }`.
+ * A missing or wrong one is an error, not a skip: a run that quietly tested
+ * one interpreter twice would look like a pass.
+ */
+export function interpreters(spawn = spawnSync) {
+	const list = [];
+	for (const [cmd, want] of [
+		['python3', null],
+		[`python${FLOOR}`, FLOOR],
+	]) {
+		const got = pythonVersion(cmd, spawn);
+		if (got.error)
+			return {
+				error: `cannot run ${cmd} (${got.error}); both Python pins in .mise.toml must be installed (mise install)`,
+			};
+		const minor = got.version.split('.').slice(0, 2).join('.');
+		if (want && minor !== want) return { error: `${cmd} is Python ${got.version}, expected ${want}.x` };
+		if (!want && minor === FLOOR)
+			return {
+				error: `python3 is Python ${got.version}, the floor; the current pin from .mise.toml must be first on PATH (run through mise)`,
+			};
+		list.push({ label: `python ${got.version}`, cmd });
+	}
+	return { list };
+}
+
+/**
+ * Run one fixture with `interp` (`{ label, cmd }`, default `python3`). Every
+ * fixture is a Python script; any other file type is an error.
+ */
+export function runFixture(examplesDir, run, interp = { label: 'python3', cmd: 'python3' }) {
+	const typeError = fixtureTypeError(run);
+	if (typeError) return { error: typeError };
+	const res = spawnSync(interp.cmd, [join(examplesDir, run)], { encoding: 'utf8', env: fixtureEnv });
+	return { status: res.status, stdout: (res.stdout ?? '').trimEnd(), stderr: res.stderr };
+}
+
+const DEFAULT_INTERPRETERS = [{ label: 'python3', cmd: 'python3' }];
+
+/**
+ * Check the `<Predict>` tags of one lesson source. `run(name, interp)`
+ * executes a fixture (injectable for tests), once per entry in `interps`.
+ * Returns `{ found, checked, failures }`: how many tags name a fixture, how
+ * many runs happened, and one message per problem.
+ */
+export function checkSource(file, src, run, interps = DEFAULT_INTERPRETERS) {
 	let checked = 0;
 	let found = 0;
 	const failures = [];
@@ -104,37 +169,52 @@ export function checkSource(file, src, run) {
 			failures.push(`${file} #${id}: has run="${name}" but no answer`);
 			continue;
 		}
-		const res = run(name);
-		if (res.error) {
-			failures.push(`${file} #${id}: ${res.error}`);
+		// Interpreter-independent, so checked once here rather than once per
+		// run; `runFixture` repeats it only for callers that skip checkSource.
+		const typeError = fixtureTypeError(name);
+		if (typeError) {
+			failures.push(`${file} #${id}: ${typeError}`);
 			continue;
 		}
-		checked++;
-		if (res.status !== 0) failures.push(`${file} #${id}: ${name} exited ${res.status}\n${res.stderr}`);
-		else if (res.stdout !== answer.trimEnd())
-			failures.push(
-				`${file} #${id}: ${name}\n  expected: ${JSON.stringify(answer)}\n  actual:   ${JSON.stringify(res.stdout)}`,
-			);
+		for (const interp of interps) {
+			const res = run(name, interp);
+			checked++;
+			if (res.status !== 0)
+				failures.push(`${file} #${id}: ${name} [${interp.label}] exited ${res.status}\n${res.stderr}`);
+			else if (res.stdout !== answer.trimEnd())
+				failures.push(
+					`${file} #${id}: ${name} [${interp.label}]\n  expected: ${JSON.stringify(answer)}\n  actual:   ${JSON.stringify(res.stdout)}`,
+				);
+		}
 	}
 	return { found, checked, failures };
 }
 
 /**
  * Check every lesson under `contentDir` against the fixtures in
- * `examplesDir`. Zero examples is a failure too: it means the lesson tree or
- * the parser is broken, not that there is nothing to check.
+ * `examplesDir`, on every interpreter from `interpreters()` (or the
+ * `interps` given). Returns `{ found, checked, failures, interpreters }`,
+ * the last being the labels the fixtures ran on. Zero examples is a failure
+ * too: it means the lesson tree or the parser is broken, not that there is
+ * nothing to check. So is a missing interpreter.
  */
-export function checkExamples(contentDir, examplesDir, run = (name) => runFixture(examplesDir, name)) {
+export function checkExamples(
+	contentDir,
+	examplesDir,
+	run = (name, interp) => runFixture(examplesDir, name, interp),
+	interps = interpreters(),
+) {
+	if (interps.error) return { found: 0, checked: 0, failures: [interps.error], interpreters: [] };
 	let checked = 0;
 	let found = 0;
 	const failures = [];
 	for (const file of walkMdx(contentDir)) {
-		const result = checkSource(file, readFileSync(file, 'utf8'), run);
+		const result = checkSource(file, readFileSync(file, 'utf8'), run, interps.list);
 		found += result.found;
 		checked += result.checked;
 		failures.push(...result.failures);
 	}
 	if (found === 0)
 		failures.push(`no <Predict run=...> examples found under ${contentDir}; the lesson tree or parser is broken`);
-	return { found, checked, failures };
+	return { found, checked, failures, interpreters: interps.list.map((i) => i.label) };
 }

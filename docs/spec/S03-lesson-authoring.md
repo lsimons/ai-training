@@ -103,6 +103,16 @@ pitfall and the exercise.
   2026-09-20). One language and one interpreter keep the runner simple and
   keep bash idiom (`set -euo pipefail`, `trap`) out of the fixtures. The
   runner rejects any other file type.
+- **Fixtures run on Python 3.9 and use the standard library only.** The
+  fixture is what the learner runs, and the `predict` answer must match on
+  their machine. A stock macOS `python3` is 3.9. A learner types
+  `python3` and gets what the lesson shows without installing anything.
+  The repo pins both the current Python and 3.9 in `.mise.toml`, CI runs
+  every fixture on both and asserts the same stdout, and ruff checks the
+  fixtures at the 3.9 target. No lesson asks for a `pip install`.
+- **First `python3` on a fresh Mac may prompt for the Xcode command-line
+  tools.** The lesson that first asks the learner to run `python3` says so,
+  so the prompt reads as expected rather than as a failure.
 - **Prompts and responses are recorded, never live.** A prompt block and
   its response block name the model and the month the response was
   recorded. Outputs live in the repo and are never fetched from a
