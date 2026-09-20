@@ -1,7 +1,7 @@
-# Lessons learned from a gamified AI literacy programme
+# Lessons learned from a gamified AI literacy program
 
 Evidence and patterns from a year-long, organization-wide AI literacy
-programme that ran as a points leaderboard: a few hundred small tasks in ten
+program that ran as a points leaderboard: a few hundred small tasks in ten
 subject categories. Each was claimed with a screenshot or a short text and
 reviewed by a small team.
 
@@ -10,7 +10,7 @@ them, and evidence about what learners actually do when tasks are optional.
 
 ## 1. The kinds of task
 
-The programme sorted every task into one of three types, and every subject
+The program sorted every task into one of three types, and every subject
 category had all three. The split is simple and proved useful both for
 authoring and for spotting gaps:
 
@@ -21,7 +21,7 @@ authoring and for spotting gaps:
 | **Judge**      | Compare two approaches, measure something, assess a risk, red-team it. | A table, a short write-up             |
 
 For this site the mapping is: **Understand** is served by the lesson body
-and its checkpoints, and **Do** and **Judge** are the two flavours of
+and its checkpoints, and **Do** and **Judge** are the two flavors of
 [Exercise](../../../spec/S03-lesson-authoring.md). A course whose exercises
 are all "do" has no place where the learner has to judge anything. A course whose
 exercises are all "judge" never gets hands dirty. Proposal: when S03 pins
@@ -35,7 +35,7 @@ which is where the completions were (see section 3).
 
 ## 2. A template for exercise text
 
-Nearly every task written in the programme's second half used one template,
+Nearly every task written in the program's second half used one template,
 and it should become the default for exercise prose:
 
 > **How to complete.** Two or three imperative sentences. Say exactly what to
@@ -61,7 +61,7 @@ component's description.
 
 ## 3. What learners actually did
 
-The completion counts are the most useful data the programme left behind.
+The completion counts are the most useful data the program left behind.
 Some rounded figures, for a population of a few hundred knowledge workers
 and engineers over nine months:
 
@@ -175,7 +175,7 @@ template in section 2 and is a "do" or a "judge" unless marked.
 
 ## Questions for review
 
-1. Name the two exercise flavours "do" and "judge" in S03, or keep one
+1. Name the two exercise flavors "do" and "judge" in S03, or keep one
    Exercise kind and express the difference only in authoring guidance?
 2. The completion figures are from one organization and one year. Quote them
    in the plan as evidence for the thin-slice approach, or keep them here as

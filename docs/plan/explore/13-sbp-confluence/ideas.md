@@ -237,7 +237,7 @@ The controller/processor distinction is the part people miss, so keep it.
 
 ## Organizational patterns (leaders; not a current lesson)
 
-- **Personas for an AI security programme**: user, implementor, automator,
+- **Personas for an AI security program**: user, implementor, automator,
   and the person responsible for a client team. Each needs different
   guidance.
 - **Survey, workshop, guide, rollout**: build practical guidance together

@@ -7,7 +7,7 @@ this directory is a decision. Future agents should read each file
 critically against the specs, then adopt, adapt, or reject item by item.
 
 The material was drawn from Schuberg Philis's internal AI wiki and its AI
-literacy programme, and rewritten from the ideas. Client names, people,
+literacy program, and rewritten from the ideas. Client names, people,
 internal systems, prices and anything confidential were left out; what
 remains is general practice that happened to be written down there first.
 Public repositories from the same organization are listed with their
@@ -39,7 +39,7 @@ licenses in [`references.md`](./references.md).
 | [`mcp-security.md`](./mcp-security.md)                             | Delegated identity, capability scoping, bulk-write safety, prompt guardrails, residual risks, CLI vs MCP                                         |
 | [`eu-ai-act.md`](./eu-ai-act.md)                                   | What the regulation lesson must cover and how to source it                                                                                       |
 | [`ideas.md`](./ideas.md)                                           | Framings, practices, templates and small concepts to fold into lessons                                                                           |
-| [`literacy.md`](./literacy.md)                                     | A three-way task typing, an exercise template, uptake data from a gamified programme, exercise ideas per area                                    |
+| [`literacy.md`](./literacy.md)                                     | A three-way task typing, an exercise template, uptake data from a gamified program, exercise ideas per area                                      |
 | [`references.md`](./references.md)                                 | Public artifacts to cite, with licenses and what each is for                                                                                     |
 | [`onboarding-deck.md`](./onboarding-deck.md)                       | Additions from an onboarding day: capability versus reliability, time to value, a controls progression, a coding-with-agents syllabus, exercises |
 
@@ -72,8 +72,8 @@ or verified.
   a risk scenario to a domain and rate it on both scales; tailor the
   charter for one project.
 - **Outline.** *Into*: the "hyper-intelligent toddler" and "untrusted
-  contributor" framings; a Watch Out narrative (a migration run with
-  production write access). *Through*: the five groups, each with its rules
+  contributor" framings; a pitfall (a migration run with production write
+  access). *Through*: the five groups, each with its rules
   and one concrete example; the companion framings (two-nines availability,
   gains raise the bar). Then the six domains and the scenarios, presented
   as what the guardrails protect against. *Beyond*: rating scales, the
@@ -127,7 +127,7 @@ or verified.
   would not want in a prompt?
 - **Verify:** the trace itself. Keep the narrative version-neutral.
 
-### L4. One lesson on the EU AI act
+### L4. The EU AI Act in one lesson
 
 - **Area:** Safety, for everyone.
 - **Proposed topic:** regulation. **Assumes:** nothing beyond the concepts
@@ -222,7 +222,7 @@ or verified.
   for Using-agents lessons: the ten sections, with trigger moments and
   example output mandatory.
 - **Exercise kinds and template** (`literacy.md`): name "do" and "judge"
-  as the two exercise flavours, require at least one of each per course,
+  as the two exercise flavors, require at least one of each per course,
   and adopt the two-part exercise text (how to complete, why do this) with
   a closing reflection prompt. The first exercise in every lesson should be
   small and produce something visible.
@@ -231,16 +231,16 @@ or verified.
 
 ## Fold into existing lessons
 
-| Item                                                                         | Target                                              |
-| ---------------------------------------------------------------------------- | --------------------------------------------------- |
-| Eight-step team workflow, durable plan file, settings as permission boundary | `coding-with-agents/first-session` or its successor |
-| Agent definitions in the repo, no hardcoded model, or permission mode        | `customizing-agents/instructions`                   |
-| Testing stochastic components                                                | `building-agents`, the evals lesson when it exists  |
-| Residency versus processing; agents that are just prompts                    | `concepts`, a tooling-landscape lesson              |
-| Saying no as a design outcome                                                | `safety/agent-risk` as a Watch Out box              |
-| Prompting: teach four techniques, park the rest in a short                   | the Foundations prompting lesson                    |
-| Public prompt-injection challenges as sources                                | the Safety injection lesson                         |
-| Concept syllabus check                                                       | Spec S02 concept lists, not a lesson                |
+| Item                                                                         | Target                                                                                          |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Eight-step team workflow, durable plan file, settings as permission boundary | `coding-with-agents/workflow` when it exists                                                    |
+| Agent definitions in the repo, no hardcoded model, or permission mode        | `customizing-agents/hooks-permissions` (subagents)                                              |
+| Testing stochastic components                                                | `building-agents/evaluation` when it exists                                                     |
+| Residency versus processing; agents that are just prompts                    | `using-agents/choosing-tools` when it exists                                                    |
+| Saying no as a design outcome                                                | `safety/agent-risk`, human-in-the-loop prose (a pitfall shows a failure, and this is a success) |
+| Prompting: teach four techniques, park the rest in a short                   | the Foundations prompting lesson                                                                |
+| Public prompt-injection challenges as sources                                | the Safety injection lesson                                                                     |
+| Concept syllabus check                                                       | Spec S02 concept lists, not a lesson                                                            |
 
 ## Questions for review
 

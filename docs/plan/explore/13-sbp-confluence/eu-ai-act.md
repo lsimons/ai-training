@@ -36,7 +36,7 @@ consolidated text, and dated.
    applicable for deployers. Link to the articles rather than paraphrasing
    them.
 5. **Transparency duties** that touch everyday work: telling people they
-   are talking to a machine, labelling synthetic content. This connects to
+   are talking to a machine, labeling synthetic content. This connects to
    the disclosure line in [`guardrails.md`](./guardrails.md) and to content
    credentials.
 6. **The timeline** of application dates taken from the Regulation and the

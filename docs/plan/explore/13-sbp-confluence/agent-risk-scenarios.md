@@ -23,7 +23,7 @@ tool itself, the vendor behind it, and the second-order vendor whose model
 the tool calls. A vendor question later added a seventh concern: what happens to
 the data if the vendor is acquired or fails.
 
-## Fourteen scenarios
+## Fifteen scenarios
 
 Each scenario names a failure and typical countermeasures. Read them as the
 failure modes of a tool-using agent, because most aren't specific to any
@@ -74,7 +74,7 @@ product.
 
 ### Access control
 
-- **09. Admin exposure.** Platform administrators on your side and the vendor's
+- **9. Admin exposure.** Platform administrators on your side and the vendor's
   can see everything every project processes. Countermeasures:
   train admins on their responsibilities; control and periodically review
   who is admin; approval flows for admin access; minimize permissions;
@@ -110,7 +110,7 @@ product.
   lifecycle procedure; owners review their workflows on a schedule;
   automatic reminders or cleanup.
 
-(Fifteen items in six domains. Merge or split as the lesson needs.)
+(Merge or split as the lesson needs.)
 
 ## Rating scales
 

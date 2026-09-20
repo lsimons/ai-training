@@ -142,6 +142,14 @@ pitfall and the exercise.
 - The learner self-grades against a model answer. Honor system.
 - One per lesson, written once, optionally ending with a one-line stretch
   goal. No variants per comfort level.
+- Small, and it produces something the learner can look at: a screenshot,
+  a diff, a short table, a few lines of text. Uptake of optional exercises
+  drops sharply with size, so an exercise that asks for a matrix or a
+  one-pager is a stretch goal, never the exercise.
+- The text says what to produce and how big it is, then in one sentence
+  why: what the learner can do afterwards, or what it protects them from.
+  It closes with one reflection question, which is also what the model
+  answer speaks to.
 
 ## Widgets
 
