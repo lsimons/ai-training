@@ -1,0 +1,107 @@
+/**
+ * A stand-in for `astro:content`. `getViteConfig` does not sync the content
+ * layer, so `getCollection()` returns nothing under Vitest. A test that
+ * needs lessons calls `vi.mock('astro:content', () => mockContent())` with
+ * the fixtures below (or its own).
+ */
+import { vi } from 'vitest';
+
+export interface DocFixture {
+	id: string;
+	body?: string;
+	data: {
+		title: string;
+		mode?: 'tutorial' | 'explanation';
+		assumes?: { objective: string; lesson: string; section: string }[];
+		covers?: string[];
+	};
+}
+
+export interface TopicFixture {
+	id: string;
+	data: { id: string; area: string; name: string; links: { prerequisites: string[] } };
+}
+
+export const docs: DocFixture[] = [
+	{ id: 'index', data: { title: 'Home' } },
+	{ id: 'concepts/index', data: { title: 'Concepts' } },
+	{
+		id: 'concepts/how-models-work',
+		data: { title: 'How a language model works', mode: 'explanation', covers: ['concepts/models'] },
+		body: `
+<Choice id="what-the-model-does" objective="o1" title="What the model does" hint="h"
+  options={[{ text: 'a', correct: true }, { text: 'b > c' }]}>
+Stem.
+</Choice>
+<Predict id="honor" objective="o1" title="Run it" hint="h">
+</Predict>
+<Predict id="graded" objective="o1" title="Graded" hint="h" answer="1 > 0" run="x.sh" revision={2}>
+</Predict>
+<Repair id="fix" objective="o1" title="Fix" hint="h" broken="a" model="b">
+</Repair>
+<Order id="opt-out" objective="o1" title="Order" hint="h" review={false} steps={['a', 'b']}>
+</Order>
+`,
+	},
+	{
+		id: 'safety/agent-risk',
+		data: {
+			title: 'Why agent safety is different',
+			mode: 'tutorial',
+			assumes: [{ objective: 'o1', lesson: 'concepts/how-models-work', section: 's' }],
+		},
+		body: '<Scenario id="s1" objective="o1" title="S" hint="h" options={[]}>\n</Scenario>',
+	},
+	{
+		id: 'safety/deeper',
+		data: {
+			title: 'Deeper',
+			mode: 'tutorial',
+			assumes: [
+				{ objective: 'o1', lesson: 'safety/agent-risk', section: 's' },
+				{ objective: 'o1', lesson: 'nowhere/none', section: 's' },
+			],
+		},
+		body: '',
+	},
+];
+
+export const topics: TopicFixture[] = [
+	{
+		id: 'concepts/models',
+		data: { id: 'concepts/models', area: 'concepts', name: 'Models', links: { prerequisites: [] } },
+	},
+	{
+		id: 'safety/risk',
+		data: { id: 'safety/risk', area: 'safety', name: 'Risk', links: { prerequisites: ['concepts/models'] } },
+	},
+];
+
+export const competencies = [
+	{
+		id: 'concepts',
+		data: {
+			area: 'concepts',
+			competencies: [
+				{
+					id: 'concepts/explains-models',
+					statement: 'Explains what a model does',
+					topics: ['concepts/models'],
+					objectives: [{ id: 'o1', statement: 'Explains generation', level: 'base', behaviors: [] }],
+					alignment: [],
+				},
+			],
+		},
+	},
+];
+
+export function mockContent(overrides: { docs?: DocFixture[]; topics?: TopicFixture[] } = {}) {
+	const collections: Record<string, unknown[]> = {
+		docs: overrides.docs ?? docs,
+		topics: overrides.topics ?? topics,
+		competencies,
+	};
+	return {
+		getCollection: vi.fn(async (name: string) => collections[name] ?? []),
+	};
+}

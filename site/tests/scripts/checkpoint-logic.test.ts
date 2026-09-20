@@ -1,0 +1,84 @@
+import {
+	answersMatch,
+	choiceFeedback,
+	isSequential,
+	normalizeAnswer,
+	orderFeedback,
+	predictFeedback,
+	rotateIfSolved,
+	selfGradeFeedback,
+	shuffle,
+	sortFeedback,
+	stageDisplay,
+} from '@scripts/checkpoint-logic';
+import { describe, expect, it } from 'vitest';
+
+describe('answers', () => {
+	it('collapses whitespace and case', () => {
+		expect(normalizeAnswer('  27°C,\n  Sun ')).toBe('27°c, sun');
+		expect(answersMatch(' 27°c, sun', '27°C, sun')).toBe(true);
+		expect(answersMatch('27°C, rain', '27°C, sun')).toBe(false);
+	});
+});
+
+describe('shuffle', () => {
+	it('returns a permutation and leaves the input alone', () => {
+		const input = [1, 2, 3, 4, 5];
+		const out = shuffle(input);
+		expect(out).toHaveLength(5);
+		expect([...out].sort()).toEqual(input);
+		expect(input).toEqual([1, 2, 3, 4, 5]);
+	});
+	it('follows the injected random source', () => {
+		// random() = 0 always picks index 0, which walks the first element to the back.
+		expect(shuffle([1, 2, 3], () => 0)).toEqual([2, 3, 1]);
+		// random() just under 1 keeps every element in place.
+		expect(shuffle([1, 2, 3], () => 0.999)).toEqual([1, 2, 3]);
+	});
+	it('isSequential recognizes 1..n', () => {
+		expect(isSequential([1, 2, 3])).toBe(true);
+		expect(isSequential([2, 1, 3])).toBe(false);
+		expect(isSequential([])).toBe(true);
+	});
+	it('rotateIfSolved moves the first item to the end only when solved', () => {
+		const pos = (n: number) => n;
+		expect(rotateIfSolved([1, 2, 3], pos)).toEqual([2, 3, 1]);
+		expect(rotateIfSolved([2, 1, 3], pos)).toEqual([2, 1, 3]);
+		expect(rotateIfSolved([1], pos)).toEqual([1]);
+	});
+});
+
+describe('feedback', () => {
+	it('choice: correct with or without a consequence', () => {
+		expect(choiceFeedback(true, 'why', undefined)).toEqual({ kind: 'ok', text: 'Correct.' });
+		expect(choiceFeedback(true, undefined, 'It runs.')).toEqual({ kind: 'ok', text: 'Correct. It runs.' });
+	});
+	it('choice: a wrong pick shows consequence, then why, then a default', () => {
+		expect(choiceFeedback(false, 'why', 'bad')).toEqual({ kind: 'nope', text: 'bad' });
+		expect(choiceFeedback(false, 'why', undefined)).toEqual({ kind: 'nope', text: 'why' });
+		expect(choiceFeedback(false, undefined, undefined).text).toBe('Not quite. Try again.');
+	});
+	it('predict, order and self-grade texts', () => {
+		expect(predictFeedback(true).kind).toBe('ok');
+		expect(predictFeedback(false).text).toBe('Not quite. Trace it once more.');
+		expect(orderFeedback(true).text).toBe('Correct order.');
+		expect(orderFeedback(false).kind).toBe('nope');
+		expect(selfGradeFeedback(true, 'predict').text).toBe('Recorded as a pass.');
+		expect(selfGradeFeedback(false, 'predict').text).toContain('Adjust your prediction');
+		expect(selfGradeFeedback(false, 'repair').text).toContain('Recorded as partial');
+	});
+	it('sort: unplaced items block grading', () => {
+		expect(sortFeedback(1, true)).toEqual({ kind: 'note', text: '1 item still to place.' });
+		expect(sortFeedback(2, false).text).toBe('2 items still to place.');
+		expect(sortFeedback(0, true).kind).toBe('ok');
+		expect(sortFeedback(0, false).text).toBe('Some items are in the wrong bucket.');
+	});
+});
+
+describe('stageDisplay', () => {
+	it('lights one pill per stage, all five when retired, none when unknown', () => {
+		expect(stageDisplay(3)).toEqual({ lit: 3, label: 'stage 3 of 5' });
+		expect(stageDisplay('done')).toEqual({ lit: 5, label: 'retired' });
+		expect(stageDisplay(undefined)).toEqual({ lit: 0, label: 'stage - of 5' });
+	});
+});
