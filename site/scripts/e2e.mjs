@@ -49,6 +49,8 @@ expect((await page.locator('.ai-notice').textContent()).trim(), 'Content co-auth
 // settings: comfort level lives here, not on the lesson; it drives routing there
 await page.goto(`${B}/settings/`);
 expect(await page.locator('[data-comfort=less]').count(), 1, 'comfort control on settings page');
+expect(await page.locator('.right-sidebar-container').count(), 1, 'right column kept on a page without headings');
+expect(await page.locator('starlight-toc').count(), 0, 'no "On this page" when it would list only the title');
 expect(await page.locator('[data-review-item]').count(), 2, 'review schedule lists the finished lesson\'s checkpoints');
 const item = () => page.locator('[data-review-item="concepts/how-models-work#what-the-model-does"]');
 expect(await item().locator('.cp-later').isDisabled(), false, 'less often enabled at stage 1');
