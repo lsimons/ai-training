@@ -139,7 +139,7 @@ What does this print?
 ```python
 reads = [t for t in TOOLS if t[1] == "read"]
 writes = [t for t in TOOLS if t[1] == "write"]
-print("%d read, %d write, %d cannot" % (len(reads), len(writes), len(CANNOT)))
+print(f"{len(reads)} read, {len(writes)} write, {len(CANNOT)} cannot")
 ```
 
 </Predict>
@@ -205,13 +205,14 @@ class WriteCap:
         self.calls = {}  # (user, minute) -> count
 
     def allow(self, user, tool, minute):
-        kind = dict((t[0], t[1]) for t in TOOLS)[tool]
+        kind = {name: kind for name, kind, _ in TOOLS}[tool]
         if kind != "write":
             return "ok"
         key = (user, minute)
         self.calls[key] = self.calls.get(key, 0) + 1
         if self.calls[key] > self.limit:
-            return "refused: %s is write call %d of %d allowed this minute" % (tool, self.calls[key], self.limit)
+            count = self.calls[key]
+            return f"refused: {tool} is write call {count} of {self.limit} allowed this minute"
         return "ok"
 ```
 
