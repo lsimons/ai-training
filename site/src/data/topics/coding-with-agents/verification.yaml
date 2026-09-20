@@ -56,19 +56,20 @@ concepts:
     definition: >-
       Checks whose outcome does not depend on a model's judgment: tests, type
       checks, linters, builds and schema validation. They give the same
-      answer every run, so they can block a merge. A review by another model
-      adds a second opinion and finds things a gate cannot, but it can be
-      wrong or be talked round in the same way as the first model, so it
-      never replaces the gate.
+      answer for the same input, so they can block a merge. A review by
+      another model adds a second opinion and finds things a gate cannot,
+      but it can be wrong or be persuaded in the same way as the first
+      model, so it never replaces the gate.
   - id: red-teaming-your-own-agent
     name: Red-teaming your own agent
     definition: >-
       Deliberately trying to make your own agent misbehave before relying on
-      it: feeding it a file with hidden instructions, asking for something
-      its permissions should stop, giving it an ambiguous brief and seeing
-      how far it runs. The aim is to learn what it does under pressure, in a
-      sandbox where the damage is nil. What you find becomes a permission
-      change, an instruction or a gate.
+      it: feeding it a file with hidden instructions, pasting it a web page
+      you did not read, asking for something its permissions should stop,
+      giving it an ambiguous brief and seeing how far it runs. The aim is to
+      learn what it does under pressure, in a sandbox where nothing real can
+      be damaged. What you find becomes a permission change, an instruction
+      or a gate.
 links:
   prerequisites: [coding-with-agents/workflow, safety/verification]
   related: []

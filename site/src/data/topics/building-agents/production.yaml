@@ -43,16 +43,19 @@ concepts:
       turns, and a runaway loop or verbose tool can multiply it again. Track
       cost per run, set budgets that stop a run, cache what repeats, and
       route simple steps to smaller models.
+  # The id says "provider" rather than the acronym for an application
+  # programming interface: Vale reads YAML keys as text and Vale.Terms
+  # rejects the acronym in lowercase. The name matches the id.
   - id: provider-operations
-    name: API operations
+    name: Provider operations
     definition: >-
       The mechanics of calling a model provider reliably. Pin a dated model
       ID so behavior changes only when you choose. Use prompt caching so the
-      stable prefix of a long system prompt and tool list is paid for once.
-      Sort errors into retriable ones, such as rate limits and overload,
-      which get a backoff and a retry, and terminal ones, such as an invalid
-      request or a content refusal, which get surfaced. Set timeouts on
-      every call.
+      stable prefix of a system prompt and tool list is processed once and
+      read back at a lower price on later calls. Retry retriable errors,
+      such as rate limits and overload, with a backoff. Report terminal
+      ones, such as an invalid request or a content refusal, to the caller.
+      Set timeouts on every call.
   - id: agent-specific-security-risks
     name: Agent-specific security risks
     definition: >-
