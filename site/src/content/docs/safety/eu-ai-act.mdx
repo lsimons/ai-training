@@ -37,7 +37,7 @@ covers providers that sell into the EU and any provider or deployer whose
 system's output is used in the EU
 ([Article 2(1)](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_2)).
 It does not apply to a person using AI for a purely personal, non-professional
-activity (Article 2(10)), so it is a law about work.
+activity (Article 2(10)), so it is a law about professional and public use.
 
 The lesson is general information, and it is not legal advice. The Act was
 amended in July 2026, guidance from the Commission keeps coming, and a
@@ -57,13 +57,15 @@ organization meets it.
 
 ## Is it an AI system at all?
 
-The Act only applies to an AI system, and it defines one in Article 3(1)
+The rules in this lesson apply to an AI system, and Article 3(1) defines one
 as a machine-based system, designed to operate with some autonomy, that
 "infers, from the input it receives, how to generate outputs such as
 predictions, content, recommendations, or decisions" (@AI Act). The word
 that matters is *infers*. The system works out how to produce
 its output from the input, rather than following a fixed procedure a person
-wrote down.
+wrote down. The Act also has rules for general-purpose AI *models*, the
+engines behind chat assistants, in Chapter V. Those fall on the model's
+provider, and this lesson doesn't cover them.
 
 Recital 12 of the original text explains what that excludes: systems "based
 on the rules defined solely by natural persons to automatically execute
@@ -80,11 +82,11 @@ you need them (@EC AI Act).
   context="The EU AI Act defines an AI system in Article 3(1) as a machine-based system that infers from its input how to generate outputs such as predictions, content, recommendations or decisions."
   title="Is this an AI system?" hint="Which of these works out how to produce its output from the input, rather than executing rules a person wrote?"
   options={[
-    { text: 'A spreadsheet macro that applies fixed if-then rules a colleague wrote.', why: 'A person wrote the rules and the macro only executes them. Which word of the definition is missing here?' },
-    { text: 'A model trained on past support tickets that predicts which team should handle a new ticket.', correct: true },
-    { text: 'A database query that lists every invoice above 10,000 euros.', why: 'The query returns whatever matches a condition a person wrote. Does it infer anything from its input?' },
+    { text: 'A thermostat that switches the heating on whenever the room drops below 19 degrees.', why: 'One threshold, set by a person. Does the device work anything out from its input?' },
+    { text: 'A tool that reads incoming invoices and predicts which cost center each one belongs to, from the invoices your team coded by hand last year.', correct: true },
+    { text: 'A mail rule that moves every message from a named sender into a folder.', why: 'The rule is a condition a person wrote. Which word of the definition is missing here?' },
   ]}>
-Your IT department asks which of these tools falls under the AI Act's definition of an AI system. Which one does?
+Your team lists the software it uses for a compliance inventory. Which of these is an AI system under Article 3(1)?
 </Choice>
 
 ## The risk tiers
@@ -93,18 +95,22 @@ The Act regulates uses of AI rather than the technology, and it sorts
 those uses into tiers. To place a use, walk down this list, and stop at the
 first tier that fits.
 
-1. **Prohibited.** Article 5 lists practices no one may put on the market or
-   use. Among them: manipulation that causes serious harm, exploiting
-   the vulnerabilities of children or of people in a weak social or
-   economic position, social scoring, predicting a crime from a person's
-   profile alone, building face-recognition databases by scraping images
-   from the internet or closed-circuit television (CCTV), inferring emotions of people
-   at work or in education (except for medical or safety reasons), and
-   sorting people by biometric data into categories such as race, religion
-   or sexual orientation. The July 2026 amendment added two more, on sexual
-   deep fakes made without consent and on material showing sexual abuse of
-   children
-   ([Article 5](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_5)).
+1. **Prohibited.**
+   [Article 5](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_5)
+   lists practices no one may put on the market or use.
+   - Manipulation or deception that causes "significant harm".
+   - Exploiting people's vulnerabilities due to age, disability, or social or
+     economic situation, causing "significant harm".
+   - Social scoring that leads to unfair treatment.
+   - Predicting a crime from a person's profile or personality traits alone.
+   - Building face-recognition databases by scraping images from the
+     internet or closed-circuit television (CCTV).
+   - Inferring the emotions of people at work or in education, except for
+     medical or safety reasons.
+   - Sorting people by their biometric data into categories such as race,
+     religion, or sexual orientation.
+   - Added in July 2026: sexual deep fakes made without consent, and
+     material showing sexual abuse of children.
 2. **High-risk.**
    [Article 6](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_6)
    gives a product route and a use-case route.
@@ -143,12 +149,12 @@ an everything-else system when it drafts your meeting notes.
   title="Which tier?" hint="Walk the list from the top. Is the practice banned outright? Is the area in Annex III? Does the system talk to people or generate content? Otherwise it is in the last tier."
   buckets={['Prohibited', 'High-risk', 'Transparency duty', 'No specific duty in the Act']}
   items={[
-    { text: 'An office tool that reads employees\' faces on video calls to score how engaged they are', bucket: 0 },
-    { text: 'A service that builds a face-recognition database from photos collected across the internet', bucket: 0 },
-    { text: 'A recruiting tool that ranks the applications for an open position', bucket: 1 },
-    { text: 'A bank\'s model that scores whether a customer will repay a loan', bucket: 1 },
-    { text: 'A chatbot on a web shop that answers customer questions', bucket: 2 },
-    { text: 'The spam filter in your mailbox', bucket: 3 },
+    { text: 'A school\'s camera system that infers whether students are bored or frustrated during lessons', bucket: 0 },
+    { text: 'A city that scores residents on their online behavior and denies the low scorers a place in housing programs', bucket: 0 },
+    { text: 'An insurer\'s model that sets the price of a life insurance policy from the applicant\'s health data', bucket: 1 },
+    { text: 'A university\'s tool that flags students who may be cheating during an online exam', bucket: 1 },
+    { text: 'A city council\'s website assistant that answers residents\' questions about waste collection', bucket: 2 },
+    { text: 'A warehouse system that predicts how many boxes each product sells next week', bucket: 3 },
   ]} />
 
 ## Provider or deployer
@@ -175,13 +181,14 @@ its purpose into an Annex III use, and the team's organization now owes
 the provider duties for it.
 
 <Pitfall title="Renaming a vendor's tool">
-A company licenses a document-classification service, gives it an internal
-product name, and offers it to customers as its own. When a customer
-asks who certified the system, the company points at the vendor. Under
-Article 25(1)(a), a party that puts its own name or trademark on a
-high-risk system already on the market is treated as its provider, and the
-original vendor stops being one for that system. Before you brand a tool
-as yours, check which role the branding gives you.
+A company licenses a CV screening service, which ranks job applicants and
+so is an Annex III use, gives it its own product name, and offers it to
+customers as its own. When a customer asks who certified the system, the
+company points at the vendor. Under Article 25(1)(a), a party that puts its
+own name or trademark on a high-risk system already on the market is
+treated as its provider, unless the contract allocates the duties
+otherwise, and the original vendor stops being one for that system. Before
+you brand a tool as yours, check which role the branding gives you.
 </Pitfall>
 
 <Match id="provider-or-deployer" objective="safety/judges-agent-risk/sets-oversight"
@@ -190,9 +197,9 @@ as yours, check which role the branding gives you.
   title="Which role?" hint="Who built the system or put their name on it, and who uses it? Did anyone change what the system is for?"
   options={['Provider', 'Deployer', 'Both']}
   rows={[
-    { statement: 'A software company builds a chatbot and sells it under its own brand', option: 0, why: 'Who developed the system and placed it on the market under their name?' },
-    { statement: 'A hospital buys that chatbot and uses it to book appointments', option: 1, why: 'Who uses the system under their own authority, without changing what it does?' },
-    { statement: 'A retailer takes a general-purpose chat tool it bought and turns it into a system that decides which customers get credit to pay in installments', option: 2, why: 'The retailer uses the system, and it also changed what the system is for. What does Article 25 say about a changed purpose that makes a system high-risk?' },
+    { statement: 'A startup tunes an open model into a contract-review assistant and sells it to law firms under its own name', option: 0, why: 'Who developed the system and placed it on the market under their name?' },
+    { statement: 'A clinic uses a vendor\'s triage model exactly as delivered to sort incoming patient messages by urgency', option: 1, why: 'Who uses the system under their own authority, without changing what it does?' },
+    { statement: 'A city council buys a general chat assistant for drafting letters and later uses it to rank applications for social housing', option: 2, why: 'The council uses the system, and it also changed what the system is for. What does Article 25 say about a changed purpose that makes a system high-risk?' },
   ]}
   rationale="Roles follow what you do with the system, and one organization can hold both roles for the same tool.">
 Match each organization to its role under the Act.
@@ -354,15 +361,17 @@ one market surveillance authority for the Act
 ([Article 70](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_70)).
 Those national authorities are who a deployer reports a serious incident
 to, and who can fine an organization in that state. At the EU level the
-Commission's AI Office builds expertise and enforces the rules for
-general-purpose AI models (Article 64), and the European Artificial
+Commission builds expertise through its AI Office (Article 64), and it has
+the exclusive power to enforce the rules for general-purpose AI models, a
+task it entrusts to the AI Office (Article 88(1)). The European Artificial
 Intelligence Board, with one representative per member state, coordinates
 the national authorities (Article 65) (@AI Act). The Commission describes
 the AI Office's powers over general-purpose models: requesting
 documentation, evaluating models, requiring corrective action and issuing
-fines (@EC AI Office). For your own country, look up which authority your
-member state designated. The Commission's AI Act pages point to them
-(@EC AI Act).
+fines (@EC AI Office). For your own country, look up which market
+surveillance authority your member state designated. Article 70(2) asks
+each member state to publish how its authorities can be contacted and to
+name one single point of contact (@AI Act).
 
 <Exercise stretch="Check whether the tool's use appears in Annex III. If it does, write down which of the deployer duties of Article 26 your organization already meets and which it does not.">
 Pick one AI tool used at your work. In two lines, decide whether your organization is its provider or its deployer, and name the one Article 50 transparency duty that applies to your use of it, or write that none applies. Ten minutes at most. Those lines are the first entry of an inventory your organization needs for the AI literacy and deployer duties, and writing one shows you how quickly the roles become clear. A good result gives the reason with the role ("deployer: we bought the tool unchanged") and the paragraph with the duty ("Article 50(1): a chatbot for customers"). Which of the Act's duties touch your own daily work, and which only your organization's?
