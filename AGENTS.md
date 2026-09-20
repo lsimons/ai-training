@@ -10,36 +10,13 @@ is for software engineers. The plan is in `docs/plan/README.md`.
 
 ## Quick reference
 
-The repo tasks are defined in `.mise.toml`, and `mise tasks` lists them. Run
-`mise trust` and `mise install` once per clone.
+The repo tasks are defined in `.mise.toml`, and `mise tasks` lists them with
+a description each. Run `mise trust` and `mise install` once per clone.
 
-| Task                              | What it does                                                         |
-| --------------------------------- | -------------------------------------------------------------------- |
-| `mise run site-install`           | Install the site dependencies (bun); may update `bun.lock`           |
-| `mise run site-install-frozen`    | Same, but fails if `bun.lock` is out of date                         |
-| `mise run site-dev`               | Dev server at <http://localhost:4321/ai-training/>                   |
-| `mise run site-build`             | Build the static site into `site/dist`                               |
-| `mise run site-check`             | Astro type/content check                                             |
-| `mise run examples`               | Run lesson example fixtures, assert the shown output                 |
-| `mise run site-e2e`               | Build + headless-browser walkthrough of every mechanism              |
-| `mise run lint`                   | prek hooks over every file + `actionlint`                            |
-| `mise run prose-sync`             | Fetch the pinned Vale style package (network)                        |
-| `mise run prose`                  | Vale prose lint; misspellings gate, style warnings advise            |
-| `mise run spell`                  | cspell, American English; names and jargon in `cspell-words.txt`     |
-| `mise run prose-extended`         | Vale with the passive-voice rule too; advisory; run now and then     |
-| `mise run prose-eval -- <pkg>`    | Every hit of a Vale package as JSON, for deciding rule by rule       |
-| `mise run prose-metrics -- <pkg>` | Every file's score on a Vale metric package (Readability)            |
-| `mise run ci`                     | Full gate: install + lint + prose + spell + examples + check + build |
-| `mise run links`                  | `lychee` broken-link check (network; not part of `ci`)               |
-| `mise run audit`                  | `zizmor` audit of workflows + dependabot config                      |
-| `mise run site-audit`             | `bun audit` of the site dependency tree (network)                    |
-| `mise run site-slides`            | Render the example `.qmd` deck to HTML + PDF                         |
-| `mise run site-favicon`           | Regenerate the favicon + apple-touch-icon                            |
-| `mise run site-clean`             | Remove build artifacts                                               |
-| `mise run ci-watch`               | Watch GitHub Actions for the current branch                          |
-
-Also available: `site-preview`, `site-browser`, and
-`mise run site-screenshot out.png /ai-training/`.
+`mise run ci` is the full gate and runs the same list the CI job runs, in the
+same order. `mise run links` (lychee, external URLs) and `mise run site-audit`
+(`bun audit`) are network calls that flake, so they're not part of `ci`. Run
+them now and then.
 
 ### Astro 7 dev server
 
@@ -61,57 +38,31 @@ For a one-off check of the built site prefer `mise run site-preview` or
 
 ## Structure
 
-This is a *project* site served under the `/ai-training` base path (set in
-`site/astro.config.mjs`), so write content links and image sources
-root-relative (`/guides/foo/`, `/guides/foo.png`); a small rehype plugin in
-the config prepends the base at render time (for both `<a href>` and
-`<img src>`). Raw HTML `<a>` tags and the landing page's hero actions are used
-verbatim and must include the base path.
+The layout is what the tree shows. The parts that aren't obvious from it:
 
-- `site/` - Astro Starlight site.
-  - `src/content/docs/` - the pages. Lessons are `<area>/<lesson>.mdx`
-    with the frontmatter from spec S03, and course pages are `<area>/index.mdx`.
-    `docs/agents/writing-a-lesson.md` is the authoring guide.
-  - `src/content.config.ts` - the `docs` schema (extended with lesson
-    fields) plus the `topics`, `competencies` and `bibliography` YAML
-    collections under `src/data/` (spec S02 "Storage").
-  - `src/components/lesson/` - the checkpoint and section components;
-    `components/widgets/` the widgets; `components/overrides/` the Starlight
-    `MarkdownContent` override that frames a lesson (routing cards, comfort
-    level, finish); `CourseGraph`, `TopicMap`, `Glossary`,
-    `ProgressOverview`.
-  - `src/scripts/progress.ts` - the local-storage progress record and review
-    schedule (specs S04, S05); `scripts/checkpoints.ts` binds interactions.
-  - `src/pages/` - generated pages: `topics/`, `competencies/`, and
-    `[area]/review`.
-  - `src/lib/` - build-time helpers: areas, lessons (checkpoint discovery,
-    graph levels), the base-path `href()` for component links.
-  - `src/styles/custom.css` - the LSD Warm theme; `lesson.css` - lesson,
-    course, map, progress and review styles (global on purpose: review
-    pages clone checkpoint markup out of lesson pages).
-  - `examples/` - the runnable fixtures behind `<Predict run=...>`.
-    `scripts/check-examples.mjs` runs them.
-  - `public/` - static assets. `public/presentations/` holds Quarto decks and
-    their committed HTML/PDF outputs.
-  - `astro.config.mjs` - site/base, the sidebar, redirects, and the rehype
-    base-link plugin.
-- `docs/plan/` - the rough plan (`README.md`) and exploration notes on the
-  source material (`explore/`). Not part of the site.
-- `docs/spec/` - numbered specs (`SNN-title.md`, each with Purpose and
-  Status; `000-specs.md` is the index). S01 is the project dictionary; use
-  its terms everywhere. Specs are standalone and never link to `docs/plan/`.
-- `docs/agents/` - agent-facing process docs (issue tracker).
-- `.mise.toml` - pinned tools and the dev/build tasks.
-- `.vale.ini` - Vale prose lint config; `.vale/styles/config/vocabularies/`
-  holds the accepted-terms list and `.vale/styles/House/` the project's own
-  rules. The style packages it pins are fetched by `mise run prose-sync` and
-  gitignored.
-- `prek.toml` - git hooks (mdformat, markdownlint, lychee, gitleaks,
-  commitlint); `prek install -t pre-commit -t commit-msg` once per clone.
-- `.github/workflows/ci.yml` lints, astro-checks and builds on push/PR;
-  `deploy.yml` publishes `site/dist` to GitHub Pages, on manual
-  dispatch only while the repo is private. CI doesn't run Quarto; slide
-  outputs are committed.
+- This is a *project* site served under the `/ai-training` base path (set in
+  `site/astro.config.mjs`). Write content links and image sources
+  root-relative (`/guides/foo/`, `/guides/foo.png`); a rehype plugin in the
+  config prepends the base at render time for Markdown `<a href>` and
+  `<img src>`. Raw HTML `<a>` tags and the landing page's hero actions are
+  used verbatim and must include the base path. Component-rendered links
+  must use `href()` from `site/src/lib/url.ts`, because the rehype plugin
+  only sees Markdown.
+- Lessons are `site/src/content/docs/<area>/<lesson>.mdx` with the
+  frontmatter from spec S03; course pages are `<area>/index.mdx`.
+  `docs/agents/writing-a-lesson.md` is the authoring guide.
+- `site/src/styles/lesson.css` is global on purpose: review pages clone
+  checkpoint markup out of lesson pages.
+- `site/examples/` holds the runnable fixtures behind `<Predict run=...>`.
+  `site/public/presentations/` holds Quarto decks and their committed
+  HTML/PDF outputs. CI doesn't run Quarto.
+- `docs/plan/` is the rough plan and source exploration, not part of the
+  site. `docs/spec/` holds numbered specs (`SNN-title.md`, each with Purpose
+  and Status; `000-specs.md` is the index). S01 is the project dictionary;
+  use its terms everywhere. Specs are standalone and never link to
+  `docs/plan/`. `docs/agents/` holds agent-facing process docs.
+- `docs/prose/README.md` records which Vale rule runs where and why, and
+  how to evaluate a new style package.
 
 ## Guidelines
 
@@ -136,10 +87,14 @@ verbatim and must include the base path.
 
 **Voice:**
 
+Many readers have English as a second language. Keep the concepts at a
+professional level but the language simple: common words and plain sentence
+structure over native-speaker idiom, wordplay, or rare vocabulary. Expand an
+acronym on first use in a lesson.
+
 Nearly all the text here is written by agents, and agent prose has tells.
 The reader shouldn't be able to hear them. `mise run prose` flags the
-patterns below through the `ai-tells` package and the `House` copies of
-three of its rules. Write so that it has nothing to say.
+patterns below after the fact. Write so that it has nothing to say.
 
 - Say what a thing does, not what it figuratively is. Content is *in* a
   directory, not *living* there; a file *contains* a value, a check
@@ -167,50 +122,30 @@ three of its rules. Write so that it has nothing to say.
 
 **Quality:**
 
-- `mise run ci` must pass before you push. It is the same list the CI job
-  runs, in the same order.
+- `mise run ci` must pass before you push.
 - Code examples in lessons are real and their shown output is asserted in
   CI (spec S03, Examples): `<Predict run="..." answer="...">` names a fixture
   under `site/examples/` and `mise run examples` fails on a mismatch. An
   example that can't run says so in the page (the component prints this
   when `run` is absent).
-- Component-rendered links must use `href()` from `src/lib/url.ts`; the
-  rehype base plugin only sees Markdown.
-- Internal links are root-relative, and the rehype plugin adds the base path.
-  `starlight-links-validator` fails `mise run site-build` on a dead one, so
-  the build is the check. Don't disable it.
-- Spelling is American English, checked by `mise run spell` (cspell) over
-  every tracked `.md`/`.mdx` file and the YAML under `site/src/data/`. Add
+- Internal links are root-relative. `starlight-links-validator` fails
+  `mise run site-build` on a dead one, so the build is the check. Don't
+  disable it.
+- Spelling is American English, checked by cspell (`mise run spell`). Add
   names and jargon to `cspell-words.txt`, grouped, one per line; never a
   British spelling. Inline code spans are skipped, so identifiers need no
   entry.
-- `mise run prose` (Vale) runs over every tracked `.md`/`.mdx` file and the
-  YAML under `site/src/data/`, minus `site/examples/` and the Code of
-  Conduct. Only errors fail: wrongly cased names, a doubled word, and the
-  tripwires (annotations left in text, slurs, redundant acronyms, date
-  forms, a spaced dash, internet slang). Spelling is cspell's job, not
-  Vale's. The Vale vocabulary in
+- Vale (`mise run prose`): errors fail the build, style warnings print and
+  are the house style. Fix a warning by rewriting unless the rewrite reads
+  worse. The vocabulary in
   `.vale/styles/config/vocabularies/ai-training/accept.txt` holds the
-  canonical casing of names ("Quarto", "Anthropic"), the TooWordy
-  exemptions, the acronyms a lesson need not spell out, and the names that
-  may stay capitalized inside a heading; every entry also has its casing
-  enforced everywhere, so common words never go in. Style warnings print
-  but never fail the build; they're the house style, adopted from the
-  Google style guide rule by rule: present tense (no `will`), contractions
-  (`don't`, not `do not`), the Oxford comma, sentence-case headings, `for example` over `e.g.`, no `currently` or `latest`, no `!`, and the
-  project's own `House.Quotes`: a comma or period that isn't part of the
-  quoted text goes *outside* the closing quote, so a quoted prompt never
-  seems to end in punctuation the learner should type. Plus the older
-  ones: cliches, weasel words, wordy phrases, "There is", gendered or
-  corporate terms, and in lessons an acronym used without being spelled
-  out once. `mise run prose-extended` adds the passive-voice,
-  sentence-initial-"So", first-person ("we", "I") and semicolon rules from
-  `.vale-extended.ini`; most of their hits are idiom, so run it now and
-  then and rewrite only what hides who does what. `docs/prose/README.md`
-  records which rule runs where and why, and how to evaluate a new style
-  package.
-- `mise run links` (lychee) checks *external* URLs only. It is not part of
-  `ci` because it is a network call that flakes.
+  canonical casing of names, and every entry has its casing enforced
+  everywhere, so common words never go in. `House.Quotes`: a comma or
+  period that isn't part of the quoted text goes *outside* the closing
+  quote, so a quoted prompt never seems to end in punctuation the learner
+  should type. `mise run prose-extended` adds passive-voice, first-person
+  and semicolon rules; most hits are idiom, so rewrite only what hides who
+  does what.
 - Re-render and commit a deck's HTML/PDF whenever you change its `.qmd`.
 - No unexplained rule disables in `.markdownlint-cli2.jsonc`; say which files
   and why, on the same line.
@@ -221,7 +156,7 @@ three of its rules. Write so that it has nothing to say.
 **Supply chain:**
 
 - `site/bun.lock` is committed and must stay in the tree. `mise run ci` and CI
-  install with `site-install-frozen`; use `mise run site-install` when
+  install with `site-install-frozen`. Use `mise run site-install` when
   deliberately changing dependencies, and commit the result.
 - Dependencies in `site/package.json` stay as ranges; `bun.lock` is the pin,
   and dependabot moves the constraint.
@@ -232,32 +167,15 @@ three of its rules. Write so that it has nothing to say.
   entry is exact-pinned and invisible to dependabot. Refresh with `mise up`
   and read the diff.
 
-## Agent skills
+## Process
 
-### Git remote
-
-Use GitHub with `gh`. The repo is `lsimons/ai-training` (private for now).
-
-### Tutor mode
-
-`.claude/skills/tutor/SKILL.md`. Run the site locally and invoke `/tutor`.
-
-### Issue tracker
-
-Use GitHub Issues. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Use needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See
-`docs/agents/issue-tracker.md`.
-
-## Commit message convention
-
-Follow [Conventional Commits](https://conventionalcommits.org/):
-
-**Format:** `type(scope): description`
-
-**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `build`, `ci`, `perf`, `revert`, `improvement`, `chore`
+- Git remote is GitHub, `lsimons/ai-training` (private for now); use `gh`.
+- Issues and triage labels: `docs/agents/issue-tracker.md`.
+- Tutor mode: `.claude/skills/tutor/SKILL.md`. Run the site locally and
+  invoke `/tutor`.
+- Commits follow [Conventional Commits](https://conventionalcommits.org/)
+  (`type(scope): description`), and commitlint enforces it.
+- Deploy to GitHub Pages is manual dispatch only while the repo is private.
 
 ## Session completion
 
