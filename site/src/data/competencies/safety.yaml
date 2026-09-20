@@ -44,7 +44,7 @@ competencies:
             why: The terms differ between tools and plans, and the answer decides whether the output may go into a product.
             example: Before shipping generated images in a brochure, the learner checks the image tool's commercial-use terms.
     alignment:
-      - framework: Anthropic AI Fluency 4D
+      - framework: AI Fluency 4D (Dakan and Feller)
         code: Diligence
         asks: Use AI responsibly, transparently and with accountability for the result
         objectives: [safety/handles-data-safely/decides-what-to-share, safety/handles-data-safely/discloses-ai-use, safety/handles-data-safely/respects-licenses, safety/judges-agent-risk/names-blast-radius, safety/judges-agent-risk/chooses-human-in-loop, coding-with-agents/works-in-team/attributes-honestly]
@@ -105,7 +105,7 @@ competencies:
             why: A team that hides caught mistakes learns nothing, and one that shares them refines its checks.
             example: "A weekly note lists \"caught this week: an invented statute number, a wrong currency conversion\" without naming who let it through."
     alignment:
-      - framework: Anthropic AI Fluency 4D
+      - framework: AI Fluency 4D (Dakan and Feller)
         code: Discernment
         asks: Judge the output, the process and the behavior of the AI critically
         objectives: [concepts/explains-models/names-failure-modes, safety/verifies-output/checks-claims, safety/verifies-output/spots-sycophancy, safety/verifies-output/calibrates-trust, using-agents/delegates-and-checks/reviews-against-brief, coding-with-agents/verifies-agent-work/reviews-others-code]
@@ -169,7 +169,7 @@ competencies:
             why: The same prompt on a new model version can act differently, and a policy that assumed the old behavior no longer holds.
             example: After the vendor's model upgrade, the learner reruns the agent on last month's tasks before letting it back on live work.
     alignment:
-      - framework: Anthropic AI Fluency 4D
+      - framework: AI Fluency 4D (Dakan and Feller)
         code: Diligence
         asks: Use AI responsibly, transparently and with accountability for the result
         objectives: [safety/handles-data-safely/decides-what-to-share, safety/handles-data-safely/discloses-ai-use, safety/handles-data-safely/respects-licenses, safety/judges-agent-risk/names-blast-radius, safety/judges-agent-risk/chooses-human-in-loop, coding-with-agents/works-in-team/attributes-honestly]
