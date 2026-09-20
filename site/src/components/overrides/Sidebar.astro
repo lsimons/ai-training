@@ -1,0 +1,49 @@
+---
+/**
+ * Starlight `Sidebar` override. Renders the default sidebar, then a client
+ * script adds a due review count next to each course link (spec S05 "Where
+ * reviews surface"). The sidebar is static at build time, so the count is
+ * drawn from the progress record on the client and redrawn on the progress
+ * event. A course with nothing due shows no count. The style is in
+ * `styles/custom.css` with the other sidebar rules.
+ */
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+---
+
+<Default {...Astro.props}><slot /></Default>
+
+<script>
+	import { AREAS } from '@lib/areas';
+	import { dueByCourse } from '@scripts/due-counts';
+	import * as progress from '@scripts/progress';
+
+	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+	const courses = AREAS.map((a) => ({ area: a.slug, title: a.name }));
+
+	/** The course links in the sidebar, with a hidden count element appended to each. */
+	const counts = new Map<string, HTMLElement>();
+	for (const c of courses) {
+		const link = document.querySelector<HTMLAnchorElement>(`.sidebar-content a[href="${base}/${c.area}/"]`);
+		if (!link) continue;
+		const count = document.createElement('span');
+		count.className = 'due-count not-content';
+		count.dataset.dueCount = c.area;
+		count.hidden = true;
+		link.appendChild(count);
+		counts.set(c.area, count);
+	}
+
+	function draw() {
+		const due = new Map(dueByCourse(courses, progress.load(), progress.today()).map((c) => [c.area, c.due]));
+		for (const [area, count] of counts) {
+			const n = due.get(area) ?? 0;
+			count.hidden = n === 0;
+			const label = document.createElement('span');
+			label.className = 'sr-only';
+			label.textContent = n === 1 ? ' review item due' : ' review items due';
+			count.replaceChildren(String(n), label);
+		}
+	}
+	draw();
+	document.addEventListener(progress.EVENT, draw);
+</script>

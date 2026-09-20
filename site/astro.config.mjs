@@ -265,6 +265,8 @@ export default defineConfig({
 				Footer: './src/components/overrides/Footer.astro',
 				// No "On this page" when it would list only the title; the column stays.
 				TableOfContents: './src/components/overrides/TableOfContents.astro',
+				// The default sidebar plus a due review count next to each course link.
+				Sidebar: './src/components/overrides/Sidebar.astro',
 			},
 		}),
 	],
