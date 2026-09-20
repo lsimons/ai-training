@@ -51,6 +51,15 @@ print(1 > 0)
 \`\`\`
 
 </Predict>
+<Predict id="shown" title="Shown" answer="2" run="y.py">
+
+Run this and compare.
+
+\`\`\`python
+print(2)
+\`\`\`
+
+</Predict>
 <Repair id="fix" objective="o1" title="Fix" hint="h" concepts={['token']} broken="a" model="b">
 </Repair>
 <Order id="opt-out" objective="o1" title="Order" hint="h" concepts={['token']} review={false} steps={['b', 'a']}>
