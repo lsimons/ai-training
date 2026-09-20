@@ -1,6 +1,6 @@
 ---
 title: Show one example
-description: Replace a paragraph of formatting rules with one worked input and output pair, see the model copy the pattern, and learn when an example beats a description and how many to give.
+description: Replace a paragraph of formatting rules with one worked input and output pair, see the model copy the pattern, and learn when to show an example instead of describing and how many to give.
 mode: tutorial
 covers:
   - concepts/prompting
@@ -30,16 +30,16 @@ import { Choice, Match, Pitfall, Exercise, Recap, Prompt, Response } from '@comp
 
 In the previous lesson you stated the format in words and in numbers, and
 that worked because "three bullets, each under 15 words" is a format words
-can carry. Some formats are not. In this lesson we take one of those, a
+can state. Some formats resist that. In this lesson we take one of those, a
 team's house style for meeting notes, and watch a paragraph of rules fail
 to produce it. Then we replace the rules with one worked example and run
 both prompts.
 
 You need any chat assistant you have access to. Every response shown here
-is illustrative: the author wrote it to show the pattern, the component
-labels it as such, and your model gives a different text. Each one is one
-possible answer, and the comparison that matters is between your own two
-runs.
+is illustrative. The author wrote it to show the pattern, and the component
+labels it that way. Your model gives a different text, and each response
+here is one possible answer. The comparison that matters is between your
+own two runs.
 
 ## A format that words describe badly
 
@@ -59,16 +59,17 @@ date, a short subject, and the attendees' initials in brackets. Each later
 line starts with a tag in capitals, padded so the items line up. An item is
 a fragment rather than a sentence. An arrow at the end gives the owner's
 initials, with a deadline where there is one, and a `NOTED` line has no
-arrow. There is no heading, and there are no bullets or blank lines. You
-already have a paragraph, and it still leaves out the column widths, what counts as a
-fragment, and whether the deadline is a day or a date.
+arrow. The note has no heading, and it has no bullets or blank lines. You
+already have a paragraph, and it still leaves out the column widths and
+what counts as a fragment. It doesn't say whether the deadline is a day or
+a date.
 
 Here are the rough notes from a second meeting, as someone typed them
 during the call. We want them in the house style.
 
 ```text
-18 sept, meeting about the Northline delivery, present: Mia K, Jonas V, Sara R
-- northline moved order 4471 from tue 14 oct to fri 17 oct morning
+18 sept, meeting about the Varrowmere delivery, present: Mia K, Jonas V, Sara R
+- varrowmere moved order 4471 from tue 14 oct to fri 17 oct morning
 - we said yes to friday, mia will confirm to them before thursday
 - the tuesday unloading shift can be cancelled, sara does it
 - not clear who takes the two replacement chairs when they arrive, jonas will ask facilities
@@ -82,12 +83,11 @@ model gets.
 
 Rewrite the rough meeting notes between the triple quotes in our house
 style. The first line has the weekday and the date, a short subject, and
-the attendees' initials in brackets. Every other line starts with a tag in
+the attendees' initials in brackets. Lines after the first start with a tag in
 capitals: DECIDED, OPEN or NOTED. The tags are padded so the items start in
-the same column. Each item is a short fragment, not a full sentence. At the
-end of a DECIDED or OPEN line, an arrow and the owner's initials, with a
-deadline if there is one. NOTED lines have no arrow. No heading, no
-bullets, no blank lines.
+the same column. Each item is a short fragment. At the end of a DECIDED or
+OPEN line, an arrow and the owner's initials, with a deadline if there is
+one. NOTED lines have no arrow. Use no heading, bullets or blank lines.
 
 ```text
 """
@@ -99,10 +99,10 @@ bullets, no blank lines.
 <Response>
 
 ```text
-**Meeting notes, 18 September: Northline delivery**
+**Meeting notes, 18 September: Varrowmere delivery**
 Attendees: MK, JV, SR
 
-- DECIDED: Accept the new delivery date of Friday 17 October (morning). -> MK to confirm with Northline before Thursday.
+- DECIDED: Accept the new delivery date of Friday 17 October (morning). -> MK to confirm with Varrowmere before Thursday.
 - DECIDED: Cancel the Tuesday unloading shift. -> SR
 - OPEN: Who will receive the two replacement chairs on arrival? -> JV to ask Facilities.
 - NOTED: The delay is caused by a port strike. No action required for us.
@@ -112,11 +112,11 @@ Attendees: MK, JV, SR
 
 Every rule is in the prompt and the answer breaks most of them. There is a
 heading, there are bullets, the tags have a colon, the items are full
-sentences, and the weekday is missing. This isn't the model ignoring you.
-In the lesson on how models work you saw that it predicts the most likely
-next token given the whole prompt, and the word "meeting notes" pulls
-toward the millions of meeting notes in its training text, which have
-headings and bullets. Your paragraph of rules is a weak pull against that,
+sentences, and the weekday is missing. In the lesson on how models work
+you saw that the model predicts the most likely next token given the whole
+prompt. The phrase "meeting notes" in your prompt pulls toward the millions
+of meeting notes in its training text, and those have headings and
+bullets. Your paragraph of rules is a weak pull against that,
 because each rule is one sentence, and the model has to turn a sentence
 into a pattern before it can follow it.
 
@@ -153,7 +153,7 @@ NOTED    Parking permits arrive after the move; no action.
 
 Now write the finished note for these rough notes:
 """
-[the Northline rough notes, pasted in full]
+[the Varrowmere rough notes, pasted in full]
 """
 ```
 
@@ -161,7 +161,7 @@ Now write the finished note for these rough notes:
 <Response>
 
 ```text
-Thu 18 Sep, Northline delivery (MK, JV, SR)
+Thu 18 Sep, Varrowmere delivery (MK, JV, SR)
 DECIDED  Accept Fri 17 Oct morning slot.          -> MK confirms by Thu
 DECIDED  Cancel Tue unloading shift.              -> SR
 OPEN     Who receives the two replacement chairs? -> JV asks facilities
@@ -172,11 +172,11 @@ NOTED    Delay caused by port strike; no action.
 
 Put this next to the first run. The rules paragraph is gone and the format
 is right: the first line, the padded tags, the fragments, the arrows, the
-missing arrow on `NOTED`. Nothing in the prompt says "pad the tags" or
-"write fragments". The model saw one input turned into one output and
+missing arrow on `NOTED`. You never wrote "pad the tags" or "write
+fragments". The model saw one input turned into one output and
 continued the pattern, the same way it continues any text. The pair you
-gave it is a [few-shot example](/glossary/#few-shot-example), a term from
-the paper that first measured how much a large model picks up from a
+gave it is a [few-shot example](/glossary/#few-shot-example), a term made
+common by the paper that showed how much a large model picks up from a
 handful of worked examples in the prompt, with no training involved
 (@Brown 2020). "Shot" means one example, so a prompt with one pair is
 one-shot and a prompt with none is zero-shot, which is what the rules
@@ -185,12 +185,12 @@ paragraph was.
 The example also did something the rules didn't try to. The rough notes
 in the example say "nothing we can do", and the finished note turns that
 into `no action` with no arrow. Your second input had "nothing for us to
-do", and the model treated it the same way. One example carried an edge
+do", and the model treated it the same way. One example covered an edge
 case, and the rules paragraph would have needed another sentence for it.
 
-## When an example beats a description
+## When to show an example instead of describing
 
-An example wins when the thing you want is easier to recognize than to
+Show an example when the thing you want is easier to recognize than to
 state. That happens for a format, for a tone and for an edge case.
 
 A **format** with layout in it: columns, padding, where the line breaks
@@ -208,22 +208,23 @@ for each case makes the prompt long, and the model may still not connect
 the rule to the case when it meets it. An example that contains the case
 shows the answer in place (@Academy building-with-the-claude-api).
 
-A description wins when the requirement is one number or one word. "Under
+Describe in words when the requirement is one number or one word. "Under
 100 words", "in Dutch", "three bullets" need no example, and an example
 would add tokens and a topic the model might copy along with the format.
 The lesson on structured output shows the case where both are used at
 once: the field names described and one filled-in example of the format.
 
-How many examples? One is often enough for a format, as you just saw. Two
-or three help when the examples need to show variety: a short note and a
-long one, a meeting with no decisions, an item with no owner. Pick each
-one to show something the others don't. Past three the returns fall
-quickly for a chat prompt, and every example costs tokens that the model
-has to read on each call. The paper that named the technique tested prompts
-with one example up to several dozen and found that the gain flattens
-after the first few (@Brown 2020). The order of a prompt engineering course for
-developers follows the same path this lesson does, a clear instruction
-first and examples where the instruction isn't enough (@DLAI-1).
+How many examples? The paper that made the term common found the biggest
+jump from no example to one, with smaller gains from each example after
+that (@Brown 2020). This course's advice for a chat prompt follows from
+that. One example is often enough for a format, as you just saw. Add a second
+or a third when one example can't show the variety you need, for example
+a short note next to a long one, or a meeting with no decisions. Pick each
+one to show something the others don't, because every example costs
+tokens that the model has to read on each call. The order of a prompt
+engineering course for developers follows the same path this lesson does,
+a clear instruction first and examples where the instruction isn't enough
+(@DLAI-1).
 
 <Match id="describe-or-show" objective="concepts/prompts-reliably/structures-a-prompt"
   concepts={['few-shot-example']}
@@ -234,7 +235,7 @@ first and examples where the instruction isn't enough (@DLAI-1).
   rows={[
     { statement: 'The answer must be under 100 words and written in Dutch.', option: 0, why: 'What would an example add to a number and a language name that the model can already act on?' },
     { statement: 'Rewrite this notice in the tone of our previous notices to residents.', option: 1, why: 'How many adjectives would it take to pin down a tone, and would two readers agree on what they mean?' },
-    { statement: 'Write the phone numbers as the directory does, with country code, a space, and digits in groups, and a fixed placeholder where a number is unknown.', option: 1, why: 'The layout has spacing and an edge case in it. How long is the sentence that describes the groups, compared with one line that shows them?' },
+    { statement: 'Write the phone numbers the way the staff directory does, including what it shows when a number is unknown.', option: 1, why: 'The layout has spacing and an edge case in it. How long is the sentence that describes the grouping, compared with one line that shows it?' },
   ]}
   rationale="A number or a word is a description the model can act on directly. Layout, tone and edge cases are easier to recognize than to state, so one example carries them better than a paragraph.">
 
@@ -250,11 +251,11 @@ instead that the person who typed it slipped on one line and wrote the
 owner without the arrow: `OPEN     Who packs the server room?   JV asks IT`.
 The model has no way to tell that this is a slip. To it, the missing
 arrow is as much a part of the pattern as the padded tags, and the
-Northline note comes back with the arrow missing on its `OPEN` line too.
-Adding a sentence "always use the arrow" rarely fixes it, because the
+Varrowmere note comes back with the arrow missing on its `OPEN` line too.
+Adding a sentence "always use the arrow" often doesn't fix it, because the
 example pulls harder than the sentence, which is the reason you used an
-example in the first place. A model copies the example more faithfully
-than it follows the rule, so read every example as if it were a rule, and
+example in the first place. A model often copies the example more closely
+than it follows a rule, so read every example as if it were a rule, and
 fix the example rather than writing a rule against it.
 
 </Pitfall>
@@ -265,10 +266,10 @@ fix the example rather than writing a rule against it.
   title="The output repeats the slip"
   hint="Which part of the prompt is the model copying most closely, and what is the smallest change that makes that part say what you want?"
   options={[
-    { text: 'Add a rule after the example: "Always end OPEN lines with an arrow."', why: 'The example still shows a line without an arrow. Which does the model follow more closely, the sentence or the pattern it is continuing?' },
+    { text: 'Add a rule after the example: "Always end OPEN lines with an arrow."', why: 'The example still shows a line without an arrow.' },
     { text: 'Correct the slip in the example and send the prompt again.', correct: true },
     { text: 'Ask the model why it left out the arrow, then fix whatever it says.', why: 'The explanation is new text predicted from your question. The lesson on how models work says what to treat it as.' },
-    { text: 'Add two more examples so the model has more to learn from.', why: 'If the new examples are right, the odds improve, but the wrong one is still in the prompt. What is the smaller fix?' },
+    { text: 'Add two more examples so the model has more to learn from.', why: 'If the new examples are right, the odds improve.' },
   ]}>
 
 You gave the model one example of the house style, and one `OPEN` line in
@@ -279,8 +280,8 @@ too. What is the right fix?
 
 <Exercise stretch="Add a deliberate mistake to your example, such as a wrong date format or a missing field, and run again. Did the output copy it? Then fix the example and confirm the copy is gone.">
 
-Pick a format from your own work that you know by sight: the way your team
-writes a status update, a changelog line, a shift handover, a ticket title.
+Pick a format from your own work that you know by sight, such as the way
+your team writes a status update or a shift handover.
 Find one finished piece in that format and the rough material it was made
 from, or write both in five minutes. In a fresh chat, describe the format in
 a paragraph of rules and ask the model to convert a second piece of rough
@@ -304,14 +305,14 @@ thought to write down at all?
    default from its training text often pulls harder.
 2. One worked input and output pair shows the pattern directly, and the
    model continues it, layout and edge cases included. The pair is a
-   few-shot example, after the paper that measured the effect (@Brown 2020).
+   few-shot example, a term the paper on the effect made common (@Brown 2020).
 3. Show an example for a format with layout in it, a tone, or an edge
    case. Describe in words when the requirement is a number or a word.
-4. One example is often enough for a format. Two or three chosen to show
-   variety usually beat a page of rules, and past that each one costs
-   tokens for little gain.
-5. The model copies the example more faithfully than it follows a rule,
-   so a mistake in the example is a rule. Read every example as a spec,
-   and fix the example rather than writing a rule against it.
+4. The biggest gain is from no example to one (@Brown 2020). One example
+   is often enough for a format, and this course's advice is two or three
+   chosen to show variety before a page of rules. Each one costs tokens.
+5. The model often copies the example more closely than it follows a
+   rule, so it copies a mistake in the example too. Read every example as
+   a spec, and fix the example rather than writing a rule against it.
 
 </Recap>
