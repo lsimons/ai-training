@@ -101,13 +101,18 @@ const posOf = (li: Element) => Number((li as HTMLElement).dataset.pos);
  * (Firefox still wants `setData` called before it starts a drag). Every
  * `dragover` inside a target calls `preventDefault()`, which is what allows
  * the drop, and then `onOver`. `.cp-dragging` marks the moving item and
- * `.cp-drop-hover` the target under the pointer. Drag events don't fire on
- * most touch browsers, so each kind keeps its click path as the fallback.
+ * `.cp-drop-hover` the target under the pointer. `onCancel` runs on a
+ * `dragend` without a drop (Escape, or a release outside every target). Drag
+ * events don't fire on most touch browsers, so each kind keeps its click path
+ * as the fallback. The `draggable="true"` attribute is the component's
+ * (Sort.astro, Order.astro), next to the aria attributes, so the rendered
+ * markup says what it does; this module only listens.
  */
 interface DragHandlers {
 	onStart?: (item: HTMLElement) => void;
 	onOver?: (target: HTMLElement, item: HTMLElement, ev: DragEvent) => void;
 	onDrop?: (target: HTMLElement, item: HTMLElement) => void;
+	onCancel?: (item: HTMLElement) => void;
 }
 function bindDrag(items: Iterable<HTMLElement>, targets: Iterable<HTMLElement>, handlers: DragHandlers): void {
 	let dragged: HTMLElement | null = null;
@@ -116,7 +121,6 @@ function bindDrag(items: Iterable<HTMLElement>, targets: Iterable<HTMLElement>, 
 		for (const t of targetList) t.classList.remove('cp-drop-hover');
 	};
 	for (const item of items) {
-		item.draggable = true;
 		item.addEventListener('dragstart', (ev) => {
 			dragged = item;
 			item.classList.add('cp-dragging');
@@ -124,9 +128,10 @@ function bindDrag(items: Iterable<HTMLElement>, targets: Iterable<HTMLElement>, 
 			if (ev.dataTransfer) ev.dataTransfer.effectAllowed = 'move';
 			handlers.onStart?.(item);
 		});
-		item.addEventListener('dragend', () => {
+		item.addEventListener('dragend', (ev) => {
 			item.classList.remove('cp-dragging');
 			clearHover();
+			if (ev.dataTransfer?.dropEffect === 'none') handlers.onCancel?.(item);
 			dragged = null;
 		});
 	}
@@ -168,13 +173,20 @@ function bindOrder(el: HTMLElement): Grader {
 		});
 	}
 	// Drag a row over another and the list reflows as you go. The arrows stay as the keyboard and touch path.
+	// The other rows keep their relative order during a drag, so the row that followed the dragged one at the
+	// start is enough to put it back when the drag is cancelled.
 	const rows = list.querySelectorAll<HTMLElement>('li');
+	let followedBy: Node | null = null;
 	bindDrag(rows, rows, {
+		onStart: (row) => {
+			followedBy = row.nextSibling;
+		},
 		onOver: (over, dragged, ev) => {
 			if (over === dragged) return;
 			const placement = dropPlacement(ev.clientY, over.getBoundingClientRect());
 			list.insertBefore(dragged, placement === 'before' ? over : over.nextSibling);
 		},
+		onCancel: (row) => list.insertBefore(row, followedBy),
 	});
 	return () => {
 		const ok = [...list.children].every((li, i) => posOf(li) === i + 1);

@@ -1,5 +1,5 @@
 /** Every checkpoint kind, graded in a lesson page (spec S01 "Interaction types", S03 "Checkpoints"). */
-import { drag, expect, storedRecord, test } from './fixtures';
+import { drag, expect, orderByDrag, storedRecord, test } from './fixtures';
 
 test('choice: a wrong pick shows its why, the right one passes', async ({ page }) => {
 	await page.goto('concepts/how-models-work/');
@@ -77,15 +77,7 @@ test('order: drag a row to its place, the arrows and the grader still agree', as
 	await expect(items.first()).toHaveCSS('cursor', 'grab');
 	await expect(items.first().locator('button[data-move=up]')).toHaveCSS('cursor', 'pointer');
 	const count = await items.count();
-	// Drag each row onto the row at its target slot: the top half of the row already there.
-	for (let pos = 1; pos <= count; pos++) {
-		const idx = await items.evaluateAll(
-			(lis, p) => lis.findIndex((l) => Number((l as HTMLElement).dataset.pos) === p),
-			pos,
-		);
-		if (idx === pos - 1) continue;
-		await drag(page, items.nth(idx), items.nth(pos - 1), 0.1);
-	}
+	await orderByDrag(page, items);
 	await expect
 		.poll(() => items.evaluateAll((lis) => lis.map((l) => Number((l as HTMLElement).dataset.pos))))
 		.toEqual(Array.from({ length: count }, (_, i) => i + 1));
