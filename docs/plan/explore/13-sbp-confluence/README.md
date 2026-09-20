@@ -242,18 +242,20 @@ or verified.
 | Public prompt-injection challenges as sources                                | the Safety injection lesson                                                                     |
 | Concept syllabus check                                                       | Spec S02 concept lists, not a lesson                                                            |
 
-## Questions for review
+## Decisions (2026-09-20, #6)
 
-1. Should L1 be one lesson (charter plus scenarios) or two (a charter lesson
-   in Safety and a risk-assessment exercise in Building agents)?
-2. L2 could live in Safety instead of Coding with agents. The brief puts it
-   in Coding with agents because every exercise needs a terminal.
-3. The guardrails charter is written in "we" voice as a template a team can
-   adopt. Keep that, or rewrite in the third person as descriptive content?
-4. The public hardened-container repository is Apache-2.0 and its README
-   threat model could be adapted with attribution. Adapt or link?
-5. The plain-language rules in `guardrails.md` assume a business setting
-   with clients. Foundations is for everyone; decide whether "client" stays
-   or becomes "the people whose data it is".
-6. `literacy.md` has its own three questions on exercise kinds, on quoting
-   the uptake figures, and on third-party challenge sites.
+| Item                                         | Decision                                                                                                                                                                                                                                             |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| L1 Guardrails                                | No lesson. Every charter rule an individual engineer should know is mapped to a topic in #13, and the rules about client agreements or team compliance standards are out of scope. The charter itself isn't published. |
+| L2 Sandboxing                                | Write it, in Coding with agents. The area is at the seven-topic cap, so `sandbox` and `trust boundary` join the `first-session` topic (#13). Link and summarize the hardened container's threat model rather than adapt it.                          |
+| L3 What does your agent send                 | Folded into #10, generalized from a terminal agent to any assistant.                                                                                                                                                                                 |
+| L4 EU AI Act                                 | Write it, low priority, from the Regulation only, with a review date, and flagged as EU-specific on a global site.                                                                                                                                   |
+| L5 Connecting an agent                       | Write it. Fits `customizing-agents/mcp` and `connects-tools-safely` as the map stands.                                                                                                                                                               |
+| L6 Which tool, which data                    | Folded into #10. "Client" becomes "data you hold for someone else". Only the level 1 self-assessment and the two boundaries carry over; levels 2 and 3 are organizational governance.                                                                |
+| L7 Reviewing what the agent pulled in        | Write it. Fits `coding-with-agents/quality` and `screens-for-security` as the map stands.                                                                                                                                                            |
+| Use-case one-pager and 70/30 as house format | Rejected. Spec S03 fixes lesson anatomy, and the one-pager is a how-to or reference format. May return if how-to pages are written.                                                                                                                  |
+| Exercise kinds and template                  | Adopted in spec S03: small visible artifact, how and why, closing reflection, "do" and "judge" as flavors without a per-course rule.                                                                                                                 |
+| Framings list                                | Stays here as a shared source. No process change.                                                                                                                                                                                                    |
+| Concept syllabus check                       | Rejected as outside the six areas (#13).                                                                                                                                                                                                             |
+| Uptake figures                               | Background only, not quoted as evidence.                                                                                                                                                                                                             |
+| Order after release 1                        | #10, then L7, L5, L2, L4. Map work in #13 comes before L2 and L4.                                                                                                                                                                                    |

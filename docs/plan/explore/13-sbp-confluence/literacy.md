@@ -175,11 +175,12 @@ template in section 2 and is a "do" or a "judge" unless marked.
 
 ## Questions for review
 
-1. Name the two exercise flavors "do" and "judge" in S03, or keep one
-   Exercise kind and express the difference only in authoring guidance?
-2. The completion figures are from one organization and one year. Quote them
-   in the plan as evidence for the thin-slice approach, or keep them here as
-   background only?
-3. The public challenge sites are third-party and could change or
-   disappear. List them as `Source` entries with a fallback exercise, or
-   embed the idea (a levelled injection puzzle) as a widget of our own?
+Decided 2026-09-20 (#6):
+
+1. "Do" and "judge" are named in spec S03 as flavors of the one Exercise
+   kind, as authoring guidance. There is no per-course rule.
+2. The completion figures stay here as background. One organization, one
+   year, and points weighted toward business impact make them an anecdote
+   rather than evidence. The thin-slice plan stands on its own.
+3. The public challenge sites become `Source` entries when the injection
+   lesson is written. The lesson's exercise must not depend on them.
