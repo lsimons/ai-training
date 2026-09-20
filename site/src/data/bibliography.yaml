@@ -234,3 +234,15 @@ Diátaxis:
   author: Daniele Procida
   license: CC BY-SA 4.0
   url: null
+Fuchsia review:
+  title: Review process for external Rust crates
+  container: Fuchsia documentation
+  author: The Fuchsia Authors
+  license: CC BY 4.0
+  url: https://fuchsia.dev/fuchsia-src/development/languages/rust/external_crates/review
+OpenSSF Scorecard:
+  title: OpenSSF Scorecard checks
+  container: Open Source Security Foundation
+  author: OpenSSF Scorecard contributors
+  license: Apache-2.0
+  url: https://scorecard.dev/
