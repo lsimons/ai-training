@@ -82,7 +82,7 @@ competencies:
         level: base
         behaviors:
           - claim: The learner has the agent describe the codebase and confirm the plan before it edits anything.
-            why: A wrong model of the repository produces a confident change in the wrong place, and it is cheaper to correct a sentence than a diff.
+            why: A wrong model of the repository produces a confident change in the wrong place, and it is cheaper to correct a sentence than a diff (@Academy claude-code-101).
             example: The learner asks "where is the config loaded and which tests cover it?" and checks the answer against the tree before saying "go ahead".
           - claim: Every session ends with the learner reading the full diff.
             why: The summary is the agent's account of what it meant to do, and the diff is what it did.
@@ -198,7 +198,7 @@ competencies:
         level: base
         behaviors:
           - claim: The learner turns a manual check into a command the agent can run and read the result of.
-            why: A check the agent can run is run on every iteration, and a check only the learner can run is run once.
+            why: A check the agent can run is run on every iteration, and a check only the learner can run is run once (@Academy ai-native-sdlc-playbook).
             example: "\"Open the page and see that the table has rows\" becomes a test that renders the page and asserts on the row count."
           - claim: "The loop has a bound: a number of attempts or a time limit, after which the agent stops and reports."
             why: An agent told "keep going until the tests pass" can run forever or delete the test.

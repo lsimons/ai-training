@@ -104,6 +104,8 @@ subprocessor
 subprocessors
 scrollytelling
 stdlib
+steerability
+streamable
 subgoals
 subheaders
 textareas

@@ -51,7 +51,7 @@ competencies:
         level: expert
         behaviors:
           - claim: "The learner can name what the SDK does that their hand-written loop did: message handling, tool dispatch, retries, stop conditions, streaming."
-            why: Knowing what was taken over is what lets the learner debug the SDK's version when it behaves differently.
+            why: Knowing what was taken over is what lets the learner debug the SDK's version when it behaves differently (@Academy claude-platform-101).
             example: The learner points at the SDK's tool dispatch and explains where their own version's error handling went.
           - claim: The learner keeps the stop conditions and budgets explicit in SDK code, rather than trusting defaults.
             why: SDK defaults are chosen for demos, and a production agent needs its own limits.

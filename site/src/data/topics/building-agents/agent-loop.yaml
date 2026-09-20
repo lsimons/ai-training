@@ -46,4 +46,4 @@ links:
   prerequisites: [building-agents/tool-use]
   related: []
   specializations: []
-sources: [AEC-13]
+sources: [AEC-13, Academy claude-platform-101, Academy building-with-the-claude-api]

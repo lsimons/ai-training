@@ -38,4 +38,4 @@ links:
   prerequisites: [building-agents/patterns]
   related: []
   specializations: []
-sources: [AEC-07, AEC-18]
+sources: [AEC-07, AEC-18, Academy claude-platform-101, Academy introduction-to-subagents]
