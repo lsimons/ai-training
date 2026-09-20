@@ -45,7 +45,8 @@ test('the finish note counts the open checkpoints', async ({ page }) => {
 test('the course page shows the finished node, the ring and the review card', async ({ page, seed }) => {
 	await seed(finished);
 	await page.goto('concepts/');
-	await expect(page.locator('[data-node]')).toHaveAttribute('data-state', 'finished');
+	// `a[data-node]`: a coming (planned) lesson renders as `span[data-node]` and has no progress state.
+	await expect(page.locator('a[data-node]')).toHaveAttribute('data-state', 'finished');
 	await expect(page.locator('[data-ring-label]')).toHaveText('100%');
 	await expect(page.locator('[data-review-card]')).toHaveText('Review due: 2 items');
 });

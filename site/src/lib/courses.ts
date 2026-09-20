@@ -66,6 +66,6 @@ export function planLevels(entries: PlanEntry[], area: string): Map<string, numb
 		level.set(e.id, depth);
 		return depth;
 	};
-	entries.forEach((e) => visit(e, new Set()));
+	for (const e of entries) visit(e, new Set());
 	return level;
 }
