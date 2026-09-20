@@ -40,8 +40,8 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 ---
 
 <div class="course not-content" data-course={area} data-nodes={JSON.stringify(nodes)}>
-	<aside class="course-review" data-review-card hidden>
-		<a href={href(`/${area}/review/`)}>Review due: <span data-review-count>0</span> items</a>
+	<aside class="course-review" data-review-card data-due="false">
+		<a href={href(`/${area}/review/`)} data-review-label>Review: nothing due yet</a>
 	</aside>
 
 	<div class="course-top">
@@ -157,12 +157,12 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 			if (ring) ring.style.setProperty('--pct', String(pctUnits));
 			const label = root.querySelector<HTMLElement>('[data-ring-label]');
 			if (label) label.textContent = `${pctUnits}%`;
-			// Review due card: every due item, not just one session's worth.
+			// Review card: always linked; counts every due item, not just one session's worth.
 			const due = progress.dueReviewIds(rec, `${area}/`);
 			const card = root.querySelector<HTMLElement>('[data-review-card]');
-			if (card) card.hidden = due.length === 0;
-			const cnt = root.querySelector<HTMLElement>('[data-review-count]');
-			if (cnt) cnt.textContent = String(due.length);
+			if (card) card.dataset.due = String(due.length > 0);
+			const reviewLabel = root.querySelector<HTMLElement>('[data-review-label]');
+			if (reviewLabel) reviewLabel.textContent = due.length ? `Review due: ${due.length} item${due.length === 1 ? '' : 's'}` : 'Review: nothing due yet';
 		}
 
 		/** Dotted edges from the lesson that teaches an assumed objective to the lesson assuming it. */
