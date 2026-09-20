@@ -1,7 +1,46 @@
 # Course plan for the Building agents area (docs/agents/writing-a-lesson.md, "Course plan").
 # One entry per lesson, in course order. Planned entries come from issue #35.
+#
+# The schema is strict, so the per-lesson detail the plan issue asks for is in
+# comments under each entry, in this order:
+#   # mode: tutorial|explanation
+#   # exercise (do|judge): one line
+#   # shorts: names, or none
+#   # assumes (other areas): topic or objective ids from other areas, or none
+#   # introduces: concept ids first taught in this lesson
+# `after` names lesson ids from this plan only. Cross-area prerequisites are
+# in the `assumes (other areas)` comment, because the other plans are written
+# in parallel and their lesson ids are not settled.
+#
+# Topic order: tool-use, agent-loop, retrieval-memory, evaluation, patterns,
+# orchestration, production. S02 "Cross-area edges" puts evaluation before
+# patterns and orchestration as a path order. Retrieval comes before
+# evaluation because it completes the builds-agent-loop competency and gives
+# the evaluation lessons a retrieval agent to grade.
+#
+# Every code example runs against a fake model with a fixture under
+# site/examples/building-agents/, the way the live agent-loop lesson does.
 area: building-agents
 lessons:
+  # ---- tool-use -----------------------------------------------------------
+  - id: building-agents/how-a-model-calls-a-tool
+    title: How a model asks for a tool
+    covers: building-agents/tool-use
+    serves:
+      - building-agents/builds-agent-loop/defines-a-tool
+    status: planned
+    minutes: 10
+    # mode: explanation
+    # exercise (judge): given a transcript of one tool-using exchange with a real model API, mark each message as written by the model or by the harness, and circle the stop reason and the tool result id that pair the result with the request
+    # shorts: none
+    # assumes (other areas): concepts/recognizes-agents/names-the-loop
+    # introduces: function-calling, n-x-m-integration-problem
+    # The model never runs code. It emits a structured request and the
+    # harness runs it. Names the stop reason field and the result id the
+    # live agent-loop lesson only mentions in prose (Academy
+    # building-with-the-claude-api, Academy claude-platform-101). The N x M
+    # problem sets up the protocols lesson at the end of the course
+    # (Academy introduction-to-model-context-protocol).
   - id: building-agents/agent-loop
     title: Building your first agent
     covers: building-agents/agent-loop
@@ -10,3 +49,447 @@ lessons:
       - building-agents/builds-agent-loop/implements-the-loop
     status: live
     minutes: 25
+    # Live. Introduces loop-from-scratch. Issue #91 adds the error path and
+    # a named stop reason to this lesson's code and is a section here, so
+    # it has no entry of its own.
+  - id: building-agents/tool-schemas
+    title: Writing a tool schema the model uses correctly
+    covers: building-agents/tool-use
+    serves:
+      - building-agents/builds-agent-loop/defines-a-tool
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/agent-loop
+    # mode: tutorial
+    # exercise (do): rewrite the fixture's vague `get_customer` schema so the fake model, which picks tools by matching request words against descriptions, calls the right one for all six fixture requests; the output is the before and after wrong-call count
+    # shorts: Tool descriptions are prompts
+    # assumes (other areas): none
+    # introduces: tool-schema-design
+    # Two tools with overlapping descriptions and a fake model that chooses
+    # by description. Predict which tool it picks, then tighten the
+    # description and an enum parameter and predict again (Academy
+    # building-with-the-claude-api).
+  - id: building-agents/tool-errors
+    title: When a tool fails
+    covers: building-agents/tool-use
+    serves:
+      - building-agents/builds-agent-loop/defines-a-tool
+      - building-agents/builds-agent-loop/implements-the-loop
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/agent-loop
+    # mode: tutorial
+    # exercise (do): give the fixture's HTTP tool a timeout that fires on the second call, return it as a structured error result, and set the harness policy to stop after two errors in a row; the output is the run's message list and the stop reason
+    # shorts: none
+    # assumes (other areas): none
+    # introduces: error-handling
+    # The tool side of what #91 does in the loop: a structured `ok: false`
+    # result the model can read, a retry count decided in the harness,
+    # and the fake model answering from the error text. Predict the message
+    # list after a missing record and after a timeout.
+  - id: building-agents/parallel-tool-calls
+    title: Several tool calls in one turn
+    covers: building-agents/tool-use
+    serves:
+      - building-agents/builds-agent-loop/implements-the-loop
+    status: planned
+    minutes: 12
+    after:
+      - building-agents/tool-errors
+    # mode: tutorial
+    # exercise (do): change the fixture loop to run the fake model's three independent weather calls together and return the results in one turn, then add a fourth call that depends on the first and show why it stays sequential
+    # shorts: Side effects under concurrency
+    # assumes (other areas): none
+    # introduces: parallel-calls
+    # The fake model requests three lookups in one reply. Predict the round
+    # count with sequential and with concurrent execution, and the order
+    # of the results.
+  # ---- agent-loop ---------------------------------------------------------
+  - id: building-agents/stopping-the-loop
+    title: Stopping the loop on purpose
+    covers: building-agents/agent-loop
+    serves:
+      - building-agents/builds-agent-loop/implements-the-loop
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/agent-loop
+      - building-agents/tool-errors
+    # mode: tutorial
+    # exercise (do): add repeated-state detection to the fixture loop so a fake model that alternates between two fixes stops with `stopped: repeated state` instead of hitting the step limit; the output is the shorter trace
+    # shorts: Ways a loop runs away
+    # assumes (other areas): none
+    # introduces: stop-conditions, unbounded-loop-pitfalls
+    # The live lesson has one step limit. This lesson gives the full set of
+    # stop rules and a fake model that never answers, retries a failing
+    # tool forever, and alternates two fixes. Predict which rule fires and
+    # what the run returns.
+  - id: building-agents/loop-on-an-sdk
+    title: Rebuilding the loop on an agent SDK
+    covers: building-agents/agent-loop
+    serves:
+      - building-agents/builds-agent-loop/uses-an-sdk
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/stopping-the-loop
+      - building-agents/parallel-tool-calls
+    # mode: explanation
+    # exercise (do): rebuild the live lesson's weather agent on an agent SDK of your choice with the maximum turns and a cost cap set explicitly, then write a five-row table of what the SDK took over (messages, dispatch, retries, stopping, streaming) and where each lived in your own loop
+    # shorts: When to drop to the raw API
+    # assumes (other areas): none
+    # introduces: agent-sdk
+    # Explanation mode because SDK code needs a real model and cannot run
+    # against the fixture in CI. The SDK code blocks are shown as
+    # non-runnable and a match checkpoint pairs hand-loop parts with SDK
+    # features. Expert-level objective. The Academy's loop against the
+    # real API is the reference (Academy claude-platform-101, Academy
+    # building-with-the-claude-api).
+  # ---- retrieval-memory ---------------------------------------------------
+  - id: building-agents/retrieval-as-a-tool
+    title: Retrieval as a tool the agent calls
+    covers: building-agents/retrieval-memory
+    serves:
+      - building-agents/builds-agent-loop/adds-retrieval
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/stopping-the-loop
+    # mode: tutorial
+    # exercise (do): add a question with no answer in the fixture corpus to the small test set and change the retrieval prompt so the fake agent answers `not found` for it instead of inventing a policy; the output is the test set results before and after
+    # shorts: Chunking and indexes
+    # assumes (other areas): concepts/explains-models/explains-grounding
+    # introduces: when-basic-rag-suffices, agentic-rag-loop
+    # Basic retrieval first: a fake search over a twelve-document corpus,
+    # top matches in the prompt, answer. Then one multi-hop question it
+    # fails, and a bounded loop that reformulates. Predict which questions
+    # the basic version answers. The Academy's just-in-time loading pattern
+    # is the same idea for a real agent (Academy claude-platform-101).
+  - id: building-agents/agent-memory
+    title: Where an agent's memory lives
+    covers: building-agents/retrieval-memory
+    serves:
+      - building-agents/builds-agent-loop/adds-retrieval
+    status: planned
+    minutes: 12
+    after:
+      - building-agents/retrieval-as-a-tool
+    # mode: explanation
+    # exercise (judge): for four memory uses (twenty user preferences, ten thousand support tickets, a running task list, facts learned this session) pick a store from the lesson's table and write one line on why the others cost more than they give
+    # shorts: Compaction and context rot
+    # assumes (other areas): concepts/explains-models/explains-grounding
+    # introduces: memory-storage-choices
+    # Files, key-value notes, an index, a database behind a tool, a summary
+    # in the system prompt. Start with a file the human can read. Covers
+    # the Academy's memory and compaction patterns as ways to keep the
+    # context small (Academy claude-platform-101).
+  # ---- evaluation ---------------------------------------------------------
+  - id: building-agents/rubrics
+    title: Turning good into a rubric
+    covers: building-agents/evaluation
+    serves:
+      - building-agents/evaluates-agents/writes-a-rubric
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/retrieval-as-a-tool
+    # mode: explanation
+    # exercise (judge): read the fixture's twelve retrieval-agent transcripts, write three criteria with anchored 0-1-2 scales, and score two transcripts with them; compare with the model answer's scores
+    # shorts: none
+    # assumes (other areas): coding-with-agents/verification
+    # introduces: quality-pillars, rubrics
+    # Correctness, faithfulness, safety, efficiency and adherence as
+    # separate scores, because one number hides the trade. A rubric
+    # written from real outputs. Checkpoints are choice and repair on
+    # weak criteria.
+  - id: building-agents/golden-sets
+    title: A golden set is the agent's regression suite
+    covers: building-agents/evaluation
+    serves:
+      - building-agents/evaluates-agents/builds-a-golden-set
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/rubrics
+    # mode: tutorial
+    # exercise (do): add two items to the fixture golden set, one from a past failure and one that should be refused, mark twenty percent of the set as held out, and run it; the output is the pass count per group
+    # shorts: none
+    # assumes (other areas): coding-with-agents/verifies-agent-work/automates-the-check
+    # introduces: golden-sets
+    # A golden set of inputs with expected qualities, run against the fake
+    # retrieval agent by a small script. Predict which items fail after a
+    # prompt change.
+  - id: building-agents/traces-and-trajectories
+    title: Recording and grading the path the agent took
+    covers: building-agents/evaluation
+    serves:
+      - building-agents/evaluates-agents/grades-trajectories
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/golden-sets
+    # mode: tutorial
+    # exercise (do): write an expected-path rule for the fixture's lookup task (search once, then answer, at most three tool calls) as a function over the trace, run it over the fixture's eight runs and list which fail and why
+    # shorts: Trace formats and tracing tools
+    # assumes (other areas): coding-with-agents/verifies-agent-work/observes-and-debugs
+    # introduces: observability, trajectory-evaluation
+    # The fixture loop gains a trace: one record per model call and tool
+    # call with latency and cost. Two runs reach the same answer and one
+    # called the payment tool three times with the wrong account. Predict
+    # the trace and which run the trajectory grader fails.
+  - id: building-agents/error-analysis
+    title: Reading failures one by one
+    covers: building-agents/evaluation
+    serves:
+      - building-agents/evaluates-agents/grades-trajectories
+      - building-agents/evaluates-agents/builds-a-golden-set
+    status: planned
+    minutes: 12
+    after:
+      - building-agents/traces-and-trajectories
+    # mode: explanation
+    # exercise (judge): classify the fixture's ten failed traces into categories you name, count them, and say which single fix moves the score most; then name the one item each failure adds to the golden set
+    # shorts: none
+    # assumes (other areas): none
+    # introduces: error-analysis
+    # Counting categories replaces guessing. The most common failure is
+    # usually one thing, and every failure that reached a user is a
+    # golden-set item. Checkpoints are match and scenario.
+  - id: building-agents/llm-as-judge
+    title: A model as the grader
+    covers: building-agents/evaluation
+    serves:
+      - building-agents/evaluates-agents/writes-a-rubric
+      - building-agents/evaluates-agents/avoids-gamed-metrics
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/rubrics
+      - building-agents/golden-sets
+    # mode: tutorial
+    # exercise (judge): for three metrics on the fixture (answer length, keyword presence, judge score) describe one way each could rise with the agent unchanged, then pair each with a metric that would catch it
+    # shorts: Judge biases and calibration
+    # assumes (other areas): none
+    # introduces: llm-as-judge, metrics-that-cannot-be-gamed
+    # A fake judge with a built-in length bias grades the fixture
+    # transcripts against the rubric. Predict which of two answers it
+    # prefers, then compare its grades with the human grades in the
+    # fixture and see where they disagree. Expert-level objective on
+    # gamed metrics served here and in the deploy gate lesson.
+  # ---- patterns -----------------------------------------------------------
+  - id: building-agents/react
+    title: Reasoning before each action
+    covers: building-agents/patterns
+    serves:
+      - building-agents/orchestrates-agents/picks-a-pattern
+    status: planned
+    minutes: 12
+    after:
+      - building-agents/stopping-the-loop
+    # mode: tutorial
+    # exercise (do): add a `thought` field to the fixture model's replies and print it before each tool call, then run the same three tasks and compare the trace with the one from the live lesson's loop; the output is the two traces side by side
+    # shorts: none
+    # assumes (other areas): none
+    # introduces: react
+    # The fake model writes one line of reasoning before each tool
+    # request. Predict the trace. Most tool-using loops are this pattern
+    # whether or not the reasoning is shown.
+  - id: building-agents/reflection
+    title: A second pass that critiques the first
+    covers: building-agents/patterns
+    serves:
+      - building-agents/orchestrates-agents/picks-a-pattern
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/react
+      - building-agents/rubrics
+    # mode: tutorial
+    # exercise (do): give the fixture critic the three criteria from the rubrics lesson instead of "is this good", cap the rounds at two, and run it on the fixture's four drafts; the output is the round count and final draft per input
+    # shorts: none
+    # assumes (other areas): none
+    # introduces: reflection
+    # A fake critic call revises a draft with checkable rules. Predict the
+    # number of rounds with and without a cap, and what a critic without
+    # concrete criteria does to a trivial edit.
+  - id: building-agents/planning
+    title: Writing the plan before taking the steps
+    covers: building-agents/patterns
+    serves:
+      - building-agents/orchestrates-agents/picks-a-pattern
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/react
+    # mode: tutorial
+    # exercise (do): make the fixture planner revise its list when step three returns a surprise, instead of running the stale step four; the output is the plan before and after the revision
+    # shorts: none
+    # assumes (other areas): none
+    # introduces: planning
+    # The fake model writes a step list, works through it and updates it.
+    # Predict the plan after a step reveals a new fact.
+  - id: building-agents/plan-or-react
+    title: Plan everything first or react step by step
+    covers: building-agents/patterns
+    serves:
+      - building-agents/orchestrates-agents/picks-a-pattern
+      - building-agents/orchestrates-agents/composes-patterns
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/planning
+      - building-agents/reflection
+    # mode: explanation
+    # exercise (judge): for four task descriptions place each on the plan-then-execute to reactive spectrum, name the pattern you would start with, and write what it costs in calls and latency at twelve steps
+    # shorts: Hierarchical planning with subagents
+    # assumes (other areas): none
+    # introduces: plan-then-execute-vs-reactive, hierarchical-planning
+    # The Academy's workflows-versus-agents recommendation is the spine: a
+    # fixed workflow when the steps are known, an agent when they are not,
+    # and most systems plan coarsely and react within a step (Academy
+    # building-with-the-claude-api). Hierarchical planning as subgoals
+    # with fresh contexts, and what is lost between levels. Checkpoints
+    # are scenario and match.
+  # ---- orchestration ------------------------------------------------------
+  - id: building-agents/orchestrating-agents
+    title: Orchestration in code or by a model
+    covers: building-agents/orchestration
+    serves:
+      - building-agents/orchestrates-agents/justifies-orchestration-cost
+      - building-agents/orchestrates-agents/composes-patterns
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/plan-or-react
+    # mode: tutorial
+    # exercise (do): inject a fault at each boundary of the fixture's manager-and-workers arrangement (an empty plan from the manager, a tool error from a worker) and make the orchestrator stop and report; the output is the two traces
+    # shorts: Subagents with fresh context
+    # assumes (other areas): none
+    # introduces: code-vs-model-driven-orchestration, sequential-hierarchical-collaborative
+    # A sequential pipeline written in code, then a manager fake model
+    # that delegates to two workers as tools. Predict the handoff messages
+    # and the token count of each arrangement (Academy
+    # introduction-to-subagents, Academy claude-platform-101).
+  - id: building-agents/orchestration-tax
+    title: What every extra agent costs
+    covers: building-agents/orchestration
+    serves:
+      - building-agents/orchestrates-agents/justifies-orchestration-cost
+    status: planned
+    minutes: 12
+    after:
+      - building-agents/orchestrating-agents
+      - building-agents/golden-sets
+    # mode: explanation
+    # exercise (judge): given the fixture's scores and token counts for a three-agent design and a single agent on the same golden set, decide which to keep and write where the score difference came from
+    # shorts: none
+    # assumes (other areas): none
+    # introduces: orchestration-tax
+    # Handoff tokens, latency, information lost at each boundary and new
+    # failure modes. Before a second agent, name what the single agent
+    # cannot do, and check whether compaction or just-in-time loading
+    # fixes it inside one context first (Academy claude-platform-101).
+    # Checkpoints are scenario and choice.
+  # ---- production ---------------------------------------------------------
+  - id: building-agents/agent-attack-surface
+    title: How a running agent gets attacked
+    covers: building-agents/production
+    serves:
+      - building-agents/runs-in-production/mitigates-agent-risks
+    status: planned
+    minutes: 12
+    after:
+      - building-agents/tool-errors
+    # mode: explanation
+    # exercise (judge): for the fixture support agent's permission list, name every outbound channel, write the injected line that would use each one, and cross out the permissions that are not needed for the task
+    # shorts: Confused deputy
+    # assumes (other areas): safety/judges-agent-risk/recognizes-injection, safety/governance
+    # introduces: agent-specific-security-risks
+    # Injection through what the agent reads, exfiltration through what
+    # it can send, over-permission, confused deputy. Engineering-level
+    # follow-on to the Foundations agent-risk lesson, with the same
+    # planted-instruction example. Checkpoints are scenario and match.
+  - id: building-agents/guardrails-in-layers
+    title: Guardrails in layers
+    covers: building-agents/production
+    serves:
+      - building-agents/runs-in-production/layers-defenses
+      - building-agents/runs-in-production/mitigates-agent-risks
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/agent-attack-surface
+      - building-agents/stopping-the-loop
+    # mode: tutorial
+    # exercise (do): set up a restricted agent with exactly two permissions (fetch a page, write a file), plant an instruction in a page it will read, predict what it does, run it, and compare; then add a third permission that sends and show what changes
+    # shorts: Human approval at irreversible steps
+    # assumes (other areas): safety/judges-agent-risk/recognizes-injection, safety/judges-agent-risk/chooses-human-in-loop, safety/governance
+    # introduces: defense-layers
+    # AEC-10 lesson. The exercise is the sandbox exercise moved out of
+    # safety/agent-risk by issue #60. The fixture loop gains a permission
+    # check, an output filter and an approval gate. Predict which layer
+    # stops the planted line, and what happens when the prompt is the
+    # only layer.
+  - id: building-agents/eval-gated-deploys
+    title: Gating a deploy on the evaluation
+    covers: building-agents/production
+    serves:
+      - building-agents/runs-in-production/gates-on-evals
+      - building-agents/runs-in-production/manages-cost-and-rollout
+    status: planned
+    minutes: 15
+    after:
+      - building-agents/golden-sets
+      - building-agents/llm-as-judge
+      - building-agents/guardrails-in-layers
+    # mode: tutorial
+    # exercise (do): add a hard gate for the should-refuse group and a soft gate for helpfulness to the fixture gate script, run it against the two candidate prompts, and read the failing transcripts of the one it blocks; the output is the gate report
+    # shorts: Shadow runs and canaries
+    # assumes (other areas): coding-with-agents/verifies-agent-work/automates-the-check, safety/governance
+    # introduces: eval-gated-deploys, rollout-strategies
+    # The golden-set script becomes a gate with a threshold per metric,
+    # then a staged rollout table (team, five percent, everyone) with a
+    # rollback that is a configuration change. Predict the gate result for
+    # a prompt change that drops one instruction.
+  - id: building-agents/cost-and-provider-operations
+    title: Cost, caching and pinning the model
+    covers: building-agents/production
+    serves:
+      - building-agents/runs-in-production/manages-cost-and-rollout
+    status: planned
+    minutes: 12
+    after:
+      - building-agents/eval-gated-deploys
+    # mode: tutorial
+    # exercise (do): add per-run cost accounting and a token budget to the fixture loop, run the fixture's five tasks, and find the one tool whose verbose output triples the average; the output is the cost table
+    # shorts: Retries and backoff
+    # assumes (other areas): none
+    # introduces: cost, provider-operations
+    # The fake provider charges per token and returns a rate-limit error
+    # on the third call. Predict the cost per run, what the budget stop
+    # returns, and how a cached stable prefix changes the bill. Pinned
+    # model ids, retries with backoff, timeouts (Academy
+    # claude-platform-101).
+  - id: building-agents/agent-protocols
+    title: Protocols for tools and for other agents
+    covers: building-agents/production
+    serves:
+      - building-agents/runs-in-production/mitigates-agent-risks
+    status: planned
+    minutes: 12
+    after:
+      - building-agents/how-a-model-calls-a-tool
+      - building-agents/guardrails-in-layers
+      - building-agents/orchestration-tax
+    # mode: explanation
+    # exercise (judge): for a proposed connection to an external agent over an agent-to-agent protocol, list what it can read and send, decide which of the fixture's defense layers apply to it, and write the one trust decision you would make before enabling it
+    # shorts: none
+    # assumes (other areas): customizing-agents/connects-tools-safely/adds-a-tool, customizing-agents/connects-tools-safely/hardens-a-connection
+    # introduces: protocols-mcp-a2a
+    # Closes the N x M thread from the first lesson. The Model Context
+    # Protocol for tools and data, agent-to-agent protocols for delegation
+    # across organizations, and each connection as a trust decision
+    # (Academy model-context-protocol-advanced-topics). Checkpoints are
+    # choice and scenario.
