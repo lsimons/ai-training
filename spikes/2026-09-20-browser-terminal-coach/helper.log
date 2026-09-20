@@ -1,7 +1,12 @@
-04:11:01 helper listening on http://127.0.0.1:4400
-04:12:08 session open 52546
-04:12:46 coach: You're in Claude Code's security prompt—select 'Yes, I trust this folder' to continue. After that, Claude Code runs in conversation mode, not as shell commands, so you can ask questions directly.
-04:12:48 session close
-04:13:01 session open 52868
-04:13:48 coach: Claude can build and code, not just explain—try asking it to create files, write scripts, or set up a project structure. This turns the spike-learner directory into a real sandbox for exploration.
-04:13:50 session close
+05:03:58 started backgrounded · f42ffef1 · AI training: spike/terminal (idle — send a prompt to start)
+05:03:59 background session "AI training: spike/terminal" f42ffef1 (f42ffef1-4c3c-420c-8905-a53a44e24ed7) in /Users/lsimons/git/lsimons/ai-training-spike-terminal
+05:03:59 helper listening on 127.0.0.1:4400 · claude session f42ffef1 (stays alive after you close the page: claude stop f42ffef1)
+
+Open this URL (the token is single-process; restart the helper to rotate it):
+
+  http://localhost:4322/ai-training/spike/terminal/?token=testtoken
+
+05:04:13 allowed: http://localhost:4322
+05:04:13 browser attached, pty 69886
+05:04:50 coach: You asked a great exploratory question! Since this is a spike on a throwaway branch, try asking Claude to explore the spike directory or show you the prototype code to understand what's been built so far.
+05:04:51 browser detached

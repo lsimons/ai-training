@@ -28,7 +28,7 @@ class Session {
     this.screen = new xterm.Terminal({ cols, rows, allowProposedApi: true, scrollback: 200 });
     this.serializer = new SerializeAddon();
     this.screen.loadAddon(this.serializer);
-    this.pty = pty.spawn(SHELL, ['-l'], { name: 'xterm-256color', cols, rows, cwd: process.env.HOME, env: ptyEnv() });
+    this.pty = pty.spawn(SHELL, ['-l'], { name: 'xterm-256color', cols, rows, cwd: process.env.SPIKE_CWD || process.cwd(), env: ptyEnv() });
     this.pty.onData((d) => {
       this.screen.write(d);
       this.send({ type: 'out', data: d });

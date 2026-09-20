@@ -1,85 +1,127 @@
 ---
 title: "Spike: live terminal with a coach"
+tableOfContents: false
 ---
 
-This page is a throwaway experiment. It embeds your **real local shell** via a
-helper process running on your machine (`bun run start` in
-`spikes/2026-09-20-browser-terminal-coach/`). Type `claude` in the terminal
-below to start Claude Code. A second Claude watches the screen and drops tips
-on top.
+This page is a throwaway experiment. It attaches to a **background Claude Code
+session** on your machine through a local helper (`node server-attach.mjs` in
+`spikes/2026-09-20-browser-terminal-coach/`). The helper prints a URL with a
+token and asks for permission in its own terminal the first time a page connects.
+A second Claude reads the session transcript and offers tips in the panel below
+the terminal.
 
 <div class="not-content" id="spike-term-root">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css" />
   <style>
-    #spike-term-root { position: relative; }
+    /* Widen this page only: hide the right rail's reserved space. */
+    :root:has(#spike-term-root) { --sl-content-width: 72rem; }
+    :root:has(#spike-term-root) .right-sidebar-container { display: none; }
     #spike-term-toolbar { display: flex; gap: .5rem; margin: .5rem 0; flex-wrap: wrap; align-items: center; }
-    #spike-term-toolbar button { padding: .3rem .7rem; cursor: pointer; }
-    #spike-term-status { font-size: .85em; opacity: .7; margin-left: auto; }
-    #spike-term { height: 520px; border-radius: 6px; overflow: hidden; background: #000; }
+    #spike-term-toolbar button, #spike-term-toolbar select { padding: .35rem .8rem; cursor: pointer; font: inherit; font-size: .9em; }
+    #spike-term-status { font-size: .85em; opacity: .75; margin-left: auto; }
+    #spike-term-session { font-size: .85em; opacity: .75; }
+    #spike-term { height: 70vh; min-height: 480px; border-radius: 8px; padding: 8px 0 0 8px; box-sizing: border-box; }
+    #spike-term .xterm { height: 100%; }
+    #spike-term.light { background: #ffffff; border: 1px solid #ddd; }
+    #spike-term.dark { background: #1e1e1e; }
     #spike-coach {
-      position: absolute; right: 1rem; bottom: 4rem; max-width: 22rem;
-      background: #fff8e1; color: #222; border: 2px solid #f0b429; border-radius: 12px;
-      padding: .8rem 1rem; box-shadow: 0 6px 24px rgba(0,0,0,.35); font-size: .95em;
-      opacity: 0; transform: translateY(12px); transition: all .3s ease; pointer-events: none;
+      margin-top: .75rem; padding: .8rem 1rem; border-radius: 8px; display: none;
+      background: var(--sl-color-gray-6); border-left: 4px solid var(--sl-color-accent);
     }
-    #spike-coach.show { opacity: 1; transform: none; pointer-events: auto; }
-    #spike-coach::after { content: ""; position: absolute; left: -14px; bottom: 12px; border: 7px solid transparent; border-right-color: #f0b429; }
-    #spike-coach .who { font-weight: 700; font-size: .8em; text-transform: uppercase; letter-spacing: .05em; color: #a06a00; }
-    #spike-coach button { margin-top: .5rem; font-size: .85em; }
-    #spike-pointer { position: absolute; font-size: 2.2rem; pointer-events: none; opacity: 0; transition: opacity .3s; animation: bob 1s infinite alternate; }
-    #spike-pointer.show { opacity: 1; }
-    @keyframes bob { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+    #spike-coach.show { display: block; }
+    #spike-coach .who { font-weight: 700; font-size: .8em; text-transform: uppercase; letter-spacing: .05em; color: var(--sl-color-accent); }
+    #spike-coach .tip { margin: .3rem 0; }
+    #spike-coach .prompt { font-family: var(--__sl-font-mono); font-size: .9em; opacity: .85; margin: .3rem 0; }
+    #spike-coach button { margin-right: .5rem; font: inherit; font-size: .85em; padding: .3rem .7rem; cursor: pointer; }
+    #spike-token { display: none; gap: .5rem; align-items: center; margin: .5rem 0; }
+    #spike-token.show { display: flex; }
+    #spike-token input { font: inherit; padding: .3rem; width: 24rem; }
+    #spike-screen-dump { max-height: 240px; overflow: auto; font-size: .75em; margin-top: .75rem; }
   </style>
+  <div id="spike-token"><label>Token from the helper's terminal: <input id="spike-token-input" placeholder="paste token" /></label><button id="btn-token">Connect</button></div>
   <div id="spike-term-toolbar">
     <button id="btn-type">Type for me</button>
     <button id="btn-coach">Ask the coach</button>
+    <button id="btn-conv">Show conversation</button>
     <button id="btn-screen">Dump screen</button>
+    <select id="sel-theme" title="Terminal colours"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select>
+    <span id="spike-term-session"></span>
     <span id="spike-term-status">connecting…</span>
   </div>
   <div id="spike-term"></div>
-  <div id="spike-pointer">👉</div>
-  <div id="spike-coach"><div class="who">Coach</div><div class="tip"></div><button class="use" hidden>Use this prompt</button></div>
-  <pre id="spike-screen-dump" hidden style="max-height: 200px; overflow: auto; font-size: .7em;"></pre>
+  <div id="spike-coach"><div class="who">Coach</div><div class="tip"></div><div class="prompt" hidden></div><button class="use" hidden>Type this prompt for me</button><button class="dismiss">Dismiss</button></div>
+  <pre id="spike-screen-dump" hidden></pre>
   <script type="module">
     import { Terminal } from 'https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/+esm';
     import { FitAddon } from 'https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/+esm';
-    const HELPER = 'ws://127.0.0.1:4400/term';
-    const status = document.getElementById('spike-term-status');
-    const term = new Terminal({ fontSize: 13, cursorBlink: true, allowProposedApi: true, theme: { background: '#000' } });
-    const fit = new FitAddon(); term.loadAddon(fit);
-    term.open(document.getElementById('spike-term')); fit.fit();
-    const ws = new WebSocket(HELPER + '?cols=' + term.cols + '&rows=' + term.rows);
-    const send = (m) => ws.readyState === 1 && ws.send(JSON.stringify(m));
-    ws.onopen = () => { status.textContent = 'connected to local shell'; term.focus(); };
-    ws.onclose = () => (status.textContent = 'disconnected (is the helper running on :4400?)');
-    ws.onerror = () => (status.textContent = 'cannot reach helper on :4400');
-    term.onData((d) => send({ type: 'in', data: d }));
-    new ResizeObserver(() => { fit.fit(); send({ type: 'resize', cols: term.cols, rows: term.rows }); }).observe(document.getElementById('spike-term'));
-    const coach = document.getElementById('spike-coach'), tipEl = coach.querySelector('.tip'), useBtn = coach.querySelector('.use');
-    const pointer = document.getElementById('spike-pointer');
-    let suggested = null, hideTimer;
-    function showCoach(html, prompt) {
-      tipEl.innerHTML = html; suggested = prompt; useBtn.hidden = !prompt; coach.classList.add('show');
-      clearTimeout(hideTimer); hideTimer = setTimeout(() => coach.classList.remove('show'), 25000);
-      // Point at the terminal's cursor row, roughly: bottom-left of the terminal box.
-      const box = document.getElementById('spike-term').getBoundingClientRect(), root = document.getElementById('spike-term-root').getBoundingClientRect();
-      pointer.style.left = (box.left - root.left + 8) + 'px';
-      pointer.style.top = (box.bottom - root.top - 48) + 'px';
-      pointer.classList.add('show'); setTimeout(() => pointer.classList.remove('show'), 4000);
-    }
-    ws.onmessage = (ev) => {
-      const m = JSON.parse(ev.data);
-      if (m.type === 'out') term.write(m.data);
-      else if (m.type === 'coach-start') status.textContent = 'coach is looking (' + m.reason + ')…';
-      else if (m.type === 'coach') { status.textContent = 'coach tip in ' + Math.round(m.ms/1000) + 's, $' + (m.cost ?? 0).toFixed(3); showCoach(m.tip, m.suggestedPrompt); window.__lastCoach = m; }
-      else if (m.type === 'coach-error') { status.textContent = 'coach error: ' + m.error; }
-      else if (m.type === 'screen') { const p = document.getElementById('spike-screen-dump'); p.hidden = false; p.textContent = m.text; window.__lastScreen = m.text; }
-      else if (m.type === 'exit') status.textContent = 'shell exited (' + m.exitCode + ')';
+    const $ = (id) => document.getElementById(id);
+    const status = $('spike-term-status');
+    // --- token: from ?token= / #token=, else sessionStorage, else ask -------
+    const params = new URLSearchParams(location.search + '&' + location.hash.slice(1));
+    let token = params.get('token') || sessionStorage.getItem('spike-token');
+    if (params.get('token')) { sessionStorage.setItem('spike-token', token); history.replaceState(null, '', location.pathname); }
+    // --- themes ---------------------------------------------------------------
+    const THEMES = {
+      light: { background: '#ffffff', foreground: '#1a1a1a', cursor: '#d35400', cursorAccent: '#fff', selectionBackground: '#cde3ff',
+        black: '#000000', red: '#c0392b', green: '#1e7e34', yellow: '#9a6700', blue: '#0b5ed7', magenta: '#8e44ad', cyan: '#0e7490', white: '#555555',
+        brightBlack: '#666666', brightRed: '#e74c3c', brightGreen: '#27ae60', brightYellow: '#b7791f', brightBlue: '#2980b9', brightMagenta: '#9b59b6', brightCyan: '#0891b2', brightWhite: '#1a1a1a' },
+      dark: { background: '#1e1e1e', foreground: '#e6e6e6', cursor: '#ffcc00', selectionBackground: '#3a5a8a' },
     };
-    document.getElementById('btn-coach').onclick = () => send({ type: 'coach' });
-    document.getElementById('btn-screen').onclick = () => send({ type: 'screen' });
-    document.getElementById('btn-type').onclick = () => send({ type: 'type-for-me', text: suggested || 'Explain in two sentences what this directory is for. Do not change any files.' });
-    useBtn.onclick = () => { send({ type: 'type-for-me', text: suggested }); coach.classList.remove('show'); };
+    const term = new Terminal({ fontSize: 15, lineHeight: 1.15, cursorBlink: true, allowProposedApi: true, minimumContrastRatio: 4.5, scrollback: 2000 });
+    const fit = new FitAddon(); term.loadAddon(fit);
+    term.open($('spike-term'));
+    const siteTheme = () => document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+    function applyTheme(choice) {
+      const t = choice === 'auto' ? siteTheme() : choice;
+      term.options.theme = THEMES[t]; $('spike-term').className = t; localStorage.setItem('spike-term-theme', choice); $('sel-theme').value = choice;
+    }
+    applyTheme(localStorage.getItem('spike-term-theme') || 'auto');
+    $('sel-theme').onchange = (e) => applyTheme(e.target.value);
+    new MutationObserver(() => $('sel-theme').value === 'auto' && applyTheme('auto')).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    fit.fit();
+    // --- connection -----------------------------------------------------------
+    let ws, suggested = null;
+    const send = (m) => ws && ws.readyState === 1 && ws.send(JSON.stringify(m));
+    function connect() {
+      if (!token) { $('spike-token').classList.add('show'); status.textContent = 'needs token'; return; }
+      status.textContent = 'connecting…';
+      ws = new WebSocket('ws://127.0.0.1:4400/term?cols=' + term.cols + '&rows=' + term.rows + '&token=' + encodeURIComponent(token));
+      ws.onopen = () => { status.textContent = 'waiting for permission in the helper terminal…'; term.focus(); };
+      ws.onclose = (e) => { status.textContent = 'disconnected: ' + (e.reason || 'is the helper running on :4400?'); if (e.code === 4001) { sessionStorage.removeItem('spike-token'); token = null; $('spike-token').classList.add('show'); } };
+      ws.onerror = () => (status.textContent = 'cannot reach helper on :4400');
+      ws.onmessage = (ev) => {
+        const m = JSON.parse(ev.data);
+        if (m.type === 'out') term.write(m.data);
+        else if (m.type === 'ready') { status.textContent = 'attached'; $('spike-token').classList.remove('show'); }
+        else if (m.type === 'session') { $('spike-term-session').textContent = '“' + m.name + '” (' + m.id + ') · ' + m.cwd.replace(/^\/Users\/[^/]+/, '~'); window.__session = m; }
+        else if (m.type === 'coach-start') status.textContent = 'coach is reading (' + m.reason + ')…';
+        else if (m.type === 'coach') { status.textContent = 'coach: ' + Math.round(m.ms / 1000) + 's, $' + (m.cost ?? 0).toFixed(3) + ', ' + m.turns + ' turns'; showCoach(m); window.__lastCoach = m; }
+        else if (m.type === 'coach-error') status.textContent = 'coach error: ' + m.error;
+        else if (m.type === 'screen') dump(m.text, 'lastScreen');
+        else if (m.type === 'conversation') dump(m.turns.map((t) => t.role + ': ' + t.text).join('\n\n'), 'lastConv', m.turns);
+        else if (m.type === 'exit') status.textContent = 'shell exited (' + m.exitCode + ')';
+      };
+    }
+    function dump(text, key, val) { const p = $('spike-screen-dump'); p.hidden = false; p.textContent = text; window['__' + key] = val ?? text; }
+    term.onData((d) => send({ type: 'in', data: d }));
+    new ResizeObserver(() => { fit.fit(); send({ type: 'resize', cols: term.cols, rows: term.rows }); }).observe($('spike-term'));
+    $('btn-token').onclick = () => { token = $('spike-token-input').value.trim(); sessionStorage.setItem('spike-token', token); connect(); };
+    connect();
+    // --- coach panel (docked, never covers the terminal) ----------------------
+    const coach = $('spike-coach');
+    function showCoach(m) {
+      coach.querySelector('.tip').textContent = m.tip; suggested = m.suggestedPrompt || null;
+      const p = coach.querySelector('.prompt'); p.hidden = !suggested; p.textContent = suggested ? '❯ ' + suggested : '';
+      coach.querySelector('.use').hidden = !suggested; coach.classList.add('show');
+    }
+    coach.querySelector('.dismiss').onclick = () => coach.classList.remove('show');
+    // Typing never presses Enter: the learner reads the prompt and sends it.
+    const typeFor = (text) => { send({ type: 'type-for-me', text, submit: false }); term.focus(); };
+    coach.querySelector('.use').onclick = () => typeFor(suggested);
+    $('btn-type').onclick = () => typeFor(suggested || 'Explain in two sentences what this directory is for. Do not change any files.');
+    $('btn-coach').onclick = () => send({ type: 'coach' });
+    $('btn-conv').onclick = () => send({ type: 'conversation' });
+    $('btn-screen').onclick = () => send({ type: 'screen' });
     window.__spike = { term, send };
   </script>
 </div>

@@ -103,6 +103,51 @@ selects the default "No, exit", so the injected prompt landed in zsh
 (`command not found: Explain`). The driver now presses ↓ first. The coach
 diagnosed this exact state correctly, which is a nice accidental demo.
 
+## Round 2: attach to a background session
+
+After Leo tried round 1, the spike moved to `claude --bg` + `claude attach`:
+
+- [`server-attach.mjs`](./server-attach.mjs) replaces `server.mjs`. On start it
+  finds or starts a background Claude Code session named
+  `AI training: spike/terminal` in the working directory (`claude --bg --name`,
+  looked up via `claude agents --json --cwd`). Each browser connection gets a
+  zsh PTY that auto-runs `claude attach <id>`, so the learner lands inside the
+  running session and re-attaches to the same conversation after a reload.
+- The coach no longer scrapes the screen. It reads the session transcript at
+  `~/.claude/projects/<cwd-slug>/<sessionId>.jsonl` (user/assistant text,
+  tool_use, tool_result) plus the live `status` from `claude agents --json`.
+  Input quality is far better: no ANSI, collapsed tool calls visible, and it
+  knows if Claude is mid-turn. The format is undocumented and may change.
+- Security minimum bar implemented: per-process random token in the URL the
+  helper prints (`?token=`, stripped from the address bar, kept in
+  sessionStorage), `Origin` allowlist (`https://lsimons.github.io` + localhost
+  dev ports), a `[y/N]` consent prompt in the helper's own terminal per origin
+  (30s timeout, deny by default; `SPIKE_AUTO_ALLOW=1` bypasses it for tests
+  only), and one browser session at a time. Verified: bad token closes with
+  4001, foreign origin with 4003, allowed origin gets `ready`.
+- UI: light/dark/auto terminal theme following Starlight's `data-theme`,
+  15px font, 70vh terminal, right rail hidden via `tableOfContents: false` +
+  a `:root:has(#spike-term-root)` rule, sidebar entry under "Spikes", docked
+  coach panel below the terminal (no floating bubble, no pointer), and
+  "Type for me" / "Type this prompt for me" never send Enter.
+- "Type for me" still goes through the PTY. There is no CLI verb to send a
+  prompt to a background session from outside; `attach` is the only input.
+- [`check-attach.mjs`](./check-attach.mjs) and [`check-ui.mjs`](./check-ui.mjs)
+  drive both rounds; screenshots `attach-coach.png`, `ui-light-coach.png`,
+  `ui-dark.png`.
+
+Run round 2 (from the repo root so the session lands there):
+
+```sh
+node spikes/2026-09-20-browser-terminal-coach/server-attach.mjs   # foreground: it will ask [y/N]
+(cd docs && bun run dev)                                           # then open the URL the helper printed
+claude stop <id>                                                   # the session outlives the page
+```
+
+Gotcha found: blank lines inside the widget's `<div>` end the Markdown HTML
+block and the rest of the script renders as a code figure. Keep widget blocks
+free of blank lines.
+
 ## Lessons learned
 
 **Hypothesis confirmed.** A ~150-line helper plus a CDN xterm.js is enough for
@@ -138,6 +183,8 @@ prompt injection, and an LLM coach. Specific takeaways:
   position (`term.buffer.active.cursorY`) so a pointer at the input line is
   doable; pointing at arbitrary TUI elements would need pattern matching on
   the scraped screen, which is the same information the coach already has.
+
+**Attach beats scrape.** Round 2 showed the background session is the right unit: it survives page reloads, has a stable id and name, its transcript is structured, and both the learner's terminal and the coach are just clients of it. The risk is coupling to internal file formats; a supported transcript or events API would remove it.
 
 Not tested: multiple concurrent sessions, Windows, terminal resize under
 Claude Code, and whether the coach can *see* tool-call detail that is collapsed

@@ -101,6 +101,10 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Spikes',
+					items: [{ slug: 'spike/terminal', label: 'Live terminal with a coach' }],
+				},
+				{
 					label: 'Reference',
 					items: [
 						{ slug: 'contributing', label: 'Contributing' },
