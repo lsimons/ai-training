@@ -71,6 +71,10 @@ Start with the goal and the limits together. The goal is the format above.
 The limits are the things a helpful agent would otherwise do for you. It
 might rephrase the dates or add advice the memo didn't give, or drop the
 printer because it seemed minor. Write the limits as plain prohibitions.
+A limit also has to survive a second reading. "Keep the printer part
+short" can mean trim the words or drop the printer, and the agent picks
+one reading without telling you which. Where the two readings lead to
+different work, write out the one you mean (@Academy introduction-to-claude-cowork).
 
 Now the context. Tell the agent which information to use and where it is.
 Here that's easy: the memo, pasted in full, is the only source. State it
@@ -172,6 +176,12 @@ cheap to do but awkward to take back, so the agent proposes and you approve.
 Deciding which desks people get is a judgment about people, so you decide,
 with the agent at most laying out the options.
 
+The degree is also something you widen over time. The first time you hand
+an agent a new kind of task, pick the lower setting even when the task
+looks safe, and move up once a few results have passed review without
+surprises. A run that goes wrong at the lower setting costs you a look. The
+same run at the higher setting costs you the cleanup (@Academy introduction-to-claude-cowork).
+
 Try it: rerun the task, but this time add one line to the brief that sets
 the degree. For example, "Draft the summary, then stop and show it to me
 before doing anything else." Notice that the agent behaves differently even
@@ -214,6 +224,13 @@ the failing criterion back: "The locker deadline is missing; add it and
 change nothing else." Then check again. Reviewing against the brief gives
 you a precise thing to say, and the agent a precise thing to do.
 
+A failure also tells you something about the brief. If the same criterion
+fails on the second try, or the agent asked a question before it started,
+the brief left a gap and the agent filled it with a guess. Close that gap
+in the brief itself, so the next task starts from a better one. The brief
+gives the review something to check, and the review shows what the next
+brief has to say (@Academy ai-fluency-framework-foundations).
+
 <Choice id="which-review" objective="using-agents/delegates-and-checks/reviews-against-brief"
   title="Which review is a review?" hint="Which of these could a second person repeat and reach the same answer?"
   options={[
@@ -241,7 +258,7 @@ into a one-sentence follow-up to the agent.
 1. A brief has four parts: goal, context, limits, done-criteria. What the agent must not do matters as much as what it must do.
 2. Name the source the agent should use. An agent that guesses picks the most available source, not the right one.
 3. Write the done-criteria before sending the task, as things you can tick rather than adjectives.
-4. Choose the degree of autonomy by how bad a wrong action is and how easily it is undone: human decides, agent proposes and human approves, or agent acts and human reviews after.
+4. Choose the degree of autonomy by how bad a wrong action is and how easily it is undone: human decides, agent proposes and human approves, or agent acts and human reviews after. Start a new kind of task at the lower setting and widen it as reviewed results earn it.
 5. Review against the brief, criterion by criterion. A result that reads well has told you nothing yet.
-6. When a criterion fails, send that criterion back rather than fixing the output yourself.
+6. When a criterion fails, send that criterion back rather than fixing the output yourself, and close the gap in the brief before the next task.
 </Recap>
