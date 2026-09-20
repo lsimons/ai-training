@@ -6,9 +6,9 @@
  */
 import { getCollection } from 'astro:content';
 import { AREAS } from '@lib/areas';
+import { getAllCoursePlans } from '@lib/courses';
 import { jsonForScript } from '@lib/json';
 import { getLessons } from '@lib/lessons';
-import { getAllCoursePlans } from '@lib/courses';
 import { href } from '@lib/url';
 
 const topics = (await getCollection('topics')).map((t) => t.data);

@@ -101,7 +101,7 @@ export const collections = {
 							 */
 							after: z.array(z.string()).default([]),
 						})
-						.strict()
+						.strict(),
 				),
 			})
 			.strict(),
