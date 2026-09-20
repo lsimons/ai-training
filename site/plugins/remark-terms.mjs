@@ -9,49 +9,56 @@
  * text.
  *
  * Matching is case-insensitive on the concept name as a whole phrase, with an
- * optional plural `s` or `es`. Headings, links and code are never marked.
+ * optional plural `s` or `es`, and straight quotes in a name also match the
+ * curly quotes remark-smartypants produces. Headings, links, code and the
+ * inside of MDX components are never marked (see mdast-walk.mjs). When two
+ * covered topics define the same concept name, the first covered topic's
+ * concept is the one linked.
+ *
+ * On every page, lesson or not, this plugin also validates hand-written
+ * glossary links: a `link` whose url is `/glossary/#<id>` with an id that is
+ * not a concept fails the build. The links validator in astro.config.mjs
+ * cannot see the component-rendered glossary anchors and excludes them, so
+ * this check is what covers that exclusion.
  */
+import { walkText } from './mdast-walk.mjs';
 
-/** Parents whose text is never scanned for terms. */
-const SKIP = new Set(['code', 'inlineCode', 'link', 'linkReference', 'heading']);
+const GLOSSARY_LINK = /^\/glossary\/#(.+)$/;
 
 /**
  * @param {{ topics: Array<{ id: string, concepts: Array<{ id: string, name: string, definition: string }> }> }} options
  */
 export function remarkTerms({ topics }) {
 	if (!Array.isArray(topics)) throw new Error('remarkTerms needs the parsed topic list');
+	const conceptIds = new Set(topics.flatMap((t) => t.concepts.map((c) => c.id)));
+
 	return (/** @type {any} */ tree, /** @type {any} */ file) => {
 		const frontmatter = file.data?.astro?.frontmatter;
-		if (!frontmatter?.mode) return;
 		/** @type {string[]} */
-		const covers = Array.isArray(frontmatter.covers) ? frontmatter.covers : [];
-		if (covers.length === 0) return;
+		const covers = frontmatter?.mode && Array.isArray(frontmatter.covers) ? frontmatter.covers : [];
 
-		const pending = topics
-			.filter((t) => covers.includes(t.id))
-			.flatMap((t) => t.concepts)
-			.map((c) => ({
-				...c,
-				pattern: new RegExp(`(?<![\\w-])${escapeRegExp(c.name)}(?:e?s)?(?![\\w-])`, 'i'),
-			}));
-		if (pending.length === 0) return;
-
-		const walk = (/** @type {any} */ node) => {
-			if (!Array.isArray(node.children)) return;
-			if (SKIP.has(node.type)) return;
-			/** @type {any[]} */
-			const out = [];
-			for (const child of node.children) {
-				if (child.type !== 'text') {
-					walk(child);
-					out.push(child);
-					continue;
-				}
-				out.push(...markTerms(child, pending));
+		/** @type {Map<string, any>} */
+		const byName = new Map();
+		for (const id of covers) {
+			const topic = topics.find((t) => t.id === id);
+			for (const c of topic?.concepts ?? []) {
+				const key = c.name.toLowerCase();
+				if (byName.has(key)) continue;
+				byName.set(key, { ...c, pattern: namePattern(c.name) });
 			}
-			node.children = out;
-		};
-		walk(tree);
+		}
+		const pending = [...byName.values()];
+
+		walkText(tree, {
+			onNode: (node) => {
+				if (node.type !== 'link' || typeof node.url !== 'string') return;
+				const m = GLOSSARY_LINK.exec(node.url);
+				if (m && !conceptIds.has(m[1])) {
+					throw new Error(`${file.path}: link to unknown glossary anchor "${node.url}". No concept has the id "${m[1]}".`);
+				}
+			},
+			onText: (node) => (pending.length > 0 ? markTerms(node, pending) : [node]),
+		});
 	};
 }
 
@@ -93,7 +100,16 @@ function markTerms(node, pending) {
 	return out;
 }
 
-/** @param {string} s */
-function escapeRegExp(s) {
-	return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+/**
+ * The whole-phrase pattern for a concept name. Straight quotes match their
+ * curly forms too, because Astro runs remark-smartypants before this plugin.
+ * @param {string} name
+ */
+function namePattern(name) {
+	const escaped = name
+		.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+		.replace(/\s+/g, '\\s+')
+		.replace(/"/g, '["“”]')
+		.replace(/'/g, "['‘’]");
+	return new RegExp(`(?<![\\w-])${escaped}(?:e?s)?(?![\\w-])`, 'i');
 }
