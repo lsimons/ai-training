@@ -1,0 +1,249 @@
+---
+title: What the model can see
+description: Count the tokens of a page of text, work out how many pages fit in a context window, and learn what falls out of view in a long chat.
+mode: tutorial
+covers:
+  - concepts/how-models-work
+serves:
+  - concepts/explains-models/explains-generation
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: text-becomes-tokens
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: where-the-scores-come-from
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: What every token costs
+    href: /concepts/what-tokens-cost/
+  - label: Where memory comes from
+    href: /concepts/memory/
+---
+
+import { Choice, Sort, Predict, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+You have been working with a chat assistant on a report for two hours. In
+your first message you said the report is for the finance team and must
+stay under two pages. Now you ask for the closing section, and the answer
+runs to four pages and addresses "the engineering team". The transcript
+below is illustrative, written for this lesson rather than recorded from a
+model, but the pattern is one you will meet.
+
+<Prompt model="illustrative" recorded="illustrative">
+Write the closing section now. Same audience and length as we agreed.
+</Prompt>
+<Response>
+Here is the closing section for the engineering team. I have kept the
+technical detail you asked for, so it runs to about four pages. Let me know
+if you want the deployment appendix as well.
+</Response>
+
+The model did not forget in the way a person forgets. It never saw your
+first message when it wrote this answer. In the previous lesson you learned
+that a model reads tokens and predicts the next one from everything it has
+seen so far. This lesson is about the limit on "everything it has seen so
+far", the **context window**. You will measure a page of text in tokens,
+work out how many pages a window holds, and see what happens when a chat
+grows past it.
+
+## Count the tokens of a page
+
+A context window is measured in tokens, so the first step is to get a
+feel for how many tokens a page of text is. Save the script
+`count_tokens.py` from
+[the fixture directory](https://github.com/lsimons/ai-training/tree/main/site/examples/concepts/context-window)
+and run it with no arguments. It counts a built-in sample of meeting notes,
+about half a page. On a fresh Mac the first `python3` command may offer to
+install the command-line developer tools, and that is expected.
+
+<Predict id="count-the-sample" title="Count the sample"
+  answer={`characters: 460
+words: 80
+tokens (estimate): 115`} run="concepts/context-window/count_tokens.py">
+Run the counter on its built-in sample and compare what you see with the
+output below.
+
+```sh
+python3 count_tokens.py
+```
+
+</Predict>
+
+The script says "estimate" for a reason. It applies the common rule of
+thumb for English, about four characters per token. A word of up to six
+letters counts as one token and a longer word as one token per four
+letters, with each punctuation mark counted as a token of its own. Real
+tokenizers are more detailed than that, and every vendor has its own, so
+the exact count for a model comes from that vendor. The API response of a
+model call reports the tokens it used, and vendors publish a token-counting
+call or a web page that runs their tokenizer
+(@Academy building-with-the-claude-api). For planning, the rule of thumb is
+close enough: a full page of English text is a few hundred tokens.
+
+## How a tokenizer splits text
+
+The counter treats "delivery" as two tokens and "June" as one. A real
+tokenizer makes the same kind of cut, with a fixed vocabulary of tens of
+thousands of chunks learned from training text. Common words are one chunk.
+A rare word is split into pieces, often at places that have nothing to do
+with syllables or spelling, and a name or a word in another language may
+end up as one token per letter (@AEC-02).
+
+Asking a model how many letters "strawberry" has goes wrong so often for
+the same reason. The model receives the token for "strawberry" as one
+number, and the letters are not in its input, so it predicts a count from
+what it has seen written about the word, the same way it predicts any other
+answer. Counting characters yourself, as the script does, is the reliable
+way.
+
+## How many pages fit
+
+Take the token count from the first step and see how many such pages fit
+in windows of different sizes. The second script takes the count as its
+argument.
+
+<Predict id="pages-per-window" title="Pages per window"
+  answer={`one page: 115 tokens
+8,000-token window: 69 pages
+32,000-token window: 278 pages
+200,000-token window: 1,739 pages
+1,000,000-token window: 8,695 pages`} run="concepts/context-window/pages_per_window.py">
+Run the second script with the token count of the sample. What does it
+print?
+
+```sh
+python3 pages_per_window.py 115
+```
+
+</Predict>
+
+The window sizes are round numbers that stand for the sizes on the market
+in 2026. Small models that run on a laptop have windows at the low end,
+and the large vendor models offer 200,000 tokens or more (@AEC-02). At the
+top end the window holds a few thousand pages of text, which sounds like
+more than you will ever need. The next section shows why it still runs
+out.
+
+## What the window holds
+
+The window is not only your messages. For one response, the model sees all
+of this at once, and the total must fit:
+
+- The instructions the product or your team set up, which you may never
+  see. In a chat product these are often a few pages by themselves.
+- The conversation so far, with every message from you and every answer.
+- Everything you pasted or attached, in full. A document you attach is
+  turned into tokens like any other text.
+- Results from tools the assistant used, such as a web search or a file
+  that it read.
+- The answer it is producing, token by token, since each new token is
+  predicted from the whole window including the answer so far.
+
+From this follows the one rule of the lesson: anything outside the window
+does not exist for the model. Yesterday's chat, the file you did not paste,
+and the company wiki are all invisible unless something puts them into the
+window for this response (@Academy ai-capabilities-and-limitations). The
+same rule explains why a model "remembers" nothing between conversations,
+because the weights do not change when you type and so the window is the
+only place a fact can be.
+
+<Sort id="inside-the-window" objective="concepts/explains-models/explains-generation"
+  concepts={['context-window']}
+  title="What can the model see?"
+  hint="For each item, ask: is it in the text being sent to the model for this one response?"
+  buckets={['In the window for this response', 'Does not exist for the model']}
+  items={[
+    { text: 'The instructions the product set up before your first message', bucket: 0 },
+    { text: 'A paragraph you pasted twenty minutes ago in this chat', bucket: 0 },
+    { text: 'The first half of the answer the model is writing right now', bucket: 0 },
+    { text: 'The result of the web search the assistant just ran', bucket: 0 },
+    { text: 'A chat you had with the same assistant last week', bucket: 1 },
+    { text: 'A spreadsheet on your laptop that you mentioned by name', bucket: 1 },
+    { text: 'An article published after the model was trained', bucket: 1 },
+  ]} />
+
+## When the early facts fall out
+
+Your chat with the assistant grows with every turn, and so does the text
+sent to the model for each response. A long chat with pasted documents can
+pass a 200,000-token window in an afternoon. Products handle the overflow
+in different ways. Some silently drop the oldest turns, some replace them
+with a short summary, and some refuse to continue and ask you to start a
+new chat. In the first two cases you get the report chat from the top of
+this lesson: the answers are still fluent, but a fact from the start of the
+chat has left the window.
+
+<Pitfall title="Scolding the model for forgetting">
+Two hours into the report chat, the assistant addresses the wrong team. You
+reply: "I told you at the start this is for finance. Pay attention." The
+next answer apologizes and then makes the same kind of mistake with the
+page limit, because your correction named only the audience. The model
+never saw your first message, so the scolding gave it nothing to work
+with. The rule: when a long chat contradicts itself, restate the facts that
+matter, in the message you are sending now. "This section is for the
+finance team, two pages at most, plain language" puts the facts back in the
+window, and the next answer has them.
+</Pitfall>
+
+Restating the facts is the fix in the moment. To prevent the problem, keep
+the facts the model needs every time in one message you can paste again,
+and start a fresh chat for a new piece of work instead of adding it to a
+long one.
+
+<Choice id="why-the-chat-contradicts-itself" objective="concepts/explains-models/explains-generation"
+  concepts={['context-window', 'token']}
+  context="The lesson opens with a long chat about a report. The learner stated the audience and the page limit in the first message, and two hours later the assistant writes for a different audience at twice the length."
+  title="Why did the answer change?"
+  hint="Where was the first message when the model produced the latest answer? Count what has been sent to the model since then."
+  options={[
+    { text: 'The model changed its mind about the audience as the conversation went on.', why: 'A model has no opinion that persists between responses. Each answer is predicted from the text in the window at that moment.' },
+    { text: 'The first message, with the audience and the page limit, was no longer in the tokens the model saw when it wrote this answer.', correct: true },
+    { text: 'The model was trained on more engineering documents than finance documents.', why: 'Training data shapes what the model tends to write, but it does not explain why the model followed the instruction for two hours and then stopped.' },
+    { text: 'Two hours is longer than the model can stay focused.', why: 'Time is not the limit. A model has no clock. The amount of text sent for each response is what changed.' },
+  ]}>
+
+After two hours of chat, the assistant that had been writing for the
+finance team in two pages suddenly writes four pages for the engineering
+team. Which explanation fits what you know about how a model produces an
+answer?
+
+</Choice>
+
+<Exercise stretch="Paste the same page into a chat assistant and ask it how many tokens the page is. Compare its answer with the script, and decide which one you trust and why.">
+
+Copy about one page of your own writing, an email or a report section, into
+a file called `page.txt`. Run `python3 count_tokens.py page.txt`, then run
+`python3 pages_per_window.py` with the token count it printed. Write down
+the three numbers: characters, estimated tokens, and how many of your pages
+fit in a 200,000-token window. With these numbers you can judge whether a
+document fits before you paste it, and after how many turns a chat is full.
+
+A good result is one line like "my page is 3,100 characters, about 750
+tokens, and 266 pages fit in 200,000 tokens." Then answer this: how many
+pages of instructions, pasted documents and earlier turns would your usual
+chat sessions need before the first message falls out of the window?
+
+</Exercise>
+
+<Recap>
+
+1. A context window is the maximum number of tokens the model takes into
+   account for one response, and a page of English text is a few hundred
+   tokens (@AEC-02).
+2. The window holds the instructions, the conversation so far, anything
+   pasted or attached, tool results and the answer being produced. Anything
+   outside it does not exist for the model
+   (@Academy ai-capabilities-and-limitations).
+3. When a long chat contradicts itself, an early fact has left the window.
+   Restate the fact in your next message instead of scolding the model.
+4. A larger window costs more per call, because every token in it is
+   processed for every response, and the model does not use every part of
+   a full window equally well (@Academy ai-capabilities-and-limitations).
+
+</Recap>
