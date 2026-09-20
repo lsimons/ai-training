@@ -213,7 +213,7 @@ to keep in sync.
 Your personal preferences belong in neither file. Claude Code also reads
 a user-level `CLAUDE.md` from your home configuration directory, in every
 project and only for you. How you like a change explained or which shell
-you use goes there, so the shared file holds only what the whole team
+you use goes there. The shared file then holds only what the whole team
 needs (@Academy claude-code-101).
 
 ## When instructions aren't enough
@@ -231,8 +231,8 @@ scrolled. "Never push to `main`" in `AGENTS.md` is advised; the hook is
 enforced. The message a blocking hook prints goes back to the agent, so
 it learns why the action was refused and can change course instead of
 retrying. Hooks in the project's shared settings file are committed with
-the code, so the whole team gets the same enforcement without each person
-setting it up (@Academy claude-code-101). A hook that runs the formatter
+the code. Everyone who clones the repository gets the same enforcement
+without setting it up (@Academy claude-code-101). A hook that runs the formatter
 after every edit works the same
 way for a procedure the agent often forgets. And when a rule isn't a
 prohibition but a procedure, a
