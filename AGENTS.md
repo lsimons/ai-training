@@ -19,6 +19,21 @@ same order. `mise run links` (lychee, external URLs) and `mise run site-audit`
 (`bun audit`) are network calls that flake, so they're not part of `ci`. Run
 them now and then.
 
+The site's own checks, in the order `ci` runs them after the prose tasks:
+
+| Task                  | What it does                                                      |
+| --------------------- | ----------------------------------------------------------------- |
+| `mise run examples`   | Run every `<Predict run=...>` fixture and compare with the lesson |
+| `mise run site-check` | `astro check`: types, templates, content schemas                  |
+| `mise run site-lint`  | Biome lint and format check (`mise run site-format` rewrites)     |
+| `mise run site-test`  | Vitest unit and component tests, 80% coverage floor               |
+| `mise run site-build` | Build `site/dist`, with the internal link check                   |
+| `mise run site-e2e`   | Build, then the Playwright walkthrough in `site/e2e/`             |
+
+`site-e2e` and `site-screenshot` need `mise run site-browser` once per
+machine. `docs/agents/testing.md` says which layer a new assertion belongs
+in.
+
 ### Astro 7 dev server
 
 `astro dev` (what `mise run site-dev` runs) detaches into a background
@@ -128,6 +143,19 @@ patterns below after the fact. Write so that it has nothing to say.
 **Quality:**
 
 - `mise run ci` must pass before you push.
+- Each check has its layer (`docs/agents/testing.md`): Biome for lint and
+  format, `astro check` for types and templates, Vitest for the logic in
+  `site/src/lib`, `site/src/scripts` and `site/scripts/lib` (80% coverage
+  floor in `site/vitest.config.ts`, never lowered), the Container API tests
+  in `site/tests/components/` for rendered markup, and Playwright in
+  `site/e2e/` for flows across pages. Browser code keeps its pure parts in
+  a module without DOM access (`progress-model.ts`, `checkpoint-logic.ts`)
+  so they can be tested under Node.
+- Biome is the one formatter for `site/` (`site/biome.json`: tabs, single
+  quotes, 120 columns; JSON keeps two spaces). Run `mise run site-format`
+  rather than hand-formatting. No `// biome-ignore` without the reason on
+  the same line. Biome skips the `.astro` template, so `astro check` stays
+  the check for that half.
 - Code examples in lessons are real and their shown output is asserted in
   CI (spec S03, Examples): `<Predict run="..." answer="...">` names a fixture
   under `site/examples/` and `mise run examples` fails on a mismatch. An
