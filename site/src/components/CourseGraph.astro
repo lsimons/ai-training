@@ -109,8 +109,7 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 			</dd>
 			<dt>Counts</dt>
 			<dd>
-				{lessons.length} lesson{lessons.length === 1 ? '' : 's'}, {totalCheckpoints} checkpoint{totalCheckpoints === 1 ? '' : 's'}
-				{coming > 0 && <>, {coming} more coming</>}
+				{lessons.length} lesson{lessons.length === 1 ? '' : 's'}, {totalCheckpoints} checkpoint{totalCheckpoints === 1 ? '' : 's'}{coming > 0 && <>, {coming} more coming</>}
 			</dd>
 			<dt>Builds on</dt>
 			<dd>
