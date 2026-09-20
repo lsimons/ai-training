@@ -94,6 +94,19 @@ export default defineConfig({
 			customCss: ['./src/styles/custom.css'],
 			sidebar: [
 				{
+					label: 'Foundations',
+					items: [
+						{ label: 'Concepts', items: [{ slug: 'concepts', label: 'Course' }, { slug: 'concepts/how-models-work', label: 'How a language model works' }] },
+					],
+				},
+				{
+					label: 'Engineering',
+					items: [
+						{ label: 'Building agents', items: [{ slug: 'building-agents', label: 'Course' }, { slug: 'building-agents/agent-loop', label: 'Building your first agent' }] },
+					],
+				},
+				{ slug: 'progress', label: 'Your progress' },
+				{
 					label: 'Authoring',
 					items: [
 						{ slug: 'guides/writing-pages', label: 'Writing pages' },
