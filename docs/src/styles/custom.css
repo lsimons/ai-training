@@ -100,8 +100,11 @@
 }
 
 /* ---- spike: lesson interactions ---- */
+:root { --at-done: #6b8f5e; --at-done-text: #3f5c36; }
+:root[data-theme=dark] { --at-done: #7fa872; --at-done-text: #a8c99c; }
+.lesson-link { padding-left: 1.75rem !important; }
 .checkpoint { border: 1px solid var(--sl-color-gray-5); border-left: 4px solid var(--sl-color-accent); border-radius: 6px; padding: 1rem 1.25rem; margin: 1.5rem 0; }
-.checkpoint.passed { border-left-color: var(--sl-color-green); }
+.checkpoint.passed { border-left-color: var(--at-done); }
 .checkpoint .cp-kind { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sl-color-gray-3); }
 .checkpoint .cp-state { font-size: 0.8rem; color: var(--sl-color-gray-3); margin-left: 0.5rem; }
 .checkpoint label { display: block; padding: 0.25rem 0; cursor: pointer; }
@@ -109,7 +112,7 @@
 .checkpoint button { margin: 0.5rem 0.5rem 0 0; padding: 0.3rem 0.8rem; border-radius: 4px; border: 1px solid var(--sl-color-gray-4); background: var(--sl-color-bg-nav); cursor: pointer; }
 .checkpoint .cp-check { background: var(--sl-color-accent); color: var(--sl-color-black); border-color: transparent; }
 .checkpoint .cp-feedback { margin-top: 0.5rem; font-weight: 600; }
-.checkpoint .cp-feedback.ok { color: var(--sl-color-green); }
+.checkpoint .cp-feedback.ok { color: var(--at-done-text); }
 .checkpoint .cp-feedback.nope { color: var(--sl-color-orange); }
 .checkpoint .cp-hint { background: var(--sl-color-gray-6); padding: 0.5rem 0.75rem; border-radius: 4px; margin-top: 0.5rem; }
 .checkpoint ol li { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; }
@@ -117,7 +120,7 @@
 .checkpoint .order-ctl button { margin: 0 0 0 0.25rem; padding: 0 0.5rem; }
 .pitfall { border-left: 4px solid var(--sl-color-orange); background: var(--sl-color-gray-6); padding: 0.75rem 1.25rem; margin: 1.5rem 0; border-radius: 6px; }
 .pitfall strong:first-child { color: var(--sl-color-orange); }
-.recap-finish { padding: 0.5rem 1rem; border-radius: 6px; background: var(--sl-color-green); color: var(--sl-color-black); border: none; cursor: pointer; font-weight: 600; }
+.recap-finish { padding: 0.5rem 1rem; border-radius: 6px; background: var(--at-done); color: var(--sl-color-white); border: none; cursor: pointer; font-weight: 600; }
 
 /* widget: sampler */
 #sampler { border: 1px solid var(--sl-color-gray-5); border-radius: 6px; padding: 1rem 1.25rem; margin: 1.5rem 0; }
@@ -128,12 +131,13 @@
 
 /* course node */
 .course-node { display: flex; align-items: center; gap: 1.25rem; border: 1px solid var(--sl-color-gray-5); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
-.course-node .ring { --pct: 0; width: 3.5rem; height: 3.5rem; border-radius: 50%; background: conic-gradient(var(--sl-color-green) calc(var(--pct) * 1%), var(--sl-color-gray-5) 0); display: grid; place-items: center; flex: none; }
+.course-node .ring { --pct: 0; width: 3.5rem; height: 3.5rem; border-radius: 50%; background: conic-gradient(var(--at-done) calc(var(--pct) * 1%), var(--sl-color-gray-5) 0); display: grid; place-items: center; flex: none; }
 .course-node .ring::after { content: ''; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--sl-color-bg); }
 .course-node .node-state { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
-.course-node[data-state=finished] .node-state { color: var(--sl-color-green); }
+.course-node[data-state=finished] .node-state { color: var(--at-done-text); }
 .course-node[data-state=read] .node-state { color: var(--sl-color-orange); }
 .milestone { display: flex; gap: 0.25rem; margin: 0.5rem 0 1rem; }
 .milestone span { flex: 1; height: 0.5rem; border-radius: 3px; background: var(--sl-color-gray-5); }
-.course-node[data-state=finished] ~ .milestone span, .milestone.done span { background: var(--sl-color-green); }
+.course-node[data-state=finished] ~ .milestone span, .milestone.done span { background: var(--at-done); }
 .progress-dump { max-height: 20rem; overflow: auto; font-size: 0.8rem; }
+.recap-finish[disabled] { opacity: 0.7; cursor: default; }
