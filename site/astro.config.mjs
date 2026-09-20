@@ -190,6 +190,7 @@ export default defineConfig({
 						{ slug: 'safety', label: 'Safety' },
 						{ slug: 'safety/responsible-use', label: 'What may go into an AI tool', attrs: { class: 'lesson-link' } },
 						{ slug: 'safety/agent-risk', label: 'Why agent safety is different', attrs: { class: 'lesson-link' } },
+						{ slug: 'safety/eu-ai-act', label: 'The EU AI Act in one lesson', attrs: { class: 'lesson-link' } },
 						{ slug: 'using-agents', label: 'Using agents' },
 						{
 							slug: 'using-agents/delegating',
