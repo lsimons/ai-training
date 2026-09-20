@@ -8,8 +8,9 @@ differentiates between learners.
 **Status:** In progress - topic and competency YAML, the map page, topic and
 competency pages, the glossary, the course lesson graph with milestone bar,
 ring and review card, and the checkpoint fail and extension cards are
-implemented (2026-09-20). Deferred: behaviors for most objectives, the
-map's side drawer, path lanes, quizzes, and alignment rows in the YAML.
+implemented (2026-09-20). Every objective has behaviors and the YAML holds
+the alignment rows for Brilliant, Ng and AI Fluency 4D (2026-09-20).
+Deferred: the map's side drawer, path lanes, and quizzes.
 
 ## Introduction
 
@@ -394,10 +395,9 @@ Learning objectives:
 
 ## Behaviors: worked example
 
-Behaviors exist for the objectives the release-1 lessons serve, and the
-rest are to write. Every objective's behaviors take this form: one-sentence claim, a why, one
-example, with two to six per objective. For
-`using-agents/delegates-and-checks/writes-a-brief` (`base`):
+Every objective has behaviors in the YAML. Each takes this form: a
+one-sentence claim, a why, and one example, with two to six per objective.
+For `using-agents/delegates-and-checks/writes-a-brief` (`base`):
 
 | #   | Claim                                                                                   | Why                                                                                                                              | Example                                                                                                                                                            |
 | --- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -408,8 +408,9 @@ example, with two to six per objective. For
 ## Alignment
 
 An alignment row maps an external framework's item to the objectives here
-that address it. The YAML keeps the rows per competency; this section summarizes
-them for the two frameworks known so far.
+that address it. The YAML keeps the rows per competency, and a row that
+names objectives from more than one competency is stored under each of them.
+This section summarizes the rows for the three frameworks known so far.
 
 ### Frameworks
 
@@ -433,26 +434,36 @@ the "asks" column paraphrases what each objective asks for.
 deploying AI applications, software engineering fundamentals, coding-agent
 use, and shaping the build (deciding what goes in the spec).
 
+**Anthropic's AI Fluency framework** names four competencies, the "4Ds":
+Delegation, Description, Discernment, and Diligence. This spec cites the
+four names as facts and paraphrases what each asks for in its own words.
+Its rows map to Foundations objectives, where Brilliant and Ng map to
+Engineering ones.
+
 ### Rows
 
-| Framework                     | Code / item                            | Asks                                                                       | Our objectives                                                                                                                |
-| ----------------------------- | -------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Brilliant Coding with AI      | TAS-1..4                               | Judge what should be built and define success, weighing value against cost | `coding-with-agents/specifies-work/judges-worth-building`, `defines-success`                                                  |
-| Brilliant Coding with AI      | INC-1, INC-2, INC-5                    | Working increments, early feedback, reversibility                          | `coding-with-agents/ships-with-agent/works-in-increments`, `keeps-change-reversible`                                          |
-| Brilliant Coding with AI      | INC-3, INC-4                           | Maintain understanding and coherence                                       | `coding-with-agents/ships-with-agent/keeps-understanding`                                                                     |
-| Brilliant Coding with AI      | SPC-3, SPC-4, SPC-6                    | Decompose, analyze dependencies, design verification                       | `coding-with-agents/specifies-work/decomposes-into-components`, `designs-the-check`                                           |
-| Brilliant Coding with AI      | SPC-5, BLD-1                           | Manage constraints; direct an agent to a specification                     | `using-agents/delegates-and-checks/writes-a-brief`, `coding-with-agents/ships-with-agent/gives-the-right-context`             |
-| Brilliant Coding with AI      | BLD-2, BLD-3                           | Adjust on new information; divide and delegate                             | `using-agents/delegates-and-checks/adjusts-mid-task`, `using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation` |
-| Brilliant Coding with AI      | BLD-4, BLD-5                           | Organize and oversee a workflow                                            | `coding-with-agents/works-in-team/runs-parallel-work`, `building-agents/orchestrates-agents/picks-a-pattern`                  |
-| Brilliant Coding with AI      | VER-2..6                               | Verify against spec, review, observe, debug, automate                      | `coding-with-agents/verifies-agent-work/*`                                                                                    |
-| Brilliant Coding with AI      | VER-7                                  | Measure quality and evaluate AI systems                                    | `building-agents/evaluates-agents/*`                                                                                          |
-| Brilliant Coding with AI      | MEM-1, MEM-2                           | Manage memory; turn repeated work into reusable knowledge                  | `customizing-agents/configures-agent/manages-memory`, `customizing-agents/writes-skill/packages-a-procedure`                  |
-| Brilliant Coding with AI      | SEC-3, SEC-5                           | Evaluate AI code for vulnerabilities; supply-chain risk                    | `coding-with-agents/verifies-agent-work/screens-for-security`                                                                 |
-| Brilliant Coding with AI      | SEC-4                                  | Mitigate AI- and agent-specific risks                                      | `building-agents/runs-in-production/mitigates-agent-risks`, `customizing-agents/connects-tools-safely/hardens-a-connection`   |
-| Brilliant Coding with AI      | ABS-1..3                               | Reason across levels of abstraction and tooling                            | `using-agents/chooses-tool-and-autonomy/reasons-across-levels`                                                                |
-| Ng, AI engineering skills map | Using coding agents                    | Plan, execute, verify, monitor at calibrated autonomy                      | `using-agents/delegates-and-checks`, `coding-with-agents/ships-with-agent`                                                    |
-| Ng, AI engineering skills map | Shaping the build                      | Deciding what goes in the spec                                             | `coding-with-agents/specifies-work`                                                                                           |
-| Ng, AI engineering skills map | Building and deploying AI applications | Build, evaluate, ship                                                      | `building-agents/*`                                                                                                           |
+| Framework                     | Code / item                            | Asks                                                                       | Our objectives                                                                                                                                                                                                                                          |
+| ----------------------------- | -------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Brilliant Coding with AI      | TAS-1..4                               | Judge what should be built and define success, weighing value against cost | `coding-with-agents/specifies-work/judges-worth-building`, `defines-success`                                                                                                                                                                            |
+| Brilliant Coding with AI      | INC-1, INC-2, INC-5                    | Working increments, early feedback, reversibility                          | `coding-with-agents/ships-with-agent/works-in-increments`, `keeps-change-reversible`                                                                                                                                                                    |
+| Brilliant Coding with AI      | INC-3, INC-4                           | Maintain understanding and coherence                                       | `coding-with-agents/ships-with-agent/keeps-understanding`                                                                                                                                                                                               |
+| Brilliant Coding with AI      | SPC-3, SPC-4, SPC-6                    | Decompose, analyze dependencies, design verification                       | `coding-with-agents/specifies-work/decomposes-into-components`, `designs-the-check`                                                                                                                                                                     |
+| Brilliant Coding with AI      | SPC-5, BLD-1                           | Manage constraints; direct an agent to a specification                     | `using-agents/delegates-and-checks/writes-a-brief`, `coding-with-agents/ships-with-agent/gives-the-right-context`                                                                                                                                       |
+| Brilliant Coding with AI      | BLD-2, BLD-3                           | Adjust on new information; divide and delegate                             | `using-agents/delegates-and-checks/adjusts-mid-task`, `using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation`                                                                                                                           |
+| Brilliant Coding with AI      | BLD-4, BLD-5                           | Organize and oversee a workflow                                            | `coding-with-agents/works-in-team/runs-parallel-work`, `building-agents/orchestrates-agents/picks-a-pattern`                                                                                                                                            |
+| Brilliant Coding with AI      | VER-2..6                               | Verify against spec, review, observe, debug, automate                      | `coding-with-agents/verifies-agent-work/*`                                                                                                                                                                                                              |
+| Brilliant Coding with AI      | VER-7                                  | Measure quality and evaluate AI systems                                    | `building-agents/evaluates-agents/*`                                                                                                                                                                                                                    |
+| Brilliant Coding with AI      | MEM-1, MEM-2                           | Manage memory; turn repeated work into reusable knowledge                  | `customizing-agents/configures-agent/manages-memory`, `customizing-agents/writes-skill/packages-a-procedure`                                                                                                                                            |
+| Brilliant Coding with AI      | SEC-3, SEC-5                           | Evaluate AI code for vulnerabilities; supply-chain risk                    | `coding-with-agents/verifies-agent-work/screens-for-security`                                                                                                                                                                                           |
+| Brilliant Coding with AI      | SEC-4                                  | Mitigate AI- and agent-specific risks                                      | `building-agents/runs-in-production/mitigates-agent-risks`, `customizing-agents/connects-tools-safely/hardens-a-connection`                                                                                                                             |
+| Brilliant Coding with AI      | ABS-1..3                               | Reason across levels of abstraction and tooling                            | `using-agents/chooses-tool-and-autonomy/reasons-across-levels`                                                                                                                                                                                          |
+| Ng, AI engineering skills map | Using coding agents                    | Plan, execute, verify, monitor at calibrated autonomy                      | `using-agents/delegates-and-checks`, `coding-with-agents/ships-with-agent`                                                                                                                                                                              |
+| Ng, AI engineering skills map | Shaping the build                      | Deciding what goes in the spec                                             | `coding-with-agents/specifies-work`                                                                                                                                                                                                                     |
+| Ng, AI engineering skills map | Building and deploying AI applications | Build, evaluate, ship                                                      | `building-agents/*`                                                                                                                                                                                                                                     |
+| Anthropic AI Fluency 4D       | Delegation                             | Decide what to hand to AI, which tool fits, and how much autonomy to give  | `using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation`, `keeps-the-human-steps`, `using-agents/delegates-and-checks/chooses-autonomy`, `coding-with-agents/specifies-work/judges-worth-building`                                       |
+| Anthropic AI Fluency 4D       | Description                            | State the goal, context and wanted output clearly, and refine it           | `concepts/prompts-reliably/*`, `using-agents/delegates-and-checks/writes-a-brief`, `adjusts-mid-task`, `coding-with-agents/ships-with-agent/gives-the-right-context`                                                                                    |
+| Anthropic AI Fluency 4D       | Discernment                            | Judge the output, the process and the behavior of the AI critically        | `concepts/explains-models/names-failure-modes`, `safety/verifies-output/checks-claims`, `spots-sycophancy`, `calibrates-trust`, `using-agents/delegates-and-checks/reviews-against-brief`, `coding-with-agents/verifies-agent-work/reviews-others-code` |
+| Anthropic AI Fluency 4D       | Diligence                              | Use AI responsibly, transparently and with accountability for the result   | `safety/handles-data-safely/*`, `safety/judges-agent-risk/names-blast-radius`, `chooses-human-in-loop`, `coding-with-agents/works-in-team/attributes-honestly`                                                                                          |
 
 ### Not covered
 
