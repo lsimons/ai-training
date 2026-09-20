@@ -1,0 +1,78 @@
+---
+/**
+ * One bar for the whole site plus a "continue" link to the first unfinished
+ * lesson. Used at the top of the progress page and on the landing page,
+ * where it also retargets the hero's primary action once there is progress.
+ */
+import { buildCatalog } from '@lib/catalog';
+import { href } from '@lib/url';
+
+interface Props {
+	/** Rewrite the landing hero's primary action to the next lesson. */
+	hero?: boolean;
+}
+const { hero = false } = Astro.props;
+const catalog = await buildCatalog();
+const first = catalog.flatMap((c) => c.lessons)[0];
+---
+
+<div class="not-content overall" data-overall data-catalog={JSON.stringify(catalog)} data-hero={String(hero)} data-base={href('/')}>
+	<div class="overall-row">
+		<div class="overall-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-bar><div></div></div>
+		<strong data-percent>0%</strong>
+	</div>
+	<p class="overall-text" data-text>No progress yet.</p>
+	<p class="overall-next">
+		<a class="overall-continue" data-continue href={first ? href(`/${first.id}/`) : href('/concepts/')}>Start with {first?.title ?? 'Concepts'}</a>
+	</p>
+</div>
+
+<style>
+	.overall { margin: 1rem 0 1.5rem; }
+	.overall-row { display: flex; align-items: center; gap: 0.75rem; }
+	.overall-bar { flex: 1; height: 0.75rem; border-radius: 4px; background: var(--sl-color-gray-5); overflow: hidden; }
+	.overall-bar > div { height: 100%; width: 0; background: var(--at-done); transition: width 0.3s; }
+	.overall-text { margin: 0.4rem 0 0; color: var(--sl-color-gray-3); font-size: 0.9rem; }
+	.overall-next { margin: 0.75rem 0 0; }
+	.overall-continue { display: inline-block; padding: 0.45rem 1rem; border-radius: 6px; background: var(--sl-color-accent); color: var(--sl-color-black); font-weight: 600; text-decoration: none; }
+</style>
+
+<script>
+	import * as progress from '@scripts/progress';
+	import { overall, type CatalogCourse } from '@scripts/overview';
+
+	document.querySelectorAll<HTMLElement>('[data-overall]').forEach((root) => {
+		const catalog: CatalogCourse[] = JSON.parse(root.dataset.catalog!);
+		const base = root.dataset.base!.replace(/\/$/, '');
+		const bar = root.querySelector<HTMLElement>('[data-bar]')!;
+		const fill = bar.firstElementChild as HTMLElement;
+		const pct = root.querySelector<HTMLElement>('[data-percent]')!;
+		const text = root.querySelector<HTMLElement>('[data-text]')!;
+		const cont = root.querySelector<HTMLAnchorElement>('[data-continue]')!;
+		const heroAction = root.dataset.hero === 'true' ? document.querySelector<HTMLAnchorElement>('.hero .sl-link-button.primary, .hero a.primary') : null;
+
+		function draw() {
+			const o = overall(catalog, progress.load());
+			fill.style.width = `${o.percent}%`;
+			bar.setAttribute('aria-valuenow', String(o.percent));
+			pct.textContent = `${o.percent}%`;
+			text.textContent = o.any
+				? `${o.finished} of ${o.lessons} lessons finished${o.skipped ? `, ${o.skipped} skipped` : ''}${o.started ? `, ${o.started} in progress` : ''}; ${o.passed} of ${o.checkpoints} checkpoints passed.`
+				: `${o.lessons} lessons and ${o.checkpoints} checkpoints across six courses. Nothing started yet.`;
+			if (o.any && o.next) {
+				cont.href = `${base}/${o.next.id}/`;
+				cont.textContent = `Continue with ${o.next.title}`;
+			} else if (o.any && !o.next) {
+				cont.href = `${base}/map/`;
+				cont.textContent = 'Everything finished. See the topic map for what comes next.';
+			}
+			if (heroAction && o.any) {
+				heroAction.href = cont.href;
+				const label = heroAction.querySelector('span') ?? heroAction;
+				label.textContent = o.next ? `Continue with ${o.next.title}` : 'All lessons finished';
+			}
+		}
+		draw();
+		document.addEventListener(progress.EVENT, draw);
+	});
+</script>
