@@ -20,7 +20,7 @@ const conceptSchema = z.object({ id: z.string(), name: z.string(), definition: z
 
 export const collections = {
 	docs: defineCollection({ loader: docsLoader(), schema: docsSchema({ extend: lessonFields }) }),
-	/** docs/src/data/topics/<area>/<topic>.yaml, per spec S02 "Storage". */
+	/** site/src/data/topics/<area>/<topic>.yaml, per spec S02 "Storage". */
 	topics: defineCollection({
 		loader: glob({ pattern: '**/*.yaml', base: './src/data/topics' }),
 		schema: z.object({
@@ -37,7 +37,7 @@ export const collections = {
 			sources: z.array(z.string()).default([]),
 		}),
 	}),
-	/** docs/src/data/competencies/<area>.yaml */
+	/** site/src/data/competencies/<area>.yaml */
 	competencies: defineCollection({
 		loader: glob({ pattern: '*.yaml', base: './src/data/competencies' }),
 		schema: z.object({
@@ -71,7 +71,7 @@ export const collections = {
 			),
 		}),
 	}),
-	/** docs/src/data/bibliography.yaml, keyed by citation key. */
+	/** site/src/data/bibliography.yaml, keyed by citation key. */
 	bibliography: defineCollection({
 		loader: file('./src/data/bibliography.yaml'),
 		schema: z.object({

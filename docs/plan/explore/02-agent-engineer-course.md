@@ -8,7 +8,7 @@ by Leo for the Claude stack. Published at
 
 ## Lessons
 
-All content: `docs/src/content/docs/NN-slug.md` (frontmatter `title` plus
+All content: `site/src/content/docs/NN-slug.md` (frontmatter `title` plus
 `sidebar.order`, no H1). Landing: `index.mdx`. 480-1000 lines each.
 
 Part 1, Fundamentals (101):
@@ -41,7 +41,7 @@ Part 3, Deep dives (301):
 ## Site tech
 
 - Astro 7.3.2 plus @astrojs/starlight 0.42.0, bun, TypeScript 6, sharp.
-  Config `docs/astro.config.mjs` (base `/agent-engineer-course`, Merriweather
+  Config `site/astro.config.mjs` (base `/agent-engineer-course`, Merriweather
   fonts, custom CSS, hardcoded 3-group sidebar).
 - Custom rehype plugin `rehypeBaseLinks` prefixes root-relative links with the
   deploy base. Same pattern as the doc template this repo started from.
@@ -57,7 +57,7 @@ Part 3, Deep dives (301):
 - No progress tracking or persisted quizzes in the site itself; quizzing and
   progress exist only in the `/teach` skill. Prose exercises exist ("Hands-On
   Exercise", "Try it yourself", notably lessons 12 and 13).
-- Pagefind search. CI builds and astro-checks; deploy publishes `docs/dist` to
+- Pagefind search. CI builds and astro-checks; deploy publishes `site/dist` to
   Pages. Tooling pinned in `.mise.toml`; hooks in `prek.toml`.
 
 ## The experimental AI tutor skill
@@ -71,7 +71,7 @@ Path: `.claude/skills/teach/SKILL.md` (commit 6dd3036, "experimental").
   spots, a spaced-recall review queue, and learner notes. Updated after each
   quiz and at session end.
 - Boots the local server: from `docs/` runs `bunx astro dev status`; if down,
-  `mise run docs-dev` (Astro 7 daemonizes), polls the local URL for 200, then
+  `mise run site-dev` (Astro 7 daemonizes), polls the local URL for 200, then
   opens the lesson URL in the browser. Leaves the server running.
 - Builds the lesson list dynamically from frontmatter, not hardcoded.
 - Quizzing: 3-5 questions one at a time, mapped to the lesson's "What you will

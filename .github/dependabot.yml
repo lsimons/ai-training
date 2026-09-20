@@ -2,9 +2,9 @@
 # https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/configure-version-updates
 version: 2
 updates:
-  # Astro Starlight site dependencies (bun lockfile in docs/)
+  # Astro Starlight site dependencies (bun lockfile in site/)
   - package-ecosystem: "bun"
-    directory: "/docs"
+    directory: "/site"
     schedule:
       interval: "weekly"
     cooldown:

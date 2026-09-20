@@ -8,8 +8,8 @@ software engineering, **5** customizing agents, **6** building agents.
 
 ## `agent-engineer-course` (Apache-2.0, may be integrated)
 
-Content root: `docs/src/content/docs/`. Sidebar hardcoded in
-`docs/astro.config.mjs`: Part 1 (01-10), Part 2 (11-14), Part 3 (15-19).
+Content root: `site/src/content/docs/`. Sidebar hardcoded in
+`site/astro.config.mjs`: Part 1 (01-10), Part 2 (11-14), Part 3 (15-19).
 
 No duration metadata exists. Estimates below are prose word counts at about
 180 wpm. Total prose is about 82k words, roughly 7.5 h of reading; with the

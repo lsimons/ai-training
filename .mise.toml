@@ -35,10 +35,10 @@ python = "3.14.7"
 
 # Deliberately NOT --frozen-lockfile: this is the task you run while
 # actually changing dependencies, and it is allowed to update bun.lock.
-# `docs-install-frozen` is the one the gate uses.
-[tasks.docs-install]
+# `site-install-frozen` is the one the gate uses.
+[tasks.site-install]
 description = "Install the site dependencies (bun); may update bun.lock"
-dir = "docs"
+dir = "site"
 run = "bun install"
 
 # A lockfile CI is willing to regenerate is not a pin. Without
@@ -47,34 +47,34 @@ run = "bun install"
 # whatever was newest at that moment — exactly the auto-download this
 # repo's pinning policy exists to prevent. This has already happened once
 # here: bun.lock's recorded constraints had drifted from package.json.
-[tasks.docs-install-frozen]
+[tasks.site-install-frozen]
 description = "Install the site dependencies, failing if bun.lock is out of date"
-dir = "docs"
+dir = "site"
 run = "bun install --frozen-lockfile"
 
-[tasks.docs-dev]
+[tasks.site-dev]
 description = "Start the live-reloading dev server"
-dir = "docs"
+dir = "site"
 run = "bun run dev"
 
-[tasks.docs-build]
-description = "Build the static site into docs/dist"
-dir = "docs"
+[tasks.site-build]
+description = "Build the static site into site/dist"
+dir = "site"
 run = "bun run build"
 
-[tasks.docs-preview]
+[tasks.site-preview]
 description = "Preview the production build"
-dir = "docs"
+dir = "site"
 run = "bun run preview"
 
 [tasks.examples]
 description = "Run every lesson example fixture and assert the output the lesson shows"
-dir = "docs"
+dir = "site"
 run = "bun scripts/check-examples.mjs --self-test && bun scripts/check-examples.mjs"
 
-[tasks.docs-e2e]
-description = "Build, serve, and click through every lesson mechanism in a headless browser. Needs `mise run docs-browser` once."
-dir = "docs"
+[tasks.site-e2e]
+description = "Build, serve, and click through every lesson mechanism in a headless browser. Needs `mise run site-browser` once."
+dir = "site"
 run = """
 bun run build
 bunx astro preview --port 4399 > /tmp/astro-e2e-preview.log 2>&1 &
@@ -96,40 +96,40 @@ pkill -f 'astro preview --port 4399' || true
 exit $status
 """
 
-[tasks.docs-check]
+[tasks.site-check]
 description = "Astro type/content check"
-dir = "docs"
+dir = "site"
 run = "bunx astro check"
 
-[tasks.docs-slides]
+[tasks.site-slides]
 description = "Render the example Quarto slide deck to HTML + PDF"
-run = "quarto render {{arg(name='deck', default='docs/public/presentations/example.qmd')}}"
+run = "quarto render {{arg(name='deck', default='site/public/presentations/example.qmd')}}"
 
-[tasks.docs-favicon]
+[tasks.site-favicon]
 description = "Regenerate the favicon + apple-touch-icon from the palette"
-dir = "docs"
+dir = "site"
 run = "bun run scripts/gen-favicon.mjs"
 
 # Not part of `ci`: this hits the registry's advisory API, so it flakes on
 # network the same way `links` does. Anything it reports gets pinned up
-# through the `overrides` block in docs/package.json — see AGENTS.md.
-[tasks.docs-audit]
+# through the `overrides` block in site/package.json — see AGENTS.md.
+[tasks.site-audit]
 description = "bun audit of the site dependency tree (network; not part of `ci`)"
-dir = "docs"
+dir = "site"
 run = "bun audit"
 
-[tasks.docs-clean]
+[tasks.site-clean]
 description = "Remove build artifacts"
-run = "rm -rf docs/dist docs/.astro"
+run = "rm -rf site/dist site/.astro"
 
-[tasks.docs-browser]
+[tasks.site-browser]
 description = "Install the Chromium browser Playwright uses for screenshots"
-dir = "docs"
+dir = "site"
 run = "bunx playwright install chromium"
 
-[tasks.docs-screenshot]
-description = "Build, serve, and screenshot a page (args: [out] [path]). Needs `mise run docs-browser` once."
-dir = "docs"
+[tasks.site-screenshot]
+description = "Build, serve, and screenshot a page (args: [out] [path]). Needs `mise run site-browser` once."
+dir = "site"
 run = """
 out="{{arg(name='out', default='out.png')}}"
 path="{{arg(name='path', default='/ai-training/')}}"
@@ -156,16 +156,16 @@ description = "lychee broken-link check (network; not part of `ci`)"
 run = "lychee --no-progress --config .lychee.toml ."
 
 # Sequential rather than `depends`, which mise runs in parallel:
-# `docs-check` and `docs-build` both write `docs/.astro`. The workflow runs
+# `site-check` and `site-build` both write `site/.astro`. The workflow runs
 # the same list as separate steps for readable logs — keep the two in sync.
 [tasks.ci]
 description = "Full CI gate: install + lint + examples + Astro check + build"
 run = [
-  "mise run docs-install-frozen",
+  "mise run site-install-frozen",
   "mise run lint",
   "mise run examples",
-  "mise run docs-check",
-  "mise run docs-build",
+  "mise run site-check",
+  "mise run site-build",
 ]
 
 # Local mirror of the `zizmor` CI job, using the mise-pinned zizmor. Not
@@ -186,8 +186,8 @@ run = [
 # registers.)
 #
 # `--collect=all` is the trap: it means "collect every kind *and ignore
-# .gitignore*", so after `mise run docs-install` it sweeps in every
-# vendored workflow under docs/node_modules — 53 findings about other
+# .gitignore*", so after `mise run site-install` it sweeps in every
+# vendored workflow under site/node_modules — 53 findings about other
 # people's repositories. Naming kinds explicitly avoids that too, but is
 # strictly narrower than the default and silently drops pre-commit
 # coverage. Omitting the flag is both simpler and broader.

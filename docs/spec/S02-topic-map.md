@@ -57,8 +57,8 @@ from these files.
 
 | File                                       | Contents                                                                                                                                                               |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/src/data/topics/<area>/<topic>.yaml` | `name`, `definition`, `concepts[] {id, name, definition}`, `links {prerequisites[], related[], specializations[]}`, `sources[]`                                        |
-| `docs/src/data/competencies/<area>.yaml`   | `competencies[] {id, statement, topics[], objectives[] {id, statement, level, behaviours[] {claim, why, example}}, alignment[] {framework, code, asks, objectives[]}}` |
+| `site/src/data/topics/<area>/<topic>.yaml` | `name`, `definition`, `concepts[] {id, name, definition}`, `links {prerequisites[], related[], specializations[]}`, `sources[]`                                        |
+| `site/src/data/competencies/<area>.yaml`   | `competencies[] {id, statement, topics[], objectives[] {id, statement, level, behaviours[] {claim, why, example}}, alignment[] {framework, code, asks, objectives[]}}` |
 
 ### Stable URLs
 

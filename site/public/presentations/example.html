@@ -1080,7 +1080,7 @@ Leo Simons
 <li><strong>HTML</strong> (reveal.js) - <code>example.html</code></li>
 <li><strong>PDF</strong> (Beamer) - <code>example.pdf</code></li>
 </ul>
-<p>Render both with <code>mise run docs-slides</code>.</p>
+<p>Render both with <code>mise run site-slides</code>.</p>
 <aside class="notes">
 <p>Speaker notes go in a <code>.notes</code> block and show up in reveal.js’s speaker view (press <code>s</code>), but not on the slide itself.</p>
 <style type="text/css">
@@ -1141,10 +1141,10 @@ display:block!important;
 <section id="make-it-yours" class="slide level2">
 <h2>Make it yours</h2>
 <ol type="1">
-<li>Copy this file to a new name in <code>docs/public/presentations/</code>.</li>
+<li>Copy this file to a new name in <code>site/public/presentations/</code>.</li>
 <li>Edit the frontmatter <code>title</code> / <code>author</code> and write your slides.</li>
-<li>Render with <code>quarto render docs/public/presentations/your-deck.qmd</code>.</li>
-<li>Link it from the sidebar in <code>docs/astro.config.mjs</code>.</li>
+<li>Render with <code>quarto render site/public/presentations/your-deck.qmd</code>.</li>
+<li>Link it from the sidebar in <code>site/astro.config.mjs</code>.</li>
 </ol>
 <p>See the <a href="https://lsimons.github.io/ai-training/guides/slides/">slides guide</a> for details.</p>
 
