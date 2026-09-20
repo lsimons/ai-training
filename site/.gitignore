@@ -26,3 +26,8 @@ out.png
 # public/presentations/). `*_files/` holds a deck's supporting assets.
 .quarto/
 public/presentations/*_files/
+
+# Vitest coverage and Playwright output
+coverage/
+playwright-report/
+test-results/
