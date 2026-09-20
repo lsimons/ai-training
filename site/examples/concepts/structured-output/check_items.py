@@ -61,7 +61,8 @@ def parse(text):
     if not text:
         return [], "the file is empty"
     if not text.startswith(("[", "{")):
-        if "{" in text or "[" in text:
+        starts_json = any(line.lstrip().startswith(("[", "{")) for line in text.splitlines())
+        if starts_json:
             return [], "the file does not start with [ (is there text before the JSON?)"
         return parse_lines(text), None
     try:
