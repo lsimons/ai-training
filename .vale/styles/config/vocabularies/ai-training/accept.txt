@@ -1,22 +1,24 @@
-# Accepted terms for Vale.Spelling and Vale.Terms. One per line; a line is
-# a Go regex matched against a single word, and a plain word is
-# case-sensitive. Case-insensitive patterns are used where a name also
-# appears in a task, package or path name (`astro-checks`, `@astrojs/starlight`).
+# Vocabulary for Vale. Spelling is cspell's job (cspell-words.txt); this
+# list serves two Vale rules only:
+#
+# 1. Vale.Terms enforces the casing of a plain word listed here, so the
+#    names below are the canonical spellings ("Quarto", not "quarto", in
+#    prose; code spans are skipped).
+# 2. Vale adds every entry to the exceptions of rules that support them,
+#    which is how the write-good.TooWordy exemptions at the end work.
+#
+# A line is a Go regex matched against a single word. Regex entries do not
+# enforce casing, so plain jargon does not belong here any more.
 
-# Products, tools, projects
-[Aa]stro
-[Ss]tarlight
+# Names whose casing Vale.Terms enforces
 Pagefind
 Quarto
 Vale
-cspell
-proselint
 Markdown
 Anthropic
 Skilljar
 Figma
 Cowork
-[Bb]asecamp
 Vue
 Vuetify
 Beamer
@@ -32,23 +34,6 @@ Midjourney
 Dyno
 Hotspot
 Clickdown
-(?i)elo
-papaparse
-localStorage
-rehype
-prek
-mdformat
-markdownlint
-gitleaks
-commitlint
-zizmor
-dependabot
-basedpyright
-pytest
-uv
-(?i)mcp
-
-# People and organisations
 Addy
 Osmani
 Ivar
@@ -63,31 +48,6 @@ Schulhoff
 Yu
 Schuberg
 Philis
-
-# Field jargon
-[Aa]gentic
-[Ee]vals?
-[Ee]xfiltrat(e|ion)
-[Ss]ubagents?
-[Ss]ubagent's
-[Oo]verreliance
-[Rr]ollouts?
-[Ss]andboxing
-[Jj]ailbreaking
-[Ee]nsembling
-[Tt]okeniz(er|ation)
-[Mm]ultimodal
-[Cc]hatbots?
-[Ss]corable
-[Pp]ermissioning
-[Hh]ackathon
-[Ee]nablement
-[Ee]xplainers
-[Ss]crollytelling
-[Cc]ourseware
-[Ll]ede
-[Mm]inimax
-[Pp]recalculus
 LLMs
 APIs
 CIs
@@ -97,63 +57,6 @@ MCQs
 TFs
 TODOs
 SHAs
-psets?
-ddb
-
-# Developer jargon
-[Rr]epos?
-[Cc]onfigs?
-[Dd]ev
-(?i)url
-pkgs
-[Ww]alkthroughs?
-[Mm]onorepos?
-[Ww]orktrees?
-[Aa]llowlists?
-[Dd]enylists?
-[Hh]ardcoded
-[Pp]repends
-[Ww]ontfix
-[Tt]extareas?
-[Rr]oadmaps?
-[Ff]avicon
-[Ff]rontmatter
-[Cc]allouts?
-[Tt]ooltips?
-[Ll]ockfile
-[Gg]itignored?
-[Tt]oolchain
-[Ss]hortcode
-[Ss]tdlib
-[Ss]tdout
-[Rr]etriable
-[Cc]ombinable
-[Cc]lippable
-[Ss]crollable
-[Ee]xtensionless
-[Ss]ubfolders?
-[Ss]ubtasks?
-[Ss]ubgoals?
-[Ss]ubheaders?
-[Uu]nvalidated
-[Uu]nreviewed
-[Uu]ntrusted
-[Uu]nformatted
-[Dd]iscoverability
-[Rr]elicensing
-[Rr]eframe
-[Uu]pvotes
-[Uu]psell
-[Aa]nonymization
-[Oo]nwards
-hrefs
-pid
-px
-enum
-(?i)eur
-
-# Possessive Vale splits oddly ("someone else's").
-else's
 
 # Exemptions for write-good.TooWordy, not spellings. Vale adds every term
 # here to the exceptions of rules that support them. These tokens are
