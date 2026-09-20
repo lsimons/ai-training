@@ -51,8 +51,9 @@ concepts:
       skills, hooks, subagents and server connections into one installable
       package with a version. A marketplace is a catalog of plugins that a
       team or vendor publishes so others can install from it by name.
-      Installing a plugin runs its hooks and grants its servers access, so
-      treat it like any other dependency and read what it contains.
+      Installing a plugin lets its hooks run in your sessions and gives its
+      servers the access you grant, so treat it like any other dependency
+      and read what it contains.
 links:
   prerequisites: [customizing-agents/instructions]
   related: []
