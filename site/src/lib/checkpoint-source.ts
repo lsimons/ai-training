@@ -33,7 +33,7 @@ const TAG_START = new RegExp(`<(${Object.keys(KIND_OF_TAG).join('|')})\\b`, 'g')
  * after its `>`, skipping any `>` inside quoted strings or `{...}` expressions
  * (option arrays, template literals).
  */
-function openingTagEnd(src: string, start: number): number {
+export function openingTagEnd(src: string, start: number): number {
 	let depth = 0;
 	let quote: string | null = null;
 	for (let i = start; i < src.length; i++) {

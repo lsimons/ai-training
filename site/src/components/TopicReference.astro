@@ -1,0 +1,109 @@
+---
+/**
+ * The learner's reference block of a topic page (spec S02 "Learner's
+ * reference"): per lesson covering the topic, the recap takeaways and the
+ * canonical example, rendered at build from the lesson source and hidden. The
+ * script reads the progress record and reveals the block of every finished
+ * lesson. The others keep the unlock note. Nothing is fetched at view time.
+ */
+import { Code } from '@astrojs/starlight/components';
+import Prompt from '@components/lesson/Prompt.astro';
+import Response from '@components/lesson/Response.astro';
+import { getLessons } from '@lib/lessons';
+import { referenceOf, type Segment } from '@lib/reference';
+import { href } from '@lib/url';
+
+interface Props {
+	topicId: string;
+}
+const { topicId } = Astro.props;
+const lessons = (await getLessons()).filter((l) => (l.data.covers ?? []).includes(topicId));
+const entries = lessons.map((l) => ({ lesson: l, ...referenceOf(l) }));
+
+/** Expressive Code wants a language it knows; plain text otherwise. */
+const lang = (s: Segment & { kind: 'code' }) => s.lang || 'text';
+---
+
+{/* Not `not-content`: the block is build-rendered prose (headings, lists, figures) that should read like the page; the script only toggles `hidden`. */}
+<div class="reference" data-reference={topicId}>
+	{entries.length === 0 && <p>No lesson covers this topic yet, so there is nothing to unlock here.</p>}
+	{
+		entries.map(({ lesson, takeaways, example }) => (
+			<section class="reference-lesson" data-reference-lesson={lesson.id} data-unlocked="false">
+				<h3>{lesson.data.title}</h3>
+				<p class="reference-locked" data-reference-locked>
+					Unlocks when you finish <a href={href(`/${lesson.id}/`)}>{lesson.data.title}</a>.
+				</p>
+				<div class="reference-body" data-reference-body hidden>
+					<h4>Takeaways</h4>
+					{takeaways.length ? (
+						<ol class="reference-takeaways">
+							{takeaways.map((t) => (
+								<li set:html={t} />
+							))}
+						</ol>
+					) : (
+						<p>This lesson has no recap takeaways yet.</p>
+					)}
+					<h4>Example</h4>
+					{!example && <p class="reference-no-example">This lesson has no runnable example or prompt block.</p>}
+					{example?.kind === 'predict' && (
+						<div class="reference-example reference-predict">
+							<p class="reference-example-title">
+								<strong>{example.title}</strong> · <a href={href(`/${lesson.id}/#${example.id}`)}>open in the lesson</a>
+							</p>
+							{example.body.map((s) => (s.kind === 'code' ? <Code code={s.code} lang={lang(s)} /> : <div set:html={s.html} />))}
+							{example.answer !== undefined && (
+								<p class="reference-answer">
+									Prints{example.answer.includes('\n') ? ' the lines below' : <>: <code>{example.answer}</code></>}
+									{example.run && (
+										<>
+											{' '}
+											(verified in CI from <code>site/examples/{example.run}</code>)
+										</>
+									)}
+								</p>
+							)}
+							{example.answer !== undefined && example.answer.includes('\n') && (
+								<pre class="reference-answer-lines">{example.answer}</pre>
+							)}
+						</div>
+					)}
+					{example?.kind === 'prompt' && (
+						<div class="reference-example">
+							<Prompt model={example.model} recorded={example.recorded}>
+								{example.prompt.map((s) => (s.kind === 'code' ? <Code code={s.code} lang={lang(s)} /> : <div set:html={s.html} />))}
+							</Prompt>
+							{example.response && (
+								<Response>
+									{example.response.map((s) => (s.kind === 'code' ? <Code code={s.code} lang={lang(s)} /> : <div set:html={s.html} />))}
+								</Response>
+							)}
+						</div>
+					)}
+				</div>
+			</section>
+		))
+	}
+</div>
+
+<script>
+	import * as progress from '@scripts/progress';
+	import { isUnlocked } from '@scripts/reference';
+
+	const root = document.querySelector<HTMLElement>('[data-reference]');
+	if (root) {
+		const sections = root.querySelectorAll<HTMLElement>('[data-reference-lesson]');
+		function draw() {
+			const record = progress.load();
+			for (const section of sections) {
+				const unlocked = isUnlocked(record, section.dataset.referenceLesson ?? '');
+				section.dataset.unlocked = String(unlocked);
+				section.querySelector<HTMLElement>('[data-reference-locked]')!.hidden = unlocked;
+				section.querySelector<HTMLElement>('[data-reference-body]')!.hidden = !unlocked;
+			}
+		}
+		draw();
+		document.addEventListener(progress.EVENT, draw);
+	}
+</script>

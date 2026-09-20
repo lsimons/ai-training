@@ -107,6 +107,8 @@ describe('checkpointsOf', () => {
 				reviewable: true,
 				concepts: ['token'],
 				context: undefined,
+				// The reference tests read this body too (lib/reference.ts).
+				stem: 'What does this print?\n\n```python\nprint(1 > 0)\n```',
 			},
 			{
 				...common,

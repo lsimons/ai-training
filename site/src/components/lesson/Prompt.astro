@@ -7,6 +7,8 @@
 interface Props {
 	model: string;
 	recorded: string;
+	/** Marks this block as the lesson's canonical example (spec S03 "Examples"). Read from the MDX source by lib/reference.ts; not rendered. */
+	canonical?: boolean;
 }
 const { model, recorded } = Astro.props;
 const illustrative = model === 'illustrative' || recorded === 'illustrative';

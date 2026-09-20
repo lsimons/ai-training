@@ -180,6 +180,7 @@ export default defineConfig({
 			customCss: ['./src/styles/custom.css', './src/styles/lesson.css'],
 			sidebar: [
 				{ slug: 'progress', label: 'Your progress' },
+				{ slug: 'reference', label: 'Your reference' },
 				{ slug: 'settings', label: 'Settings' },
 				{
 					label: 'Foundations',

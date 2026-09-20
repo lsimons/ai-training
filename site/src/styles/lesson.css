@@ -232,6 +232,20 @@
 .review-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
 .review-empty { padding: 1rem; border: 1px dashed var(--sl-color-gray-4); border-radius: 6px; }
 
+/* ---- learner's reference (topic pages and /reference/) ---- */
+.reference-lesson { border: 1px solid var(--sl-color-gray-5); border-left: 4px solid var(--sl-color-gray-4); border-radius: 6px; padding: 0.75rem 1.25rem; margin: 1rem 0; }
+.reference-lesson[data-unlocked='true'] { border-left-color: var(--at-done); }
+.reference-lesson h3 { margin-top: 0.25rem; }
+.reference-lesson h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sl-color-gray-3); }
+.reference-locked { color: var(--sl-color-gray-3); font-style: italic; }
+.reference-example-title { font-size: 0.9rem; }
+.reference-answer { font-size: 0.9rem; color: var(--sl-color-gray-2); }
+.reference-empty { padding: 1rem; border: 1px dashed var(--sl-color-gray-4); border-radius: 6px; }
+.reference-area { margin: 1rem 0; }
+.reference-area h2 { font-size: 1.1rem; margin: 0 0 0.5rem; }
+.reference-area ul { margin: 0; padding-left: 1.25rem; }
+.reference-area li { padding: 0.15rem 0; }
+
 /* ---- citations and terms (remark plugins, spec S03 "Citations and terms") ---- */
 .sl-markdown-content a.citation { font-size: 0.75em; vertical-align: super; line-height: 0; text-decoration: none; margin-left: 0.1em; }
 .sl-markdown-content ol.references { font-size: 0.9rem; }

@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 /** One reference page per topic (spec S02 "Stable URLs"), rendered from the YAML. */
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import TopicReference from '@components/TopicReference.astro';
 import { areaOf } from '@lib/areas';
 import { getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
@@ -24,6 +25,7 @@ const headings = [
 	{ depth: 2, slug: 'concepts', text: 'Concepts' },
 	{ depth: 2, slug: 'links', text: 'Links' },
 	{ depth: 2, slug: 'lessons', text: 'Lessons' },
+	{ depth: 2, slug: 'reference', text: 'Your reference' },
 	{ depth: 2, slug: 'sources', text: 'Sources' },
 ];
 ---
@@ -47,6 +49,11 @@ const headings = [
 
 	<h2 id="lessons">Lessons</h2>
 	{lessons.length ? <ul>{lessons.map((l) => <li><a href={href(`/${l.id}/`)}>{l.data.title}</a> ({l.data.mode})</li>)}</ul> : <p>No lesson covers this topic yet.</p>}
+
+	{/* The learner's reference (spec S02 "Learner's reference"): build-rendered, revealed per finished lesson. */}
+	<h2 id="reference">Your reference</h2>
+	<p>Each lesson above adds its takeaways and its example here once you finish it. <a href={href('/reference/')}>Your reference</a> lists every lesson you have finished.</p>
+	<TopicReference topicId={topic.id} />
 
 	<h2 id="sources">Sources</h2>
 	{
