@@ -2,7 +2,9 @@
 /**
  * Assign one option to each statement row (spec S01 `match`). Each row is a
  * `<select>`, so it is keyboard operable without extra scripting. Per-row
- * feedback after Check; `rationale` shows on a full pass.
+ * feedback after Check, linked to the select with `aria-describedby` (the
+ * shared `.cp-feedback` region does the announcing); `rationale` shows on
+ * a full pass.
  */
 import CheckpointShell from './CheckpointShell.astro';
 
@@ -40,13 +42,13 @@ for (const r of rows) {
 				rows.map((r, i) => (
 					<div class="cp-match-row" data-option={r.option} data-why={r.why}>
 						<label for={`${id}-row-${i}`}>{r.statement}</label>
-						<select id={`${id}-row-${i}`}>
+						<select id={`${id}-row-${i}`} aria-describedby={`${id}-row-${i}-fb`}>
 							<option value="">Choose…</option>
 							{options.map((o, j) => (
 								<option value={j}>{o}</option>
 							))}
 						</select>
-						<span class="cp-row-feedback" aria-live="polite"></span>
+						<span class="cp-row-feedback" id={`${id}-row-${i}-fb`}></span>
 					</div>
 				))
 			}

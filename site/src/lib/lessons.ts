@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { DEFAULT_REVISION, KIND_OF_TAG, isReviewable, type CheckpointKind } from './checkpoint-rules';
+import { DEFAULT_REVISION, KIND_OF_TAG, isReviewable, type CheckpointKind, type CheckpointTag } from './checkpoint-rules';
 
 export type Lesson = CollectionEntry<'docs'>;
 
@@ -67,7 +67,7 @@ export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 	const out: CheckpointInfo[] = [];
 	for (const m of src.matchAll(TAG_START)) {
 		const tag = openingTag(src, m.index);
-		const kind: CheckpointKind | undefined = KIND_OF_TAG[m[1]];
+		const kind: CheckpointKind | undefined = KIND_OF_TAG[m[1] as CheckpointTag];
 		if (!kind) throw new Error(`${lesson.id}: unknown checkpoint tag <${m[1]}>`);
 		const id = attrValue(tag, 'id');
 		if (!id) throw new Error(`${lesson.id}: <${m[1]}> without an id: ${tag.slice(0, 80)}`);
