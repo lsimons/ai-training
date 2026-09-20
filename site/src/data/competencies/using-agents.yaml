@@ -46,7 +46,16 @@ competencies:
       - id: using-agents/delegates-and-checks/adjusts-mid-task
         statement: Adjusts the brief when the work reveals new information
         level: base
-        behaviors: []
+        behaviors:
+          - claim: When the agent reports something the brief did not anticipate, the learner updates the brief rather than answering the question in the chat.
+            why: An answer in the chat is lost to the next run; a brief that carries the new information keeps the fix.
+            example: The agent asks which of two templates to use; the learner adds "use `templates/2026/`" to the brief and restarts from it.
+          - claim: The learner stops the agent when the work shows the goal itself was wrong, instead of letting it finish the wrong thing well.
+            why: Finished wrong work costs the run and the review; a stopped run costs only the run.
+            example: The agent's first draft shows the data is quarterly, not monthly; the learner stops and rewrites the done-criteria.
+          - claim: A change to the brief is stated as a change, so the agent drops the old constraint.
+            why: An agent holds the earlier instruction in context and tries to satisfy both.
+            example: "\"Replace the earlier limit of five bullets with: no limit, one bullet per decision\" rather than only stating the new rule."
     alignment:
       - framework: Brilliant Coding with AI
         code: SPC-5, BLD-1
@@ -60,6 +69,18 @@ competencies:
         code: Using coding agents
         asks: Plan, execute, verify, monitor at calibrated autonomy
         objectives: [using-agents/delegates-and-checks, coding-with-agents/ships-with-agent]
+      - framework: Anthropic AI Fluency 4D
+        code: Delegation
+        asks: Decide what to hand to AI, which tool fits, and how much autonomy to give
+        objectives: [using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation, using-agents/chooses-tool-and-autonomy/keeps-the-human-steps, using-agents/delegates-and-checks/chooses-autonomy, coding-with-agents/specifies-work/judges-worth-building]
+      - framework: Anthropic AI Fluency 4D
+        code: Description
+        asks: State the goal, context and wanted output clearly, and refine it
+        objectives: [concepts/prompts-reliably/structures-a-prompt, concepts/prompts-reliably/iterates-on-output, concepts/prompts-reliably/asks-for-structure, using-agents/delegates-and-checks/writes-a-brief, using-agents/delegates-and-checks/adjusts-mid-task, coding-with-agents/ships-with-agent/gives-the-right-context]
+      - framework: Anthropic AI Fluency 4D
+        code: Discernment
+        asks: Judge the output, the process and the behavior of the AI critically
+        objectives: [concepts/explains-models/names-failure-modes, safety/verifies-output/checks-claims, safety/verifies-output/spots-sycophancy, safety/verifies-output/calibrates-trust, using-agents/delegates-and-checks/reviews-against-brief, coding-with-agents/verifies-agent-work/reviews-others-code]
   - id: using-agents/chooses-tool-and-autonomy
     statement: Chooses the right tool and autonomy level for a job
     topics: [using-agents/choosing-tools, using-agents/delegating]
@@ -67,15 +88,42 @@ competencies:
       - id: using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation
         statement: Picks chat, agent or automation for a task and says why
         level: base
-        behaviors: []
+        behaviors:
+          - claim: The learner picks chat when the task needs judgment at every step, an agent when the steps are known but the path varies, and automation when the steps and path are fixed.
+            why: Each level trades control for effort, and the wrong pick either wastes attention or removes it where it was needed.
+            example: Drafting a difficult email is chat; cleaning up a folder of misnamed files is an agent; renaming every new invoice on arrival is automation.
+          - claim: The learner says what would make them move a task to the next level, and what would move it back.
+            why: Tasks change, and a rule for moving makes the choice reviewable.
+            example: "\"Once the agent has filed ten reports without a correction, schedule it; if it needs a correction twice in a month, go back to reviewing each.\""
+          - claim: The learner picks the level for the task's worst case, not its typical case.
+            why: A task that is routine nine times and consequential the tenth needs the level that handles the tenth.
+            example: Replying to support tickets stays at agent-with-approval because one in fifty tickets is a legal complaint.
       - id: using-agents/chooses-tool-and-autonomy/keeps-the-human-steps
         statement: Names the steps that stay human and why
         level: base
-        behaviors: []
+        behaviors:
+          - claim: The learner names the steps that stay with a person because someone has to answer for them, not because the agent cannot do them.
+            why: Some steps are kept because a person has to be accountable for them, and that reason should be said out loud.
+            example: The agent can draft the performance review, but the manager writes the rating, because the manager is the one who has to defend it.
+          - claim: The learner keeps the step where the information is not in any system the agent can reach.
+            why: An agent works from what it can read, and much of what matters in a decision is in conversations and context it never saw.
+            example: The agent proposes the meeting time from calendars; the person keeps the choice because they know a colleague is having a hard week.
+          - claim: The learner keeps the steps that teach them what they need to keep judging the agent's work.
+            why: If every step is handed over, the person loses the knowledge that lets them check the result.
+            example: The engineer keeps reading the tests the agent writes, even though the agent could review them, so that they still know the system.
       - id: using-agents/chooses-tool-and-autonomy/reasons-across-levels
         statement: Re-applies judgment when the tool level rises
         level: expert
-        behaviors: []
+        behaviors:
+          - claim: When a tool takes over a level of work, the learner moves their attention to the level above it and asks the same questions there.
+            why: The questions about correctness, cost and risk do not go away; they move to the specification and the review.
+            example: When the agent writes the code, the learner stops reviewing syntax and starts reviewing whether the acceptance test proves the requirement.
+          - claim: The learner can still go down to the lower level when the higher-level signal does not add up.
+            why: Higher-level signals depend on the lower level being sound, and the ability to check it is what makes the trust deserved.
+            example: The dashboard says the migration succeeded, and the learner still opens the database to count rows when the number looks round.
+          - claim: The learner notices when a tool's rise changes what counts as a mistake, and changes the checks to match.
+            why: The old checks catch the old mistakes, and a more capable tool makes different ones.
+            example: With an agent that writes tests too, "are there tests?" stops working as a check and "do the tests fail when the feature is broken?" replaces it.
     alignment:
       - framework: Brilliant Coding with AI
         code: BLD-2, BLD-3
@@ -85,3 +133,7 @@ competencies:
         code: ABS-1..3
         asks: Reason across levels of abstraction and tooling
         objectives: [using-agents/chooses-tool-and-autonomy/reasons-across-levels]
+      - framework: Anthropic AI Fluency 4D
+        code: Delegation
+        asks: Decide what to hand to AI, which tool fits, and how much autonomy to give
+        objectives: [using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation, using-agents/chooses-tool-and-autonomy/keeps-the-human-steps, using-agents/delegates-and-checks/chooses-autonomy, coding-with-agents/specifies-work/judges-worth-building]
