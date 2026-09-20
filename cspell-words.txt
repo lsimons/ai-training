@@ -11,6 +11,7 @@ Osmani
 addyosmani
 Malan
 Daniele
+Vaswani
 Procida
 Schulhoff
 Soares
@@ -34,6 +35,11 @@ Replit
 Skilljar
 Vuetify
 basedpyright
+Falco
+Forgejo
+Gitea
+Giskard
+Rovo
 papaparse
 prek
 zizmor
@@ -55,6 +61,8 @@ psets
 
 # Jargon
 anonymization
+automator
+deployers
 chatbots
 clippable
 courseware
@@ -65,19 +73,25 @@ evals
 exfiltration
 extensionless
 frontmatter
+gamified
 hackathon
 Hotspot
 hrefs
 jailbreaking
+lockfiles
 lede
 multimodal
 permissioned
 permissioning
 pkgs
 retriable
+Reflexion
 rstrip
 sandboxing
+sandboxed
 scorable
+subprocessor
+subprocessors
 scrollytelling
 stdlib
 subgoals
