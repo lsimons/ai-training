@@ -46,8 +46,9 @@ test('the course page shows the finished node, the ring and the review card', as
 	await seed(finished);
 	await page.goto('concepts/');
 	// `a[data-node]`: a coming (planned) lesson renders as `span[data-node]` and has no progress state.
-	await expect(page.locator('a[data-node]')).toHaveAttribute('data-state', 'finished');
-	await expect(page.locator('[data-ring-label]')).toHaveText('100%');
+	await expect(page.locator('a[data-node="concepts/how-models-work"]')).toHaveAttribute('data-state', 'finished');
+	// The seed finishes one of the six live Concepts lessons: round(1 / 6 * 100) = 17 (overview.ts `progressPercent`).
+	await expect(page.locator('[data-ring-label]')).toHaveText('17%');
 	await expect(page.locator('[data-review-card]')).toHaveText('Review due: 2 items');
 });
 
@@ -61,7 +62,13 @@ test('the topic map colors covered topics by lesson state', async ({ page, seed 
 	await seed(finished);
 	await page.goto('map/');
 	expect(await page.locator('.topic-node').count()).toBeGreaterThan(0);
-	expect(await page.locator('.topic-node[data-state=finished]').count()).toBeGreaterThan(0);
+	// The topic has two live lessons (how-models-work and context-window) and the seed finishes one, so the map
+	// colors it `in-progress`. A topic without a lesson in the seed stays `untouched`.
+	await expect(page.locator('.topic-node[data-topic="concepts/how-models-work"]')).toHaveAttribute(
+		'data-state',
+		'in-progress',
+	);
+	await expect(page.locator('.topic-node[data-topic="concepts/prompting"]')).toHaveAttribute('data-state', 'untouched');
 });
 
 test('the progress page exports, resets and imports the record', async ({ page, seed, seedRaw }) => {
