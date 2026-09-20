@@ -57,7 +57,7 @@
 /* Rows drag. The arrow buttons keep the pointer from the shared button rule above. */
 .cp-order li { cursor: grab; }
 .cp-order li:active { cursor: grabbing; }
-.cp-order li::before { content: '⋮⋮'; color: var(--sl-color-gray-3); letter-spacing: -0.15em; font-size: 0.8rem; }
+.cp-order li::before { content: '⋮⋮' / ''; color: var(--sl-color-gray-3); letter-spacing: -0.15em; font-size: 0.8rem; }
 .cp-order li.cp-dragging { opacity: 0.5; }
 .cp-move { margin-left: auto; display: flex; gap: 0.25rem; }
 .cp-move button { padding: 0 0.5rem; }

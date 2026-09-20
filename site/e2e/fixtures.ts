@@ -96,6 +96,23 @@ export async function answerChoice(page: Page, id: string) {
  * once more over the target. `targetY` is the fraction of the target's height
  * to point at: 0.5 is its middle, near 0 its top edge.
  */
+/**
+ * Solve an `order` checkpoint by dragging alone: each row goes onto the top
+ * tenth of the row at its target slot, so it lands before that row. Rows
+ * already in place are skipped.
+ */
+export async function orderByDrag(page: Page, items: Locator) {
+	const count = await items.count();
+	for (let pos = 1; pos <= count; pos++) {
+		const idx = await items.evaluateAll(
+			(lis, p) => lis.findIndex((l) => Number((l as HTMLElement).dataset.pos) === p),
+			pos,
+		);
+		if (idx === pos - 1) continue;
+		await drag(page, items.nth(idx), items.nth(pos - 1), 0.1);
+	}
+}
+
 export async function drag(page: Page, source: Locator, target: Locator, targetY = 0.5) {
 	// Both must be on screen at once: `page.mouse` works in viewport coordinates and a scroll mid-drag
 	// changes which element Chromium picks up. The sort test sets a tall viewport for this reason.

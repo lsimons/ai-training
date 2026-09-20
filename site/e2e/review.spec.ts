@@ -1,5 +1,5 @@
 /** The settings page's review schedule and the review page (spec S05). */
-import { drag, expect, storedRecord, test } from './fixtures';
+import { expect, orderByDrag, storedRecord, test } from './fixtures';
 
 const TODAY = new Date().toISOString().slice(0, 10);
 const ITEM = 'concepts/how-models-work#what-the-model-does';
@@ -91,15 +91,7 @@ test('the review page clones an order checkpoint that drags like the lesson copy
 	const items = cp.locator('ol li');
 	await expect(items.first()).toHaveAttribute('draggable', 'true');
 	await expect(items.first()).toHaveCSS('cursor', 'grab');
-	const count = await items.count();
-	for (let pos = 1; pos <= count; pos++) {
-		const idx = await items.evaluateAll(
-			(lis, p) => lis.findIndex((l) => Number((l as HTMLElement).dataset.pos) === p),
-			pos,
-		);
-		if (idx === pos - 1) continue;
-		await drag(page, items.nth(idx), items.nth(pos - 1), 0.1);
-	}
+	await orderByDrag(page, items);
 	await cp.locator('.cp-check').first().click();
 	await expect(cp.locator('.cp-feedback')).toHaveText('Correct order.');
 	await expect(cp.locator('.cp-stage-label')).toHaveText('stage 2 of 5');

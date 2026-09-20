@@ -51,6 +51,12 @@ const click = (sel: string) => q<HTMLElement>(sel).click();
 /** A drag event as the browser fires it. happy-dom has no `DragEvent`, so a `MouseEvent` carries the pointer. */
 const drag = (el: Element, type: string, clientY = 0) =>
 	el.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, clientY }));
+/** The `dragend` a browser fires after Escape or a release outside every target: `dropEffect` is `none`. */
+const cancelDrag = (el: Element) => {
+	const ev = new MouseEvent('dragend', { bubbles: true, cancelable: true });
+	Object.defineProperty(ev, 'dataTransfer', { value: { dropEffect: 'none' } });
+	el.dispatchEvent(ev);
+};
 const feedback = () => q('.cp-feedback').textContent;
 const state = () => q('[data-checkpoint]').dataset.state;
 
@@ -162,9 +168,9 @@ describe('predict', () => {
 describe('order', () => {
 	const body = `
 		<ol class="cp-order">
-			<li data-pos="1"><span>one</span><button data-move="up">↑</button><button data-move="down">↓</button></li>
-			<li data-pos="2"><span>two</span><button data-move="up">↑</button><button data-move="down">↓</button></li>
-			<li data-pos="3"><span>three</span><button data-move="up">↑</button><button data-move="down">↓</button></li>
+			<li data-pos="1" draggable="true"><span>one</span><button data-move="up">↑</button><button data-move="down">↓</button></li>
+			<li data-pos="2" draggable="true"><span>two</span><button data-move="up">↑</button><button data-move="down">↓</button></li>
+			<li data-pos="3" draggable="true"><span>three</span><button data-move="up">↑</button><button data-move="down">↓</button></li>
 		</ol>`;
 	const positions = () => [...q('ol').children].map((li) => Number((li as HTMLElement).dataset.pos));
 
@@ -204,7 +210,7 @@ describe('order', () => {
 		expect(positions()).toEqual([2, 3, 1]);
 		const rows = [...q('ol').children] as HTMLElement[];
 		for (const li of rows) {
-			expect(li.draggable).toBe(true);
+			expect(li.getAttribute('draggable')).toBe('true');
 			li.getBoundingClientRect = () => ({ top: 100, height: 40 }) as DOMRect;
 		}
 		const [two, three, one] = rows as [HTMLElement, HTMLElement, HTMLElement];
@@ -231,6 +237,34 @@ describe('order', () => {
 		expect(positions()).toEqual([1, 2, 3]);
 		vi.restoreAllMocks();
 	});
+	it('a cancelled drag puts the row back where it started', () => {
+		vi.spyOn(Math, 'random').mockReturnValue(0.999);
+		bindCheckpoint(shell('order', 'o', body));
+		expect(positions()).toEqual([2, 3, 1]);
+		const rows = [...q('ol').children] as HTMLElement[];
+		for (const li of rows) li.getBoundingClientRect = () => ({ top: 100, height: 40 }) as DOMRect;
+		const [two, three, one] = rows as [HTMLElement, HTMLElement, HTMLElement];
+		// Reflowed live, then Escape: back to the start.
+		drag(three, 'dragstart');
+		drag(two, 'dragover', 105);
+		expect(positions()).toEqual([3, 2, 1]);
+		cancelDrag(three);
+		expect(positions()).toEqual([2, 3, 1]);
+		expect(three.classList.contains('cp-dragging')).toBe(false);
+		// The last row too: its `nextSibling` is null, so it is appended again.
+		drag(one, 'dragstart');
+		drag(two, 'dragover', 105);
+		expect(positions()).toEqual([1, 2, 3]);
+		cancelDrag(one);
+		expect(positions()).toEqual([2, 3, 1]);
+		// A dragend after a drop is not a cancel.
+		drag(one, 'dragstart');
+		drag(two, 'dragover', 105);
+		drag(two, 'drop');
+		drag(one, 'dragend');
+		expect(positions()).toEqual([1, 2, 3]);
+		vi.restoreAllMocks();
+	});
 });
 
 describe('sort', () => {
@@ -239,8 +273,8 @@ describe('sort', () => {
 			<div class="cp-pool-wrap">
 				<button class="cp-pool-target">Unplaced</button>
 				<div class="cp-pool">
-					<button class="cp-chip" data-bucket="0" aria-pressed="false">a</button>
-					<button class="cp-chip" data-bucket="1" aria-pressed="false">b</button>
+					<button class="cp-chip" data-bucket="0" aria-pressed="false" draggable="true">a</button>
+					<button class="cp-chip" data-bucket="1" aria-pressed="false" draggable="true">b</button>
 				</div>
 			</div>
 			<div class="cp-bucket" data-bucket="0"><button class="cp-bucket-target">Left</button><div class="cp-bucket-items"></div></div>
@@ -301,7 +335,7 @@ describe('sort', () => {
 	it('drags a chip into a bucket, between buckets and back to the pool', () => {
 		bindCheckpoint(shell('sort', 's', body));
 		const bucketItems = (n: number) => q<HTMLElement>(`.cp-bucket[data-bucket="${n}"] .cp-bucket-items`);
-		expect(chip('a').draggable).toBe(true);
+		expect(chip('a').getAttribute('draggable')).toBe('true');
 		drag(chip('a'), 'dragstart');
 		expect(chip('a').getAttribute('aria-pressed')).toBe('true');
 		drag(bucketItems(1), 'dragover');
