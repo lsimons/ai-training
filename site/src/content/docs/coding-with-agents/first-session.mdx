@@ -154,14 +154,14 @@ and stops. Before it writes the file it asks you.
 <Prompt model="illustrative" recorded="illustrative">
 Fix the off-by-one in `done()` in `todo.py`: `done 1` marks the
 second item. The failing test is `test_done_marks_the_numbered_item` in
-`test_todo.py`; make it pass without changing the test. Only edit
+`test_todo.py`. Make it pass without changing the test. Only edit
 `todo.py`. Don't touch `todos.json`. Done when `python3 -m unittest -q`
 reports OK.
 </Prompt>
 <Response>
 The bug is on the first line of `done()`: `index = number` should be
 `index = number - 1`. The bounds check below it already assumes a
-zero-based index, so it needs no change.
+zero-based index, so it doesn't need to change.
 
 I would like to edit `todo.py` (1 line). Allow?
 </Response>

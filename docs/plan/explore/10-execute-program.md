@@ -18,7 +18,7 @@ days. Subscription, with 16 free lessons.
 Their pitch, in their words: reading or watching isn't doing; free
 resources are passive, uneven and unmaintained; every code example is
 verified by two independent automated test systems and a third check in the
-browser. No multiple choice, no true/false anywhere.
+browser. It has no multiple-choice or true/false items anywhere.
 
 ## The lesson
 
@@ -122,7 +122,7 @@ S01 and S02; spaced review is [spec S05](../../spec/S05-spaced-review.md).
    types' better sibling for anything executable: it is not multiple choice,
    it can't be guessed, and grading is exact. Add `predict` to the
    interaction types in spec S01, with an honor-system variant for
-   non-executable cases (predict what the agent will do, then run it).
+   non-executable cases (predict what the agent does, then run it).
 2. **Never reveal the answer in a lesson; hints are diagnostic questions.**
    Matches the CS50 Duck finding and the Anthropic modules. Give Up exists
    only in reviews, where the learner has already passed once.

@@ -26,7 +26,7 @@ The **compass** is the authoring tool: ask "action or cognition?" and "study
 or work?" and the answer names the kind. The most common failure is blurring
 neighbors, above all tutorials into how-to guides.
 
-Process guidance: use it as a guide, not a plan; improve one small thing at a
+Process guidance: treat it as a guide rather than a plan. Improve one small thing at a
 time and publish it; never create empty section scaffolding; let structure
 emerge from well-formed pages.
 

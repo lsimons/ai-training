@@ -162,7 +162,7 @@ Generates a full course at `/ai/course/<slug>` in about 30 seconds: title,
 tagline, About, "What this course covers" bullets, six modules of five
 lessons each (30 lessons), with a **Regenerate** menu (plain, or with a
 prompt). Free tier then allows five lesson bodies. Lesson pages are
-generated on open in about 40 seconds and are substantial: several H2
+generated on open in about 40 seconds and are long, with multiple H2
 sections, code blocks, a comparison table, a **Remember** callout, a
 generated diagram placeholder, an **interactive step-through widget**
 ("Interactive Runtime Explorer" with Next phase and Reset), an inline
@@ -236,7 +236,7 @@ Items 1, 3, 6, and 7 declined for now.
    competency structure, the verified examples, the exercises, review and
    tutor grounding, not in prose alone.
 7. **Project pages as specifications** with requirements, technologies,
-   what you will learn and community solutions. A good template for our
+   what you learn and community solutions. A good template for our
    `project` unit, though peer solutions are out of scope without a backend.
 8. **Deep-linkable topic pages** beside the map, one URL per node, good for
    search and for the tutor to cite.
