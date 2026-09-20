@@ -6,7 +6,8 @@ An open training suite for getting started with AI (concepts, safety, using
 agents, AI-assisted software engineering, customizing and building agents),
 built as an [Astro Starlight](https://starlight.astro.build/) site and
 published to GitHub Pages. Basic material is for knowledge workers; the rest
-is for software engineers. The plan is in `docs/plan/README.md`.
+is for software engineers. Design decisions are in `docs/spec/`, and open
+work is in GitHub issues (`docs/agents/issue-tracker.md`).
 
 ## Quick reference
 
@@ -56,11 +57,12 @@ The layout is what the tree shows. The parts that aren't obvious from it:
 - `site/examples/` holds the runnable fixtures behind `<Predict run=...>`.
   `site/public/presentations/` holds Quarto decks and their committed
   HTML/PDF outputs. CI doesn't run Quarto.
-- `docs/plan/` is the rough plan and source exploration, not part of the
-  site. `docs/spec/` holds numbered specs (`SNN-title.md`, each with Purpose
+- `docs/spec/` holds numbered specs (`SNN-title.md`, each with Purpose
   and Status; `000-specs.md` is the index). S01 is the project dictionary;
-  use its terms everywhere. Specs are standalone and never link to
-  `docs/plan/`. `docs/agents/` holds agent-facing process docs.
+  use its terms everywhere. Specs are standalone. The early plan and the
+  source exploration notes were removed on 2026-09-20 once the specs and
+  issues held everything in them. `docs/agents/` holds agent-facing
+  process docs.
 - `docs/prose/README.md` records which Vale rule runs where and why, and
   how to evaluate a new style package.
 
@@ -71,14 +73,17 @@ The layout is what the tree shows. The parts that aren't obvious from it:
 - This is a public, open-content project. No company names, internal URLs or
   confidential material.
 - Content is CC BY-SA 4.0 (`LICENSE`) and code is Apache-2.0 (`LICENSE-CODE`).
-  Source material has different terms, and `docs/plan/README.md` has the table.
-  In short: `agent-engineer-course` (Apache-2.0) and Diátaxis (CC BY-SA)
-  content may be adapted with attribution and an entry in `NOTICE.md`; CS50
-  (CC BY-NC-SA) may be cited and its ideas used, but its text may not be
-  adapted (verbatim inclusion only, marked per page); Anthropic Academy and
-  DeepLearning.AI material may only be linked or used as inspiration, never
-  copied. Prefer public `academy.claude.com` URLs when linking Anthropic
-  courses.
+  Source material has different terms, and spec S02 "Source material" has
+  the per-source table for topic content. In short: `agent-engineer-course`
+  (Apache-2.0) and Diátaxis (CC BY-SA) content may be adapted with
+  attribution and an entry in `NOTICE.md`. CS50 (CC BY-NC-SA) may be cited
+  and its ideas used, but its text may not be adapted (verbatim inclusion
+  only, marked per page). Anthropic Academy and DeepLearning.AI material
+  may only be linked or used as inspiration, never copied. Learn Prompting
+  supplies vocabulary only, and prompting concepts are written from the
+  papers. The Schuberg Philis AI wiki supplied ideas only, rewritten, and
+  none of its text. Prefer public `academy.claude.com` URLs when linking
+  Anthropic courses.
 - Interactive widgets in lesson pages must sit in `class="not-content"`
   containers. Never emit a literal `</script>` or `</pre>` inside widget JS
   strings. It breaks mdformat and the renderer.

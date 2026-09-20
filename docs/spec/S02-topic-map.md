@@ -5,7 +5,11 @@ with prerequisite links) and what a learner should be able to do afterwards
 (competencies, their learning objectives and behaviors). Say how the map
 differentiates between learners.
 
-**Status:** Draft
+**Status:** In progress - topic and competency YAML, the map page, topic and
+competency pages, the glossary, the course lesson graph with milestone bar,
+ring and review card, and the checkpoint fail and extension cards are
+implemented (2026-09-20). Deferred: behaviors for most objectives, the
+map's side drawer, path lanes, quizzes, and alignment rows in the YAML.
 
 ## Introduction
 
@@ -388,8 +392,8 @@ Learning objectives:
 
 ## Behaviors: worked example
 
-Only one objective has behaviors so far, and the rest are to write.
-Every objective's behaviors take this form: one-sentence claim, a why, one
+Behaviors exist for the objectives the release-1 lessons serve, and the
+rest are to write. Every objective's behaviors take this form: one-sentence claim, a why, one
 example, with two to six per objective. For
 `using-agents/delegates-and-checks/writes-a-brief` (`base`):
 

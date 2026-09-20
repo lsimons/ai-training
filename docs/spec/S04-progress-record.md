@@ -3,7 +3,10 @@
 **Purpose:** Define the learner's progress record: what it stores, where it
 lives, how it is versioned, and how it moves between browsers.
 
-**Status:** Draft
+**Status:** In progress - the record, its storage key, lesson states, checkpoint
+states, the review map, comfort level, export, import and reset are
+implemented (2026-09-20). Deferred: goals and quizzes exist in the record
+shape only, with no page that writes them.
 
 ## Introduction
 
