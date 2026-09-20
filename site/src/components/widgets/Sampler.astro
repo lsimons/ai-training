@@ -22,8 +22,10 @@
 	.sampler-temp { display: flex; gap: 0.5rem; align-items: center; }
 	.sampler-temp input { flex: 1; max-width: 20rem; }
 	.sampler-bars { margin: 0.75rem 0; display: grid; gap: 0.25rem; }
-	.sampler-bars .bar { display: grid; grid-template-columns: 8rem 1fr 4rem; align-items: center; gap: 0.5rem; font-family: var(--sl-font-mono); font-size: 0.85rem; }
-	.sampler-bars .fill { height: 1rem; background: var(--sl-color-accent); border-radius: 2px; transition: width 0.2s; }
+	/* The rows are built with createElement and never get Astro's scope class, so their rules need :global(). */
+	.sampler-bars :global(.bar) { display: grid; grid-template-columns: 8rem 1fr 4rem; align-items: center; gap: 0.5rem; font-family: var(--sl-font-mono); font-size: 0.85rem; }
+	.sampler-bars :global(.pct) { text-align: right; font-variant-numeric: tabular-nums; }
+	.sampler-bars :global(.fill) { height: 1rem; background: var(--sl-color-accent); border-radius: 2px; transition: width 0.2s; }
 	.sampler-go { padding: 0.35rem 0.85rem; border-radius: 4px; border: 1px solid var(--sl-color-gray-4); background: var(--sl-color-bg-nav); cursor: pointer; font: inherit; }
 	.sampler-out { margin: 0.75rem 0 0; font-size: 1.1rem; min-height: 1.5rem; }
 </style>
@@ -54,11 +56,13 @@
 					const row = document.createElement('div');
 					row.className = 'bar';
 					const name = document.createElement('span');
+					name.className = 'tok';
 					name.textContent = tok;
 					const fill = document.createElement('span');
 					fill.className = 'fill';
 					fill.style.width = `${(p * 100).toFixed(1)}%`;
 					const pct = document.createElement('span');
+					pct.className = 'pct';
 					pct.textContent = `${(p * 100).toFixed(1)}%`;
 					row.append(name, fill, pct);
 					return row;
