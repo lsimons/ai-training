@@ -33,6 +33,7 @@ lessons:
     serves:
       - concepts/explains-models/explains-generation
     status: planned
+    issue: 117
     minutes: 12
     after:
       - concepts/how-models-work
@@ -49,6 +50,7 @@ lessons:
     serves:
       - concepts/prompts-reliably/structures-a-prompt
     status: planned
+    issue: 119
     minutes: 15
     after:
       - concepts/how-models-work
@@ -63,6 +65,7 @@ lessons:
     serves:
       - concepts/prompts-reliably/structures-a-prompt
     status: planned
+    issue: 121
     minutes: 12
     after:
       - concepts/prompt-anatomy
@@ -77,6 +80,7 @@ lessons:
     serves:
       - concepts/prompts-reliably/asks-for-structure
     status: planned
+    issue: 123
     minutes: 12
     after:
       - concepts/prompt-anatomy
@@ -91,6 +95,7 @@ lessons:
     serves:
       - concepts/prompts-reliably/structures-a-prompt
     status: planned
+    issue: 125
     minutes: 10
     after:
       - concepts/prompt-anatomy
@@ -105,6 +110,7 @@ lessons:
     serves:
       - concepts/prompts-reliably/iterates-on-output
     status: planned
+    issue: 127
     minutes: 15
     after:
       - concepts/structured-output
@@ -121,6 +127,7 @@ lessons:
     serves:
       - concepts/explains-models/names-failure-modes
     status: planned
+    issue: 129
     minutes: 15
     after:
       - concepts/how-models-work
@@ -136,6 +143,7 @@ lessons:
       - concepts/explains-models/explains-generation
       - concepts/explains-models/names-failure-modes
     status: planned
+    issue: 131
     minutes: 12
     after:
       - concepts/how-models-work
@@ -150,6 +158,7 @@ lessons:
     serves:
       - concepts/explains-models/names-failure-modes
     status: planned
+    issue: 134
     minutes: 12
     after:
       - concepts/thin-path
@@ -164,6 +173,7 @@ lessons:
     serves:
       - concepts/explains-models/explains-generation
     status: planned
+    issue: 137
     minutes: 15
     after:
       - concepts/context-window
@@ -180,6 +190,7 @@ lessons:
     serves:
       - concepts/recognizes-agents/names-the-loop
     status: planned
+    issue: 140
     minutes: 15
     after:
       - concepts/iterating-on-a-prompt
@@ -195,6 +206,7 @@ lessons:
     serves:
       - concepts/recognizes-agents/tells-agent-from-assistant
     status: planned
+    issue: 143
     minutes: 12
     after:
       - concepts/agent-loop
@@ -209,6 +221,7 @@ lessons:
     serves:
       - concepts/recognizes-agents/places-on-autonomy-scale
     status: planned
+    issue: 146
     minutes: 12
     after:
       - concepts/assistant-or-agent
@@ -225,6 +238,7 @@ lessons:
     serves:
       - concepts/explains-models/explains-grounding
     status: planned
+    issue: 149
     minutes: 15
     after:
       - concepts/agent-loop
@@ -240,6 +254,7 @@ lessons:
       - concepts/explains-models/explains-grounding
       - concepts/explains-models/explains-generation
     status: planned
+    issue: 152
     minutes: 12
     after:
       - concepts/retrieval
