@@ -65,7 +65,7 @@ as a dependency of `date-fmt`, and `microroute-js` moved from 4.19.2 to
 
 ```python
 for name, version, kind in classify(before, after):
-    print("%s %s: %s" % (name, version, kind))
+    print(f"{name} {version}: {kind}")
 ```
 
 </Predict>
@@ -245,7 +245,7 @@ last line the script prints?
 
 ```python
 findings = [c for c in result["checks"] if c["score"] < THRESHOLD]
-print("%d of %d checks below %d" % (len(findings), len(result["checks"]), THRESHOLD))
+print(f"{len(findings)} of {len(result['checks'])} checks below {THRESHOLD}")
 ```
 
 </Predict>
