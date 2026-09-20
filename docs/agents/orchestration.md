@@ -285,7 +285,7 @@ to #35, then #60, #61 and #19) plus a plan-table request from the maintainer
 became eleven branches, and the wave and stacked pull requests that merged
 were #108 with the six course plans and the plan table, #109 with two
 lesson changes, and #110 with the EU AI Act lesson stacked on the plans. A
-write-back pull request followed with the issue numbers of the 103 lesson
+write-back pull request, #219, followed with the issue numbers of the 103 lesson
 issues the plans opened (deliverable 2 of #30 to #35). About twenty review
 passes, nine of the eleven branches sent back once. Review caught the competency-topic
 mismatch in four of the six plans, an exercise that had the learner paste
