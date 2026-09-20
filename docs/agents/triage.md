@@ -32,12 +32,12 @@ leave an issue "for later" without saying what later means.
 
 ## The four outcomes
 
-| Outcome                       | When                                                                           | What the comment holds                                                                 |
-| ----------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| `ready-for-agent`             | Every decision the work needs is made, with the answer written down             | The decisions, the files to touch, and a "done when" an agent can check                |
-| `ready-for-agent`, blocked    | Fully specified, waits on another issue or an open pull request                | `blocked by #N (PR #M)` and the instruction to confirm the merge before starting        |
-| `ready-for-human`             | The next step is something only the maintainer can do                          | The one action, stated so the maintainer can do it without rereading the issue          |
-| Closed                        | Not worth doing, superseded, or split into children                            | The reason, or the list of child issues and the entries that were dropped, each with why |
+| Outcome                    | When                                                                | What the comment holds                                                                   |
+| -------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `ready-for-agent`          | Every decision the work needs is made, with the answer written down | The decisions, the files to touch, and a "done when" an agent can check                  |
+| `ready-for-agent`, blocked | Fully specified, waits on another issue or an open pull request     | `blocked by #N (PR #M)` and the instruction to confirm the merge before starting         |
+| `ready-for-human`          | The next step is something only the maintainer can do               | The one action, stated so the maintainer can do it without rereading the issue           |
+| Closed                     | Not worth doing, superseded, or split into children                 | The reason, or the list of child issues and the entries that were dropped, each with why |
 
 A "write the spec" issue is a valid `ready-for-agent` outcome when the
 decisions are made and only the writing is left. Put the decisions in the
