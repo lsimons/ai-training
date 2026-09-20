@@ -12,16 +12,20 @@ interface Props {
 	objective: string;
 	title: string;
 	hint: string;
+	/** S02 concept ids the checkpoint exercises, at least one (spec S03 "Checkpoints"). */
+	concepts: string[];
+	/** One paragraph that makes the item readable outside its lesson; the review page shows it. */
+	context?: string;
 	review?: boolean;
 	revision?: number;
 	options: Option[];
 }
-const { id, objective, title, hint, review, revision, options } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, options } = Astro.props;
 const correct = options.filter((o) => o.correct).length;
 if (correct !== 1) throw new Error(`Scenario "${id}" needs exactly one correct option, has ${correct}`);
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {review} {revision} kind="scenario" checkLabel="Decide">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} kind="scenario" checkLabel="Decide">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-options" role="radiogroup" aria-label={title}>

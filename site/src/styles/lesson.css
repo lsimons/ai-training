@@ -25,6 +25,8 @@
 .cp-head { display: flex; justify-content: space-between; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sl-color-gray-3); }
 .cp-title { margin: 0.25rem 0 0.5rem; font-size: 1.05rem; }
 .checkpoint .cp-stem > :first-child { margin-top: 0; }
+/* The standalone context paragraph; hidden in the lesson, shown on the review page. */
+.cp-context { margin: 0 0 0.75rem; color: var(--sl-color-gray-2); font-size: 0.95rem; }
 .cp-options label { display: flex; gap: 0.5rem; align-items: baseline; padding: 0.3rem 0; cursor: pointer; }
 .cp-options label.cp-answer { outline: 2px solid var(--at-done); outline-offset: 2px; border-radius: 4px; }
 .cp-multi { border: 0; padding: 0; margin: 0; }

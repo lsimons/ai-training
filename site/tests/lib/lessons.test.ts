@@ -1,5 +1,5 @@
 import { buildCatalog } from '@lib/catalog';
-import { checkpointsOf, getLessons, type Lesson } from '@lib/lessons';
+import { checkpointsOf, checkpointTagsOf, getLessons, type Lesson, parseAttrs } from '@lib/lessons';
 import { knownPagePaths } from '@lib/links';
 import { describe, expect, it, vi } from 'vitest';
 import { type DocFixture, docs } from './content';
@@ -12,6 +12,7 @@ const lesson = (id: string): Lesson => {
 	return d as unknown as Lesson;
 };
 const asLesson = (d: DocFixture): Lesson => d as unknown as Lesson;
+const body = (b: string): Lesson => asLesson({ id: 'x/y', data: { title: 'X' }, body: b });
 
 describe('getLessons', () => {
 	it('returns docs with a mode, sorted by id, optionally by area', async () => {
@@ -24,38 +25,131 @@ describe('getLessons', () => {
 	});
 });
 
+describe('parseAttrs', () => {
+	it('reads string, expression and bare props', () => {
+		const attrs = parseAttrs(
+			'<Choice id="a" title=\'t\' review={false} options={[{ text: "x}y", why: `a > b` }]} honor>',
+		);
+		expect(attrs.get('id')).toEqual({ value: 'a', expr: false });
+		expect(attrs.get('title')).toEqual({ value: 't', expr: false });
+		expect(attrs.get('review')).toEqual({ value: 'false', expr: true });
+		expect(attrs.get('options')).toEqual({ value: '[{ text: "x}y", why: `a > b` }]', expr: true });
+		expect(attrs.get('honor')).toEqual({ value: '', expr: false });
+	});
+	it('rejects an unterminated string or expression and an unquoted value', () => {
+		expect(() => parseAttrs('<Choice id="a>')).toThrow(/unterminated string for id/);
+		expect(() => parseAttrs('<Choice options={[>')).toThrow(/unterminated expression for options/);
+		expect(() => parseAttrs('<Choice id=a>')).toThrow(/unquoted value for id/);
+	});
+});
+
+describe('checkpointTagsOf', () => {
+	it('returns the tag, its props and the stem, empty for a self-closing tag', () => {
+		const tags = checkpointTagsOf(
+			body('<Sort id="s" concepts={[\'a\']} buckets={[]} items={[]} />\n<Choice id="c">\n\nStem *here*.\n\n</Choice>'),
+		);
+		expect(tags.map((t) => [t.tag, t.kind, t.stem])).toEqual([
+			['Sort', 'sort', ''],
+			['Choice', 'choice', 'Stem *here*.'],
+		]);
+		expect(tags[0]?.attrs.get('concepts')).toEqual({ value: "['a']", expr: true });
+	});
+	it('rejects a tag without a closing tag and an unterminated opening tag', () => {
+		expect(() => checkpointTagsOf(body('<Choice id="c">\nStem.\n'))).toThrow(/without a closing tag/);
+		expect(() => checkpointTagsOf(body('<Choice id="a" options={['))).toThrow(/unterminated tag/);
+		expect(() => checkpointTagsOf(body('<Choice id="a>'))).toThrow(/unterminated tag/);
+	});
+});
+
 describe('checkpointsOf', () => {
-	it('reads every checkpoint tag with its objective, kind, title, revision and reviewability', () => {
-		const o1 = { objective: 'o1' };
+	it('reads every checkpoint tag with its kind, title, revision, reviewability, concepts, context and stem', () => {
+		const common = { objective: 'o1', hint: 'h', stem: '' };
 		expect(checkpointsOf(lesson('concepts/how-models-work'))).toEqual([
-			{ id: 'what-the-model-does', ...o1, title: 'What the model does', kind: 'choice', revision: 1, reviewable: true },
-			{ id: 'honor', ...o1, title: 'Run it', kind: 'predict', revision: 1, reviewable: false },
-			{ id: 'graded', ...o1, title: 'Graded', kind: 'predict', revision: 2, reviewable: true },
-			{ id: 'fix', ...o1, title: 'Fix', kind: 'repair', revision: 1, reviewable: false },
-			{ id: 'opt-out', ...o1, title: 'Order', kind: 'order', revision: 1, reviewable: false },
+			{
+				...common,
+				id: 'what-the-model-does',
+				title: 'What the model does',
+				kind: 'choice',
+				revision: 1,
+				reviewable: true,
+				concepts: ['token', 'context-window'],
+				context: 'The lesson shows a widget.',
+				stem: 'Stem.',
+			},
+			{
+				...common,
+				id: 'honor',
+				title: 'Run it',
+				kind: 'predict',
+				revision: 1,
+				reviewable: false,
+				concepts: ['token'],
+				context: undefined,
+			},
+			{
+				...common,
+				id: 'graded',
+				title: 'Graded',
+				kind: 'predict',
+				revision: 2,
+				reviewable: true,
+				concepts: ['token'],
+				context: undefined,
+			},
+			{
+				...common,
+				id: 'fix',
+				title: 'Fix',
+				kind: 'repair',
+				revision: 1,
+				reviewable: false,
+				concepts: ['token'],
+				context: undefined,
+			},
+			{
+				...common,
+				id: 'opt-out',
+				title: 'Order',
+				kind: 'order',
+				revision: 1,
+				reviewable: false,
+				concepts: ['token'],
+				context: undefined,
+			},
 		]);
 		expect(checkpointsOf(lesson('safety/agent-risk'))[0]?.kind).toBe('scenario');
 		expect(checkpointsOf(lesson('safety/deeper'))).toEqual([]);
 	});
-	it('falls back to the id as title, an empty objective, and handles a missing body', () => {
-		const l = asLesson({ id: 'x/y', data: { title: 'X' }, body: '<Choice id="only-id" options={[]}>' });
+	it('falls back to the id as title and handles a missing body', () => {
+		const l = body('<Choice id="only-id" concepts={["c"]} options={[]}>\n</Choice>');
 		expect(checkpointsOf(l)[0]?.title).toBe('only-id');
-		expect(checkpointsOf(l)[0]?.objective).toBe('');
 		expect(checkpointsOf(asLesson({ id: 'x/y', data: { title: 'X' } }))).toEqual([]);
 	});
 	it('rejects a tag without an id, a bad review value, a bad revision and an unterminated tag', () => {
-		const at = (body: string) => () => checkpointsOf(asLesson({ id: 'x/y', data: { title: 'X' }, body }));
-		expect(at('<Choice objective="o">')).toThrow(/without an id/);
-		expect(at('<Choice id="a" review={maybe}>')).toThrow(/review must be/);
-		expect(at('<Choice id="a" revision={0}>')).toThrow(/revision must be a positive integer/);
-		expect(at('<Choice id="a" revision="two">')).toThrow(/revision must be a positive integer/);
+		const at = (b: string) => () => checkpointsOf(body(b));
+		expect(at('<Choice objective="o">\n</Choice>')).toThrow(/without an id/);
+		expect(at('<Choice id="a" concepts={["c"]} review={maybe}>\n</Choice>')).toThrow(/review must be/);
+		expect(at('<Choice id="a" concepts={["c"]} revision={0}>\n</Choice>')).toThrow(
+			/revision must be a positive integer/,
+		);
+		expect(at('<Choice id="a" concepts={["c"]} revision="two">\n</Choice>')).toThrow(
+			/revision must be a positive integer/,
+		);
 		expect(at('<Choice id="a" options={[')).toThrow(/unterminated tag/);
 	});
+	it('requires concepts as a non-empty array expression', () => {
+		const at = (b: string) => () => checkpointsOf(body(b));
+		expect(at('<Choice id="a" options={[]}>\n</Choice>')).toThrow(
+			/x\/y#a: concepts=\{\['concept-id', \.\.\.\]\} is required/,
+		);
+		expect(at('<Choice id="a" concepts="token" options={[]}>\n</Choice>')).toThrow(/is required/);
+		expect(at('<Choice id="a" concepts={[]} options={[]}>\n</Choice>')).toThrow(/at least one concept id/);
+	});
 	it('skips a > inside quotes, braces and template literals', () => {
-		const body = '<Choice id="a" title="b > c" options={[{ text: `x > y`, why: "p > q" }]}>';
-		expect(checkpointsOf(asLesson({ id: 'x/y', data: { title: 'X' }, body }))[0]?.title).toBe('b > c');
-		const escaped = '<Choice id="a" title="q" options={[{ text: \'it\\\'s > 1\' }]}>';
-		expect(checkpointsOf(asLesson({ id: 'x/y', data: { title: 'X' }, body: escaped }))).toHaveLength(1);
+		const b = '<Choice id="a" concepts={["c"]} title="b > c" options={[{ text: `x > y`, why: "p > q" }]}>\n</Choice>';
+		expect(checkpointsOf(body(b))[0]?.title).toBe('b > c');
+		const escaped = '<Choice id="a" concepts={["c"]} title="q" options={[{ text: \'it\\\'s > 1\' }]}>\n</Choice>';
+		expect(checkpointsOf(body(escaped))).toHaveLength(1);
 	});
 });
 

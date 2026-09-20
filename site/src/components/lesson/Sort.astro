@@ -11,19 +11,23 @@ interface Props {
 	objective: string;
 	title: string;
 	hint: string;
+	/** S02 concept ids the checkpoint exercises, at least one (spec S03 "Checkpoints"). */
+	concepts: string[];
+	/** One paragraph that makes the item readable outside its lesson; the review page shows it. */
+	context?: string;
 	review?: boolean;
 	revision?: number;
 	buckets: string[];
 	items: Item[];
 }
-const { id, objective, title, hint, review, revision, buckets, items } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, buckets, items } = Astro.props;
 for (const it of items) {
 	if (it.bucket < 0 || it.bucket >= buckets.length)
 		throw new Error(`Sort "${id}": item "${it.text}" points at bucket ${it.bucket}`);
 }
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {review} {revision} kind="sort">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} kind="sort">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-sort">

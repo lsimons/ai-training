@@ -7,14 +7,18 @@ interface Props {
 	objective: string;
 	title: string;
 	hint: string;
+	/** S02 concept ids the checkpoint exercises, at least one (spec S03 "Checkpoints"). */
+	concepts: string[];
+	/** One paragraph that makes the item readable outside its lesson; the review page shows it. */
+	context?: string;
 	broken: string;
 	model: string;
 	revision?: number;
 }
-const { id, objective, title, hint, broken, model, revision } = Astro.props;
+const { id, objective, title, hint, concepts, context, broken, model, revision } = Astro.props;
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {revision} kind="repair" checkLabel="Record grade">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {revision} kind="repair" checkLabel="Record grade">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-repair">

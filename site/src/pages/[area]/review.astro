@@ -109,6 +109,9 @@ const formats = [
 			section.querySelector<HTMLElement>('.cp-skip')?.remove();
 			const giveUp = section.querySelector<HTMLElement>('.cp-giveup');
 			if (giveUp) giveUp.hidden = false;
+			// The author's standalone context (spec S03 "Checkpoints"): hidden in the lesson, shown here.
+			const context = section.querySelector<HTMLElement>('.cp-context');
+			if (context) context.hidden = false;
 			items.replaceChildren(section);
 			let done = false;
 			bindCheckpoint(section, {

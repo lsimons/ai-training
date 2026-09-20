@@ -12,16 +12,20 @@ interface Props {
 	objective: string;
 	title: string;
 	hint: string;
+	/** S02 concept ids the checkpoint exercises, at least one (spec S03 "Checkpoints"). */
+	concepts: string[];
+	/** One paragraph that makes the item readable outside its lesson; the review page shows it. */
+	context?: string;
 	answer?: string;
 	run?: string;
 	review?: boolean;
 	revision?: number;
 }
-const { id, objective, title, hint, answer, run, review, revision } = Astro.props;
+const { id, objective, title, hint, concepts, context, answer, run, review, revision } = Astro.props;
 const honor = answer === undefined;
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {review} {revision} {honor} kind="predict" checkLabel={honor ? 'Record' : 'Check'}>
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} {honor} kind="predict" checkLabel={honor ? 'Record' : 'Check'}>
 	<slot />
 	<Fragment slot="body">
 		<div data-answer={answer} data-run={run} class="cp-predict">

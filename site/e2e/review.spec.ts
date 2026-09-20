@@ -45,6 +45,8 @@ test('the review page records one result per item: pass on Check, fail on Give U
 	await expect(page.locator('[data-status]')).toHaveText('Item 1 of 2');
 	await expect(cp).toHaveAttribute('data-kind', 'choice');
 	await expect(cp.locator('.cp-giveup')).toBeDisabled();
+	// The author's `context` is hidden in the lesson and shown here (spec S03 "Checkpoints").
+	await expect(cp.locator('.cp-context')).toBeVisible();
 
 	// Item 1: a correct answer records a pass and closes the item.
 	await cp.locator('label[data-correct]').first().click();

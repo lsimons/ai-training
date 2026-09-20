@@ -19,7 +19,13 @@ export interface DocFixture {
 
 export interface TopicFixture {
 	id: string;
-	data: { id: string; area: string; name: string; links: { prerequisites: string[] } };
+	data: {
+		id: string;
+		area: string;
+		name: string;
+		concepts: { id: string; name: string; definition: string }[];
+		links: { prerequisites: string[] };
+	};
 }
 
 export const docs: DocFixture[] = [
@@ -30,16 +36,17 @@ export const docs: DocFixture[] = [
 		data: { title: 'How a language model works', mode: 'explanation', covers: ['concepts/models'] },
 		body: `
 <Choice id="what-the-model-does" objective="o1" title="What the model does" hint="h"
-  options={[{ text: 'a', correct: true }, { text: 'b > c' }]}>
+  concepts={['token', 'context-window']} context="The lesson shows a widget."
+  options={[{ text: 'a', correct: true }, { text: 'b > c', why: 'No.' }]}>
 Stem.
 </Choice>
-<Predict id="honor" objective="o1" title="Run it" hint="h">
+<Predict id="honor" objective="o1" title="Run it" hint="h" concepts={['token']}>
 </Predict>
-<Predict id="graded" objective="o1" title="Graded" hint="h" answer="1 > 0" run="x.sh" revision={2}>
+<Predict id="graded" objective="o1" title="Graded" hint="h" concepts={['token']} answer="1 > 0" run="x.sh" revision={2}>
 </Predict>
-<Repair id="fix" objective="o1" title="Fix" hint="h" broken="a" model="b">
+<Repair id="fix" objective="o1" title="Fix" hint="h" concepts={['token']} broken="a" model="b">
 </Repair>
-<Order id="opt-out" objective="o1" title="Order" hint="h" review={false} steps={['a', 'b']}>
+<Order id="opt-out" objective="o1" title="Order" hint="h" concepts={['token']} review={false} steps={['b', 'a']}>
 </Order>
 `,
 	},
@@ -50,7 +57,7 @@ Stem.
 			mode: 'tutorial',
 			assumes: [{ objective: 'o1', lesson: 'concepts/how-models-work', section: 's' }],
 		},
-		body: '<Scenario id="s1" objective="o1" title="S" hint="h" options={[]}>\n</Scenario>',
+		body: '<Scenario id="s1" objective="o1" title="S" hint="h" concepts={[\'risk\']} options={[]}>\n</Scenario>',
 	},
 	{
 		id: 'safety/deeper',
@@ -69,16 +76,31 @@ Stem.
 export const topics: TopicFixture[] = [
 	{
 		id: 'concepts/models',
-		data: { id: 'concepts/models', area: 'concepts', name: 'Models', links: { prerequisites: [] } },
+		data: {
+			id: 'concepts/models',
+			area: 'concepts',
+			name: 'Models',
+			concepts: [
+				{ id: 'token', name: 'Token', definition: 'A chunk of text.' },
+				{ id: 'context-window', name: 'Context window', definition: 'What the model can see.' },
+			],
+			links: { prerequisites: [] },
+		},
 	},
 	{
 		id: 'safety/risk',
-		data: { id: 'safety/risk', area: 'safety', name: 'Risk', links: { prerequisites: ['concepts/models'] } },
+		data: {
+			id: 'safety/risk',
+			area: 'safety',
+			name: 'Risk',
+			concepts: [{ id: 'risk', name: 'Risk', definition: 'What can go wrong.' }],
+			links: { prerequisites: ['concepts/models'] },
+		},
 	},
 	// No lesson covers it and no plan entry names it: the topic map's gap state.
 	{
 		id: 'safety/governance',
-		data: { id: 'safety/governance', area: 'safety', name: 'Governance', links: { prerequisites: [] } },
+		data: { id: 'safety/governance', area: 'safety', name: 'Governance', concepts: [], links: { prerequisites: [] } },
 	},
 ];
 
