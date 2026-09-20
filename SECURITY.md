@@ -22,4 +22,4 @@ progress. This is a small personal project, so response times may vary.
 This is a static documentation site. The main risks are in the build tooling
 and the GitHub Actions workflows, which are pinned and audited with zizmor.
 Interactive lesson content runs entirely in the browser and stores progress in
-local storage only; no data is sent to a server.
+local storage only, and it sends nothing to a server.

@@ -3,7 +3,7 @@
 Captured 2026-09-20 from the local clone at `~/git/lsimons/Learn_Prompting`
 (<https://github.com/trigaten/Learn_Prompting>, Sander Schulhoff and
 community) plus a look at the live guide at
-<https://learnprompting.org/docs/introduction>. Two branches matter:
+<https://learnprompting.org/docs/introduction>. The branches that matter:
 
 | Branch          | Last commit          | License         | Content                                                                    |
 | --------------- | -------------------- | --------------- | -------------------------------------------------------------------------- |
@@ -52,11 +52,11 @@ LLM evaluation), and adds least-to-most, ensembling, math reliability,
 Midjourney and shot types, and a Hot Topics page (GPT-4, Auto-GPT, BabyAGI,
 AgentGPT).
 
-Authoring mechanics worth noting:
+Authoring mechanics:
 
 - **Citations as remark plugin.** `(@key)` in Markdown resolves against
   `bibliography.bib` (`remark-bibtex`); 115 unique keys on the CC BY branch,
-  140 on `main`; a generated bibliography page. Papers are cited, not just
+  140 on `main`, and a generated bibliography page. Papers are cited, not just
   linked.
 - **Auto-glossary tooltips.** `%%shown text|glossary key%%` resolves against
   `glossary.yml` (27 terms) and renders a hover definition
@@ -66,15 +66,16 @@ Authoring mechanics worth noting:
   (`trydyno-embed`, text-davinci-003, temperature and top-p in attributes,
   with the recorded output as `initial-response`). `main` migrated to
   `embed.learnprompting.org` iframes whose whole configuration is a
-  base64-encoded JSON in the URL. Dyno is gone; the pages that depended on it
-  now show nothing. Around 2024 they also introduced `<AIInput>` and
+  base64-encoded JSON in the URL. Dyno is gone, and the pages that depended on it
+  are now blank. Around 2024 they also introduced `<AIInput>` and
   `<AIOutput title="...">` components for static prompt and response pairs
   (57 and 33 uses), which are just styled blocks.
 - **Takeaways box** at the top of each `main` Basics page: two or three
   bullets of what the page teaches. Difficulty emoji in the title. One
   header illustration per page.
-- **Footnotes for asides**, difficulty label per page, no quizzes, no
-  progress, no exercises beyond "try this in ChatGPT".
+- **Footnotes for asides** and a difficulty label per page. The only
+  exercise form is "try this in ChatGPT". Quizzes and progress tracking are
+  absent.
 
 ## Quality
 
@@ -84,7 +85,7 @@ It reads like good lecture notes: one idea, one figure from the paper, one
 demo, a Limitations section, a paper citation. Faults: typos, a glossary
 entry defining LLM as "Language Language Model", everything demonstrated on
 text-davinci-003, and some claims now wrong (CoT "only yields gains at about
-100B parameters"; "there exist few to no defenses" against injection).
+100B parameters", and "there exist few to no defenses" against injection).
 
 The `main` rewrite from mid-2023 is roughly double the length for the same
 ideas and has the GPT-4-era register the prompt for this note predicted:
@@ -141,18 +142,18 @@ mattering.
 3. **Glossary tooltips from the concept register.** `%%text|term%%` or a
    `<Term>` component that renders the register definition on hover is the
    natural rendering of spec S01's concept register inside lessons. Their
-   two implementations show it can be a remark plugin, not a component, so
-   plain Markdown stays plain.
+   two implementations show it can be a remark plugin, which keeps plain
+   Markdown plain.
 4. **Prompt and response as a styled pair.** Adopt an `AIInput` /
    `AIOutput`-style block for static prompt and response examples in
    Foundations lessons, and the model and settings are named on the block. Ours
-   should carry the model and date, since their undated davinci-003 outputs
+   should name the model and date, since their undated davinci-003 outputs
    are the main reason the pages aged badly.
-5. **Don't embed a third-party playground.** Two generations of live embeds
+5. **Don't embed a third-party playground.** Both generations of live embeds
    died with the vendors. Our spec S01 rule that examples run in CI and show
-   asserted output is the right answer; a static recorded output beats a dead
-   iframe.
-6. **The walkthrough shape.** The Applied Prompting pages (LSAT multiple
+   asserted output is the right answer; a static recorded output is better than a
+   dead iframe.
+6. **The walkthrough arc.** The Applied Prompting pages (LSAT multiple
    choice, discussion questions) follow a good tutorial arc: naive prompt,
    show the failure, add one technique, reorder, reword, compare. That arc
    is a reusable lesson template for the Using agents area and is CC BY.

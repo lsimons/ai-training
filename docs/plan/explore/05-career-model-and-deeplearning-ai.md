@@ -16,8 +16,8 @@ Two layers, all static files under `packages/career-model-ui/public/`:
    Header `Competency Area, Competency Group, Competency`; rows nest by prefix,
    so the tree is arbitrary depth.
 2. **Detail**: one YAML per node in `public/competencies/<category>/<area>/<competency>.yaml`.
-   44 files exist; most are stubs (`definition: todo`); `construction/coding.yaml`
-   is fully fleshed out.
+   44 files exist, and most are stubs (`definition: todo`). Only
+   `construction/coding.yaml` is fully fleshed out.
 
 ### Schema
 
@@ -47,8 +47,8 @@ Categories (4): General, Software Production, Software Management, Software
 Technology. Areas per category; Software Production has Requirements,
 Interaction Design, Architecture, Construction, Test, Maintenance. Competencies
 and sub-competencies below each area. **Levels are behaviors within a
-competency** (`base / expert / lead`), not separate nodes; there is no role or
-seniority ladder.
+competency** (`base / expert / lead`) rather than separate nodes, and the
+model has no role or seniority ladder.
 
 ### Visual map
 
@@ -65,12 +65,14 @@ Good fit with modest changes. Already present: a hierarchical topic tree
 decoupled from detail files; a typed link graph (prerequisites, related,
 specializations), which is the edge set a topic map needs; curated resources
 (books, courses with free/duration, references); a `learningPath` narrative; an
-`evaluation` field that maps onto assessment; three proficiency tiers. Gaps: no
-explicit goals or outcomes, no learner state, no sequencing beyond
-prerequisites, no stable IDs (display-name paths are brittle), levels are prose
-not structured criteria, and most detail files are unwritten. Keep the
-"cheap tree, rich leaves" idea; the tree can just be folder structure. The D3
-force graph is inspiration only; Vue 2 and D3 v5 are end of life.
+`evaluation` field that maps onto assessment, and three proficiency tiers.
+Gaps: it has no explicit goals or outcomes and no learner state, its
+sequencing goes no further than prerequisites, its IDs are display-name paths
+that break on rename, its levels are prose rather than structured criteria, and
+most detail files are unwritten.
+Keep the "cheap tree, rich leaves" idea, and let the tree be plain folder
+structure. The D3 force graph is inspiration only, since Vue 2 and D3 v5 are
+end of life.
 
 ## 2. `ai-deep-learning` (`~/git/lsimons/ai-deep-learning`)
 
@@ -85,21 +87,21 @@ Reading order from `COURSES.md` with topic coverage (AIC = AI concepts, SAFE =
 AI safety, USE = using agents, SWE = AI-assisted software engineering, CUST =
 customizing agents, BUILD = building agents):
 
-| #   | Course                                          | One line                                                                   | Topics           |
-| --- | ----------------------------------------------- | -------------------------------------------------------------------------- | ---------------- |
-| 1   | ChatGPT Prompt Engineering                      | Two prompting principles, then summarize/infer/transform/expand, a chatbot | AIC              |
-| 2   | Generative AI for Everyone                      | What genAI can and can't do, how projects get built, societal impact       | AIC, SAFE        |
-| 3   | AI Prompting for Everyone                       | Power user: search and research, AI as thought partner, sycophancy         | AIC, USE, SAFE   |
-| 4   | AI Python for Beginners                         | Python from zero with an LLM as coding assistant                           | SWE (entry)      |
-| 5   | Claude Code: A Highly Agentic Coding Assistant  | Codebase comprehension, features, tests, refactoring, GitHub, hooks        | USE, SWE, CUST   |
-| 6   | Intro to Generative AI for Software Development | How LLMs work, pair coding, LLM-driven code analysis                       | AIC, SWE         |
-| 7   | Team Software Engineering with AI               | Testing, debugging, documentation, dependency management                   | SWE              |
-| 8   | AI-Powered Software and System Design           | Config-driven development, schema design, design patterns                  | SWE              |
-| 9   | MCP: Build Rich-Context AI Apps with Anthropic  | MCP servers and clients exposing tools, data, and prompts                  | CUST, BUILD      |
-| 10  | Agent Skills with Anthropic                     | Packaging expertise as skills; skills vs tools, MCP, and subagents         | CUST, BUILD      |
-| 11  | Agentic AI                                      | Task decomposition, evals, reflection and tool-use patterns, autonomy      | BUILD, USE, SAFE |
+| #   | Course                                          | One line                                                               | Topics           |
+| --- | ----------------------------------------------- | ---------------------------------------------------------------------- | ---------------- |
+| 1   | ChatGPT Prompt Engineering                      | Prompting principles, then summarize/infer/transform/expand, a chatbot | AIC              |
+| 2   | Generative AI for Everyone                      | What genAI can and can't do, how projects get built, societal impact   | AIC, SAFE        |
+| 3   | AI Prompting for Everyone                       | Power user: search and research, AI as thought partner, sycophancy     | AIC, USE, SAFE   |
+| 4   | AI Python for Beginners                         | Python from zero with an LLM as coding assistant                       | SWE (entry)      |
+| 5   | Claude Code: A Highly Agentic Coding Assistant  | Codebase comprehension, features, tests, refactoring, GitHub, hooks    | USE, SWE, CUST   |
+| 6   | Intro to Generative AI for Software Development | How LLMs work, pair coding, LLM-driven code analysis                   | AIC, SWE         |
+| 7   | Team Software Engineering with AI               | Testing, debugging, documentation, dependency management               | SWE              |
+| 8   | AI-Powered Software and System Design           | Config-driven development, schema design, design patterns              | SWE              |
+| 9   | MCP: Build Rich-Context AI Apps with Anthropic  | MCP servers and clients exposing tools, data, and prompts              | CUST, BUILD      |
+| 10  | Agent Skills with Anthropic                     | Packaging expertise as skills; skills vs tools, MCP, and subagents     | CUST, BUILD      |
+| 11  | Agentic AI                                      | Task decomposition, evals, reflection and tool-use patterns, autonomy  | BUILD, USE, SAFE |
 
 Sequencing shape: foundations without code, then programming with AI, then AI
 in the software engineering lifecycle, then extending agents (MCP, skills),
 then designing agents. Notable gap: **AI safety is nowhere a first-class
-track**; it is diffused into the "for everyone" and evals material.
+track** and is diffused into the "for everyone" and evals material.

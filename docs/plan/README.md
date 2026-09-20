@@ -21,18 +21,18 @@ should cover, in roughly this order:
 Most content is for engineers. The basic content (concepts, safety, using
 agents) is for general knowledge work.
 
-It is public, open source, and open content. Decided 2026-09-19: content is
+It is a public project with open source code and open content. Decided 2026-09-19: content is
 **CC BY-SA 4.0** and code is **Apache-2.0** (including the parts lifted from
 `lsimons-template-doc`). An earlier same-day choice of CC BY-NC-SA, made so
-CS50 text could be adapted, was reversed: the CC-licensed CS50 material
-barely overlaps the six areas, the NC term makes corporate internal training
-an ambiguous use, and BY-SA lets Diátaxis, Apache, CC BY and CC BY-SA
-material be adapted freely. It replaces two earlier attempts:
+CS50 text could be adapted, was reversed. The CC-licensed CS50 material
+barely overlaps the six areas, and the NC term makes corporate internal
+training an ambiguous use. BY-SA also lets Diátaxis, Apache, CC BY, and CC
+BY-SA material be adapted freely. It replaces two earlier attempts:
 
 - `archive/lsimons-ai-training`: private, Schuberg Philis specific, never got
   past scaffolding. See [explore/01](./explore/01-prior-sbp-training-and-course-compare.md).
 - `agent-engineer-course`: a fork of Addy Osmani's course. Addy joined
-  Anthropic and is unlikely to maintain the upstream, so the fork becomes a
+  Anthropic and is unlikely to maintain the upstream. The fork becomes a
   rebuild here. See [explore/02](./explore/02-agent-engineer-course.md).
 
 ## Sources and what may be done with each
@@ -40,11 +40,11 @@ material be adapted freely. It replaces two earlier attempts:
 | Source                         | License                                         | Use here                                                                                                                                                                                                                                                                                                |
 | ------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `agent-engineer-course` (fork) | Apache-2.0                                      | Integrate the best content, with attribution to Addy Osmani, Ivar Soares Urdalen and Leo Simons in `NOTICE.md`.                                                                                                                                                                                         |
-| `ai-cs50` (CS50 AI, workshops) | CC BY-NC-SA 4.0                                 | Ideas, structure, and vocabulary with citation. Text may not be adapted into this BY-SA work; a page may be included verbatim, marked with its own license. Workshop talk transcripts are YouTube captions and not licensed; don't redistribute.                                                        |
-| Diátaxis                       | CC BY-SA 4.0                                    | Adopt the four kinds and the compass; text may be adapted with attribution. See [explore/08](./explore/08-diataxis.md).                                                                                                                                                                                 |
+| `ai-cs50` (CS50 AI, workshops) | CC BY-NC-SA 4.0                                 | Ideas, structure, and vocabulary with citation. Text may not be adapted into this BY-SA work; a page may be included verbatim, marked with its own license. Workshop talk transcripts are YouTube captions and not licensed, so don't redistribute them.                                                |
+| Diátaxis                       | CC BY-SA 4.0                                    | Adopt the four kinds and the compass. Text may be adapted with attribution. See [explore/08](./explore/08-diataxis.md).                                                                                                                                                                                 |
 | `ai-anthropic-partners`        | Anthropic, proprietary                          | Reference and link only, preferring public `academy.claude.com` URLs.                                                                                                                                                                                                                                   |
-| `ai-deep-learning`             | DeepLearning.AI, paid                           | Inspiration for topic coverage and sequencing only. Embed nothing.                                                                                                                                                                                                                                      |
-| Learn Prompting                | CC BY 4.0 (to 2023-02-15), then CC BY-NC-SA 4.0 | Vocabulary and authoring patterns only; no text adapted from either license period. Prompting concepts are written from the papers. See [explore/12](./explore/12-learn-prompting.md).                                                                                                                  |
+| `ai-deep-learning`             | DeepLearning.AI, paid                           | Inspiration for topic coverage and sequencing only. Don't embed any of it.                                                                                                                                                                                                                              |
+| Learn Prompting                | CC BY 4.0 (to 2023-02-15), then CC BY-NC-SA 4.0 | Vocabulary and authoring patterns only. Don't adapt text from either license period. Prompting concepts are written from the papers. See [explore/12](./explore/12-learn-prompting.md).                                                                                                                 |
 | `archive/career-model`         | Apache-2.0 (own)                                | Reuse the competency data model and the idea of a visual map.                                                                                                                                                                                                                                           |
 | Schuberg Philis AI wiki        | Company work product, no license                | Ideas only, rewritten: engineering guardrails, agent security scenarios, sandboxing and containment patterns, EU AI Act lesson brief, tool onboarding tiers, literacy programme evidence. Public Apache-2.0 repos it points at may be adapted. See [explore/13](./explore/13-sbp-confluence/README.md). |
 
@@ -57,7 +57,7 @@ See the `explore/` reports for detail on each.
 - **Interactive lesson content** in the style of the Anthropic SCORM modules:
   teaching screens, checkpoints (multiple choice, sorting, scenario
   decisions), watch-out boxes, reflection prompts, recap, and quiz. Progress
-  and answers kept in browser local storage; no backend.
+  and answers are kept in browser local storage, without a backend.
 - **Tutor mode**: run the site on localhost from inside a Claude Code session
   and let Claude act as an interactive tutor. Inspired by the CS50 Duck
   research (topic restriction, hints not answers, show-not-tell, watch for
@@ -80,12 +80,12 @@ See the `explore/` reports for detail on each.
 | Question                      | Decision                                                                                                                                                          |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Site title                    | **AI Training**                                                                                                                                                   |
-| Area naming                   | Two sidebar groups: **Foundations** (Concepts, Safety, Using agents) and **Engineering** (Coding with agents, Customizing agents, Building agents).               |
+| Area naming                   | The sidebar has the groups **Foundations** (Concepts, Safety, Using agents) and **Engineering** (Coding with agents, Customizing agents, Building agents).        |
 | Audience split                | Foundations is written at one level for everyone. Engineering continues after Foundations and has two comfort levels per lesson (CS50 "less / more comfortable"). |
-| First public release ("done") | One thin slice through all six areas: one or two lessons each so the shape is visible end to end, then deepen.                                                    |
+| First public release ("done") | One thin slice through all six areas: one or two lessons each so the structure is visible end to end, then deepen.                                                |
 | Tutor mode                    | A skill in this repo (`.claude/skills/`), used by running the site locally inside a Claude Code session. Plugin packaging can follow later.                       |
-| Repo visibility               | Stays private until Leo explicitly decides it is ready. Going public is a separate, explicit decision, not tied to a milestone.                                   |
-| Learner progress              | Browser local storage plus export/import of a JSON file. No backend.                                                                                              |
+| Repo visibility               | Private until Leo explicitly decides it is ready. Going public is a separate, explicit decision, not tied to a milestone.                                         |
+| Learner progress              | Browser local storage plus export/import of a JSON file, with no backend.                                                                                         |
 
 ## Next steps
 
@@ -133,4 +133,4 @@ See the `explore/` reports for detail on each.
    question. Untested against learners.
 7. Replace the template pages under `site/src/content/docs/` with real
    content, area by area. Release 1 (one lesson per area) landed
-   2026-09-20; the template authoring guides remain under "Contributing".
+   2026-09-20, and the template authoring guides remain under "Contributing".

@@ -57,7 +57,7 @@ Dictionary seeds:
   button), **design50** (qualitative design feedback), **submit50**,
   **compare50** (similarity), `submit.cs50.io`, the **CS50 duck** (ddb), `cs50.ai`.
 - **Grading**: three axes, **correctness**, **style**, **design** (design scored
-  1-5); completion credit as a lighter option. Academic honesty philosophy:
+  1-5), with completion credit as a lighter option. Academic honesty philosophy:
   "be reasonable" with a 72-hour regret clause. The honesty page explicitly
   permits using the CS50 Duck.
 - **Roles and events**: preceptor, teaching fellow (TF), TA, office hours,
@@ -80,7 +80,7 @@ Sources: `courses/cs50-workshop-2024/talks/06-teaching-cs50-with-ai.md`
   fishing and cap cost. Also "explain highlighted code" and "endorsed answers".
 - Research findings: 300k+ students, about 21k prompts/day (2025). Survey:
   about 47% "very helpful", 26% "helpful". Questions asked of TFs fell from
-  0.89 to 0.28 per student; office-hours attendance from 51% to 30%. Student
+  0.89 to 0.28 per student, and office-hours attendance from 51% to 30%. Student
   quotes: "like having a personal tutor", "gave me enough hints to try on my
   own", "inhuman level of patience".
 - Failure mode named **instruction dilution**: with about 20 guardrails in one
@@ -88,14 +88,14 @@ Sources: `courses/cs50-workshop-2024/talks/06-teaching-cs50-with-ai.md`
   blocks despite the rule. Fix: **show, not tell**. V2 used few-shot examples
   (4), V3 fine-tuned GPT-4o-mini on 50 TF-authored conversations. Blind A/B
   evaluation by 29 teaching fellows on 50 real student queries, scored with
-  Elo; V2/V3 preferred over V0 about 60% of the time. V3 is in production.
+  Elo, and V2/V3 were preferred over V0 about 60% of the time. V3 is in production.
 
 ## 4. License
 
 Confirmed from `courses/cs50-ai/pages/license.md` and the workshop license
 pages: **CC BY-NC-SA 4.0**. Free to share and adapt with attribution (Harvard
 CS50, David J. Malan, Brian Yu), a link to the license and a note of changes;
-**non-commercial only**; derivatives must carry the same license.
+**non-commercial only**, and derivatives must use the same license.
 
 Implication for this project: CS50 material can't be copied into a CC BY or
 CC BY-SA work. Ideas, structure and pedagogy can be adopted and cited;

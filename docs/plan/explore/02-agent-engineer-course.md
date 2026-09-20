@@ -9,7 +9,7 @@ by Leo for the Claude stack. Published at
 ## Lessons
 
 All content: `site/src/content/docs/NN-slug.md` (frontmatter `title` plus
-`sidebar.order`, no H1). Landing: `index.mdx`. 480-1000 lines each.
+`sidebar.order`, without an H1). Landing: `index.mdx`. 480-1000 lines each.
 
 Part 1, Fundamentals (101):
 
@@ -58,14 +58,14 @@ Part 3, Deep dives (301):
   progress exist only in the `/teach` skill. Prose exercises exist ("Hands-On
   Exercise", "Try it yourself", for example lessons 12 and 13).
 - Pagefind search. CI builds and astro-checks; deploy publishes `site/dist` to
-  Pages. Tooling pinned in `.mise.toml`; hooks in `prek.toml`.
+  Pages. Tooling is pinned in `.mise.toml` and hooks in `prek.toml`.
 
 ## The experimental AI tutor skill
 
 Path: `.claude/skills/teach/SKILL.md` (commit 6dd3036, "experimental").
 
 - Slash command `/teach [lesson number | resume | review | status]`. Persona:
-  tutor, not lecturer; never pastes lessons into chat.
+  a tutor rather than a lecturer, and it never pastes lessons into chat.
 - Progress is stored in Claude's auto-memory directory as `teach-progress.md`
   (indexed from `MEMORY.md`): a table of Lesson / Read / Quiz / Score / Weak
   spots, a spaced-recall review queue, and learner notes. Updated after each
@@ -99,7 +99,7 @@ from upstream Addy content, edited throughout by Leo. Attribution is in
   unfilled and no NOTICE file. Upstream addyosmani/agent-engineer should be
   checked for its own license and copyright holder before reuse.
 - For a CC-licensed derivative: Apache-2.0 is one-way compatible with CC BY 4.0
-  and CC BY-SA 4.0. A derivative may carry a CC license while keeping
+  and CC BY-SA 4.0. A derivative may use a CC license while keeping
   Apache-2.0 terms on the incorporated material. Required: retain the Apache
   license text and notices, state that files were changed, credit Addy Osmani
   (content), Ivar Soares Urdalen (Starlight setup) and Leo Simons (Claude-stack
@@ -109,7 +109,7 @@ from upstream Addy content, edited throughout by Leo. Attribution is in
 
 - One leftover stub: `14-agent-protocols-mcp-and-a2a.md:187`,
   `// MCP packet animation placeholder`.
-- `/teach` is marked experimental; no tests or CI coverage.
+- `/teach` is marked experimental and has no tests or CI coverage.
 - LICENSE copyright placeholder not filled in.
 - `CONTRIBUTING.md` line 7 references "the guidelines above" that don't exist.
 - Documented constraints in `AGENTS.md`: public repo (no company names or

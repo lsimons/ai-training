@@ -1,7 +1,7 @@
 # Release 1 (S06)
 
 **Purpose:** Define the first release: one lesson per area, chosen so the
-shape of the site is visible end to end and every mechanism is exercised at
+structure of the site is visible end to end and every mechanism is exercised at
 least once.
 
 **Status:** Draft
@@ -48,15 +48,15 @@ has six courses of one lesson each.
 
 ## What release 1 exercises
 
-| Mechanism       | Exercised by                                                                                                 |
-| --------------- | ------------------------------------------------------------------------------------------------------------ |
-| Lesson graph    | Six course pages, each a one-node graph with a milestone bar and completion ring                             |
-| Topic map       | Six topics colored from lesson state; the rest of the map drawn from the YAML with no lessons yet            |
-| Interactions    | `predict`, `choice`, `scenario`, `sort`, `order`, `repair` with `self-grade`, two widgets                    |
-| Routing         | Checkpoint fail cards and extension cards on the six lessons; comfort level on the three Engineering lessons |
-| Progress record | Read, finished and skipped states; export and import                                                         |
-| Spaced review   | Finishing any slice lesson schedules its checkpoints; one review page per course                             |
-| Tutor mode      | Tested against these six lessons only                                                                        |
+| Mechanism       | Exercised by                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------- |
+| Lesson graph    | One course page per area, each a one-node graph with a milestone bar and completion ring                      |
+| Topic map       | One topic per area colored from lesson state, and the rest of the map drawn from the YAML with no lessons yet |
+| Interactions    | `predict`, `choice`, `scenario`, `sort`, `order`, `repair` with `self-grade`, two widgets                     |
+| Routing         | Checkpoint fail cards and extension cards on the six lessons; comfort level on the three Engineering lessons  |
+| Progress record | Read, finished and skipped states; export and import                                                          |
+| Spaced review   | Finishing any slice lesson schedules its checkpoints; one review page per course                              |
+| Tutor mode      | Tested against these six lessons only                                                                         |
 
 Routing is thin in release 1. It needs the objective graph to be real and
 needs somewhere to route to, and six lessons give little of either. The data
@@ -65,13 +65,13 @@ in.
 
 ## Not in release 1
 
-- Projects. Every course may close with one later; none does yet.
+- Projects. Every course may close with one later, but none does yet.
 - Course quizzes. A one-lesson course has nothing to quiz beyond its
   checkpoints.
 - Shorts, how-to pages and reference pages other than the generated topic
   pages and glossary.
 - Stub pages. The sidebar shows only the six real lessons.
-- Paths as rendered maps. The three paths are defined as data; the
+- Paths as rendered maps. The paths are defined as data, and the
   three-lane rendering can wait until courses have more than one lesson.
 
 ## Done
