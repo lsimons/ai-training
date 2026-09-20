@@ -32,8 +32,7 @@ lessons:
     covers: concepts/how-models-work
     serves:
       - concepts/explains-models/explains-generation
-    status: planned
-    issue: 117
+    status: live
     minutes: 12
     after:
       - concepts/how-models-work
