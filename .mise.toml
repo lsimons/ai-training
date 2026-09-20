@@ -75,36 +75,42 @@ run = "bun run preview"
 [tasks.examples]
 description = "Run every lesson example fixture and assert the output the lesson shows"
 dir = "site"
-run = "bun scripts/check-examples.mjs --self-test && bun scripts/check-examples.mjs"
-
-[tasks.site-e2e]
-description = "Build, serve, and click through every lesson mechanism in a headless browser. Needs `mise run site-browser` once."
-dir = "site"
-run = """
-bun run build
-bunx astro preview --port 4399 > /tmp/astro-e2e-preview.log 2>&1 &
-# Wait for the preview server rather than sleeping a fixed time.
-for _ in $(seq 1 60); do
-  if curl -fsS -o /dev/null http://localhost:4399/ai-training/; then break; fi
-  sleep 0.5
-done
-if ! curl -fsS -o /dev/null http://localhost:4399/ai-training/; then
-  echo "preview server did not come up on :4399 within 30s" >&2
-  cat /tmp/astro-e2e-preview.log >&2
-  pkill -f 'astro preview --port 4399' || true
-  exit 1
-fi
-PORT=4399 bun scripts/e2e.mjs
-status=$?
-# `bunx` forks the real server; kill by command line, not by the bunx pid.
-pkill -f 'astro preview --port 4399' || true
-exit $status
-"""
+run = "bun scripts/check-examples.mjs"
 
 [tasks.site-check]
 description = "Astro type/content check"
 dir = "site"
 run = "bunx astro check"
+
+# Biome does both lint and format for the site's TypeScript, JavaScript,
+# JSON and the frontmatter/script halves of .astro files (its Astro support
+# stops at the template; `site-check` covers that). One config: site/biome.json.
+[tasks.site-lint]
+description = "Biome lint + format check over site/ (config: site/biome.json)"
+dir = "site"
+run = "bun run lint"
+
+[tasks.site-format]
+description = "Biome: rewrite site/ files in the house format"
+dir = "site"
+run = "bun run format"
+
+# Vitest with the Astro Vite config, so tests see the same aliases and
+# virtual modules as the build. The 80% coverage floor in vitest.config.ts
+# fails the task when missed. docs/agents/testing.md says which layer tests
+# what.
+[tasks.site-test]
+description = "Vitest unit and component tests with the coverage floor"
+dir = "site"
+run = "bun run test"
+
+# Playwright starts and stops `astro preview` itself (playwright.config.ts
+# `webServer`), so this task only has to build first. `mise run site-e2e --
+# e2e/review.spec.ts` runs one spec.
+[tasks.site-e2e]
+description = "Build, then run the Playwright walkthrough in site/e2e/. Needs `mise run site-browser` once."
+dir = "site"
+run = ["bun run build", "bun run e2e"]
 
 [tasks.site-slides]
 description = "Render the example Quarto slide deck to HTML + PDF"
@@ -127,22 +133,20 @@ run = "bun audit"
 description = "Remove build artifacts"
 run = "rm -rf site/dist site/.astro"
 
+# The Chromium build Playwright drives for `site-e2e` and `site-screenshot`.
+# `--with-deps` adds the system libraries the browser needs on a Linux CI
+# runner; on macOS it is a no-op.
 [tasks.site-browser]
-description = "Install the Chromium browser Playwright uses for screenshots"
+description = "Install the Chromium browser Playwright uses for site-e2e and site-screenshot"
 dir = "site"
-run = "bunx playwright install chromium"
+run = "bunx playwright install --with-deps chromium"
 
 [tasks.site-screenshot]
 description = "Build, serve, and screenshot a page (args: [out] [path]). Needs `mise run site-browser` once."
 dir = "site"
 run = """
-out="{{arg(name='out', default='out.png')}}"
-path="{{arg(name='path', default='/ai-training/')}}"
 bun run build
-bun run preview --port 4321 > /tmp/astro-preview.log 2>&1 &
-sleep 4
-bunx playwright screenshot --viewport-size=1280,800 "http://localhost:4321${path}" "$out"
-status=$?; pkill -f "astro preview" || true; exit $status
+bun scripts/screenshot.mjs "{{arg(name='out', default='out.png')}}" "{{arg(name='path', default='/ai-training/')}}"
 """
 
 # The prek hooks (mdformat, markdownlint, gitleaks, the pre-commit-hooks
@@ -228,8 +232,10 @@ cspell --no-progress $files
 # Sequential rather than `depends`, which mise runs in parallel:
 # `site-check` and `site-build` both write `site/.astro`. The workflow runs
 # the same list as separate steps for readable logs — keep the two in sync.
+# `site-e2e` is last because it builds the site again and needs the browser
+# from `site-browser`; in the workflow it is its own job after the build.
 [tasks.ci]
-description = "Full CI gate: install + lint + prose + spell + examples + Astro check + build"
+description = "Full CI gate: install + lint + prose + spell + examples + Astro check + Biome + unit tests + build + e2e"
 run = [
   "mise run site-install-frozen",
   "mise run lint",
@@ -238,7 +244,10 @@ run = [
   "mise run spell",
   "mise run examples",
   "mise run site-check",
+  "mise run site-lint",
+  "mise run site-test",
   "mise run site-build",
+  "mise run site-e2e",
 ]
 
 # Local mirror of the `zizmor` CI job, using the mise-pinned zizmor. Not
