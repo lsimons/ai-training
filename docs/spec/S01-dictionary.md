@@ -227,7 +227,7 @@ node, never in general knowledge alone, and cites the node's reference page.
 | *why it matters*         | States the why of the node's behaviors                                                                                                           |
 | *quiz me*                | Asks the node's checkpoints, one at a time                                                                                                       |
 | *test me*                | Asks open questions and grades free-text answers against the behaviors                                                                           |
-| *critique this*          | Writes a deliberately imperfect answer for a served objective; the learner critiques it against the behaviors, and the tutor grades the critique |
+| *critique this*          | Writes a deliberately imperfect answer for a served objective. The learner critiques it against the behaviors, and the tutor grades the critique |
 
 ## Identifiers
 
