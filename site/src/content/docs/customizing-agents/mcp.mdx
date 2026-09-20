@@ -46,6 +46,15 @@ protocol changes is who writes the tool and where it runs
 process on your machine, while a remote one is reached over HTTP and
 runs code, often someone else's, with credentials you gave it.
 
+That last point is where the operator's questions start. The protocol
+says how a tool is described and called. It tells a server to check
+access and to rate-limit calls, and it tells a client to keep a person in
+the loop for sensitive operations. It doesn't say what the right limits
+are for your wiki, whether a server followed the advice, or what the
+model should do with a result. Those are yours to decide, and a remote
+server makes each decision matter more, because the code and the data are
+out of your hands.
+
 Tools are the primitive most servers offer, and the protocol defines
 others. *Resources* are data with a URI that the client reads into
 context, such as a file or a record, and the client decides when.
@@ -60,15 +69,6 @@ asks the server to respect them, so they bound a well-behaved server and
 prove nothing about a hostile one. For the operator's questions in this
 lesson, sampling and roots are the two to check: does this server ask to
 sample, and does your client show you what it asks?
-
-That last point is where the operator's questions start. The protocol
-says how a tool is described and called. It tells a server to check
-access and to rate-limit calls, and it tells a client to keep a person in
-the loop for sensitive operations. It doesn't say what the right limits
-are for your wiki, whether a server followed the advice, or what the
-model should do with a result. Those are yours to decide, and a remote
-server makes each decision matter more, because the code and the data are
-out of your hands.
 
 ## Whose identity does the agent act under?
 
@@ -378,16 +378,17 @@ browser the agent's shell can't open, and there is no token you may
 store, a remote server with an OAuth flow may be the only connection
 that works.
 
-When the model gets the CLI's flags wrong, a skill that documents the
-commands for the task is a cheaper fix than a server. It loads only when
-the task matches, and otherwise costs a name and a description
-(@Academy claude-code-101).
+The typed-interface case in that list has a cheaper fix than a server.
+When the model gets the CLI's flags wrong, a skill that lists the
+commands for the task teaches it the right ones. The skill loads only
+when the task matches. The rest of the time it costs a name and a
+description (@Academy claude-code-101).
 
 | Question                     | CLI                                                     | MCP server                                                    |
 | ---------------------------- | ------------------------------------------------------- | ------------------------------------------------------------- |
 | Setup                        | Already installed and logged in for most developers     | Configure the client, authenticate, approve tools             |
 | Authorization model          | Approved and denied command patterns, in your config    | Token scopes on the server, per-tool approval in the client   |
-| Context cost per turn        | No per-tool descriptions; help output only when the model asks for it | Every tool description, every turn                            |
+| Context cost per turn        | No per-tool descriptions; help output only when the model asks for it | Every tool description on every turn, or a search step when the client loads tools on demand |
 | What breaks with SSO         | A login that needs a browser the shell can't open, with no token to store | Usually nothing, the OAuth flow is the point                  |
 | What only this one can do    | Anything the CLI's authors shipped                      | Structured search, typed inputs, systems without a CLI        |
 
@@ -420,7 +421,10 @@ small, and each one prevents a common problem.
   through a committed `.mcp.json` that every teammate's client reads
   (@Academy claude-code-101). The committed list is convenient, and it is
   also a way for one pull request to install a server on every
-  teammate's machine, so review a change to it like a dependency change.
+  teammate's machine. In an interactive session Claude Code asks you to
+  approve a project-scoped server before it loads. A non-interactive run
+  loads it without asking, which is where a review of the change matters
+  most. Review it like a dependency change.
 - List the allowed tools per server in the client configuration instead
   of allowing every tool, and run browser-driving servers in their
   isolated mode.
