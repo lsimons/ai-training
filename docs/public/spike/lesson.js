@@ -98,7 +98,9 @@
     const r = store.load();
     if (!r.lessons[lessonId]) store.lesson(lessonId, 'read');
     const fin = document.querySelector('[data-finish]');
-    if (fin) fin.addEventListener('click', () => { store.lesson(lessonId, 'finished'); fin.textContent = 'Finished ✓'; });
+    const drawFin = () => { const l = store.load().lessons[lessonId]; if (fin && l && l.state === 'finished') { fin.textContent = `Finished ✓ (${l.at})`; fin.disabled = true; } };
+    if (fin) fin.addEventListener('click', () => { store.lesson(lessonId, 'finished'); drawFin(); });
+    drawFin();
   }
 
   /* course page: one node, shows state */
