@@ -7,6 +7,7 @@
  * `data-progress-id` (`<lesson id>#<checkpoint id>`).
  */
 import * as progress from './progress';
+import type { CheckpointKind } from '@lib/checkpoint-rules';
 
 export interface BindOptions {
 	/** Review mode adds Give Up, stage pills and the frequency control, and records to `reviews`. */
@@ -236,7 +237,7 @@ function bindRepair(el: HTMLElement): Grader {
 	};
 }
 
-const binders: Record<string, (el: HTMLElement) => Grader> = {
+const binders: Record<CheckpointKind, (el: HTMLElement) => Grader> = {
 	choice: bindChoice,
 	'multi-choice': bindMultiChoice,
 	match: bindMatch,
@@ -271,8 +272,8 @@ function drawStage(el: HTMLElement) {
 export function bindCheckpoint(el: HTMLElement, opts: BindOptions = {}): void {
 	if (el.dataset.bound) return;
 	el.dataset.bound = 'true';
-	const kind = el.dataset.kind ?? '';
-	const binder = binders[kind];
+	// `data-kind` is rendered from a `CheckpointKind`, so the cast only narrows the DOM string.
+	const binder: ((el: HTMLElement) => Grader) | undefined = binders[el.dataset.kind as CheckpointKind];
 	if (!binder) return;
 	const grade = binder(el);
 	const id = el.dataset.progressId!;
@@ -350,7 +351,8 @@ function revealAnswer(el: HTMLElement) {
 	} else if (kind === 'match') {
 		el.querySelectorAll<HTMLElement>('.cp-match-row').forEach((r) => {
 			$<HTMLSelectElement>(r, 'select')!.value = r.dataset.option ?? '';
-			r.dataset.state = 'right';
+			// Neutral, so a reveal after Give Up never looks like a pass.
+			r.dataset.state = 'revealed';
 			$(r, '.cp-row-feedback')!.textContent = '';
 		});
 		announce(el, 'note', `Each row now shows its answer. ${$(el, '.cp-match')?.dataset.rationale ?? ''}`.trim());
