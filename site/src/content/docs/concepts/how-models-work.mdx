@@ -79,10 +79,10 @@ frequency-weighted and frozen at the training cutoff.
 
 That first training stage produces a text continuer, and a text continuer
 has no idea that you want an answer. Type a question into a raw model and
-it may reply with more questions, because that is what a worksheet looks
-like. A second, shorter stage fixes this: the network is trained on
-example replies that people have rated, and it learns to treat your text
-as a request and to answer it. Those ratings leave marks of their own.
+it may reply with more questions, in the pattern of a worksheet. A second,
+shorter stage fixes this: the network is trained on example replies that
+people have rated, and it learns to treat your text as a request and to
+answer it. Those ratings leave marks of their own.
 People tend to rate agreeable replies and long replies higher, so the
 finished model leans toward both (@Academy ai-capabilities-and-limitations).
 
@@ -117,12 +117,12 @@ mysterious.
   (@Academy ai-capabilities-and-limitations).
 - **Sycophancy.** Agreeable replies were rated well in the second training
   stage, so agreeing is likely text. Push back and the model often folds,
-  whether or not you were right.
+  even when you were right.
 - **Instruction dilution.** Everything in the context is just tokens.
   A rule you stated on page one competes with everything said since, and
   long conversations drift. Attention across the context window is also
-  uneven: material in the middle of a long input carries less weight than
-  material at the start or the end.
+  uneven: the model attends less to material in the middle of a long input
+  than to material at the start or the end.
 - **Cutoff and staleness.** Anything after training is invisible unless a
   tool puts it in the context.
 
@@ -149,7 +149,7 @@ in "strawberry" and to spell the word backwards. Then ask it for the
 opening sentence of a book you know well, and ask that last question a
 second time in a fresh chat. Note which answers are right and, for the
 wrong ones, which failure mode from this lesson explains it. If the two
-answers about the book differ, that is sampling at work.
+answers about the book differ, the difference is sampling at work.
 
 A good result names one failure mode per wrong answer and can say, in a
 sentence, why prediction rather than lookup produces it.
