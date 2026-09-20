@@ -1,0 +1,14 @@
+05:58:07 started opencode serve on http://127.0.0.1:4497
+05:58:07 created opencode session ses_f429b521affera3YtAk885TvQy
+05:58:07 opencode session "AI training: spike/terminal" ses_f429b521affera3YtAk885TvQy in /Users/lsimons/git/lsimons/ai-training-spike-terminal
+05:58:07 helper listening on 127.0.0.1:4402 · opencode session ses_f429b521affera3YtAk885TvQy (the opencode server stops with this helper)
+
+Open this URL (the token is single-process; restart the helper to rotate it):
+
+  http://localhost:4322/ai-training/spike/terminal/?token=testtoken
+
+05:58:15 allowed: http://localhost:4322
+05:58:15 browser attached, pty 90308
+05:59:05 coach: Ground your explanation in actual files—ask the agent to check README.md or package.json first so they're summarizing what's really there, not inferring from folder names alone.
+05:59:06 browser detached
+05:59:06 stopping opencode serve

@@ -3,8 +3,8 @@ title: "Spike: live terminal with a coach"
 tableOfContents: false
 ---
 
-This page is a throwaway experiment. It attaches to a **background Claude Code
-session** on your machine through a local helper (`node server-attach.mjs` in
+This page is a throwaway experiment. It attaches to a **background Claude Code or opencode
+session** (`SPIKE_AGENT=opencode` when starting the helper) on your machine through a local helper (`node server-attach.mjs` in
 `spikes/2026-09-20-browser-terminal-coach/`). The helper prints a URL with a
 token and asks for permission in its own terminal the first time a page connects.
 A second Claude reads the session transcript and offers tips in the panel below
@@ -80,6 +80,7 @@ the terminal.
     // --- token: from ?token= / #token=, else sessionStorage, else ask -------
     const params = new URLSearchParams(location.search + '&' + location.hash.slice(1));
     let token = params.get('token') || sessionStorage.getItem('spike-token');
+    if (params.get('port')) sessionStorage.setItem('spike-port', params.get('port'));
     if (params.get('token')) { sessionStorage.setItem('spike-token', token); history.replaceState(null, '', location.pathname); }
     // --- themes ---------------------------------------------------------------
     const THEMES = {
@@ -106,7 +107,7 @@ the terminal.
     function connect() {
       if (!token) { $('spike-token').classList.add('show'); status.textContent = 'needs token'; return; }
       status.textContent = 'connecting…';
-      ws = new WebSocket('ws://127.0.0.1:4400/term?cols=' + term.cols + '&rows=' + term.rows + '&token=' + encodeURIComponent(token));
+      ws = new WebSocket('ws://127.0.0.1:' + (sessionStorage.getItem('spike-port') || 4400) + '/term?cols=' + term.cols + '&rows=' + term.rows + '&token=' + encodeURIComponent(token));
       ws.onopen = () => { status.textContent = 'waiting for permission in the helper terminal…'; $('spike-consent').classList.add('show'); };
       ws.onclose = (e) => { $('spike-consent').classList.remove('show'); status.textContent = 'disconnected: ' + (e.reason || 'is the helper running on :4400?'); if (e.code === 4001) { sessionStorage.removeItem('spike-token'); token = null; $('spike-token').classList.add('show'); } };
       ws.onerror = () => (status.textContent = 'cannot reach helper on :4400');
@@ -114,7 +115,7 @@ the terminal.
         const m = JSON.parse(ev.data);
         if (m.type === 'out') term.write(m.data);
         else if (m.type === 'ready') { status.textContent = 'attached'; $('spike-token').classList.remove('show'); $('spike-consent').classList.remove('show'); term.focus(); }
-        else if (m.type === 'session') { $('spike-term-session').textContent = '“' + m.name + '” (' + m.id + ') · ' + m.cwd.replace(/^\/Users\/[^/]+/, '~'); window.__session = m; }
+        else if (m.type === 'session') { $('spike-term-session').textContent = m.agent + ' · “' + m.name + '” (' + m.id + ') · ' + m.cwd.replace(/^\/Users\/[^/]+/, '~'); window.__session = m; }
         else if (m.type === 'coach-start') status.textContent = 'coach is reading (' + m.reason + ')…';
         else if (m.type === 'coach') { status.textContent = 'coach: ' + Math.round(m.ms / 1000) + 's, $' + (m.cost ?? 0).toFixed(3) + ', ' + m.turns + ' turns'; showCoach(m); window.__lastCoach = m; }
         else if (m.type === 'coach-error') status.textContent = 'coach error: ' + m.error;

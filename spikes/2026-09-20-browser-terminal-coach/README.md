@@ -158,6 +158,20 @@ history with older tips dimmed, and the terminal narrows to ~82 columns at
 framing; left for a later spike), `--max-budget-usd` (worth adding for
 learners on their own keys).
 
+Round 4 (opencode): the helper now has two agent adapters. `SPIKE_AGENT=opencode`
+starts `opencode serve --port 4497` (or reuses one), creates/finds a session
+titled `AI training: spike/terminal` in the working directory via the server's
+HTTP API, and the browser terminal runs
+`command opencode attach http://127.0.0.1:4497 --dir <cwd> --session <id>`.
+The coach reads `GET /session/{id}/message` (roles + text/tool parts) and
+`GET /session/status`, a documented API rather than Claude's on-disk JSONL.
+The server also exposes `prompt_async`, so opencode could receive prompts
+without keystrokes; not used because the learner should press Enter. Login is
+the learner's business (`/connect`, provider auth); the helper does not touch
+it. `command opencode` is used in the PTY to bypass shell aliases/functions.
+Verified with `ui-opencode.png`: TUI attached, typed prompt visible in the
+API, coach tip produced. `?port=` in the page URL overrides the helper port.
+
 Gotcha found: blank lines inside the widget's `<div>` end the Markdown HTML
 block and the rest of the script renders as a code figure. Keep widget blocks
 free of blank lines.
@@ -199,6 +213,8 @@ prompt injection, and an LLM coach. Specific takeaways:
   the scraped screen, which is the same information the coach already has.
 
 **Attach beats scrape.** Round 2 showed the background session is the right unit: it survives page reloads, has a stable id and name, its transcript is structured, and both the learner's terminal and the coach are just clients of it. The risk is coupling to internal file formats; a supported transcript or events API would remove it.
+
+**Two agents, one shape.** Both Claude Code and opencode fit the same adapter contract (ensure session, attach command, read conversation, status). opencode's HTTP server is the nicer integration surface; Claude Code's equivalent would be a supported transcript/events API.
 
 Not tested: multiple concurrent sessions, Windows, terminal resize under
 Claude Code, and whether the coach can *see* tool-call detail that is collapsed
