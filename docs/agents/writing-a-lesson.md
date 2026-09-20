@@ -22,9 +22,9 @@ serves:                   # objective ids: <area>/<competency>/<objective>
   - using-agents/delegates-and-checks/writes-a-brief
   - using-agents/delegates-and-checks/chooses-autonomy
 assumes:                  # each points at the lesson section that teaches it
-  - objective: concepts/recognises-agents/tells-agent-from-assistant
+  - objective: concepts/explains-models/explains-generation
     lesson: concepts/how-models-work
-    section: one-token-at-a-time
+    section: one-token-at-a-time   # slug of a real `## ` heading in that lesson
 extends-to:
   - label: Decomposing work
     href: /using-agents/decomposition/
@@ -42,8 +42,9 @@ pages that do not exist yet; they render as plain text until they do.
 
 Opener paragraph(s), then H2 sections. Teaching prose is plain Markdown.
 Components go between paragraphs, never inside list items or tables.
-Every served objective gets exactly one checkpoint with
-`objective="<that id>"`. One `<Pitfall>`, one `<Exercise>`, one `<Recap>`
+Every served objective gets at least one checkpoint with
+`objective="<that id>"`; each checkpoint names the one objective it
+evidences. One `<Pitfall>`, one `<Exercise>`, one `<Recap>`
 at the end. Tutorial mode: one or two paragraphs, then an example the
 learner runs or predicts; every example that runs gets a `<Predict>`.
 
@@ -76,10 +77,10 @@ What does this print?
 
 ```python
 print(TOOLS["get_weather"]["fn"]("Lisbon"))
-````
+```
 
 </Predict>
-```
+````
 
 `run` names a file under `docs/examples/`. `mise run examples` executes it
 and fails if its stdout is not `answer`. The file holds the complete,
@@ -142,6 +143,14 @@ The prompt text.
 </Prompt>
 <Response>
 The recorded response.
+</Response>
+
+<Prompt model="illustrative" recorded="illustrative">
+A prompt written by the author, not recorded from a model.
+</Prompt>
+<Response>
+The written response. The component labels the pair as illustrative; the
+page must also say so in prose next to it.
 </Response>
 
 <Recap>

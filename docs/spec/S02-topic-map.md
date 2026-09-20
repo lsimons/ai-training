@@ -34,7 +34,7 @@ covers one topic and teaches one to five of its concepts.
 
 | Tier                   | Register     | Owns                             | Carries                                                                             |
 | ---------------------- | ------------ | -------------------------------- | ----------------------------------------------------------------------------------- |
-| **Topic**              | noun         | two to six concepts              | The graph edges: `prerequisite` (the arrow in the map), `related`, `specialization` |
+| **Topic**              | noun         | two to eight concepts            | The graph edges: `prerequisite` (the arrow in the map), `related`, `specialization` |
 | **Concept**            | noun         | one paragraph definition         | Inherits its topic's edges; has a glossary anchor                                   |
 | **Competency**         | verb phrase  | three to six learning objectives | The topics it draws on, possibly across areas; its alignment rows                   |
 | **Learning objective** | verb phrase  | two to six behaviours; one level | What lessons serve and assume, what checkpoints prove                               |

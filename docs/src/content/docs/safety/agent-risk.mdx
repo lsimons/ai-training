@@ -7,10 +7,11 @@ covers:
 serves:
   - safety/judges-agent-risk/names-blast-radius
   - safety/judges-agent-risk/chooses-human-in-loop
+  - safety/judges-agent-risk/recognises-injection
 assumes:
-  - objective: concepts/recognises-agents/tells-agent-from-assistant
+  - objective: concepts/explains-models/names-failure-modes
     lesson: concepts/how-models-work
-    section: one-token-at-a-time
+    section: failure-modes-named
 extends-to:
   - label: Verifying outputs
     href: /safety/verification/
@@ -143,7 +144,9 @@ deletes, pays, publishes or changes anything shared. In practice the agent
 does most of the work and you spend a few seconds on each of the two or
 three moments that matter.
 
-A short exchange with a well-set-up agent looks like this.
+A short exchange with a well-set-up agent looks like this. The transcript
+is illustrative: it shows the shape of a good exchange, not a recording of
+one model, and your agent will phrase things differently.
 
 <Prompt model="illustrative" recorded="illustrative">
 Go through this week's scheduling emails and reply to each one proposing a
@@ -216,7 +219,7 @@ are not three separate lessons; they are one habit, and prompt injection is
 the reason you need it even when you trust the agent completely. You may
 trust the agent. You cannot trust everything the agent will read.
 
-<Predict id="predict-the-planted-instruction" objective="safety/judges-agent-risk/names-blast-radius"
+<Predict id="predict-the-planted-instruction" objective="safety/judges-agent-risk/recognises-injection"
   title="What will the agent do with the planted page?" hint="Which of its permissions can the planted sentence actually spend? List them before you guess.">
 You are going to check this one yourself, in a sandbox you can throw away.
 
@@ -230,10 +233,11 @@ agent to "summarise this page in two sentences".
 Before you run it, write down your prediction: what will the agent do, and
 what is the *worst* it could do given only those two permissions?
 
-Then run it and compare. Whatever happened, the check is the same: did the
-worst case stay inside the blast radius you named? Mark yourself as passed
-only if your prediction named every action the agent's permissions actually
-allowed, whether or not the agent took them.
+Then run it and compare. Whatever happened, the check is the same: did you
+see the planted line as an instruction the agent might follow, and did you
+name the path the data could take out? Mark yourself as passed only if your
+prediction named the planted instruction as a risk and every action the
+agent's permissions actually allowed, whether or not the agent took them.
 </Predict>
 
 <Choice id="where-to-put-the-approval" objective="safety/judges-agent-risk/chooses-human-in-loop"

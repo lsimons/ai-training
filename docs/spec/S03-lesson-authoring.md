@@ -4,7 +4,10 @@
 what it contains and declares, how examples, citations, terms and prompts are
 written, and how checkpoints, exercises and widgets behave.
 
-**Status:** Draft
+**Status:** Draft. Changed after the release 1 review: checkpoints are "at
+least one per served objective" instead of exactly one, because tutorial
+mode also demands a `predict` for every example that runs; and prompt
+blocks may be marked `illustrative` in release 1 (see "Examples").
 
 ## Introduction
 
@@ -40,7 +43,7 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 | Opener      | Where we are going: "In this lesson we will...". Never "you will learn...".                                            |
 | Sections    | H2s, each with a section kind. Body sections alternate teaching with pitfalls and checkpoints.                         |
 | Pitfall     | At least one, placed right after the teaching it belongs to: setup, what went wrong, the rule. Short in tutorial mode. |
-| Checkpoints | One per served objective, each mapped to exactly one objective.                                                        |
+| Checkpoints | At least one per served objective; a checkpoint's `objective` names the one objective it evidences.                    |
 | Exercise    | Exactly one.                                                                                                           |
 | Recap       | Numbered takeaways, the served objectives as "You can now...", the sources cited on the page, and what comes next.     |
 
@@ -55,7 +58,7 @@ recap carry that role.
 | `title`      | The display title                                                                                    |
 | `mode`       | `tutorial` or `explanation`                                                                          |
 | `covers`     | The topic ids the lesson teaches                                                                     |
-| `serves`     | The learning objective ids the lesson teaches toward; each gets a checkpoint                         |
+| `serves`     | The learning objective ids the lesson teaches toward; each gets at least one checkpoint              |
 | `assumes`    | The learning objective ids the lesson relies on, each pointing at the lesson section that teaches it |
 | `extends-to` | Where a confident learner goes next: the next lesson, a specialization topic or a short              |
 
@@ -96,6 +99,12 @@ pitfall and the exercise.
   recorded. Outputs live in the repo and are never fetched from a
   third-party playground or embed at view time. Live embeds die with their
   vendors and undated outputs age badly.
+- **Illustrative transcripts are allowed in release 1, marked.** Until
+  transcripts are recorded, an author may write one and set
+  `model="illustrative" recorded="illustrative"`. The component must label
+  the block as illustrative, and the page must say so in prose next to it
+  ("the transcript is illustrative..."). A block that pretends to be a
+  recording is a defect.
 - **Prompting walkthroughs follow one arc:** the naive attempt, the failure
   it produces, one change at a time (technique, order, wording), then
   compare.

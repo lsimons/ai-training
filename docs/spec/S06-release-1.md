@@ -23,14 +23,14 @@ tied to this release.
 
 One lesson per area, each exercising a different interaction type.
 
-| Area               | Lesson (working title)                 | Mode        | Covers topic                     | Serves objectives                                                                  | Basis                                       | Interaction to prove     |
-| ------------------ | -------------------------------------- | ----------- | -------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------ |
-| concepts           | How a language model works             | explanation | concepts/how-models-work         | `explains-models/explains-generation`, `names-failure-modes`                       | new; `AEC-02` first half                    | `choice`, widget         |
-| safety             | Why agent safety is different          | explanation | safety/agent-risk                | `judges-agent-risk/names-blast-radius`, `chooses-human-in-loop`                    | `AEC-10` first half, rewritten for everyone | `scenario`, pitfall      |
-| using-agents       | Delegating a task to an agent          | tutorial    | using-agents/delegating          | `delegates-and-checks/writes-a-brief`, `chooses-autonomy`, `reviews-against-brief` | new; a real delegation in a sandbox         | `sort` (autonomy levels) |
-| coding-with-agents | Your first session with a coding agent | tutorial    | coding-with-agents/first-session | `ships-with-agent/runs-a-session`, `gives-the-right-context`                       | `AEC-12` public rewrite; fixture repository | `predict`, `exercise`    |
-| customizing-agents | Project instructions: AGENTS.md        | tutorial    | customizing-agents/instructions  | `configures-agent/writes-project-instructions`                                     | `AEC-15` with the builder widget            | `repair`, widget         |
-| building-agents    | Building your first agent              | tutorial    | building-agents/agent-loop       | `builds-agent-loop/defines-a-tool`, `implements-the-loop`                          | `AEC-13`                                    | `predict`, `order`       |
+| Area               | Lesson (working title)                 | Mode        | Covers topic                     | Serves objectives                                                                       | Basis                                       | Interaction to prove     |
+| ------------------ | -------------------------------------- | ----------- | -------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------ |
+| concepts           | How a language model works             | explanation | concepts/how-models-work         | `explains-models/explains-generation`, `names-failure-modes`                            | new; `AEC-02` first half                    | `choice`, widget         |
+| safety             | Why agent safety is different          | explanation | safety/agent-risk                | `judges-agent-risk/names-blast-radius`, `chooses-human-in-loop`, `recognises-injection` | `AEC-10` first half, rewritten for everyone | `scenario`, pitfall      |
+| using-agents       | Delegating a task to an agent          | tutorial    | using-agents/delegating          | `delegates-and-checks/writes-a-brief`, `chooses-autonomy`, `reviews-against-brief`      | new; a real delegation in a sandbox         | `sort` (autonomy levels) |
+| coding-with-agents | Your first session with a coding agent | tutorial    | coding-with-agents/first-session | `ships-with-agent/runs-a-session`, `gives-the-right-context`                            | `AEC-12` public rewrite; fixture repository | `predict`, `exercise`    |
+| customizing-agents | Project instructions: AGENTS.md        | tutorial    | customizing-agents/instructions  | `configures-agent/writes-project-instructions`                                          | `AEC-15` with the builder widget            | `repair`, widget         |
+| building-agents    | Building your first agent              | tutorial    | building-agents/agent-loop       | `builds-agent-loop/defines-a-tool`, `implements-the-loop`                               | `AEC-13`                                    | `predict`, `order`       |
 
 Each lesson is the first and only lesson of its area's course, so release 1
 has six courses of one lesson each.
@@ -39,8 +39,8 @@ has six courses of one lesson each.
 
 - Served, assumed and extends-to objectives in frontmatter, pointing at
   real ids in the topic map.
-- One pitfall, one checkpoint per served objective, one exercise with a
-  stretch goal, and a recap.
+- One pitfall, at least one checkpoint per served objective, one exercise
+  with a stretch goal, and a recap.
 - In tutorial mode: the paragraph-then-example rhythm, `predict` for every
   example that runs, and a resettable fixture.
 - Behaviours written for every objective it serves, so the tutor and the
