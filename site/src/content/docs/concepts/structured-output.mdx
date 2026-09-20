@@ -1,0 +1,338 @@
+---
+title: Output the next step can use
+description: Ask a chat assistant for action items as named fields with allowed values, check the result with the program that has to read it, and fix the prompt until it passes.
+mode: tutorial
+covers:
+  - concepts/prompting
+serves:
+  - concepts/prompts-reliably/asks-for-structure
+assumes:
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: the-instruction
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: mark-the-boundary
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: format-and-length
+extends-to:
+  - label: Change the prompt before you retry
+    href: /concepts/iterating-on-a-prompt/
+---
+
+import { Choice, Predict, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In the lesson on instruction, context, and format you asked for three
+bullets under 15 words, and a person read them. In this lesson the reader
+of the answer is a program. We ask a chat assistant for the action items
+in the notes of a project meeting, and we paste each answer into a small
+checker that accepts the same items as a task tracker's import. The first
+answer is prose and the checker can't read it. By the end the answer
+passes, and the difference is what the prompt now says about the format.
+
+You need any chat assistant, a terminal, and `python3`. Every response
+shown here is illustrative: the author wrote it to show the pattern, and
+the component says so. Your model gives a different text, and the checker
+tells you whether that text passes.
+
+## Prose that someone retypes
+
+Here are the meeting notes. They're fictional, and every round uses them
+unchanged.
+
+> Project meeting, 29 September. Present: Dana, Jonas, Maria, Sam.
+>
+> Maria shows the new login page. Jonas found that the password reset email
+> still goes to the old address. Jonas fixes that before the test round on
+> Friday 3 October. Everyone agrees this is the most urgent item.
+>
+> The contract for the search box ends in December. Dana asks Sam to get
+> two quotes for a replacement, by 17 October. Nobody sees it as urgent
+> yet.
+>
+> The help texts still use the old system name. Maria takes that, target 10
+> October, low priority.
+>
+> Sam notes that the accessibility check isn't booked yet. Dana books it
+> with the agency by 8 October. Medium priority.
+
+The team's tracker imports items from a file, and each item needs four
+fields: an owner, a task, a due date written as `YYYY-MM-DD`, and a
+priority that's `high`, `medium`, or `low`. Paste the notes into your chat
+tool with a one-line request above them.
+
+<Prompt model="illustrative" recorded="illustrative">
+List the action items from the notes between the triple quotes.
+
+"""
+[the notes, pasted in full]
+"""
+</Prompt>
+<Response>
+Here are the action items from the meeting:
+
+1. **Jonas** will fix the password reset email so that it goes to the new
+   address. This needs to be done before the test round on Friday 3
+   October and is the most urgent item.
+2. **Sam** will get two quotes for a new search box by 17 October,
+   since the current contract ends in December.
+3. **Maria** will update the help texts to use the new system name, with a
+   target of 10 October.
+4. **Dana** will book the accessibility check with the agency by 8 October.
+</Response>
+
+This is a good answer for a person. For the tracker it is four paragraphs
+that someone retypes. While retyping they decide what the priority of item
+2 is, and they decide which year "17 October" is in. Each decision is a
+place for a mistake, and a second person retyping the same notes would
+decide some of them the other way. The prompt said nothing about the format, so the model chose the
+format it uses for a general reader, as it did in the last lesson.
+
+## One line per item
+
+**Structured output** is an answer in a fixed format that the next step
+can read without a person reformatting it. The simplest such format is
+one line per item, with the fields named in the line. Ask for exactly that,
+and name the allowed values where a field has a fixed set of them.
+
+<Prompt model="illustrative" recorded="illustrative">
+List every action item from the notes between the triple quotes. Write
+one line per item and nothing else, in this exact format:
+
+owner: first name | task: what they do, under 12 words | due: YYYY-MM-DD | priority: high, medium, or low
+
+Use the first names as written in the notes. The year is 2026. Take the
+priority from what the notes say about urgency.
+
+"""
+[the notes, pasted in full]
+"""
+</Prompt>
+<Response>
+owner: Jonas | task: fix the password reset email address | due: 2026-10-03 | priority: high
+owner: Sam | task: get two quotes for a new search box | due: 2026-10-17 | priority: low
+owner: Maria | task: replace the old system name in the help texts | due: 2026-10-10 | priority: low
+owner: Dana | task: book the accessibility check with the agency | due: 2026-10-08 | priority: medium
+</Response>
+
+Now run the check. The checker is a short Python program in the course
+repository, under `site/examples/concepts/structured-output/`. Copy that
+directory or work in a clone, and change into it. `check_items.py` reads a
+file of items and prints one line per item, `ok` or `FAIL`, then a summary
+line. It accepts two input formats: the one-line format from this round,
+and the same fields as JSON (JavaScript Object Notation, a text format
+that programs read and write), which the next round asks for. The
+`sample/` directory has the answers shown on this page, so you can run the
+checker before you paste your own.
+
+<Predict id="check-the-lines" title="Check the one-line answer"
+  answer={`ok 1: Jonas, fix the password reset email address, 2026-10-03, high
+ok 2: Sam, get two quotes for a new search box, 2026-10-17, low
+ok 3: Maria, replace the old system name in the help texts, 2026-10-10, low
+ok 4: Dana, book the accessibility check with the agency, 2026-10-08, medium
+4 of 4 items pass`} run="concepts/structured-output/check_lines.py">
+Run the checker on the sample answer, and compare what you see with the
+output below.
+
+```sh
+python3 check_items.py sample/lines.txt
+```
+
+</Predict>
+
+Now check your own answer. Copy it out of the chat tool into a file named
+`mine.txt` in the same directory and run `python3 check_items.py mine.txt`.
+The checker skips a line that starts with three backticks, so you can
+leave a code fence around the answer in place. If an item fails, the line tells you which field
+is missing or which value is outside the allowed set. That failure is
+about your prompt, so change the prompt, run it again in a fresh chat, and
+check again.
+
+## Named keys and allowed values
+
+The one-line format is easy to read and easy to break: a task that
+contains a `|` splits into an extra field, and there is no agreed way to
+write a value that's empty or a list. When the next step is a program,
+ask for the format the program reads. For many trackers and scripts that's
+JSON. The request has the same parts as before: the type, the fields, and
+the allowed values of each field.
+
+<Prompt model="illustrative" recorded="illustrative" canonical>
+List every action item from the notes between the triple quotes. Return a
+JSON array with one object per item. Each object has exactly these four
+keys, and no others:
+
+- "owner": the first name as written in the notes
+- "task": what they do, under 12 words
+- "due": the date as "YYYY-MM-DD", in the year 2026
+- "priority": one of "high", "medium", or "low", taken from what the notes say about urgency
+
+Return only the JSON, with no text before or after it.
+
+"""
+[the notes, pasted in full]
+"""
+</Prompt>
+<Response>
+
+```json
+[
+  {"owner": "Jonas", "task": "fix the password reset email address", "due": "2026-10-03", "priority": "high"},
+  {"owner": "Sam", "task": "get two quotes for a new search box", "due": "2026-10-17", "priority": "low"},
+  {"owner": "Maria", "task": "replace the old system name in the help texts", "due": "2026-10-10", "priority": "low"},
+  {"owner": "Dana", "task": "book the accessibility check with the agency", "due": "2026-10-08", "priority": "medium"}
+]
+```
+
+</Response>
+
+The checker reads a file that starts with `[` as JSON and applies the same
+four checks: every key present, no extra keys, a date the import can
+parse, and a priority from the allowed set.
+
+<Predict id="check-the-json" title="Check the JSON answer"
+  answer={`ok 1: Jonas, fix the password reset email address, 2026-10-03, high
+ok 2: Sam, get two quotes for a new search box, 2026-10-17, low
+ok 3: Maria, replace the old system name in the help texts, 2026-10-10, low
+ok 4: Dana, book the accessibility check with the agency, 2026-10-08, medium
+4 of 4 items pass`} run="concepts/structured-output/check_json.py">
+Run the checker on the sample JSON, and compare what you see with the
+output below.
+
+```sh
+python3 check_items.py sample/items.json
+```
+
+</Predict>
+
+Save your own JSON answer as `mine.json` and run the checker on it too.
+Both rounds print the same report, because the checker looks at the
+fields and the values and not at the packaging. Naming the fields is what
+made the two answers comparable, and it is also what makes a missing
+value visible: an item without a due date fails a check instead of
+disappearing into a paragraph.
+
+Vendors' developer tools add ways to force a format on the output, and
+the public course on the Claude API describes one of them
+(@Academy building-with-the-claude-api). The rule in this lesson is
+older than those features and works in any chat tool: say what the format
+is, in enough detail that a program can check it (@DLAI-1).
+
+## Check the first result
+
+A usable format request names the output type (a JSON array, one line per
+item, a table), the fields of each item, and the allowed values of every
+field that has a fixed set of them, including how dates and numbers are
+written. Leave one out and the model fills the gap with its own default,
+and the default changes from run to
+run.
+
+<Pitfall title="Return JSON">
+A learner types "Return the action items as JSON" and gets a JSON object
+with an `action_items` key holding four objects with `assignee`, `action`,
+`deadline` and `priority` keys, where the deadline is "Friday 3 October"
+and the priority is "urgent". The import rejects every item. They run the
+same prompt again and get an array of objects with `who`, `what` and
+`when` keys. Both answers are valid JSON, and neither matches the other or
+the tracker. Rule: name the keys and the allowed values, because "return
+JSON" fixes the packaging and leaves the contents to the model.
+</Pitfall>
+
+The sample directory has the first of those two answers. Run the checker
+on it to see what it reports when the type is right and the fields are
+not.
+
+<Predict id="check-the-bare-json" title="Check the bare JSON answer"
+  answer={`FAIL 1: missing owner, task, due (found assignee, action, deadline)
+FAIL 1: priority "urgent" is not one of high, low, medium
+FAIL 2: missing owner, task, due (found assignee, action, deadline)
+FAIL 2: priority "normal" is not one of high, low, medium
+FAIL 3: missing owner, task, due (found assignee, action, deadline)
+FAIL 3: priority "normal" is not one of high, low, medium
+FAIL 4: missing owner, task, due (found assignee, action, deadline)
+0 of 4 items pass`} run="concepts/structured-output/check_bare.py">
+Run the checker on the answer to "return JSON", and compare what you see
+with the output below.
+
+```sh
+python3 check_items.py sample/bare.json
+```
+
+</Predict>
+
+The last part of the rule is about order of work. Check the first result
+against the program that has to read it before you produce the rest. A
+format that looks right on the screen can still fail on the one detail the
+consumer is strict about, such as a date format or an empty field, and
+finding that on item 1 costs one prompt change. Finding it after 200 items
+costs 200 corrections. The checker in this lesson is a stand-in for that
+consumer. At work the consumer is the import button, the spreadsheet, or
+the script, and you use that instead.
+
+<Choice id="which-request-imports" objective="concepts/prompts-reliably/asks-for-structure"
+  concepts={['structured-output']}
+  context="A colleague has the notes of a meeting and wants a chat assistant to turn the action items into a file that a task tracker imports. The tracker needs an owner, a task, a due date written as YYYY-MM-DD and a priority that is high, medium or low."
+  title="Which request can the tracker import?"
+  hint="For each request, ask: does it name the fields the tracker needs, and does it say which values each field may hold?"
+  options={[
+    { text: '"Put the action items from these notes in a table so I can import them into the tracker."', why: 'A table is a type without fields. The model picks the columns and their order, and the priority is whatever word it chooses, so the import still needs a person to fix the file.' },
+    { text: '"Return the action items from these notes as JSON. I will import the file into our tracker."', why: 'JSON is the type the import reads, but the keys are unnamed and the values are free. The next run gives other keys, and a priority of "urgent" fails the import.' },
+    { text: '"One line per item, fields separated by tabs, in this order: owner (first name), task (under 12 words), due (YYYY-MM-DD, year 2026), priority (high, medium or low)."', correct: true },
+  ]}>
+
+A colleague shows you three requests for the same meeting notes. Which
+one gives the tracker a file it can import without anyone editing it?
+
+</Choice>
+
+<Choice id="first-result-looks-right" objective="concepts/prompts-reliably/asks-for-structure"
+  concepts={['structured-output']}
+  context="A learner has a prompt that asks for action items as JSON with named keys and allowed values. They have 40 sets of meeting notes to process and the first set gave an answer that looks right on the screen."
+  title="The first result looks right"
+  hint="Who is strict about the details in this format, the learner reading the screen or the program that reads the file?"
+  options={[
+    { text: 'Run the other 39 sets of notes with the same prompt, then import everything at once.', why: 'A file that looks right can still fail on a detail the import is strict about. If it does, the fix is now 40 corrections instead of one prompt change.' },
+    { text: 'Import the first result into the tracker now, and change the prompt if the import rejects anything.', correct: true },
+    { text: 'Ask the assistant to check its own answer for mistakes, then run the other 39 sets.', why: 'The assistant does not know what the import accepts, and its check is another prediction. The consumer of the file is the check that counts.' },
+  ]}>
+
+The first result looks right. What do you do next?
+
+</Choice>
+
+<Exercise stretch="Add a fifth field to the request, such as a status that is one of open, blocked or done, then extend the checker's FIELDS list so it checks that field too.">
+
+Take the checker and the sample notes from this lesson, and write your
+own format request from scratch without looking at the ones on this page.
+Ask for the four fields with their allowed values, in the one-line format
+or as JSON. Run the prompt in your chat tool and save the answer as a
+file, then run `python3 check_items.py` on that file. If any item fails, change one thing in the
+prompt, run it again in a fresh chat, and check again. Stop when the
+report says `4 of 4 items pass`. Fifteen minutes is enough. Doing this
+once against a checker you can't argue with is what makes you name the
+fields the next time, before the first run.
+
+A good result is a passing report and a prompt that names the type, the
+four fields and the allowed values of `due` and `priority`. Which part of
+your first request did the checker catch, and would a person retyping the
+answer have caught it?
+
+</Exercise>
+
+<Recap>
+
+1. Prose is for a person to read. When the next step is a program, ask for
+   the format that program reads, and the retyping and the decisions made
+   while retyping disappear.
+2. A usable format request names the output type, the fields of
+   each item, and the allowed values of every field that has a fixed set
+   of them, including how dates and numbers are written.
+3. "Return JSON" fixes the packaging and leaves the keys and values to the
+   model, which chooses differently on each run. Named keys make runs
+   comparable and make a missing value visible.
+4. Check the first result against its consumer, the import, the
+   spreadsheet or the script, before you produce the rest. Fixing the
+   prompt after item 1 costs one change.
+
+</Recap>
