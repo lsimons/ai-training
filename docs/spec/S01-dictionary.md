@@ -229,14 +229,15 @@ The tutor offers a fixed set of verbs scoped to the current topic or lesson.
 Each answer is grounded in the concept definitions and behaviors of that
 node, never in general knowledge alone, and cites the node's reference page.
 
-| Verb                     | Does                                                                   |
-| ------------------------ | ---------------------------------------------------------------------- |
-| *explain*                | Explains the node from its concept definitions                         |
-| *key points*             | Lists the node's behaviors as short claims                             |
-| *explain like I am five* | Re-explains with an everyday analogy                                   |
-| *why it matters*         | States the why of the node's behaviors                                 |
-| *quiz me*                | Asks the node's checkpoints, one at a time                             |
-| *test me*                | Asks open questions and grades free-text answers against the behaviors |
+| Verb                     | Does                                                                                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| *explain*                | Explains the node from its concept definitions                                                                                                   |
+| *key points*             | Lists the node's behaviors as short claims                                                                                                       |
+| *explain like I am five* | Re-explains with an everyday analogy                                                                                                             |
+| *why it matters*         | States the why of the node's behaviors                                                                                                           |
+| *quiz me*                | Asks the node's checkpoints, one at a time                                                                                                       |
+| *test me*                | Asks open questions and grades free-text answers against the behaviors                                                                           |
+| *critique this*          | Writes a deliberately imperfect answer for a served objective; the learner critiques it against the behaviors, and the tutor grades the critique |
 
 ## Identifiers
 
