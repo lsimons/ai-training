@@ -6,7 +6,7 @@ reports the files that fail the threshold, so a normal `prose-eval` run
 hides the passing files and the distribution. This script copies the
 package's rules into a temporary style with the threshold removed, runs Vale
 over the same files as `mise run prose`, and writes one row per file with
-every score. Judgement-free; the reading is in docs/prose/.
+every score. This script makes no judgment. The reading is in docs/prose/.
 
 Usage: scripts/prose_metrics.py <package> [out-dir]
 Writes <out-dir>/scores.tsv (default out-dir: docs/prose/reports/<package>).
