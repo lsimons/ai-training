@@ -4,6 +4,8 @@
 # inside a code span does not need listing, cspell skips those.
 
 # People
+Flesch
+Kincaid
 Addy
 Osmani
 addyosmani
