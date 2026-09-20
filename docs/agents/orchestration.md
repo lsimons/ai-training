@@ -98,8 +98,8 @@ request with `--base feat/M-slug`. Two consequences:
 - The CI workflow runs on `pull_request` against `main` only, so a stacked
   pull request gets no automatic run. The builder triggers
   `gh workflow run ci.yml --ref <branch>` and watches that.
-- When the base merges by rebase, its commits get new SHAs. Retarget the
-  stacked pull request to `main` (`gh pr edit N --base main`) and have the
+- When the base merges by rebase, its commits get new SHAs. Change the
+  stacked pull request's base to `main` (`gh pr edit N --base main`) and have the
   builder rebase; the old base commits drop out as already applied. If
   `git rebase` replays them anyway, reset to `origin/main` and cherry-pick
   the branch's own commits.
