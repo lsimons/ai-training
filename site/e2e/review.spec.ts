@@ -96,5 +96,6 @@ test('the review page clones an order checkpoint that drags like the lesson copy
 	await expect(cp.locator('.cp-feedback')).toHaveText('Correct order.');
 	await expect(cp.locator('.cp-stage-label')).toHaveText('stage 2 of 5');
 	const record = await storedRecord(page);
-	expect((record.reviews?.[item] as { history: string[] } | undefined)?.history).toEqual(['pass']);
+	const history = (record.reviews?.[item] as { history: { result: string }[] } | undefined)?.history ?? [];
+	expect(history.map((h) => h.result)).toEqual(['pass']);
 });
