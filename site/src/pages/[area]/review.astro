@@ -6,7 +6,7 @@
  */
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { AREAS } from '@lib/areas';
-import { getLessons, checkpointsOf } from '@lib/lessons';
+import { checkpointsOf, getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
 
 export async function getStaticPaths() {
@@ -23,7 +23,15 @@ const catalog = lessons.map((l) => ({
 		.filter((c) => c.reviewable)
 		.map((c) => ({ id: c.id, revision: c.revision })),
 }));
-const formats = [...new Set(lessons.flatMap((l) => checkpointsOf(l).filter((c) => c.reviewable).map((c) => c.kind)))];
+const formats = [
+	...new Set(
+		lessons.flatMap((l) =>
+			checkpointsOf(l)
+				.filter((c) => c.reviewable)
+				.map((c) => c.kind),
+		),
+	),
+];
 ---
 
 <StarlightPage frontmatter={{ title: `Review: ${area.name}`, description: `Review items due for the ${area.name} course.`, tableOfContents: false }}>
@@ -88,12 +96,13 @@ const formats = [...new Set(lessons.flatMap((l) => checkpointsOf(l).filter((c) =
 
 		async function next(i: number) {
 			bar.style.width = `${due.length ? Math.round((i / due.length) * 100) : 100}%`;
-			if (i >= due.length) return finish();
+			const progressId = due[i];
+			if (progressId === undefined) return finish();
 			status.textContent = `Item ${i + 1} of ${due.length}`;
-			const section = await fetchSection(due[i]);
+			const section = await fetchSection(progressId);
 			if (!section) {
 				// Orphaned item (content changed): drop it and move on.
-				progress.update((r) => delete r.reviews[due[i]]);
+				progress.update((r) => delete r.reviews[progressId]);
 				return next(i + 1);
 			}
 			delete section.dataset.bound;

@@ -6,9 +6,9 @@
  */
 import { getCollection } from 'astro:content';
 import { AREAS } from '@lib/areas';
+import { jsonForScript } from '@lib/json';
 import { getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
-import { jsonForScript } from '@lib/json';
 
 const topics = (await getCollection('topics')).map((t) => t.data);
 const lessons = await getLessons();
@@ -26,12 +26,17 @@ const byArea = AREAS.map((a) => {
 		depth.set(id, d);
 		return d;
 	};
-	list.forEach((t) => visit(t.id, new Set()));
+	for (const t of list) visit(t.id, new Set());
 	list.sort((x, y) => depth.get(x.id)! - depth.get(y.id)! || x.name.localeCompare(y.name));
 	return { area: a, topics: list };
 });
-const coverage = topics.map((t) => ({ id: t.id, lessons: lessons.filter((l) => (l.data.covers ?? []).includes(t.id)).map((l) => l.id) }));
-const edges = topics.flatMap((t) => t.links.prerequisites.map((from) => ({ from, to: t.id, cross: from.split('/')[0] !== t.area })));
+const coverage = topics.map((t) => ({
+	id: t.id,
+	lessons: lessons.filter((l) => (l.data.covers ?? []).includes(t.id)).map((l) => l.id),
+}));
+const edges = topics.flatMap((t) =>
+	t.links.prerequisites.map((from) => ({ from, to: t.id, cross: from.split('/')[0] !== t.area })),
+);
 ---
 
 <div class="not-content">

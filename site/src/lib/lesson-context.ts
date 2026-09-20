@@ -1,5 +1,5 @@
-import type { AstroGlobal } from 'astro';
 import type { CollectionEntry } from 'astro:content';
+import type { AstroGlobal } from 'astro';
 
 /** The lesson entry a component is rendered inside, from Starlight's route data. */
 export function lessonEntryOf(Astro: AstroGlobal): CollectionEntry<'docs'> {
