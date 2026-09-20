@@ -29,7 +29,7 @@ extends-to:
 import { Choice, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
 
 In the last lesson every part of the prompt went into one message: the
-instruction, the material, the reader and the format. Some of those parts
+instruction, the material, the reader, and the format. Some of those parts
 are the same for every message you send. The reader is always your team,
 the answers should always be short, and there are topics the assistant
 should never touch. In this lesson we look at the system prompt, the text
@@ -40,12 +40,12 @@ who writes one and where a rule has to go when it should hold every time.
 ## The text the model reads first
 
 Everything the model works from is text in its context. The conversation
-you see is part of that text. Before it, there is usually a block you do
-not see, written by whoever set the assistant up. That block is the
-**role and system prompt**, in most products called the system prompt.
-It says who the model is in this conversation, how it should sound, which
-rules hold for every answer, and what it must never do
-(@Academy building-with-the-claude-api).
+you see is part of that text. Before it, there is a block that whoever
+set the assistant up wrote, and in most products you do not see it. That
+block is the **role and system prompt**, in most products called the
+system prompt. It says who the model is in this conversation and how it
+should sound. It also lists the rules that hold for every answer and what
+the model must never do (@AEC-02) (@Academy building-with-the-claude-api).
 
 A short one covers four things. The *role* says what the assistant is
 for, such as the help desk of a bicycle rental shop. *Tone* is how it
@@ -55,20 +55,21 @@ such as the audience and the format. The *never-do list* names the topics
 or actions that are off limits, and often what to do instead.
 
 Because the system prompt comes before every turn, the model treats it as
-the frame for the whole conversation. It is still tokens. A rule in it
+the frame for the whole conversation. It is still tokens in the context,
+like everything else. A rule in it
 competes with everything said afterwards, which the lesson on how models
 work called instruction dilution. A long conversation can drift away from
 it, and a rule in a system prompt is a strong default and never a
 guarantee. Within one short conversation, though, the system prompt decides
 more about the answers than one user message does (@AEC-02).
 
-## Two system prompts, one question
+## Same question, different system prompt
 
-Here are two fictional system prompts for an assistant at the same small
-company. Both are followed by the same user message. The responses below
-are illustrative: the author wrote them to show the pattern, and each one
-is one possible answer among many. Your model gives a different text, and
-the comparison to make is between the two columns.
+Below are fictional system prompts for two assistants at the same small
+company, each followed by the same user message. The responses are
+illustrative: the author wrote them to show the pattern, and each one is
+one possible answer among many. Your model gives a different text, and the
+comparison to make is between the two pairs.
 
 <Prompt model="illustrative" recorded="illustrative">
 
@@ -89,48 +90,49 @@ and include your laptop's asset tag. They usually respond within an hour.
 
 <Prompt model="illustrative" recorded="illustrative">
 
-**System prompt:** You are a patient tutor for employees who are new to
-the company. Explain things one step at a time and say why each step
-matters. When a request is unclear, ask one question back before you
-answer. End every answer with one thing the user could read next.
+**System prompt:** You are the onboarding guide for employees in their
+first month at the company. Give the steps in order and say why each one
+matters, because the user does not know the office yet. When a request is
+unclear, ask one question back before you answer. End every answer with
+one page from the onboarding handbook the user could read next.
 
 **User:** My laptop won't connect to the office Wi-Fi. What do I do?
 
 </Prompt>
 <Response>
-Let's take it one step at a time. First, check which network your laptop
-is trying to join. Offices often have two, one for staff and one for
-guests, and the staff one needs your company login. Second, turn Wi-Fi off
-and on, which makes the laptop ask for the network again. Third, if you
-see a login window, use the same username and password as for your email.
-Which of these steps did you get to before it failed? That tells us where
-to look next. If you want the background, the IT onboarding page explains
-how the two networks differ.
+Welcome, and don't worry, this happens to most people in their first week.
+First, check which network your laptop is trying to join. The office has
+two, one for staff and one for guests, and the staff one needs your
+company login. Second, turn Wi-Fi off and on, which makes the laptop ask
+for the network again. Third, if you see a login window, use the same
+username and password as for your email. Which of these steps did you get
+to before it failed? That tells us where to look next. The handbook page
+"Getting online on your first day" has screenshots of each step.
 </Response>
 
 The user typed the same sentence. The first answer is three sentences of
 plain instructions, and the second is a walkthrough with a question back
-and a reading tip. Nothing in the user message asked for either style.
-The system prompt did.
+and a reading tip. Nothing in the user message asked for either style, so
+the difference comes from the system prompt.
 
 Now imagine the same two assistants get a second message: "Can I carry over
 unused vacation days to next year?" The first one has a rule for this. It
 says the question is for HR and gives the mailbox, and it does not try to
-answer. The second one has no such rule, so it answers with a general
-step-by-step explanation of vacation carry-over and asks which contract
-the user has. One of those answers is what the company wanted, and the
+answer. The second one has no such rule, so it gives a general explanation
+of how vacation carry-over works and asks which contract the user has. One
+of those answers is what the company wanted, and the
 difference is one sentence in the system prompt.
 
 ## Who writes it
 
-In a chat product, the vendor writes the system prompt and you do not see
-it. It names the assistant and sets its tone. It also tells the model the
-current date and lists the topics it declines. When two products built on
-the same model behave differently, much of the difference is in those
-hidden prompts. Many products let you add to it: a settings page for
-"custom instructions", or a project with instructions that apply to every
-chat in it. That text is appended to the vendor's prompt, and it holds for
-every conversation you start there.
+In a chat product, the vendor writes the system prompt, and in most
+products you do not see it. It names the assistant and sets its tone, and
+it often gives the model the current date and the topics to decline. When
+two products built on the same model behave differently, much of the
+difference is in those prompts. Many products let you add to it: a
+settings page for "custom instructions", or a project with instructions
+that apply to every chat in it. That text is added to the vendor's prompt,
+and it holds for every conversation you start there.
 
 In an agent or a custom application, the developer writes it. The
 programming interface of every major model has a field for it, separate
@@ -144,13 +146,15 @@ shows how to make those changes one at a time.
 
 <Pitfall title="A rule typed into the chat">
 On Monday you tell the assistant to answer in Dutch from now on and to
-keep every answer under 100 words. For the rest of that chat it does. On
-Tuesday you open a new chat and ask a question. Four paragraphs of English
-come back. The rule was a message in Monday's conversation. A new
-conversation starts from the system prompt alone, and your message is not
-in it. Rule: a rule you want every time goes where the conversation
-starts. In a chat product that is the custom instructions or the project
-settings. In your own application it is the system prompt.
+keep it to one paragraph. For the rest of that chat it does. On Tuesday
+you open a new chat and ask a question. Four paragraphs of English come
+back. The rule was a message in Monday's conversation. Unless the product
+has a memory feature that saved your preference, a new conversation starts
+from the system prompt and your custom instructions alone, and Monday's
+message is not in it. Even where memory exists, it is the product's guess
+about what to keep. Rule: a rule you want every time goes where the
+conversation starts. In a chat product that is the custom instructions or
+the project settings. In your own application it is the system prompt.
 </Pitfall>
 
 <Sort id="system-prompt-or-this-message" objective="concepts/prompts-reliably/structures-a-prompt"
@@ -194,14 +198,16 @@ corrects it in the chat each time. Where does the fix go?
 <Exercise stretch="Write a third system prompt that combines the brevity of the first with the question-back rule of the second, and predict where the two rules conflict.">
 
 Copy the two system prompts from this lesson into a text file, one above
-the other. Under them, write three user messages of your own: one plain
-technical question, one that is unclear, such as "it doesn't work", and
-one about pay or leave. For each message, write one line per system prompt
-that predicts how the answer differs: its length, whether it asks a
-question back, and whether it answers at all. Nine short lines is enough,
-and it takes about ten minutes. Predicting before you run is what turns a
-system prompt from a block of text into a set of rules you can reason
-about.
+the other. Under them, write three user messages of your own, and choose
+ones that differ from the two in this lesson: one that is unclear, such as
+"it doesn't work", one that neither prompt has a rule for, such as a
+farewell message for a colleague, and one that only the never-do list
+covers, such as a question about a contract. For each message, write one
+line per system prompt that predicts how the answer differs: its length,
+whether it asks a question back, and whether it answers at all. Six short
+lines is enough, and it takes about five minutes. Predicting before you
+run is what turns a system prompt from a block of text into a set of rules
+you can reason about.
 
 If you have a chat product that lets you set custom instructions, or a
 project with its own instructions, paste one system prompt there, send the
@@ -218,8 +224,8 @@ did you misjudge?
    sets a role, a tone, the standing rules and a never-do list, and it
    frames every later turn (@Academy building-with-the-claude-api).
 2. Two assistants on the same model with different system prompts give
-   different answers to the same message, in length, in style and in what
-   they refuse.
+   different answers to the same message, in length and in what they
+   refuse.
 3. In a chat product the vendor writes it and you can add to it through
    custom instructions. In an agent or a custom application the developer
    writes it, and that is where recurring behavior gets fixed (@AEC-02).
