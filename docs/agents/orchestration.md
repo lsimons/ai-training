@@ -39,9 +39,11 @@ both, so the builder and the reviewer never talk to each other.
 
    - the issue number and the instruction to load the `build` skill;
    - the branch name (`feat/<issue>-<slug>`);
-   - the setup a fresh worktree needs before any check runs: `mise run site-install-frozen` before the `site-*` tasks and `mise run prose-sync` before `mise run prose`. Without the sync Vale runs only
-     the House rules and says nothing, and the `ai-tells` errors appear in
-     CI instead (issue #103);
+   - the setup a fresh worktree needs before any check runs:
+     `mise run site-install-frozen` before the `site-*` tasks and
+     `mise run prose-sync` before `mise run prose`. Without the sync Vale
+     runs only the House rules and says nothing, and the `ai-tells` errors
+     appear in CI instead (issue #103);
    - the definition of done: `mise run ci` green locally, pushed, a pull
      request against `main` whose body says `Closes #N`, GitHub CI green,
      not merged;
@@ -144,10 +146,11 @@ yet, with the same findings by severity and the same `Verdict:` line, and
 the revisions and re-checks follow it there.
 
 The coordinator keeps the integration branch, `wave/<n>-<slug>`, in a
-dedicated worktree. When a branch is approved, it is rebased onto the wave
-branch rather than merged into it. The wave history then has no merge
-commits, and the later rebase merge into `main` keeps one commit per
-change:
+dedicated worktree created from `main`
+(`git worktree add ../wave-3 -b wave/3-course-plans origin/main`). When a
+branch is approved, it is rebased onto the wave branch rather than merged
+into it. The wave history then has no merge commits, and the later rebase
+merge into `main` keeps one commit per change:
 
 ```sh
 git fetch origin
@@ -158,13 +161,14 @@ git checkout wave/3-course-plans
 
 The wave branch now holds the earlier branches and this one, in the order
 they were approved. When every approved branch is in, the coordinator runs
-`mise run ci` once on the wave branch, pushes it, and opens one pull
-request against `main`. Its body holds a table with one row per branch:
-the issue, the branch, a link to the review comment, and a link to the
-re-check comment where there was one. The review record is then on GitHub
-next to the pull request that shipped it. The maintainer approves the wave, and
-the coordinator merges it with `gh pr merge --rebase` as usual. The deploy
-happens once.
+`mise run ci` on the wave branch, pushes it, and opens one pull request
+against `main`. A branch that joins after that gets its own `mise run ci`
+on the wave branch before the next push. The pull request body holds a
+table with one row per branch: the issue, the branch, a link to the review
+comment, and a link to the re-check comment where there was one. The
+review record is then on GitHub next to the pull request that shipped it.
+The maintainer approves the wave, and the coordinator merges it with
+`gh pr merge --rebase` as usual. The deploy happens once.
 
 The cases that come up:
 
@@ -174,10 +178,11 @@ The cases that come up:
   the next one. Nothing on the wave branch depends on it.
 - **A rebase conflict between branches in the wave.** The rebase of the
   second branch stops on the conflict. The coordinator doesn't resolve it.
-  It tells the builder whose branch came second to resolve the conflict on
-  the integration branch, in the coordinator's worktree or in a fresh one
-  checked out on `wave/<n>-<slug>`, and to push the result to the wave
-  branch. The first branch is left as it was rebased.
+  It runs `git rebase --abort`, which leaves the wave worktree as it was,
+  and tells the builder whose branch came second to redo the `--onto`
+  rebase in that worktree, resolve the conflict there, and run the
+  `branch -f` and `checkout` lines itself. The first branch is left as it
+  was rebased.
 - **A follow-up after the branch is on the wave.** A builder that pushes
   one more commit to its own branch, after a review finding on the wave
   pull request, tells the coordinator the SHA. The coordinator
@@ -185,16 +190,13 @@ The cases that come up:
   the wave again would replay commits the wave already holds.
 - **A change stacked on the wave.** A lesson whose course needs the plan
   entry the wave adds starts from the wave branch and opens a draft pull
-  request with `--base wave/<n>-<slug>`, and its builder triggers CI with
-  `gh workflow run ci.yml --ref <branch>` because `pull_request` runs only
-  against `main`. After the wave merges, the coordinator changes its base with
-  `gh pr edit N --base main` and the builder runs `git rebase origin/main`, which drops the wave commits as already applied. Then it
-  is an ordinary pull request.
-- **The port.** Only one agent at a time runs `site-e2e`, which serves on
-  port 4400. The coordinator's `mise run ci` on the wave branch is that
-  run, so it waits until `lsof -i :4400` is empty, and no builder runs
-  `mise run ci`, `site-dev` or `site-screenshot` locally while the wave is
-  open. Builders run the individual tasks their change touches instead.
+  request with `--base wave/<n>-<slug>`. The rules under "Stacked pull
+  requests" apply as written, with the wave branch as the base and the
+  change to `main` after the wave merges.
+- **The port.** The port rule under "What collides" applies. The
+  coordinator's `mise run ci` on the wave branch is the one e2e run, so it
+  waits until `lsof -i :4400` is empty, and builders run the individual
+  tasks their change touches instead of `mise run ci`.
 
 ## What collides, and how to avoid it
 
@@ -271,9 +273,10 @@ shipped without the review pass.
 
 Wave 2 ran in per-pull-request mode. Twenty-five issues were in scope at
 the start of the day, twenty pull requests merged, sixteen issues closed,
-about twenty-two review passes, fifteen pull requests sent back at least
-once, zero merged with an open blocking finding. Review caught a tutor
-exemplar dialogue that leaked a graded checkpoint's answer, a reset that
+about twenty-two review passes, fifteen pull requests sent back or given
+items to apply at least once, zero merged with an open blocking finding.
+Review caught a tutor exemplar dialogue that leaked a graded checkpoint's
+answer, a reset that
 resurrected a migrated progress record, a skills-check input rename that
 broke self-graded checkpoints, a spec bootstrap contract that WebFetch couldn't
 meet, near-verbatim Academy sentences in three lesson pull requests,
@@ -287,11 +290,12 @@ were #108 with the six course plans and the plan table, #109 with two
 lesson changes, and #110 with the EU AI Act lesson stacked on the plans. A
 write-back pull request, #219, followed with the issue numbers of the 103 lesson
 issues the plans opened (deliverable 2 of #30 to #35). About twenty review
-passes, nine of the eleven branches sent back once. Review caught the competency-topic
-mismatch in four of the six plans, an exercise that had the learner paste
-their own confidential document, a sort item with two defensible answers,
-and a course-plan table that scrolled the page sideways on a phone, and it
-verified a July 2026 amendment to the EU AI Act and every article
-reference against EUR-Lex before the maintainer's own check. The wave
+passes, nine of the eleven branches sent back or given items to apply
+once. Review caught the competency-topic mismatch in four of the six
+plans, an exercise that had the learner paste their own confidential
+document, a sort item with two defensible answers, and a course-plan table
+that scrolled the page sideways on a phone. It also verified a July 2026
+amendment to the EU AI Act and every article reference against EUR-Lex
+before the maintainer's own check. The wave
 pull requests, two of them, replaced what would have been nine pull
 requests and nine deploys.
