@@ -32,6 +32,9 @@ actionlint = "1.7.12"
 shellcheck = "0.11.0"
 # Runs the lesson example fixtures (`mise run examples`).
 python = "3.14.7"
+# Installs the pinned Python dev tools (ruff, basedpyright, pytest) from
+# uv.lock into .venv (`mise run py-install-frozen`).
+uv = "0.12.13"
 # Prose lint (`mise run prose`). Its style packages are pinned by URL in
 # .vale.ini and fetched by `mise run prose-sync`.
 vale = "3.20.0"
@@ -213,11 +216,46 @@ vale --no-exit --config .vale-extended.ini $files
 # counts per area, into docs/prose/reports/<package>/. See docs/prose/README.md.
 [tasks.prose-eval]
 description = "Collect every hit of a Vale package for review: mise run prose-eval -- <package>"
-run = "scripts/prose-eval.py"
+run = "scripts/prose_eval.py"
 
 [tasks.prose-metrics]
 description = "Score every file on a Vale metric package (Readability) for docs/prose/reports"
-run = "scripts/prose-metrics.py"
+run = "scripts/prose_metrics.py"
+
+# Python quality tools (ruff, basedpyright, pytest) for scripts/, tests/ and
+# the lesson fixtures under site/examples/. pyproject.toml holds their
+# config, and uv.lock pins them. The same frozen/unfrozen split as the bun
+# tasks above: `py-install` may relock, `py-install-frozen` (`--locked`) is
+# what the gate runs and fails on a stale lock.
+[tasks.py-install]
+description = "uv sync of the Python dev tools; may update uv.lock"
+run = "uv sync --all-groups"
+
+[tasks.py-install-frozen]
+description = "uv sync of the Python dev tools, failing if uv.lock is out of date"
+run = "uv sync --all-groups --locked"
+
+[tasks.py-lint]
+description = "ruff check + ruff format --check over every .py file"
+run = ["uv run ruff check .", "uv run ruff format --check ."]
+
+[tasks.py-format]
+description = "ruff format + ruff check --fix"
+run = ["uv run ruff format .", "uv run ruff check --fix ."]
+
+# Two configs on purpose: strict for the repo's own code (pyproject.toml)
+# and `standard` at Python 3.9 for the lesson fixtures
+# (site/examples/pyrightconfig.json). basedpyright has no per-directory
+# typeCheckingMode.
+[tasks.py-typecheck]
+description = "basedpyright: strict over scripts/ and tests/, standard (py39) over site/examples/"
+run = ["uv run basedpyright", "uv run basedpyright -p site/examples"]
+
+# tests/ only. The unittest file in a lesson fixture repo is lesson content
+# the learner runs, and `mise run examples` asserts the fixture output.
+[tasks.py-test]
+description = "pytest over tests/ with coverage of scripts/ (floor 80%)"
+run = "uv run pytest"
 
 # Spell check in American English over the same files as `prose`. cspell's
 # en-US dictionary is separate from en-GB, so British spellings fail. Names
@@ -237,10 +275,14 @@ cspell --no-progress $files
 # `site-e2e` is last because it builds the site again and needs the browser
 # from `site-browser`; in the workflow it is its own job after the build.
 [tasks.ci]
-description = "Full CI gate: install + lint + prose + spell + examples + Astro check + Biome + unit tests + build + e2e"
+description = "Full CI gate: install + lint + Python lint/typecheck/test + prose + spell + examples + Astro check + Biome + unit tests + build + e2e"
 run = [
   "mise run site-install-frozen",
+  "mise run py-install-frozen",
   "mise run lint",
+  "mise run py-lint",
+  "mise run py-typecheck",
+  "mise run py-test",
   "mise run prose-sync",
   "mise run prose",
   "mise run spell",

@@ -1,0 +1,12 @@
+{
+  // Lesson example fixtures, checked as Python 3.9 at `standard`. The root
+  // pyproject.toml holds the `strict` config for scripts/ and tests/, and
+  // `mise run py-typecheck` runs both. Two files because basedpyright has
+  // no per-directory typeCheckingMode. Standard rather than strict: strict
+  // wants a type on every parameter and every dict, and a fixture that
+  // reads like a typing tutorial teaches the wrong lesson.
+  "pythonVersion": "3.9",
+  "typeCheckingMode": "standard",
+  "include": ["."],
+  "exclude": ["**/__pycache__"]
+}
