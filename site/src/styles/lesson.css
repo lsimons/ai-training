@@ -111,6 +111,9 @@
 /* ---- course graph ---- */
 .course { display: grid; gap: 1.25rem; margin-top: 1rem; }
 .course-review a { display: block; padding: 0.6rem 1rem; border-radius: 6px; background: var(--sl-color-accent-low); border: 1px solid var(--sl-color-accent); font-weight: 600; text-decoration: none; }
+.course-review[data-due='false'] a { background: transparent; border-color: var(--sl-color-gray-5); color: var(--sl-color-gray-3); font-weight: 400; }
+.progress-review { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--sl-color-gray-3); }
+.schedule-due { margin: 0 0 1rem; }
 .course-top { display: grid; grid-template-columns: 5rem 1fr; gap: 1.25rem; align-items: center; }
 .course-ring { --pct: 0; width: 5rem; height: 5rem; border-radius: 50%; display: grid; place-items: center; font-size: 0.85rem; font-weight: 700;
 	background: conic-gradient(var(--at-done) calc(var(--pct) * 1%), var(--sl-color-gray-5) 0); }

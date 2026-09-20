@@ -109,10 +109,12 @@ expect(await page.locator('.instructions-builder').count(), 1, 'builder widget')
 await page.goto(`${B}/concepts/`);
 expect(await page.locator('[data-node]').getAttribute('data-state'), 'finished', 'course node state');
 expect(await page.locator('[data-ring-label]').textContent(), '100%', 'course ring');
-expect(await page.locator('[data-review-card]').isHidden(), true, 'review card hidden (nothing due)');
+expect((await page.locator('[data-review-card]').textContent()).trim(), 'Review: nothing due yet', 'review card linked when nothing is due');
 // force a review due: set due date to today in storage
 await page.evaluate(() => { const k='ai-training-progress-v1'; const r=JSON.parse(localStorage.getItem(k)); for (const id in r.reviews) r.reviews[id].due='2000-01-01'; localStorage.setItem(k, JSON.stringify(r)); });
 await page.reload(); expect((await page.locator('[data-review-card]').textContent()).trim(), 'Review due: 2 items', 'review card after due');
+await page.goto(`${B}/settings/`); expect((await page.locator('[data-due-now]').textContent()).trim(), /^Due now: .*Concepts \(2\)/, 'settings lists courses with items due');
+await page.goto(`${B}/progress/`); expect(await page.locator('[data-progress-review=concepts]').textContent(), 'Review due: 2 items', 'progress page links the review');
 await page.goto(`${B}/concepts/review/`); await page.waitForSelector('.review [data-checkpoint]', { timeout: 5000 });
 expect(await page.locator('[data-status]').textContent(), 'Item 1 of 2', 'review status'); expect(await page.locator('.review [data-checkpoint]').getAttribute('data-kind'), 'choice', 'review kind');
 cp = page.locator('.review [data-checkpoint]');
