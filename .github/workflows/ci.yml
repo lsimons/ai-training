@@ -63,9 +63,9 @@ jobs:
       - name: Install
         run: mise run site-install-frozen
 
-      # The frozen task, not `py-install`: a pyproject.toml change that
-      # uv.lock does not reflect must fail here rather than be silently
-      # re-resolved on the runner into an unreviewed version set.
+      # The frozen task. A pyproject.toml change that uv.lock does not
+      # reflect must fail here, because `py-install` would silently
+      # re-resolve it on the runner into an unreviewed version set.
       - name: Install Python tools
         run: mise run py-install-frozen
 

@@ -2,8 +2,8 @@
 """Collect the data for evaluating a Vale style package.
 
 Writes every hit as JSON plus word counts per area, so rules compare as hits
-per thousand words. Judgement-free; the per-rule reports and the decisions
-live in docs/prose/.
+per thousand words. This script makes no judgment. The per-rule reports and
+the decisions are in docs/prose/.
 
 Usage: scripts/prose_eval.py <package> [out-dir]
 Writes <out-dir>/<package>.json and <out-dir>/wordcount.tsv

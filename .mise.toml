@@ -225,8 +225,10 @@ run = "scripts/prose_metrics.py"
 # Python quality tools (ruff, basedpyright, pytest) for scripts/, tests/ and
 # the lesson fixtures under site/examples/. pyproject.toml holds their
 # config, and uv.lock pins them. The same frozen/unfrozen split as the bun
-# tasks above: `py-install` may relock, `py-install-frozen` (`--locked`) is
-# what the gate runs and fails on a stale lock.
+# tasks above: `py-install` may relock, and `py-install-frozen` (`--locked`)
+# is what the gate runs and fails on a stale lock. The three check tasks
+# also pass `--locked`, so a local `mise run py-lint` after editing a pin
+# fails instead of rewriting uv.lock and checking with unreviewed tools.
 [tasks.py-install]
 description = "uv sync of the Python dev tools; may update uv.lock"
 run = "uv sync --all-groups"
@@ -237,7 +239,7 @@ run = "uv sync --all-groups --locked"
 
 [tasks.py-lint]
 description = "ruff check + ruff format --check over every .py file"
-run = ["uv run ruff check .", "uv run ruff format --check ."]
+run = ["uv run --locked ruff check .", "uv run --locked ruff format --check ."]
 
 [tasks.py-format]
 description = "ruff format + ruff check --fix"
@@ -249,13 +251,13 @@ run = ["uv run ruff format .", "uv run ruff check --fix ."]
 # typeCheckingMode.
 [tasks.py-typecheck]
 description = "basedpyright: strict over scripts/ and tests/, standard (py39) over site/examples/"
-run = ["uv run basedpyright", "uv run basedpyright -p site/examples"]
+run = ["uv run --locked basedpyright", "uv run --locked basedpyright -p site/examples"]
 
 # tests/ only. The unittest file in a lesson fixture repo is lesson content
 # the learner runs, and `mise run examples` asserts the fixture output.
 [tasks.py-test]
 description = "pytest over tests/ with coverage of scripts/ (floor 80%)"
-run = "uv run pytest"
+run = "uv run --locked pytest"
 
 # Spell check in American English over the same files as `prose`. cspell's
 # en-US dictionary is separate from en-GB, so British spellings fail. Names
