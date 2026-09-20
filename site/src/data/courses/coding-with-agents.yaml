@@ -1,0 +1,12 @@
+# Course plan for the Coding with agents area (docs/agents/writing-a-lesson.md, "Course plan").
+# One entry per lesson, in course order. Planned entries come from issue #33.
+area: coding-with-agents
+lessons:
+  - id: coding-with-agents/first-session
+    title: Your first session with a coding agent
+    covers: coding-with-agents/first-session
+    serves:
+      - coding-with-agents/ships-with-agent/runs-a-session
+      - coding-with-agents/ships-with-agent/gives-the-right-context
+    status: live
+    minutes: 25

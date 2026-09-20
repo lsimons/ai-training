@@ -97,23 +97,3 @@ export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 	}
 	return out;
 }
-
-/**
- * Levels for the lesson graph (spec S02 "Course page as lesson graph"): a
- * lesson sits one level below the deepest lesson it assumes, within the course.
- */
-export function levelsOf(lessons: Lesson[]): Map<string, number> {
-	const ids = new Set(lessons.map((l) => l.id));
-	const level = new Map<string, number>();
-	const visit = (l: Lesson, seen: Set<string>): number => {
-		if (level.has(l.id)) return level.get(l.id)!;
-		if (seen.has(l.id)) return 0;
-		seen.add(l.id);
-		const deps = (l.data.assumes ?? []).map((a) => a.lesson).filter((id) => ids.has(id) && id !== l.id);
-		const depth = deps.length ? Math.max(...deps.map((id) => visit(lessons.find((x) => x.id === id)!, seen))) + 1 : 0;
-		level.set(l.id, depth);
-		return depth;
-	};
-	for (const l of lessons) visit(l, new Set());
-	return level;
-}

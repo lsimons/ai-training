@@ -60,10 +60,11 @@ One YAML file per topic and one per area's competencies. The map page, one
 reference page per topic, one per competency, and the glossary all render
 from these files.
 
-| File                                       | Contents                                                                                                                                                              |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `site/src/data/topics/<area>/<topic>.yaml` | `name`, `definition`, `concepts[] {id, name, definition}`, `links {prerequisites[], related[], specializations[]}`, `sources[]`                                       |
-| `site/src/data/competencies/<area>.yaml`   | `competencies[] {id, statement, topics[], objectives[] {id, statement, level, behaviors[] {claim, why, example}}, alignment[] {framework, code, asks, objectives[]}}` |
+| File                                       | Contents                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site/src/data/topics/<area>/<topic>.yaml` | `name`, `definition`, `concepts[] {id, name, definition}`, `links {prerequisites[], related[], specializations[]}`, `sources[]`                                                                                                                                                                                     |
+| `site/src/data/competencies/<area>.yaml`   | `competencies[] {id, statement, topics[], objectives[] {id, statement, level, behaviors[] {claim, why, example}}, alignment[] {framework, code, asks, objectives[]}}`                                                                                                                                               |
+| `site/src/data/courses/<area>.yaml`        | The area's ordered lesson plan: `lessons[] {id, title, covers, serves[], status (planned, drafting, live), issue, minutes, after[]}`. The course page renders every entry, live or coming, and `mise run courses` checks the file against the pages and the YAML above. Format in `docs/agents/writing-a-lesson.md` |
 
 ### Stable URLs
 
