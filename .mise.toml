@@ -187,6 +187,18 @@ vale --no-exit $files
 vale --minAlertLevel=error $files
 """
 
+# Same files, the extended config (.vale-extended.ini) that also enables the
+# passive-voice rule. Advisory: it never fails, and most hits are idiom.
+# Run it every so often and rewrite the sentences that hide who does what.
+[tasks.prose-extended]
+description = "Vale prose lint with the extended (passive-voice) rules; advisory only"
+run = """
+set -e
+files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**')
+# shellcheck disable=SC2086
+vale --no-exit --config .vale-extended.ini $files
+"""
+
 # Sequential rather than `depends`, which mise runs in parallel:
 # `site-check` and `site-build` both write `site/.astro`. The workflow runs
 # the same list as separate steps for readable logs — keep the two in sync.
