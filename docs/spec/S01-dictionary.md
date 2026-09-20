@@ -61,6 +61,7 @@ course > lesson > section.
 | **Pitfall**       | A section showing a realistic failure mode right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule.                                                                                                                                           | watch-out, warning, gotcha, caution    |
 | **Checkpoint**    | A graded interaction inside a lesson, mapped to one learning objective. See "Checkpoint".                                                                                                                                                                                                  | question, quiz, test, assessment       |
 | **Exercise**      | A hands-on task the learner does outside the page, then self-grades against a model answer. See "Exercise".                                                                                                                                                                                | assignment, homework, task, variant    |
+| **Habit**         | A small task the learner does in their own work, outside the site, and marks done or skipped. Offered after a lesson is finished and brought back on a short fixed schedule. Distinct from an exercise, which is done in the lesson. See "Habit".                                          | micro-habit, nudge, challenge          |
 | **Project**       | A larger exercise closing a course, which comes with a specification and a walkthrough.                                                                                                                                                                                                    | capstone, assignment                   |
 | **Quiz**          | The end-of-course set of checkpoint questions. Pass means all objectives touched with at most one miss.                                                                                                                                                                                    | exam, test                             |
 | **Recap**         | The closing section of a lesson: numbered takeaways, sources, what comes next. See "Recap and the learner's reference".                                                                                                                                                                    | summary, conclusion, `TL;DR`           |
@@ -104,6 +105,15 @@ course > lesson > section.
   self-grades against a model answer. Honor system.
 - One per lesson, written once. May end with a one-line **stretch goal** for
   confident learners. The exercise has no variants.
+
+### Habit
+
+- Done in the learner's own work, at a moment the habit text names. No
+  model answer, no grade.
+- Zero, one or two per lesson, declared by the author. The learner marks
+  each occurrence **done** or **skipped**, and both count the same.
+- Comes back on a short fixed schedule after the lesson is finished, then
+  retires. The schedule and the storage are set in a later spec.
 
 ### Recap and the learner's reference
 

@@ -32,6 +32,7 @@ reads when the learner exports it.
 | lesson     | `state`: `read`, `finished` or `skipped`; the date it changed                      |
 | checkpoint | `state`: `passed`, `skipped` or `attempted`; the number of attempts                |
 | review     | Per checkpoint: `stage`, `due`, `last`, `history`. Written by the review schedule. |
+| habit      | Per habit: `next`, `history`. Written by the habit schedule, set in a later spec.  |
 | quiz       | Per course: score and date                                                         |
 | learner    | Chosen comfort level, chosen goals                                                 |
 

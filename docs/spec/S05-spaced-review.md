@@ -64,8 +64,7 @@ Five stages, shown to the learner as five pills.
 - Comfort level has no other coupling to reviews.
 - A session shows at most **12 due items**, oldest due first. The page
   says how many remain.
-- The site doesn't limit lessons per day, and only offers a suggestion after two lessons in
-  one sitting.
+- The site doesn't limit lessons per day.
 
 ## Where reviews surface
 
