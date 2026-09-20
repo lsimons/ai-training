@@ -29,3 +29,8 @@ export function dueByCourse(
 export function dueLine(course: DueCourse): string {
 	return `${course.title}: ${course.due} ${course.due === 1 ? 'item' : 'items'} due`;
 }
+
+/** The screen-reader text after the sidebar count, so the link reads "Concepts 3 review items due". */
+export function dueCountLabel(due: number): string {
+	return due === 1 ? ' review item due' : ' review items due';
+}

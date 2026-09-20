@@ -35,6 +35,7 @@ const catalog = await buildCatalog();
 
 <script>
 	import { historyDisplay } from '@scripts/checkpoint-logic';
+	import { dueByCourse } from '@scripts/due-counts';
 	import * as progress from '@scripts/progress';
 
 	interface CatalogCheckpoint {
@@ -84,19 +85,17 @@ const catalog = await buildCatalog();
 
 		/** Which courses have items due now, each linking to its review page. */
 		function drawDueNow(rec: progress.ProgressRecord) {
-			const courses = catalog
-				.map((c) => ({ course: c, due: progress.dueReviewIds(rec, `${c.area}/`).length }))
-				.filter((x) => x.due > 0);
+			const courses = dueByCourse(catalog, rec, progress.today());
 			if (!courses.length) {
 				dueNow.textContent = 'Nothing due right now.';
 				return;
 			}
 			dueNow.replaceChildren('Due now: ');
-			courses.forEach(({ course, due }, i) => {
+			courses.forEach((course, i) => {
 				if (i > 0) dueNow.append(', ');
 				const a = document.createElement('a');
 				a.href = `${base}/${course.area}/review/`;
-				a.textContent = `${course.title} (${due})`;
+				a.textContent = `${course.title} (${course.due})`;
 				dueNow.appendChild(a);
 			});
 			dueNow.append('.');
