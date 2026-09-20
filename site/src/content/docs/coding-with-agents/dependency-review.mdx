@@ -74,11 +74,11 @@ Each kind gets a different review. A new direct dependency is an
 architecture decision, while somebody upstream decided the transitive one
 for you, and a version bump changes code you already accepted once.
 
-The agent can draw up the list for you. Ask it, in a fresh session with no
-memory of writing the feature, to name every package the lockfile diff
-added or bumped and what each one is for. A fresh session has no stake in
-the choices, so it reports what it finds instead of defending what it
-meant (@Academy claude-code-in-action). The list is where the review
+The agent can draw up the list for you. Start a new session, one that
+never saw the feature being built, and ask it to name every package the
+lockfile diff added or bumped and what each one is for. A session that
+didn't make the choices has nothing to defend, so it describes the diff
+as it is (@Academy claude-code-in-action). The list is where the review
 starts, and you write the verdict at the end.
 
 ## Principles that keep the review affordable
