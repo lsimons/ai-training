@@ -233,17 +233,22 @@ node, never in general knowledge alone, and cites the node's reference page.
 Each unit is identified by a lowercase kebab-case **slug**. Slugs never
 change once published, but display names may. The project doesn't use short codes.
 
-| Unit       | Identifier                                          | Example                                                |
-| ---------- | --------------------------------------------------- | ------------------------------------------------------ |
-| Area       | `<area>`                                            | `safety`                                               |
-| Course     | `<area>/<course>`                                   | `using-agents/delegating`                              |
-| Lesson     | `<area>/<course>/<lesson>`, equal to the page route | `using-agents/delegating/writes-a-brief`               |
-| Section    | `<lesson id>#<section slug>`                        | `using-agents/delegating/writes-a-brief#fix-the-brief` |
-| Checkpoint | Its section id                                      | as above                                               |
-| Topic      | `<area>/<topic>`, a noun slug                       | `concepts/prompting`                                   |
-| Competency | `<area>/<competency>`, verb-led                     | `safety/verifies-output`                               |
-| Objective  | `<competency id>/<objective>`, verb-led             | `safety/verifies-output/checks-claims`                 |
-| Concept    | `<concept>`; global and unique                      | `context-window`                                       |
+| Unit       | Identifier                                 | Example                                 |
+| ---------- | ------------------------------------------ | --------------------------------------- |
+| Area       | `<area>`                                   | `safety`                                |
+| Course     | `<area>`, the same as its area             | `using-agents`                          |
+| Lesson     | `<area>/<lesson>`, equal to the page route | `using-agents/delegating`               |
+| Section    | `<lesson id>#<section slug>`               | `using-agents/delegating#fix-the-brief` |
+| Checkpoint | Its section id                             | as above                                |
+| Topic      | `<area>/<topic>`, a noun slug              | `concepts/prompting`                    |
+| Competency | `<area>/<competency>`, verb-led            | `safety/verifies-output`                |
+| Objective  | `<competency id>/<objective>`, verb-led    | `safety/verifies-output/checks-claims`  |
+| Concept    | `<concept>`; global and unique             | `context-window`                        |
+
+Each area has one course, so a course id is its area id and a lesson id has
+two segments (decided 2026-09-20, issue #24). The day an area needs a second
+course, the id scheme gains a `<course>` segment and progress records are
+migrated with a record version bump per S04.
 
 ## Open questions
 

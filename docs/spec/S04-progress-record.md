@@ -66,13 +66,13 @@ reads when the learner exports it.
   "comfort": "less",
   "goals": [{ "competency": "building-agents/builds-agent-loop", "level": "base" }],
   "lessons": {
-    "using-agents/delegating/writes-a-brief": { "state": "finished", "at": "2026-09-20" }
+    "using-agents/delegating": { "state": "finished", "at": "2026-09-20" }
   },
   "checkpoints": {
-    "using-agents/delegating/writes-a-brief#fix-the-brief": { "state": "passed", "attempts": 2 }
+    "using-agents/delegating#fix-the-brief": { "state": "passed", "attempts": 2 }
   },
   "reviews": {
-    "using-agents/delegating/writes-a-brief#fix-the-brief": {
+    "using-agents/delegating#fix-the-brief": {
       "stage": 2,
       "due": "2026-09-23",
       "last": "pass",
@@ -80,7 +80,7 @@ reads when the learner exports it.
     }
   },
   "quizzes": {
-    "using-agents/delegating": { "score": 0.9, "at": "2026-09-21" }
+    "using-agents": { "score": 0.9, "at": "2026-09-21" }
   }
 }
 ```
