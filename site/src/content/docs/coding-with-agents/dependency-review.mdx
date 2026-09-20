@@ -232,7 +232,7 @@ project, and prints every check that scored below 5, then a summary line.
 
 <Predict id="predict-triage" objective="coding-with-agents/verifies-agent-work/screens-for-security"
   title="Predict the summary line" hint="Count the checks in the fixture with a score under 5. A score of exactly 5 is not under 5."
-  answer="5 of 10 checks below 5" run="coding-with-agents/dependency-review/triage.sh">
+  answer="5 of 10 checks below 5" run="coding-with-agents/dependency-review/triage_summary.py">
 The fixture has ten checks. `Binary-Artifacts`, `Dangerous-Workflow`,
 `Token-Permissions` and `Vulnerabilities` score 10. `Pinned-Dependencies`
 scores 5. `Branch-Protection` scores 3, `Code-Review` 2, and
