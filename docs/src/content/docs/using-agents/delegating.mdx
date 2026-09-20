@@ -9,7 +9,7 @@ serves:
   - using-agents/delegates-and-checks/chooses-autonomy
   - using-agents/delegates-and-checks/reviews-against-brief
 assumes:
-  - objective: concepts/recognises-agents/tells-agent-from-assistant
+  - objective: concepts/explains-models/explains-generation
     lesson: concepts/how-models-work
     section: one-token-at-a-time
 extends-to:
@@ -117,8 +117,10 @@ Questions go to the office manager, who holds a walk-through next Tuesday
 at ten.
 </Response>
 
-Your result will differ in wording. That is fine; the brief did not fix the
-wording, it fixed the shape and the facts.
+The response above is illustrative, written to show the shape of a good
+result rather than recorded from one model, and your result will differ in
+wording. That is fine; the brief did not fix the wording, it fixed the
+shape and the facts.
 
 <Repair id="fix-the-brief" objective="using-agents/delegates-and-checks/writes-a-brief"
   title="Fix the brief" hint="Which of the four parts is missing, and what would the agent fill in on its own?"
@@ -145,21 +147,22 @@ before it checks in with you. For a summary that is barely a question; the
 agent writes, you read. For anything that touches the world (sending,
 deleting, paying, publishing) it is the main question.
 
-There are three useful levels. At the first, **the human decides**: the
-agent gathers or drafts, and you take every action yourself. At the second,
-**the agent proposes and the human approves**: it prepares the action and
-waits for a yes before taking it. At the third, **the agent acts and the
-human reviews after**: it does the work and you check the outcome.
+That is the agent's **degree of autonomy**, and three settings cover most
+tasks. At the first, **the human decides**: the agent gathers or drafts,
+and you take every action yourself. At the second, **the agent proposes and
+the human approves**: it prepares the action and waits for a yes before
+taking it. At the third, **the agent acts and the human reviews after**: it
+does the work and you check the outcome.
 
-The level to pick depends on two things: how bad a wrong action is, and how
-easy it is to undo. Drafting the summary is cheap and reversible, so level
-three is right. Emailing that summary to the whole team is cheap to do but
-awkward to take back, so level two. Deciding which desks people get is a
-judgement about people, so level one, with the agent at most laying out the
-options.
+The degree to pick depends on two things: how bad a wrong action is, and
+how easy it is to undo. Drafting the summary is cheap and reversible, so the
+agent acts and you review after. Emailing that summary to the whole team is
+cheap to do but awkward to take back, so the agent proposes and you approve.
+Deciding which desks people get is a judgement about people, so you decide,
+with the agent at most laying out the options.
 
 Try it: rerun the task, but this time add one line to the brief that sets
-the level. For example, "Draft the summary, then stop and show it to me
+the degree. For example, "Draft the summary, then stop and show it to me
 before doing anything else." Notice that the agent behaves differently even
 though the task did not change.
 
@@ -216,7 +219,7 @@ the brief?
 Pick a short text of your own that you do not mind sharing with an agent:
 a newsletter, a notice, a set of meeting notes. Write a brief for a
 one-page summary of it with all four parts (goal, context, limits,
-done-criteria), add one line that sets the autonomy level, and send it.
+done-criteria), add one line that sets the degree of autonomy, and send it.
 Then review the result by ticking each done-criterion. A good result is
 one where you can name every criterion that passed and every one that
 failed without rereading the whole summary, and where any failure turns
@@ -227,7 +230,7 @@ into a one-sentence follow-up to the agent.
 1. A brief has four parts: goal, context, limits, done-criteria. What the agent must not do matters as much as what it must do.
 2. Name the source the agent should use. An agent that guesses picks the most available source, not the right one.
 3. Write the done-criteria before sending the task, as things you can tick rather than adjectives.
-4. Choose the autonomy level by how bad a wrong action is and how easily it is undone: human decides, agent proposes and human approves, or agent acts and human reviews after.
+4. Choose the degree of autonomy by how bad a wrong action is and how easily it is undone: human decides, agent proposes and human approves, or agent acts and human reviews after.
 5. Review against the brief, criterion by criterion. A result that reads well has told you nothing yet.
 6. When a criterion fails, send that criterion back rather than fixing the output yourself.
 </Recap>
