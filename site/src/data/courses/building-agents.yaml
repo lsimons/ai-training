@@ -43,7 +43,7 @@ lessons:
     # and the stop reason (Academy building-with-the-claude-api, Academy
     # claude-platform-101). The N x M problem closes the lesson and sets up
     # agent-protocols (Academy introduction-to-model-context-protocol).
-    # Until agent-loop.mdx gains an `assumes` that points here, both
+    # Until the live lesson page gains an `assumes` that points here, both
     # lessons render at the top row, because a live entry takes its place
     # from its page. The live lesson's follow-up issue should add it.
   - id: building-agents/agent-loop
@@ -73,8 +73,8 @@ lessons:
     # introduces: tool-schema-design
     # Two tools with overlapping descriptions and a fake model that chooses
     # by description. Predict which tool it picks, then tighten the
-    # description and an enum parameter and predict again (Academy
-    # building-with-the-claude-api).
+    # description and an enum parameter and predict again
+    # (Academy building-with-the-claude-api).
   - id: building-agents/tool-errors
     title: When a tool fails
     covers: building-agents/tool-use
@@ -150,8 +150,8 @@ lessons:
     # against the fixture in CI. The SDK code blocks are shown as
     # non-runnable and a match checkpoint pairs hand-loop parts with SDK
     # features. Expert-level objective. The Academy's loop against the
-    # real API is the reference (Academy claude-platform-101, Academy
-    # building-with-the-claude-api).
+    # real API is the reference (Academy claude-platform-101,
+    # Academy building-with-the-claude-api).
   # ---- retrieval-memory ---------------------------------------------------
   - id: building-agents/retrieval-as-a-tool
     title: Retrieval as a tool the agent calls
@@ -357,8 +357,8 @@ lessons:
     # introduces: plan-then-execute-vs-reactive, hierarchical-planning
     # The Academy's workflows-versus-agents recommendation is the spine: a
     # fixed workflow when the steps are known, an agent when they are not,
-    # and most systems plan coarsely and react within a step (Academy
-    # building-with-the-claude-api). Hierarchical planning as subgoals
+    # and most systems plan coarsely and react within a step
+    # (Academy building-with-the-claude-api). Hierarchical planning as subgoals
     # with fresh contexts, and what is lost between levels. Checkpoints
     # are scenario and match.
   # ---- orchestration ------------------------------------------------------
