@@ -80,7 +80,7 @@ Path: `.claude/skills/teach/SKILL.md` (commit 6dd3036, "experimental").
   miss. Three-tier hint escalation (reframe, locate, scaffold). Hard rule:
   never reveal answers to open questions, even on insistence.
 
-## Upstream vs Leo
+## Upstream versus this fork
 
 Git history: 29 commits by Addy Osmani (through 2026-07-16), 1 by Ivar Soares
 Urdalen, 32 by Leo Simons (from 2026-07-19 onwards), 18 by dependabot.
@@ -103,7 +103,7 @@ from upstream Addy content, edited throughout by Leo. Attribution is in
   Apache-2.0 terms on the incorporated material. Required: retain the Apache
   license text and notices, state that files were changed, credit Addy Osmani
   (content), Ivar Soares Urdalen (Starlight setup) and Leo Simons (Claude-stack
-  edition) with links, and do not imply endorsement.
+  edition) with links, and don't imply endorsement.
 
 ## Gaps and TODOs
 
@@ -111,7 +111,7 @@ from upstream Addy content, edited throughout by Leo. Attribution is in
   `// MCP packet animation placeholder`.
 - `/teach` is marked experimental; no tests or CI coverage.
 - LICENSE copyright placeholder not filled in.
-- `CONTRIBUTING.md` line 7 references "the guidelines above" that do not exist.
+- `CONTRIBUTING.md` line 7 references "the guidelines above" that don't exist.
 - Documented constraints in `AGENTS.md`: public repo (no company names or
   internal URLs), widgets must be `class="not-content"`, never emit literal
   `</script>` / `</pre>` inside widget JS strings, TypeScript held to 6.x.

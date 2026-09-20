@@ -5,7 +5,7 @@ Procida, <https://diataxis.fr/>, read from the repository at
 `~/git/lsimons/diataxis-documentation-framework` (`source/*.rst`). Licensed
 CC BY-SA 4.0, the same license as this project's content, so its text may be
 adapted with attribution and a note of changes. This note paraphrases; it
-does not copy.
+doesn't copy.
 
 ## The framework in short
 
@@ -41,8 +41,7 @@ learners at work and stay outside courses and paths.
    below. Explanation-mode lessons may discuss, compare and hold opinions,
    and their checkpoints test understanding.
 2. **Tutorial rules** for tutorial-mode lessons and for exercises:
-   - Open with where we are going ("In this lesson we will…"), not with "you
-     will learn…". Objectives are frontmatter data that drive checkpoints
+   - Open with where we're going (`In this lesson we…`), not with `you will learn…`. Objectives are frontmatter data that drive checkpoints
      and tutor mode; the recap states them as "You can now…".
    - Visible results early and often; every step produces something the
      learner can see.
@@ -50,7 +49,7 @@ learners at work and stay outside courses and paths.
      likely signs of going wrong. Our pitfall sections are this, kept
      short.
    - Minimize explanation; link to an explanation page or short instead.
-   - One path, no choices or alternatives. Hence comfort levels apply to
+   - One path, no choices, or alternatives. Hence comfort levels apply to
      alternative exercises and shorts, never to branches inside a lesson.
    - Safe and repeatable: a contrived setting the learner can reset. For
      agent lessons that means a fixture repository or sandbox, never the
@@ -71,11 +70,11 @@ learners at work and stay outside courses and paths.
 6. **Release discipline**: publish small complete steps; the sidebar shows
    only areas that have a real lesson; no stub pages.
 
-## What we deliberately do not adopt
+## What we deliberately don't adopt
 
 - Diátaxis discourages planning and top-down structure. We keep the plan and
   the topic map because a curriculum needs sequencing and prerequisites that
-  a product's documentation does not. The map is the structure of what is
+  a product's documentation doesn't. The map is the structure of what's
   taught, not of the pages.
 - Diátaxis has no concept of assessment. Checkpoints, quizzes, progress and
   comfort levels come from CS50 and the Anthropic modules

@@ -1,4 +1,4 @@
-# S04 - Progress record
+# Progress record (S04)
 
 **Purpose:** Define the learner's progress record: what it stores, where it
 lives, how it is versioned, and how it moves between browsers.
@@ -15,14 +15,14 @@ reads when the learner exports it.
 ## Principles
 
 - **Browser only.** The record is one JSON document in browser local
-  storage. There is no server, no account and no telemetry.
+  storage. There is no server, no account, and no telemetry.
 - **Nothing leaves the browser** unless the learner exports the file.
-- **The answer is in the page.** A static site cannot hide answer keys, so
+- **The answer is in the page.** A static site can't hide answer keys, so
   the record tracks passes on the honor system; it holds no secrets.
 - **Resettable.** The learner can reset one course or the whole record,
   after a confirmation.
 
-## What is recorded
+## What gets recorded
 
 | Per        | Fields                                                                             |
 | ---------- | ---------------------------------------------------------------------------------- |
@@ -43,11 +43,11 @@ reads when the learner exports it.
 
 ### Checkpoint states
 
-| Stored      | Meaning                                                 |
-| ----------- | ------------------------------------------------------- |
-| `attempted` | Answered wrong at least once, not yet passed or skipped |
-| `passed`    | Answered right                                          |
-| `skipped`   | Skip pressed; recorded, never counts as a pass          |
+| Stored      | Meaning                                                  |
+| ----------- | -------------------------------------------------------- |
+| `attempted` | Answered wrong at least once, not yet passed, or skipped |
+| `passed`    | Answered right                                           |
+| `skipped`   | Skip pressed; recorded, never counts as a pass           |
 
 ## Storage
 
@@ -88,7 +88,7 @@ reads when the learner exports it.
 - Import replaces the record with the file's contents after a confirmation.
 - A file with an older `version` is migrated when a migration exists and
   otherwise refused with a message naming the versions.
-- Both live on one progress page, linked from the course page and the
+- Both live on one progress page, which is linked from the course page and the
   sidebar.
 
 ## Content changes

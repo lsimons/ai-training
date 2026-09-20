@@ -1,11 +1,11 @@
-# Exploration 07: SCORM interaction catalog and CS50 Duck tutor design
+# Exploration 07: SCORM interaction catalog and the CS50 duck tutor design
 
 Captured 2026-09-19. Goes below [explore/03](./03-cs50-pedagogy.md) and
 [explore/04](./04-anthropic-academy.md) into mechanics and counts.
 
 Licensing: the Anthropic SCORM packages are proprietary. This note records
 **structure, mechanics and counts only**; no lesson text, question stems,
-options, rationales or model answers. The CS50 workshop transcripts are
+options, rationales, or model answers. The CS50 workshop transcripts are
 YouTube captions and not CC-licensed; public write-ups must paraphrase and
 cite the talk. CS50 course pages are CC BY-NC-SA 4.0.
 
@@ -64,7 +64,7 @@ Two sequencing idioms:
 
 ### Progress, gating, scoring, storage
 
-- One JSON blob in localStorage under a **versioned key** (e.g. `dev-m2-vF2`)
+- One JSON blob in localStorage under a **versioned key** (for example `dev-m2-vF2`)
   so content changes invalidate state. Two shapes; the nicer one keeps
   `visited / done / skipped / attempted`.
 - A cross-module roll-up key per path (array of completed module numbers)
@@ -78,7 +78,7 @@ Two sequencing idioms:
   rows marked. Quizzes require 100%.
 - SCORM bridge reports only incomplete/completed, bookmark and time; score is
   hard-coded to 100. **All real answers live in localStorage only.** This is
-  exactly the plan's model; copy it deliberately, including reset and the
+  exactly the plan's model; copy it deliberately, and include reset and the
   versioned key.
 
 ### Interaction catalog
@@ -132,7 +132,7 @@ is `aria-live`; focus moves to the new screen title; arrow keys navigate.
   garnish. A component set of that size covers everything.
 - The Complete screen doubles as the path map from one cross-module key.
 
-## Part 2: CS50 Duck tutor design
+## Part 2: the CS50 duck tutor design
 
 ### Sources in the repo
 
@@ -170,7 +170,7 @@ they already have.
 
 RAG: lecture captions chunked to 30 s, embedded, stored in a vector DB,
 top-N pasted into the prompt. The motivation is **register and scope**, not
-facts: without grounding the model answers at a level beginners cannot
+facts: without grounding the model answers at a level beginners can't
 follow; with it, answers use the course's own vocabulary.
 
 ### Instruction dilution (the key finding)
@@ -182,7 +182,7 @@ follow; with it, answers use the course's own vocabulary.
   the newer model was trained to be more helpful.
 - Pedagogical misalignment even when rules are followed: stating the fix
   instead of asking a diagnostic question ("what are the types of x and y?").
-- No evaluation existed, so prompt or model changes could not be measured.
+- No evaluation existed, so prompt or model changes couldn't be measured.
 
 ### The fix: show, not tell
 

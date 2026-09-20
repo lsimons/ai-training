@@ -1,4 +1,4 @@
-# 000 - Specs
+# Specs (000)
 
 This document is the entry point for the *AI Training* specifications.
 
@@ -12,9 +12,9 @@ what ships. Each spec reads on its own.
 | --- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | S01 | [Project dictionary](S01-dictionary.md)        | Fix the words this project uses for its content, its knowledge model, its interactions and its learners, so that every page, data file and component means the same thing by the same name.                                | Draft  |
 | S02 | [Topic map and competencies](S02-topic-map.md) | Name what the site teaches (topics and concepts, with prerequisite links), name what a learner should be able to do afterwards (competencies, objectives, behaviors), and say how the map differentiates between learners. | Draft  |
-| S03 | [Lesson authoring](S03-lesson-authoring.md)    | Fix the rules every lesson page follows: page kind, anatomy and frontmatter, examples, citations, terms and prompts, checkpoints, exercises and widgets.                                                                   | Draft  |
+| S03 | [Lesson authoring](S03-lesson-authoring.md)    | Fix the rules every lesson page follows: page kind, anatomy and frontmatter, examples, citations, terms and prompts, checkpoints, exercises, and widgets.                                                                  | Draft  |
 | S04 | [Progress record](S04-progress-record.md)      | Define the learner's progress record: what it stores, where it lives, how it is versioned, and how it moves between browsers.                                                                                              | Draft  |
-| S05 | [Spaced review](S05-spaced-review.md)          | Define how the site brings a learner back to what they learned, without a backend: which items are reviewed, on what schedule, where reviews surface, and what is stored.                                                  | Draft  |
+| S05 | [Spaced review](S05-spaced-review.md)          | Define how the site brings a learner back to what they learned, without a backend: which items are reviewed, on what schedule, where reviews surface, and what's stored.                                                   | Draft  |
 | S06 | [Release 1](S06-release-1.md)                  | Define the first release: one lesson per area, chosen so the shape of the site is visible end to end and every mechanism is exercised at least once.                                                                       | Draft  |
 
 ## Naming scheme
@@ -33,24 +33,24 @@ what ships. Each spec reads on its own.
   spec would need a later detail, it states only what it needs and leaves
   the detail to the later spec without naming it.
 - Every spec uses the terms of [S01 Project dictionary](S01-dictionary.md).
-  The dictionary defines words; rules about writing, storing and shipping
+  The dictionary defines words; rules about writing, storing, and shipping
   belong in the later specs.
 - Cross-references are relative links with the spec's title, for example
   `[project dictionary](S01-dictionary.md)`. Inside tables, use the number:
   `[S01](S01-dictionary.md)`.
 - Specs must not link to `docs/plan/` and must not depend on a plan or an
-  exploration note to be understood. Copy the rule, concept or idea into
+  exploration note to be understood. Copy the rule, concept, or idea into
   the spec. Describe a mechanism as this project does it, not as the source
   it was borrowed from does it.
 
 ## Shape of a spec
 
-1. `# SNN - Title`
+1. `# Title (SNN)`
 2. `**Purpose:**` one or two sentences saying what the spec decides.
 3. `**Status:**` per the convention below.
 4. `## Introduction`: the context a reader needs and the earlier specs it
    builds on.
-5. The body: headers and subheaders, with tables and lists preferred over
+5. The body: headers and subheaders; tables and lists are preferred over
    long paragraphs. A worked example wherever a rule is easy to misread.
 6. `## Related specs`: links back to the lower-numbered specs relied on
    (omitted in S01).
@@ -65,7 +65,7 @@ index above mirrors the same string.
 | Form                                            | Meaning                                                                                |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `Draft`                                         | Design still in flux                                                                   |
-| `In progress - <what has shipped>`              | Partial implementation; say what has shipped and what is deferred                      |
+| `In progress - <what has shipped>`              | Partial implementation; say what has shipped and what's deferred                       |
 | `Accepted - <note>`                             | Design accepted, no code yet                                                           |
 | `Implemented (YYYY-MM-DD)`                      | Shipped; the date is the commit date of the last implementing commit                   |
 | `Superseded by [SNN](SNN-slug.md) (YYYY-MM-DD)` | Replaced by a later spec; keep the file and add a short "Superseded" note near the top |

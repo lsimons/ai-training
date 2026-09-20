@@ -5,7 +5,7 @@ Explored 2026-09-19 by a read-only agent. Sources:
 - `~/git/lsimons/archive/lsimons-ai-training`
 - `~/git/lsimons/lsimons-arch/code/2026-09-19-agent-course-compare`
 
-## 1. archive/lsimons-ai-training
+## 1. `archive/lsimons-ai-training`
 
 **Status: scaffolding only. No training content was ever written.** The repo is
 docs infrastructure (specs, plans, scripts) plus a placeholder Python package.
@@ -15,7 +15,7 @@ Plans P02 and P03 are still Draft.
 30-90 minutes, standalone and combinable into workshops:
 
 1. Knowledge workers, *Working with GenAI safely*: what GenAI is and isn't,
-   prompting patterns, evaluating output, confidentiality and data
+   prompting patterns, evaluating output, confidentiality, and data
    classification, approved tools.
 2. Engineers, *Agentic Engineering safely*: agent loops, tool use, sandboxing
    and permission models, prompt and context engineering, testing AI-generated
@@ -40,7 +40,7 @@ made GitHub Actions red.
 **Pedagogy, progress, exercises, glossary:** essentially absent. Only traces:
 S01 requires each spec to state audience, learning objectives, prerequisites
 and delivery shape (slide deck, handout, exercise). No glossary, taxonomy,
-assessments or progress tracking anywhere.
+assessments, or progress tracking anywhere.
 
 **Worth reusing:** the three-track audience split and its topic lists; the
 tutorial-as-directory layout with shared design assets; multi-format render with
@@ -54,7 +54,7 @@ classification framing; the SharePoint Stream video shortcode and Confluence
 embed research; the private fork remotes; the `../mdd` and `../caseum` sibling
 checkout assumptions.
 
-## 2. lsimons-arch/code/2026-09-19-agent-course-compare
+## 2. `lsimons-arch/code/2026-09-19-agent-course-compare`
 
 Files: `AGENTS.md`, `gen_course_comparison.py` (data-in-code generator, stdlib
 only), `2026-09-19-agent-course-vs-dlai-comparison.html` (generated). A
@@ -87,7 +87,7 @@ labels: not-covered / mention / explained / hands-on.
 01. A full "working with Claude Code" workflow lesson (explore, plan, code,
     commit; CLAUDE.md; plan mode; reviewer subagent; PR).
 02. Hooks, subagent design, verification of unsupervised runs.
-03. Error analysis, component evals and a runnable eval pipeline.
+03. Error analysis, component evals, and a runnable eval pipeline.
 04. State the workflow-first default and teach environment inspection.
 05. Production API mechanics (prompt caching, retriable vs terminal errors,
     eval-gated model routing, pinned model IDs).
@@ -106,5 +106,5 @@ labels: not-covered / mention / explained / hands-on.
     with 20+ rules; blind pairwise ELO evaluation).
 
 **Caveats:** depth labels are judgment calls from reader subagents; hosted DLAI
-labs and some Anthropic SCORM checkpoints did not survive extraction; Osmani
+labs and some Anthropic SCORM checkpoints didn't survive extraction; Osmani
 word counts include widget JS.

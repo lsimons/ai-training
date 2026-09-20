@@ -15,7 +15,7 @@ one day after the `license-CC-BY` branch point, so that branch is exactly the
 last CC BY state. CC BY 4.0 content may be adapted into this CC BY-SA 4.0
 project with attribution and a `NOTICE.md` entry. Everything on `main` and on
 the live site is CC BY-NC-SA and falls under the same rule as CS50 in the
-plan's source table: cite and use ideas, do not adapt text. The English pages
+plan's source table: cite and use ideas, don't adapt text. The English pages
 on `main` moved to a `(docs)/docs/<slug>/page.mdx` layout in March 2024
 ("replaced docs"), which is the source tree of the current Next.js site; the
 site itself has since grown sections not in the repo (Models, RAG, Agents,
@@ -79,7 +79,7 @@ Authoring mechanics worth noting:
 ## Quality
 
 The CC BY branch is human-written, terse, and honest about uncertainty
-("To my knowledge, this solution has not been explored in the literature").
+("To my knowledge, this solution hasn't been explored in the literature").
 It reads like good lecture notes: one idea, one figure from the paper, one
 demo, a Limitations section, a paper citation. Faults: typos, a glossary
 entry defining LLM as "Language Language Model", everything demonstrated on
@@ -90,8 +90,8 @@ The `main` rewrite from mid-2023 is roughly double the length for the same
 ideas and has the GPT-4-era register the prompt for this note predicted:
 "revolutionized many aspects of technology", "it's important to note",
 "delve", a "Conclusion" paragraph that restates the page, a Pitfalls page
-that is five generic paragraphs. The Basic Applications pages are pasted
-ChatGPT transcripts with light commentary. Facts did not get worse, but the
+that's five generic paragraphs. The Basic Applications pages are pasted
+ChatGPT transcripts with light commentary. Facts didn't get worse, but the
 signal per word did. The offensive and defensive measures pages are the
 exception: short, concrete, and still the standard names for those tricks.
 
@@ -118,7 +118,7 @@ Little text, a few patterns, and a source for the prompting slice of the
 concept register.
 
 Decision 2026-09-20: items 2 to 6 adopted and written into spec S01 (Rules
-and the Walkthrough entry). Item 1 rejected: Learn Prompting is not a
+and the Walkthrough entry). Item 1 rejected: Learn Prompting isn't a
 content source. The prompting concepts are written from the original papers
 and a web search, with Learn Prompting used for vocabulary only, so no
 `NOTICE.md` entry is needed and the CC BY branch distinction stops
@@ -126,11 +126,11 @@ mattering.
 
 1. **Seed prompting concepts from the CC BY branch, with attribution.** The
    short intermediate pages (chain of thought, zero-shot CoT,
-   self-consistency, generated knowledge), the standard prompt and exemplar
+   self-consistency, generated knowledge), the standard prompt, and exemplar
    definitions, and the prompt hacking trio (injection, leaking,
    jailbreaking) plus the 2023 defensive measures are adaptable. Use them as
    one-paragraph concept definitions in the concept register and as the
-   Safety area's named-defense list, rewritten for current models and cited
+   Safety area's named-defense list, rewritten for current models, and cited
    to the original papers. Add a `NOTICE.md` entry pointing at commit
    `71e1d57`. Nothing from `main` or the live site may be adapted; the
    offensive-measures taxonomy names can be used as vocabulary with a link.
@@ -145,10 +145,10 @@ mattering.
    plain Markdown stays plain.
 4. **Prompt and response as a styled pair.** Adopt an `AIInput` /
    `AIOutput`-style block for static prompt and response examples in
-   Foundations lessons, with the model and settings named on the block. Ours
+   Foundations lessons, and the model and settings are named on the block. Ours
    should carry the model and date, since their undated davinci-003 outputs
    are the main reason the pages aged badly.
-5. **Do not embed a third-party playground.** Two generations of live embeds
+5. **Don't embed a third-party playground.** Two generations of live embeds
    died with the vendors. Our spec S01 rule that examples run in CI and show
    asserted output is the right answer; a static recorded output beats a dead
    iframe.
@@ -156,9 +156,9 @@ mattering.
    choice, discussion questions) follow a good tutorial arc: naive prompt,
    show the failure, add one technique, reorder, reword, compare. That arc
    is a reusable lesson template for the Using agents area and is CC BY.
-7. **Takeaways box: no.** Their two or three "you will learn" bullets at
+7. **Takeaways box: no.** Their two or three `you will learn` bullets at
    the top of each page are exactly what spec S01 forbids for learning
-   objectives; the lesson opener ("In this lesson we will...") and the recap
+   objectives; the lesson opener (`In this lesson we...`) and the recap
    already carry that role. Noted only so it is not proposed again.
 
 Not adopted: the four-color difficulty emoji (our two comfort levels per

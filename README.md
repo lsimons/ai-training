@@ -1,4 +1,4 @@
-# ai-training
+# AI training
 
 An open training suite for getting started with AI: concepts, safety, using
 AI agents, AI-assisted software engineering, and customizing and building AI
@@ -25,7 +25,7 @@ fork of Addy Osmani's [agent-engineer](https://github.com/addyosmani/agent-engin
 course with a Starlight setup from Ivar Soares Urdalen. It adopts the
 pedagogy of Harvard's [CS50](https://cs50.harvard.edu/) and references the
 public courses on [Claude Academy](https://academy.claude.com/). See
-[`docs/plan/README.md`](./docs/plan/README.md) for what is reused from where and
+[`docs/plan/README.md`](./docs/plan/README.md) for what's reused from where and
 under which terms.
 
 ## Development

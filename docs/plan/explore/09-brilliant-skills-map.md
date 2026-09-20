@@ -40,10 +40,10 @@ citations between nodes. No prerequisites, levels or grades are encoded.
 ### Coding with AI: full outline
 
 Tier **The governing practices**: development should be informed by judgment
-about what is worth building and guided by building in shippable increments.
+about what's worth building and guided by building in shippable increments.
 
 - **TAS Taste, what's worth building.** As building gets cheap, deciding
-  what is worth building and what a good result is comes first.
+  what's worth building and what a good result is comes first.
   - TAS-1 Judge an idea using relevant information and domain knowledge
   - TAS-2 Determine what a successful outcome requires
   - TAS-3 Weigh value against cost and alternatives
@@ -52,24 +52,24 @@ about what is worth building and guided by building in shippable increments.
   understanding and coherence over work increasingly produced by AI.
   - INC-1 Develop in working increments
   - INC-2 Sequence increments for early feedback
-  - INC-3 Maintain understanding of what is being developed
+  - INC-3 Maintain understanding of what's being developed
   - INC-4 Maintain architectural coherence across increments
   - INC-5 Keep change reversible
 
 Tier **The build loop**: every piece of work needs specification,
 implementation and verification; as AI takes implementation, human skill
 concentrates in specifying, verifying and designing workflows, and then one
-level up: specifying how to specify, delegate and verify.
+level up: specifying how to specify, delegate, and verify.
 
 - **SPC Specification & Design.** Framing the problem and defining success,
-  including how it will be verified, before anything is built.
+  including how it gets verified, before anything is built.
   - SPC-1 Design how users will interact with the artifact
   - SPC-2 Design the data model
   - SPC-3 Decompose a problem into modular components
   - SPC-4 Analyze dependencies among components
   - SPC-5 Manage the information and constraints the work requires
   - SPC-6 Design how the work will be verified
-  - MEM-1 Manage what is held in memory through the work
+  - MEM-1 Manage what's held in memory through the work
   - MEM-2 Turn repeated work into reusable knowledge
 - **BLD Designing Workflows.** Building turns into directing agents,
   adjusting, and designing workflows.
@@ -79,7 +79,7 @@ level up: specifying how to specify, delegate and verify.
   - BLD-4 Organize work into a structured workflow
   - BLD-5 Oversee a workflow to completion
 - **VER Verification.** Value concentrates in detecting and correcting
-  output, especially output that is "almost right".
+  output, especially output that's "almost right".
   - VER-1 Verify a system across multiple dimensions
   - VER-2 Verify a program against its specification
   - VER-3 Read and review code written by others
@@ -105,7 +105,7 @@ Tier **Cross-cutting practices**: security and abstraction apply throughout.
 
 Skill density per objective ranges from 2 (most) to 6 (SPC-5, VER-1).
 
-### Foundations of Computer Science: outline only
+### The computer science half, outline only
 
 Tiers Program Design (CFL Control Flow & Logic, MOD Functions & Modularity),
 Computational Problem-Solving (IND Inductive Thinking, PSV Problem-Solving
@@ -121,13 +121,13 @@ practice in one map, which is roughly our Foundations-to-Engineering span.
   expensive moment. Example: get "add item" working before "remove item".
   Second skill: tackle the riskiest unknown first, because deferred risk
   grows.
-- VER-7: a rubric turns "good" into scorable criteria; a good metric cannot
+- VER-7: a rubric turns "good" into scorable criteria; a good metric can't
   be satisfied without the real improvement it stands for; an evaluation
   scores a system on a representative input set, leaving borderline cases to
   people. Example: fifty questions with reference answers, scored
   automatically.
 - BLD-1: directing an agent means stating the goal, the information the work
-  needs and the limits it must stay within, because an agent fills in what is
+  needs and the limits it must stay within, because an agent fills in what's
   unsaid; domain knowledge is what lets you judge and correct its output.
 
 ## 2. Standards alignment
@@ -147,10 +147,10 @@ Two views over the same mapping:
   in part; no partial flag.
 
 Frameworks covered besides Common Core: Digital SAT, ACT, AP Precalculus,
-NY Regents, NC Math 1-3, GCSE, A Level, IB, GRE and GMAT Quant. The coding
-map is not yet aligned to anything external.
+NY Regents, NC Math 1-3, GCSE, A Level, IB, GRE, and GMAT Quant. The coding
+map isn't yet aligned to anything external.
 
-Vocabulary: **course** (subject, e.g. Fractions), **level** (a group of
+Vocabulary: **course** (subject, for example Fractions), **level** (a group of
 lessons capped by a 10 to 15 problem **level review**), **lesson** (5 to 10
 minutes of interactive problems plus a **skills check**), **targeted skill**
 (the lesson-sized ability a standard is matched to), **standard** (external
@@ -171,15 +171,15 @@ code).
 
 ## 4. Comparison with our specs
 
-| Brilliant                         | Ours ([spec S01](../../spec/S01-dictionary.md), [spec S02](../../spec/S02-topic-map.md)) | Note                                                                                                                          |
-| --------------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Tier                              | Group / area                                                                             | Theirs are thematic bands; ours are audience bands. Both are three to six.                                                    |
-| Big idea (noun)                   | Topic                                                                                    | Same register. Theirs carry a one-sentence "why now" summary; ours carry concepts and edges.                                  |
-| Learning objective (verb, coded)  | Competency                                                                               | Same register. Theirs are coded and finer: 37 versus our 18 for a narrower subject.                                           |
-| Skill (claim, why, example)       | Behavior                                                                                 | We have one draft base behavior per competency; they have 2 to 6 well-formed skills per objective. This is the level we lack. |
-| Standard                          | (none)                                                                                   | An external framework a lesson is matched to. We have no alignment layer.                                                     |
-| Targeted skill and lesson         | Learning objective and checkpoint                                                        | Same idea: a lesson-sized unit that proves a standard.                                                                        |
-| Lesson, 5 to 10 min, skills check | Lesson, 10 to 25 min, checkpoints                                                        | Ours are two to three times longer. Their level review is our course quiz.                                                    |
+| Brilliant                         | Ours ([spec S01](../../spec/S01-dictionary.md), [spec S02](../../spec/S02-topic-map.md)) | Note                                                                                                                        |
+| --------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Tier                              | Group / area                                                                             | Theirs are thematic bands; ours are audience bands. Both are three to six.                                                  |
+| Big idea (noun)                   | Topic                                                                                    | Same register. Theirs carry a one-sentence "why now" summary; ours carry concepts and edges.                                |
+| Learning objective (verb, coded)  | Competency                                                                               | Same register. Theirs are coded and finer: 37 versus our 18 for a narrower subject.                                         |
+| Skill (claim, why, example)       | Behavior                                                                                 | We've one draft base behavior per competency; they have 2 to 6 well-formed skills per objective. This is the level we lack. |
+| Standard                          | (none)                                                                                   | An external framework a lesson is matched to. We've no alignment layer.                                                     |
+| Targeted skill and lesson         | Learning objective and checkpoint                                                        | Same idea: a lesson-sized unit that proves a standard.                                                                      |
+| Lesson, 5 to 10 min, skills check | Lesson, 10 to 25 min, checkpoints                                                        | Ours are two to three times longer. Their level review is our course quiz.                                                  |
 
 ## 5. Implications
 
@@ -207,7 +207,7 @@ routing default.
    Brilliant's Coding with AI codes, Andrew Ng's AI engineering skills map,
    later any corporate or national AI literacy framework. Cheap to keep and
    lets a learner or employer find us by a code they already know.
-5. **Content gaps this exposes in area 4 and 6.** Taste (what is worth
+5. **Content gaps this exposes in area 4 and 6.** Taste (what's worth
    building), specification and design as a first-class topic, verification
    as its own topic rather than a corner of quality, reversibility as a
    habit, and abstraction across tool levels. Security as a cross-cutting

@@ -21,7 +21,7 @@ should cover, in roughly this order:
 Most content is for engineers. The basic content (concepts, safety, using
 agents) is for general knowledge work.
 
-It is public, open source and open content. Decided 2026-09-19: content is
+It is public, open source, and open content. Decided 2026-09-19: content is
 **CC BY-SA 4.0** and code is **Apache-2.0** (including the parts lifted from
 `lsimons-template-doc`). An earlier same-day choice of CC BY-NC-SA, made so
 CS50 text could be adapted, was reversed: the CC-licensed CS50 material
@@ -40,7 +40,7 @@ material be adapted freely. It replaces two earlier attempts:
 | Source                         | License                                         | Use here                                                                                                                                                                                                                                         |
 | ------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `agent-engineer-course` (fork) | Apache-2.0                                      | Integrate the best content, with attribution to Addy Osmani, Ivar Soares Urdalen and Leo Simons in `NOTICE.md`.                                                                                                                                  |
-| `ai-cs50` (CS50 AI, workshops) | CC BY-NC-SA 4.0                                 | Ideas, structure and vocabulary with citation. Text may not be adapted into this BY-SA work; a page may be included verbatim, marked with its own license. Workshop talk transcripts are YouTube captions and not licensed; do not redistribute. |
+| `ai-cs50` (CS50 AI, workshops) | CC BY-NC-SA 4.0                                 | Ideas, structure, and vocabulary with citation. Text may not be adapted into this BY-SA work; a page may be included verbatim, marked with its own license. Workshop talk transcripts are YouTube captions and not licensed; don't redistribute. |
 | Diátaxis                       | CC BY-SA 4.0                                    | Adopt the four kinds and the compass; text may be adapted with attribution. See [explore/08](./explore/08-diataxis.md).                                                                                                                          |
 | `ai-anthropic-partners`        | Anthropic, proprietary                          | Reference and link only, preferring public `academy.claude.com` URLs.                                                                                                                                                                            |
 | `ai-deep-learning`             | DeepLearning.AI, paid                           | Inspiration for topic coverage and sequencing only. Embed nothing.                                                                                                                                                                               |
@@ -55,7 +55,7 @@ See the `explore/` reports for detail on each.
   (Starlight, LSD Warm theme, Quarto decks, pinned toolchain, CI, zizmor).
 - **Interactive lesson content** in the style of the Anthropic SCORM modules:
   teaching screens, checkpoints (multiple choice, sorting, scenario
-  decisions), watch-out boxes, reflection prompts, recap and quiz. Progress
+  decisions), watch-out boxes, reflection prompts, recap, and quiz. Progress
   and answers kept in browser local storage; no backend.
 - **Tutor mode**: run the site on localhost from inside a Claude Code session
   and let Claude act as an interactive tutor. Inspired by the CS50 Duck
@@ -98,7 +98,7 @@ See the `explore/` reports for detail on each.
    [explore/06](./explore/06-lesson-inventory.md) (lesson inventories,
    `/teach` skill) and
    [explore/07](./explore/07-scorm-interactions-and-duck-tutor.md) (SCORM
-   interaction catalog, CS50 Duck tutor design). The Duck papers are not
+   interaction catalog, CS50 Duck tutor design). The Duck papers aren't
    in the repo and still need fetching. Added later the same day:
    [explore/08](./explore/08-diataxis.md) (Diátaxis) and
    [explore/09](./explore/09-brilliant-skills-map.md) (Brilliant's coding
@@ -123,7 +123,7 @@ See the `explore/` reports for detail on each.
    plugins (S03), `match` and `multi-choice`, the map's side drawer, path
    lanes, quizzes.
 6. ~~Design tutor mode.~~ First version 2026-09-20 as
-   `.claude/skills/tutor/SKILL.md`, with the verbs and the review recall
+   `.claude/skills/tutor/SKILL.md`. It holds the verbs and the review recall
    question. Untested against learners.
 7. Replace the template pages under `site/src/content/docs/` with real
    content, area by area. Release 1 (one lesson per area) landed

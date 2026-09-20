@@ -74,3 +74,32 @@ SHAs
 [Dd]emonstrate
 [Ii]t is
 [Ii]t was
+
+# Google.Acronyms exemptions (lessons): acronyms this audience reads without
+# a definition. MCP, RAG and LLM are deliberately absent so the lesson that
+# introduces them spells them out once.
+API
+CSS
+CSV
+HTML
+JSON
+MDX
+PDF
+SCSS
+SMTP
+YAML
+# Google.Headings exemptions: names and codes that stay capitalized
+# mid-heading. Vale.Terms then enforces that casing everywhere, so only
+# words that are never lowercase belong here (not AI, URL, CLI, or Claude, which
+# appear as slugs, keys, and file names).
+SCORM
+CS50
+LSD
+S01
+S02
+S03
+S04
+S05
+S06
+Learn Prompting
+Execute Program

@@ -18,7 +18,8 @@ import sys
 
 # Same file set as `mise run prose`, minus the reports themselves, which
 # quote the flagged sentences and would otherwise flag again, and minus
-# CLAUDE.md, a symlink to AGENTS.md that would count twice.
+# CLAUDE.md, a symlink to AGENTS.md that would count twice, and minus the
+# Code of Conduct, which nobody here wrote.
 FILE_PATHSPECS = [
     "*.md",
     "*.mdx",
@@ -27,6 +28,8 @@ FILE_PATHSPECS = [
     ":!site/examples/**",
     ":!docs/prose/reports/**",
     ":!CLAUDE.md",
+    # The Contributor Covenant, verbatim third-party text.
+    ":!CODE_OF_CONDUCT.md",
 ]
 
 

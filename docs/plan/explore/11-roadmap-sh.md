@@ -1,7 +1,7 @@
 # Exploration 11: roadmap.sh
 
 Captured 2026-09-19/20 in a logged-in session (Leo's free account) with a
-driven browser, plus the public map data and the content repository.
+driven browser plus the public map data and the content repository.
 Sources: <https://roadmap.sh/ai-engineer>, <https://roadmap.sh/ai-agents>,
 <https://roadmap.sh/ai>, the map JSON served at `https://roadmap.sh/<slug>.json`,
 and <https://github.com/nilbuild/developer-roadmap> (the repository moved
@@ -11,15 +11,15 @@ from `kamranahmedse`).
 notice, not an open license. Everything including text and images is
 copyrighted; use is allowed for personal purposes only; republishing
 content or images anywhere is forbidden without consent. The site is
-"community created" but the terms are not. This note records structure,
-mechanics and topic titles as facts. No roadmap text may be reused.
+"community created" but the terms aren't. This note records structure,
+mechanics, and topic titles as facts. No roadmap text may be reused.
 
 ## What it is
 
 Role-based and skill-based developer roadmaps drawn as a vertical flowchart
 of topics with per-topic resource links, plus progress tracking, projects,
 and a paid AI layer ("AI Tutor") that generates explanations, quizzes,
-courses, guides, roadmaps and learning plans on demand. Free tier: 20 AI
+courses, guides, roadmaps, and learning plans on demand. Free tier: 20 AI
 chats, 2 courses, 2 quizzes, 2 guides, 2 roadmaps, 2 plans. About 3.2
 million registered users, 367k GitHub stars.
 
@@ -58,7 +58,7 @@ One Markdown file per topic or subtopic in the repository:
 file name is the only link between drawing and text. Contributing rules:
 one paragraph of plain explanation, at most eight links, each typed
 `@official@`, `@opensource@`, `@article@`, `@course@`, `@podcast@`,
-`@video@`, `@book@`, rendered as badges and split into free and premium
+`@video@`, `@book@`, rendered as badges, and split into free and premium
 (sponsored) resources. AI Engineer has 194 content files, AI Agents 101.
 
 ### Topics covered
@@ -69,7 +69,7 @@ controls, open vs closed weights, streaming, reasoning models, fine-tuning
 vs prompting, embeddings, RAG basics), AI Agents 101 (what agents are, what
 tools are, the agent loop drawn as four numbered steps: perception, reason
 and plan, acting, observation and reflection; example use cases), prompt
-engineering (six "writing good prompts" rules, CoT, ToT), tools and actions
+engineering (six "writing good prompts" rules, CoT, ToT), tools, and actions
 (tool definition: name, schema, error handling, examples; example tools;
 MCP with hosts, clients, servers, local vs remote), agent memory (short and
 long term, episodic vs semantic, RAG, summarization, forgetting), agent
@@ -77,16 +77,16 @@ architectures (RAG agent, ReAct, planner-executor, DAG agents, multi-agent,
 self-critique), building agents (from scratch: API calls, the loop, parsing,
 error and rate-limit handling; native function calling per vendor;
 frameworks), evaluation and testing (metrics, unit and integration tests,
-human in the loop, LangSmith, Ragas, DeepEval), debugging and monitoring
+human in the loop, LangSmith, Ragas, DeepEval), debugging, and monitoring
 (tracing, observability tools), security and ethics (prompt injection, tool
 sandboxing and permissioning, PII, bias guardrails, red teaming).
 
 AI Engineer (role roadmap, 5794 px tall): introduction (what an AI engineer
-is versus an ML engineer, impact on product), working with LLMs and common
+is versus an ML engineer, impact on product), working with LLMs, and common
 terminology, pre-trained models by vendor, how LLMs work, prompt engineering
 and prompt anatomy, context engineering (a whole column: context layer,
 sources, security, evaluation, memory systems, long context, multi-agent
-context sharing, failure modes, context warehouses), AI safety and ethics
+context sharing, failure modes, context warehouses), AI safety, and ethics
 (injection, bias, privacy, adversarial testing, moderation APIs, end-user
 ids, constraining inputs and outputs), open versus closed models and
 platforms (LM Studio, Hugging Face, Ollama, vendor APIs, OpenRouter),
@@ -118,7 +118,7 @@ names. Their unit is a technology or term; ours is a competency.
   fills it gray; Skip and Learning have their own styles. Toggling Done
   again clears it.
 - Each topic also has a standalone page at `/<roadmap>/<slug>@<id>` with
-  the same content and links, for search engines and sharing.
+  the same content and links for search engines and sharing.
 - A floating **AI Tutor: "Have a question? Type here"** bar sits over the
   map on every roadmap page, opening a roadmap-scoped chat ("Roadmap Chat",
   20 free messages).
@@ -129,7 +129,7 @@ Everything is generated on demand, streamed, and counted against a quota.
 Every AI surface carries "AI can make mistakes, verify important
 information".
 
-### Quick Explain
+### `Quick Explain`
 
 Switches the drawer to the AI Tutor tab and streams a structured
 explanation of the topic: **What it is**, **How it works**, **Why this
@@ -139,7 +139,7 @@ List the key points, Summarize the topic, Explain like I am five, Why is
 it important. A chat box below takes free questions "about the lesson".
 Each use costs one chat (18 left became 17).
 
-### Test my Knowledge
+### `Test my Knowledge`
 
 Same tab. Generates one open question at a time into the chat ("The LLM
 itself is stateless, yet an agent loop maintains context across multiple
@@ -156,7 +156,7 @@ rationale appears ("Option 3 is correct because..."); wrong options are
 disabled; **Next Question**. Progress "Question 1 of 9, 11% complete".
 Costs one of two free quizzes.
 
-### Teach Me
+### `Teach Me`
 
 Generates a full course at `/ai/course/<slug>` in about 30 seconds: title,
 tagline, About, "What this course covers" bullets, six modules of five
@@ -182,7 +182,7 @@ build projects, strengthen fundamentals, explore a new field) producing a
 learning plan. **Lesson Packs** at `/packs` are hand-written short courses
 by the roadmap.sh team (for example Git Fundamentals, 14 lessons, 2.3 hours
 read) with projects and "an AI tutor on the side". Personalize on the
-roadmap page did not open in the driven browser and was not examined.
+roadmap page didn't open in the driven browser and wasn't examined.
 
 ## Projects
 
@@ -206,7 +206,7 @@ Community Solutions.
 ## What to take from it
 
 Decision 2026-09-20: items 2, 4, 5 and 8 applied to specs S01 and S02.
-Items 1, 3, 6 and 7 declined for now.
+Items 1, 3, 6, and 7 declined for now.
 
 1. **The drawer pattern for topic nodes.** Click a node, get content,
    status, and actions in a side panel without leaving the map. This is how

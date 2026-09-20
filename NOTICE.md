@@ -13,7 +13,7 @@ terms. Add an entry whenever you bring in content from elsewhere.
   changed; the Apache license text is at
   <https://www.apache.org/licenses/LICENSE-2.0>. No endorsement is implied.
 - **CS50** (<https://cs50.harvard.edu/>), Harvard University, David J. Malan and
-  Brian Yu. Licensed under CC BY-NC-SA 4.0, which this CC BY-SA work cannot
+  Brian Yu. Licensed under CC BY-NC-SA 4.0, which this CC BY-SA work can't
   adapt. This project adopts and cites CS50's teaching approach and
   vocabulary as ideas only. Any CS50 page included verbatim is marked with its
   own license on that page.

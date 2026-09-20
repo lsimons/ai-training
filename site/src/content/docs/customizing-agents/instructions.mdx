@@ -22,9 +22,9 @@ import InstructionsBuilder from '@components/widgets/InstructionsBuilder.astro';
 
 In your first session you gave the agent context by hand: which files
 mattered, which command runs the tests, which branch not to touch. In this
-lesson we will write that context down once, in a file the agent reads at
-the start of every session, and we will see what belongs in that file, what
-does not, and what to do when a written rule is not enough.
+lesson we write that context down once, in a file the agent reads at
+the start of every session, and we see what belongs in that file, what
+doesn't, and what to do when a written rule isn't enough.
 
 Nothing in this lesson runs. The examples are file contents, and the
 fixture is a small fictional project called `invoice-mailer`: a Python
@@ -41,9 +41,9 @@ common pattern is to write `AGENTS.md` and make `CLAUDE.md` a symlink to
 it, or to have one contain a single line pointing at the other.
 
 Think of the file as the briefing you would give a capable contractor on
-their first morning. They can read code. They cannot know which command
+their first morning. They can read code. They can't know which command
 your team runs before pushing, which directory is generated, or which
-obvious-looking fix has already been tried and reverted twice. That is the
+obvious-looking fix has already been tried and reverted twice. That's the
 gap the file fills.
 
 Here is the smallest useful version for our fixture:
@@ -59,17 +59,17 @@ Renders invoices to PDF and sends them over SMTP. Python 3.13, uv.
 - Lint and format: `uv run ruff check . && uv run ruff format .`
 ```
 
-Five lines of content. An agent that reads this will run the right test
+Five lines of content. An agent that reads this runs the right test
 command on the first try instead of guessing between `pytest`,
 `python -m pytest` and `make test`. That alone pays for the file.
 
 ## What belongs in it
 
-Everything in the file should be something the agent cannot work out from
+Everything in the file should be something the agent can't work out from
 the code, or could work out but gets wrong often enough that you are tired
-of correcting it. In practice that is four kinds of content.
+of correcting it. In practice that's four kinds of content.
 
-**Commands.** How to install, test, lint, build and run. One line each,
+**Commands.** How to install, test, lint, build, and run. One line each,
 with the exact invocation. If the project has a task runner, name it and
 say that the runner is the source of truth.
 
@@ -83,39 +83,39 @@ which style choices are deliberate.
 
 **Rules that remove a recurring mistake.** This is the most valuable
 category and the hardest to write in advance. Every time the agent does
-the same wrong thing twice, add one line that stops it. "Do not add
+the same wrong thing twice, add one line that stops it. "Don't add
 retries around SMTP calls; the queue already retries" is a good rule. It
 is specific, it says what to do instead, and it exists because of a real
 incident.
 
-Build one now. Tick what is true for a project you know, fill in the
+Build one now. Tick what's true for a project you know, fill in the
 short fields, and read the result as if you were the agent seeing it for
 the first time.
 
 <InstructionsBuilder />
 
-Notice how short the output stays even with every box ticked. That is the
+Notice how short the output stays even with every box ticked. That's the
 target. A real project's file grows over time, but it grows one line per
 lesson learned, not one paragraph per feature.
 
-## What does not belong
+## What doesn't belong
 
-The failure mode of instruction files is not that they are missing. It is
-that they are long. Every line costs context on every turn of every
-session, and an agent given two pages of prose will follow some of it and
-silently drop the rest.
+The failure mode of instruction files isn't that they're missing. It is
+that they're long. Every line costs context on every turn of every
+session, and an agent given two pages of prose follows some of it and
+silently drops the rest.
 
 Three things to leave out:
 
 **Anything the agent can read from the code.** The list of dependencies
 is in the lockfile. The function signatures are in the source. The API
 routes are in the router. Pointing at the file ("routes are registered in
-`app/routes.py`") is fine; copying its contents is not, because the copy
+`app/routes.py`") is fine; copying its contents isn't, because the copy
 goes stale and the agent then has two conflicting sources.
 
 **Long prose.** Architecture essays, project history, the reasoning behind
 every decision. If the reasoning matters, put it in a design document and
-link to it; the agent will read it when the task calls for it.
+link to it; the agent reads it when the task calls for it.
 
 **Restating the obvious.** "Write clean code." "Follow best practices."
 "Make sure tests pass." A capable agent already does these, and the lines
@@ -186,7 +186,7 @@ tools handle this the same way: the agent always reads the file at the
 repository root, and also reads a file in a subdirectory when it works on
 files under that directory. Closer wins on conflict.
 
-That gives a natural split. The root file holds what is true everywhere:
+That gives a natural split. The root file holds what's true everywhere:
 the task runner, the commit convention, the branch rule. Each project's
 file holds only what differs: its own test command, its own language, its
 own recurring mistakes.
@@ -205,12 +205,12 @@ Resist the urge to copy the root rules into each child file so that it
 reads standalone. The agent sees both; the copy only adds a second place
 to keep in sync.
 
-## When instructions are not enough
+## When instructions aren't enough
 
 An instruction is a request. The agent reads it, usually follows it, and
-sometimes does not, particularly late in a long session when the file has
-scrolled far back in its context. If a rule is one you cannot afford to
-have skipped even once, do not rely on prose for it. A *hook* runs a
+sometimes doesn't, particularly late in a long session when the file has
+scrolled far back in its context. If a rule is one you can't afford to
+have skipped even once, don't rely on prose for it. A *hook* runs a
 command of yours at a fixed point in the agent's loop, before a tool call
 or after an edit, and can block the action outright. For example, a hook
 that runs before every shell command, inspects the command the agent is
@@ -218,11 +218,11 @@ about to run, and exits non-zero when it matches `git push` to `main`
 means the push never happens, however far back the instruction file has
 scrolled. "Never push to `main`" in `AGENTS.md` is advised; the hook is
 enforced. A hook that runs the formatter after every edit works the same
-way for a procedure the agent tends to forget. And when a rule is not a
+way for a procedure the agent tends to forget. And when a rule isn't a
 prohibition but a procedure, a
 multi-step thing the agent should do the same way every time, it is
 better packaged as a *skill*: a named, self-contained set of instructions
-the agent loads only when the task calls for it, so it does not sit in
+the agent loads only when the task calls for it, so it doesn't sit in
 every session's context. The next lesson is about writing one.
 
 <Exercise stretch="Now add one more rule that is enforced rather than advised: an agent hook that blocks the action, or a CI check that fails when the rule is broken, and remove the equivalent line from AGENTS.md.">
@@ -235,20 +235,20 @@ guess, delete the project's git history, and repeat the same three tasks.
 
 A good result: the second run makes none of the wrong guesses from the
 first, and every line in your file traces back to one of them. If a line
-does not, it is a candidate to delete.
+doesn't, it is a candidate to delete.
 </Exercise>
 
 <Recap>
 1. The agent reads `AGENTS.md` (or `CLAUDE.md`; same content, different
    tool convention) at the start of every session; it is the briefing for
    a capable contractor's first morning.
-2. Put in it what the agent cannot read from the code: commands,
+2. Put in it what the agent can't read from the code: commands,
    structure, conventions, and one line for every mistake it keeps making.
 3. Leave out what the code already says, long prose, and rules that apply
    to every project on earth. Short files get followed; long ones get
    skimmed.
-4. In a monorepo, the root file holds what is shared and each project's
+4. In a monorepo, the root file holds what's shared and each project's
    file holds only what differs; closer wins.
-5. A rule you cannot afford to have skipped belongs in a hook, not in
+5. A rule you can't afford to have skipped belongs in a hook, not in
    prose; a procedure the agent should repeat belongs in a skill.
 </Recap>

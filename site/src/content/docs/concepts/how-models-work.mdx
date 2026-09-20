@@ -27,12 +27,12 @@ model predicts the next piece of text, one piece at a time.
 ## Text becomes tokens
 
 A model never sees letters or words. Its input is cut into **tokens**, short
-chunks of text that are usually a word, part of a word or a punctuation
+chunks of text that are usually a word, part of a word, or a punctuation
 mark. "Unbelievable" might be three tokens; "the" is one. Each token has a
 number, and the model works only with those numbers.
 
-This has consequences you will notice. Models are bad at counting letters
-in a word, because they never saw the letters. They are priced per token,
+This has consequences you notice. Models are bad at counting letters
+in a word, because they never saw the letters. They're priced per token,
 not per word. And rare names and non-English text often cost more tokens
 per character than common English, because the token vocabulary was built
 around the text that appears most often in training data.
@@ -51,7 +51,7 @@ scores, but the mechanism is the real one.
 <Sampler />
 
 Two things to notice. The distribution is fixed by the input; only the
-*pick* is random. And **temperature** does not add knowledge, it only
+*pick* is random. And **temperature** doesn't add knowledge, it only
 flattens or sharpens the same distribution. At low temperature the model
 almost always picks the top token and sounds confident and repetitive. At
 high temperature it wanders.
@@ -74,7 +74,7 @@ came next scores higher. Nothing is stored as facts or rules. What emerges
 is a compressed statistical model of the text it saw: grammar, style,
 common facts, common code, common arguments.
 
-That is why models know a great deal about things that appear often in
+That's why models know a great deal about things that appear often in
 writing and are unreliable about things that appear rarely, recently, or
 only in your organization's private documents. Knowledge is
 frequency-weighted and frozen at the training cutoff.
@@ -101,7 +101,7 @@ mysterious.
 
 - **Hallucination.** The most likely continuation of "The 2019 paper by
   Smith et al. showed" is a plausible citation, even if no such paper exists.
-  Confidence in the prose is not confidence in the fact.
+  Confidence in the prose isn't confidence in the fact.
 - **Sycophancy.** Text that agrees with the questioner is common in
   training data. Push back and the model often folds, not because you were
   right but because folding is likely text.
@@ -146,6 +146,6 @@ sentence, why prediction rather than lookup produces it.
    scores; temperature reshapes the distribution and adds nothing.
 3. The scores come from weights fitted to training text, so knowledge is
    frequency-weighted and stops at the cutoff.
-4. Hallucination, sycophancy, dilution and staleness all follow from that.
+4. Hallucination, sycophancy, dilution, and staleness all follow from that.
 
 </Recap>

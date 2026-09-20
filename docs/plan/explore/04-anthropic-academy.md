@@ -1,4 +1,4 @@
-# Exploration: Anthropic Partner Academy and Claude Academy
+# Exploration: the two Anthropic academies (partner and public)
 
 Explored 2026-09-19 by a read-only agent. Source:
 `~/git/lsimons/ai-anthropic-partners`. Key index files: `COURSES.md`,
@@ -106,4 +106,4 @@ On Academy, progress and badges require sign-in with a Claude account.
 The course material is Anthropic's copyright, held as private study notes
 under a partner account. **Reference and link only.** Prefer the public
 `academy.claude.com/courses/<slug>` URLs, which need no partner account. Do
-not copy lesson text, transcripts, quiz answers, slide images or attachments.
+not copy lesson text, transcripts, quiz answers, slide images, or attachments.
