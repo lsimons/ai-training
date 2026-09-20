@@ -40,6 +40,7 @@ lessons:
     serves:
       - customizing-agents/writes-skill/chooses-skill-over-tool
     status: planned
+    issue: 159
     minutes: 10
     after:
       - customizing-agents/instructions
@@ -54,6 +55,7 @@ lessons:
     serves:
       - customizing-agents/writes-skill/packages-a-procedure
     status: planned
+    issue: 162
     minutes: 15
     after:
       - customizing-agents/skill-or-tool-or-instruction
@@ -68,6 +70,7 @@ lessons:
     serves:
       - customizing-agents/writes-skill/packages-a-procedure
     status: planned
+    issue: 165
     minutes: 10
     after:
       - customizing-agents/first-skill
@@ -82,6 +85,7 @@ lessons:
     serves:
       - customizing-agents/writes-skill/discloses-progressively
     status: planned
+    issue: 167
     minutes: 15
     after:
       - customizing-agents/first-skill
@@ -96,6 +100,7 @@ lessons:
     serves:
       - customizing-agents/writes-skill/chooses-skill-over-tool
     status: planned
+    issue: 170
     minutes: 10
     after:
       - customizing-agents/first-skill
@@ -126,6 +131,7 @@ lessons:
     serves:
       - customizing-agents/connects-tools-safely/adds-a-tool
     status: planned
+    issue: 171
     minutes: 15
     after:
       - customizing-agents/mcp
@@ -140,6 +146,7 @@ lessons:
     serves:
       - customizing-agents/connects-tools-safely/weighs-tool-cost
     status: planned
+    issue: 173
     minutes: 15
     after:
       - customizing-agents/mcp-first-server
@@ -154,6 +161,7 @@ lessons:
     serves:
       - customizing-agents/connects-tools-safely/hardens-a-connection
     status: planned
+    issue: 175
     minutes: 15
     after:
       - customizing-agents/mcp-first-server
@@ -170,6 +178,7 @@ lessons:
     serves:
       - customizing-agents/configures-agent/sets-permissions
     status: planned
+    issue: 177
     minutes: 15
     after:
       - customizing-agents/instructions
@@ -184,6 +193,7 @@ lessons:
     serves:
       - customizing-agents/configures-agent/sets-permissions
     status: planned
+    issue: 179
     minutes: 15
     after:
       - customizing-agents/permission-modes
@@ -198,6 +208,7 @@ lessons:
     serves:
       - customizing-agents/configures-agent/sets-permissions
     status: planned
+    issue: 181
     minutes: 10
     after:
       - customizing-agents/allowlists
@@ -212,6 +223,7 @@ lessons:
     serves:
       - customizing-agents/configures-agent/adds-a-hook
     status: planned
+    issue: 184
     minutes: 15
     after:
       - customizing-agents/allowlists
@@ -226,6 +238,7 @@ lessons:
     serves:
       - customizing-agents/configures-agent/sets-permissions
     status: planned
+    issue: 187
     minutes: 15
     after:
       - customizing-agents/allowlists
@@ -242,6 +255,7 @@ lessons:
     serves:
       - customizing-agents/configures-agent/manages-memory
     status: planned
+    issue: 189
     minutes: 15
     after:
       - customizing-agents/first-skill
@@ -256,6 +270,7 @@ lessons:
     serves:
       - customizing-agents/configures-agent/manages-memory
     status: planned
+    issue: 192
     minutes: 10
     after:
       - customizing-agents/memory-review
@@ -270,6 +285,7 @@ lessons:
     serves:
       - customizing-agents/configures-agent/manages-memory
     status: planned
+    issue: 195
     minutes: 15
     after:
       - customizing-agents/compaction
@@ -285,6 +301,7 @@ lessons:
       - customizing-agents/configures-agent/manages-memory
       - customizing-agents/configures-agent/adds-a-hook
     status: planned
+    issue: 197
     minutes: 15
     after:
       - customizing-agents/session-handoff
