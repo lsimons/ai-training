@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-01",
+  "repo": {
+    "name": "github.com/example/date-fmt",
+    "commit": "0000000000000000000000000000000000000000"
+  },
+  "score": 4.6,
+  "checks": [
+    { "name": "Binary-Artifacts", "score": 10, "reason": "no binaries found in the repo" },
+    { "name": "Branch-Protection", "score": 3, "reason": "branch protection is not maximal on development and all release branches" },
+    { "name": "Code-Review", "score": 2, "reason": "Found 3/20 approved changesets -- score normalized to 2" },
+    { "name": "Dangerous-Workflow", "score": 10, "reason": "no dangerous workflow patterns detected" },
+    { "name": "Dependency-Update-Tool", "score": 0, "reason": "no update tool detected" },
+    { "name": "Maintained", "score": 0, "reason": "0 commit(s) and 0 issue activity found in the last 90 days -- score normalized to 0" },
+    { "name": "Pinned-Dependencies", "score": 5, "reason": "dependency not pinned by hash detected -- score normalized to 5" },
+    { "name": "Signed-Releases", "score": 0, "reason": "Project has not signed or included provenance with any releases." },
+    { "name": "Token-Permissions", "score": 10, "reason": "GitHub workflow tokens follow principle of least privilege" },
+    { "name": "Vulnerabilities", "score": 10, "reason": "0 existing vulnerabilities detected" }
+  ]
+}
