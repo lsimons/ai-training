@@ -28,10 +28,10 @@ concepts:
     name: Test-driven change
     definition: >-
       Writing or having the agent write a failing test that captures the
-      desired behaviour, then implementing until it passes, then cleaning up.
+      desired behavior, then implementing until it passes, then cleaning up.
       The test gives the agent an unambiguous target it can run on its own
       and gives you proof that the change does what was asked. It suits
-      bounded behavioural changes and bug fixes.
+      bounded behavioral changes and bug fixes.
   - id: working-increments
     name: Working increments
     definition: >-
@@ -44,7 +44,7 @@ concepts:
     name: Sequencing for early feedback
     definition: >-
       Ordering increments so the riskiest assumption or the most visible
-      behaviour is tested first. Build the thin end-to-end path before the
+      behavior is tested first. Build the thin end-to-end path before the
       details, the integration before the polish, the part you are least sure
       about before the part you are certain of. Early feedback turns a
       possible rewrite into a small correction.

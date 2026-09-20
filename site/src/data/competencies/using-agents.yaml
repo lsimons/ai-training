@@ -7,7 +7,7 @@ competencies:
       - id: using-agents/delegates-and-checks/writes-a-brief
         statement: Writes a brief with goal, context, limits and done-criteria
         level: base
-        behaviours:
+        behaviors:
           - claim: A brief states the goal, the context the work needs and the limits it must stay within.
             why: An agent fills in whatever is left unsaid with plausible defaults, so what it must not touch matters as much as what it must do.
             example: "\"Update the pricing table in `docs/pricing.md` from this spreadsheet; do not change any other file\" stays on task, where \"update the pricing\" may rewrite the page."
@@ -20,7 +20,7 @@ competencies:
       - id: using-agents/delegates-and-checks/chooses-autonomy
         statement: Chooses how much the agent may do before checking in
         level: base
-        behaviours:
+        behaviors:
           - claim: The learner sets the check-in point from the cost of a wrong step, not from how much they trust the tool.
             why: Trust built on a few good runs does not lower the cost of the one bad run.
             example: For a summary of meeting notes the agent may finish unattended; for replies to customers it stops before each send, even though it has drafted well before.
@@ -33,7 +33,7 @@ competencies:
       - id: using-agents/delegates-and-checks/reviews-against-brief
         statement: Reviews the result against the brief, not against a feeling
         level: base
-        behaviours:
+        behaviors:
           - claim: The review walks the done-criteria one by one and records pass or fail for each.
             why: A result that reads well is accepted by feel; a checklist catches the criterion the agent skipped.
             example: The brief said "every row appears once and totals match"; the learner counts rows and adds the totals rather than skimming the table.
@@ -46,7 +46,7 @@ competencies:
       - id: using-agents/delegates-and-checks/adjusts-mid-task
         statement: Adjusts the brief when the work reveals new information
         level: base
-        behaviours: []
+        behaviors: []
     alignment:
       - framework: Brilliant Coding with AI
         code: SPC-5, BLD-1
@@ -67,15 +67,15 @@ competencies:
       - id: using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation
         statement: Picks chat, agent or automation for a task and says why
         level: base
-        behaviours: []
+        behaviors: []
       - id: using-agents/chooses-tool-and-autonomy/keeps-the-human-steps
         statement: Names the steps that stay human and why
         level: base
-        behaviours: []
+        behaviors: []
       - id: using-agents/chooses-tool-and-autonomy/reasons-across-levels
-        statement: Re-applies judgement when the tool level rises
+        statement: Re-applies judgment when the tool level rises
         level: expert
-        behaviours: []
+        behaviors: []
     alignment:
       - framework: Brilliant Coding with AI
         code: BLD-2, BLD-3

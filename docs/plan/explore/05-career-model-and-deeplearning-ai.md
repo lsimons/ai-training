@@ -1,4 +1,4 @@
-# Exploration: career-model competency catalogue and DeepLearning.AI courses
+# Exploration: career-model competency catalog and DeepLearning.AI courses
 
 Explored 2026-09-19 by a read-only agent.
 
@@ -46,14 +46,14 @@ references:
 Categories (4): General, Software Production, Software Management, Software
 Technology. Areas per category; Software Production has Requirements,
 Interaction Design, Architecture, Construction, Test, Maintenance. Competencies
-and sub-competencies below each area. **Levels are behaviours within a
+and sub-competencies below each area. **Levels are behaviors within a
 competency** (`base / expert / lead`), not separate nodes; there is no role or
 seniority ladder.
 
 ### Visual map
 
 `src/components/CompetencyGraph.vue`: a D3 v5 force simulation drawing circles
-into an inline SVG, pastel colour per area, props for width, height, max level
+into an inline SVG, pastel color per area, props for width, height, max level
 and category. Used on the home page (four small maps, one per category) and on
 category, area and competency views. Loading in `src/store/competencies.js`
 (papaparse plus the `yaml` package). Design sketches in
@@ -87,7 +87,7 @@ customizing agents, BUILD = building agents):
 
 | #   | Course                                          | One line                                                                   | Topics           |
 | --- | ----------------------------------------------- | -------------------------------------------------------------------------- | ---------------- |
-| 1   | ChatGPT Prompt Engineering                      | Two prompting principles, then summarise/infer/transform/expand, a chatbot | AIC              |
+| 1   | ChatGPT Prompt Engineering                      | Two prompting principles, then summarize/infer/transform/expand, a chatbot | AIC              |
 | 2   | Generative AI for Everyone                      | What genAI can and cannot do, how projects get built, societal impact      | AIC, SAFE        |
 | 3   | AI Prompting for Everyone                       | Power user: search and research, AI as thought partner, sycophancy         | AIC, USE, SAFE   |
 | 4   | AI Python for Beginners                         | Python from zero with an LLM as coding assistant                           | SWE (entry)      |

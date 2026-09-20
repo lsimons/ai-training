@@ -72,7 +72,7 @@ and plan, acting, observation and reflection; example use cases), prompt
 engineering (six "writing good prompts" rules, CoT, ToT), tools and actions
 (tool definition: name, schema, error handling, examples; example tools;
 MCP with hosts, clients, servers, local vs remote), agent memory (short and
-long term, episodic vs semantic, RAG, summarisation, forgetting), agent
+long term, episodic vs semantic, RAG, summarization, forgetting), agent
 architectures (RAG agent, ReAct, planner-executor, DAG agents, multi-agent,
 self-critique), building agents (from scratch: API calls, the loop, parsing,
 error and rate-limit handling; native function calling per vendor;
@@ -115,7 +115,7 @@ names. Their unit is a technology or term; ours is a competency.
   one-paragraph content, a **Learn with AI** box with **Quick Explain**,
   **Teach Me**, **Quiz me**, then Premium Resources (sponsored) and Free
   Resources as typed badges. Done strikes the node through on the map and
-  fills it grey; Skip and Learning have their own styles. Toggling Done
+  fills it gray; Skip and Learning have their own styles. Toggling Done
   again clears it.
 - Each topic also has a standalone page at `/<roadmap>/<slug>@<id>` with
   the same content and links, for search engines and sharing.
@@ -227,7 +227,7 @@ Items 1, 3, 6 and 7 declined for now.
    scoped interactions the CS50 Duck note recommended
    ([explore/07](./07-scorm-interactions-and-duck-tutor.md)). Tutor mode
    should expose the same verbs per topic and per lesson, driven by our
-   concept definitions and behaviours rather than a general prompt.
+   concept definitions and behaviors rather than a general prompt.
 6. **Generated lesson anatomy as a checklist.** Their generated lessons
    contain the same parts our spec S01 lesson has (sections, callouts, an
    inline check, a summary, recall questions, a next card) plus a

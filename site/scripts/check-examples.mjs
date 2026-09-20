@@ -116,7 +116,7 @@ if (process.argv.includes('--self-test')) {
 			const id = props.get('id') ?? '?';
 			if (!run) {
 				// A tag that mentions `run` but did not parse into a run prop is a
-				// parser gap, not an honour-system Predict; fail rather than skip.
+				// parser gap, not an honor-system Predict; fail rather than skip.
 				if (/\brun\b/.test(attrs)) failures.push(`${file} #${id}: tag mentions "run" but no run= prop parsed:\n${attrs}`);
 				continue;
 			}

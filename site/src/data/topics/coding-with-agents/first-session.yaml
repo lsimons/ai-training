@@ -23,7 +23,7 @@ concepts:
       where a feature lives, how a request flows, what a module depends on.
       The agent reads files and searches faster than you can, and its
       explanation is a fast first map. Verify the map against the code on
-      anything you will act on, since agents summarise confidently.
+      anything you will act on, since agents summarize confidently.
   - id: first-change
     name: First change
     definition: >-

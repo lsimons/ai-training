@@ -1,7 +1,7 @@
 import { AREAS } from './areas';
 import { getLessons, checkpointsOf } from './lessons';
 
-/** The site's courses and lessons in path order, serialisable for client scripts. */
+/** The site's courses and lessons in path order, serializable for client scripts. */
 export interface CatalogCheckpoint {
 	id: string;
 	reviewable: boolean;

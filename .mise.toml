@@ -35,6 +35,8 @@ python = "3.14.7"
 # Prose lint (`mise run prose`). Its style packages are pinned by URL in
 # .vale.ini and fetched by `mise run prose-sync`.
 vale = "3.20.0"
+# Spell check in American English (`mise run spell`); words in cspell.json.
+cspell = "10.3.0"
 
 # Deliberately NOT --frozen-lockfile: this is the task you run while
 # actually changing dependencies, and it is allowed to update bun.lock.
@@ -207,16 +209,29 @@ vale --no-exit --config .vale-extended.ini $files
 description = "Collect every hit of a Vale package for review: mise run prose-eval -- <package>"
 run = "scripts/prose-eval.py"
 
+# Spell check in American English over the same files as `prose`. cspell's
+# en-US dictionary is separate from en-GB, so British spellings fail. Names
+# and jargon go in cspell-words.txt; inline code spans are skipped.
+[tasks.spell]
+description = "cspell (American English) over Markdown, MDX and the site data YAML"
+run = """
+set -e
+files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md')
+# shellcheck disable=SC2086
+cspell --no-progress $files
+"""
+
 # Sequential rather than `depends`, which mise runs in parallel:
 # `site-check` and `site-build` both write `site/.astro`. The workflow runs
 # the same list as separate steps for readable logs — keep the two in sync.
 [tasks.ci]
-description = "Full CI gate: install + lint + prose + examples + Astro check + build"
+description = "Full CI gate: install + lint + prose + spell + examples + Astro check + build"
 run = [
   "mise run site-install-frozen",
   "mise run lint",
   "mise run prose-sync",
   "mise run prose",
+  "mise run spell",
   "mise run examples",
   "mise run site-check",
   "mise run site-build",

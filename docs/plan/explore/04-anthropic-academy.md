@@ -16,7 +16,7 @@ the public URLs below are reliable equivalents.
 
 - Claude 101: everyday use of Claude (projects, artifacts, skills, connectors,
   research). <https://academy.claude.com/courses/claude-101>
-- AI capabilities and limitations: mental model of LLM behaviour.
+- AI capabilities and limitations: mental model of LLM behavior.
   <https://academy.claude.com/courses/ai-capabilities-and-limitations>
 - AI Fluency: Framework and foundations: the 4D framework (Delegation,
   Description, Discernment, Diligence).
@@ -79,7 +79,7 @@ Interaction patterns observed:
   learner picks exactly N defective components.
 - **Flip / reveal cards** via `<details>` / `<summary>`, plus glossary items.
 - **Tab strips**.
-- **Reflection / honour-system free text** (`textarea`, nothing graded).
+- **Reflection / honor-system free text** (`textarea`, nothing graded).
 - **Cumulative design exercise**: one design problem grows across screens and
   ends in a five-decision write-up.
 - **Diagrams**: inline SVG.

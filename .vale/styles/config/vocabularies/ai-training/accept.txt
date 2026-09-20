@@ -9,6 +9,7 @@
 Pagefind
 Quarto
 Vale
+cspell
 proselint
 Markdown
 Anthropic
@@ -143,7 +144,7 @@ pkgs
 [Rr]eframe
 [Uu]pvotes
 [Uu]psell
-[Aa]nonymisation
+[Aa]nonymization
 [Oo]nwards
 hrefs
 pid

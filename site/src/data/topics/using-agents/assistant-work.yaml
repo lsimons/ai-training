@@ -3,14 +3,14 @@ area: using-agents
 name: Working with an assistant
 definition: >-
   The everyday uses of a chat assistant for knowledge work: finding and
-  summarising information, thinking a problem through out loud, producing and
+  summarizing information, thinking a problem through out loud, producing and
   reshaping drafts, getting critical feedback on your own work, and working
   from files and images you supply rather than from the model's memory.
 concepts:
   - id: finding-information
     name: Finding information
     definition: >-
-      Using an assistant to locate, summarise and compare information, in
+      Using an assistant to locate, summarize and compare information, in
       documents you supply or, with a search tool, on the web. It is fast at
       orientation and at turning a long text into the three things you need
       to know. It is unreliable on specifics from memory alone, so ask for

@@ -1,5 +1,5 @@
 /**
- * Client behaviour for checkpoints (spec S01 "Interaction types", S03
+ * Client behavior for checkpoints (spec S01 "Interaction types", S03
  * "Checkpoints") in lessons and on review pages (spec S05).
  *
  * The components render the markup; this module binds it. A checkpoint is a
@@ -60,7 +60,7 @@ function bindPredict(el: HTMLElement): Grader {
 	const answer = $(el, '.cp-predict')?.dataset.answer;
 	const ta = $<HTMLTextAreaElement>(el, 'textarea')!;
 	if (answer === undefined) {
-		// Honour-system variant: the learner ran it and grades themselves.
+		// Honor-system variant: the learner ran it and grades themselves.
 		return () => {
 			const grade = $<HTMLInputElement>(el, 'input[name$="-selfgrade"]:checked');
 			if (!grade) {

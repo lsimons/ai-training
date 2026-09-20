@@ -5,7 +5,7 @@ definition: >-
   You cannot improve an agent you cannot measure. This topic covers naming
   the qualities that matter, turning them into rubrics and metrics that
   resist gaming, grading the path the agent took as well as its answer, using
-  a model as a judge, maintaining golden sets, analysing errors and observing
+  a model as a judge, maintaining golden sets, analyzing errors and observing
   the agent in use.
 concepts:
   - id: quality-pillars
@@ -29,7 +29,7 @@ concepts:
     name: Metrics that cannot be gamed
     definition: >-
       A metric that can improve without the real quality improving will be
-      optimised until it does exactly that. Length, keyword presence and
+      optimized until it does exactly that. Length, keyword presence and
       self-reported success are easy to game; tests the agent cannot see,
       human spot checks and outcomes measured downstream are harder. Choose
       metrics that require the quality itself to move, and watch for

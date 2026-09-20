@@ -1,6 +1,6 @@
 id: safety/failure-modes
 area: safety
-name: Recognising failure
+name: Recognizing failure
 definition: >-
   Model failures rarely announce themselves; they arrive as fluent, confident
   text. This topic shows what hallucination looks like in real documents and
@@ -32,7 +32,7 @@ concepts:
       It starts with tasks you know well and then spreads to ones you do not,
       where you can no longer tell a good answer from a plausible one. The
       remedy is to keep verifying in proportion to stakes and to keep enough
-      of your own competence to recognise when the tool is wrong.
+      of your own competence to recognize when the tool is wrong.
   - id: automation-complacency
     name: Automation complacency
     definition: >-

@@ -1,0 +1,88 @@
+# Project words for cspell (American English is the dictionary; this list
+# is names and jargon only, never a spelling variant). One word per line,
+# case-insensitive. Keep it grouped and short: a word that only appears
+# inside a code span does not need listing, cspell skips those.
+
+# People
+Addy
+Osmani
+addyosmani
+Malan
+Daniele
+Procida
+Schulhoff
+Soares
+Ivar
+Urdalen
+ivarurdalen
+Simons
+lsimons
+Schuberg
+Philis
+
+# Products, tools, projects
+Beamer
+Cowork
+Merriweather
+Ollama
+Pydantic
+pytest
+Qdrant
+Replit
+Skilljar
+Vuetify
+basedpyright
+papaparse
+prek
+zizmor
+davinci
+MRKL
+
+# Course and certification codes
+CCAO
+CCAR
+CCDV
+CUST
+DLAI
+GCSE
+SCORM
+SDLC
+Precalculus
+pset
+psets
+
+# Jargon
+anonymization
+chatbots
+clippable
+courseware
+daemonizes
+Diátaxis
+ensembling
+evals
+exfiltration
+extensionless
+frontmatter
+hackathon
+Hotspot
+hrefs
+jailbreaking
+lede
+multimodal
+permissioned
+permissioning
+pkgs
+retriable
+rstrip
+sandboxing
+scorable
+scrollytelling
+stdlib
+subgoals
+subheaders
+textareas
+unreviewed
+unvalidated
+upsell
+upvotes
+worktrees

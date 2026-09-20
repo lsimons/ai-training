@@ -66,6 +66,9 @@ jobs:
       - name: Prose lint
         run: mise run prose
 
+      - name: Spell check
+        run: mise run spell
+
       - name: Examples
         run: mise run examples
 

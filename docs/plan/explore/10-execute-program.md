@@ -10,7 +10,7 @@ Proprietary; structure and mechanics only, no lesson text reused.
 An interactive course platform for professional programmers who already
 know one language: Python, TypeScript, SQL, JavaScript arrays and regular
 expressions, and so on. As of this visit: 428 lessons and 3,735 code
-examples across the catalogue; the Python for Programmers course has 66
+examples across the catalog; the Python for Programmers course has 66
 lessons and 882 examples and takes a median of 12 hours over 16 calendar
 days. Subscription, with 16 free lessons.
 
@@ -119,7 +119,7 @@ S01 and S02; spaced review is [spec S05](../../spec/S05-spaced-review.md).
    the value, run it to grade. This is the `repair` and `choice` interaction
    types' better sibling for anything executable: it is not multiple choice,
    it cannot be guessed, and grading is exact. Add `predict` to the
-   interaction types in spec S01, with an honour-system variant for
+   interaction types in spec S01, with an honor-system variant for
    non-executable cases (predict what the agent will do, then run it).
 2. **Never reveal the answer in a lesson; hints are diagnostic questions.**
    Matches the CS50 Duck finding and the Anthropic modules. Give Up exists
@@ -128,7 +128,7 @@ S01 and S02; spaced review is [spec S05](../../spec/S05-spaced-review.md).
    paragraphs short and forces an example per idea. Our tutorial-mode
    lessons should adopt the rhythm even if we render the whole page.
 4. **Reuse across examples with an explicit note.** State-carrying examples
-   let a lesson build one artefact; the note stops confusion.
+   let a lesson build one artifact; the note stops confusion.
 5. **The course page is the graph.** Levels with locked tiers and dotted
    prerequisite edges is a good rendering for our per-course lesson view and
    fits the three-lane path idea in spec S02.

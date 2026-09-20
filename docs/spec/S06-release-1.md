@@ -26,7 +26,7 @@ One lesson per area, each exercising a different interaction type.
 | Area               | Lesson (working title)                 | Mode        | Covers topic                     | Serves objectives                                                                       | Basis                                       | Interaction to prove     |
 | ------------------ | -------------------------------------- | ----------- | -------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------ |
 | concepts           | How a language model works             | explanation | concepts/how-models-work         | `explains-models/explains-generation`, `names-failure-modes`                            | new; `AEC-02` first half                    | `choice`, widget         |
-| safety             | Why agent safety is different          | explanation | safety/agent-risk                | `judges-agent-risk/names-blast-radius`, `chooses-human-in-loop`, `recognises-injection` | `AEC-10` first half, rewritten for everyone | `scenario`, pitfall      |
+| safety             | Why agent safety is different          | explanation | safety/agent-risk                | `judges-agent-risk/names-blast-radius`, `chooses-human-in-loop`, `recognizes-injection` | `AEC-10` first half, rewritten for everyone | `scenario`, pitfall      |
 | using-agents       | Delegating a task to an agent          | tutorial    | using-agents/delegating          | `delegates-and-checks/writes-a-brief`, `chooses-autonomy`, `reviews-against-brief`      | new; a real delegation in a sandbox         | `sort` (autonomy levels) |
 | coding-with-agents | Your first session with a coding agent | tutorial    | coding-with-agents/first-session | `ships-with-agent/runs-a-session`, `gives-the-right-context`                            | `AEC-12` public rewrite; fixture repository | `predict`, `exercise`    |
 | customizing-agents | Project instructions: AGENTS.md        | tutorial    | customizing-agents/instructions  | `configures-agent/writes-project-instructions`                                          | `AEC-15` with the builder widget            | `repair`, widget         |
@@ -43,7 +43,7 @@ has six courses of one lesson each.
   with a stretch goal, and a recap.
 - In tutorial mode: the paragraph-then-example rhythm, `predict` for every
   example that runs, and a resettable fixture.
-- Behaviours written for every objective it serves, so the tutor and the
+- Behaviors written for every objective it serves, so the tutor and the
   checkpoints have something exact to test.
 
 ## What release 1 exercises
@@ -51,7 +51,7 @@ has six courses of one lesson each.
 | Mechanism       | Exercised by                                                                                                 |
 | --------------- | ------------------------------------------------------------------------------------------------------------ |
 | Lesson graph    | Six course pages, each a one-node graph with a milestone bar and completion ring                             |
-| Topic map       | Six topics coloured from lesson state; the rest of the map drawn from the YAML with no lessons yet           |
+| Topic map       | Six topics colored from lesson state; the rest of the map drawn from the YAML with no lessons yet            |
 | Interactions    | `predict`, `choice`, `scenario`, `sort`, `order`, `repair` with `self-grade`, two widgets                    |
 | Routing         | Checkpoint fail cards and extension cards on the six lessons; comfort level on the three Engineering lessons |
 | Progress record | Read, finished and skipped states; export and import                                                         |
@@ -94,7 +94,7 @@ green.
 
 ## Open questions
 
-1. Whether the two `explanation` lessons should get an honour-system
+1. Whether the two `explanation` lessons should get an honor-system
    `predict` (predict what the agent does, then run it) so `predict` is
    proven outside code too. Leaning: yes for the safety lesson.
 2. Whether release 1 needs the example runner in CI, or whether marking

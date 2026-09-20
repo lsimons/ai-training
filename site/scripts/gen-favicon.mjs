@@ -1,6 +1,6 @@
 // Generate the site favicon + apple-touch-icon from the LSD Warm palette.
 //
-// A simple "document" glyph: an accent-coloured rounded page with a few text
+// A simple "document" glyph: an accent-colored rounded page with a few text
 // lines, legible at favicon sizes. Swap this out for your own brand mark.
 //
 //   cd docs && bun run scripts/gen-favicon.mjs

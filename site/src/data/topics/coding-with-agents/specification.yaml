@@ -13,7 +13,7 @@ concepts:
     definition: >-
       Judging an idea before building it: who needs it, what it costs to
       build and to keep, what it displaces, and what happens if it is not
-      built. Cheap implementation makes this judgement more important, not
+      built. Cheap implementation makes this judgment more important, not
       less, because the cost of building the wrong thing is now mostly the
       cost of maintaining it. Say no, or say smaller, before the agent starts.
   - id: success-criteria
@@ -21,7 +21,7 @@ concepts:
     definition: >-
       Concrete, checkable statements of what a finished result must do and
       must not do, written before the work starts. Good criteria describe
-      observable behaviour, name the edge cases that matter and set limits
+      observable behavior, name the edge cases that matter and set limits
       such as performance or compatibility. They become the agent's target
       and the reviewer's checklist, and they stop a plausible result from
       being accepted as a correct one.

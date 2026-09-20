@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en-US",
+  "dictionaries": [
+    "softwareTerms",
+    "companies",
+    "project-words"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "project-words",
+      "path": "./cspell-words.txt",
+      "addWords": true
+    }
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "site/dist",
+    "site/.astro",
+    "site/examples",
+    "docs/prose/reports",
+    "bun.lock",
+    "cspell-words.txt",
+    ".vale/styles"
+  ],
+  "languageSettings": [
+    {
+      "languageId": "markdown,mdx",
+      "ignoreRegExpList": [
+        "/`[^`\\n]+`/g"
+      ]
+    }
+  ]
+}

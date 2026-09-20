@@ -85,7 +85,7 @@ print(TOOLS["get_weather"]["fn"]("Lisbon"))
 `run` names a file under `site/examples/`. `mise run examples` executes it
 and fails if its stdout is not `answer`. The file holds the complete,
 runnable program; the page shows only the part the learner needs. Omit
-`run` only for the honour-system variant (predict what an agent does), and
+`run` only for the honor-system variant (predict what an agent does), and
 then say in the stem that the learner checks it themselves.
 
 ```mdx

@@ -2,10 +2,10 @@ id: safety/governance
 area: safety
 name: Governance and oversight
 definition: >-
-  Once agents work inside an organisation, individual care is not enough.
+  Once agents work inside an organization, individual care is not enough.
   This topic covers the shared controls: a policy that says what is allowed,
   logs that make agent actions reviewable, awareness that a model update can
-  change behaviour overnight, and a clear route for escalating when something
+  change behavior overnight, and a clear route for escalating when something
   goes wrong.
 concepts:
   - id: policy
@@ -15,7 +15,7 @@ concepts:
       what tasks, and with what checks before results are relied on. A good
       policy is short, names owners and gives examples of allowed and
       disallowed use. Without one, every person invents their own rules and
-      the organisation's exposure is the sum of the most careless choices.
+      the organization's exposure is the sum of the most careless choices.
   - id: logging-and-audit
     name: Logging and audit
     definition: >-
@@ -40,7 +40,7 @@ concepts:
       The agreed route for raising an AI-related problem: a leaked document,
       an agent that took a wrong action, output that harmed someone. It names
       who to tell, how fast and what to preserve. People report faster when
-      the route is known and blameless, and the organisation learns from
+      the route is known and blameless, and the organization learns from
       near-misses instead of only from disasters.
 links:
   prerequisites: [safety/agent-risk]

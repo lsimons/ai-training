@@ -55,7 +55,7 @@ AEC-09:
   license: Apache-2.0
   url: null
 AEC-10:
-  title: "Guardrails and safety: why agent safety differs, defence layers, injection, human in the loop"
+  title: "Guardrails and safety: why agent safety differs, defense layers, injection, human in the loop"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0

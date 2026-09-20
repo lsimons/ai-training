@@ -76,7 +76,7 @@ common facts, common code, common arguments.
 
 That is why models know a great deal about things that appear often in
 writing and are unreliable about things that appear rarely, recently, or
-only in your organisation's private documents. Knowledge is
+only in your organization's private documents. Knowledge is
 frequency-weighted and frozen at the training cutoff.
 
 <Choice id="what-the-model-does" objective="concepts/explains-models/explains-generation"
@@ -85,7 +85,7 @@ frequency-weighted and frozen at the training cutoff.
   options={[
     { text: 'It looked the answer up, but the database is called the weights.', why: 'Weights are not a database. Nothing is stored as retrievable records; the network produces scores for next tokens.' },
     { text: 'It produced the answer token by token, each time scoring what text is likely to come next.', correct: true },
-    { text: 'It searched the web and summarised the results.', why: 'Search is a separate tool some products add on top. The model itself only predicts tokens; it has no built-in search.' },
+    { text: 'It searched the web and summarized the results.', why: 'Search is a separate tool some products add on top. The model itself only predicts tokens; it has no built-in search.' },
     { text: 'It picked the closest match from a library of pre-written answers.', why: 'There is no library. Nothing is stored as finished text; the answer is produced fresh, token by token, and even a model that thinks before answering does that thinking as generated text.' },
   ]}>
 
@@ -118,7 +118,7 @@ mysterious.
     { text: 'Sycophancy', why: 'Sycophancy is agreeing with the user. Nobody suggested a date here.' },
     { text: 'Hallucination driven by the training cutoff', correct: true },
     { text: 'Instruction dilution', why: 'Nothing in the conversation was long enough to dilute; this is a single question.' },
-    { text: 'A tokenisation problem', why: 'Tokenisation affects things like counting letters, not knowledge of recent events.' },
+    { text: 'A tokenization problem', why: 'Tokenization affects things like counting letters, not knowledge of recent events.' },
   ]}>
 
 You ask for the release date of a library version that came out last

@@ -66,7 +66,7 @@ labels: not-covered / mention / explained / hands-on.
 
 - Osmani is uniquely strong on orchestration frameworks beyond Anthropic's
   stack (L18), A2A (L14), quantified MCP-vs-CLI (L16), the tool-design checklist
-  (L3), an attack catalogue with runnable guardrails (L10), and interactive
+  (L3), an attack catalog with runnable guardrails (L10), and interactive
   widgets.
 - DeepLearning.AI wins on eval-driven method (measured reflection, 2x2 eval
   taxonomy, error-analysis tallies, component evals) and live coding-agent
@@ -82,7 +82,7 @@ labels: not-covered / mention / explained / hands-on.
   complete. Cluster 4 ("shaping the build") is covered by neither Osmani nor
   DLAI.
 
-**Eleven prioritised recommendations** (SUGGESTIONS block in the generator):
+**Eleven prioritized recommendations** (SUGGESTIONS block in the generator):
 
 01. A full "working with Claude Code" workflow lesson (explore, plan, code,
     commit; CLAUDE.md; plan mode; reviewer subagent; PR).
@@ -96,7 +96,7 @@ labels: not-covered / mention / explained / hands-on.
 07. Skills authoring rules, comparison table, troubleshooting, plugins, SDK
     example.
 08. Measured reflection, code execution, sandboxing.
-09. One fictionalised failure narrative ("Watch Out" box) per building lesson.
+09. One fictionalized failure narrative ("Watch Out" box) per building lesson.
 10. CS50 AI weeks 0/2/4/6 as a named optional foundations track plus four
     folded-in explanations (week 6 caveat: encoder-decoder, not decoder-only).
 11. Adopt CS50 pedagogy: the define-to-create ladder, the into/through/beyond
@@ -105,6 +105,6 @@ labels: not-covered / mention / explained / hands-on.
     Duck pattern (instruction dilution measured at roughly 20-25% leaked code
     with 20+ rules; blind pairwise ELO evaluation).
 
-**Caveats:** depth labels are judgement calls from reader subagents; hosted DLAI
+**Caveats:** depth labels are judgment calls from reader subagents; hosted DLAI
 labs and some Anthropic SCORM checkpoints did not survive extraction; Osmani
 word counts include widget JS.

@@ -40,7 +40,7 @@ concepts:
       old turns, tool output and stale instructions. Important details get
       lost among irrelevant ones, early instructions are followed less
       reliably and answers drift. Long sessions and large pasted documents
-      cause it. The cure is to keep context short and deliberate: summarise,
+      cause it. The cure is to keep context short and deliberate: summarize,
       start fresh, or retrieve only what is needed.
 links:
   prerequisites: [concepts/what-is-an-agent]
