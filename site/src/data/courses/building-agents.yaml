@@ -24,23 +24,28 @@ area: building-agents
 lessons:
   # ---- tool-use -----------------------------------------------------------
   - id: building-agents/how-a-model-calls-a-tool
-    title: How a model asks for a tool
+    title: What a tool call looks like on the wire
     covers: building-agents/tool-use
     serves:
       - building-agents/builds-agent-loop/defines-a-tool
     status: planned
     minutes: 10
     # mode: explanation
-    # exercise (judge): given a transcript of one tool-using exchange with a real model API, mark each message as written by the model or by the harness, and circle the stop reason and the tool result id that pair the result with the request
+    # exercise (judge): given the live lesson's fake model reply `{"tool": "get_weather", "args": {"city": "Lisbon"}}` and the tool's result, write the three real API messages they become (the tool request block with its id, the tool result message that quotes that id, and the final text reply), then mark which field plays the role of the fake model's `answer` key
     # shorts: none
     # assumes (other areas): concepts/recognizes-agents/names-the-loop
     # introduces: function-calling, n-x-m-integration-problem
-    # The model never runs code. It emits a structured request and the
-    # harness runs it. Names the stop reason field and the result id the
-    # live agent-loop lesson only mentions in prose (Academy
-    # building-with-the-claude-api, Academy claude-platform-101). The N x M
-    # problem sets up the protocols lesson at the end of the course
-    # (Academy introduction-to-model-context-protocol).
+    # The content the live lesson leaves out on purpose: one full request
+    # (system prompt, tool definitions with a JSON schema, message list)
+    # and one full response, then the tool result message and the second
+    # request that carries the whole history again. Shows how the fake
+    # model's `tool` and `answer` keys map onto the request block, its id
+    # and the stop reason (Academy building-with-the-claude-api, Academy
+    # claude-platform-101). The N x M problem closes the lesson and sets up
+    # agent-protocols (Academy introduction-to-model-context-protocol).
+    # Until agent-loop.mdx gains an `assumes` that points here, both
+    # lessons render at the top row, because a live entry takes its place
+    # from its page. The live lesson's follow-up issue should add it.
   - id: building-agents/agent-loop
     title: Building your first agent
     covers: building-agents/agent-loop
@@ -49,9 +54,9 @@ lessons:
       - building-agents/builds-agent-loop/implements-the-loop
     status: live
     minutes: 25
-    # Live. Introduces loop-from-scratch. Issue #91 adds the error path and
-    # a named stop reason to this lesson's code and is a section here, so
-    # it has no entry of its own.
+    # introduces: loop-from-scratch
+    # Live. Issue #91 adds the error path and a named stop reason to this
+    # lesson's code and is a section here, so it has no entry of its own.
   - id: building-agents/tool-schemas
     title: Writing a tool schema the model uses correctly
     covers: building-agents/tool-use
@@ -62,7 +67,7 @@ lessons:
     after:
       - building-agents/agent-loop
     # mode: tutorial
-    # exercise (do): rewrite the fixture's vague `get_customer` schema so the fake model, which picks tools by matching request words against descriptions, calls the right one for all six fixture requests; the output is the before and after wrong-call count
+    # exercise (do): rewrite the fixture's vague `get_customer` schema so the fake model, which picks tools by matching request words against descriptions, calls the right one for all six fixture requests. The output is the wrong-call count before and after.
     # shorts: Tool descriptions are prompts
     # assumes (other areas): none
     # introduces: tool-schema-design
@@ -81,7 +86,7 @@ lessons:
     after:
       - building-agents/agent-loop
     # mode: tutorial
-    # exercise (do): give the fixture's HTTP tool a timeout that fires on the second call, return it as a structured error result, and set the harness policy to stop after two errors in a row; the output is the run's message list and the stop reason
+    # exercise (do): give the fixture's HTTP tool a timeout that fires on the second call, return it as a structured error result, and set the harness policy to stop after two errors in a row. The output is the run's message list and the stop reason.
     # shorts: none
     # assumes (other areas): none
     # introduces: error-handling
@@ -118,7 +123,7 @@ lessons:
       - building-agents/agent-loop
       - building-agents/tool-errors
     # mode: tutorial
-    # exercise (do): add repeated-state detection to the fixture loop so a fake model that alternates between two fixes stops with `stopped: repeated state` instead of hitting the step limit; the output is the shorter trace
+    # exercise (do): add repeated-state detection to the fixture loop so a fake model that alternates between two fixes stops with `stopped: repeated state` instead of hitting the step limit. The output is the shorter trace.
     # shorts: Ways a loop runs away
     # assumes (other areas): none
     # introduces: stop-conditions, unbounded-loop-pitfalls
@@ -137,7 +142,7 @@ lessons:
       - building-agents/stopping-the-loop
       - building-agents/parallel-tool-calls
     # mode: explanation
-    # exercise (do): rebuild the live lesson's weather agent on an agent SDK of your choice with the maximum turns and a cost cap set explicitly, then write a five-row table of what the SDK took over (messages, dispatch, retries, stopping, streaming) and where each lived in your own loop
+    # exercise (judge): from the lesson's SDK code blocks, write a five-row table of what the SDK took over (messages, dispatch, retries, stopping, streaming) and the line in the live lesson's loop where each one lived. Stretch: rebuild the weather agent on an agent SDK with the maximum turns and a cost cap set explicitly, and test that both stop it.
     # shorts: When to drop to the raw API
     # assumes (other areas): none
     # introduces: agent-sdk
@@ -158,7 +163,7 @@ lessons:
     after:
       - building-agents/stopping-the-loop
     # mode: tutorial
-    # exercise (do): add a question with no answer in the fixture corpus to the small test set and change the retrieval prompt so the fake agent answers `not found` for it instead of inventing a policy; the output is the test set results before and after
+    # exercise (do): add a question with no answer in the fixture corpus to the small test set, and change the retrieval prompt so the fake agent answers `not found` for it instead of inventing a policy. The output is the test set results before and after.
     # shorts: Chunking and indexes
     # assumes (other areas): concepts/explains-models/explains-grounding
     # introduces: when-basic-rag-suffices, agentic-rag-loop
@@ -196,9 +201,9 @@ lessons:
     after:
       - building-agents/retrieval-as-a-tool
     # mode: explanation
-    # exercise (judge): read the fixture's twelve retrieval-agent transcripts, write three criteria with anchored 0-1-2 scales, and score two transcripts with them; compare with the model answer's scores
+    # exercise (judge): read the fixture's twelve retrieval-agent transcripts, write three criteria with anchored 0-1-2 scales, and score two transcripts with them. Compare your scores with the model answer's.
     # shorts: none
-    # assumes (other areas): coding-with-agents/verification
+    # assumes (other areas): coding-with-agents/verifies-agent-work/reviews-others-code
     # introduces: quality-pillars, rubrics
     # Correctness, faithfulness, safety, efficiency and adherence as
     # separate scores, because one number hides the trade. A rubric
@@ -214,7 +219,7 @@ lessons:
     after:
       - building-agents/rubrics
     # mode: tutorial
-    # exercise (do): add two items to the fixture golden set, one from a past failure and one that should be refused, mark twenty percent of the set as held out, and run it; the output is the pass count per group
+    # exercise (do): add two items to the fixture golden set, one from a past failure and one that should be refused, mark twenty percent of the set as held out, and run it. The output is the pass count per group.
     # shorts: none
     # assumes (other areas): coding-with-agents/verifies-agent-work/automates-the-check
     # introduces: golden-sets
@@ -250,13 +255,16 @@ lessons:
     after:
       - building-agents/traces-and-trajectories
     # mode: explanation
-    # exercise (judge): classify the fixture's ten failed traces into categories you name, count them, and say which single fix moves the score most; then name the one item each failure adds to the golden set
+    # exercise (judge): classify the fixture's ten failed traces into categories you name, count them, and say which single fix moves the score most. Then name the one item each failure adds to the golden set.
     # shorts: none
     # assumes (other areas): none
     # introduces: error-analysis
-    # Counting categories replaces guessing. The most common failure is
-    # usually one thing, and every failure that reached a user is a
-    # golden-set item. Checkpoints are match and scenario.
+    # Explanation mode on purpose. The categories are the learner's own
+    # judgment, and a script that tallies given labels would only test
+    # arithmetic. Counting the categories replaces guessing about what to
+    # fix, because the most common failure is usually one thing, and every
+    # failure that reached a user is a golden-set item. Checkpoints are
+    # match and scenario.
   - id: building-agents/llm-as-judge
     title: A model as the grader
     covers: building-agents/evaluation
@@ -288,8 +296,9 @@ lessons:
     minutes: 12
     after:
       - building-agents/stopping-the-loop
+      - building-agents/rubrics
     # mode: tutorial
-    # exercise (do): add a `thought` field to the fixture model's replies and print it before each tool call, then run the same three tasks and compare the trace with the one from the live lesson's loop; the output is the two traces side by side
+    # exercise (do): add a `thought` field to the fixture model's replies and print it before each tool call, then run the same three tasks and compare the trace with the one from the live lesson's loop. The output is the two traces side by side.
     # shorts: none
     # assumes (other areas): none
     # introduces: react
@@ -307,7 +316,7 @@ lessons:
       - building-agents/react
       - building-agents/rubrics
     # mode: tutorial
-    # exercise (do): give the fixture critic the three criteria from the rubrics lesson instead of "is this good", cap the rounds at two, and run it on the fixture's four drafts; the output is the round count and final draft per input
+    # exercise (do): give the fixture critic the three criteria from the rubrics lesson instead of "is this good", cap the rounds at two, and run it on the fixture's four drafts. The output is the round count and final draft per input.
     # shorts: none
     # assumes (other areas): none
     # introduces: reflection
@@ -324,7 +333,7 @@ lessons:
     after:
       - building-agents/react
     # mode: tutorial
-    # exercise (do): make the fixture planner revise its list when step three returns a surprise, instead of running the stale step four; the output is the plan before and after the revision
+    # exercise (do): make the fixture planner revise its list when step three returns a surprise, instead of running the stale step four. The output is the plan before and after the revision.
     # shorts: none
     # assumes (other areas): none
     # introduces: planning
@@ -364,14 +373,15 @@ lessons:
     after:
       - building-agents/plan-or-react
     # mode: tutorial
-    # exercise (do): inject a fault at each boundary of the fixture's manager-and-workers arrangement (an empty plan from the manager, a tool error from a worker) and make the orchestrator stop and report; the output is the two traces
+    # exercise (do): inject a fault at each boundary of the fixture's manager-and-workers arrangement (an empty plan from the manager, a tool error from a worker) and make the orchestrator stop and report. The output is the two traces.
     # shorts: Subagents with fresh context
     # assumes (other areas): none
     # introduces: code-vs-model-driven-orchestration, sequential-hierarchical-collaborative
     # A sequential pipeline written in code, then a manager fake model
     # that delegates to two workers as tools. Predict the handoff messages
-    # and the token count of each arrangement (Academy
-    # introduction-to-subagents, Academy claude-platform-101).
+    # and which agent runs when in each arrangement. The token comparison
+    # waits for the next lesson (Academy introduction-to-subagents, Academy
+    # claude-platform-101).
   - id: building-agents/orchestration-tax
     title: What every extra agent costs
     covers: building-agents/orchestration
@@ -388,7 +398,9 @@ lessons:
     # assumes (other areas): none
     # introduces: orchestration-tax
     # Handoff tokens, latency, information lost at each boundary and new
-    # failure modes. Before a second agent, name what the single agent
+    # failure modes, with the token count of each arrangement from the
+    # previous lesson's fixture as the worked example. Before a second
+    # agent, name what the single agent
     # cannot do, and check whether compaction or just-in-time loading
     # fixes it inside one context first (Academy claude-platform-101).
     # Checkpoints are scenario and choice.
@@ -402,15 +414,18 @@ lessons:
     minutes: 12
     after:
       - building-agents/tool-errors
+      - building-agents/traces-and-trajectories
     # mode: explanation
     # exercise (judge): for the fixture support agent's permission list, name every outbound channel, write the injected line that would use each one, and cross out the permissions that are not needed for the task
     # shorts: Confused deputy
-    # assumes (other areas): safety/judges-agent-risk/recognizes-injection, safety/governance
+    # assumes (other areas): safety/judges-agent-risk/recognizes-injection (lesson safety/agent-risk), safety/judges-agent-risk/sets-oversight
     # introduces: agent-specific-security-risks
     # Injection through what the agent reads, exfiltration through what
     # it can send, over-permission, confused deputy. Engineering-level
     # follow-on to the Foundations agent-risk lesson, with the same
-    # planted-instruction example. Checkpoints are scenario and match.
+    # planted-instruction example. A scenario asks what happens when the
+    # system prompt is the only layer, which sets up the next lesson.
+    # Checkpoints are scenario and match.
   - id: building-agents/guardrails-in-layers
     title: Guardrails in layers
     covers: building-agents/production
@@ -422,16 +437,17 @@ lessons:
     after:
       - building-agents/agent-attack-surface
       - building-agents/stopping-the-loop
+      - building-agents/traces-and-trajectories
     # mode: tutorial
-    # exercise (do): set up a restricted agent with exactly two permissions (fetch a page, write a file), plant an instruction in a page it will read, predict what it does, run it, and compare; then add a third permission that sends and show what changes
+    # exercise (do): set up a restricted agent with exactly two permissions (fetch a page, write a file), plant an instruction in a page it will read, predict what it does, run it, and compare. Stretch: add a third permission that sends, rerun, and write down what changed.
     # shorts: Human approval at irreversible steps
-    # assumes (other areas): safety/judges-agent-risk/recognizes-injection, safety/judges-agent-risk/chooses-human-in-loop, safety/governance
+    # assumes (other areas): safety/judges-agent-risk/recognizes-injection (lesson safety/agent-risk), safety/judges-agent-risk/chooses-human-in-loop (lesson safety/agent-risk), safety/judges-agent-risk/sets-oversight
     # introduces: defense-layers
     # AEC-10 lesson. The exercise is the sandbox exercise moved out of
     # safety/agent-risk by issue #60. The fixture loop gains a permission
-    # check, an output filter and an approval gate. Predict which layer
-    # stops the planted line, and what happens when the prompt is the
-    # only layer.
+    # check, an output filter and an approval gate, one Predict each, and
+    # the trace from traces-and-trajectories shows which layer fired.
+    # Predict which layer stops the planted line.
   - id: building-agents/eval-gated-deploys
     title: Gating a deploy on the evaluation
     covers: building-agents/production
@@ -445,9 +461,9 @@ lessons:
       - building-agents/llm-as-judge
       - building-agents/guardrails-in-layers
     # mode: tutorial
-    # exercise (do): add a hard gate for the should-refuse group and a soft gate for helpfulness to the fixture gate script, run it against the two candidate prompts, and read the failing transcripts of the one it blocks; the output is the gate report
+    # exercise (do): add a hard gate for the should-refuse group and a soft gate for helpfulness to the fixture gate script, run it against the two candidate prompts, and read the failing transcripts of the one it blocks. The output is the gate report.
     # shorts: Shadow runs and canaries
-    # assumes (other areas): coding-with-agents/verifies-agent-work/automates-the-check, safety/governance
+    # assumes (other areas): coding-with-agents/verifies-agent-work/automates-the-check, safety/judges-agent-risk/sets-oversight
     # introduces: eval-gated-deploys, rollout-strategies
     # The golden-set script becomes a gate with a threshold per metric,
     # then a staged rollout table (team, five percent, everyone) with a
@@ -463,7 +479,7 @@ lessons:
     after:
       - building-agents/eval-gated-deploys
     # mode: tutorial
-    # exercise (do): add per-run cost accounting and a token budget to the fixture loop, run the fixture's five tasks, and find the one tool whose verbose output triples the average; the output is the cost table
+    # exercise (do): add per-run cost accounting and a token budget to the fixture loop, run the fixture's five tasks, and find the one tool whose verbose output triples the average. The output is the cost table.
     # shorts: Retries and backoff
     # assumes (other areas): none
     # introduces: cost, provider-operations
@@ -486,7 +502,7 @@ lessons:
     # mode: explanation
     # exercise (judge): for a proposed connection to an external agent over an agent-to-agent protocol, list what it can read and send, decide which of the fixture's defense layers apply to it, and write the one trust decision you would make before enabling it
     # shorts: none
-    # assumes (other areas): customizing-agents/connects-tools-safely/adds-a-tool, customizing-agents/connects-tools-safely/hardens-a-connection
+    # assumes (other areas): customizing-agents/connects-tools-safely/adds-a-tool (lesson customizing-agents/mcp), customizing-agents/connects-tools-safely/hardens-a-connection (lesson customizing-agents/mcp)
     # introduces: protocols-mcp-a2a
     # Closes the N x M thread from the first lesson. The Model Context
     # Protocol for tools and data, agent-to-agent protocols for delegation
