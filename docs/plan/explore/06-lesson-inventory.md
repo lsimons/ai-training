@@ -11,33 +11,33 @@ software engineering, **5** customizing agents, **6** building agents.
 Content root: `site/src/content/docs/`. Sidebar hardcoded in
 `site/astro.config.mjs`: Part 1 (01-10), Part 2 (11-14), Part 3 (15-19).
 
-No duration metadata exists. Estimates below are prose word counts at about
-180 wpm. Total prose is about 82k words, roughly 7.5 h of reading; with the
-exercises and build lessons 12-16 h.
+The source has no duration metadata. The estimates below are prose word
+counts at about 180 wpm. Total prose is about 82k words, roughly 7.5 h of
+reading, or 12-16 h with the exercises and build lessons.
 
 ### Part 1: fundamentals
 
-| #   | File                                  | Summary                                                                               | Length     | Areas       | Audience           | Interactive / exercise                                                                     |
-| --- | ------------------------------------- | ------------------------------------------------------------------------------------- | ---------- | ----------- | ------------------ | ------------------------------------------------------------------------------------------ |
-| 01  | `01-what-are-ai-agents.md`            | LLM vs agent, brain/hands/loop model, autonomy-level taxonomy, when a prompt suffices | 3.3k, 20 m | 1, 3        | KW + engineer      | `agent-levels-explorer` widget; ELI5                                                       |
-| 02  | `02-how-agents-think.md`              | Tokens and context, reasoning strategies, model choice, system prompts, sampling      | 4.6k, 25 m | 1           | Both, 2nd half eng | `context-window-explorer`; ELI5                                                            |
-| 03  | `03-tools-giving-agents-hands.md`     | Tool types, function calling, schema design, N x M problem, checklist                 | 4.6k, 25 m | 1, 6        | Engineer           | `tool-call-flow`; ELI5; design checklist                                                   |
-| 04  | `04-agentic-design-patterns.md`       | ReAct, Reflection, Tool Use, Planning; trade-offs and combinations                    | 3.4k, 20 m | 1, 6        | Engineer           | Has objectives + prerequisites; `pattern-visualizer`; ELI5                                 |
-| 05  | `05-memory-and-context.md`            | Context engineering, memory kinds, sessions, memory vs RAG, context rot, storage      | 4.2k, 25 m | 1, 5, 6     | Engineer           | Objectives + prerequisites; `memory-explorer` (3 views); ELI5                              |
-| 06  | `06-planning-and-reasoning.md`        | Mission/scan/think/act/observe loop, plan-then-execute, hierarchy, CoT/ToT            | 4.6k, 25 m | 1, 6        | Engineer           | Objectives + prerequisites; `planning-sim`; ELI5                                           |
-| 07  | `07-multi-agent-systems.md`           | Architectures, communication, roles, refund walkthrough, orchestration tax            | 4.7k, 25 m | 1, 6        | Engineer           | `multi-agent-viz`; **design exercise** (3 scenarios), convertible to a scenario checkpoint |
-| 08  | `08-agentic-rag.md`                   | Basic RAG limits, retrieve/evaluate/refine loop, when basic RAG is enough             | 3.6k, 20 m | 1, 6        | Engineer           | `rag-viz`; ELI5; **build exercise** (2-4 h)                                                |
-| 09  | `09-evaluating-and-testing-agents.md` | Four quality pillars, metrics, trajectories, LLM-as-judge, eval harness               | 6.5k, 35 m | 1, 2, 6     | Engineer           | `eval-dashboard` (largest widget); ELI5; **eval-suite exercise** (3-5 h)                   |
-| 10  | `10-guardrails-and-safety.md`         | Why agent safety differs, defense layers, prompt injection, human-in-the-loop         | 6.4k, 35 m | **2**, 1, 6 | Both               | `pillars-viz` + `guardrails-viz`; safety checklist. Best KW safety material in either repo |
+| #   | File                                  | Summary                                                                               | Length     | Areas       | Audience           | Interactive / exercise                                                                           |
+| --- | ------------------------------------- | ------------------------------------------------------------------------------------- | ---------- | ----------- | ------------------ | ------------------------------------------------------------------------------------------------ |
+| 01  | `01-what-are-ai-agents.md`            | LLM vs agent, brain/hands/loop model, autonomy-level taxonomy, when a prompt suffices | 3.3k, 20 m | 1, 3        | KW + engineer      | `agent-levels-explorer` widget; ELI5                                                             |
+| 02  | `02-how-agents-think.md`              | Tokens and context, reasoning strategies, model choice, system prompts, sampling      | 4.6k, 25 m | 1           | Both, 2nd half eng | `context-window-explorer`; ELI5                                                                  |
+| 03  | `03-tools-giving-agents-hands.md`     | Tool types, function calling, schema design, N x M problem, checklist                 | 4.6k, 25 m | 1, 6        | Engineer           | `tool-call-flow`; ELI5; design checklist                                                         |
+| 04  | `04-agentic-design-patterns.md`       | ReAct, Reflection, Tool Use, Planning; trade-offs and combinations                    | 3.4k, 20 m | 1, 6        | Engineer           | Has objectives + prerequisites; `pattern-visualizer`; ELI5                                       |
+| 05  | `05-memory-and-context.md`            | Context engineering, memory kinds, sessions, memory vs RAG, context rot, storage      | 4.2k, 25 m | 1, 5, 6     | Engineer           | Objectives + prerequisites; `memory-explorer` (3 views); ELI5                                    |
+| 06  | `06-planning-and-reasoning.md`        | Mission/scan/think/act/observe loop, plan-then-execute, hierarchy, CoT/ToT            | 4.6k, 25 m | 1, 6        | Engineer           | Objectives + prerequisites; `planning-sim`; ELI5                                                 |
+| 07  | `07-multi-agent-systems.md`           | Architectures, communication, roles, refund walkthrough, orchestration tax            | 4.7k, 25 m | 1, 6        | Engineer           | `multi-agent-viz`; **design exercise** (3 scenarios), convertible to a scenario checkpoint       |
+| 08  | `08-agentic-rag.md`                   | Basic RAG limits, retrieve/evaluate/refine loop, when basic RAG is enough             | 3.6k, 20 m | 1, 6        | Engineer           | `rag-viz`; ELI5; **build exercise** (2-4 h)                                                      |
+| 09  | `09-evaluating-and-testing-agents.md` | Four quality pillars, metrics, trajectories, LLM-as-judge, eval harness               | 6.5k, 35 m | 1, 2, 6     | Engineer           | `eval-dashboard` (largest widget); ELI5; **eval-suite exercise** (3-5 h)                         |
+| 10  | `10-guardrails-and-safety.md`         | Why agent safety differs, defense layers, prompt injection, human-in-the-loop         | 6.4k, 35 m | **2**, 1, 6 | Both               | `pillars-viz` + `guardrails-viz`, and a safety checklist. Best KW safety material in either repo |
 
 ### Part 2: building and shipping
 
-| #   | File                                     | Summary                                                                 | Length             | Areas   | Audience | Interactive / exercise                                                                                  |
-| --- | ---------------------------------------- | ----------------------------------------------------------------------- | ------------------ | ------- | -------- | ------------------------------------------------------------------------------------------------------- |
-| 11  | `11-from-prototype-to-production.md`     | Production gap, eval-gated deploys, CI/CD, rollout strategies, cost     | 4.1k, 25 m         | 6, 4, 2 | Engineer | `pipeline-viz`; readiness checklist                                                                     |
-| 12  | `12-getting-started-with-claude-code.md` | Claude Code + API via LiteLLM proxy + Agent SDK setup, which model when | 4.2k, 25 m + setup | 3, 4, 6 | Engineer | `claude-stack` chooser; setup walkthrough. **Written around an internal proxy; needs a public rewrite** |
-| 13  | `13-building-your-first-agent.md`        | Agent loop from scratch in six steps, then with the Agent SDK           | 3.8k, 20 m + 2-3 h | 6, 4    | Engineer | Only lesson with no widget; most exercise-shaped                                                        |
-| 14  | `14-agent-protocols-mcp-and-a2a.md`      | Why protocols, MCP and A2A, composition, security, ecosystem            | 4.4k, 25 m         | 5, 6, 2 | Engineer | `mcp-a2a-viz`; ELI5. Placeholder comment at line 187                                                    |
+| #   | File                                     | Summary                                                                 | Length             | Areas   | Audience | Interactive / exercise                                                                                       |
+| --- | ---------------------------------------- | ----------------------------------------------------------------------- | ------------------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| 11  | `11-from-prototype-to-production.md`     | Production gap, eval-gated deploys, CI/CD, rollout strategies, cost     | 4.1k, 25 m         | 6, 4, 2 | Engineer | `pipeline-viz`; readiness checklist                                                                          |
+| 12  | `12-getting-started-with-claude-code.md` | Claude Code + API via LiteLLM proxy + Agent SDK setup, which model when | 4.2k, 25 m + setup | 3, 4, 6 | Engineer | `claude-stack` chooser and a setup walkthrough. **Written around an internal proxy; needs a public rewrite** |
+| 13  | `13-building-your-first-agent.md`        | Agent loop from scratch in six steps, then with the Agent SDK           | 3.8k, 20 m + 2-3 h | 6, 4    | Engineer | The only lesson with no widget, and the one closest to a hands-on exercise                                   |
+| 14  | `14-agent-protocols-mcp-and-a2a.md`      | Why protocols, MCP and A2A, composition, security, ecosystem            | 4.4k, 25 m         | 5, 6, 2 | Engineer | `mcp-a2a-viz` and ELI5. Placeholder comment at line 187                                                      |
 
 ### Part 3: deep dives
 
@@ -54,11 +54,11 @@ exercises and build lessons 12-16 h.
 - Structure is consistent: intro (or objectives + prerequisites), body, optional
   `## ELI5`, worked example, `## Key takeaways`, further reading.
 - Only 04, 05, 06 have explicit `## What you will learn`. The `/teach` skill
-  quizzes off those bullets; adding objectives everywhere is cheap and valuable.
+  quizzes off those bullets, so adding objectives everywhere is cheap and valuable.
 - ELI5 sections in 01-06, 08, 09, 13, 14, 19 are a ready "less comfortable"
   layer for the two-comfort-level Engineering lessons.
-- Exercises are sparse and prose-only (07, 08, 09, 13, 15). No quizzes, no
-  checkpoints, no progress state in the site.
+- Exercises are sparse and prose-only (07, 08, 09, 13, 15). The site has no
+  quizzes, checkpoints, or progress state.
 - 18 of 19 lessons have one or two inline vanilla-JS widgets, no shared
   component library, no persistence. Rebuilding these as reusable components
   with local-storage state is the main engineering work.
@@ -73,11 +73,12 @@ exercises and build lessons 12-16 h.
 Single file: `.claude/skills/teach/SKILL.md`. Invoked as
 `/teach [lesson | resume | review | status]`. Key behaviors:
 
-- Tutor, not lecturer: the learner reads in the browser; never paste lessons.
+- Tutor, not lecturer: the learner reads in the browser, and the skill never
+  pastes lessons.
 - Progress in a `teach-progress.md` in Claude's auto-memory directory: lesson
   table (read / quiz / score / weak spots), a spaced-recall review queue,
   learner notes. Written after every quiz.
-- Lesson list read from frontmatter at run time; never hardcoded.
+- Lesson list read from frontmatter at run time, never hardcoded.
 - Boots the dev server if down, polls until 200, opens the lesson URL, leaves
   the server running.
 - One recall question from the review queue before each new lesson.
@@ -85,8 +86,9 @@ Single file: `.claude/skills/teach/SKILL.md`. Invoked as
   boundaries with a quiz per chunk. Widgets are part of the lesson: ask the
   learner what they observed.
 - Quiz: 3-5 questions, one at a time, each mapped to an objective; recall,
-  apply, contrast; no true/false; one question must reference a page artifact.
-- Hard rule: never state the answer to an open question. Three hint tiers:
+  apply, contrast, with no true/false, and one question must reference a page
+  artifact.
+- Hard rule: never state the answer to an open question. Hints come in tiers:
   reframe, locate, scaffold. Pass = all objectives touched, at most one miss;
   never blocks moving on.
 - Terse tone, no praise inflation, fast-forward for experts, respect
@@ -107,7 +109,7 @@ lesson table. Lesson types (`video`, `video_reading`, `video_notebook`,
 | --- | ----------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------- | ------- | --------- |
 | 1   | ChatGPT Prompt Engineering for Developers       | beginner, 1h40     | Two prompting principles; summarize / infer / transform / expand; chatbot                         | 1       | KW        |
 | 2   | Generative AI for Everyone                      | beginner, 5h       | Intro; projects; business and society                                                             | 1, 2    | KW        |
-| 3   | AI Prompting for Everyone                       | beginner, 7h       | Finding information; AI as thought partner (incl. sycophancy); multimedia and code                | 1, 3, 2 | KW        |
+| 3   | AI Prompting for Everyone                       | beginner, 7h       | Finding information, AI as thought partner (incl. sycophancy), and multimedia and code            | 1, 3, 2 | KW        |
 | 4   | AI Python for Beginners                         | beginner, 11h30    | Python basics through packages and APIs                                                           | 4 entry | KW to eng |
 | 5   | Claude Code: A Highly Agentic Coding Assistant  | intermediate, 2h   | Setup, features, testing, parallel work, GitHub and hooks, notebook to dashboard, Figma           | 3, 4, 5 | Engineer  |
 | 6   | Intro to Generative AI for Software Development | 6h26               | Intro; pair-coding; code analysis                                                                 | 1, 4    | Engineer  |
@@ -119,21 +121,21 @@ lesson table. Lesson types (`video`, `video_reading`, `video_notebook`,
 
 `the-batch/ai-engineering-skills-map.md` (own synthesis of Ng's Batch series)
 names four skills: building/deploying AI apps, software engineering
-fundamentals, using coding agents, shaping the build. Maps onto areas 6, 4, 3
+fundamentals, using coding agents, deciding what to build. Maps onto areas 6, 4, 3
 and justifies the area split.
 
 ### Sequencing lessons
 
-1. Three ramps: no-code foundations, programming with AI, AI in the SDLC,
-   extending agents, designing agents. `agent-engineer-course` lacks the
+1. The ramps are no-code foundations, programming with AI, AI in the SDLC,
+   extending agents, and designing agents. `agent-engineer-course` lacks the
    front end.
 2. Every DL.AI module ends in a quiz and usually a lab. This is the biggest
    gap against the plan's checkpoint/quiz model.
 3. "Degrees of autonomy" is an early anchor concept in both; good for the
    topic map.
-4. Ng puts evals and error analysis early and repeatedly; `agent-engineer-course`
-   defers them to lesson 09.
-5. Safety isn't a first-class track anywhere; area 2 needs original material.
-6. Skills and MCP each carry a 2 h hands-on course; area 5 can go deeper.
+4. Ng puts evals and error analysis early and repeatedly, while
+   `agent-engineer-course` defers them to lesson 09.
+5. Safety isn't a first-class track anywhere, so area 2 needs original material.
+6. Skills and MCP each have a 2 h hands-on course, so area 5 can go deeper.
 7. DL.AI units are 3-25 min. Split the 950+ line lessons (09, 10, 18) into
    screen-sized units.

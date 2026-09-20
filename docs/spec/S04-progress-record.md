@@ -15,10 +15,10 @@ reads when the learner exports it.
 ## Principles
 
 - **Browser only.** The record is one JSON document in browser local
-  storage. There is no server, no account, and no telemetry.
-- **Nothing leaves the browser** unless the learner exports the file.
+  storage. The site runs without a server, an account, or telemetry.
+- **The record leaves the browser only** when the learner exports the file.
 - **The answer is in the page.** A static site can't hide answer keys, so
-  the record tracks passes on the honor system; it holds no secrets.
+  the record tracks passes on the honor system and doesn't contain secrets.
 - **Resettable.** The learner can reset one course or the whole record,
   after a confirmation.
 

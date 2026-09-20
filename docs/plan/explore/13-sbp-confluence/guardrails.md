@@ -9,7 +9,7 @@ Part 2 is the everyday version for people who aren't engineers.
 
 These guardrails govern the use of AI tools in the engineering process
 (coding, testing, reviewing, documenting) where the result matters: systems
-whose failure has real consequences for real people. They assume the team
+whose failure hurts real people. They assume the team
 delivers for a client, but apply equally to a team working on its own
 systems.
 
@@ -21,7 +21,7 @@ systems.
    the most capable model isn't the default for everything.
 3. Source code goes only to AI services that contractually retain none of
    it.
-4. Other sensitive information, in particular personal data of the client's
+4. Other sensitive information, such as personal data of the client's
    people or customers, doesn't go to external AI services, beyond what a
    user needs to log in.
 5. Data residency requirements are checked per provider before we use it.
@@ -53,15 +53,15 @@ systems.
    through the normal secure delivery pipeline. Read access may be granted;
    write access isn't.
 3. Intellectual property created with AI is handled as agreed with the
-   client; it doesn't stay with the AI provider.
-4. Every use of AI is documented in the project documentation.
+   client, and it doesn't stay with the AI provider.
+4. Each project documents its use of AI in the project documentation.
 5. The delivery process keeps working if an AI tool becomes unavailable.
 
 ### Applying least privilege
 
 1. AI tools get only the access to data and environments that the project
    needs.
-2. The same access control policy applies to AI tools as to human and
+2. AI tools follow the same access control policy as human and
    service accounts: defined and documented per project.
 3. AI tool permissions that are no longer needed are reviewed and removed
    at least quarterly.
@@ -76,7 +76,7 @@ prose, not in the rules:
 - Hosted AI tools run at roughly two-nines availability. That isn't
   mission-critical grade. Plan for the tool being down.
 - Productivity gains raise the bar, not the ceiling. Treat them as either an
-  accepted dependency or a risk to mitigate; don't promise them onward.
+  accepted dependency or a risk to mitigate, and don't promise them onward.
 - Broad, long-lived tokens in an agent's hands create an unacceptable blast
   radius. Scope tokens tightly in both permission and duration.
 - Treat coding agents as untrusted contributors with unusually powerful
@@ -88,8 +88,8 @@ Vendor-specific facts (where data is processed, retention periods, which
 search engine is used) are deliberately absent; the lesson should teach the
 learner to look those facts up for their own tool.
 
-- **Know where your data goes.** Every prompt and response is processed by
-  the provider, in the region the provider chooses. Find out which region,
+- **Know where your data goes.** The provider processes each prompt and
+  response, in the region the provider chooses. Find out which region,
   how long conversations are kept, and whether the contract rules out
   training on your data. Consumer subscriptions often do train on it;
   business tiers usually don't.
@@ -158,7 +158,7 @@ content credentials (C2PA) for generated images.
 - The charter is a template. The lesson should have the learner tailor it,
   not memorize it: which rules would their team drop, tighten, or add?
 - A real organization should have legal review of its own version. Say so.
-- The sample "Watch Out" narrative for L1: a team lets the agent run a
+- Sample "Watch Out" narrative for L1: a team lets the agent run a
   migration with a service account that has production write access; the
   migration succeeds and deletes a column nobody meant to drop. Ask which
   three rules would have prevented it.

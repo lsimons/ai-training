@@ -5,7 +5,7 @@ competencies:
     topics: [coding-with-agents/specification, using-agents/decomposition]
     objectives:
       - id: coding-with-agents/specifies-work/judges-worth-building
-        statement: Judges whether something is worth building before building it
+        statement: Judges whether something should be built before building it
         level: base
         behaviors: []
       - id: coding-with-agents/specifies-work/defines-success
@@ -23,7 +23,7 @@ competencies:
     alignment:
       - framework: Brilliant Coding with AI
         code: TAS-1..4
-        asks: Judge what is worth building, define success, weigh cost
+        asks: Judge what should be built and define success, weighing value against cost
         objectives: [coding-with-agents/specifies-work/judges-worth-building, coding-with-agents/specifies-work/defines-success]
       - framework: Brilliant Coding with AI
         code: SPC-3, SPC-4, SPC-6

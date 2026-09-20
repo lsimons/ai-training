@@ -1,14 +1,14 @@
-# Ideas worth saving
+# Ideas to save
 
 Framings, practices, templates and small concepts, grouped by where they
 land. Each item names the area (1 concepts, 2 safety, 3 using agents, 4
 coding with agents, 5 customizing agents, 6 building agents) and whether it
 is a lesson ingredient or an authoring pattern. Evaluate each critically
-before adopting it; none is a decision.
+before adopting it, because none of them is a decision.
 
 ## Framings for lesson introductions
 
-- **The hyper-intelligent toddler** (2, 3). Highly capable, no judgment.
+- **The hyper-intelligent toddler** (2, 3). Highly capable and without judgment.
   Protect it from itself, the way you would protect a toddler near a
   staircase. Best single image for why sandboxing and review exist.
 - **An untrusted contributor with unusually powerful tools** (2, 4). Manage
@@ -24,7 +24,7 @@ before adopting it; none is a decision.
   model produce code unchecked, without review or accountability, isn't an
   engineering practice.
 - **Shadow AI** (2). When governed tools are absent or bad, people use
-  ungoverned ones. Minimum viable governance beats no governance; the safe
+  ungoverned ones. Even thin governance is better than none, and the safe
   path has to be the easy path.
 - **Try it this week, then keep re-trying** (3). Half an hour with a
   colleague who already uses the tool, on something low-risk. Capabilities
@@ -47,7 +47,7 @@ before adopting it; none is a decision.
   that load only when relevant.
 - **The project settings file is the permission boundary.** Decide what
   power the agent has per project, in the repository, reviewed like code.
-- **Prefer the forge's CLI over an MCP server** for git hosting; see
+- **Prefer the forge's CLI over an MCP server** for git hosting. See
   [`mcp-security.md`](./mcp-security.md) section 6.
 - **Open the agent in the service directory**, not the repository root.
 - **Agent definitions live in the repository**; don't hardcode tools,
@@ -58,8 +58,8 @@ before adopting it; none is a decision.
 - **Coherence engineering** (4): the artifacts of a system (specification,
   code, tests, documentation) should agree, and an agent can measure and
   improve their coherence. The teachable move is "code and tests should
-  agree; now extend that to every artifact".
-- **The workshop shape** for customizing agents (5): a short concept talk,
+  agree, so extend that to every artifact".
+- **The workshop format** for customizing agents (5): a short concept talk,
   then build your own skill, then apply it to a real bottleneck in your
   own workflow.
 
@@ -80,13 +80,14 @@ before adopting it; none is a decision.
   exercises to compare agents. This is the bridge from classical testing
   to evals.
 - **Deterministic gates for probabilistic output**: tests, type checks,
-  linters and builds decide; a second model only advises.
+  linters and builds decide, and a second model only advises.
 
 ## Reviewing dependencies the agent pulled in (area 4, lesson L7)
 
 A review method for external components, in the tradition of the public
 third-party review guidelines listed in [`references.md`](./references.md).
-Agents add dependencies fast and confidently; this is the counterweight.
+Agents add dependencies fast and confidently, and this method is the
+counterweight.
 
 Principles:
 
@@ -94,15 +95,15 @@ Principles:
   introduces and spend the review there. Compare with the risk of writing
   it yourself.
 - **Think about future cost.** A convenient shortcut today can be a big
-  problem later; solving a general class of problems once pays repeatedly.
+  problem later. Solving a general class of problems once pays repeatedly.
 - **Be wary of surprises.** A confusing piece of code or API is paid for
   many times over.
 - **No default outcome.** The same principles govern "use the library" and
   "write it ourselves".
-- **Give back.** Report genuine findings upstream, for the parts you use.
+- **Give back.** Report real findings upstream, for the parts you use.
 - **Share assessments** so the next team doesn't redo them.
 
-Six review dimensions, with which apply when:
+The review dimensions, and which of them apply to which change:
 
 | Change                    | Architecture | Quality | Governance and support | Security | Code | License            |
 | ------------------------- | ------------ | ------- | ---------------------- | -------- | ---- | ------------------ |
@@ -115,9 +116,9 @@ Questions per dimension:
 - *Architecture*: do we already have something similar? How many
   sub-dependencies, how large? Is the review cost disproportionate to the
   benefit? Does the API make sense here (async, platform assumptions)? Is
-  it documented; are there undocumented invariants or unsafe code?
+  it documented, and are there undocumented invariants or unsafe code?
 - *Quality*: would we fork and maintain it if abandoned? Are there
-  meaningful tests, passing in CI? Duplication and complexity as red flags.
+  real tests, passing in CI? Duplication and complexity as red flags.
 - *Governance and support*: multiple maintainers, known authors, many
   reverse dependencies, recent activity, foundation backing, or one vendor.
   Crisp definition: a project has open governance when it is clear how
@@ -149,12 +150,13 @@ is about 95% generic and is proposed as the house format for Using-agents
 lessons.
 
 01. **Title**: specific.
-02. **Goal**: the outcome in one or two sentences, not the process.
+02. **Goal**: the outcome in one or two sentences, without describing the
+    process.
 03. **Trigger moments**: real signals that this is the moment to use it,
     such as joining a project midway, preparing for a check-in, ramping up
     after leave. Triggers make adoption intuitive.
 04. **The 70/30 model**: who does what (below).
-05. **Steps**: two to five, no more.
+05. **Steps**: two to five at most.
 06. **Starter prompts**: three to six, copy-paste ready; optional advanced
     ones.
 07. **Example output**: show what good looks like; it lowers fear and aligns
@@ -177,10 +179,10 @@ The 70/30 model:
 It normalizes expectations and takes the "AI perfection" anxiety out of the
 room.
 
-### Eight questions to ask any AI vendor
+### Questions to ask any AI vendor
 
 From a transparency Q&A written for one office assistant, with the answers
-removed; the questions generalize.
+removed. The questions generalize.
 
 1. What data is shared with you when I use the AI features, and does the
    AI bypass any of my existing permissions?
@@ -196,7 +198,7 @@ removed; the questions generalize.
    data, citations, confidence signals)?
 8. How do you detect and handle direct and indirect prompt injection?
 
-Concepts the answers introduce, worth glossary entries (area 1): grounding,
+Concepts the answers introduce that deserve glossary entries (area 1): grounding,
 user versus cross-prompt injection, content credentials (C2PA).
 
 ### A four-tier data classification
@@ -210,7 +212,7 @@ What may I paste in? A four-tier model:
 | Client-related        | Metadata we hold to serve a client; may include personal data of their people; joint controller at least | Approved tools, with care      |
 | Client data           | Part of the client's own product or service; we're a processor                                           | Only with the client's consent |
 
-The controller/processor distinction is the part people miss; keep it.
+The controller/processor distinction is the part people miss, so keep it.
 
 ### Small concepts (area 1, 2)
 
@@ -220,7 +222,7 @@ The controller/processor distinction is the part people miss; keep it.
   of what a search-enabled assistant does and why sensitive prompts still
   leak in part.
 - **"Agents" that are just prompts.** Some vendors' agents are saved
-  prompts with no tools; they can't act outside the model.
+  prompts with no tools, so they can't act outside the model.
 - **Your tool's cost display may be wrong.** Verify spend at the gateway or
   provider, not in the client's UI.
 - **Enterprise tiers sell governance.** Audit logs, single sign-on
@@ -228,8 +230,8 @@ The controller/processor distinction is the part people miss; keep it.
   control.
 - **A license filter for model output.** Some assistants can block
   suggestions that match public code; without it there is a chance of
-  reproducing copyleft code verbatim. Legally and ethically unsettled;
-  worth one honest paragraph.
+  reproducing copyleft code verbatim. Legally and ethically unsettled, and
+  it deserves one honest paragraph.
 - **Copyleft aside, output disclosure is the norm to teach.** One line
   saying content is AI-generated.
 
@@ -243,7 +245,7 @@ The controller/processor distinction is the part people miss; keep it.
 - **Roles and non-roles** for an internal AI platform: knowledge worker,
   engineer (a specialization), client-facing director, AI engineer,
   platform engineer, security engineer, innovation specialist; and
-  explicitly who it is *not* for, including the attacker, with the honest
+  explicitly who it isn't for, including the attacker, with the honest
   note that injection into knowledge bases wasn't yet guarded against.
   Saying who a system isn't for is a design skill.
 - **An adoption ladder** from experiment to service: discovery → try it →
@@ -265,6 +267,6 @@ multimodal, fine-tuning); evaluation-driven development and re-ranking;
 retrieval in depth (grounding; chunking by fixed size, overlap, recursion,
 document, semantics or agent; extraction; vector stores and semantic
 search; embedding models versus generative models; cosine, dot product and
-Euclidean distance; graph-shaped retrieval); problem framing (what's and
-isn't an AI-shaped problem; human versus model performance). Use it as a
+Euclidean distance; graph-based retrieval); problem framing (what's and
+isn't a problem suited to AI, and human versus model performance). Use it as a
 checklist against the S02 concept lists.

@@ -55,7 +55,7 @@ Screen kinds and approximate counts across the 18 packages:
 | Quiz            | 9     | End-of-module MCQ set (associate track mostly)     |
 | Module Complete | 18    | Checkpoint tally plus path map with "You Are Here" |
 
-Two sequencing idioms:
+The sequencing idiom differs by track:
 
 - Developer / architect: repeated **Teaching, Watch Out, Checkpoint** per
   topic (7-9 topics), then Cumulative task, Recap, Glossary, Complete.
@@ -65,19 +65,20 @@ Two sequencing idioms:
 ### Progress, gating, scoring, storage
 
 - One JSON blob in localStorage under a **versioned key** (for example `dev-m2-vF2`)
-  so content changes invalidate state. Two shapes; the nicer one keeps
-  `visited / done / skipped / attempted`.
+  so content changes invalidate state. The blob comes in two formats, and the
+  nicer one keeps `visited / done / skipped / attempted`.
 - A cross-module roll-up key per path (array of completed module numbers)
   feeds the path map on the Complete screen.
 - Navigation is free, but **Next is disabled on a checkpoint until passed or
   explicitly skipped**. Skip is always available, is remembered, and is
-  visibly distinct from passed; the certificate counts only passes.
+  visibly distinct from passed, and the certificate counts only passes.
 - Scoring is all-or-nothing with unlimited retries, and the **answer key is
   revealed only on a pass**. Wrong MCQ picks show that option's rationale plus
   "try again", never the right answer. Matching shows "Partial 2/3" with wrong
   rows marked. Quizzes require 100%.
 - SCORM bridge reports only incomplete/completed, bookmark and time; score is
-  hard-coded to 100. **All real answers live in localStorage only.** This is
+  hard-coded to 100. **In all 18 packages the real answers are stored in
+  localStorage only.** This is
   exactly the plan's model; copy it deliberately, and include reset and the
   versioned key.
 
@@ -86,19 +87,20 @@ Two sequencing idioms:
 Graded:
 
 01. **Single-select MCQ** (13 pkgs, 257 options). Data as
-    `[{label, correct, rationale}]`; rationale per option.
+    `[{label, correct, rationale}]`, with a rationale per option.
 02. **Radio MCQ groups** (2 pkgs) for several questions on one screen.
 03. **End-of-module quiz** (10 pkgs), all questions at once, pass = all correct.
 04. **Matching / row assignment** (7 pkgs, 62 rows): statement rows, shared
     option chips or selects, one per row, per-row scoring.
 05. **Bucket sort** (10 pkgs, 136 chips): click-to-select then click-a-bucket,
-    not drag-and-drop; keyboard operable; submit when pool empty; strict pass.
+    not drag-and-drop. Keyboard operable, submitted when the pool is empty,
+    strict pass.
 06. **Multi-select "find the N"** (9 pkgs): pass only when exactly N correct
     and zero false positives. Skins: checkbox list, signal cards, and a
     **diagram-node defect pick** on a drawn architecture flow.
 07. **Code/prompt repair, honor system** (13 pkgs, 55 textareas): broken
     artifact, textarea gated on 10+ chars, "Reveal model answer" shows model
-    answer plus explanation; no automated grading.
+    answer plus explanation. Grading is manual.
 08. **Self-assessment band** (11 pkgs): after reveal, "matches / retry" or a
     three-band correct / partial / incorrect with different remediation
     pointers per band.
@@ -109,17 +111,17 @@ Teaching-screen (ungraded):
 
 - Tab strips (13 pkgs); flip cards (14 pkgs, 109).
 - Hotspot strips (stepped diagram with detail pane).
-- Clickdown accordions for pitfalls; table reveals.
-- Glossary items plus CSS-only tooltip terms; rollover cause/effect.
+- Clickdown accordions for pitfalls, and table reveals.
+- Glossary items plus CSS-only tooltip terms, and rollover cause/effect.
 - Clickable trace tables (multi-turn session, click a turn to annotate).
-- Callout boxes (neutral / failure / plain); recap lists; learning-objective
-  lists; data tables.
+- Callout boxes (neutral / failure / plain), recap lists, learning-objective
+  lists, data tables.
 - Code blocks rendered by JS from string arrays with a hand-written tokenizer.
-- Range-slider explainer; Module Complete / path map.
+- Range-slider explainer, and the Module Complete / path map.
 
 Accessibility: click-only widgets get `tabindex=0` and `role=button` via a
-helper re-applied by a MutationObserver; Enter/Space map to click; feedback
-is `aria-live`; focus moves to the new screen title; arrow keys navigate.
+helper re-applied by a MutationObserver, Enter/Space map to click, feedback
+is `aria-live`, focus moves to the new screen title, and arrow keys navigate.
 
 ### Design lessons
 
@@ -127,10 +129,10 @@ is `aria-live`; focus moves to the new screen title; arrow keys navigate.
   answer is in the page": honor system plus self-grade, not fake hiding.
 - Checkpoint-gated Next with always-available, remembered Skip.
 - Rationale per option is what makes MCQs teach.
-- About six primitives carry the corpus: MCQ, matching, bucket sort,
+- About six primitives make up the corpus: MCQ, matching, bucket sort,
   multi-select-N, textarea + self-grade, reveal/accordion. The rest is
   garnish. A component set of that size covers everything.
-- The Complete screen doubles as the path map from one cross-module key.
+- The Complete screen is also the path map, built from one cross-module key.
 
 ## Part 2: the CS50 duck tutor design
 
@@ -145,19 +147,19 @@ transcripts (captions, cite only):
 
 Also `courses/cs50-ai/pages/honesty.md`, which whitelists the Duck (line 58)
 and has the 72-hour regret clause (line 38). The talks mention published
-papers but capture no URLs; fetch from outside if needed.
+papers but don't capture URLs, so fetch them from outside if needed.
 
 ### Premise and guardrails
 
 Off-the-shelf models are "too helpful". The project deliberately makes a
-capable model less useful so it is more educationally useful; they call these
-**pedagogical guardrails**. Goal: 24/7 virtual office hours approximating a
+capable model less useful so it is more educationally useful, and they call
+these **pedagogical guardrails**. Goal: 24/7 virtual office hours approximating a
 1:1 ratio.
 
 System prompt, paraphrased: friendly supportive TA persona who is also a
 rubber duck; answer only about the course; refuse unrelated topics; never
-give full problem-set solutions. Four moves: persona, topic restriction,
-off-topic refusal, no full solutions. Re-injected on every turn.
+give full problem-set solutions. The moves are persona, topic restriction,
+off-topic refusal, and a ban on full solutions. Re-injected on every turn.
 
 ### Runtime architecture
 
@@ -195,18 +197,21 @@ follow; with it, answers use the course's own vocabulary.
 
 Eval: frozen set of 50 real queries stratified by intent (15 code-gen, 15
 debugging, 10 error message, 5 intro, 5 conceptual); blind pairwise A/B by 29
-teaching fellows, single- and multi-turn; Elo with 95% CIs. V1 bought nothing.
+teaching fellows, single- and multi-turn, scored as Elo with 95% CIs. V1
+bought nothing.
 V2 and V3 preferred over V0 about 60% of the time, CIs clear of V0. V3 is in
 production.
 
-### Product ideas worth reusing
+### Product ideas to reuse
 
-- Explain highlighted code as a scoped action, not an open chat box.
+- Explain highlighted code as a scoped action triggered from a selection
+  instead of typed into an open chat box.
 - Show a diff first, explain on demand, apply only after; add friction on
   purpose early on.
-- Endorsed answers: bot answers carry a disclaimer until a human endorses.
+- Endorsed answers: bot answers show a disclaimer until a human endorses.
 - Pair-programmer duck answers only the question asked and volunteers
-  nothing; deliberate omission of adjacent lessons the student should find.
+  nothing. Leaving out the adjacent lessons the student should find is
+  deliberate.
 - Reverse tutoring: the duck writes imperfect code and the student critiques.
 - Refusal with a walkthrough offer when asked for the solution outright.
 - Honesty policy names the sanctioned AI path.
@@ -220,11 +225,13 @@ compressed grade signal, which pushed toward oral exams.
 01. Keep the guardrail list short (about 5 rules in prose); carry the rest as
     examples.
 02. Ship 4-6 exemplar dialogues in the skill body instead of more prose.
-03. The site is the corpus; Claude Code reads it from disk. Grounding is for
-    register and scope, no embedding infrastructure needed.
+03. The site is the corpus, and Claude Code reads it from disk. Grounding is
+    for register and scope, so reading the files is enough and the tutor can
+    skip embedding infrastructure.
 04. Scope the interaction: "explain this", "check my answer", "am I on
-    track?" beat an open chat.
-05. Answer with a diagnostic question; make deliberate omission explicit.
+    track?" work better than an open chat.
+05. Answer with a diagnostic question, and say so when leaving something out
+    on purpose.
 06. Build the eval first: about 50 realistic learner queries stratified by
     intent, blind pairwise, Elo with CIs.
 07. Re-test after every model change.

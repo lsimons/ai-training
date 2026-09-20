@@ -12,9 +12,9 @@ everything matters. Each level includes everything from the level below.
 
 ## Find your level
 
-Judge the tool on four axes: **who can access it**, **confidentiality of
-the data**, **integrity of the data** (can the tool change or delete it),
-**availability** (does anything depend on the tool staying up).
+Judge the tool on four axes. **Who can access it**, the **confidentiality
+of the data**, the **integrity of the data** (can the tool change or delete
+it), and its **availability** (does anything depend on the tool staying up).
 
 | Level                       | Data                                                                      | Impact if it breaks or leaks              | Approval                                                          | Time      |
 | --------------------------- | ------------------------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------- | --------- |
@@ -22,12 +22,13 @@ the data**, **integrity of the data** (can the tool change or delete it),
 | **2. Internal only**        | Internal data; no personal data; no client or production data             | Embarrassing, recoverable                 | Team lead plus a security check                                   | Days      |
 | **3. Personal or critical** | Client data, personal data, production access, or something depends on it | Contractual, legal, or operational damage | Full assessment; the data owner's consent; formal risk acceptance | Weeks     |
 
-Two boundaries deserve emphasis:
+The boundaries between levels need emphasis:
 
 - **Level 1 ends the moment real information appears.** Using the tool in a
   meeting with a client, or on non-public notes, is no longer experimenting.
 - **Moving from level 1 to level 2 requires an owner.** Someone must own the
-  tool: patching, vulnerabilities, access, cleanup. No owner, no level 2.
+  tool: patching, vulnerabilities, access, cleanup. Without an owner the
+  tool stays at level 1.
 
 ## What each level requires
 
@@ -57,29 +58,29 @@ writing".
 Five to ten minutes, no approval needed, keep a copy for the team. Every
 requirement carries its reason.
 
-| Requirement                                                                                              | Why                                                                        |
-| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| I use only dummy, synthetic, or public data: no real company data, no client data, no production systems | Real data, even internal, needs a proper assessment and can be exposed     |
-| I have checked that no real names, email addresses, IP addresses or production data are involved         | "Anonymized" real data can often be re-identified                          |
-| The tool has no read or write access to production systems                                               | Production access from an experimental tool can cause outages or data loss |
-| The tool has no access to real company systems or data stores                                            | Even read access to real systems exposes information                       |
-| I have set spending limits where the tool bills by use                                                   | Experiments left running rack up bills                                     |
-| I delete accounts, data, and integrations when the experiment ends                                       | Forgotten experimental accounts become vulnerabilities over time           |
-| I have written down what I'm testing and share what I learn                                              | Others learn from it and avoid duplicate work                              |
-| I report security concerns or incidents to the security team                                             | Fast reporting limits damage                                               |
+| Requirement                                                                                                                 | Why                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| I use only dummy, synthetic, or public data, and the tool doesn't get real company data, client data, or production systems | Real data, even internal, needs a proper assessment and can be exposed     |
+| I have checked that no real names, email addresses, IP addresses or production data are involved                            | "Anonymized" real data can often be re-identified                          |
+| The tool has no read or write access to production systems                                                                  | Production access from an experimental tool can cause outages or data loss |
+| The tool has no access to real company systems or data stores                                                               | Even read access to real systems exposes information                       |
+| I have set spending limits where the tool bills by use                                                                      | Experiments left running rack up bills                                     |
+| I delete accounts, data, and integrations when the experiment ends                                                          | Forgotten experimental accounts become vulnerabilities over time           |
+| I have written down what I'm testing and share what I learn                                                                 | Others learn from it and avoid duplicate work                              |
+| I report security concerns or incidents to the security team                                                                | Fast reporting limits damage                                               |
 
 ## Level 2 checklist, highlights
 
 The full template has about twenty-five items in eight sections, each with a
-rationale. The ones worth teaching:
+rationale. The ones to teach:
 
 - Train the team on data boundaries **before** they start using the tool.
-- Verify where data is stored and processed; jurisdiction matters.
+- Verify where data is stored and processed, because jurisdiction matters.
 - The vendor is a real, active company with a track record, and the product
   is actively maintained. Defunct vendors stop patching and may sell the
   data.
 - The tool can be restricted to an approved list of model providers.
-- No shared accounts; review access every six months; remove leavers.
+- No shared accounts. Review access every six months and remove leavers.
 - No admin or service accounts for integrations. Use delegated
   authentication so the tool acts with the user's own permissions; stored
   admin credentials are hard to track and compromised without detection.

@@ -18,21 +18,21 @@ Brilliant's prose and must not be copied into the site.
 ## 1. The coding skills map
 
 Marketing framing: "designed for college students, early-career
-professionals, and ambitious beginners". Two halves: **Foundations of
-Computer Science** (7 big ideas, 42 learning objectives, 196 skills) and
-**Coding with AI** (7 big ideas, 37 learning objectives, 106 skills).
+professionals, and ambitious beginners". One half is **Foundations of
+Computer Science** (7 big ideas, 42 learning objectives, 196 skills), the
+other **Coding with AI** (7 big ideas, 37 learning objectives, 106 skills).
 
 ### Four-level shape
 
 | Level              | Form                                                                                                             | Example                                                                                                                        |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Tier               | A named band on the map with a one-paragraph note. Three per half.                                               | "The build loop"                                                                                                               |
+| Tier               | A named band on the map with a one-paragraph note. Each half has three.                                          | "The build loop"                                                                                                               |
 | Big idea (pillar)  | A **noun phrase** with a three-letter code and a one-sentence summary of why it matters now.                     | VER "Verification": generation is cheap, so verification is the new bottleneck                                                 |
 | Learning objective | A **verb phrase** with a numbered code, 2 to 8 per big idea.                                                     | INC-2 "Sequence increments for early feedback"                                                                                 |
 | Skill              | A **declarative claim** (one sentence), a **why** paragraph, and one concrete **example**. 2 to 6 per objective. | Under INC-2: "Steps are ordered so that each one can be checked on its own", why, then the add-item-before-remove-item example |
 
 The map draws big ideas as boxes in tier bands; clicking one lists its
-objectives; clicking an objective opens the skill panel. Cross-references
+objectives, and clicking an objective opens the skill panel. Cross-references
 appear inside skill text ("the same judgment about relevant information from
 SPC-5, applied at the moment work is handed off"), so codes are used as
 citations between nodes. No prerequisites, levels or grades are encoded.
@@ -110,14 +110,15 @@ Skill density per objective ranges from 2 (most) to 6 (SPC-5, VER-1).
 Tiers Program Design (CFL Control Flow & Logic, MOD Functions & Modularity),
 Computational Problem-Solving (IND Inductive Thinking, PSV Problem-Solving
 Principles), Algorithms & Data Structures (EFF Analyzing Efficiency, DSI Data
-Structures & Interfaces, ALG Algorithm Design). Same shape. Not our subject,
+Structures & Interfaces, ALG Algorithm Design). Same four-level structure. Not
+our subject,
 but it shows the framework is meant to span from classic CS to AI-era
 practice in one map, which is roughly our Foundations-to-Engineering span.
 
-### Three representative skills, paraphrased
+### Representative skills, paraphrased
 
 - INC-2: order steps so each can be checked on its own, because an order that
-  yields nothing checkable until the end pushes all learning to the most
+  only becomes checkable at the end pushes all learning to the most
   expensive moment. Example: get "add item" working before "remove item".
   Second skill: tackle the riskiest unknown first, because deferred risk
   grows.
@@ -128,11 +129,11 @@ practice in one map, which is roughly our Foundations-to-Engineering span.
   automatically.
 - BLD-1: directing an agent means stating the goal, the information the work
   needs and the limits it must stay within, because an agent fills in what's
-  unsaid; domain knowledge is what lets you judge and correct its output.
+  unsaid, and domain knowledge is what lets you judge and correct its output.
 
 ## 2. Standards alignment
 
-Two views over the same mapping:
+The same mapping is shown from both sides:
 
 - **Lesson by lesson**: Course | Lesson | Standards | Grade levels. Many
   standards map to one lesson ("Adding Fractions" aligns with 4.NF.3 and
@@ -144,7 +145,7 @@ Two views over the same mapping:
   Data Visually and the skills "Read and compare bars on a bar chart" and
   "Reading and comparing bar charts". Roughly 200 standards, grades 3 to
   high school. A standard is listed only where content addresses it fully or
-  in part; no partial flag.
+  in part, without a partial flag.
 
 Frameworks covered besides Common Core: Digital SAT, ACT, AP Precalculus,
 NY Regents, NC Math 1-3, GCSE, A Level, IB, GRE, and GMAT Quant. The coding
@@ -171,15 +172,15 @@ code).
 
 ## 4. Comparison with our specs
 
-| Brilliant                         | Ours ([spec S01](../../spec/S01-dictionary.md), [spec S02](../../spec/S02-topic-map.md)) | Note                                                                                                                        |
-| --------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Tier                              | Group / area                                                                             | Theirs are thematic bands; ours are audience bands. Both are three to six.                                                  |
-| Big idea (noun)                   | Topic                                                                                    | Same register. Theirs carry a one-sentence "why now" summary; ours carry concepts and edges.                                |
-| Learning objective (verb, coded)  | Competency                                                                               | Same register. Theirs are coded and finer: 37 versus our 18 for a narrower subject.                                         |
-| Skill (claim, why, example)       | Behavior                                                                                 | We've one draft base behavior per competency; they have 2 to 6 well-formed skills per objective. This is the level we lack. |
-| Standard                          | (none)                                                                                   | An external framework a lesson is matched to. We've no alignment layer.                                                     |
-| Targeted skill and lesson         | Learning objective and checkpoint                                                        | Same idea: a lesson-sized unit that proves a standard.                                                                      |
-| Lesson, 5 to 10 min, skills check | Lesson, 10 to 25 min, checkpoints                                                        | Ours are two to three times longer. Their level review is our course quiz.                                                  |
+| Brilliant                         | Ours ([spec S01](../../spec/S01-dictionary.md), [spec S02](../../spec/S02-topic-map.md)) | Note                                                                                                                  |
+| --------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Tier                              | Group / area                                                                             | Theirs are thematic bands and ours are audience bands. Both are three to six.                                         |
+| Big idea (noun)                   | Topic                                                                                    | Same register. Theirs have a one-sentence "why now" summary, and ours have concepts and edges.                        |
+| Learning objective (verb, coded)  | Competency                                                                               | Same register. Theirs are coded and finer: 37 versus our 18 for a narrower subject.                                   |
+| Skill (claim, why, example)       | Behavior                                                                                 | We've one draft base behavior per competency, while they have 2 to 6 skills per objective. This is the level we lack. |
+| Standard                          | (none)                                                                                   | An external framework a lesson is matched to. We've no alignment layer.                                               |
+| Targeted skill and lesson         | Learning objective and checkpoint                                                        | Same idea: a lesson-sized unit that proves a standard.                                                                |
+| Lesson, 5 to 10 min, skills check | Lesson, 10 to 25 min, checkpoints                                                        | Ours are two to three times longer. Their level review is our course quiz.                                            |
 
 ## 5. Implications
 
@@ -199,7 +200,7 @@ routing default.
    not. Give competencies a three-letter code per topic-ish cluster and a
    number, keep slugs for URLs.
 3. **Split competencies finer.** Our 18 are big-idea sized. Brilliant's 37
-   objectives for coding-with-AI alone suggest each of ours should carry
+   objectives for coding-with-AI alone suggest each of ours should have
    three to six coded objectives, and the objectives are what lessons and
    checkpoints point at.
 4. **Add an alignment layer.** A small table per competency: external
@@ -215,8 +216,8 @@ routing default.
    with `building-agents/production` and `evaluation`.
 6. **Lesson length.** Their 5 to 10 minute unit with a skills check argues
    for splitting our lessons into sections that each end in a checkpoint,
-   which spec S01 already allows; watch total lesson length.
+   which spec S01 already allows, but watch total lesson length.
 7. **Differentiation model.** Their "three learners in parallel in one
    graph" is the comfort-level idea done through the map rather than through
    alternate content: prerequisite review, current objective, extension.
-   Worth adopting as how paths and the map interact.
+   Adopt it as how paths and the map interact.

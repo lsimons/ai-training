@@ -11,12 +11,13 @@ no service account of its own; it acts as a **delegate of the human**, bound
 by that human's existing permissions. If the user can't edit a page in the
 browser, the agent can't edit it through the MCP server either.
 
-Consequences worth teaching:
+Consequences to teach:
 
 - Prefer OAuth with an interactive consent flow over long-lived API tokens.
   The reviewed server allowed disabling token auth entirely, which forces
   interactive login and rules out headless, unattended use.
-- Tokens should be per user, per site and session-scoped, and expire.
+- Tokens should be scoped per user, per site, and per session, with an
+  expiry.
 - The server should validate that each request targets the site the token
   was issued for.
 - Audit logs on the target system then attribute every action to a person.
@@ -25,9 +26,9 @@ Consequences worth teaching:
 
 Inventory what the server can do, split by **read** and **write**, and list
 explicitly what it **can't** do. In the reviewed case: about a dozen read
-tools and a handful of write tools per system (create, update, comment,
-transition), and no delete, no permission changes, no bulk board or
-workflow operations, no exports. Knowing the "can't" list is as valuable as
+tools and a few write tools per system (create, update, comment,
+transition). It couldn't delete, change permissions, run bulk board or
+workflow operations, or export. Knowing the "can't" list is as valuable as
 the "can" list: it bounds the worst case.
 
 Application-side controls seen in the review: only administrators install
@@ -37,7 +38,7 @@ before any write.
 
 ## 3. Bulk writes and rate limits
 
-The reviewed server enforced no per-tool rate limit on writes. Nothing
+The reviewed server didn't enforce a per-tool rate limit on writes. Nothing
 stopped a model from calling "create page" fifty times in one turn. The
 only natural brakes were the platform's general API rate limits (a few
 hundred requests per minute, then HTTP 429), the model's context window
@@ -70,25 +71,26 @@ Rules for using write tools
 ```
 
 With the caveat the review itself made: prompt guardrails are defense in
-depth, not a guarantee. They stop accidents and naive attacks; they aren't
-the sole control.
+depth, not a guarantee. They stop accidents and naive attacks, but they can't be the only
+control.
 
 ## 5. Residual risks
 
-Five named classes, each with what, example, and mitigation. Rate them for
-your own context; don't inherit anyone else's rating.
+The review names the classes below, each with what, example, and
+mitigation. Rate them for your own context instead of inheriting anyone
+else's rating.
 
-| Risk                               | What                                                                                               | Mitigations                                                                                        |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Indirect prompt injection          | A page or issue contains text that instructs the model; the model acts on it via a write tool      | Rule 3 above; confirm-before-write; least privilege on the user account itself                     |
-| Unintended bulk operations         | A vague request ("clean up the backlog") becomes dozens of writes                                  | Write caps; rule 4; version history                                                                |
-| Data leakage through model context | Retrieved restricted content lands in a chat, an export or a page the user then shares more widely | The model has no notion of classification; the user does. Teach it; rule 5; per-chat tool enabling |
-| Token exposure                     | A stolen OAuth token acts as the user until expiry                                                 | Short expiry; interactive-only auth; IP or domain allowlists on the server side                    |
-| Cross-server tool poisoning        | A malicious tool description on one MCP server instructs the model to misuse tools from another    | Vet every server separately; keep the set small; read the tool descriptions you install            |
+| Risk                               | What                                                                                                     | Mitigations                                                                                            |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Indirect prompt injection          | A page or issue contains text that instructs the model; the model acts on it via a write tool            | Rule 3 above; confirm-before-write; least privilege on the user account itself                         |
+| Unintended bulk operations         | A vague request ("clean up the backlog") becomes dozens of writes                                        | Write caps; rule 4; version history                                                                    |
+| Data leakage through model context | Retrieved restricted content is copied into a chat, an export or a page the user then shares more widely | The model has no notion of classification, but the user does. Teach it; rule 5; per-chat tool enabling |
+| Token exposure                     | A stolen OAuth token acts as the user until expiry                                                       | Short expiry; interactive-only auth; IP or domain allowlists on the server side                        |
+| Cross-server tool poisoning        | A malicious tool description on one MCP server instructs the model to misuse tools from another          | Vet every server separately; keep the set small; read the tool descriptions you install                |
 
 ## 6. CLI or MCP?
 
-An opinionated position worth teaching: don't install a forge MCP server
+An opinionated position to teach: don't install a forge MCP server
 at all; let the agent use the forge's command-line client instead. The
 reasons:
 
@@ -101,8 +103,9 @@ reasons:
 
 The trade-off table: setup steps, authorization model (approved command
 patterns versus token permissions), and what breaks when single sign-on is
-in the way. Teach it as a design axis, not a verdict; some servers offer
-things no CLI does (structured search, documentation lookup).
+in the way. Teach it as a design axis rather than a verdict, because some
+servers offer things no CLI does (structured search, documentation
+lookup).
 
 ## 7. Small practices from other server notes
 
@@ -125,12 +128,11 @@ things no CLI does (structured search, documentation lookup).
 ## Notes for the lesson author
 
 - L5 extends the fork's MCP lessons (Osmani 14 and 16), which cover
-  protocol and architecture; this adds the operator's view.
+  protocol and architecture, and this adds the operator's view.
 - Checkpoint: given a tool inventory, mark which tools need
   confirm-before-write. Scenario decision: the model proposes forty edits;
   what do you do?
 - Exercise, more comfortable: write the five-rule block for a server of the
   learner's choice and test it with an injected instruction inside a
   retrieved document.
-- Don't reproduce any organization's own risk rating. The point is that
-  the rating depends on who can write to the documents the agent reads.
+- Don't reproduce any organization's own risk rating. The rating depends on who can write to the documents the agent reads.

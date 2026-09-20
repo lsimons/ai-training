@@ -18,7 +18,7 @@ components that render a lesson implement it.
 
 ## Choosing the page kind
 
-Every page has one of the four kinds. Choose the kind with the Diátaxis
+A page has one of the four kinds. Choose the kind with the Diátaxis
 compass: does the page serve **action** (doing) or **cognition** (knowing),
 and does it serve **study** (acquiring a craft) or **work** (applying it)?
 
@@ -30,22 +30,22 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 - Lessons are only ever `tutorial` or `explanation`; the choice is the
   lesson's **mode**.
 - How-to and reference pages serve learners at work and stay outside
-  courses and paths. No how-to or reference section exists in the sidebar
-  until there is a page to put in it.
+  courses and paths. The sidebar gets a how-to or reference section once
+  there is a page to put in it.
 - The topic map pages and the glossary are generated reference; authors do
   not write them by hand.
 
 ## Lesson anatomy
 
-| Part        | Rule                                                                                                                   |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Length      | 10 to 25 minutes.                                                                                                      |
-| Opener      | Where we're going, in the present tense: "In this lesson we build...". Never `you will learn`.                         |
-| Sections    | H2s, each with a section kind. Body sections alternate teaching with pitfalls and checkpoints.                         |
-| Pitfall     | At least one, placed right after the teaching it belongs to: setup, what went wrong, the rule. Short in tutorial mode. |
-| Checkpoints | At least one per served objective; a checkpoint's `objective` names the one objective it evidences.                    |
-| Exercise    | Exactly one.                                                                                                           |
-| Recap       | Numbered takeaways, the served objectives as "You can now...", the sources cited on the page, and what comes next.     |
+| Part        | Rule                                                                                                                                               |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Length      | 10 to 25 minutes.                                                                                                                                  |
+| Opener      | Where we're going, in the present tense: "In this lesson we build...". Never `you will learn`.                                                     |
+| Sections    | H2s, each with a section kind. Body sections alternate teaching with pitfalls and checkpoints.                                                     |
+| Pitfall     | At least one, placed right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule. Short in tutorial mode. |
+| Checkpoints | At least one per served objective. A checkpoint's `objective` names the one objective it evidences.                                                |
+| Exercise    | Exactly one.                                                                                                                                       |
+| Recap       | Numbered takeaways, the served objectives as "You can now...", the sources cited on the page, and what comes next.                                 |
 
 Objectives are frontmatter data that drive checkpoints, routing, and tutor
 mode. They're never printed as a `you will learn` list; the opener and the
@@ -69,9 +69,9 @@ Tutorial-mode lessons follow these rules:
 - **Visible results early and often.** Every step produces something the
   learner can see.
 - **Keep the narrative of the expected.** Show expected output and flag the
-  likely signs of going wrong; pitfall sections do this.
+  likely signs of going wrong. Pitfall sections do this.
 - **Minimize explanation.** Link to an explanation page or a short instead.
-- **One path, no choices.** Differentiation happens through routing between
+- **One path.** The lesson doesn't offer choices. Differentiation happens through routing between
   lessons, never through branches inside one.
 - **Safe and repeatable.** A contrived setting the learner can reset.
 - **Concrete and particular.** The general emerges from the specific.
@@ -90,7 +90,7 @@ pitfall and the exercise.
 
 - **Every code example is real.** It runs, and its shown output is asserted
   in CI. An example that can't run (an agent transcript, a screenshot) is
-  marked as such in the page. Until the example runner exists the rule still
+  marked that way in the page. Until the example runner exists the rule still
   holds: an example that can't run says so.
 - **Prefer `predict`** for any example that runs. Use `choice` only where
   nothing runs.
@@ -103,20 +103,20 @@ pitfall and the exercise.
   transcripts are recorded, an author may write one and set
   `model="illustrative" recorded="illustrative"`. The component must label
   the block as illustrative, and the page must say so in prose next to it
-  ("the transcript is illustrative..."). A block that pretends to be a
-  recording is a defect.
+  ("the transcript is illustrative..."). A block that looks like a
+  recording but isn't one is a defect.
 - **Prompting walkthroughs follow one arc:** the naive attempt, the failure
   it produces, one change at a time (technique, order, wording), then
   compare.
 
 ## Citations and terms
 
-- **Every source is cited by key.** `(@key)` in Markdown resolves against
+- **Sources are cited by key.** `(@key)` in Markdown resolves against
   one bibliography file in the repo and renders as a numbered reference
   with a per-page sources list. Concept definitions, recaps, and behaviors
   cite papers and vendor documentation this way, never as bare inline URLs.
-- **The first mention of a concept is a term.** It is marked in Markdown by
-  a remark plugin, not a component, so plain Markdown stays plain. The term
+- **The first mention of a concept is a term.** A remark plugin marks it in
+  Markdown rather than a component, so plain Markdown stays plain. The term
   renders the concept's glossary definition on hover and links to its
   glossary anchor. Later mentions are plain text.
 
@@ -144,11 +144,11 @@ pitfall and the exercise.
 
 ## Widgets
 
-- A widget teaches; it never grades.
+- A widget teaches and never grades.
 - Widgets sit in a `class="not-content"` container so the page styles do
   not apply to them.
 - Widget scripts never emit a literal `</script>` or `</pre>` inside a JS
-  string; it breaks the Markdown formatter and the renderer.
+  string, because it breaks the Markdown formatter and the renderer.
 
 ## Related specs
 

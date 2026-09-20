@@ -22,8 +22,8 @@ consolidated text, and dated.
    a spreadsheet macro isn't one.
 2. **The risk tiers.** Prohibited practices; high-risk systems (the
    annexed use-case list and the product-safety route); systems with
-   transparency obligations; everything else. A decision tree is the right
-   shape, and a scenario-sorting checkpoint follows naturally.
+   transparency obligations, and everything else. A decision tree is the
+   right structure, and a scenario-sorting checkpoint follows naturally.
 3. **Provider or deployer.** Who develops or brands a system, who uses it,
    and how a deployer becomes a provider (substantial modification, change
    of intended purpose, own name on someone else's system). Two short
@@ -66,6 +66,6 @@ consolidated text, and dated.
 - Foundations lesson, one level, for everyone. Engineers get a pointer to
   the provider obligations from L1.
 - Checkpoints: tier sorting for six short scenarios; a provider-or-deployer
-  decision for three; one "is this even an AI system?" question.
+  decision for three, and one "is this even an AI system?" question.
 - Mark the lesson with a review date; the Regulation's application dates
   and guidance move.

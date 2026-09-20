@@ -20,13 +20,13 @@ sources:
 import { Repair, Pitfall, Exercise, Recap } from '@components/lesson';
 import InstructionsBuilder from '@components/widgets/InstructionsBuilder.astro';
 
-In your first session you gave the agent context by hand: which files
-mattered, which command runs the tests, which branch not to touch. In this
-lesson we write that context down once, in a file the agent reads at
-the start of every session, and we see what belongs in that file, what
-doesn't, and what to do when a written rule isn't enough.
+In your first session you gave the agent context by hand, from the files
+that mattered to the test command and the branch to leave alone. In this lesson
+we write that context down once, in a file the agent reads at the start of
+every session. We also look at what belongs in that file and what doesn't,
+and at what to do when a written rule isn't enough.
 
-Nothing in this lesson runs. The examples are file contents, and the
+You don't run anything in this lesson. The examples are file contents, and the
 fixture is a small fictional project called `invoice-mailer`: a Python
 service that renders invoices to PDF and sends them over SMTP. You can
 reproduce every step in an empty directory with a text editor.
@@ -38,10 +38,10 @@ and load it into their context before the first user message. The
 convention differs by tool: some look for `AGENTS.md`, some for
 `CLAUDE.md`, some for both. The content is the same either way, so the
 common pattern is to write `AGENTS.md` and make `CLAUDE.md` a symlink to
-it, or to have one contain a single line pointing at the other.
+it, or to have one contain one line pointing at the other.
 
-Think of the file as the briefing you would give a capable contractor on
-their first morning. They can read code. They can't know which command
+The file is the briefing you would give a capable contractor on their
+first morning. They can read code. They can't know which command
 your team runs before pushing, which directory is generated, or which
 obvious-looking fix has already been tried and reverted twice. That's the
 gap the file fills.
@@ -59,7 +59,7 @@ Renders invoices to PDF and sends them over SMTP. Python 3.13, uv.
 - Lint and format: `uv run ruff check . && uv run ruff format .`
 ```
 
-Five lines of content. An agent that reads this runs the right test
+An agent that reads these few lines runs the right test
 command on the first try instead of guessing between `pytest`,
 `python -m pytest` and `make test`. That alone pays for the file.
 
@@ -78,8 +78,8 @@ Which directories are generated and must not be edited by hand. Where new
 code of each kind goes.
 
 **Conventions.** The rules the code follows that a reader would not infer
-from one file: commit message format, branch naming, how tests are named,
-which style choices are deliberate.
+from one file: the commit message format, the branch naming scheme, the
+test naming scheme, and which style choices are deliberate.
 
 **Rules that remove a recurring mistake.** This is the most valuable
 category and the hardest to write in advance. Every time the agent does
@@ -94,7 +94,7 @@ the first time.
 
 <InstructionsBuilder />
 
-Notice how short the output stays even with every box ticked. That's the
+Notice how short the output is even with every box ticked. That's the
 target. A real project's file grows over time, but it grows one line per
 lesson learned, not one paragraph per feature.
 
@@ -105,7 +105,7 @@ that they're long. Every line costs context on every turn of every
 session, and an agent given two pages of prose follows some of it and
 silently drops the rest.
 
-Three things to leave out:
+Leave these out:
 
 **Anything the agent can read from the code.** The list of dependencies
 is in the lockfile. The function signatures are in the source. The API
@@ -115,7 +115,7 @@ goes stale and the agent then has two conflicting sources.
 
 **Long prose.** Architecture essays, project history, the reasoning behind
 every decision. If the reasoning matters, put it in a design document and
-link to it; the agent reads it when the task calls for it.
+link to it. The agent reads it when the task calls for it.
 
 **Restating the obvious.** "Write clean code." "Follow best practices."
 "Make sure tests pass." A capable agent already does these, and the lines
@@ -174,17 +174,17 @@ Renders invoices to PDF and sends them over SMTP. Python 3.13, uv.
 - Do not add retries around SMTP calls; the queue already retries.
 - Every change to a template needs a matching golden-file test in \`tests/rendering/\`.`}>
 This is the current `AGENTS.md` of `invoice-mailer`. The agent keeps running
-`python -m pytest` (wrong), committing to `main`, and wrapping mail calls in
-retry loops. Rewrite the file so that each of those stops, and so that
+`python -m pytest` (wrong) and committing to `main`. It also wraps mail
+calls in retry loops. Rewrite the file so that each of those stops, and so that
 nothing in it restates what the agent could read from the repository.
 </Repair>
 
 ## Instructions in a monorepo
 
-A repository with more than one project in it needs more than one file, and the
-tools handle this the same way: the agent always reads the file at the
-repository root, and also reads a file in a subdirectory when it works on
-files under that directory. Closer wins on conflict.
+A repository with more than one project in it needs more than one file.
+The tools handle this the same way: the agent always reads the file at the
+repository root, and it also reads a file in a subdirectory when it works
+on files under that directory. Closer wins on conflict.
 
 That gives a natural split. The root file holds what's true everywhere:
 the task runner, the commit convention, the branch rule. Each project's
@@ -231,7 +231,7 @@ command that works, one source file. Run a coding agent in it and give it
 three small tasks without any instructions file. Note every time it
 guesses wrong (test command, file location, style, branch). Then write an
 `AGENTS.md` of at most fifteen lines that would have prevented each wrong
-guess, delete the project's git history, and repeat the same three tasks.
+guess. Delete the project's git history and repeat the same three tasks.
 
 A good result: the second run makes none of the wrong guesses from the
 first, and every line in your file traces back to one of them. If a line
@@ -248,7 +248,7 @@ doesn't, it is a candidate to delete.
    to every project on earth. Short files get followed; long ones get
    skimmed.
 4. In a monorepo, the root file holds what's shared and each project's
-   file holds only what differs; closer wins.
-5. A rule you can't afford to have skipped belongs in a hook, not in
-   prose; a procedure the agent should repeat belongs in a skill.
+   file holds only what differs, and on conflict the closer file applies.
+5. A rule you can't afford to have skipped belongs in a hook rather than
+   in prose, and a procedure the agent should repeat belongs in a skill.
 </Recap>

@@ -19,17 +19,17 @@ repository was involved. Grouped by the lesson they serve.
 
 ## Agent configuration and workflow
 
-| Reference                                                  | Use                                                                                      |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| <https://code.claude.com/docs/en/memory>                   | Root instructions file and modular rules                                                 |
-| <https://code.claude.com/docs/en/sub-agents>               | Agent definitions in the repository                                                      |
-| <https://code.claude.com/docs/en/skills>                   | Skills; the build-your-own-skill workshop                                                |
-| <https://code.claude.com/docs/en/hooks-guide>              | Hooks as in-harness CI steps                                                             |
-| <https://code.claude.com/docs/en/mcp>                      | MCP client configuration                                                                 |
-| <https://code.claude.com/docs/en/plugin-marketplaces>      | Plugins and private marketplaces                                                         |
-| <https://github.com/schubergphilis/agents.md> (Apache-2.0) | A public collection of agent instruction files; compare with the fork's AGENTS.md lesson |
-| <https://github.com/kasbuunk/coherence-engineering>        | The coherence idea for area 4                                                            |
-| <https://github.com/lsimons/caseum> (CC BY 4.0)            | The role-description format used for personas                                            |
+| Reference                                                  | Use                                                                                         |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| <https://code.claude.com/docs/en/memory>                   | Root instructions file and modular rules                                                    |
+| <https://code.claude.com/docs/en/sub-agents>               | Agent definitions in the repository                                                         |
+| <https://code.claude.com/docs/en/skills>                   | Skills; the build-your-own-skill workshop                                                   |
+| <https://code.claude.com/docs/en/hooks-guide>              | Hooks as in-harness CI steps                                                                |
+| <https://code.claude.com/docs/en/mcp>                      | MCP client configuration                                                                    |
+| <https://code.claude.com/docs/en/plugin-marketplaces>      | Plugins and private marketplaces                                                            |
+| <https://github.com/schubergphilis/agents.md> (Apache-2.0) | A public collection of agent instruction files, to compare with the fork's AGENTS.md lesson |
+| <https://github.com/kasbuunk/coherence-engineering>        | The coherence idea for area 4                                                               |
+| <https://github.com/lsimons/caseum> (CC BY 4.0)            | The role-description format used for personas                                               |
 
 ## MCP security
 
@@ -67,7 +67,7 @@ repository was involved. Grouped by the lesson they serve.
 
 | Reference                                                                                                                                                         | Use                                                  |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| Vaswani et al., "Attention Is All You Need" (2017), arXiv                                                                                                         | The origin story                                     |
+| Vaswani et al., "Attention Is All You Need" (2017), arXiv                                                                                                         | The paper that introduced the transformer            |
 | DORA research on AI as an amplifier                                                                                                                               | Cite the report, not the paraphrase                  |
 | Collins Dictionary Word of the Year 2025, "vibe coding"                                                                                                           | One line of color                                    |
 | <https://platform.claude.com/docs/en/about-claude/models/choosing-a-model>                                                                                        | Model choice, for the setup lesson                   |

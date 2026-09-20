@@ -29,8 +29,8 @@ the only mechanism that brings a learner back to old material.
   are too long or not gradable.
 - Authors may mark a checkpoint `review: false` (a one-off that doesn't
   bear repeating) or supply **variants**: alternative stems with the same
-  answer, or alternative option orders, so a review tests the idea rather
-  than recognition of the wording.
+  answer, or alternative option orders. Variants make a review test the idea
+  rather than recognition of the wording.
 
 ## Schedule
 
@@ -44,29 +44,29 @@ Five stages, shown to the learner as five pills.
 | 4     | 21 days             |
 | 5     | 60 days, then done  |
 
-| Event                 | Effect                                                                                                          |
-| --------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Lesson finished       | Each of its checkpoints enters at stage 1, due one day later                                                    |
-| Pass                  | Item moves up one stage. Passing stage 5 retires the item (`done`); it stays visible in the learner's reference |
-| Fail or Give Up       | Item drops to stage 1, due tomorrow                                                                             |
-| "See this sooner"     | Item drops one stage                                                                                            |
-| "See this less often" | Item rises one stage                                                                                            |
-| Comfort level `less`  | New items enter at stage 1 and are due in the learner's next session, even the same day                         |
-| Comfort level `more`  | New items enter at stage 2                                                                                      |
+| Event                 | Effect                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Lesson finished       | Each of its checkpoints enters at stage 1, due one day later                                                       |
+| Pass                  | Item moves up one stage. Passing stage 5 retires the item (`done`) and keeps it visible in the learner's reference |
+| Fail or Give Up       | Item drops to stage 1, due tomorrow                                                                                |
+| "See this sooner"     | Item drops one stage                                                                                               |
+| "See this less often" | Item rises one stage                                                                                               |
+| Comfort level `less`  | New items enter at stage 1 and are due in the learner's next session, even the same day                            |
+| Comfort level `more`  | New items enter at stage 2                                                                                         |
 
 - The frequency control is the only manual knob, and it is per item, offered
   after answering.
 - Comfort level has no other coupling to reviews.
 - A session shows at most **12 due items**, oldest due first. The page
   says how many remain.
-- There is no daily limit on lessons, only a suggestion after two lessons in
+- The site doesn't limit lessons per day, and only offers a suggestion after two lessons in
   one sitting.
 
 ## Where reviews surface
 
 | Place                      | Surface                                                                                                                                                                                                                        |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Course page                | A "Review due: N items" card above the lesson graph when N > 0, leading to the review page for that course. Also a small count in the sidebar group header.                                                                    |
+| Course page                | A "Review due: N items" card above the lesson graph when N > 0. The card links to the review page for that course. Also a small count in the sidebar group header.                                                             |
 | Landing page and path page | One line per course with due items                                                                                                                                                                                             |
 | Tutor mode                 | At session start, if items are due, the tutor asks one recall question before anything else. The tutor reads the exported progress file if the learner has exported it, otherwise it asks the learner to open the review page. |
 | Routing                    | Per the topic map: an item failed twice in a row marks its objective "behind" in the path lanes and offers the section that teaches it                                                                                         |
@@ -82,19 +82,19 @@ One page per course at `/<area>/<course>/review/`.
    - Give Up is enabled after one attempt, shows the answer and rationale,
      and counts as a fail. Give Up exists only here, never in lessons.
    - Each item records exactly one result per review session. A correct
-     Check records a pass. A wrong Check records nothing yet: the learner
-     may retry or Give Up, and Give Up records the single fail. Once a
+     Check records a pass. A wrong Check doesn't record a result yet: the learner
+     may retry or Give Up, and Give Up records the fail. Once a
      result is recorded, Check and Give Up are both disabled.
 3. After each answer: the lesson link, the five-pill stage, and the frequency
    control.
 4. **Finish review** returns to the course page.
 
-A header progress bar counts items in this session.
+A progress bar in the header counts the items in this session.
 
 ## Storage
 
 The schedule is stored in the progress record's `reviews` map, keyed by
-checkpoint id, with the shape shown in the progress record spec.
+checkpoint id, with the structure shown in the progress record spec.
 
 | Field     | Meaning                                                                                |
 | --------- | -------------------------------------------------------------------------------------- |
@@ -105,8 +105,8 @@ checkpoint id, with the shape shown in the progress record spec.
 
 - Because the schedule is inside the progress record, it moves with the
   learner by export and import, and it resets when the record resets.
-- No server, no notifications, no email. A learner who doesn't come back is
-  not reminded. This is a known limit; tutor mode is the only active
+- The site has no server and doesn't send notifications or email, so a learner who
+  doesn't come back isn't reminded. This is a known limit. Tutor mode is the only active
   reminder, and only when the learner opens a session.
 
 ## Content changes
@@ -122,7 +122,7 @@ checkpoint id, with the shape shown in the progress record spec.
 - [S01 Project dictionary](S01-dictionary.md): checkpoint, review, review
   item, comfort level, interaction types.
 - [S02 Topic map and competencies](S02-topic-map.md): the course page that
-  shows the review due card; the routing rule for items failed twice.
+  shows the review due card, and the routing rule for items failed twice.
 - [S04 Progress record](S04-progress-record.md): where the schedule is
   stored and how it moves between browsers.
 
@@ -131,7 +131,7 @@ checkpoint id, with the shape shown in the progress record spec.
 1. Whether skipped-in-lesson checkpoints should enter review at all, or first
    require a pass in the lesson. Leaning: enter, because skipping is often "I
    know this", and a review is how we find out.
-2. Whether Foundations courses should review at all, given knowledge-worker
+2. Whether Foundations courses should review at all, because knowledge-worker
    learners may take one course and leave. Leaning: yes, but keep sessions
    to five items for Foundations.
 3. Whether to allow reviewing across courses in one session. Leaning: no

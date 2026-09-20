@@ -4,8 +4,7 @@ Ready-to-use ideas and lesson briefs on the operational side of AI safety
 (guardrails, containment, tool onboarding, MCP security), on regulation
 (the EU AI Act), and on what makes optional exercises get done. Nothing in
 this directory is a decision. Future agents should read each file
-critically, check it against the specs, and adopt, adapt, or reject item by
-item.
+critically against the specs, then adopt, adapt, or reject item by item.
 
 The material was drawn from Schuberg Philis's internal AI wiki and its AI
 literacy programme, and rewritten from the ideas. Client names, people,
@@ -20,27 +19,27 @@ licenses in [`references.md`](./references.md).
    proposing topics. Topic names below are suggestions.
 2. Treat every claim, flag, version number, and figure as needing a check.
    Agent flags, environment variables, and sandbox options change between
-   releases; the regulation lesson must be written from the Regulation.
+   releases, and the regulation lesson must be written from the Regulation.
 3. Where a file says "regenerate" or "verify", do that rather than adapting
    the text.
 4. Public artifacts are listed in [`references.md`](./references.md) with
    licenses. Apache-2.0 and CC BY material may be adapted with attribution
-   and a `NOTICE.md` entry; everything else is link-only.
-5. Two authoring changes belong in `docs/agents/writing-a-lesson.md`, not in
-   a lesson; see "Authoring changes" below.
+   and a `NOTICE.md` entry. Everything else is link-only.
+5. The changes under "Authoring changes" below belong in
+   `docs/agents/writing-a-lesson.md` rather than in a lesson.
 
 ## Files
 
 | File                                                               | What it holds                                                                                                                                    |
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [`guardrails.md`](./guardrails.md)                                 | An engineering guardrails charter, plain-language rules for everyone, a "can I?" table, key hygiene, disclosure                                  |
-| [`agent-risk-scenarios.md`](./agent-risk-scenarios.md)             | Six security domains, fifteen risk scenarios with countermeasures, rating scales, an assessment template                                         |
-| [`tool-onboarding-tiers.md`](./tool-onboarding-tiers.md)           | Three levels for bringing an AI tool into an organization, plus both checklists                                                                  |
+| [`agent-risk-scenarios.md`](./agent-risk-scenarios.md)             | A six-domain security model, fifteen risk scenarios with countermeasures, rating scales, an assessment template                                  |
+| [`tool-onboarding-tiers.md`](./tool-onboarding-tiers.md)           | A three-level ladder for bringing an AI tool into an organization, plus both checklists                                                          |
 | [`sandboxing-and-containment.md`](./sandboxing-and-containment.md) | What a coding agent sends, six isolation approaches, a layered containment pattern, configuration hygiene                                        |
 | [`mcp-security.md`](./mcp-security.md)                             | Delegated identity, capability scoping, bulk-write safety, prompt guardrails, residual risks, CLI vs MCP                                         |
 | [`eu-ai-act.md`](./eu-ai-act.md)                                   | What the regulation lesson must cover and how to source it                                                                                       |
 | [`ideas.md`](./ideas.md)                                           | Framings, practices, templates and small concepts to fold into lessons                                                                           |
-| [`literacy.md`](./literacy.md)                                     | Three task kinds, an exercise template, uptake data from a gamified programme, exercise ideas per area                                           |
+| [`literacy.md`](./literacy.md)                                     | A three-way task typing, an exercise template, uptake data from a gamified programme, exercise ideas per area                                    |
 | [`references.md`](./references.md)                                 | Public artifacts to cite, with licenses and what each is for                                                                                     |
 | [`onboarding-deck.md`](./onboarding-deck.md)                       | Additions from an onboarding day: capability versus reliability, time to value, a controls progression, a coding-with-agents syllabus, exercises |
 
@@ -56,9 +55,10 @@ licenses in [`references.md`](./references.md).
 | L6  | Which tool, which data                 | Using agents       | Knowledge workers | `tool-onboarding-tiers.md`, `guardrails.md` part 2 |
 | L7  | Reviewing what the agent pulled in     | Coding with agents | Engineers         | `ideas.md`, dependency review                      |
 
-Each brief gives the area, the objectives it would serve, an outline in the
-into/through/beyond arc, checkpoint ideas, comfort levels where the area is
-Engineering, and what must be regenerated or verified.
+Each brief gives the area and the objectives it would serve, then outlines
+the into/through/beyond arc and lists checkpoint ideas. Where the area is
+Engineering it adds comfort levels. It closes with what must be regenerated
+or verified.
 
 ### L1. Guardrails for AI-assisted engineering
 
@@ -70,7 +70,7 @@ Engineering, and what must be regenerated or verified.
 - **Objectives:** state the five groups of guardrails and give one rule for
   each; tell a deterministic quality gate from a probabilistic one; assign
   a risk scenario to a domain and rate it on both scales; tailor the
-  charter for a given project.
+  charter for one project.
 - **Outline.** *Into*: the "hyper-intelligent toddler" and "untrusted
   contributor" framings; a Watch Out narrative (a migration run with
   production write access). *Through*: the five groups, each with its rules
@@ -103,7 +103,7 @@ Engineering, and what must be regenerated or verified.
   the layered containment pattern with public building blocks; secret
   redaction on the way out. *Beyond*: unsupervised mode, the flag with the
   warning in its name, the first-party middle ground, the harness with no
-  guardrails at all; the configuration hygiene checklist.
+  guardrails at all, and the configuration hygiene checklist.
 - **Checkpoints:** `Predict` which hosts are contacted; multiple choice on
   what the warmup prompt contained; sort controls into "inside the harness"
   versus "outside the trust boundary"; scenario decision: the agent needs a
@@ -113,19 +113,19 @@ Engineering, and what must be regenerated or verified.
   yourself, add one layer (a proxy allowlist or a review-gate repository).
 - **Verify:** redo the trace on a current agent version and a fresh
   checkout; flags, environment variable names, and sandbox options change
-  between releases; decide whether to adapt the Apache-2.0 threat model
+  between releases. Decide whether to adapt the Apache-2.0 threat model
   text with attribution or summarize it.
 
 ### L3. What does your agent send? (short)
 
-- **Area:** Safety, for everyone. A short, not a full lesson.
+- **Area:** Safety, for everyone. A short rather than a full lesson.
 - **Objectives:** explain that an assistant sends more than the visible
   prompt; name two categories of hidden content (environment details,
-  recent history); know that this can be checked.
+  recent history), and know that this can be checked.
 - **Outline:** the trace as a story, in plain words, with one `Predict`
   and one reflection: what's in your working directory right now that you
   would not want in a prompt?
-- **Verify:** the trace itself; keep the narrative version-neutral.
+- **Verify:** the trace itself. Keep the narrative version-neutral.
 
 ### L4. One lesson on the EU AI act
 
@@ -138,7 +138,7 @@ Engineering, and what must be regenerated or verified.
   where the literacy duty comes from.
 - **Outline:** as specified in [`eu-ai-act.md`](./eu-ai-act.md).
 - **Checkpoints:** tier sorting for six scenarios; provider-or-deployer for
-  three; one "is this an AI system?" question.
+  three, and one "is this an AI system?" question.
 - **Regenerate:** everything from the Regulation and the Commission's material.
   Add a review date to the lesson.
 
@@ -148,16 +148,16 @@ Engineering, and what must be regenerated or verified.
 - **Proposed topic:** MCP in operation. **Assumes:** the MCP protocol and
   deep-dive material carried over from the fork (Osmani 14 and 16) or the
   site's equivalent.
-- **Objectives:** explain delegated identity and why it beats a service
+- **Objectives:** explain delegated identity and why it is preferable to a service
   account; scope a server's capabilities by read, write and "can't"; add
   compensating controls where the server has no write rate limit; write a
   five-rule prompt guardrail block and say what it doesn't guarantee;
-  choose between a CLI and an MCP server for a given system.
+  choose between a CLI and an MCP server for one system.
 - **Outline.** *Into*: the model proposes forty edits to a wiki; what stops
   it? *Through*: identity principle; capability inventory; bulk-write
   safety; prompt guardrails; residual risks including indirect injection
   and cross-server tool poisoning. *Beyond*: CLI versus MCP as a design
-  axis; installation hygiene; reading good tool descriptions.
+  axis; installation hygiene, and reading good tool descriptions.
 - **Checkpoints:** mark which tools in an inventory need
   confirm-before-write; scenario decision on the forty edits; multiple
   choice on which control is preventive versus a safety net.
@@ -176,14 +176,14 @@ Engineering, and what must be regenerated or verified.
 - **Objectives:** place a proposed use of a tool at one of three levels;
   complete a level 1 self-assessment; apply a four-tier data
   classification to a pasting decision; ask a vendor the right eight
-  questions; add a disclosure line to generated content.
+  questions, and add a disclosure line to generated content.
 - **Outline.** *Into*: the "Can I…?" table as a quiz before teaching.
   *Through*: the four axes and three levels; the two boundaries
   (experimenting ends when real information appears; level 2 needs an
   owner); the level 1 checklist with its reasons; what changes at level 2;
-  the data classification tiers; the plain-language rules. *Beyond*: the
+  the data classification tiers, and the plain-language rules. *Beyond*: the
   eight vendor questions; residency versus processing; web search sends a
-  derived query; disclosure.
+  derived query, and disclosure.
 - **Checkpoints:** assign a level to three tool descriptions, one of which
   is a trap; sort ten data items into the four tiers; multiple choice on
   the web-search leak.
@@ -200,12 +200,12 @@ Engineering, and what must be regenerated or verified.
 - **Objectives:** state the review principles, including "no default
   outcome"; pick which review dimensions apply to a direct dependency, a
   transitive one and a version bump; run the OpenSSF Scorecard checks on a
-  package; decide what to skip in a code review and say why.
+  package, and decide what to skip in a code review and say why.
 - **Outline.** *Into*: the agent added four packages in one afternoon; the
-  pull request is green; now what? *Through*: principles; the six
+  pull request is green, so now what? *Through*: principles; the six
   dimensions and the applicability table; the questions per dimension; the
   skip list. *Beyond*: the one-page template as an exercise; minimum
-  release age and lockfiles as automation; giving findings back upstream.
+  release age and lockfiles as automation, and giving findings back upstream.
 - **Checkpoints:** the applicability table as a matching exercise;
   multiple choice on the open-governance definition; scenario decision: a
   small, unmaintained package with one maintainer and no tests, pulled in
@@ -214,7 +214,7 @@ Engineering, and what must be regenerated or verified.
   More: run Scorecard, read the code on the critical path, write the
   verdict.
 - **Verify:** acknowledge the public third-party review guideline the
-  method follows; Scorecard check names change.
+  method follows. Scorecard check names change.
 
 ## Authoring changes (not lessons)
 

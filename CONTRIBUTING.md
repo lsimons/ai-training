@@ -18,10 +18,10 @@ AI agents: see [AGENTS.md](AGENTS.md).
 
 This site is built with [Astro Starlight](https://starlight.astro.build/).
 
-Tools are pinned in `.mise.toml`; run `mise install` once. Then:
+Tools are pinned in `.mise.toml`, so run `mise install` once. Then:
 
 - `mise run site-install` - Install the site dependencies (bun). Updates
-  `site/bun.lock` if `site/package.json` changed; commit the result.
+  `site/bun.lock` if `site/package.json` changed. Commit the result.
   `mise run ci` and CI use `site-install-frozen`, which fails instead of
   resolving the difference.
 - `mise run site-dev` - Start the live-reloading docs server.

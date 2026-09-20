@@ -11,7 +11,7 @@ doesn't copy.
 
 Diátaxis says documentation serves a practitioner of a craft along two axes:
 **action** versus **cognition** (doing versus knowing) and **acquisition**
-versus **application** (study versus work). The four quadrants are the four
+versus **application** (study versus work). The quadrants are the four
 kinds of documentation, and the claim is that there are exactly four because
 the two axes cover the whole territory.
 
@@ -36,25 +36,25 @@ A training site lives almost entirely on the study half of the map, so its
 pages are tutorials and explanation. How-to and reference exist but serve
 learners at work and stay outside courses and paths.
 
-1. **Every lesson has a mode**, `tutorial` or `explanation`, declared in
+1. **Each lesson declares a mode**, `tutorial` or `explanation`, in
    frontmatter. Tutorial-mode lessons follow the Diátaxis tutorial rules
    below. Explanation-mode lessons may discuss, compare and hold opinions,
    and their checkpoints test understanding.
 2. **Tutorial rules** for tutorial-mode lessons and for exercises:
    - Open with where we're going (`In this lesson we…`), not with `you will learn…`. Objectives are frontmatter data that drive checkpoints
-     and tutor mode; the recap states them as "You can now…".
+     and tutor mode, and the recap states them as "You can now…".
    - Visible results early and often; every step produces something the
      learner can see.
    - Maintain the narrative of the expected: show expected output, flag the
      likely signs of going wrong. Our pitfall sections are this, kept
      short.
    - Minimize explanation; link to an explanation page or short instead.
-   - One path, no choices, or alternatives. Hence comfort levels apply to
+   - One path, with no choices or alternatives, so comfort levels apply to
      alternative exercises and shorts, never to branches inside a lesson.
    - Safe and repeatable: a contrived setting the learner can reset. For
      agent lessons that means a fixture repository or sandbox, never the
      learner's own project.
-   - Concrete and particular; the general emerges from the specific.
+   - Concrete and particular. The general emerges from the specific.
 3. **Page kinds outside courses**: `how-to` (a recipe for an already
    competent learner, real-world, may branch, no checkpoints) and
    `reference` (austere, mirrors the structure of what it describes). No
@@ -68,7 +68,7 @@ learners at work and stay outside courses and paths.
    absent". Tutor mode puts the instructor back: watching, correcting,
    asking what the learner noticed.
 6. **Release discipline**: publish small complete steps; the sidebar shows
-   only areas that have a real lesson; no stub pages.
+   only areas that have a real lesson, and there are no stub pages.
 
 ## What we deliberately don't adopt
 

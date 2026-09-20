@@ -2,7 +2,7 @@
 
 A lightweight method for assessing any AI tool before connecting it to
 systems or data. The scenarios are the checkpoint material for L1 in the
-[README](./README.md); the rating scales and template are its exercise.
+[README](./README.md), and the rating scales and template are its exercise.
 
 The stance to teach with it: good enough to get started, improve as you
 learn, move fast while being responsible.
@@ -18,15 +18,16 @@ learn, move fast while being responsible.
 | Operational security | What happens when things go wrong?      |
 | Lifecycle management | How do we keep things clean over time?  |
 
-Platform trust has three layers, each to be judged separately: the tool
-itself, the vendor behind it, and the second-order vendor whose model the
-tool calls. A vendor question later added a seventh concern: what happens to
+Platform trust has three layers, and each needs a separate judgment: the
+tool itself, the vendor behind it, and the second-order vendor whose model
+the tool calls. A vendor question later added a seventh concern: what happens to
 the data if the vendor is acquired or fails.
 
 ## Fourteen scenarios
 
 Each scenario names a failure and typical countermeasures. Read them as the
-failure modes of a tool-using agent; most aren't specific to any product.
+failure modes of a tool-using agent, because most aren't specific to any
+product.
 
 ### Data leakage
 
@@ -43,31 +44,33 @@ failure modes of a tool-using agent; most aren't specific to any product.
 - **3. Files kept as input or memory.** Uploaded files and memory stores can
   leak outside the organization or between users of the same platform.
   Countermeasures: teach what's safe to upload; understand the platform's
-  isolation model; clean up old files.
+  isolation model, and clean up old files.
 - **4. Third-party data pulled in through connectors.** Someone connects the
   tool to a wiki or document store that holds a client's data; the client
   never agreed to this processor. Countermeasures: teach what may be
   processed; require the data owner's approval before connecting their
-  systems; put this in onboarding.
+  systems, and put this in onboarding.
 - **5. Cross-context mixing.** Confidential data becomes input to a public
   query or is mixed with data from another security context.
-  Countermeasures: a clear data classification; training on safe handling.
+  Countermeasures: a clear data classification and training on safe
+  handling.
 
 ### Integration security
 
-- **6. Excessive permissions.** The tool's integrations carry permissions
+- **6. Excessive permissions.** The tool's integrations have permissions
   ordinary users don't have, and those can be abused by mistake, through
   prompt injection, or by a bug. Countermeasures: review every
   integration; avoid admin-level accounts; prefer delegated authentication
-  so the user's own permissions apply; ship safe default configurations.
+  so the user's own permissions apply, and ship safe default
+  configurations.
 - **7. Destructive actions at machine speed.** The tool can act destructively
   across every connected system, quickly. Countermeasures: connect only
   systems with tested, restorable backups; require approval for write
-  permissions; make it safe to ask "is this a bad idea?".
+  permissions, and make it safe to ask "is this a bad idea?".
 - **8. Resource exhaustion.** One agent running wild burns through all
   tokens, storage or API quota, or effectively denies service to an
   integrated system. Countermeasures: spending and rate limits per
-  integration; sensible defaults; usage monitoring.
+  integration, sensible defaults, and usage monitoring.
 
 ### Access control
 
@@ -116,7 +119,7 @@ failure modes of a tool-using agent; most aren't specific to any product.
 1. Minimal: minor inconvenience.
 2. Low: limited data exposure or operational impact.
 3. Medium: moderate exposure or business disruption.
-4. High: significant data breach or client impact.
+4. High: a large data breach or client impact.
 5. Critical: severe breach, legal consequences, or major business failure.
 
 **Likelihood (1-5)**
@@ -146,9 +149,9 @@ conditions, or not approved, with conditions, approver, and date.
   prompt injection and supply chain map directly onto these scenarios.
 - Checkpoint idea: show a short tool description and ask which three
   scenarios apply most (sorting or multi-choice).
-- Exercise idea: rate two scenarios for a given tool on both scales, then
-  compare with a worked answer. Two comfort levels: less comfortable gets
-  the scenario list; more comfortable also writes the countermeasures.
+- Exercise idea: rate two scenarios for one tool on both scales, then
+  compare with a worked answer. Less comfortable gets the scenario list,
+  and more comfortable also writes the countermeasures.
 - The three-layer trust model is under-taught. Give it its own paragraph
   and a concept entry: a chat tool built on a gateway built on a model
   vendor means three privacy policies, three retention periods, three
