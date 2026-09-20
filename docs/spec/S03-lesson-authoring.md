@@ -4,10 +4,14 @@
 what it contains and declares, how examples, citations, terms, and prompts are
 written, and how checkpoints, exercises, and widgets behave.
 
-**Status:** Draft. Changed after the release 1 review: checkpoints are "at
-least one per served objective" instead of exactly one, because tutorial
-mode also demands a `predict` for every example that runs; and prompt
-blocks may be marked `illustrative` in release 1 (see "Examples").
+**Status:** In progress - lesson anatomy, frontmatter, the checkpoint,
+pitfall, exercise, recap, prompt and response components, widgets, and the
+example runner in CI are implemented (2026-09-20). Deferred: the citation
+plugin (`(@key)`) and the term remark plugin. Changed after the release 1
+review: checkpoints are "at least one per served objective" instead of
+exactly one, because tutorial mode also demands a `predict` for every
+example that runs; and prompt blocks may be marked `illustrative` in
+release 1 (see "Examples").
 
 ## Introduction
 
