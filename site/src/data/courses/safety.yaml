@@ -43,6 +43,7 @@ lessons:
     serves:
       - safety/handles-data-safely/decides-what-to-share
     status: planned
+    issue: 113
     minutes: 15
     after:
       - safety/responsible-use
@@ -58,6 +59,7 @@ lessons:
       - safety/handles-data-safely/discloses-ai-use
       - safety/handles-data-safely/respects-licenses
     status: planned
+    issue: 114
     minutes: 15
     after:
       - safety/responsible-use
@@ -72,6 +74,7 @@ lessons:
     serves:
       - safety/verifies-output/checks-claims
     status: planned
+    issue: 115
     minutes: 15
     # mode: tutorial
     # exercise (judge): Read the lesson's second summary before running the check, predict from their specificity which of its claims are invented, then run the fixture and record where the prediction held and where it did not.
@@ -84,6 +87,7 @@ lessons:
     serves:
       - safety/verifies-output/calibrates-trust
     status: planned
+    issue: 116
     minutes: 15
     after:
       - safety/spotting-hallucination
@@ -98,6 +102,7 @@ lessons:
     serves:
       - safety/verifies-output/calibrates-trust
     status: planned
+    issue: 118
     minutes: 10
     after:
       - safety/spotting-hallucination
@@ -113,6 +118,7 @@ lessons:
       - safety/verifies-output/checks-claims
       - safety/verifies-output/calibrates-trust
     status: planned
+    issue: 120
     minutes: 15
     after:
       - safety/spotting-hallucination
@@ -128,6 +134,7 @@ lessons:
     serves:
       - safety/verifies-output/checks-claims
     status: planned
+    issue: 122
     minutes: 15
     after:
       - safety/checking-habits
@@ -142,6 +149,7 @@ lessons:
     serves:
       - safety/verifies-output/spots-sycophancy
     status: planned
+    issue: 124
     minutes: 15
     after:
       - safety/checking-habits
@@ -157,6 +165,7 @@ lessons:
       - safety/verifies-output/checks-claims
       - safety/verifies-output/keeps-a-check-habit
     status: planned
+    issue: 126
     minutes: 15
     after:
       - safety/following-the-source
@@ -171,6 +180,7 @@ lessons:
     serves:
       - safety/verifies-output/calibrates-trust
     status: planned
+    issue: 128
     minutes: 15
     after:
       - safety/checking-habits
@@ -200,6 +210,7 @@ lessons:
       - safety/judges-agent-risk/names-blast-radius
       - safety/judges-agent-risk/chooses-human-in-loop
     status: planned
+    issue: 130
     minutes: 15
     after:
       - safety/agent-risk
@@ -215,6 +226,7 @@ lessons:
     serves:
       - safety/judges-agent-risk/recognizes-injection
     status: planned
+    issue: 132
     minutes: 15
     after:
       - safety/agent-risk
@@ -229,6 +241,7 @@ lessons:
     serves:
       - safety/judges-agent-risk/sets-oversight
     status: planned
+    issue: 135
     minutes: 15
     after:
       - safety/agent-risk
@@ -244,6 +257,7 @@ lessons:
     serves:
       - safety/judges-agent-risk/sets-oversight
     status: planned
+    issue: 138
     minutes: 15
     after:
       - safety/writing-an-ai-policy
@@ -260,6 +274,7 @@ lessons:
       - safety/judges-agent-risk/sets-oversight
       - safety/judges-agent-risk/names-blast-radius
     status: planned
+    issue: 141
     minutes: 15
     after:
       - safety/writing-an-ai-policy
