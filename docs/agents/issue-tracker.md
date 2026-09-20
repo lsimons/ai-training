@@ -14,19 +14,26 @@ gh issue edit <number> --add-label ready-for-agent --remove-label needs-triage
 
 ## Labels
 
-| Label           | Description                                    | Color   |
-| --------------- | ---------------------------------------------- | ------- |
-| bug             | Something isn't working                        | #d73a4a |
-| documentation   | Improvements or additions to documentation     | #0075ca |
-| enhancement     | New feature or request                         | #a2eeef |
-| needs-triage    | Maintainer needs to evaluate this issue        | #e6e6fa |
-| needs-info      | Waiting on reporter for more information       | #e6e6fa |
-| ready-for-agent | Fully specified, ready for an autonomous agent | #e6e6fa |
-| ready-for-human | Requires human implementation                  | #e6e6fa |
-| wontfix         | This won't be worked on                        | #ffffff |
+| Label           | Description                                                              | Color   |
+| --------------- | ------------------------------------------------------------------------ | ------- |
+| bug             | Something isn't working                                                  | #d73a4a |
+| content         | Adds, changes or improves content: lessons, courses, specs, docs         | #0e8a16 |
+| code            | Adds, changes or improves source code: the site's TypeScript, Python, CI | #1d76db |
+| documentation   | Improvements or additions to documentation                               | #0075ca |
+| enhancement     | New feature or request                                                   | #a2eeef |
+| needs-triage    | Maintainer needs to evaluate this issue                                  | #e6e6fa |
+| needs-info      | Waiting on reporter for more information                                 | #e6e6fa |
+| ready-for-agent | Fully specified, ready for an autonomous agent                           | #e6e6fa |
+| ready-for-human | Requires human implementation                                            | #e6e6fa |
+| wontfix         | This won't be worked on                                                  | #ffffff |
 
 GitHub's default labels (`duplicate`, `good first issue`, `help wanted`,
 `invalid`, `question`, `accessibility`) also exist and may be used.
+
+Every open issue has `content`, `code` or both, saying what kind of
+change it asks for. A lesson issue (title `Lesson: ...`) is `content`. An
+issue that touches both a lesson and the code behind it (a fixture and its
+lesson page, a schema field and the spec row) gets both.
 
 ## Triage flow
 
