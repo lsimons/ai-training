@@ -82,9 +82,12 @@ print(TOOLS["get_weather"]["fn"]("Lisbon"))
 
 `run` names a file under `site/examples/`. `mise run examples` executes it
 and fails if its stdout isn't `answer`. The file holds the complete,
-runnable program, and the page shows only the part the learner needs. Omit
-`run` only for the honor-system variant (predict what an agent does), and
-then say in the stem that the learner checks it themselves.
+runnable program, and the page shows only the part the learner needs. Every
+fixture is a Python script (`.py`, run with `python3`), and the runner
+rejects any other file type. A fixture that needs to run a command or copy
+a file does it with `subprocess` and `shutil`. Omit `run` only for the
+honor-system variant (predict what an agent does), and then say in the stem
+that the learner checks it themselves.
 
 ```mdx
 <Order id="order-the-loop" objective="..." title="Order the loop" hint="..."
