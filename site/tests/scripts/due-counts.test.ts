@@ -1,4 +1,4 @@
-import { dueByCourse, dueLine } from '@scripts/due-counts';
+import { dueByCourse, dueCountLabel, dueLine } from '@scripts/due-counts';
 import { applyLessonFinished, emptyRecord, type ProgressRecord } from '@scripts/progress-model';
 import { describe, expect, it } from 'vitest';
 
@@ -50,5 +50,12 @@ describe('dueLine', () => {
 	it('uses the singular for one item', () => {
 		expect(dueLine({ area: 'concepts', title: 'Concepts', due: 1 })).toBe('Concepts: 1 item due');
 		expect(dueLine({ area: 'safety', title: 'Safety', due: 3 })).toBe('Safety: 3 items due');
+	});
+});
+
+describe('dueCountLabel', () => {
+	it('uses the singular for one item', () => {
+		expect(dueCountLabel(1)).toBe(' review item due');
+		expect(dueCountLabel(2)).toBe(' review items due');
 	});
 });

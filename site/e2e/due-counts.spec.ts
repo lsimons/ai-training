@@ -21,8 +21,8 @@ async function makeDue(page: Page) {
 test('the sidebar and the landing page show the same due count once a finished lesson comes due', async ({ page }) => {
 	// Nothing finished: no count anywhere.
 	await page.goto('concepts/');
-	await expect(page.locator('[data-due-count]')).toHaveCount(6);
-	await expect(page.locator('[data-due-count]:not([hidden])')).toHaveCount(0);
+	await expect(page.locator('.sidebar-content a[href="/ai-training/concepts/"]')).toBeVisible();
+	await expect(page.locator('[data-due-count]')).toHaveCount(0);
 	await page.goto('');
 	await expect(page.locator('[data-due-lines]')).toBeHidden();
 
@@ -32,7 +32,7 @@ test('the sidebar and the landing page show the same due count once a finished l
 	await answerChoice(page, 'name-the-failure');
 	await page.locator('[data-finish]').click();
 	await expect(page.locator('[data-finish]')).toHaveText(/^Finished ✓/);
-	await expect(page.locator('[data-due-count="concepts"]')).toBeHidden();
+	await expect(page.locator('[data-due-count]')).toHaveCount(0);
 	const record = await storedRecord(page);
 	const items = Object.keys(record.reviews ?? {}).filter((id) => id.startsWith(`${LESSON}#`)).length;
 	expect(items).toBe(2);
@@ -44,7 +44,7 @@ test('the sidebar and the landing page show the same due count once a finished l
 	await expect(count).toBeVisible();
 	await expect(count).toHaveText(`${items} review items due`);
 	await expect(page.locator('[data-review-card]')).toHaveText(`Review due: ${items} items`);
-	await expect(page.locator('[data-due-count="safety"]')).toBeHidden();
+	await expect(page.locator('[data-due-count]')).toHaveCount(1);
 
 	// The landing page shows one line for the course, linking to its review page.
 	await page.goto('');
@@ -70,5 +70,5 @@ test('the sidebar and the landing page show the same due count once a finished l
 	await page.locator('[data-reset]').click();
 	await expect(page.locator('[data-message]')).toHaveText('Progress reset.');
 	await expect(page.locator('[data-due-lines]')).toBeHidden();
-	await expect(count).toBeHidden();
+	await expect(count).toHaveCount(0);
 });
