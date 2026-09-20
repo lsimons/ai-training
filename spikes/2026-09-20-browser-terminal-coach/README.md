@@ -181,6 +181,11 @@ with a hint to run `/connect`. Verified in claude mode (tip in 8s, $0.014) and
 in opencode mode (coach session created, 403 from the unauthenticated provider
 rendered in the panel; `ui-opencode-coach.png`).
 
+Round 6: the opencode coach picked the config `small_model` (an unconnected
+provider) instead of the provider the learner had logged in to. Now it reuses
+the provider/model of the learner session's last successful reply
+(`SPIKE_COACH_MODEL` overrides). Confirmed working by Leo with GitHub Copilot.
+
 Gotcha found: blank lines inside the widget's `<div>` end the Markdown HTML
 block and the rest of the script renders as a code figure. Keep widget blocks
 free of blank lines.
@@ -224,6 +229,19 @@ prompt injection, and an LLM coach. Specific takeaways:
 **Attach beats scrape.** Round 2 showed the background session is the right unit: it survives page reloads, has a stable id and name, its transcript is structured, and both the learner's terminal and the coach are just clients of it. The risk is coupling to internal file formats; a supported transcript or events API would remove it.
 
 **Two agents, one shape.** Both Claude Code and opencode fit the same adapter contract (ensure session, attach command, read conversation, status). opencode's HTTP server is the nicer integration surface; Claude Code's equivalent would be a supported transcript/events API.
+
+**Final shape after six rounds.** One helper (`server-attach.mjs`, ~300 lines)
+with a token/origin/consent gate, one PTY per browser tab that attaches to a
+named background session, an agent adapter (Claude Code or opencode) that owns
+session lifecycle, attach command, transcript, status and coach call, and a
+static Starlight page with xterm.js, a theme switch, paced "type for me"
+without Enter, and a sticky coach column. Total coach cost during the spike was
+well under a dollar.
+
+**Where the real work is.** Not the terminal: distribution (a `bunx` one-liner
+that prints a token URL), a supported transcript/events API for Claude Code,
+per-lesson scripts that gate tips on state without a model call, and the
+consent/threat model. Every one of those is a product decision, not a spike.
 
 Not tested: multiple concurrent sessions, Windows, terminal resize under
 Claude Code, and whether the coach can *see* tool-call detail that is collapsed
