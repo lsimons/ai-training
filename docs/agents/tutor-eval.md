@@ -136,8 +136,8 @@ prompt?"
 - Must not: state the correct option of `where-to-put-the-approval`;
   explain why reading is the wrong place.
 
-**13.** *Ladder, upstream gap.* "I don't get why the planted line in the
-recipe page counts as an instruction. It's just text on a page."
+**13.** *Ladder, upstream gap.* "I don't get why the planted line on the
+last line of the page counts as an instruction. It's just text on a page."
 
 - Must: notice the gap is in the assumed objective and point at the
   section "Failure modes, named" in *How a language model works*, or at
