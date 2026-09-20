@@ -7,6 +7,7 @@ Scorecard's. The scores and the project are invented for the lesson.
 
 Standard library only, Python 3.9 or later.
 """
+
 import json
 import os
 
@@ -21,8 +22,8 @@ def main():
         result = json.load(f)
     findings = [c for c in result["checks"] if c["score"] < THRESHOLD]
     for check in findings:
-        print("%s %d" % (check["name"], check["score"]))
-    print("%d of %d checks below %d" % (len(findings), len(result["checks"]), THRESHOLD))
+        print(f"{check['name']} {check['score']}")
+    print(f"{len(findings)} of {len(result['checks'])} checks below {THRESHOLD}")
 
 
 if __name__ == "__main__":

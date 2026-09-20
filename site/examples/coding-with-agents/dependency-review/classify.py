@@ -10,6 +10,7 @@ would be labeled transitive here; the fixture has none.
 
 Standard library only, Python 3.9 or later.
 """
+
 import json
 import os
 
@@ -33,7 +34,7 @@ def installed(lock):
     out = {}
     for path, entry in lock["packages"].items():
         if path.startswith("node_modules/"):
-            out[path[len("node_modules/"):]] = entry["version"]
+            out[path[len("node_modules/") :]] = entry["version"]
     return out
 
 
@@ -55,7 +56,7 @@ def main():
     before = load("package-lock.before.json")
     after = load("package-lock.after.json")
     for name, version, kind in classify(before, after):
-        print("%s %s: %s" % (name, version, kind))
+        print(f"{name} {version}: {kind}")
 
 
 if __name__ == "__main__":

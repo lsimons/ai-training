@@ -4,6 +4,7 @@ Runs triage.py as a subprocess so the lesson's checkpoint asserts one line
 while the full script stays the one the learner reads. Standard library
 only, Python 3.9 or later.
 """
+
 import os
 import subprocess
 import sys
