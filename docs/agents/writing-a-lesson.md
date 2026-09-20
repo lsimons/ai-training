@@ -157,9 +157,11 @@ page must also say so in prose next to it.
 </Recap>
 ```
 
-`Recap` appends "You can now..." from the served objectives, what comes next
-from `extends-to`, and the finish button. Don't write those by hand. Sources
-are listed on the topic page, from the topic YAML, not on the lesson.
+`Recap` appends "You can now..." from the served objectives, a "Next" link
+(the course's next lesson, or the next course page after the last one), and
+the finish button. Don't write those by hand. `extends-to` only feeds the
+"You are ahead" card. Sources are listed on the topic page, from the topic
+YAML, not on the lesson.
 
 Widgets are their own components under `site/src/components/widgets/` and
 are imported by name. They teach and never grade.

@@ -64,7 +64,9 @@
 .cp-bucket-target, .cp-pool-target { width: 100%; text-align: left; font-weight: 600; }
 .cp-bucket-target::after, .cp-pool-target::after { content: ' ↓'; color: var(--sl-color-gray-3); }
 
-/* review-only */
+/* review-only. These are flex containers, and an author `display` beats the
+   browser's `[hidden] { display: none }`, so restate it. */
+.checkpoint [hidden] { display: none !important; }
 .cp-after { margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; font-size: 0.9rem; }
 .cp-stage { display: inline-flex; gap: 0.2rem; align-items: center; }
 .cp-stage > span { width: 0.9rem; height: 0.5rem; border-radius: 3px; background: var(--sl-color-gray-5); }
