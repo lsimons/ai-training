@@ -95,7 +95,7 @@ lessons:
       - using-agents/delegating
     # mode: explanation
     # exercise (judge): sort six supplied tasks into draft only, ask before anything irreversible, or run to completion, and write the one-sentence boundary for two of them.
-    # shorts: Trust earned by results
+    # shorts: Widening autonomy as results pass
     # assumes (other areas): concepts/recognizes-agents/places-on-autonomy-scale, safety/judges-agent-risk/names-blast-radius
     # introduces: none (deepens choosing-a-degree-of-autonomy from the live lesson)
   - id: using-agents/adjusting-the-brief
@@ -108,7 +108,7 @@ lessons:
     after:
       - using-agents/delegating
     # mode: tutorial
-    # exercise (do): run the lesson's brief, which is written so the agent must ask a question, answer it by editing the brief instead of the chat, restart from the edited brief, and compare the two results.
+    # exercise (do): run the lesson's brief, which is written so the agent must ask a question, answer it by editing the brief instead of the chat, restart from the edited brief, and compare the two results. If the agent guesses instead of asking, its pick between the two named templates is the question to answer.
     # shorts: Why an answer in the chat is lost
     # assumes (other areas): concepts/prompts-reliably/iterates-on-output, concepts/how-models-work
     # introduces: none (deepens task-brief and checking-results from the live lesson)
@@ -124,7 +124,7 @@ lessons:
     after:
       - using-agents/delegating
     # mode: tutorial
-    # exercise (do): take the supplied large task (a three-part report from three source files), split it into pieces that each have an input, an output and a check, and write the brief for the first piece.
+    # exercise (do): take the supplied large task (a three-part report from three source files), split it into pieces that each have an input, an output and a check, write the brief for the first piece, and run that piece so the result is what you look at.
     # shorts: The decisions that are yours to make first
     # assumes (other areas): none
     # introduces: task-decomposition
@@ -140,7 +140,7 @@ lessons:
       - using-agents/breaking-work-into-pieces
       - using-agents/adjusting-the-brief
     # mode: tutorial
-    # exercise (do): delegate the first piece from the previous lesson, check it against its criteria, change the brief with what the result showed, and delegate the second piece. Keep a two-line log per round.
+    # exercise (do): delegate the supplied first piece and its criteria (a model answer to the previous exercise; your own split works too), check the result against the criteria, change the brief with what the result showed, and delegate the second piece. Keep a two-line log per round.
     # shorts: Keeping rounds short
     # assumes (other areas): safety/verifies-output/keeps-a-check-habit
     # introduces: task-iteration
@@ -148,14 +148,14 @@ lessons:
     title: When to stop delegating and do it yourself
     covers: using-agents/decomposition
     serves:
-      - using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation
+      - using-agents/delegates-and-checks/adjusts-mid-task
     status: planned
     minutes: 10
     after:
       - using-agents/delegating-in-rounds
     # mode: explanation
     # exercise (judge): read three supplied round logs and mark, for each, the round where taking the step back would have been cheaper, with the sign that shows it.
-    # shorts: The third round
+    # shorts: The third round on one piece is the signal
     # assumes (other areas): none
     # introduces: when-to-stop-and-do-it-yourself
   # Topic using-agents/choosing-tools (five concepts, four lessons). One tutorial
@@ -166,7 +166,6 @@ lessons:
     covers: using-agents/choosing-tools
     serves:
       - using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation
-      - using-agents/delegates-and-checks/chooses-autonomy
     status: planned
     minutes: 15
     after:
@@ -190,6 +189,8 @@ lessons:
     # shorts: When a small model is the right one
     # assumes (other areas): concepts/limits, concepts/how-models-work
     # introduces: model-fit, cost-and-speed
+    # note: no objective in S02 covers model fit yet. Issue #106 proposes a base
+    # objective under chooses-tool-and-autonomy; `serves` to be updated when #106 lands.
   - id: using-agents/steps-that-stay-human
     title: The steps that stay human
     covers: using-agents/choosing-tools
@@ -204,8 +205,8 @@ lessons:
     # shorts: A human path when the tool is down
     # assumes (other areas): safety/judges-agent-risk/chooses-human-in-loop, safety/governance
     # introduces: what-to-keep-human
-  - id: using-agents/when-the-tool-climbs
-    title: Asking the same questions one level up
+  - id: using-agents/reasoning-across-tool-levels
+    title: Reasoning across tool levels
     covers: using-agents/choosing-tools
     serves:
       - using-agents/chooses-tool-and-autonomy/reasons-across-levels
