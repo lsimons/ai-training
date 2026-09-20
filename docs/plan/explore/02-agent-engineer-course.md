@@ -56,7 +56,7 @@ Part 3, Deep dives (301):
   `lp-quiz` / `lp-roadmap` (lesson 19).
 - No progress tracking or persisted quizzes in the site itself; quizzing and
   progress exist only in the `/teach` skill. Prose exercises exist ("Hands-On
-  Exercise", "Try it yourself", notably lessons 12 and 13).
+  Exercise", "Try it yourself", for example lessons 12 and 13).
 - Pagefind search. CI builds and astro-checks; deploy publishes `site/dist` to
   Pages. Tooling pinned in `.mise.toml`; hooks in `prek.toml`.
 
@@ -66,14 +66,14 @@ Path: `.claude/skills/teach/SKILL.md` (commit 6dd3036, "experimental").
 
 - Slash command `/teach [lesson number | resume | review | status]`. Persona:
   tutor, not lecturer; never pastes lessons into chat.
-- Progress lives in Claude's auto-memory directory as `teach-progress.md`
+- Progress is stored in Claude's auto-memory directory as `teach-progress.md`
   (indexed from `MEMORY.md`): a table of Lesson / Read / Quiz / Score / Weak
   spots, a spaced-recall review queue, and learner notes. Updated after each
   quiz and at session end.
 - Boots the local server: from `docs/` runs `bunx astro dev status`; if down,
   `mise run site-dev` (Astro 7 daemonizes), polls the local URL for 200, then
   opens the lesson URL in the browser. Leaves the server running.
-- Builds the lesson list dynamically from frontmatter, not hardcoded.
+- Builds the lesson list from frontmatter at run time, not hardcoded.
 - Quizzing: 3-5 questions one at a time, mapped to the lesson's "What you will
   learn" bullets; mixes recall / apply / contrast; at least one question
   references a concrete page artifact. Pass = all bullets touched, at most one
