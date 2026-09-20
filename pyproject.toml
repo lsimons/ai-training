@@ -1,0 +1,77 @@
+# Python quality tooling for this repo. There is no package to build: the
+# Python here is the standalone helpers in scripts/ (Python 3.14, standard
+# library only) and the lesson example fixtures under site/examples/ (Python
+# 3.9+, read and copied by learners). This file configures ruff,
+# basedpyright and pytest for both, and uv pins the tools in uv.lock.
+
+[project]
+name = "ai-training"
+version = "0.0.0"
+description = "Tooling metadata for the ai-training repo; not a package"
+requires-python = ">=3.14"
+license = "Apache-2.0"
+license-files = ["LICENSE-CODE"]
+dependencies = []
+
+[dependency-groups]
+# Exact pins, like everything in .mise.toml [tools]. uv.lock is the lock and
+# `mise run py-install-frozen` (`uv sync --locked`) refuses a stale one.
+dev = [
+  "pytest==9.1.1",
+  "pytest-cov==7.1.0",
+  "ruff==0.16.7",
+  "basedpyright==1.40.1",
+]
+
+[tool.uv]
+# The repo is not installable; uv only manages the dev tools.
+package = false
+exclude-newer = "1 week"
+
+# Two audiences, one config. This section is the strict set for scripts/ and
+# tests/ (ours, Python 3.14). site/examples/ruff.toml extends it and lowers
+# `target-version` to py39, so the UP (pyupgrade) rules never push syntax a
+# learner's older interpreter rejects. Do not add a third config.
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+extend-exclude = ["site/node_modules", "site/dist"]
+
+[tool.ruff.lint]
+# E/W pycodestyle, F pyflakes, I isort, N pep8-naming, UP pyupgrade,
+# B bugbear, C4 comprehensions, SIM simplify, PTH pathlib, RUF ruff-specific.
+select = ["E", "F", "I", "W", "N", "UP", "B", "C4", "SIM", "PTH", "RUF"]
+
+[tool.ruff.lint.isort]
+# The scripts are imported by name from tests/, so sort them as ours.
+known-first-party = ["prose_eval", "prose_metrics"]
+
+[tool.ruff.lint.per-file-ignores]
+# Lesson fixtures show `open()` and `os.path` on purpose: they are what a
+# learner meets in most codebases, and Path would be one more thing to
+# explain. Repo scripts do use pathlib.
+"site/examples/**" = ["PTH"]
+
+# Strict, for the repo's own code. The lesson fixtures are checked by a
+# second config, site/examples/pyrightconfig.json (Python 3.9, `standard`),
+# because basedpyright has no per-directory typeCheckingMode. `mise run
+# py-typecheck` runs both.
+[tool.basedpyright]
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+include = ["scripts", "tests"]
+# The tests import the scripts as modules, the same way pytest's
+# `pythonpath` below makes them importable.
+extraPaths = ["scripts"]
+exclude = ["**/node_modules", "**/__pycache__", ".venv"]
+
+[tool.pytest.ini_options]
+# Only the repo's own tests. site/examples/**/test_*.py is lesson content
+# that the learner runs; `mise run examples` asserts its output.
+testpaths = ["tests"]
+pythonpath = ["scripts"]
+# --strict-markers/-config turn typos in markers and in this table into
+# errors; xfail_strict fails a test that was expected to fail but passed.
+# Coverage counts scripts/ only.
+addopts = "-v --strict-markers --strict-config --cov=scripts --cov-report=term-missing --cov-fail-under=80"
+xfail_strict = true
