@@ -7,6 +7,8 @@
 import { chromium } from 'playwright';
 const B = `http://localhost:${process.env.PORT ?? 4399}/ai-training`;
 const browser = await chromium.launch(); const page = await browser.newPage();
+// Only the site under test: webfonts and other external requests get an empty reply, so the walkthrough never waits on the network.
+await page.route('**/*', (r) => (r.request().url().startsWith(`http://localhost:`) ? r.continue() : r.fulfill({ status: 204, body: '' })));
 const errs = []; page.on('pageerror', e => errs.push('PAGEERROR ' + e.message)); page.on('console', m => m.type()==='error' && errs.push('CONSOLE ' + m.text()));
 const log = (...a) => console.log(...a);
 const fb = (cp) => cp.locator('.cp-feedback').textContent();
@@ -41,11 +43,31 @@ expect(await page.locator('[data-finish]').isDisabled(), false, 'finish enabled 
 await page.click('[data-finish]'); expect(await page.locator('[data-finish]').textContent(), /^Finished ✓ \(\d{4}-\d{2}-\d{2}\)$/, 'finish label');
 await page.reload(); expect(await page.locator('[data-finish]').textContent(), /^Finished ✓/, 'finish persisted'); expect(await page.locator('[data-finish]').isDisabled(), true, 'finish disabled after finishing');
 
-// building-agents: predict + order, comfort toggle, routing
+expect((await page.locator('.ai-notice').textContent()).trim(), 'Content co-authored by AI.', 'AI notice in the footer');
+
+// settings: comfort level lives here, not on the lesson; it drives routing there
+await page.goto(`${B}/settings/`);
+expect(await page.locator('[data-comfort=less]').count(), 1, 'comfort control on settings page');
+expect(await page.locator('[data-review-item]').count(), 2, 'review schedule lists the finished lesson\'s checkpoints');
+const item = () => page.locator('[data-review-item="concepts/how-models-work#what-the-model-does"]');
+expect(await item().locator('.cp-later').isDisabled(), false, 'less often enabled at stage 1');
+await item().locator('.cp-later').click(); await page.waitForTimeout(100);
+expect(await item().locator('.cp-stage-label').textContent(), /^stage 2 of 5, due \d{4}-\d{2}-\d{2}$/, 'less often raises the stage');
+await item().locator('.cp-sooner').click(); await page.waitForTimeout(100);
+expect(await item().locator('.cp-stage-label').textContent(), /^stage 1 of 5/, 'sooner lowers the stage');
+expect(await item().locator('.cp-sooner').isDisabled(), true, 'sooner disabled at stage 1');
+await page.click('[data-comfort=less]'); expect(await page.locator('[data-comfort=less]').getAttribute('aria-pressed'), 'true', 'comfort less pressed');
+
+// building-agents: predict + order, routing from the comfort level
 await page.goto(`${B}/building-agents/agent-loop/`);
-expect(await page.locator('[data-comfort=less]').count(), 1, 'comfort control present');
-await page.click('[data-comfort=less]'); expect(await page.locator('[data-route=behind]').isHidden(), false, 'behind card shown for less');
-await page.click('[data-comfort=less]'); expect(await page.locator('[data-route=behind]').isHidden(), true, 'behind card hidden again after toggling less off');
+expect(await page.locator('[data-comfort]').count(), 0, 'no comfort control on the lesson');
+expect(await page.locator('[data-route=behind]').isHidden(), false, 'behind card shown for less');
+await page.goto(`${B}/settings/`); await page.click('[data-comfort=less]');
+expect(await page.locator('[data-comfort=less]').getAttribute('aria-pressed'), 'false', 'comfort less unset again');
+await page.goto(`${B}/building-agents/agent-loop/`);
+expect(await page.locator('[data-route=behind]').isHidden(), true, 'behind card hidden again after unsetting less');
+expect((await page.locator('[data-finish-note]').textContent()).trim(), 'Pass or skip 3 more checkpoints to finish this lesson.', 'finish note');
+expect(await page.locator('.recap-sources').count(), 0, 'no sources block on the lesson');
 cp = page.locator('#predict-tool-call'); await cp.locator('textarea').fill('27°C, rain'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Not quite. Trace it once more.', 'predict wrong');
 await cp.locator('textarea').fill(' 27°c, sun'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Correct. That is exactly the output.', 'predict right (normalised)');
 cp = page.locator('#predict-loop'); await cp.locator('textarea').fill('It is 14°C, rain there.'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Correct. That is exactly the output.', 'predict2');
@@ -131,6 +153,7 @@ await page.screenshot({ path: '/tmp/ai-training-e2e-progress.png', fullPage: tru
 await page.goto(`${B}/concepts/`); await page.screenshot({ path: '/tmp/ai-training-e2e-course.png', fullPage: true });
 await page.goto(`${B}/map/`); await page.screenshot({ path: '/tmp/ai-training-e2e-map.png', fullPage: true });
 await page.goto(`${B}/using-agents/delegating/`); await page.screenshot({ path: '/tmp/ai-training-e2e-lesson.png', fullPage: true });
+await page.goto(`${B}/settings/`); await page.screenshot({ path: '/tmp/ai-training-e2e-settings.png', fullPage: true });
 expect(errs, [], 'page errors');
 await browser.close();
 if (failures.length) {

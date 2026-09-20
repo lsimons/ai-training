@@ -1,8 +1,8 @@
 ---
 /**
  * Closes a lesson (spec S03 "Recap"): the author's numbered takeaways, then
- * "You can now..." from the served objectives, the sources cited, what comes
- * next from `extends-to`, and the finish button.
+ * "You can now..." from the served objectives, what comes next from
+ * `extends-to`, and the finish button. Sources live on the topic pages.
  */
 import { getCollection } from 'astro:content';
 import { lessonEntryOf } from '@lib/lesson-context';
@@ -18,12 +18,6 @@ const served = (data.serves ?? []).map((id) => ({ id, statement: objectives.get(
 const missing = served.filter((s) => !s.statement).map((s) => s.id);
 if (missing.length) throw new Error(`${entry.id}: serves unknown objective(s): ${missing.join(', ')}`);
 
-const bibliography = await getCollection('bibliography');
-const sources = (data.sources ?? []).map((key) => {
-	const ref = bibliography.find((b) => b.id === key);
-	if (!ref) throw new Error(`${entry.id}: unknown source key ${key}`);
-	return { key, ...ref.data };
-});
 const pages = await knownPagePaths();
 const next = (data['extends-to'] ?? []).map((n) => ({ ...n, exists: pages.has(n.href) }));
 ---
@@ -36,26 +30,8 @@ const next = (data['extends-to'] ?? []).map((n) => ({ ...n, exists: pages.has(n.
 		{served.map((s) => <li data-objective={s.id}>{s.statement}</li>)}
 	</ul>
 	{
-		sources.length > 0 && (
-			<>
-				<p><strong>Sources</strong></p>
-				<ul class="recap-sources">
-					{sources.map((s) => (
-						<li>
-							<code>{s.key}</code> {s.title}
-							{s.container && <>, <em>{s.container}</em></>}
-							{s.author && <> ({s.author})</>}
-							{s.license && <>, {s.license}</>}
-							{s.url && <> · <a href={s.url}>link</a></>}
-						</li>
-					))}
-				</ul>
-			</>
-		)
-	}
-	{
 		next.length > 0 && (
-			<p class="recap-next">
+			<p class="recap-next not-content">
 				<strong>Next:</strong>{' '}
 				{next.map((n, i) => (
 					<>
@@ -69,6 +45,6 @@ const next = (data['extends-to'] ?? []).map((n) => ({ ...n, exists: pages.has(n.
 	<div class="not-content recap-actions">
 		<button type="button" class="recap-finish" data-finish>Mark lesson finished</button>
 		<button type="button" class="recap-skip" data-skip-lesson>I know this, skip it</button>
-		<span class="recap-finish-note" data-finish-note></span>
+		<p class="recap-finish-note" data-finish-note role="status"></p>
 	</div>
 </section>

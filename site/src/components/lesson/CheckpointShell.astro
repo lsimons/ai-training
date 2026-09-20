@@ -2,8 +2,9 @@
 /**
  * Shared frame for every checkpoint kind (spec S03 "Checkpoints"): a section
  * whose id is the checkpoint id, a heading, the stem, the interaction, and the
- * Check / Hint / Skip controls. Review-only controls are rendered hidden and
- * enabled by the review page.
+ * Check / Hint / Skip controls. Review-only controls (Give up, the stage
+ * pills) are rendered hidden and enabled by the review page. The review
+ * frequency is adjusted on the settings page, not here.
  */
 import { lessonIdOf } from '@lib/lesson-context';
 import { href } from '@lib/url';
@@ -63,7 +64,5 @@ const progressId = `${lessonId}#${id}`;
 			<span></span><span></span><span></span><span></span><span></span>
 			<em class="cp-stage-label"></em>
 		</span>
-		<button type="button" class="cp-sooner">See this sooner</button>
-		<button type="button" class="cp-later">See this less often</button>
 	</div>
 </section>

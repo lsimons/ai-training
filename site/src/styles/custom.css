@@ -101,3 +101,36 @@
 
 /* Lesson pages nest under their course in the sidebar. */
 .lesson-link { padding-left: 1.75rem !important; }
+
+/* Sidebars. Starlight gives the table of contents half of whatever is left
+   after the content column, so on a wide laptop it grows past the left menu.
+   Pin it to the same width as the left menu and center the content in the
+   remaining space. Same breakpoint as Starlight's TwoColumnContent. */
+@media (min-width: 72rem) {
+	.right-sidebar-container {
+		width: var(--sl-sidebar-width);
+	}
+	[data-has-sidebar][data-has-toc] .main-pane {
+		--sl-content-margin-inline: auto;
+		width: calc(100% - var(--sl-sidebar-width));
+	}
+}
+
+/* The left menu: link text the size of the table of contents (13px), group
+   labels one step up. Starlight's own rules are layered, so these win. */
+@media (min-width: 50rem) {
+	.sidebar-content a {
+		font-size: var(--sl-text-xs);
+	}
+	.sidebar-content .large {
+		font-size: var(--sl-text-sm);
+	}
+}
+
+/* "Content co-authored by AI." on every page, below the Starlight footer. */
+.ai-notice {
+	margin: 1.5rem 0 0;
+	text-align: center;
+	font-size: var(--sl-text-xs);
+	color: var(--sl-color-gray-3);
+}

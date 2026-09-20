@@ -283,15 +283,6 @@ export function bindCheckpoint(el: HTMLElement, opts: BindOptions = {}): void {
 		revealAnswer(el);
 		recordReviewOnce(false);
 	});
-	$(el, '.cp-sooner')?.addEventListener('click', () => {
-		progress.adjustReviewStage(id, -1);
-		drawStage(el);
-	});
-	$(el, '.cp-later')?.addEventListener('click', () => {
-		progress.adjustReviewStage(id, +1);
-		drawStage(el);
-	});
-
 	drawState(el);
 	if (opts.review) drawStage(el);
 }

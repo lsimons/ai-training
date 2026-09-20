@@ -81,12 +81,16 @@
 .prompt-block[data-illustrative='true'] figcaption { color: var(--at-warn); }
 .prompt-body { padding: 0.25rem 0.75rem; }
 .prompt-body > :first-child { margin-top: 0.5rem; }
-.recap-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+.recap-actions { display: flex; gap: 0.5rem 1rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
+.recap-finish-note { flex-basis: 100%; margin: 0; padding: 0.5rem 0.75rem; border-left: 4px solid var(--sl-color-accent); background: var(--sl-color-accent-low); border-radius: 4px; font-weight: 600; }
+.recap-finish-note:empty { display: none; }
+.recap-next { margin: 1.5rem 0 0; padding: 0.75rem 1.25rem; border: 1px solid var(--sl-color-accent); border-radius: 6px; background: var(--sl-color-bg-nav); font-size: 1.1rem; }
+.recap-next strong { color: var(--sl-color-text-accent); }
 .recap-finish { background: var(--at-done) !important; color: #fff !important; border-color: transparent !important; font-weight: 600; }
 .recap-objectives li::before { content: '✓ '; color: var(--at-done-text); }
 .recap-objectives { list-style: none; padding-left: 0.5rem; }
 
-/* routing cards and comfort */
+/* routing cards, comfort (settings page) */
 .route-card { border: 1px solid var(--sl-color-gray-5); border-radius: 6px; padding: 0.75rem 1.25rem; margin: 1rem 0; background: var(--sl-color-bg-nav); }
 .route-title { font-weight: 700; margin: 0 0 0.25rem; }
 .route-where { color: var(--sl-color-gray-3); font-size: 0.9rem; }
@@ -94,6 +98,15 @@
 .comfort { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; font-size: 0.9rem; margin: 0 0 1rem; }
 .comfort button[aria-pressed='true'] { background: var(--sl-color-accent-low); border-color: var(--sl-color-accent); }
 .comfort-note { color: var(--sl-color-gray-3); }
+
+/* ---- settings page ---- */
+.settings h2 { margin-top: 2rem; }
+.review-schedule { display: grid; gap: 0.5rem; margin: 1rem 0; }
+.schedule-item { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 1rem; align-items: center; padding: 0.6rem 0.9rem; border: 1px solid var(--sl-color-gray-5); border-radius: 6px; font-size: 0.9rem; }
+.schedule-name { grid-column: 1 / -1; font-weight: 600; text-decoration: none; color: var(--sl-color-text-accent); }
+.schedule-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.schedule-actions button { padding: 0.25rem 0.7rem; border-radius: 4px; border: 1px solid var(--sl-color-gray-4); background: var(--sl-color-bg-nav); color: var(--sl-color-text); cursor: pointer; font: inherit; font-size: 0.85rem; }
+.schedule-actions button:disabled { opacity: 0.5; cursor: default; }
 
 /* ---- course graph ---- */
 .course { display: grid; gap: 1.25rem; margin-top: 1rem; }
