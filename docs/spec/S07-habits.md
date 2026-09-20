@@ -20,8 +20,8 @@ Authors declare habits with a component that follows the rules of
 learner did in the [progress record](S04-progress-record.md), and it
 brings habits back on the days that [spaced review](S05-spaced-review.md)
 uses for its first stages. Reviews test recall of what a lesson taught.
-Habits ask the learner to apply it once, at work, and then again a few days
-later, so the lesson changes what they do and not only what they know.
+Habits ask the learner to apply it at work, once and then again a few days
+later. The lesson then changes what they do as well as what they know.
 
 ## Principles
 
@@ -71,33 +71,35 @@ The days are the first three stages of the review schedule.
 | 2          | 3 days after the lesson is finished |
 | 3          | 7 days after the lesson is finished |
 
-| Event                  | Effect                                                                                    |
-| ---------------------- | ----------------------------------------------------------------------------------------- |
-| Lesson finished        | Each of its habits gets an entry with `next` set to the day after                         |
-| Done                   | A `done` result is appended to `history`, and `next` moves to the next occurrence         |
-| Skipped                | A `skipped` result is appended to `history`, and `next` moves to the next occurrence      |
-| Learner is late        | `next` moves to the first occurrence later than today. If none is left, the habit retires |
-| Third result recorded  | The habit retires: `next` becomes `null` and the card no longer shows                     |
-| Lesson finished again  | Nothing. An existing entry, retired or not, is kept                                       |
-| Lesson or course reset | The habit entries under that lesson are removed with the rest of its progress             |
+| Event                  | Effect                                                                                                          |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Lesson finished        | Each of its habits gets an entry with `since` set to that day and `next` to the day after                       |
+| Done                   | A `done` result is appended to `history`, and `next` moves to the next occurrence                               |
+| Skipped                | A `skipped` result is appended to `history`, and `next` moves to the next occurrence                            |
+| Learner is late        | `next` moves to the first occurrence after `since` that is later than today. If none is left, the habit retires |
+| Third result recorded  | The habit retires: `next` becomes `null` and the card no longer shows                                           |
+| Lesson finished again  | Nothing. An existing entry, retired or not, is kept                                                             |
+| Lesson or course reset | The habit entries under that lesson are removed with the rest of its progress                                   |
 
-- The dates are anchored on the day the lesson was finished, so a learner
-  who comes back on day 5 sees the habit once, and then again on day 7.
+- The dates are anchored on `since`, the day the lesson was first finished,
+  so a learner who comes back on day 5 sees the habit once, and then again
+  on day 7. Finishing the lesson again doesn't move `since`.
 - A habit is due when `next <= today`. Both results move it forward, so a
   learner is never asked twice about the same occurrence.
 - Comfort level has no effect on habits.
 
 ## Where habits surface
 
-| Place              | Surface                                                                                                                                                                                            |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lesson page        | The habit card, after the recap. Before the lesson is finished it shows the habit text only. Once the habit is due it shows **Done** and **Skip**. Once retired it shows the text and its results. |
-| Course review page | Today's due habits above the review items, each with **Done** and **Skip**. A course with no habits due shows nothing extra.                                                                       |
-| Progress page      | A line per lesson with an active habit, showing the habit text, the next date and the results so far.                                                                                              |
-| Tutor mode         | At session start, if a habit is due, the tutor asks whether the learner did it, as part of the same opener that asks a recall question when review items are due. It records nothing itself.       |
+| Place              | Surface                                                                                                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lesson page        | The habit card, after the recap. Before the lesson is finished it shows the habit text only. Finished and not yet due: the text and the next date. Due: the text with **Done** and **Skip**. Retired: the text and its results. |
+| Course review page | Today's due habits above the review items, each with **Done** and **Skip**. A course with no habits due shows nothing extra.                                                                                                    |
+| Progress page      | One line per active habit, grouped under its lesson, showing the habit text, the next date and the results so far.                                                                                                              |
+| Tutor mode         | At session start, if a habit is due, the tutor asks whether the learner did it, as part of the same opener that asks a recall question when review items are due. It records nothing itself.                                    |
 
-The review page and the progress page read the exported record or local
-storage the same way they do for reviews. There is no notification and no
+The review page and the progress page read local storage the same way they
+do for reviews. The exported file is for the tutor and for moving between
+browsers. There is no notification and no
 email, the same limit the review schedule has.
 
 ## Storage
@@ -107,19 +109,22 @@ alongside the `lessons`, `checkpoints` and `reviews` maps. Adding the map
 changes what the record means, so it arrives with the next record version
 and a migration that copies an older record and adds an empty `habits` map.
 
-| Field     | Meaning                                                                                                                                 |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `next`    | ISO calendar day in the learner's local time zone when the habit is next due, or `null` once the habit has retired                      |
-| `history` | Results, oldest first, each `{ "at": <ISO day>, "result": "done" or "skipped" }`. Capped at three entries, one per scheduled occurrence |
+| Field     | Meaning                                                                                                                                                   |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `since`   | ISO calendar day in the learner's local time zone on which the lesson was first finished. The three occurrences are counted from it, and it never changes |
+| `next`    | ISO calendar day in the learner's local time zone when the habit is next due, or `null` once the habit has retired                                        |
+| `history` | Results, oldest first, each `{ "at": <ISO day>, "result": "done" or "skipped" }`. Capped at three entries, one per scheduled occurrence                   |
 
-Worked example. The learner finished `safety/agent-risk` on 2026-09-20 and
-did the habit on the 21st. They came back on the 25th, two days late for the
-second occurrence, and skipped it. The next occurrence is the 27th.
+Worked example. The learner finished `safety/agent-risk` on 2026-09-20, so
+both habits have `since` 2026-09-20 and occurrences on the 21st, 23rd and
+27th. They did the first habit on the 21st. On the 25th, two days late for
+the second occurrence, they skipped it. The next occurrence is the 27th.
 
 ```json
 {
   "habits": {
     "safety/agent-risk#name-the-blast-radius": {
+      "since": "2026-09-20",
       "next": "2026-09-27",
       "history": [
         { "at": "2026-09-21", "result": "done" },
@@ -127,6 +132,7 @@ second occurrence, and skipped it. The next occurrence is the 27th.
       ]
     },
     "safety/agent-risk#check-the-diff-first": {
+      "since": "2026-09-20",
       "next": null,
       "history": [
         { "at": "2026-09-21", "result": "done" },
