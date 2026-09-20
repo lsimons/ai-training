@@ -8,7 +8,7 @@
 import Default from '@astrojs/starlight/components/TableOfContents.astro';
 
 const { toc } = Astro.locals.starlightRoute;
-const onlyTitle = !toc || (toc.items.length === 1 && toc.items[0].children.length === 0);
+const onlyTitle = !toc || (toc.items.length === 1 && toc.items[0]?.children.length === 0);
 ---
 
 {!onlyTitle && <Default><slot /></Default>}
