@@ -10,8 +10,8 @@ is for software engineers. The plan is in `docs/plan/README.md`.
 
 ## Quick reference
 
-Every repo task is defined in `.mise.toml`; `mise tasks` lists them. Run `mise trust`
-and `mise install` once per clone.
+The repo tasks are defined in `.mise.toml`, and `mise tasks` lists them. Run
+`mise trust` and `mise install` once per clone.
 
 | Task                              | What it does                                                         |
 | --------------------------------- | -------------------------------------------------------------------- |
@@ -57,7 +57,7 @@ daemon keeps serving old content and old config, which looks like an edit
 Restart it (stop, then `mise run site-dev`) after changing
 `astro.config.mjs`, `content.config.ts`, or anything under `src/data/`.
 For a one-off check of the built site prefer `mise run site-preview` or
-`site-screenshot`; neither leaves a daemon behind.
+`site-screenshot`. Neither leaves a daemon behind.
 
 ## Structure
 
@@ -70,7 +70,7 @@ verbatim and must include the base path.
 
 - `site/` - Astro Starlight site.
   - `src/content/docs/` - the pages. Lessons are `<area>/<lesson>.mdx`
-    with the frontmatter from spec S03; course pages are `<area>/index.mdx`.
+    with the frontmatter from spec S03, and course pages are `<area>/index.mdx`.
     `docs/agents/writing-a-lesson.md` is the authoring guide.
   - `src/content.config.ts` - the `docs` schema (extended with lesson
     fields) plus the `topics`, `competencies` and `bibliography` YAML
@@ -89,7 +89,7 @@ verbatim and must include the base path.
   - `src/styles/custom.css` - the LSD Warm theme; `lesson.css` - lesson,
     course, map, progress and review styles (global on purpose: review
     pages clone checkpoint markup out of lesson pages).
-  - `examples/` - the runnable fixtures behind `<Predict run=...>`;
+  - `examples/` - the runnable fixtures behind `<Predict run=...>`.
     `scripts/check-examples.mjs` runs them.
   - `public/` - static assets. `public/presentations/` holds Quarto decks and
     their committed HTML/PDF outputs.
@@ -119,8 +119,8 @@ verbatim and must include the base path.
 
 - This is a public, open-content project. No company names, internal URLs or
   confidential material.
-- Content is CC BY-SA 4.0 (`LICENSE`); code is Apache-2.0 (`LICENSE-CODE`).
-  Source material has different terms; `docs/plan/README.md` has the table.
+- Content is CC BY-SA 4.0 (`LICENSE`) and code is Apache-2.0 (`LICENSE-CODE`).
+  Source material has different terms, and `docs/plan/README.md` has the table.
   In short: `agent-engineer-course` (Apache-2.0) and Diátaxis (CC BY-SA)
   content may be adapted with attribution and an entry in `NOTICE.md`; CS50
   (CC BY-NC-SA) may be cited and its ideas used, but its text may not be
@@ -130,9 +130,40 @@ verbatim and must include the base path.
   courses.
 - Interactive widgets in lesson pages must sit in `class="not-content"`
   containers. Never emit a literal `</script>` or `</pre>` inside widget JS
-  strings; it breaks mdformat and the renderer.
+  strings. It breaks mdformat and the renderer.
 - Learner progress is stored in browser local storage only. No backend, no
   telemetry.
+
+**Voice:**
+
+Nearly all the text here is written by agents, and agent prose has tells.
+The reader shouldn't be able to hear them. `mise run prose` flags the
+patterns below through the `ai-tells` package and the `House` copies of
+three of its rules. Write so that it has nothing to say.
+
+- Say what a thing does, not what it figuratively is. Content is *in* a
+  directory, not *living* there; a file *contains* a value, a check
+  *rejects* a change, a format is a format and not a `shape`.
+- No tacked-on clause after a semicolon. Two sentences, or a comma and a
+  conjunction.
+- Don't announce a count and then list (`Three things matter: ...`). Give
+  the list, or make the count the point.
+- Don't default to the rule of three. Name two things when there are two,
+  and four when there are four. A run of parallel verbs in threes is the
+  loudest tell there is.
+- No clipped mottos (`Hints, not answers.`, `One path, no choices.`).
+  Write the sentence.
+- No `not X, but Y` or `a Y, not a Z` as the default way to make a
+  point. State the positive claim.
+- No sentence-initial `Hence`, `Thus`, `Notably`, `Moreover`, `That's why`.
+  Join with `and`, `but`, or `so`, or start with the point. `For example`
+  is fine.
+- No `no X, no Y, no Z` stacks, no `Nothing here needs ...`, no "Every X
+  has ..." as a rhythm. Once is fine, but a run is the tell.
+- No `delve`, `robust`, `seamless`, `leverage`, `landscape`, `journey`,
+  no `It's worth noting`, no `In conclusion`, no `I hope this helps`.
+- Plain words for plain things: `use`, not `utilize`; `so`, not
+  `consequently`.
 
 **Quality:**
 
@@ -145,7 +176,7 @@ verbatim and must include the base path.
   when `run` is absent).
 - Component-rendered links must use `href()` from `src/lib/url.ts`; the
   rehype base plugin only sees Markdown.
-- Internal links are root-relative; the rehype plugin adds the base path.
+- Internal links are root-relative, and the rehype plugin adds the base path.
   `starlight-links-validator` fails `mise run site-build` on a dead one, so
   the build is the check. Don't disable it.
 - Spelling is American English, checked by `mise run spell` (cspell) over
@@ -196,9 +227,9 @@ verbatim and must include the base path.
   and dependabot moves the constraint.
 - `mise run site-audit` (`bun audit`) must be clean. Fix an advisory in a
   *transitive* package with the `overrides` block in `site/package.json`.
-- Pin GitHub Actions to full-length commit SHAs; `zizmor` enforces it.
+- Pin GitHub Actions to full-length commit SHAs. `zizmor` enforces it.
 - Every `.mise.toml` tool and every `prek.toml` `additional_dependencies`
-  entry is exact-pinned and invisible to dependabot; refresh with `mise up`
+  entry is exact-pinned and invisible to dependabot. Refresh with `mise up`
   and read the diff.
 
 ## Agent skills
