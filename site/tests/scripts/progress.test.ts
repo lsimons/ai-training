@@ -58,6 +58,15 @@ describe('load', () => {
 		expect(progress.load()).toEqual(progress.emptyRecord());
 		expect(localStorage.getItem(KEY)).toBeNull();
 	});
+	it('reset after a migration removes the old key too, so the next load starts fresh', () => {
+		vi.spyOn(console, 'info').mockImplementation(() => {});
+		localStorage.setItem(progress.storageKeyFor(1), JSON.stringify({ version: 1, comfort: 'more' }));
+		expect(progress.load().comfort).toBe('more');
+		progress.reset();
+		expect(localStorage.getItem(KEY)).toBeNull();
+		expect(localStorage.getItem(progress.storageKeyFor(1))).toBeNull();
+		expect(progress.load()).toEqual(progress.emptyRecord());
+	});
 	it('starts fresh on unparsable storage', () => {
 		localStorage.setItem(KEY, '{not json');
 		expect(progress.load()).toEqual(progress.emptyRecord());
@@ -188,5 +197,29 @@ describe('wrappers write through storage', () => {
 		expect(stored().lessons).toEqual({});
 		expect(warn).toHaveBeenCalledTimes(1);
 		expect(warn.mock.calls[0]?.[0]).toContain('dropped 1 malformed "lessons" entry');
+	});
+});
+
+// Last on purpose: the failing write here trips the module's warn-once flag, which the write test above checks.
+describe('load after a migration whose write failed', () => {
+	it('logs the migration once, even when the write under this key fails', async () => {
+		// A fresh module instance, so the once-only flag starts unset regardless of the tests above.
+		vi.resetModules();
+		const fresh = await import('@scripts/progress');
+		const info = vi.spyOn(console, 'info').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		const v1 = JSON.stringify({ version: 1, comfort: 'less' });
+		const quota = () => {
+			throw new Error('quota');
+		};
+		vi.stubGlobal('localStorage', {
+			getItem: (key: string) => (key === fresh.storageKeyFor(1) ? v1 : null),
+			setItem: quota,
+			removeItem: quota,
+		});
+		expect(fresh.load().comfort).toBe('less');
+		expect(fresh.load().comfort).toBe('less');
+		vi.unstubAllGlobals();
+		expect(info).toHaveBeenCalledTimes(1);
 	});
 });

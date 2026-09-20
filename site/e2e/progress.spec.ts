@@ -1,5 +1,5 @@
 /** Finishing a lesson, and where that progress shows up and persists (spec S04). */
-import { answerChoice, expect, storedRecord, test } from './fixtures';
+import { answerChoice, expect, storageKeyFor, storedRecord, test } from './fixtures';
 
 // The site compares due dates against the local calendar day (progress-model.ts `today()`), so the
 // seed is built the same way. `toISOString()` is UTC, which is already tomorrow in the evening west of UTC.
@@ -64,8 +64,10 @@ test('the topic map colors covered topics by lesson state', async ({ page, seed 
 	expect(await page.locator('.topic-node[data-state=finished]').count()).toBeGreaterThan(0);
 });
 
-test('the progress page exports, resets and imports the record', async ({ page, seed }) => {
+test('the progress page exports, resets and imports the record', async ({ page, seed, seedRaw }) => {
 	await seed(finished);
+	// A leftover version 1 record: reset must remove it too, or the next load would migrate it back.
+	await seedRaw(1, { version: 1, lessons: { 'concepts/how-models-work': { state: 'read', at: TODAY } } });
 	await page.goto('progress/');
 	expect(await page.locator('.progress-course').count()).toBeGreaterThan(0);
 	expect(await page.locator('.progress-lesson').count()).toBeGreaterThan(0);
@@ -79,6 +81,9 @@ test('the progress page exports, resets and imports the record', async ({ page, 
 	await page.locator('[data-reset]').click();
 	await expect(page.locator('[data-message]')).toHaveText('Progress reset.');
 	expect(JSON.parse((await page.locator('[data-dump]').textContent()) ?? '{}').lessons).toEqual({});
+	// Both keys are gone. (No reload here: the seed init script would write them again on the next navigation.)
+	expect(await storedRecord(page, storageKeyFor(1))).toEqual({});
+	expect(await storedRecord(page)).toEqual({});
 
 	page.once('dialog', (d) => d.accept());
 	await page.locator('[data-import]').setInputFiles(file);

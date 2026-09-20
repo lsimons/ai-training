@@ -1,3 +1,4 @@
+import type { ReviewTrace } from './progress-model';
 /**
  * The parts of checkpoint grading that need no DOM: answer comparison, the
  * shuffle rules, and the feedback texts. `checkpoints.ts` binds these to the
@@ -127,4 +128,11 @@ export function matchVerdict(
 export function stageDisplay(stage: number | 'done' | undefined): { lit: number; label: string } {
 	if (stage === 'done') return { lit: 5, label: 'retired' };
 	return { lit: stage ?? 0, label: `stage ${stage ?? '-'} of 5` };
+}
+
+/** The settings page's one-line summary of a review item's answers, from its `history` (spec S05 "Storage"). */
+export function historyDisplay(history: readonly ReviewTrace[]): string {
+	const last = history[history.length - 1];
+	if (!last) return 'not answered yet';
+	return `${history.length} answered, last ${last.result} on ${last.at}`;
 }

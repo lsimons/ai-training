@@ -198,29 +198,56 @@ function migrateV1(doc: Record<string, unknown>): Record<string, unknown> {
 	return { ...doc, version: 2, reviews };
 }
 
+type MigrationStep = (doc: Record<string, unknown>) => Record<string, unknown>;
 /** Each step brings a record from the keyed version to the next one. */
-const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => Record<string, unknown>> = { 1: migrateV1 };
+const MIGRATIONS: Record<number, MigrationStep> = { 1: migrateV1 };
 
 /**
  * Bring a parsed record of an older version up to `VERSION`, one step at a
  * time. Anything that is not a record with a known older version is returned
  * as it came, so `normalize` and `parseImport` can reject it.
  */
-export function migrate(parsed: unknown): unknown {
+export function migrate(parsed: unknown, steps: Record<number, MigrationStep> = MIGRATIONS): unknown {
 	let doc = parsed;
 	while (isObject(doc) && typeof doc.version === 'number' && doc.version < VERSION) {
-		const step = MIGRATIONS[doc.version];
+		const from = doc.version;
+		const step = steps[from];
 		if (!step) return doc;
-		doc = step(doc);
+		const next = step(doc);
+		// A step that does not move the version forward would loop forever; stop and let the caller reject the doc.
+		if (!isObject(next) || typeof next.version !== 'number' || next.version <= from) return doc;
+		doc = next;
 	}
 	return doc;
 }
 
 /**
+ * Drop malformed `history` traces from every review item, keeping the item
+ * (it is the learner's schedule). Returns a copy of the map, and reports the
+ * drops under `reviews.history`.
+ */
+function cleanHistories(reviews: unknown, warnings: NormalizeWarning[]): unknown {
+	if (!isObject(reviews)) return reviews;
+	const out: Record<string, unknown> = {};
+	let dropped = 0;
+	for (const [id, item] of Object.entries(reviews)) {
+		if (!isObject(item) || !Array.isArray(item.history)) {
+			out[id] = item;
+			continue;
+		}
+		const history = item.history.filter(isReviewTrace);
+		dropped += item.history.length - history.length;
+		out[id] = { ...item, history };
+	}
+	if (dropped) warnings.push({ field: 'reviews.history', kind: 'dropped', count: dropped });
+	return out;
+}
+
+/**
  * Coerce a parsed document into a well-formed record, or `null` when it is not
  * a record of this `VERSION` or of an older version `migrate` knows. Malformed
- * fields fall back to empty, and each one is reported in `warnings` when the
- * caller passes an array.
+ * fields fall back to empty, a malformed history trace is dropped from its
+ * item, and each drop is reported in `warnings` when the caller passes an array.
  */
 export function normalize(raw: unknown, warnings: NormalizeWarning[] = []): ProgressRecord | null {
 	const parsed = migrate(raw);
@@ -230,7 +257,7 @@ export function normalize(raw: unknown, warnings: NormalizeWarning[] = []): Prog
 	record.goals = Array.isArray(parsed.goals) ? parsed.goals.filter(isGoalEntry) : [];
 	record.lessons = cleanMap('lessons', parsed.lessons, isLessonEntry, warnings);
 	record.checkpoints = cleanMap('checkpoints', parsed.checkpoints, isCheckpointEntry, warnings);
-	record.reviews = cleanMap('reviews', parsed.reviews, isReviewEntry, warnings);
+	record.reviews = cleanMap('reviews', cleanHistories(parsed.reviews, warnings), isReviewEntry, warnings);
 	record.quizzes = cleanMap('quizzes', parsed.quizzes, isQuizEntry, warnings);
 	return record;
 }

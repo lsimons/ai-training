@@ -159,9 +159,11 @@ learner missed and asks about it instead of explaining it.
 1. Ask which lesson the learner is on, or read it from the URL they paste.
    Read that `.mdx` under `site/src/content/docs/` and its topic YAML.
 2. If the learner has exported their progress (a JSON file with
-   `"version": 1`), read it. For every item in `reviews` whose `due` is
+   `"version": 2`), read it. For every item in `reviews` whose `due` is
    today or earlier, ask **one** recall question from that checkpoint before
-   anything else. If they haven't exported, ask them to open
+   anything else. Each item's `history` lists its answers, oldest first, as
+   `{ "at": "YYYY-MM-DD", "result": "pass" | "fail" }`, so a run of recent
+   fails shows which checkpoint needs the most help. If they haven't exported, ask them to open
    `/ai-training/<area>/review/` when items are due.
 3. Offer the verbs.
 

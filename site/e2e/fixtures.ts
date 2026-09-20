@@ -5,10 +5,9 @@
  * import `test` and `expect` from here instead of `@playwright/test`.
  */
 import { test as base, expect, type Page } from '@playwright/test';
+import { STORAGE_KEY, storageKeyFor, VERSION } from '../src/scripts/progress-model';
 
-export const VERSION = 2;
-export const storageKeyFor = (version: number) => `ai-training-progress-v${version}`;
-export const STORAGE_KEY = storageKeyFor(VERSION);
+export { STORAGE_KEY, storageKeyFor, VERSION };
 
 /** A partial progress record to seed before the first navigation. */
 export interface Seed {
