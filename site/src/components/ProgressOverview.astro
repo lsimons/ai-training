@@ -100,6 +100,17 @@ const catalog = await buildCatalog();
 						row.append(dot, link, cps);
 						card.appendChild(row);
 					}
+					if (course.lessons.length) {
+						const due = progress.dueReviewIds(rec, `${course.area}/`).length;
+						const review = document.createElement('p');
+						review.className = 'progress-review';
+						const rl = document.createElement('a');
+						rl.href = `${base}/${course.area}/review/`;
+						rl.dataset.progressReview = course.area;
+						rl.textContent = due ? `Review due: ${due} item${due === 1 ? '' : 's'}` : 'Review: nothing due yet';
+						review.appendChild(rl);
+						card.appendChild(review);
+					}
 					return card;
 				})
 			);
