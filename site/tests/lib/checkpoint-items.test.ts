@@ -87,6 +87,8 @@ describe('checkpointItemsOf', () => {
 			reviewable: true,
 		});
 		expect(one(`<Predict ${base}>\n</Predict>`)).toMatchObject({ options: null, answer: null, reviewable: false });
+		// An ungraded example (no objective) is not an item at all.
+		expect(checkpointItemsOf(body('<Predict id="e" title="T" answer="1" run="x.py">\n</Predict>'))).toEqual([]);
 		expect(one(`<Repair ${base} broken={\`b\`} model="m">\n</Repair>`)).toMatchObject({
 			options: { broken: 'b' },
 			answer: 'm',
@@ -106,6 +108,7 @@ describe('buildCheckpointExport', () => {
 			'concepts/how-models-work#what-the-model-does',
 			'concepts/how-models-work#honor',
 			'concepts/how-models-work#graded',
+			// `shown`, the ungraded example between `graded` and `fix`, is not exported.
 			'concepts/how-models-work#fix',
 			'concepts/how-models-work#opt-out',
 			'safety/agent-risk#s1',

@@ -109,6 +109,10 @@ describe('checkSource', () => {
 		expect(missed.found).toBe(0);
 		expect(missed.failures[0]).toContain('no run= prop parsed');
 	});
+	it('checks an ungraded example (no objective) like any other run', () => {
+		const res = checkSource('f.mdx', '<Predict id="e" title="T" answer="hello" run="x.py">', ok);
+		expect(res).toEqual({ found: 1, checked: 1, failures: [] });
+	});
 	it('ignores an honor-system predict', () => {
 		expect(checkSource('f.mdx', '<Predict id="a" title="t">', ok)).toEqual({ found: 0, checked: 0, failures: [] });
 	});

@@ -118,7 +118,8 @@ export function parseAttrs(tag: string): Map<string, CheckpointAttr> {
  * The checkpoint tags in `src`: the component name, its props, and the
  * children as Markdown (empty for a self-closing tag). `where` names the
  * lesson in error messages. The scanner only knows the tags in
- * `KIND_OF_TAG`, so a new kind enters there first.
+ * `KIND_OF_TAG`, so a new kind enters there first. A `<Predict>` with no
+ * `objective` is an ungraded example, not a checkpoint, and is skipped.
  */
 export function scanCheckpointTags(src: string, where: string): CheckpointTagInfo[] {
 	const out: CheckpointTagInfo[] = [];
@@ -134,6 +135,9 @@ export function scanCheckpointTags(src: string, where: string): CheckpointTagInf
 		} catch (e) {
 			throw new Error(`${where}: <${tag}> ${(e as Error).message}: ${opening.slice(0, 80)}`);
 		}
+		// A Predict without an objective is an ungraded example (spec S03 "Examples"): CI runs its fixture,
+		// the page shows the output, and it is not a checkpoint anywhere.
+		if (tag === 'Predict' && !attrs.has('objective')) continue;
 		let stem = '';
 		if (!/\/\s*>$/.test(opening)) {
 			const close = src.indexOf(`</${tag}>`, end);

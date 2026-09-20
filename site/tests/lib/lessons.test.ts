@@ -134,6 +134,13 @@ describe('checkpointsOf', () => {
 		expect(checkpointsOf(lesson('safety/agent-risk'))[0]?.kind).toBe('scenario');
 		expect(checkpointsOf(lesson('safety/deeper'))).toEqual([]);
 	});
+	it('skips a Predict without an objective: an ungraded example is not a checkpoint', () => {
+		const ids = checkpointsOf(lesson('concepts/how-models-work')).map((c) => c.id);
+		expect(ids).not.toContain('shown');
+		expect(checkpointTagsOf(body('<Predict id="e" title="T" answer="1" run="x.py">\n</Predict>'))).toEqual([]);
+		// The same tag with an objective is a checkpoint, whatever else it lacks.
+		expect(checkpointTagsOf(body('<Predict id="e" objective="o" answer="1" run="x.py">\n</Predict>'))).toHaveLength(1);
+	});
 	it('falls back to the id as title and handles a missing body', () => {
 		const l = body('<Choice id="only-id" concepts={["c"]} options={[]}>\n</Choice>');
 		expect(checkpointsOf(l)[0]?.title).toBe('only-id');
