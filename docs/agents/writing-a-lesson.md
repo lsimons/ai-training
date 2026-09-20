@@ -123,6 +123,15 @@ a file does it with `subprocess` and `shutil`. Omit `run` only for the
 honor-system variant (predict what an agent does), and then say in the stem
 that the learner checks it themselves.
 
+A Python fixture is also code a learner copies, so `mise run py-lint` and
+`mise run py-typecheck` check it: ruff (check and format) at the Python 3.9
+target, and basedpyright at `standard` as Python 3.9. Keep to syntax that
+Python 3.9 accepts (`match` statements and `X | Y` unions in runtime
+annotations are newer), and run `mise run py-format` before committing.
+The config is `site/examples/ruff.toml` and
+`site/examples/pyrightconfig.json`. pytest skips the fixture's own tests,
+so `mise run examples` stays the check on what the lesson shows.
+
 ```mdx
 <Order id="order-the-loop" objective="..." title="Order the loop" hint="..."
   steps={['Send the messages to the model', 'Check for a final answer', 'Run the tool', 'Append the result']} />
