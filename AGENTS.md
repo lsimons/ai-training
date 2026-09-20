@@ -153,11 +153,14 @@ verbatim and must include the base path.
   entry.
 - `mise run prose` (Vale) runs over every tracked `.md`/`.mdx` file and the
   YAML under `site/src/data/`, minus `site/examples/`. Only errors fail:
-  misspellings and wrongly cased terms. Add real jargon or names to
-  `.vale/styles/config/vocabularies/ai-training/accept.txt` (one regex per
-  line); fix typos in the text. Style warnings (cliches, weasel words,
-  wordy phrases, "There is") print but never fail the build; a doubled word
-  does. `mise run prose-extended` adds the passive-voice and
+  wrongly cased names, a doubled word, and the proselint tripwires
+  (annotations left in text, slurs, "PIN number", date forms). Spelling is
+  cspell's job, not Vale's. The Vale vocabulary in
+  `.vale/styles/config/vocabularies/ai-training/accept.txt` holds the
+  canonical casing of names ("Quarto", "Anthropic") and the TooWordy
+  exemptions, nothing else. Style warnings (cliches, weasel words, wordy
+  phrases, "There is", gendered or corporate terms) print but never fail
+  the build. `mise run prose-extended` adds the passive-voice and
   sentence-initial-"So" rules from `.vale-extended.ini`; most of their hits
   are idiom, so run it now and then and rewrite only the sentences that
   hide who does what. `docs/prose/README.md` records which rule runs where
