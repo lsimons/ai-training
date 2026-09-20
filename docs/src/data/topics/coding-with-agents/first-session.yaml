@@ -1,0 +1,56 @@
+id: coding-with-agents/first-session
+area: coding-with-agents
+name: Running a coding agent
+definition: >-
+  A coding agent works inside your repository with your tools. This topic
+  gets a first session going: installing and configuring the agent, letting
+  it read and explain the codebase, making a first small change, understanding
+  what it asks permission for, and managing the session so its context stays
+  useful.
+concepts:
+  - id: install-and-setup
+    name: Install and setup
+    definition: >-
+      Getting a coding agent running in a terminal or editor: installing the
+      tool, authenticating to a model provider, opening it in a repository
+      and checking it can run the project's own commands. Setup is also where
+      you decide what the agent may reach, so do it in a repository you can
+      afford to have touched and with a clean working tree.
+  - id: codebase-understanding
+    name: Codebase understanding
+    definition: >-
+      Using the agent to orient in unfamiliar code before changing it: ask
+      where a feature lives, how a request flows, what a module depends on.
+      The agent reads files and searches faster than you can, and its
+      explanation is a fast first map. Verify the map against the code on
+      anything you will act on, since agents summarise confidently.
+  - id: first-change
+    name: First change
+    definition: >-
+      A small, well-bounded edit done with the agent to learn how it works:
+      a fix with a failing test, a rename, a documentation update. Brief it,
+      watch which files it reads, read the diff it proposes and run the
+      tests yourself. The point is to calibrate how it behaves in your
+      project before trusting it with something larger.
+  - id: permissions
+    name: Permissions
+    definition: >-
+      What the agent may do without asking: read files, edit files, run
+      commands, reach the network. Coding agents prompt for approval on
+      risky actions by default and let you widen or narrow that. Approving
+      everything for convenience turns a mistake in a command into a mistake
+      in your repository or system, so widen access per project and per
+      task.
+  - id: session-and-context
+    name: Session and context
+    definition: >-
+      A session is one conversation with the agent and its context window is
+      the session's memory. Every file read and command output lands in it,
+      so long sessions fill up and the agent starts forgetting earlier
+      instructions. Keep one task per session, start fresh for unrelated
+      work, and ask for a summary before compacting or handing off.
+links:
+  prerequisites: [using-agents/delegating]
+  related: []
+  specializations: []
+sources: [AEC-12, DLAI-5]

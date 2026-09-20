@@ -62,6 +62,9 @@ jobs:
       - name: Check (Astro type/content check)
         run: mise run docs-check
 
+      - name: Examples
+        run: mise run examples
+
       - name: Build
         run: mise run docs-build
 

@@ -1,0 +1,47 @@
+id: coding-with-agents/context
+area: coding-with-agents
+name: Context engineering for code
+definition: >-
+  An agent's output quality follows the quality of its context. This topic
+  covers what belongs in a project's standing instructions, how to scope a
+  task so the agent looks in the right places, how to point it at specific
+  files, and how to keep a session from degrading as its context fills.
+concepts:
+  - id: project-instructions
+    name: Project instructions
+    definition: >-
+      A file in the repository the agent reads at the start of every session,
+      holding what it needs to know each time: how to build and test, the
+      conventions to follow, the places not to touch. It is where a recurring
+      agent mistake gets fixed once. Keep it short and factual; long
+      instruction files are followed less reliably than short ones.
+  - id: scoping-a-task
+    name: Scoping a task
+    definition: >-
+      Telling the agent where a task lives and where it stops: which module,
+      which layer, which files are in play and which are off limits.
+      Scoping saves context by avoiding exploration of irrelevant code and
+      prevents the well-meaning refactor that spreads a small change across
+      the repository. A scoped brief also makes the resulting diff easier to
+      review.
+  - id: referencing-files
+    name: Referencing files
+    definition: >-
+      Naming the exact files, functions or documents the agent should read
+      instead of describing them, so it loads the right context on the first
+      try. A path and a line number beat "the config code". Reference the
+      example to imitate, the test to extend and the spec to follow; the
+      agent will otherwise pick whichever similar file it finds first.
+  - id: avoiding-context-rot
+    name: Avoiding context rot
+    definition: >-
+      Keeping the session's context lean so the agent keeps following
+      instructions and remembering the goal: one task per session, summaries
+      instead of raw logs, fresh sessions for new work, and no pasting of
+      whole files it can read itself. When answers drift or earlier rules get
+      ignored, the context is full; compact or restart rather than push on.
+links:
+  prerequisites: [coding-with-agents/workflow, concepts/grounding]
+  related: [customizing-agents/instructions]
+  specializations: []
+sources: [AEC-15]

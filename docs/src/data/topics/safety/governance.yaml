@@ -1,0 +1,49 @@
+id: safety/governance
+area: safety
+name: Governance and oversight
+definition: >-
+  Once agents work inside an organisation, individual care is not enough.
+  This topic covers the shared controls: a policy that says what is allowed,
+  logs that make agent actions reviewable, awareness that a model update can
+  change behaviour overnight, and a clear route for escalating when something
+  goes wrong.
+concepts:
+  - id: policy
+    name: Policy
+    definition: >-
+      A written statement of which AI tools may be used, with what data, for
+      what tasks, and with what checks before results are relied on. A good
+      policy is short, names owners and gives examples of allowed and
+      disallowed use. Without one, every person invents their own rules and
+      the organisation's exposure is the sum of the most careless choices.
+  - id: logging-and-audit
+    name: Logging and audit
+    definition: >-
+      Recording what an agent was asked, what it did, which tools it called
+      and what changed, so that a person can later reconstruct and judge its
+      actions. Logs turn an opaque incident into a traceable one and make
+      patterns visible across many sessions. Store them where the agent
+      itself cannot edit them, and review a sample even when nothing has gone
+      wrong.
+  - id: model-change-risk
+    name: Model change risk
+    definition: >-
+      Providers update models, and a workflow that behaved well can behave
+      differently after an update: a format changes, a refusal appears, a
+      shortcut is taken. Because the model is outside your control, treat
+      each change like a dependency upgrade: pin versions where possible,
+      keep a test set that represents your tasks, and re-run it when the
+      model changes.
+  - id: escalation
+    name: Escalation
+    definition: >-
+      The agreed route for raising an AI-related problem: a leaked document,
+      an agent that took a wrong action, output that harmed someone. It names
+      who to tell, how fast and what to preserve. People report faster when
+      the route is known and blameless, and the organisation learns from
+      near-misses instead of only from disasters.
+links:
+  prerequisites: [safety/agent-risk]
+  related: []
+  specializations: []
+sources: [AEC-10, AEC-11]

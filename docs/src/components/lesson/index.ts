@@ -1,0 +1,11 @@
+export { default as Choice } from './Choice.astro';
+export { default as Scenario } from './Scenario.astro';
+export { default as Predict } from './Predict.astro';
+export { default as Order } from './Order.astro';
+export { default as Sort } from './Sort.astro';
+export { default as Repair } from './Repair.astro';
+export { default as Pitfall } from './Pitfall.astro';
+export { default as Exercise } from './Exercise.astro';
+export { default as Recap } from './Recap.astro';
+export { default as Prompt } from './Prompt.astro';
+export { default as Response } from './Response.astro';

@@ -1,0 +1,56 @@
+id: customizing-agents/hooks-permissions
+area: customizing-agents
+name: Hooks, permissions, settings
+definition: >-
+  The mechanical controls around a coding agent: permission modes that decide
+  what it may do unasked, allowlists that widen or narrow that per command,
+  hooks that run your own scripts at fixed points, subagents that isolate
+  work, and the layering of settings between user, project and session.
+concepts:
+  - id: permission-modes
+    name: Permission modes
+    definition: >-
+      Preset levels of how much an agent may do without asking, from
+      approving every edit and command, through auto-accepting edits but
+      asking for commands, to running everything unattended. The mode sets
+      the default; allowlists refine it. Choose per task by what a mistake
+      would cost, and step up only inside a sandbox or a disposable worktree.
+  - id: allowlists
+    name: Allowlists
+    definition: >-
+      Explicit lists of tools, commands or paths the agent may use without a
+      prompt, and denylists it may never use. They turn a stream of approval
+      prompts into a one-off decision and make that decision reviewable in
+      configuration. Keep them narrow and specific; a broad wildcard grants
+      much more than the command that prompted it.
+  - id: hooks
+    name: Hooks
+    definition: >-
+      User-defined scripts the agent runs at lifecycle events: before or
+      after a tool call, when a session starts, when the agent finishes. A
+      hook can block an action, transform it, or run a check such as
+      formatting or a secret scan. Hooks enforce rules deterministically
+      where instructions only ask, and their output goes back to the agent
+      so it can react.
+  - id: subagents
+    name: Subagents
+    definition: >-
+      Separate agent instances the main agent delegates to, each with its own
+      context window, tool set and often its own instructions. They keep bulky
+      work such as searching or reviewing out of the main context, allow
+      parallel work and let a task run with narrower permissions than the
+      parent. The parent sees only the subagent's report.
+  - id: settings-layering
+    name: Settings layering
+    definition: >-
+      Configuration comes from several places that override each other in a
+      fixed order: the user's own defaults, the project's shared settings
+      committed to the repository, local project overrides that are not
+      committed, and flags for one session. Knowing the order explains why a
+      setting seems ignored and lets a team ship safe defaults while people
+      keep personal preferences.
+links:
+  prerequisites: [customizing-agents/instructions, safety/agent-risk]
+  related: []
+  specializations: []
+sources: []

@@ -1,0 +1,12 @@
+---
+/** A realistic failure mode right after the teaching it belongs to: setup, what went wrong, the rule (spec S01 "Pitfall"). */
+interface Props {
+	title: string;
+}
+const { title } = Astro.props;
+---
+
+<aside class="pitfall" aria-label={`Pitfall: ${title}`}>
+	<p class="pitfall-title">Pitfall: {title}</p>
+	<slot />
+</aside>

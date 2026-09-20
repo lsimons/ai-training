@@ -1,0 +1,57 @@
+id: coding-with-agents/verification
+area: coding-with-agents
+name: Verifying agent work
+definition: >-
+  Code you did not write needs a different kind of reading. This topic covers
+  reviewing an agent's diff against the specification rather than for
+  plausibility, observing the system as it runs, narrowing a fault
+  systematically, and turning checks into loops the agent can run itself
+  within limits you set.
+concepts:
+  - id: reviewing-code-you-did-not-write
+    name: Reviewing code you did not write
+    definition: >-
+      Reading an agent's diff as a reviewer, not an author: you have no
+      memory of why each line exists, so every line has to justify itself.
+      Look for changes outside the brief, silent behaviour changes, deleted
+      tests, copied patterns applied wrongly and comments that describe
+      intent rather than what the code does. Read the code, not the agent's
+      summary of it.
+  - id: verifying-against-the-specification
+    name: Verifying against the specification
+    definition: >-
+      Checking the result against the success criteria written before the
+      work, item by item, instead of judging whether the change looks
+      reasonable. This catches the plausible-but-wrong result, the criterion
+      quietly dropped and the edge case skipped. If a criterion cannot be
+      checked, either the spec or the verification design needs fixing
+      before the change is accepted.
+  - id: observing-a-running-system
+    name: Observing a running system
+    definition: >-
+      Running the changed software and watching what it actually does: the
+      logs it writes, the requests it makes, the state it leaves behind, the
+      screen it renders. Tests prove what they cover; observation catches
+      what nobody thought to test. For agent work, running it yourself is
+      also the check that the agent's report of "tests pass" is true.
+  - id: isolating-a-fault
+    name: Isolating a fault
+    definition: >-
+      Narrowing a failure to its cause by systematic steps: reproduce it,
+      shrink the input, bisect the change, add observation at the boundary,
+      confirm the hypothesis before fixing. Agents can help at each step but
+      will also guess fixes; insisting on a reproduced, explained cause
+      before any patch is what keeps the fix from becoming a new bug.
+  - id: bounded-self-checking-loops
+    name: Bounded self-checking loops
+    definition: >-
+      Giving the agent a check it can run itself, such as a test suite, a
+      linter or a build, and letting it iterate until the check passes, with
+      a limit on attempts and a rule for what it may change. The bound
+      matters: an unbounded loop will eventually satisfy the check by
+      weakening it. The human verifies the check is still honest at the end.
+links:
+  prerequisites: [coding-with-agents/workflow, safety/verification]
+  related: []
+  specializations: []
+sources: [Brilliant VER]

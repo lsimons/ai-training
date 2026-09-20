@@ -1,0 +1,258 @@
+---
+title: Your first session with a coding agent
+description: Start a coding agent in a small repository, give it the context it needs, make one change behind a permissions prompt, and review the diff before you trust it.
+mode: tutorial
+covers:
+  - coding-with-agents/first-session
+serves:
+  - coding-with-agents/ships-with-agent/runs-a-session
+  - coding-with-agents/ships-with-agent/gives-the-right-context
+assumes:
+  - objective: using-agents/delegates-and-checks/writes-a-brief
+    lesson: using-agents/delegating
+    section: writing-the-brief
+  - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
+extends-to:
+  - label: Plan, implement, verify
+    href: /coding-with-agents/workflow/
+sources:
+  - AEC-12
+---
+
+import { Predict, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we will run one complete session with a coding agent: open it
+in a small repository, ask it to explain the code, point it at a failing
+test, let it make one change, and read the diff before we accept it. The
+repository is a fixture that ships with this course, so nothing you do here
+can touch your own work.
+
+A coding agent is an agent that works in your terminal or editor with the
+tools a programmer has: it reads files, edits them, and runs commands. Claude
+Code is one example; there are several others, and this lesson uses none of
+their specific features. Wherever it says "your coding agent", use the one
+you have installed.
+
+## The fixture
+
+The fixture is a to-do list command in about seventy lines of Python. It
+lives in the course repository under
+`docs/examples/coding-with-agents/first-session/fixture-repo/`. Copy that
+directory somewhere, or work in a clone of the course repository; either
+way, `git checkout -- .` inside it puts every file back the way it was. You
+will reset it at least once.
+
+Inside are five files: `todo.py`, the program; `test_todo.py`, its
+tests; `todos.json`, a committed list of three items; `README.md`; and
+`AGENTS.md`, four lines of instructions for the agent. Change into the
+directory, then run the program before you run the agent. You want to know
+what "working" looks like before someone else changes it.
+
+<Predict id="predict-list" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  title="Predict the list" hint="Three items are committed in todos.json. How does todo.py mark a finished one?"
+  answer={`1. [ ] Buy milk
+2. [x] Call the plumber
+3. [ ] Water the plants`} run="coding-with-agents/first-session/list.sh">
+What does this print? Type all three lines.
+
+```sh
+python3 todo.py list
+```
+</Predict>
+
+## Start the agent and ask it to explain
+
+Start your coding agent from inside `fixture-repo`. The directory you start
+in is the agent's world: it will read from it, edit in it, and run commands
+in it. Starting one level too high hands it your whole home directory.
+
+Your first message is not a task. It is a question, and its purpose is to
+check that the agent is looking at the same code you are.
+
+<Prompt model="illustrative" recorded="illustrative">
+Explain what this repository does and how the pieces fit together. Do not
+change anything.
+</Prompt>
+<Response>
+This is a small command-line to-do list. `todo.py` stores items in
+`todos.json` (or the file named by `TODO_FILE`) and offers three commands:
+`add`, `list` and `done`. `test_todo.py` covers the three operations with
+`unittest`. `AGENTS.md` asks for standard library only and says not to edit
+`todos.json`. The `done` function takes a 1-based item number from the
+command line but indexes the list with it directly, which looks like an
+off-by-one.
+</Response>
+
+The transcripts in this lesson are illustrative: they show the shape of a
+good exchange, not a recording of one model. Your agent will phrase things
+differently, and may or may not spot the off-by-one unprompted. Either is
+fine; you are about to hand it the evidence.
+
+Notice what the agent read without being asked: `AGENTS.md`. Most coding
+agents load a project-instructions file at start. Four lines there set the
+rules for the whole session, and you did not have to repeat them.
+
+## Find the evidence yourself
+
+Before you ask for a fix, see the failure with your own eyes. It takes ten
+seconds, and it gives you something exact to point at.
+
+<Predict id="predict-tests" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  title="Predict the verdict" hint="Four tests, and the README says one fails on purpose. What is the last line unittest prints in quiet mode?"
+  answer="FAILED (failures=1)" run="coding-with-agents/first-session/tests.sh">
+What is the last line of output?
+
+```sh
+python3 -m unittest -q 2>&1 | tail -1
+```
+</Predict>
+
+Read the failing test. `test_done_marks_the_numbered_item` calls
+`todo.done(items, 1)` and expects `"done #1: Buy milk"`. The program says
+something else. Prove it against the committed list, on a copy so the
+fixture stays clean.
+
+<Predict id="predict-done-bug" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  title="Predict what done does" hint="The function uses the number as the index without subtracting one. Which item sits at index 1?"
+  answer="done #1: Call the plumber" run="coding-with-agents/first-session/done_bug.sh">
+What does this print?
+
+```sh
+cp todos.json /tmp/todos.json
+TODO_FILE=/tmp/todos.json python3 todo.py done 1
+```
+</Predict>
+
+You now hold three concrete things: the file with the bug, the test that
+catches it, and the wrong output. That is the context the agent needs. A
+brief without them makes the agent go and find them, and it may find
+something else instead.
+
+## Give the right context
+
+Think back to the brief you wrote in *Delegating a task to an agent*: goal,
+context, limits, done-criteria. For a coding agent the context is files and
+commands, the limits are which files it may touch, and the done-criterion
+is usually a test.
+
+<Repair id="repair-the-brief" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  title="Fix the brief" hint="If you handed this to a colleague who had never seen the repository, what would they have to go and find out first?"
+  broken={`The done command is broken, please fix it.`}
+  model={`Fix the off-by-one in the done() function in todo.py: "done 1" currently marks the second item. The failing test is test_done_marks_the_numbered_item in test_todo.py; make it pass without changing the test. Only edit todo.py. Do not touch todos.json. Done when python3 -m unittest -q reports OK.`}>
+This brief will send the agent hunting. Rewrite it so it names the file,
+the failing test, what the agent may and may not change, and how you will
+know it is done.
+</Repair>
+
+## The first change and the permissions prompt
+
+Send your repaired brief. The agent will read `todo.py`, propose an edit,
+and stop. Before it writes the file it asks you.
+
+<Prompt model="illustrative" recorded="illustrative">
+Fix the off-by-one in `done()` in `todo.py`: `done 1` currently marks the
+second item. The failing test is `test_done_marks_the_numbered_item` in
+`test_todo.py`; make it pass without changing the test. Only edit
+`todo.py`. Do not touch `todos.json`. Done when `python3 -m unittest -q`
+reports OK.
+</Prompt>
+<Response>
+The bug is on the first line of `done()`: `index = number` should be
+`index = number - 1`. The bounds check below it already assumes a
+zero-based index, so it needs no change.
+
+I would like to edit `todo.py` (1 line). Allow?
+</Response>
+
+That question is the permissions prompt. By default a coding agent asks
+before it edits a file or runs a command, and the answer is where your
+judgement enters the session. Think in terms of blast radius, as you did
+in *Why agent safety is different*: a one-line edit to a file you can
+`git checkout` is about as small as a blast radius gets. Approve it.
+
+Some agents offer to stop asking for the rest of the session. Decline that
+for now. The prompt is the pause in which you read what is about to happen,
+and this lesson is about building the habit of reading.
+
+## Review the diff
+
+The agent says it is done. It may even say the tests pass. Do not take its
+word for either; look at what changed.
+
+```sh
+git diff
+```
+
+```diff
+-    index = number
++    index = number - 1
+```
+
+Then run the check you named in the brief. The done-criterion was yours,
+so you run it.
+
+```sh
+python3 -m unittest -q 2>&1 | tail -1
+```
+
+```text
+OK
+```
+
+That output is not asserted by this course, because your agent produced the
+edit; it is what you should see if the fix is the one above. If you see
+anything else, read the diff again before you ask the agent for more.
+
+<Pitfall title="Accepting a diff you did not read">
+An engineer asks an agent to fix a failing test, sees "all tests pass" in
+the reply, and accepts. The agent had changed the test's expected value to
+match the buggy output. The tests did pass. The rule: the agent's summary
+is a claim, the diff is the evidence, and a passing test is only proof if
+you also confirm the test did not move. Read every line the agent changed,
+every time.
+</Pitfall>
+
+## Sessions and context
+
+Everything you have said and everything the agent has read in this session
+sits in its context window: the agent's working memory. That is why the
+agent could answer "explain this repository" once and then fix the bug
+without re-reading the tests; the tests were already in context.
+
+It is also why sessions should end. The context has a fixed size, and as it
+fills, early material drops out or gets summarised. A long session that
+drifts across unrelated tasks gets worse at each of them. The habit to
+build: one task, one session. When the diff is reviewed and the tests pass,
+end the session and start a fresh one for the next task.
+
+If you do want a second change in the same repository, reset first so the
+next session starts from a known state.
+
+```sh
+git checkout -- .
+python3 -m unittest -q 2>&1 | tail -1
+```
+
+That puts the bug back, and the last line is `FAILED (failures=1)` again.
+Same command as the checkpoint above, same answer.
+
+<Exercise stretch="Now ask the agent for a refactor you choose, for example replacing the done-mark strings with a constant, and review it the same way: read the diff, run the tests, reset if you do not like it.">
+In a fresh session, with the fixture reset, fix the bug with your coding
+agent using the brief you repaired above. Approve the edit at the
+permissions prompt, then read `git diff` and run
+`python3 -m unittest -q` yourself.
+
+A good result: the diff touches one line in `todo.py`, `test_todo.py` and
+`todos.json` are unchanged, and the last line of the test run is `OK`.
+Finish by running `git checkout -- .` so the fixture is ready for next time.
+</Exercise>
+
+<Recap>
+1. Start the agent in the directory that is the task's world, and ask it to explain before you ask it to change.
+2. Find the evidence yourself first: the file, the failing test, the wrong output. Then put those in the brief, with limits and a done-criterion.
+3. The permissions prompt is where your judgement enters; weigh the blast radius, and keep the prompt on.
+4. The agent's summary is a claim. The diff is the evidence, and you run the check you named.
+5. One task, one session. Reset the fixture and start fresh.
+</Recap>

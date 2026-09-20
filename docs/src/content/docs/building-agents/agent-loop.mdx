@@ -1,0 +1,163 @@
+---
+title: Building your first agent
+description: Define one tool, run the loop that lets a model call it, and see why the loop is the whole trick.
+mode: tutorial
+covers:
+  - building-agents/agent-loop
+serves:
+  - building-agents/builds-agent-loop/defines-a-tool
+  - building-agents/builds-agent-loop/implements-the-loop
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+extends-to:
+  - label: Design patterns
+    href: /building-agents/patterns/
+sources:
+  - AEC-13
+---
+
+import { Predict, Order, Pitfall, Exercise, Recap } from '@components/lesson';
+
+An agent is a model in a loop with tools. That sentence is the whole
+architecture; in this lesson we make it concrete. We define one tool,
+write the loop, and watch a model use the tool to answer a question it
+could not answer alone.
+
+Every example below runs against a fixture: a fake model that behaves
+deterministically, so you can predict what happens and check yourself. The
+complete program is `docs/examples/building-agents/agent-loop/agent.py` in
+the repository; swapping in a real model changes one function.
+
+## A tool is a function plus a description
+
+The model cannot run code. What it can do is emit text that says "call
+this function with these arguments". So a tool has two halves: the
+function you will run, and the description the model reads to decide when
+to ask for it.
+
+```python
+def get_weather(city: str) -> str:
+    data = {"Amsterdam": "14°C, rain", "Lisbon": "27°C, sun"}
+    return data.get(city, f"no data for {city}")
+
+TOOLS = {
+    "get_weather": {
+        "fn": get_weather,
+        "description": "Current weather for a city. Args: city (str).",
+    },
+}
+```
+
+Predict before you run.
+
+<Predict id="predict-tool-call" objective="building-agents/builds-agent-loop/defines-a-tool"
+  title="Predict the output" hint="The tool is a plain function. Look up Lisbon in the dict."
+  answer="27°C, sun" run="building-agents/agent-loop/tool_call.sh">
+
+What does this print?
+
+```python
+print(TOOLS["get_weather"]["fn"]("Lisbon"))
+```
+
+</Predict>
+
+The description matters as much as the code. The model chooses tools by
+reading descriptions, so a vague one ("weather stuff") gets called at the
+wrong times and with the wrong arguments.
+
+<Pitfall title="Describing the implementation instead of the use">
+A first draft often reads "Calls the OpenWeather API with an HTTP GET".
+The model does not care how; it needs to know *when* and *with what*.
+Rule: write the description for the caller, name each argument and its
+type, and say what comes back.
+</Pitfall>
+
+## The loop
+
+Now the fixture model. It looks at the last message and either asks for a
+tool or gives a final answer.
+
+```python
+def fake_model(messages):
+    last = messages[-1]
+    if last["role"] == "user" and "weather" in last["content"]:
+        city = last["content"].split(" in ")[-1].rstrip("?")
+        return {"tool": "get_weather", "args": {"city": city}}
+    if last["role"] == "tool":
+        return {"answer": f"It is {last['content']} there."}
+    return {"answer": "I can only help with weather."}
+```
+
+And the loop itself. Read it slowly; every agent framework you will ever
+use is this with more error handling.
+
+```python
+def run(question, model=fake_model, max_steps=5):
+    messages = [{"role": "user", "content": question}]
+    for _ in range(max_steps):
+        reply = model(messages)
+        if "answer" in reply:
+            return reply["answer"]
+        tool = TOOLS[reply["tool"]]
+        result = tool["fn"](**reply["args"])
+        messages.append({"role": "assistant", "content": str(reply)})
+        messages.append({"role": "tool", "content": result})
+    return "gave up"
+```
+
+This reuses `TOOLS` and `fake_model` from above.
+
+<Predict id="predict-loop" objective="building-agents/builds-agent-loop/implements-the-loop"
+  title="Predict the loop" hint="Trace two rounds: first the model asks for a tool, then it sees the tool result and answers."
+  answer="It is 14°C, rain there." run="building-agents/agent-loop/loop.sh">
+
+What does this print?
+
+```python
+print(run("What is the weather in Amsterdam?"))
+```
+
+</Predict>
+
+Notice `max_steps`. Without it, a model that keeps asking for tools runs
+forever and spends your money. Every real loop has a budget.
+
+<Order id="order-the-loop" objective="building-agents/builds-agent-loop/implements-the-loop"
+  title="Order one iteration" hint="What does the loop need to know before it can decide whether to run a tool at all?"
+  steps={[
+    'Send the message list to the model',
+    'Check whether the reply is a final answer; if so, return it',
+    'Look up the requested tool by name',
+    'Run the tool function with the model\'s arguments',
+    'Append the tool call and the tool result to the messages',
+  ]}>
+
+Put the steps of one iteration of the agent loop in order.
+
+</Order>
+
+<Exercise stretch="Replace fake_model with a call to a real model API that supports tool use, keeping run unchanged. The only new work is translating the API's tool-call format into the shape the loop already understands.">
+
+Copy `agent.py` from the repository. Add a second tool, `get_time(city)`,
+returning a fixed string per city. Extend `fake_model` so a question
+containing "time" asks for it. Run the loop on "What is the time in
+Lisbon?" and check the answer.
+
+A good result: the new tool has a description written for the caller, the
+loop itself is unchanged, and the question returns the fixed string for
+Lisbon in one tool round.
+
+</Exercise>
+
+<Recap>
+
+1. A tool is a function plus a description written for the model.
+2. The loop is: ask the model, run the tool it asks for, append the result,
+   repeat until it answers or the budget runs out.
+3. The model never runs anything; your loop does. That is where safety
+   controls go.
+
+</Recap>

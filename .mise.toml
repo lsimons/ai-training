@@ -30,6 +30,8 @@ zizmor = "1.30.1"
 # missing, so shellcheck is pinned here too rather than left to the host.
 actionlint = "1.7.12"
 shellcheck = "0.11.0"
+# Runs the lesson example fixtures (`mise run examples`).
+python = "3.14.7"
 
 # Deliberately NOT --frozen-lockfile: this is the task you run while
 # actually changing dependencies, and it is allowed to update bun.lock.
@@ -64,6 +66,25 @@ run = "bun run build"
 description = "Preview the production build"
 dir = "docs"
 run = "bun run preview"
+
+[tasks.examples]
+description = "Run every lesson example fixture and assert the output the lesson shows"
+dir = "docs"
+run = "bun scripts/check-examples.mjs"
+
+[tasks.docs-e2e]
+description = "Build, serve, and click through every lesson mechanism in a headless browser. Needs `mise run docs-browser` once."
+dir = "docs"
+run = """
+bun run build
+bunx astro preview --port 4399 > /tmp/astro-e2e-preview.log 2>&1 &
+sleep 3
+PORT=4399 bun scripts/e2e.mjs
+status=$?
+# `bunx` forks the real server; kill by command line, not by the bunx pid.
+pkill -f 'astro preview --port 4399' || true
+exit $status
+"""
 
 [tasks.docs-check]
 description = "Astro type/content check"
@@ -128,10 +149,11 @@ run = "lychee --no-progress --config .lychee.toml ."
 # `docs-check` and `docs-build` both write `docs/.astro`. The workflow runs
 # the same list as separate steps for readable logs — keep the two in sync.
 [tasks.ci]
-description = "Full CI gate: install + lint + Astro check + build"
+description = "Full CI gate: install + lint + examples + Astro check + build"
 run = [
   "mise run docs-install-frozen",
   "mise run lint",
+  "mise run examples",
   "mise run docs-check",
   "mise run docs-build",
 ]

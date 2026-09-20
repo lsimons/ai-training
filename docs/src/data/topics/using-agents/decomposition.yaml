@@ -1,0 +1,38 @@
+id: using-agents/decomposition
+area: using-agents
+name: Decomposing work
+definition: >-
+  Large tasks fail as single prompts. This topic teaches breaking work into
+  pieces an agent can complete and you can check, iterating on the pieces as
+  the results reveal what you actually needed, and recognising the point where
+  another round of delegation costs more than doing the step yourself.
+concepts:
+  - id: task-decomposition
+    name: Task decomposition
+    definition: >-
+      Splitting a large piece of work into steps small enough that each has a
+      clear input, a clear output and a way to check it. Good pieces can be
+      handed to an agent one at a time, verified independently and redone
+      without losing the others. Decomposition also surfaces the decisions
+      that are yours to make before the agent starts filling gaps.
+  - id: task-iteration
+    name: Iteration
+    definition: >-
+      Working in rounds: delegate a piece, check it, adjust the brief with
+      what you learned, delegate the next. The first result usually reveals a
+      missing constraint or a wrong assumption about the goal. Treat each
+      round as feedback on the brief rather than as the agent failing, and
+      keep rounds short so mistakes stay cheap.
+  - id: when-to-stop-and-do-it-yourself
+    name: When to stop and do it yourself
+    definition: >-
+      Recognising the point where explaining, correcting and re-checking an
+      agent costs more than doing the step directly. Signs include a third
+      round on the same piece, a task that depends on knowledge only you
+      hold, or a check that takes longer than the work. Taking the step back
+      is a judgement call, not a failure of the tool or of you.
+links:
+  prerequisites: [using-agents/delegating]
+  related: []
+  specializations: []
+sources: [DLAI-11]
