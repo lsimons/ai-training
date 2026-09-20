@@ -13,7 +13,7 @@
 # prompting and limits, then what-is-an-agent, then grounding.
 area: concepts
 lessons:
-  # --- concepts/how-models-work (five concepts: three lessons) ---
+  # --- concepts/how-models-work (five concepts: two lessons here, model-family-and-size in concepts/what-tokens-cost) ---
   - id: concepts/how-models-work
     title: How a language model works
     covers: concepts/how-models-work
@@ -26,7 +26,7 @@ lessons:
     # exercise (judge): ask the same question twice, read both answers, and explain the difference in terms of sampling
     # shorts: none
     # assumes (other areas): none
-    # introduces: token, training-vs-inference, sampling-and-temperature (names context-window, hallucination, knowledge-cutoff and sycophancy in passing; the lessons below teach them)
+    # introduces: token, training-vs-inference, sampling-and-temperature, hallucination, knowledge-cutoff (names context-window, non-determinism and sycophancy in passing; the lessons below teach them)
   - id: concepts/context-window
     title: What the model can see
     covers: concepts/how-models-work
@@ -41,20 +41,6 @@ lessons:
     # shorts: how a tokenizer splits text (why letter counting fails)
     # assumes (other areas): none
     # introduces: context-window
-  - id: concepts/model-size
-    title: Model families and sizes
-    covers: concepts/how-models-work
-    serves:
-      - concepts/explains-models/explains-generation
-    status: planned
-    minutes: 10
-    after:
-      - concepts/how-models-work
-    # mode: explanation
-    # exercise (judge): for three described tasks, pick a small or a large model and write one sentence of reasoning each
-    # shorts: none
-    # assumes (other areas): none
-    # introduces: model-family-and-size
 
   # --- concepts/prompting (five concepts, tutorial side: five lessons) ---
   - id: concepts/prompt-anatomy
@@ -93,7 +79,7 @@ lessons:
     status: planned
     minutes: 12
     after:
-      - concepts/one-example
+      - concepts/prompt-anatomy
     # mode: tutorial
     # exercise (do): ask for named fields with allowed values, paste the result into the fixture that checks it, and fix the prompt until it passes
     # shorts: none
@@ -130,7 +116,7 @@ lessons:
 
   # --- concepts/limits (six concepts: four lessons) ---
   - id: concepts/thin-path
-    title: Well-worn paths and thin ones
+    title: Where a model makes things up
     covers: concepts/limits
     serves:
       - concepts/explains-models/names-failure-modes
@@ -139,10 +125,10 @@ lessons:
     after:
       - concepts/how-models-work
     # mode: explanation
-    # exercise (judge): place five tasks as "trust and spot-check" or "verify every specific", and for one failure name the two properties behind it
+    # exercise (judge): for five tasks, decide whether to spot-check or to verify every specific, and for one wrong answer name the two properties that met to produce it
     # shorts: checking a citation
     # assumes (other areas): none
-    # introduces: hallucination, knowledge-cutoff
+    # introduces: none. Deepens hallucination and knowledge-cutoff, which the live lesson introduces and grades. This lesson adds where fabrication concentrates (specifics, rare topics, recent events) and how much checking a task calls for. Issue #86 decides whether the task-placing checkpoint goes in the live lesson or here; this entry stands either way.
   - id: concepts/same-prompt-twice
     title: Same prompt, different answer
     covers: concepts/limits
@@ -154,10 +140,10 @@ lessons:
     after:
       - concepts/how-models-work
     # mode: tutorial
-    # exercise (do): run the sampling fixture ten times at two temperatures and tabulate how often the answers agree
+    # exercise (do): run the sampling fixture ten times at two temperatures, tabulate how often the answers agree, and write the check a workflow would need to accept that variation
     # shorts: none
     # assumes (other areas): none
-    # introduces: non-determinism
+    # introduces: non-determinism. The live lesson shows that two runs differ and why. This lesson adds the consequence for a process: one good run proves nothing about a prompt, variation remains at the lowest temperature, and any workflow built on a model needs a check that tolerates it.
   - id: concepts/straight-answer
     title: Getting a straight answer
     covers: concepts/limits
@@ -178,14 +164,14 @@ lessons:
     serves:
       - concepts/explains-models/explains-generation
     status: planned
-    minutes: 12
+    minutes: 15
     after:
       - concepts/context-window
     # mode: tutorial
-    # exercise (do): price a long prompt and a short one with the token counter and a price table, then find the rule that a long instruction file buried
+    # exercise (do): price a long prompt and a short one with the token counter and a price table for a small and a large model, then find the rule that a long instruction file buried
     # shorts: why long instruction files fail
     # assumes (other areas): none
-    # introduces: cost-and-latency, instruction-dilution
+    # introduces: model-family-and-size, cost-and-latency, instruction-dilution. Dilution here is about one instruction competing with the text after it, in one prompt or file. Context rot (concepts/memory) is the session-level effect of a filling window.
 
   # --- concepts/what-is-an-agent (five concepts: three lessons; hub for five topics in other areas) ---
   - id: concepts/agent-loop
@@ -257,9 +243,9 @@ lessons:
     minutes: 12
     after:
       - concepts/retrieval
-      - concepts/context-window
+      - concepts/what-tokens-cost
     # mode: explanation
     # exercise (judge): read a long transcript, mark where the answers start to drift, and say which of summarize, start fresh or retrieve would have helped
     # shorts: none
     # assumes (other areas): none
-    # introduces: short-and-long-term-memory, context-rot
+    # introduces: short-and-long-term-memory, context-rot. Context rot is the session-level decline as the window fills with old turns and tool output; concepts/what-tokens-cost covers instruction dilution inside one prompt or file.
