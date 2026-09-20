@@ -12,20 +12,20 @@ in the repository root.
 
 Tools are pinned in `.mise.toml`; run `mise install` once. Then:
 
-- `mise run docs-install` - install the site dependencies (bun).
-- `mise run docs-dev` - start the live-reloading dev server.
-- `mise run docs-build` - build the static site into `docs/dist`.
-- `mise run docs-check` - run the Astro type/content check.
+- `mise run site-install` - install the site dependencies (bun).
+- `mise run site-dev` - start the live-reloading dev server.
+- `mise run site-build` - build the static site into `site/dist`.
+- `mise run site-check` - run the Astro type/content check.
 - `mise run lint` - run the prek hooks over every file, plus `actionlint`.
 - `mise run ci` - the full gate: install, lint, check, build. CI runs the same.
 
-Content lives in `docs/src/content/docs/`; static assets in `docs/public/`.
+Content lives in `site/src/content/docs/`; static assets in `site/public/`.
 
 ## Slide decks
 
 The [example presentation](/presentations/example.qmd) is built with
-[Quarto](https://quarto.org/). Render it with `mise run docs-slides` (or
-`quarto render docs/public/presentations/example.qmd`).
+[Quarto](https://quarto.org/). Render it with `mise run site-slides` (or
+`quarto render site/public/presentations/example.qmd`).
 
 The presentations change so rarely that their rendered HTML and PDF outputs are
 committed to git.

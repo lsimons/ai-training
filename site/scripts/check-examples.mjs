@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Example runner (spec S03 "Examples", S06 open question 2): every `<Predict
- * run="..." answer="...">` in a lesson names a fixture under docs/examples/.
+ * run="..." answer="...">` in a lesson names a fixture under site/examples/.
  * This runs each fixture and fails if its stdout is not the answer shown to
  * the learner. `.sh` fixtures run with bash, `.py` with python3.
  *

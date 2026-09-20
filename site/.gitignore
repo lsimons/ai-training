@@ -19,7 +19,7 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
-# Playwright screenshot output (see `mise run docs-screenshot`)
+# Playwright screenshot output (see `mise run site-screenshot`)
 out.png
 
 # Quarto render intermediates (the html/pdf outputs are committed; see

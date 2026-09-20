@@ -31,7 +31,7 @@ renders to two outputs:
 - **HTML** (reveal.js) - `example.html`
 - **PDF** (Beamer) - `example.pdf`
 
-Render both with `mise run docs-slides`.
+Render both with `mise run site-slides`.
 
 ::: {.notes}
 Speaker notes go in a `.notes` block and show up in reveal.js's speaker view
@@ -81,10 +81,10 @@ $$\int_0^1 x^2 \, dx = \frac{1}{3}$$
 
 ## Make it yours
 
-1. Copy this file to a new name in `docs/public/presentations/`.
+1. Copy this file to a new name in `site/public/presentations/`.
 2. Edit the frontmatter `title` / `author` and write your slides.
-3. Render with `quarto render docs/public/presentations/your-deck.qmd`.
-4. Link it from the sidebar in `docs/astro.config.mjs`.
+3. Render with `quarto render site/public/presentations/your-deck.qmd`.
+4. Link it from the sidebar in `site/astro.config.mjs`.
 
 See the [slides guide](https://lsimons.github.io/ai-training/guides/slides/)
 for details.

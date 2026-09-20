@@ -1,13 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mise run docs-install)",
-      "Bash(mise run docs-build)",
-      "Bash(mise run docs-check)",
-      "Bash(mise run docs-clean)",
-      "Bash(mise run docs-slides)",
-      "Bash(mise run docs-slides *)",
-      "Bash(mise run docs-favicon)",
+      "Bash(mise run site-install)",
+      "Bash(mise run site-build)",
+      "Bash(mise run site-check)",
+      "Bash(mise run site-clean)",
+      "Bash(mise run site-slides)",
+      "Bash(mise run site-slides *)",
+      "Bash(mise run site-favicon)",
       "Bash(mise run lint)",
       "Bash(mise run links)",
       "Bash(mise run ci)",

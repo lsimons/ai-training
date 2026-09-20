@@ -4,12 +4,12 @@ description: Add Markdown pages, wire them into the sidebar, and link between th
 ---
 
 Pages are Markdown (`.md`) or MDX (`.mdx`) files under
-`docs/src/content/docs/`. The path under that directory becomes the URL, and
+`site/src/content/docs/`. The path under that directory becomes the URL, and
 each page needs at least a `title` in its frontmatter.
 
 ## Add a page
 
-Create `docs/src/content/docs/guides/my-page.md`:
+Create `site/src/content/docs/guides/my-page.md`:
 
 ```markdown
 ---
@@ -24,7 +24,7 @@ That page is served at `/guides/my-page/` (under the deploy base path).
 
 ## Wire it into the sidebar
 
-The sidebar is defined explicitly in `docs/astro.config.mjs`. Add your page to
+The sidebar is defined explicitly in `site/astro.config.mjs`. Add your page to
 a group's `items`:
 
 ```js
