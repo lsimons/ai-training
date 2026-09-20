@@ -97,6 +97,8 @@ stdlib
 subgoals
 subheaders
 textareas
+tricolon
+tricolons
 unreviewed
 unvalidated
 upsell
