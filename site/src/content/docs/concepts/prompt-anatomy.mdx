@@ -1,0 +1,319 @@
+---
+title: Instruction, context and format
+description: Turn a one-line request into a prompt with a clear instruction, marked context, a named audience and a stated output format, and see what each part changes.
+mode: tutorial
+covers:
+  - concepts/prompting
+serves:
+  - concepts/prompts-reliably/structures-a-prompt
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: text-becomes-tokens
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: where-the-scores-come-from
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: Show one example
+    href: /concepts/one-example/
+  - label: Output the next step can use
+    href: /concepts/structured-output/
+---
+
+import { Choice, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we take a one-line request that gets a vague answer and
+rebuild it, one part at a time, into a prompt that gets a usable one. Each
+round adds one part and you run the result in your own chat tool, so you see
+what that part changes. By the end you have a four-item checklist you can
+apply to any request.
+
+You need any chat assistant you have access to. The lesson doesn't depend
+on which product you use. Every response shown here is illustrative: the
+author wrote it to show the pattern, and the component says so. Your model
+gives a different text, and the comparison you care about is between your
+own rounds.
+
+## One line, one vague answer
+
+Here is the material we work with in every round. It is a fictional email
+from a supplier. Read it once now, so you can judge each answer later.
+
+> Subject: Change to your delivery of 14 October
+>
+> Dear customer,
+>
+> Thank you for your order 4471. Because of a strike at the port, the
+> pallets for this order arrive at our warehouse three days later than
+> planned. We now expect to deliver on Friday 17 October between 8:00 and
+> 12:00 instead of Tuesday 14 October. The two replacement chairs you asked
+> about are on the same pallet. If Friday morning doesn't work for you,
+> reply to this email with two other dates this week, and we book the first
+> one that has a slot. Please confirm by Thursday whether Friday works, so
+> we can release the pallet.
+>
+> Kind regards,
+> Northline Logistics
+
+Paste the email into your chat tool, and type one line above it.
+
+<Prompt model="illustrative" recorded="illustrative">
+Summarize this.
+
+[the email, pasted in full]
+</Prompt>
+<Response>
+This email from Northline Logistics informs the customer that their order
+4471 has been delayed by three days due to a port strike. The delivery has
+been rescheduled from Tuesday 14 October to Friday 17 October between 8:00
+and 12:00, and includes the two replacement chairs. The customer is asked to
+confirm by Thursday whether the new time works, or to propose two
+alternative dates.
+</Response>
+
+You probably got something like this. It is correct and it is a paragraph
+that restates the email in slightly fewer words. Whoever reads it still
+has to work out what changed and what they have to do. That is the
+default a model falls back on when the prompt leaves everything unsaid:
+the prediction that fits most "summarize this" requests in its training
+text. In the lesson on how models work you saw that the model has no
+picture of what you want beyond the tokens you gave it, so the answer to a
+vague prompt is an average of everyone's answer. Every part we add below
+takes one of those guesses away from the model.
+
+## The instruction
+
+The **instruction** is the part of the prompt that says what to do. A
+clear one names the task, the input it applies to and the constraints to
+respect. "Summarize" names a task and nothing else. What counts as a good
+summary here is the changes and the actions, and the model has no way to
+know that unless you say it.
+
+Rewrite the line so it says what to keep and what to leave out, then run
+it on the same email.
+
+<Prompt model="illustrative" recorded="illustrative">
+Summarize the email below. Keep only what changed compared to the original
+plan and what we have to do about it. Leave out greetings, apologies and
+the reason for the delay. Do not add anything the email doesn't say.
+
+[the email, pasted in full]
+</Prompt>
+<Response>
+The delivery of order 4471 moves from Tuesday 14 October to Friday 17
+October, 8:00 to 12:00. The two replacement chairs are on the same
+delivery. You need to confirm by Thursday whether Friday works. If it
+doesn't, reply with two other dates this week.
+</Response>
+
+The greeting and the strike are gone, and the reader gets the change and
+the actions. Compare with your first round. Most of the difference comes
+from the two constraints, "keep only" and "leave out", and from the one
+rule against additions. A model fills any gap with a plausible default,
+so most prompt failures trace back to something the instruction left
+unsaid (@Academy ai-fluency-framework-foundations).
+
+## Mark the boundary
+
+The prompt now has two kinds of text. The instruction is yours and tells
+the model what to do. The email is material for the model to work on. In
+the prompt they are one stream of tokens, and the model has to guess where
+one ends and the other begins. Usually the guess is right. When the
+material itself contains sentences that look like requests, it isn't.
+
+<Pitfall title="A line of the email becomes an order">
+A learner pastes a longer version of the same email and types "summarize"
+below it. The email ends with "Please confirm by Thursday whether Friday
+works". The model answers: "Confirmed, Friday 17 October works for us."
+It has written a reply to the supplier instead of a summary for the
+learner, because the last request-shaped sentence in the prompt came from
+the email. The instruction and the material ran together, so the model
+treated a line of the material as the order. Rule: mark where your
+instruction ends and the pasted material begins, and put the instruction
+first.
+</Pitfall>
+
+A **delimiter** is a marker that fences off the material. Triple quotes,
+a line of dashes, or a pair of tags such as `<email>` and `</email>` all
+work. The choice matters less than using one at all, and saying in the
+instruction which marker you used, so the model knows the fenced text is
+the input and everything outside it is the order (@DLAI-1).
+
+<Prompt model="illustrative" recorded="illustrative">
+Summarize the email between the triple quotes. Keep only what changed
+compared to the original plan and what we have to do about it. Leave out
+greetings, apologies and the reason for the delay. Do not add anything
+the email doesn't say.
+
+"""
+[the email, pasted in full]
+"""
+</Prompt>
+<Response>
+The delivery of order 4471 moves from Tuesday 14 October to Friday 17
+October, 8:00 to 12:00. The replacement chairs come with it. Confirm by
+Thursday whether Friday works, or reply with two other dates this week.
+</Response>
+
+On a short, polite email the answer barely changes, and that is the
+point. The boundary costs you one line and protects you when the material
+is long, when it contains requests, and later, when a tool rather than you
+puts the material into the prompt. Delimiters are also the first defense
+the safety lessons build on, where the pasted material is written by
+someone who wants the model to follow it.
+
+<Choice id="which-marks-the-boundary" objective="concepts/prompts-reliably/structures-a-prompt"
+  concepts={['instruction']}
+  context="A colleague wants a chat assistant to summarize an email from a supplier. The email ends with a request to confirm a delivery date."
+  title="Which prompt marks the boundary?"
+  hint="In each prompt, where does the model's order end and the pasted material begin, and does the prompt say so?"
+  options={[
+    { text: 'The email, pasted in full, and on the next line: "summarize".', why: 'The instruction comes last and nothing separates it from the email. The request at the end of the email sits right next to it, and the model can read either one as the order.' },
+    { text: '"Summarize the email between the triple quotes for me, in three bullets." Then the email between two lines of """.', correct: true },
+    { text: '"Summarize this email:" followed directly by the email text, ending with the supplier\'s request to confirm.', why: 'The instruction comes first, which helps, but nothing marks where the email ends. The supplier\'s request to confirm is the last sentence the model reads, with no fence around it.' },
+    { text: '"Please read the email below carefully and summarize it. Thank you!" followed by the email.', why: 'Politeness is not a boundary. The model still has to guess where your text stops and the email starts, and the email\'s own request is unfenced.' },
+  ]}>
+
+A colleague asks you which of these prompts to use for the supplier
+email. Which one marks the boundary between the instruction and the
+material?
+
+</Choice>
+
+## Audience and purpose
+
+The summary so far is for nobody in particular. In practice a summary is
+for someone, who needs it for something, and those two facts decide what
+goes in. The same email summarized for yourself, for the warehouse team
+lead who plans the shifts, and for a customer who is waiting for the
+chairs differ in what they keep and in how they say it. The model cannot
+guess which reader you have in mind, so it picks a general one.
+
+Add one sentence that names the reader and what they do with the text.
+
+<Prompt model="illustrative" recorded="illustrative">
+Summarize the email between the triple quotes for the warehouse team lead,
+who has not seen it and needs to decide whether to move Tuesday's unloading
+shift. Keep only what changed compared to the original plan and what we
+have to do about it. Leave out greetings, apologies and the reason for the
+delay. Do not add anything the email doesn't say.
+
+"""
+[the email, pasted in full]
+"""
+</Prompt>
+<Response>
+Northline moved the delivery of order 4471 from Tuesday 14 October to
+Friday 17 October, 8:00 to 12:00, so the Tuesday unloading shift is not
+needed for this order. The replacement chairs arrive on the same pallet.
+We have to confirm the Friday slot by Thursday. If Friday morning is a
+problem, we can reply with two other dates this week instead.
+</Response>
+
+The same facts now lead with the one the team lead acts on, the Tuesday
+shift, and the confirmation is stated as something "we" have to do. The
+prompt didn't ask for either of those. Naming the reader and the purpose
+let the model choose them, and it chose better than it did for a general
+reader (@Academy ai-fluency-framework-foundations).
+
+## Format and length
+
+Left to itself, the model picks a format and a length for a general
+reader. A paragraph is its default, and the length follows the input. The
+next step, a person scanning a chat message or a program reading the
+answer, usually wants something else, and the only way it gets that is if
+the prompt says so. State the format, the length and what to leave off,
+in numbers where you can. "Keep it short" means a different thing to every
+reader, and "three bullets, each under 15 words" means one thing.
+
+<Prompt model="illustrative" recorded="illustrative">
+Summarize the email between the triple quotes for the warehouse team lead,
+who has not seen it and needs to decide whether to move Tuesday's unloading
+shift. Keep only what changed compared to the original plan and what we
+have to do about it. Leave out greetings, apologies and the reason for the
+delay. Do not add anything the email doesn't say.
+
+Format: three bullets, each under 15 words, no heading and no introduction
+line.
+
+"""
+[the email, pasted in full]
+"""
+</Prompt>
+<Response>
+- Order 4471 delivery moves from Tuesday 14 to Friday 17 October, 8:00 to 12:00.
+- Replacement chairs arrive on the same pallet.
+- Confirm Friday by Thursday, or reply with two other dates this week.
+</Response>
+
+Put the first round next to this one. The email is the same and the model
+is the same. The difference is four sentences of prompt, and each one
+closed a gap the model would otherwise fill with a default. The next two
+lessons add two more parts: one worked example of the output, for when
+the format is hard to describe, and a fixed shape a program can read
+(@DLAI-3).
+
+<Sort id="sort-the-fragments" objective="concepts/prompts-reliably/structures-a-prompt"
+  concepts={['instruction']}
+  context="The fragments come from a prompt that asks a chat assistant to summarize a supplier's email about a delayed delivery for a warehouse team lead."
+  title="Which part is this?"
+  hint="Ask of each fragment: does it say what to do, is it the material to work on, does it say who reads the result and why, or does it say what the result looks like?"
+  buckets={['Instruction', 'Context', 'Audience and purpose', 'Format']}
+  items={[
+    { text: 'Summarize the email between the triple quotes.', bucket: 0 },
+    { text: 'Do not add anything the email doesn\'t say.', bucket: 0 },
+    { text: 'Leave out greetings and apologies.', bucket: 0 },
+    { text: 'The pasted email, between two lines of """.', bucket: 1 },
+    { text: 'Our order number is 4471.', bucket: 1 },
+    { text: 'The reader is the warehouse team lead, who hasn\'t seen the email.', bucket: 2 },
+    { text: 'They need to decide whether to move Tuesday\'s unloading shift.', bucket: 2 },
+    { text: 'Three bullets, each under 15 words.', bucket: 3 },
+    { text: 'Plain text, no heading, no introduction line.', bucket: 3 },
+  ]}>
+
+Place each fragment of the prompt in the bucket for the part it belongs
+to.
+
+</Sort>
+
+<Exercise stretch="Take the four-part prompt and remove one part at a time, running each version. Which part changes the answer the most for your text?">
+
+Pick a short text of your own that you don't mind pasting into a chat
+assistant: a notice, a newsletter, a meeting invitation. Send it with a
+one-line request first, such as "summarize this" or "what does this
+mean". Then rewrite the request with all four parts: an instruction with
+its constraints, the text fenced by a delimiter that the instruction
+names, one sentence naming the reader and what they do with the result,
+and a format with a length in numbers. Send that too, in a fresh chat, and
+put the two answers side by side. Ten minutes is enough. Doing this once
+on your own text is what makes the checklist stick.
+
+A good result is one where you can point at each sentence of the second
+answer and name the part of the prompt that put it there. Which part of
+your first request was the model guessing at most?
+
+</Exercise>
+
+<Recap>
+
+1. A one-line request gets the average answer, because the model fills
+   every gap with the most common default from its training text.
+2. The instruction says what to do: the task, the input it applies to and
+   the constraints. Most prompt failures trace back to something it left
+   unsaid.
+3. Mark the boundary between the instruction and the pasted material with
+   a delimiter, name that delimiter in the instruction, and put the
+   instruction first. Material and instruction that run together let a
+   line of the material become the order.
+4. Name the audience and the purpose. They decide what the summary keeps
+   and what it leads with.
+5. State the format and the length in numbers. "Short" is a guess and
+   "three bullets under 15 words" is a check.
+
+</Recap>
