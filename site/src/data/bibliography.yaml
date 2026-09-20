@@ -1,246 +1,289 @@
 # Source material keyed as in docs/spec/S02-topic-map.md "Source material".
-# url is null unless the spec gives a public URL.
+# type is per spec S01 "Source" (book, course, reference or video). url is a
+# public URL only where the licensing rules in AGENTS.md allow a link to the
+# source (agent-engineer-course, DeepLearning.AI, CS50, Diátaxis); otherwise null.
 AEC-01:
+  type: course
   title: "What are AI agents: model versus agent, autonomy levels, when a prompt suffices"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-02:
+  type: course
   title: "How agents think: tokens and context, reasoning strategies, model choice, system prompts"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-03:
+  type: course
   title: "Tools, giving agents hands: function calling, schema design, the N x M problem"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-04:
+  type: course
   title: "Agentic design patterns: ReAct, reflection, tool use, planning"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-05:
+  type: course
   title: "Memory and context: context engineering, memory kinds, memory versus RAG, context rot"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-06:
+  type: course
   title: "Planning and reasoning: the loop, plan-then-execute, hierarchy"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-07:
+  type: course
   title: "Multi-agent systems: architectures, roles, the orchestration tax"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-08:
+  type: course
   title: "Agentic RAG: the retrieve, evaluate, refine loop; when basic RAG is enough"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-09:
+  type: course
   title: "Evaluating and testing agents: quality pillars, metrics, trajectories, LLM as judge"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-10:
+  type: course
   title: "Guardrails and safety: why agent safety differs, defense layers, injection, human in the loop"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-11:
+  type: course
   title: "From prototype to production: eval-gated deploys, rollout, cost"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-12:
+  type: course
   title: Getting started with Claude Code
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-13:
+  type: course
   title: "Building your first agent: the loop from scratch, then with an SDK"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-14:
+  type: course
   title: Agent protocols, MCP and A2A
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-15:
+  type: course
   title: "AGENTS.md: contents, monorepo hierarchies, with a builder widget"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-16:
+  type: course
   title: "MCP deep dive: MCP versus CLI, security failure modes, token cost"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-17:
+  type: course
   title: "Agent skills: skills versus tools, the spec, progressive disclosure"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 AEC-18:
+  type: course
   title: "Orchestrators: code- versus model-driven, patterns, anti-patterns"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: null
+  url: https://github.com/lsimons/agent-engineer-course
 DLAI-1:
+  type: course
   title: ChatGPT Prompt Engineering for Developers
   container: DeepLearning.AI
   author: DeepLearning.AI
   license: Proprietary
-  url: null
+  url: https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/
 DLAI-2:
+  type: course
   title: Generative AI for Everyone
   container: DeepLearning.AI
   author: DeepLearning.AI
   license: Proprietary
-  url: null
+  url: https://www.deeplearning.ai/courses/generative-ai-for-everyone/
 DLAI-3:
+  type: course
   title: AI Prompting for Everyone
   container: DeepLearning.AI
   author: DeepLearning.AI
   license: Proprietary
-  url: null
+  url: https://www.deeplearning.ai/courses/ai-prompting-for-everyone/
 DLAI-5:
+  type: course
   title: "Claude Code: A Highly Agentic Coding Assistant"
   container: DeepLearning.AI
   author: DeepLearning.AI
   license: Proprietary
-  url: null
+  url: https://www.deeplearning.ai/short-courses/claude-code-a-highly-agentic-coding-assistant/
 DLAI-6:
+  type: course
   title: Intro to Generative AI for Software Development
   container: DeepLearning.AI
   author: DeepLearning.AI
   license: Proprietary
-  url: null
+  url: https://www.deeplearning.ai/courses/introduction-to-generative-ai-for-software-development/
 DLAI-7:
+  type: course
   title: Team Software Engineering with AI
   container: DeepLearning.AI
   author: DeepLearning.AI
   license: Proprietary
-  url: null
+  url: https://www.deeplearning.ai/courses/team-software-engineering-with-ai/
 DLAI-9:
+  type: course
   title: "MCP: Build Rich-Context AI Apps with Anthropic"
   container: DeepLearning.AI
   author: DeepLearning.AI
   license: Proprietary
-  url: null
+  url: https://www.deeplearning.ai/short-courses/mcp-build-rich-context-ai-apps-with-anthropic/
 DLAI-10:
+  type: course
   title: Agent Skills with Anthropic
   container: DeepLearning.AI
   author: DeepLearning.AI
   license: Proprietary
-  url: null
+  url: https://www.deeplearning.ai/short-courses/agent-skills-with-anthropic/
 DLAI-11:
+  type: course
   title: "Agentic AI: M1 workflows and autonomy, M2 reflection, M4 evals and error analysis, M5 autonomous agents"
   container: DeepLearning.AI
   author: DeepLearning.AI
   license: Proprietary
-  url: null
+  url: https://www.deeplearning.ai/courses/agentic-ai/
 CS50:
+  type: course
   title: Harvard CS50 and its AI tutor
   container: Harvard CS50
   author: Harvard University, CS50
   license: CC BY-NC-SA 4.0
-  url: null
+  url: https://cs50.harvard.edu/
 Ng:
+  type: reference
   title: "AI engineering skills map: build and deploy AI applications, software engineering fundamentals, use coding agents, shape the build"
   container: The Batch (newsletter)
   author: Andrew Ng
   license: Public newsletter
   url: null
 Brilliant TAS:
+  type: reference
   title: "Taste: what is worth building"
   container: Brilliant, Coding with AI skills map
   author: Brilliant
   license: Proprietary
   url: null
 Brilliant INC:
+  type: reference
   title: Developing incrementally
   container: Brilliant, Coding with AI skills map
   author: Brilliant
   license: Proprietary
   url: null
 Brilliant SPC:
+  type: reference
   title: Specification and design
   container: Brilliant, Coding with AI skills map
   author: Brilliant
   license: Proprietary
   url: null
 Brilliant MEM:
+  type: reference
   title: Memory (listed under SPC)
   container: Brilliant, Coding with AI skills map
   author: Brilliant
   license: Proprietary
   url: null
 Brilliant BLD:
+  type: reference
   title: Designing workflows
   container: Brilliant, Coding with AI skills map
   author: Brilliant
   license: Proprietary
   url: null
 Brilliant VER:
+  type: reference
   title: Verification
   container: Brilliant, Coding with AI skills map
   author: Brilliant
   license: Proprietary
   url: null
 Brilliant SEC:
+  type: reference
   title: Security and adversarial thinking
   container: Brilliant, Coding with AI skills map
   author: Brilliant
   license: Proprietary
   url: null
 Brilliant ABS:
+  type: reference
   title: Reasoning across levels of abstraction
   container: Brilliant, Coding with AI skills map
   author: Brilliant
   license: Proprietary
   url: null
 Learn Prompting:
+  type: reference
   title: The community prompt engineering guide
   container: Learn Prompting
   author: Learn Prompting contributors
   license: "CC BY 4.0 (to 2023-02-15), then CC BY-NC-SA 4.0"
   url: null
 Diátaxis:
+  type: reference
   title: Diátaxis, a systematic approach to technical documentation authoring
   container: Diátaxis
   author: Daniele Procida
   license: CC BY-SA 4.0
-  url: null
+  url: https://diataxis.fr/
 Fuchsia review:
+  type: reference
   title: Review process for external Rust crates
   container: Fuchsia documentation
   author: The Fuchsia Authors
   license: CC BY 4.0
   url: https://fuchsia.dev/fuchsia-src/development/languages/rust/external_crates/review
 OpenSSF Scorecard:
+  type: reference
   title: OpenSSF Scorecard checks
   container: Open Source Security Foundation
   author: OpenSSF Scorecard contributors

@@ -106,10 +106,11 @@ export const collections = {
 			})
 			.strict(),
 	}),
-	/** site/src/data/bibliography.yaml, keyed by citation key. */
+	/** site/src/data/bibliography.yaml, keyed by citation key. `type` per spec S01 "Source". */
 	bibliography: defineCollection({
 		loader: file('./src/data/bibliography.yaml'),
 		schema: z.object({
+			type: z.enum(['book', 'course', 'reference', 'video']),
 			title: z.string(),
 			container: z.string().nullable().optional(),
 			author: z.string().nullable().optional(),
