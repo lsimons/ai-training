@@ -74,7 +74,7 @@ force graph is inspiration only; Vue 2 and D3 v5 are end of life.
 
 ## 2. ai-deep-learning (`~/git/lsimons/ai-deep-learning`)
 
-Personal fetcher turning DeepLearning.AI courses into local markdown. Also
+Personal fetcher turning DeepLearning.AI courses into local Markdown. Also
 `the-batch/ai-engineering-skills-map.md` with Andrew Ng's AI Engineering Skills
 Map series, relevant for sequencing.
 

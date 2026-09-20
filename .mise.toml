@@ -32,6 +32,9 @@ actionlint = "1.7.12"
 shellcheck = "0.11.0"
 # Runs the lesson example fixtures (`mise run examples`).
 python = "3.14.7"
+# Prose lint (`mise run prose`). Its style packages are pinned by URL in
+# .vale.ini and fetched by `mise run prose-sync`.
+vale = "3.20.0"
 
 # Deliberately NOT --frozen-lockfile: this is the task you run while
 # actually changing dependencies, and it is allowed to update bun.lock.
@@ -155,14 +158,45 @@ run = ["prek run --all-files --skip lychee", "actionlint"]
 description = "lychee broken-link check (network; not part of `ci`)"
 run = "lychee --no-progress --config .lychee.toml ."
 
+# The synced `write-good` style is gitignored; this fetches it from the
+# release URL pinned in .vale.ini. Network, like `site-install-frozen`.
+[tasks.prose-sync]
+description = "Fetch the pinned Vale style packages (network)"
+run = "vale sync"
+
+# Which files: every tracked Markdown/MDX file plus the topic, competency
+# and bibliography YAML under site/src/data (Vale reads YAML as plain text,
+# keys included). Going through `git ls-files` is what excludes site/dist,
+# node_modules and the synced style package without a second ignore list.
+# site/examples is left out: the fixture repos there are test inputs, not
+# prose.
+#
+# Two passes. Vale's exit code covers everything at or above
+# MinAlertLevel, with no way to print a class of finding without failing on
+# it, so the first pass shows every warning and the second decides the
+# outcome. Only errors (misspellings, unknown terms) block. Passive voice
+# and cliches are a judgement call for a reviewer, not a build failure.
+[tasks.prose]
+description = "Vale prose lint over Markdown, MDX and the site data YAML. Errors gate; warnings advise."
+run = """
+set -e
+files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**')
+# shellcheck disable=SC2086
+vale --no-exit $files
+# shellcheck disable=SC2086
+vale --minAlertLevel=error $files
+"""
+
 # Sequential rather than `depends`, which mise runs in parallel:
 # `site-check` and `site-build` both write `site/.astro`. The workflow runs
 # the same list as separate steps for readable logs — keep the two in sync.
 [tasks.ci]
-description = "Full CI gate: install + lint + examples + Astro check + build"
+description = "Full CI gate: install + lint + prose + examples + Astro check + build"
 run = [
   "mise run site-install-frozen",
   "mise run lint",
+  "mise run prose-sync",
+  "mise run prose",
   "mise run examples",
   "mise run site-check",
   "mise run site-build",

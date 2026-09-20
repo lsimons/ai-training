@@ -59,6 +59,13 @@ jobs:
       - name: Lint
         run: mise run lint
 
+      # The synced `write-good` style is gitignored; fetch it before linting.
+      - name: Fetch Vale styles
+        run: mise run prose-sync
+
+      - name: Prose lint
+        run: mise run prose
+
       - name: Examples
         run: mise run examples
 

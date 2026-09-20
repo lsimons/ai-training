@@ -47,7 +47,7 @@ Part 3, Deep dives (301):
   deploy base. Same pattern as the doc template this repo started from.
 - No framework components. Interactive widgets are inline
   `<div class="not-content" id="...">` plus `<script>` blocks written directly
-  in the markdown of 18 of 19 lessons. Examples: `agent-levels-explorer`,
+  in the Markdown of 18 of 19 lessons. Examples: `agent-levels-explorer`,
   `context-window-explorer`, `tool-call-flow`, `pattern-visualizer`,
   `memory-explorer`, `planning-sim`, `multi-agent-viz`, `rag-viz`,
   `eval-dashboard`, `guardrails-viz`, `pipeline-viz`, `claude-stack`,
