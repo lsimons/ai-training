@@ -44,7 +44,7 @@ competencies:
             why: Knowing this turns "the assistant does not know our policy" into "rephrase or fix the index", which is a fixable problem.
             example: The assistant says it has no travel policy, so the learner asks about "expense rules for trips", gets the document, and reports the naming gap.
     alignment:
-      - framework: Anthropic AI Fluency 4D
+      - framework: AI Fluency 4D (Dakan and Feller)
         code: Discernment
         asks: Judge the output, the process and the behavior of the AI critically
         objectives: [concepts/explains-models/names-failure-modes, safety/verifies-output/checks-claims, safety/verifies-output/spots-sycophancy, safety/verifies-output/calibrates-trust, using-agents/delegates-and-checks/reviews-against-brief, coding-with-agents/verifies-agent-work/reviews-others-code]
@@ -95,7 +95,7 @@ competencies:
             why: A format that looks right can still fail on the detail the consumer cares about, such as a date format or an empty field.
             example: The learner pastes the first generated CSV into the spreadsheet import and fixes the column order in the prompt before running the other 200 rows.
     alignment:
-      - framework: Anthropic AI Fluency 4D
+      - framework: AI Fluency 4D (Dakan and Feller)
         code: Description
         asks: State the goal, context and wanted output clearly, and refine it
         objectives: [concepts/prompts-reliably/structures-a-prompt, concepts/prompts-reliably/iterates-on-output, concepts/prompts-reliably/asks-for-structure, using-agents/delegates-and-checks/writes-a-brief, using-agents/delegates-and-checks/adjusts-mid-task, coding-with-agents/ships-with-agent/gives-the-right-context]
@@ -142,4 +142,8 @@ competencies:
           - claim: The learner knows the loop ends either because the agent decides it is done or because a limit stops it, and can tell which happened.
             why: "\"Stopped because the budget ran out\" and \"stopped because it is finished\" need different follow-up."
             example: An agent that ends with a half-written file and no summary hit a limit, so the learner checks the log rather than trusting the output.
-    alignment: []
+    alignment:
+      - framework: AI Fluency 4D (Dakan and Feller)
+        code: Delegation
+        asks: Decide what to hand to AI, which tool fits, and how much autonomy to give
+        objectives: [concepts/recognizes-agents/places-on-autonomy-scale, using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation, using-agents/chooses-tool-and-autonomy/keeps-the-human-steps, using-agents/delegates-and-checks/chooses-autonomy, coding-with-agents/specifies-work/judges-worth-building]
