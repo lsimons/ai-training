@@ -69,10 +69,10 @@ competencies:
         code: Shaping the build
         asks: Deciding what goes in the spec
         objectives: [coding-with-agents/specifies-work]
-      - framework: Anthropic AI Fluency 4D
+      - framework: AI Fluency 4D (Dakan and Feller)
         code: Delegation
         asks: Decide what to hand to AI, which tool fits, and how much autonomy to give
-        objectives: [using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation, using-agents/chooses-tool-and-autonomy/keeps-the-human-steps, using-agents/delegates-and-checks/chooses-autonomy, coding-with-agents/specifies-work/judges-worth-building]
+        objectives: [concepts/recognizes-agents/places-on-autonomy-scale, using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation, using-agents/chooses-tool-and-autonomy/keeps-the-human-steps, using-agents/delegates-and-checks/chooses-autonomy, coding-with-agents/specifies-work/judges-worth-building]
   - id: coding-with-agents/ships-with-agent
     statement: Ships a change with a coding agent through plan, implement and verify
     topics: [coding-with-agents/first-session, coding-with-agents/workflow, coding-with-agents/context]
@@ -159,7 +159,7 @@ competencies:
         code: Using coding agents
         asks: Plan, execute, verify, monitor at calibrated autonomy
         objectives: [using-agents/delegates-and-checks, coding-with-agents/ships-with-agent]
-      - framework: Anthropic AI Fluency 4D
+      - framework: AI Fluency 4D (Dakan and Feller)
         code: Description
         asks: State the goal, context and wanted output clearly, and refine it
         objectives: [concepts/prompts-reliably/structures-a-prompt, concepts/prompts-reliably/iterates-on-output, concepts/prompts-reliably/asks-for-structure, using-agents/delegates-and-checks/writes-a-brief, using-agents/delegates-and-checks/adjusts-mid-task, coding-with-agents/ships-with-agent/gives-the-right-context]
@@ -228,7 +228,7 @@ competencies:
         code: SEC-3, SEC-5
         asks: Evaluate AI code for vulnerabilities; supply-chain risk
         objectives: [coding-with-agents/verifies-agent-work/screens-for-security]
-      - framework: Anthropic AI Fluency 4D
+      - framework: AI Fluency 4D (Dakan and Feller)
         code: Discernment
         asks: Judge the output, the process and the behavior of the AI critically
         objectives: [concepts/explains-models/names-failure-modes, safety/verifies-output/checks-claims, safety/verifies-output/spots-sycophancy, safety/verifies-output/calibrates-trust, using-agents/delegates-and-checks/reviews-against-brief, coding-with-agents/verifies-agent-work/reviews-others-code]
@@ -296,7 +296,7 @@ competencies:
         code: BLD-4, BLD-5
         asks: Organize and oversee a workflow
         objectives: [coding-with-agents/works-in-team/runs-parallel-work, building-agents/orchestrates-agents/picks-a-pattern]
-      - framework: Anthropic AI Fluency 4D
+      - framework: AI Fluency 4D (Dakan and Feller)
         code: Diligence
         asks: Use AI responsibly, transparently and with accountability for the result
         objectives: [safety/handles-data-safely/decides-what-to-share, safety/handles-data-safely/discloses-ai-use, safety/handles-data-safely/respects-licenses, safety/judges-agent-risk/names-blast-radius, safety/judges-agent-risk/chooses-human-in-loop, coding-with-agents/works-in-team/attributes-honestly]
