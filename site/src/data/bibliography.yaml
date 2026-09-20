@@ -135,64 +135,64 @@ DLAI-1:
   title: ChatGPT Prompt Engineering for Developers
   container: DeepLearning.AI
   author: DeepLearning.AI
-  license: Proprietary
-  url: https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/
+  license: Proprietary (link only, nothing copied)
+  url: https://www.deeplearning.ai/courses/chatgpt-prompt-eng
 DLAI-2:
   type: course
   title: Generative AI for Everyone
   container: DeepLearning.AI
   author: DeepLearning.AI
-  license: Proprietary
-  url: https://www.deeplearning.ai/courses/generative-ai-for-everyone/
+  license: Proprietary (link only, nothing copied)
+  url: https://www.deeplearning.ai/courses/generative-ai-for-everyone
 DLAI-3:
   type: course
   title: AI Prompting for Everyone
   container: DeepLearning.AI
   author: DeepLearning.AI
-  license: Proprietary
-  url: https://www.deeplearning.ai/courses/ai-prompting-for-everyone/
+  license: Proprietary (link only, nothing copied)
+  url: https://www.deeplearning.ai/courses/ai-prompting-for-everyone
 DLAI-5:
   type: course
   title: "Claude Code: A Highly Agentic Coding Assistant"
   container: DeepLearning.AI
   author: DeepLearning.AI
-  license: Proprietary
-  url: https://www.deeplearning.ai/short-courses/claude-code-a-highly-agentic-coding-assistant/
+  license: Proprietary (link only, nothing copied)
+  url: https://www.deeplearning.ai/courses/claude-code-a-highly-agentic-coding-assistant
 DLAI-6:
   type: course
   title: Intro to Generative AI for Software Development
   container: DeepLearning.AI
   author: DeepLearning.AI
-  license: Proprietary
-  url: https://www.deeplearning.ai/courses/introduction-to-generative-ai-for-software-development/
+  license: Proprietary (link only, nothing copied)
+  url: https://www.deeplearning.ai/courses/introduction-to-generative-ai-for-software-development
 DLAI-7:
   type: course
   title: Team Software Engineering with AI
   container: DeepLearning.AI
   author: DeepLearning.AI
-  license: Proprietary
-  url: https://www.deeplearning.ai/courses/team-software-engineering-with-ai/
+  license: Proprietary (link only, nothing copied)
+  url: https://www.deeplearning.ai/courses/team-software-engineering-with-ai
 DLAI-9:
   type: course
   title: "MCP: Build Rich-Context AI Apps with Anthropic"
   container: DeepLearning.AI
   author: DeepLearning.AI
-  license: Proprietary
-  url: https://www.deeplearning.ai/short-courses/mcp-build-rich-context-ai-apps-with-anthropic/
+  license: Proprietary (link only, nothing copied)
+  url: https://www.deeplearning.ai/courses/mcp-build-rich-context-ai-apps-with-anthropic
 DLAI-10:
   type: course
   title: Agent Skills with Anthropic
   container: DeepLearning.AI
   author: DeepLearning.AI
-  license: Proprietary
-  url: https://www.deeplearning.ai/short-courses/agent-skills-with-anthropic/
+  license: Proprietary (link only, nothing copied)
+  url: https://www.deeplearning.ai/courses/agent-skills-with-anthropic
 DLAI-11:
   type: course
   title: "Agentic AI: M1 workflows and autonomy, M2 reflection, M4 evals and error analysis, M5 autonomous agents"
   container: DeepLearning.AI
   author: DeepLearning.AI
-  license: Proprietary
-  url: https://www.deeplearning.ai/courses/agentic-ai/
+  license: Proprietary (link only, nothing copied)
+  url: https://www.deeplearning.ai/courses/agentic-ai
 Academy ai-capabilities-and-limitations:
   type: course
   title: AI capabilities and limitations

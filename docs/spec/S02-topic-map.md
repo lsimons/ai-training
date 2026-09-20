@@ -12,6 +12,8 @@ implemented (2026-09-20). Every objective has behaviors and the YAML holds
 the alignment rows for Brilliant, Ng and AI Fluency 4D (2026-09-20).
 Claude Academy is a source, with one `Academy <slug>` key per cited course
 in the bibliography and the topic YAML (2026-09-20).
+Every `DLAI-N` key carries its verified public course page URL in the
+bibliography and the table below (2026-09-20).
 Deferred: the map's side drawer, path lanes, and quizzes.
 
 ## Introduction
@@ -150,17 +152,19 @@ The topic tables below name the material each topic can start from. Keys:
 | `AEC-17` | Agent skills: skills versus tools, the spec, progressive disclosure                           |
 | `AEC-18` | Orchestrators: code- versus model-driven, patterns, anti-patterns                             |
 
-| Key       | DeepLearning.AI course                                                                                  |
-| --------- | ------------------------------------------------------------------------------------------------------- |
-| `DLAI-1`  | ChatGPT Prompt Engineering for Developers                                                               |
-| `DLAI-2`  | Generative AI for Everyone                                                                              |
-| `DLAI-3`  | AI Prompting for Everyone                                                                               |
-| `DLAI-5`  | Claude Code: A Highly Agentic Coding Assistant                                                          |
-| `DLAI-6`  | Intro to Generative AI for Software Development                                                         |
-| `DLAI-7`  | Team Software Engineering with AI                                                                       |
-| `DLAI-9`  | MCP: Build Rich-Context AI Apps with Anthropic                                                          |
-| `DLAI-10` | Agent Skills with Anthropic                                                                             |
-| `DLAI-11` | Agentic AI: M1 workflows and autonomy, M2 reflection, M4 evals and error analysis, M5 autonomous agents |
+DeepLearning.AI courses cited, in reading order. Each links to its public course page. The pages are linked and never copied or embedded.
+
+| Key       | DeepLearning.AI course                                                                                  | Public course page                                                                           |
+| --------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `DLAI-1`  | ChatGPT Prompt Engineering for Developers                                                               | <https://www.deeplearning.ai/courses/chatgpt-prompt-eng>                                     |
+| `DLAI-2`  | Generative AI for Everyone                                                                              | <https://www.deeplearning.ai/courses/generative-ai-for-everyone>                             |
+| `DLAI-3`  | AI Prompting for Everyone                                                                               | <https://www.deeplearning.ai/courses/ai-prompting-for-everyone>                              |
+| `DLAI-5`  | Claude Code: A Highly Agentic Coding Assistant                                                          | <https://www.deeplearning.ai/courses/claude-code-a-highly-agentic-coding-assistant>          |
+| `DLAI-6`  | Intro to Generative AI for Software Development                                                         | <https://www.deeplearning.ai/courses/introduction-to-generative-ai-for-software-development> |
+| `DLAI-7`  | Team Software Engineering with AI                                                                       | <https://www.deeplearning.ai/courses/team-software-engineering-with-ai>                      |
+| `DLAI-9`  | MCP: Build Rich-Context AI Apps with Anthropic                                                          | <https://www.deeplearning.ai/courses/mcp-build-rich-context-ai-apps-with-anthropic>          |
+| `DLAI-10` | Agent Skills with Anthropic                                                                             | <https://www.deeplearning.ai/courses/agent-skills-with-anthropic>                            |
+| `DLAI-11` | Agentic AI: M1 workflows and autonomy, M2 reflection, M4 evals and error analysis, M5 autonomous agents | <https://www.deeplearning.ai/courses/agentic-ai>                                             |
 
 Claude Academy courses cited, by slug. Each is at `https://academy.claude.com/courses/<slug>`. Course and concept names are facts, and the material itself is paraphrased and never copied.
 
