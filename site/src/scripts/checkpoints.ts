@@ -4,10 +4,26 @@
  *
  * The components render the markup; this module binds it. A checkpoint is a
  * `<section data-checkpoint data-kind=...>` whose progress key is
- * `data-progress-id` (`<lesson id>#<checkpoint id>`).
+ * `data-progress-id` (`<lesson id>#<checkpoint id>`). The grading rules and
+ * feedback texts are in `checkpoint-logic.ts`.
  */
-import * as progress from './progress';
+
 import type { CheckpointKind } from '@lib/checkpoint-rules';
+import {
+	answersMatch,
+	choiceFeedback,
+	type Feedback,
+	matchVerdict,
+	multiChoiceVerdict,
+	orderFeedback,
+	predictFeedback,
+	rotateIfSolved,
+	selfGradeFeedback,
+	shuffle,
+	sortFeedback,
+	stageDisplay,
+} from './checkpoint-logic';
+import * as progress from './progress';
 
 export interface BindOptions {
 	/** Review mode adds Give Up, stage pills and the frequency control, and records to `reviews`. */
@@ -15,27 +31,18 @@ export interface BindOptions {
 	onResult?: (el: HTMLElement, passed: boolean) => void;
 }
 
-const norm = (s: string) => s.replace(/\s+/g, ' ').trim().toLowerCase();
-
 function $<T extends Element = HTMLElement>(root: ParentNode, sel: string): T | null {
 	return root.querySelector<T>(sel);
 }
 
-function announce(el: HTMLElement, kind: 'ok' | 'nope' | 'note', text: string) {
+function announce(el: HTMLElement, fb: Feedback) {
 	const f = $(el, '.cp-feedback');
 	if (!f) return;
-	f.textContent = text;
-	f.className = `cp-feedback ${kind}`;
+	f.textContent = fb.text;
+	f.className = `cp-feedback ${fb.kind}`;
 }
 
-function shuffle<T>(arr: T[]): T[] {
-	const a = [...arr];
-	for (let i = a.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[a[i], a[j]] = [a[j], a[i]];
-	}
-	return a;
-}
+const note = (text: string): Feedback => ({ kind: 'note', text });
 
 /** Each kind returns a grader: () => passed | null (null = nothing to grade yet). */
 type Grader = () => boolean | null;
@@ -43,91 +50,40 @@ type Grader = () => boolean | null;
 function bindChoice(el: HTMLElement): Grader {
 	return () => {
 		const picked = $<HTMLInputElement>(el, 'input[type=radio]:checked');
-		if (!picked) {
-			announce(el, 'note', 'Pick an answer first.');
+		const label = picked?.closest('label');
+		if (!label) {
+			announce(el, note('Pick an answer first.'));
 			return null;
 		}
-		const label = picked.closest('label')!;
 		const ok = label.dataset.correct === 'true';
-		const why = label.dataset.why;
-		const consequence = label.dataset.consequence;
-		if (ok) announce(el, 'ok', consequence ? `Correct. ${consequence}` : 'Correct.');
-		else announce(el, 'nope', consequence ?? why ?? 'Not quite. Try again.');
-		return ok;
-	};
-}
-
-/** Exactly the N correct boxes and nothing else. A wrong pick shows its `why`; a missed item is only counted. */
-function bindMultiChoice(el: HTMLElement): Grader {
-	const wanted = Number($(el, '.cp-multi')?.dataset.count ?? 0);
-	return () => {
-		const picked = [...el.querySelectorAll<HTMLInputElement>('input[type=checkbox]:checked')].map((i) => i.closest('label')!);
-		if (!picked.length) {
-			announce(el, 'note', `Pick ${wanted} answers first.`);
-			return null;
-		}
-		const wrong = picked.filter((l) => l.dataset.correct !== 'true');
-		const right = picked.length - wrong.length;
-		if (wrong.length) {
-			announce(el, 'nope', wrong[0].dataset.why ?? 'One of your picks is not right.');
-			return false;
-		}
-		if (right < wanted) {
-			announce(el, 'nope', `${right} of ${wanted} so far, and nothing wrong. ${wanted - right} more to find.`);
-			return false;
-		}
-		announce(el, 'ok', 'Correct.');
-		return true;
-	};
-}
-
-/** One `<select>` per row. Each row gets its own mark; the rationale shows only when every row is right. */
-function bindMatch(el: HTMLElement): Grader {
-	const rows = [...el.querySelectorAll<HTMLElement>('.cp-match-row')];
-	const rationale = $(el, '.cp-match')?.dataset.rationale ?? '';
-	return () => {
-		const empty = rows.filter((r) => !$<HTMLSelectElement>(r, 'select')!.value).length;
-		if (empty) {
-			announce(el, 'note', `${empty} row${empty === 1 ? '' : 's'} still to fill.`);
-			return null;
-		}
-		let wrong = 0;
-		rows.forEach((r) => {
-			const ok = $<HTMLSelectElement>(r, 'select')!.value === r.dataset.option;
-			r.dataset.state = ok ? 'right' : 'wrong';
-			const fb = $(r, '.cp-row-feedback')!;
-			fb.textContent = ok ? 'Right.' : (r.dataset.why ?? 'Not this one.');
-			if (!ok) wrong++;
-		});
-		const ok = wrong === 0;
-		announce(el, ok ? 'ok' : 'nope', ok ? `Correct. ${rationale}`.trim() : `${wrong} row${wrong === 1 ? '' : 's'} wrong. Each row says which.`);
+		announce(el, choiceFeedback(ok, label.dataset.why, label.dataset.consequence));
 		return ok;
 	};
 }
 
 function bindPredict(el: HTMLElement): Grader {
 	const answer = $(el, '.cp-predict')?.dataset.answer;
-	const ta = $<HTMLTextAreaElement>(el, 'textarea')!;
+	const ta = $<HTMLTextAreaElement>(el, 'textarea');
 	if (answer === undefined) {
 		// Honor-system variant: the learner ran it and grades themselves.
 		return () => {
 			const grade = $<HTMLInputElement>(el, 'input[name$="-selfgrade"]:checked');
 			if (!grade) {
-				announce(el, 'note', 'Run it, then say how your prediction held up.');
+				announce(el, note('Run it, then say how your prediction held up.'));
 				return null;
 			}
 			const ok = grade.value === 'pass';
-			announce(el, ok ? 'ok' : 'nope', ok ? 'Recorded as a pass.' : 'Recorded. Adjust your prediction and try once more when you are ready.');
+			announce(el, selfGradeFeedback(ok, 'predict'));
 			return ok;
 		};
 	}
 	return () => {
-		if (!ta.value.trim()) {
-			announce(el, 'note', 'Type your prediction first.');
+		if (!ta?.value.trim()) {
+			announce(el, note('Type your prediction first.'));
 			return null;
 		}
-		const ok = norm(ta.value) === norm(answer);
-		announce(el, ok ? 'ok' : 'nope', ok ? 'Correct. That is exactly the output.' : 'Not quite. Trace it once more.');
+		const ok = answersMatch(ta.value, answer);
+		announce(el, predictFeedback(ok));
 		if (ok) {
 			const reveal = $(el, '.cp-reveal');
 			if (reveal) reveal.hidden = false;
@@ -136,55 +92,55 @@ function bindPredict(el: HTMLElement): Grader {
 	};
 }
 
+const posOf = (li: Element) => Number((li as HTMLElement).dataset.pos);
+
 function bindOrder(el: HTMLElement): Grader {
-	const list = $<HTMLOListElement>(el, 'ol.cp-order')!;
-	const items = shuffle([...list.children] as HTMLLIElement[]);
+	const list = $<HTMLOListElement>(el, 'ol.cp-order');
+	if (!list) return () => null;
 	// Never present the already-correct order.
-	if (items.length > 1 && items.every((li, i) => Number(li.dataset.pos) === i + 1)) items.push(items.shift()!);
-	items.forEach((li) => list.appendChild(li));
-	list.querySelectorAll<HTMLButtonElement>('button[data-move]').forEach((btn) => {
+	for (const li of rotateIfSolved(shuffle([...list.children]), posOf)) list.appendChild(li);
+	for (const btn of list.querySelectorAll<HTMLButtonElement>('button[data-move]')) {
 		btn.addEventListener('click', () => {
-			const li = btn.closest('li')!;
+			const li = btn.closest('li');
+			if (!li) return;
 			if (btn.dataset.move === 'up' && li.previousElementSibling) list.insertBefore(li, li.previousElementSibling);
 			if (btn.dataset.move === 'down' && li.nextElementSibling) list.insertBefore(li.nextElementSibling, li);
 			btn.focus();
 		});
-	});
+	}
 	return () => {
-		const ok = [...list.children].every((li, i) => Number((li as HTMLElement).dataset.pos) === i + 1);
-		announce(el, ok ? 'ok' : 'nope', ok ? 'Correct order.' : 'Not the right order yet.');
+		const ok = [...list.children].every((li, i) => posOf(li) === i + 1);
+		announce(el, orderFeedback(ok));
 		return ok;
 	};
 }
 
 /** Click a chip to select it, then click a bucket to place it. Keyboard: both are buttons. */
 function bindSort(el: HTMLElement): Grader {
-	const pool = $(el, '.cp-pool')!;
-	const chips = shuffle([...pool.querySelectorAll<HTMLButtonElement>('.cp-chip')]);
-	chips.forEach((c) => pool.appendChild(c));
+	const pool = $(el, '.cp-pool');
+	if (!pool) return () => null;
+	for (const c of shuffle([...pool.querySelectorAll<HTMLButtonElement>('.cp-chip')])) pool.appendChild(c);
 	let selected: HTMLButtonElement | null = null;
 	const select = (chip: HTMLButtonElement | null) => {
-		el.querySelectorAll('.cp-chip').forEach((c) => c.setAttribute('aria-pressed', 'false'));
+		for (const c of el.querySelectorAll('.cp-chip')) c.setAttribute('aria-pressed', 'false');
 		selected = chip;
 		if (chip) chip.setAttribute('aria-pressed', 'true');
 	};
-	el.querySelectorAll<HTMLButtonElement>('.cp-chip').forEach((chip) => {
+	for (const chip of el.querySelectorAll<HTMLButtonElement>('.cp-chip')) {
 		chip.addEventListener('click', () => select(selected === chip ? null : chip));
-	});
-	el.querySelectorAll<HTMLElement>('.cp-bucket').forEach((bucket) => {
-		const drop = $(bucket, '.cp-bucket-items')!;
-		const target = $<HTMLButtonElement>(bucket, '.cp-bucket-target')!;
-		target.addEventListener('click', () => {
+	}
+	for (const bucket of el.querySelectorAll<HTMLElement>('.cp-bucket')) {
+		const drop = $(bucket, '.cp-bucket-items');
+		$<HTMLButtonElement>(bucket, '.cp-bucket-target')?.addEventListener('click', () => {
 			if (!selected) {
-				announce(el, 'note', 'Select an item first, then a bucket.');
+				announce(el, note('Select an item first, then a bucket.'));
 				return;
 			}
-			drop.appendChild(selected);
+			drop?.appendChild(selected);
 			select(null);
 		});
-	});
-	const backTarget = $<HTMLButtonElement>(el, '.cp-pool-target');
-	backTarget?.addEventListener('click', () => {
+	}
+	$<HTMLButtonElement>(el, '.cp-pool-target')?.addEventListener('click', () => {
 		if (selected) {
 			pool.appendChild(selected);
 			select(null);
@@ -192,48 +148,80 @@ function bindSort(el: HTMLElement): Grader {
 	});
 	return () => {
 		const left = pool.querySelectorAll('.cp-chip').length;
-		if (left) {
-			announce(el, 'note', `${left} item${left === 1 ? '' : 's'} still to place.`);
-			return null;
-		}
 		let ok = true;
-		el.querySelectorAll<HTMLElement>('.cp-bucket').forEach((bucket) => {
-			bucket.querySelectorAll<HTMLElement>('.cp-chip').forEach((chip) => {
+		for (const bucket of el.querySelectorAll<HTMLElement>('.cp-bucket')) {
+			for (const chip of bucket.querySelectorAll<HTMLElement>('.cp-chip')) {
 				if (chip.dataset.bucket !== bucket.dataset.bucket) ok = false;
-			});
-		});
-		announce(el, ok ? 'ok' : 'nope', ok ? 'All placed correctly.' : 'Some items are in the wrong bucket.');
-		return ok;
+			}
+		}
+		announce(el, sortFeedback(left, ok));
+		return left ? null : ok;
 	};
 }
 
 /** Repair: edit, reveal the model answer, then self-grade. Only pass counts. */
 function bindRepair(el: HTMLElement): Grader {
-	const reveal = $<HTMLButtonElement>(el, '.cp-reveal-btn')!;
-	const model = $(el, '.cp-model')!;
-	const grade = $(el, '.cp-selfgrade')!;
-	reveal.addEventListener('click', () => {
-		model.hidden = false;
-		grade.hidden = false;
+	const reveal = $<HTMLButtonElement>(el, '.cp-reveal-btn');
+	const model = $(el, '.cp-model');
+	const grade = $(el, '.cp-selfgrade');
+	reveal?.addEventListener('click', () => {
+		if (model) model.hidden = false;
+		if (grade) grade.hidden = false;
 		reveal.disabled = true;
 	});
 	return () => {
 		const picked = $<HTMLInputElement>(el, 'input[name$="-selfgrade"]:checked');
-		if (model.hidden) {
-			announce(el, 'note', 'Write your fix, then reveal the model answer and compare.');
+		if (!model || model.hidden) {
+			announce(el, note('Write your fix, then reveal the model answer and compare.'));
 			return null;
 		}
 		if (!picked) {
-			announce(el, 'note', 'Compare with the model answer and grade yourself.');
+			announce(el, note('Compare with the model answer and grade yourself.'));
 			return null;
 		}
 		if (picked.value === 'retry') {
-			announce(el, 'note', 'Edit your version and grade again.');
+			announce(el, note('Edit your version and grade again.'));
 			return null;
 		}
 		const ok = picked.value === 'pass';
-		announce(el, ok ? 'ok' : 'nope', ok ? 'Recorded as a pass.' : 'Recorded as partial. Only a pass counts; improve it and grade again.');
+		announce(el, selfGradeFeedback(ok, 'repair'));
 		return ok;
+	};
+}
+
+/** Exactly the N correct boxes and nothing else. A wrong pick shows its `why`; a missed item is only counted. */
+function bindMultiChoice(el: HTMLElement): Grader {
+	const wanted = Number($(el, '.cp-multi')?.dataset.count ?? 0);
+	return () => {
+		const picked = [...el.querySelectorAll<HTMLInputElement>('input[type=checkbox]:checked')]
+			.map((i) => i.closest('label'))
+			.filter((l): l is HTMLLabelElement => l !== null);
+		const wrong = picked.filter((l) => l.dataset.correct !== 'true');
+		const verdict = multiChoiceVerdict(wanted, picked.length, wrong.length, wrong[0]?.dataset.why);
+		announce(el, verdict.feedback);
+		return verdict.ok;
+	};
+}
+
+/** One `<select>` per row. Each row gets its own mark; the rationale shows only when every row is right. */
+function bindMatch(el: HTMLElement): Grader {
+	const matchRows = [...el.querySelectorAll<HTMLElement>('.cp-match-row')];
+	const rationale = $(el, '.cp-match')?.dataset.rationale ?? '';
+	return () => {
+		const empty = matchRows.filter((r) => !$<HTMLSelectElement>(r, 'select')?.value).length;
+		let wrong = 0;
+		if (empty === 0) {
+			for (const r of matchRows) {
+				const ok = $<HTMLSelectElement>(r, 'select')?.value === r.dataset.option;
+				r.dataset.state = ok ? 'right' : 'wrong';
+				const fb = $(r, '.cp-row-feedback');
+				if (fb) fb.textContent = ok ? 'Right.' : (r.dataset.why ?? 'Not this one.');
+				if (!ok) wrong++;
+			}
+		}
+		const verdict = matchVerdict(empty, wrong, rationale);
+		announce(el, verdict.feedback);
+		return verdict.ok;
 	};
 }
 
@@ -249,7 +237,7 @@ const binders: Record<CheckpointKind, (el: HTMLElement) => Grader> = {
 };
 
 function drawState(el: HTMLElement) {
-	const id = el.dataset.progressId!;
+	const id = el.dataset.progressId ?? '';
 	const c = progress.load().checkpoints[id];
 	const s = $(el, '.cp-state');
 	if (s) s.textContent = c ? c.state : '';
@@ -259,14 +247,14 @@ function drawState(el: HTMLElement) {
 function drawStage(el: HTMLElement) {
 	const pills = $(el, '.cp-stage');
 	if (!pills) return;
-	const item = progress.load().reviews[el.dataset.progressId!];
+	const item = progress.load().reviews[el.dataset.progressId ?? ''];
+	const { lit, label } = stageDisplay(item?.stage);
 	pills.hidden = false;
 	pills.querySelectorAll<HTMLElement>('span').forEach((p, i) => {
-		const stage = item?.stage === 'done' ? 5 : Number(item?.stage ?? 0);
-		p.dataset.on = String(i < stage);
+		p.dataset.on = String(i < lit);
 	});
-	const label = $(pills, '.cp-stage-label');
-	if (label) label.textContent = item?.stage === 'done' ? 'retired' : `stage ${item?.stage ?? '-'} of 5`;
+	const labelEl = $(pills, '.cp-stage-label');
+	if (labelEl) labelEl.textContent = label;
 }
 
 export function bindCheckpoint(el: HTMLElement, opts: BindOptions = {}): void {
@@ -276,7 +264,7 @@ export function bindCheckpoint(el: HTMLElement, opts: BindOptions = {}): void {
 	const binder: ((el: HTMLElement) => Grader) | undefined = binders[el.dataset.kind as CheckpointKind];
 	if (!binder) return;
 	const grade = binder(el);
-	const id = el.dataset.progressId!;
+	const id = el.dataset.progressId ?? '';
 
 	const giveUp = $<HTMLButtonElement>(el, '.cp-giveup');
 	if (giveUp) giveUp.disabled = true;
@@ -323,7 +311,7 @@ export function bindCheckpoint(el: HTMLElement, opts: BindOptions = {}): void {
 
 	$(el, '.cp-skip')?.addEventListener('click', () => {
 		progress.skipCheckpoint(id);
-		announce(el, 'note', 'Skipped. It stays available, and comes back in review.');
+		announce(el, note('Skipped. It stays available, and comes back in review.'));
 		drawState(el);
 		opts.onResult?.(el, false);
 	});
@@ -344,39 +332,40 @@ function revealAnswer(el: HTMLElement) {
 	if (kind === 'choice' || kind === 'scenario') {
 		const right = $<HTMLElement>(el, 'label[data-correct=true]');
 		right?.classList.add('cp-answer');
-		announce(el, 'note', `The answer is marked. ${right?.dataset.consequence ?? ''}`.trim());
+		announce(el, note(`The answer is marked. ${right?.dataset.consequence ?? ''}`.trim()));
 	} else if (kind === 'multi-choice') {
-		el.querySelectorAll<HTMLElement>('label[data-correct=true]').forEach((l) => l.classList.add('cp-answer'));
-		announce(el, 'note', 'The correct items are marked.');
+		for (const l of el.querySelectorAll<HTMLElement>('label[data-correct=true]')) l.classList.add('cp-answer');
+		announce(el, note('The correct items are marked.'));
 	} else if (kind === 'match') {
-		el.querySelectorAll<HTMLElement>('.cp-match-row').forEach((r) => {
-			$<HTMLSelectElement>(r, 'select')!.value = r.dataset.option ?? '';
+		for (const r of el.querySelectorAll<HTMLElement>('.cp-match-row')) {
+			const select = $<HTMLSelectElement>(r, 'select');
+			if (select) select.value = r.dataset.option ?? '';
 			// Neutral, so a reveal after Give Up never looks like a pass.
 			r.dataset.state = 'revealed';
-			$(r, '.cp-row-feedback')!.textContent = '';
-		});
-		announce(el, 'note', `Each row now shows its answer. ${$(el, '.cp-match')?.dataset.rationale ?? ''}`.trim());
+			const fb = $(r, '.cp-row-feedback');
+			if (fb) fb.textContent = '';
+		}
+		announce(el, note(`Each row now shows its answer. ${$(el, '.cp-match')?.dataset.rationale ?? ''}`.trim()));
 	} else if (kind === 'predict') {
 		const reveal = $(el, '.cp-reveal');
 		if (reveal) reveal.hidden = false;
-		announce(el, 'note', 'The output is shown below.');
+		announce(el, note('The output is shown below.'));
 	} else if (kind === 'order') {
-		const list = $<HTMLOListElement>(el, 'ol.cp-order')!;
-		[...list.children]
-			.sort((a, b) => Number((a as HTMLElement).dataset.pos) - Number((b as HTMLElement).dataset.pos))
-			.forEach((li) => list.appendChild(li));
-		announce(el, 'note', 'The steps are now in the right order.');
+		const list = $<HTMLOListElement>(el, 'ol.cp-order');
+		if (!list) return;
+		for (const li of [...list.children].sort((a, b) => posOf(a) - posOf(b))) list.appendChild(li);
+		announce(el, note('The steps are now in the right order.'));
 	} else if (kind === 'sort') {
-		el.querySelectorAll<HTMLElement>('.cp-chip').forEach((chip) => {
+		for (const chip of el.querySelectorAll<HTMLElement>('.cp-chip')) {
 			const bucket = el.querySelector<HTMLElement>(`.cp-bucket[data-bucket="${chip.dataset.bucket}"] .cp-bucket-items`);
 			bucket?.appendChild(chip);
-		});
-		announce(el, 'note', 'Every item is now in its bucket.');
+		}
+		announce(el, note('Every item is now in its bucket.'));
 	}
 }
 
 export function bindAll(root: ParentNode, opts: BindOptions = {}): HTMLElement[] {
 	const els = [...root.querySelectorAll<HTMLElement>('[data-checkpoint]')];
-	els.forEach((el) => bindCheckpoint(el, opts));
+	for (const el of els) bindCheckpoint(el, opts);
 	return els;
 }
