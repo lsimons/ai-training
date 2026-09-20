@@ -120,8 +120,35 @@ print(run("What is the weather in Amsterdam?"))
 
 </Predict>
 
+A real model API returns the same two cases in a different format. The
+reply carries a stop reason field that says whether the model finished or
+wants a tool, and each tool result carries the id of the request it
+answers, so the model can match them up when it asked for several tools at
+once. Every round sends the whole message list and the tool definitions
+again, because the model keeps no state between calls
+(@Academy building-with-the-claude-api). The `answer` key in `fake_model`
+plays the role of the stop reason, and translating that field is most of
+the work of swapping in a real model.
+
 Notice `max_steps`. Without it, a model that keeps asking for tools runs
 forever and spends your money. A real loop has a budget.
+
+A real loop also survives a failing tool. When the function raises or times
+out, the error text goes into the message list as the tool result, marked
+as an error. The model can then retry with better arguments or tell the
+user what went wrong. An exception that escapes the loop ends the run with
+nothing to show. How many retries a step gets is a decision for the loop,
+and after the same error twice in a row it should stop and say which limit
+fired.
+
+Every vendor SDK (software development kit) ships this loop under a name
+such as tool runner or agent SDK. You hand it your functions and it
+returns the final answer, with the descriptions built from the function
+signatures and the request and result rounds handled inside
+(@Academy claude-platform-101). That saves the code above and hides the
+same decisions: how many steps it takes, what it does on a tool error, when
+it stops, and what it puts in the message list. Having written the loop
+once, you know which of those to check in the SDK's version.
 
 <Order id="order-the-loop" objective="building-agents/builds-agent-loop/implements-the-loop"
   title="Order one iteration" hint="What does the loop need to know before it can decide whether to run a tool at all?"
