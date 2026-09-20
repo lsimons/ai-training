@@ -40,10 +40,6 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 ---
 
 <div class="course not-content" data-course={area} data-nodes={JSON.stringify(nodes)}>
-	<aside class="course-review" data-review-card data-due="false">
-		<a href={href(`/${area}/review/`)} data-review-label>Review: nothing due yet</a>
-	</aside>
-
 	<div class="course-top">
 		<div class="course-ring" data-ring style="--pct: 0" aria-label="Completion">
 			<span data-ring-label>0%</span>
@@ -79,6 +75,10 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 		}
 		<script is:inline type="application/json" data-edges set:html={jsonForScript(edges)} />
 	</div>
+
+	<aside class="course-review" data-review-card data-due="false">
+		<a href={href(`/${area}/review/`)} data-review-label>Review: nothing due yet</a>
+	</aside>
 
 	<aside class="course-about">
 		<p class="course-about-title">About this course</p>
