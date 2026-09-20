@@ -97,3 +97,6 @@ mise.local.toml
 # Python bytecode from the scripts/ helpers
 __pycache__/
 .vale/styles/Google/
+.vale/styles/ai-tells/
+# Shipped inside the ai-tells zip.
+.vale/styles/config/templates/
