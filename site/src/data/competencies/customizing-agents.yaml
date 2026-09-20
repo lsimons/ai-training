@@ -8,14 +8,14 @@ competencies:
         statement: Writes instructions that remove a recurring agent mistake
         level: base
         behaviors:
-          - claim: Each instruction is traceable to a mistake the agent actually made, not to a mistake someone imagined.
+          - claim: Each instruction is traceable to a mistake the agent made in a real session.
             why: Instructions written from imagination pad the file, dilute the ones that matter and are never tested.
             example: After the agent ran `npm install` twice against a pinned lockfile, the learner adds "install with `npm ci`, never `npm install`" and nothing else that day.
           - claim: An instruction says what to do and how the agent can tell it did it, in one or two lines.
             why: Vague guidance such as "write clean code" gives the agent nothing to check itself against.
             example: "\"Run `mise run ci` before reporting done; it must exit 0\" replaces \"make sure everything works\"."
           - claim: The learner removes an instruction when the mistake stops recurring or when a hook or a check now enforces it.
-            why: A project file that only grows becomes a wall the agent skims, and the rules that still matter get lost in it.
+            why: A project file that only grows gets skimmed, and the rules that still matter get lost in it.
             example: Once a pre-commit hook rejects unformatted files, the learner deletes the "always run the formatter" line from the instructions.
       - id: customizing-agents/configures-agent/sets-permissions
         statement: Sets permissions to the least the work needs
@@ -25,7 +25,7 @@ competencies:
             why: A broad allowlist granted for convenience is the blast radius of every later mistake.
             example: The settings allow `npm test` and `git diff` without asking, and everything else prompts.
           - claim: The learner separates what the agent may read from what it may write and run.
-            why: Reading is nearly always safe; writing and running are where damage happens.
+            why: Reading is nearly always safe, and writing and running are where damage happens.
             example: The agent may read the whole repository but may write only under `src/` and `tests/`.
           - claim: The learner reviews the permission set after a task and removes what was not used.
             why: Permissions accumulate and are never removed on their own.
@@ -35,7 +35,7 @@ competencies:
         level: base
         behaviors:
           - claim: The learner reaches for a hook when a rule must hold every time, and for an instruction when it is guidance.
-            why: An instruction is read and sometimes ignored; a hook runs whether or not the model remembered.
+            why: An instruction is read and sometimes ignored, but a hook runs whether or not the model remembered.
             example: "\"Run the formatter before committing\" becomes a pre-commit hook after the third unformatted commit."
           - claim: A hook fails loudly and says what to do, and it runs fast enough that nobody disables it.
             why: A silent hook is a mystery to the agent and a slow hook is a hook someone turns off.
@@ -48,16 +48,16 @@ competencies:
         level: expert
         behaviors:
           - claim: The learner decides what the agent should carry between sessions and puts it in a file the agent reads, rather than relying on automatic memory.
-            why: Automatic memory keeps what the tool thought was important; a file keeps what the team decided was.
+            why: Automatic memory keeps what the tool thought was important, and a file keeps what the team decided was.
             example: The project's context file records "the staging database is read-only for agents" so no session has to relearn it.
           - claim: The learner reviews what the agent has remembered and deletes what is stale or wrong.
             why: A wrong remembered fact is applied to every future session with full confidence.
-            example: The memory file still says the tests take ten minutes; after the test speed-up, the learner removes the line so the agent stops skipping them.
+            example: The memory file still says the tests take ten minutes. After the test speed-up, the learner removes the line so the agent stops skipping them.
           - claim: "When a session's work continues later, the learner has the agent write a handoff: state, decisions, what is left."
             why: Context does not survive the session, and the next session otherwise reconstructs it from the diff, badly.
             example: The session ends with a `HANDOFF.md` that names the failing test and the two approaches already ruled out.
           - claim: The learner turns a fix that sessions had to make more than once into a skill or an instruction.
-            why: Repeated work in memory is a symptom; the cure is a reusable procedure.
+            why: Repeated work in memory is a symptom, and the cure is a reusable procedure.
             example: After three sessions each worked out how to regenerate the API client, the steps become a skill.
     alignment:
       - framework: Brilliant Coding with AI
@@ -74,7 +74,7 @@ competencies:
         behaviors:
           - claim: The learner picks an instruction for a rule, a skill for a procedure, and a tool for an ability the agent does not have.
             why: Each does one thing, and a rule written as a skill or a procedure written as an instruction fails in a predictable way.
-            example: "\"Always use `bun`, never `npm`\" is an instruction; \"how to cut a release\" is a skill; \"query the issue tracker\" is a tool."
+            example: "\"Always use `bun`, never `npm`\" is an instruction. \"How to cut a release\" is a skill, and \"query the issue tracker\" is a tool."
           - claim: The learner asks whether the agent can already do the task with what it has before adding anything.
             why: A skill that wraps a command the agent already knows adds context and no ability.
             example: The agent can run `gh pr create` unaided, so the skill only records the team's PR template and review steps.
@@ -90,7 +90,7 @@ competencies:
             example: A release skill says "use when asked to cut a release", lists the six commands in order, and ends with "the tag exists and CI on the tag is green".
           - claim: The skill is tested by running it from a fresh session on someone else's machine.
             why: A procedure that only works with the author's setup is not reusable.
-            example: A colleague's agent runs the skill and stops at a missing environment variable; the skill gains a check for it.
+            example: A colleague's agent runs the skill and stops at a missing environment variable, so the skill gains a check for it.
           - claim: The skill names the commands and files exactly, and says what to do when a step fails.
             why: A procedure that assumes success stops at the first surprise.
             example: "\"If `mise run ci` fails, fix the reported task and rerun; do not skip the task\" is part of the skill."
@@ -103,7 +103,7 @@ competencies:
             example: The description is "Cut and publish a release of this package" and nothing more.
           - claim: The main skill file holds the common path, and rare cases, long references and templates go into files the skill points to.
             why: A skill that loads everything up front costs the context of the rare case on every run.
-            example: The release skill's body is forty lines; the rollback procedure is in `rollback.md`, loaded only when needed.
+            example: The release skill's body is forty lines, and the rollback procedure is in `rollback.md`, loaded only when needed.
           - claim: The learner measures what the skill costs when loaded and trims it when it grows.
             why: Skills grow by accretion, and no single addition looks expensive.
             example: The learner counts the tokens of the skill directory after each change and moves a bloated table into a script.
@@ -122,10 +122,10 @@ competencies:
         behaviors:
           - claim: The learner adds the smallest tool that does the job, with read-only access where the task is read-only.
             why: A tool's permissions are what the agent, or an injected instruction, can do with it.
-            example: The issue tracker is connected with a token that can read and comment, not close or delete.
+            example: The issue tracker is connected with a token that can read and comment and cannot close or delete.
           - claim: The learner picks between an MCP server and a CLI by what the agent needs and what each costs.
-            why: An MCP server's tool list is in context on every turn; a CLI is called only when used and needs a shell.
-            example: For two occasional queries the learner uses the CLI; for a tool the agent calls constantly with structured input, an MCP server.
+            why: An MCP server's tool list is in context on every turn, and a CLI is called only when used and needs a shell.
+            example: For two occasional queries the learner uses the CLI. For a tool the agent calls constantly with structured input, they use an MCP server.
           - claim: The tool is added with a test task and the transcript is read before it is used on real work.
             why: The first use shows what the agent thinks the tool does, which may differ from what it does.
             example: The learner asks the agent to "list open issues" and sees it call the tool with the wrong filter, then fixes the description.
@@ -137,7 +137,7 @@ competencies:
             why: Tool definitions travel with every request, and a tool used once costs on every turn it is present.
             example: The learner measures that a server's forty tool schemas add several thousand tokens per turn and keeps only the three tools the task uses.
           - claim: The learner names what the tool lets the agent do that it could not before, and what an injected instruction could do with it.
-            why: A tool's risk is its abilities in the wrong hands, and the wrong hands are one web page away.
+            why: A tool's risk is its abilities in the wrong hands, and any web page the agent reads can hold an injected instruction.
             example: A tool that posts to chat is what turns a read-only summarizer into an exfiltration path, so it is added only where posting is the task.
           - claim: The learner compares the tool against the alternative of no tool.
             why: Many tools wrap something the agent could read from a file or a command.
@@ -153,11 +153,11 @@ competencies:
             why: Exfiltration is read plus send, and the send is the part you can control.
             example: The research agent has fetch and file-write, and no email or chat tool, and file-write is confined to one directory.
           - claim: Credentials given to a tool are scoped, short-lived and separate from the person's own.
-            why: A leaked agent token should cost a revocation, not an account.
+            why: A leaked agent token should cost one revocation and nothing more.
             example: The MCP server runs with a service account that can read one project's issues, and the token expires daily.
           - claim: The learner logs tool calls and their arguments and reviews them for the tool's first weeks.
             why: Injection shows up as a call that made no sense for the task, and only a log shows it.
-            example: The log shows the agent tried to fetch a URL containing a file's contents; the learner traces it to a planted comment in a README.
+            example: The log shows the agent tried to fetch a URL containing a file's contents, and the learner traces it to a planted comment in a README.
     alignment:
       - framework: Brilliant Coding with AI
         code: SEC-4

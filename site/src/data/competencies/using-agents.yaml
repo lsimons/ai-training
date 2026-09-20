@@ -15,44 +15,44 @@ competencies:
             why: Without them the result is judged by feel, and a plausible result is accepted as a correct one.
             example: "\"Done when every row in the spreadsheet appears once in the table and the totals match\" turns review into a check rather than a read."
           - claim: The brief names the information the agent should use and where it is.
-            why: An agent that has to guess sources will pick the most available one, not the right one.
+            why: An agent that has to guess sources picks the most available one, which is rarely the right one.
             example: "Pointing at the approved spreadsheet, not \"the latest numbers\", prevents the agent from pulling last quarter's figures from an old email."
       - id: using-agents/delegates-and-checks/chooses-autonomy
         statement: Chooses how much the agent may do before checking in
         level: base
         behaviors:
-          - claim: The learner sets the check-in point from the cost of a wrong step, not from how much they trust the tool.
+          - claim: The learner sets the check-in point from the cost of a wrong step, however much they trust the tool.
             why: Trust built on a few good runs does not lower the cost of the one bad run.
-            example: For a summary of meeting notes the agent may finish unattended; for replies to customers it stops before each send, even though it has drafted well before.
+            example: For a summary of meeting notes the agent may finish unattended. For replies to customers it stops before each send, even though it has drafted well before.
           - claim: A first run of a new kind of task is done with more check-ins than later runs of the same task.
             why: The first run shows where the agent's defaults differ from the learner's, and that is when the brief gets fixed.
-            example: The first time the agent files expense reports the learner reviews each one; after the brief has been corrected twice, they review a sample.
+            example: The first time the agent files expense reports the learner reviews each one. After the brief has been corrected twice, they review a sample.
           - claim: The learner can state in one sentence what the agent may do without asking and what it must ask about.
             why: If the boundary cannot be said plainly, it has not been chosen and the agent will choose it.
-            example: "\"Edit anything under `drafts/`, ask before touching anything else, never send\" is a boundary; \"be careful\" is not."
+            example: "\"Edit anything under `drafts/`, ask before touching anything else, never send\" is a boundary, and \"be careful\" is not."
       - id: using-agents/delegates-and-checks/reviews-against-brief
         statement: Reviews the result against the brief, not against a feeling
         level: base
         behaviors:
           - claim: The review walks the done-criteria one by one and records pass or fail for each.
-            why: A result that reads well is accepted by feel; a checklist catches the criterion the agent skipped.
-            example: The brief said "every row appears once and totals match"; the learner counts rows and adds the totals rather than skimming the table.
+            why: A result that reads well is accepted by feel, and a checklist catches the criterion the agent skipped.
+            example: The brief said "every row appears once and totals match", so the learner counts rows and adds the totals instead of skimming the table.
           - claim: The review checks the limits as well as the goal, looking for what the agent did that it was not asked to do.
             why: An agent that finishes the task and also "improves" three other things has broken the brief even if the task is done.
             example: The learner opens the list of changed files and questions the two files that the brief did not mention.
           - claim: A result that fails review sends the learner back to the brief before it sends them back to the agent.
             why: Most misses are something the brief left unsaid, and re-running the same brief reproduces the miss.
-            example: The agent used last year's template; the learner adds "use the template in `templates/2026/`" to the brief and runs again instead of typing "no, the new one".
+            example: The agent used last year's template, so the learner adds "use the template in `templates/2026/`" to the brief and runs again instead of typing "no, the new one".
       - id: using-agents/delegates-and-checks/adjusts-mid-task
         statement: Adjusts the brief when the work reveals new information
         level: base
         behaviors:
           - claim: When the agent reports something the brief did not anticipate, the learner updates the brief rather than answering the question in the chat.
-            why: An answer in the chat is lost to the next run; a brief that carries the new information keeps the fix.
-            example: The agent asks which of two templates to use; the learner adds "use `templates/2026/`" to the brief and restarts from it.
+            why: An answer in the chat is lost to the next run, but a brief that holds the new information keeps the fix.
+            example: The agent asks which of two templates to use, so the learner adds "use `templates/2026/`" to the brief and restarts from it.
           - claim: The learner stops the agent when the work shows the goal itself was wrong, instead of letting it finish the wrong thing well.
-            why: Finished wrong work costs the run and the review; a stopped run costs only the run.
-            example: The agent's first draft shows the data is quarterly, not monthly; the learner stops and rewrites the done-criteria.
+            why: Finished wrong work costs the run and the review, and a stopped run costs only the run.
+            example: The agent's first draft shows the data is quarterly instead of monthly, so the learner stops and rewrites the done-criteria.
           - claim: A change to the brief is stated as a change, so the agent drops the old constraint.
             why: An agent holds the earlier instruction in context and tries to satisfy both.
             example: "\"Replace the earlier limit of five bullets with: no limit, one bullet per decision\" rather than only stating the new rule."
@@ -91,23 +91,23 @@ competencies:
         behaviors:
           - claim: The learner picks chat when the task needs judgment at every step, an agent when the steps are known but the path varies, and automation when the steps and path are fixed.
             why: Each level trades control for effort, and the wrong pick either wastes attention or removes it where it was needed.
-            example: Drafting a difficult email is chat; cleaning up a folder of misnamed files is an agent; renaming every new invoice on arrival is automation.
+            example: Drafting a difficult email is chat. Cleaning up a folder of misnamed files is an agent. Renaming every new invoice on arrival is automation.
           - claim: The learner says what would make them move a task to the next level, and what would move it back.
             why: Tasks change, and a rule for moving makes the choice reviewable.
             example: "\"Once the agent has filed ten reports without a correction, schedule it; if it needs a correction twice in a month, go back to reviewing each.\""
-          - claim: The learner picks the level for the task's worst case, not its typical case.
+          - claim: The learner picks the level for the task's worst case.
             why: A task that is routine nine times and consequential the tenth needs the level that handles the tenth.
             example: Replying to support tickets stays at agent-with-approval because one in fifty tickets is a legal complaint.
       - id: using-agents/chooses-tool-and-autonomy/keeps-the-human-steps
         statement: Names the steps that stay human and why
         level: base
         behaviors:
-          - claim: The learner names the steps that stay with a person because someone has to answer for them, not because the agent cannot do them.
+          - claim: The learner names the steps that stay with a person because someone has to answer for them, even when the agent could do them.
             why: Some steps are kept because a person has to be accountable for them, and that reason should be said out loud.
             example: The agent can draft the performance review, but the manager writes the rating, because the manager is the one who has to defend it.
           - claim: The learner keeps the step where the information is not in any system the agent can reach.
             why: An agent works from what it can read, and much of what matters in a decision is in conversations and context it never saw.
-            example: The agent proposes the meeting time from calendars; the person keeps the choice because they know a colleague is having a hard week.
+            example: The agent proposes the meeting time from calendars, and the person keeps the choice because they know a colleague is having a hard week.
           - claim: The learner keeps the steps that teach them what they need to keep judging the agent's work.
             why: If every step is handed over, the person loses the knowledge that lets them check the result.
             example: The engineer keeps reading the tests the agent writes, even though the agent could review them, so that they still know the system.
@@ -116,7 +116,7 @@ competencies:
         level: expert
         behaviors:
           - claim: When a tool takes over a level of work, the learner moves their attention to the level above it and asks the same questions there.
-            why: The questions about correctness, cost and risk do not go away; they move to the specification and the review.
+            why: The questions about correctness, cost and risk do not go away. They move to the specification and the review.
             example: When the agent writes the code, the learner stops reviewing syntax and starts reviewing whether the acceptance test proves the requirement.
           - claim: The learner can still go down to the lower level when the higher-level signal does not add up.
             why: Higher-level signals depend on the lower level being sound, and the ability to check it is what makes the trust deserved.

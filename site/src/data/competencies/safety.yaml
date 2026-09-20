@@ -10,7 +10,7 @@ competencies:
         behaviors:
           - claim: Before pasting, the learner asks who can see the prompt, how long it is kept, and whether it may train a model.
             why: The answers differ between a consumer chat product, an enterprise plan and a local model, and the same paste is fine in one and a breach in another.
-            example: The learner checks that the company's approved tool has "no training on inputs" in its terms before pasting a customer list, and uses that tool, not a personal account.
+            example: The learner checks that the company's approved tool has "no training on inputs" in its terms before pasting a customer list, and uses that tool instead of a personal account.
           - claim: The learner removes or replaces personal data and secrets the task does not need before sharing the rest.
             why: Most tasks work as well on redacted data, and what is not sent cannot leak.
             example: To ask for help with a spreadsheet formula, the learner replaces the names column with "Person 1, Person 2" and keeps the numbers.
@@ -23,11 +23,11 @@ competencies:
         behaviors:
           - claim: The learner says that AI helped when the audience would judge the work differently knowing it.
             why: Disclosure is about not misleading, and the test is what the reader would want to know.
-            example: A translated contract carries "machine-translated, reviewed by X"; a spell-checked email does not.
+            example: A translated contract carries "machine-translated, reviewed by X", and a spell-checked email does not.
           - claim: The learner follows the disclosure rule of the place the work goes to, and asks when there is none.
             why: Journals, employers, schools and open-source projects have different rules, and breaking one costs more than the disclosure.
             example: Before submitting to a conference, the learner reads the AI policy and adds the required statement.
-          - claim: Disclosure names what the AI did and what the person checked, not only that AI was used.
+          - claim: Disclosure names what the AI did and what the person checked.
             why: "\"Written with AI\" tells the reader nothing about what to trust, while \"drafted by AI, facts checked by me\" does."
             example: A commit message says which agent wrote the code and that the author ran and read the tests.
       - id: safety/handles-data-safely/respects-licenses
@@ -38,7 +38,7 @@ competencies:
             why: A model can repeat text or code it saw in training, and the license of the original still applies to the copy.
             example: A generated function that matches a well-known library almost word for word gets the library's attribution, or gets rewritten.
           - claim: When adapting licensed material with AI help, the learner keeps the original's license terms and attribution.
-            why: The transformation does not remove the obligation; the derived work carries it.
+            why: The transformation does not remove the obligation, and the derived work carries it.
             example: Rewriting a CC BY-SA tutorial with an assistant, the learner keeps the attribution and releases the result under the same license.
           - claim: The learner knows the terms of the tool they use for who owns the output and what the tool may do with the input.
             why: The terms differ between tools and plans, and the answer decides whether the output may go into a product.
@@ -59,7 +59,7 @@ competencies:
           - claim: Every specific claim in AI output that leaves the learner's desk (a number, a date, a name, a quote, a citation) is checked against a source.
             why: Specifics are what the model invents most convincingly and what the reader acts on.
             example: Before sending a briefing the learner opens each of the three cited reports and finds one does not say what the summary claims.
-          - claim: The learner checks the source itself, not the model's description of it.
+          - claim: The learner reads the source itself and compares it with the model's description of it.
             why: A model can produce a real title with an invented finding attached to it.
             example: The paper exists, but the learner reads its abstract and sees it studied a different population than the summary says.
           - claim: When a claim cannot be checked, the learner marks it as unverified or removes it.
@@ -82,12 +82,12 @@ competencies:
         statement: Matches the depth of checking to the cost of being wrong
         level: base
         behaviors:
-          - claim: The learner sets the depth of checking from what happens if the output is wrong, not from how good it looks.
+          - claim: The learner sets the depth of checking from what happens if the output is wrong.
             why: Fluency is constant and consequences are not, so the cost of a mistake is the only thing that should change the effort.
-            example: A brainstorm list gets no checking; a dosage table in a patient leaflet gets every value checked by a second person.
+            example: A brainstorm list gets no checking. A dosage table in a patient leaflet gets every value checked by a second person.
           - claim: The learner checks harder when the output cannot be undone or goes to people who will not check it themselves.
-            why: An internal draft has readers who catch mistakes; a published page or a sent email does not.
-            example: An internal summary is skimmed; the same summary going to a customer is read line by line.
+            why: An internal draft has readers who catch mistakes, and a published page or a sent email does not.
+            example: An internal summary is skimmed, and the same summary going to a customer is read line by line.
           - claim: The learner treats a domain they cannot judge as high risk regardless of the task's size.
             why: In an unfamiliar domain the learner cannot see the mistakes, so the checking has to come from a source or a person who can.
             example: A one-paragraph legal clause goes to the legal team, even though it is short and reads well.
@@ -117,38 +117,38 @@ competencies:
         statement: Names what an agent action can reach and break
         level: base
         behaviors:
-          - claim: Before letting an agent act, the learner lists what the agent's tools and credentials can reach, not only what the task needs.
+          - claim: Before letting an agent act, the learner lists everything the agent's tools and credentials can reach, beyond what the task needs.
             why: An agent acts with everything it has been given, and a wrong step lands wherever that access extends.
             example: Asked to let an agent tidy one folder, the learner notices it has been given write access to the whole shared drive and narrows that first.
           - claim: The learner separates actions that can be undone from actions that cannot.
-            why: A reversible mistake costs a retry; an irreversible one costs whatever was sent, deleted or paid.
+            why: A reversible mistake costs a retry. An irreversible one costs whatever was sent, deleted or paid.
             example: Drafting an email is reversible, sending it is not, so the learner lets the agent draft and keeps sending for themselves.
           - claim: The learner names who else is affected when the agent gets it wrong.
-            why: Blast radius is measured in people and systems, not in the size of the task.
-            example: A script that renames files in a personal folder affects one person; the same script on a shared calendar affects everyone invited, and the learner treats them differently.
+            why: Blast radius is measured in people and systems, and the size of the task says nothing about it.
+            example: A script that renames files in a personal folder affects one person. The same script on a shared calendar affects everyone invited, and the learner treats them differently.
       - id: safety/judges-agent-risk/chooses-human-in-loop
         statement: Chooses where a human must approve
         level: base
         behaviors:
-          - claim: Approval is placed right before the irreversible or externally visible step, not at the start of the task.
+          - claim: Approval is placed right before the irreversible or externally visible step, and a plan approval at the start does not replace it.
             why: Approving the plan up front does not catch the mistake the agent makes halfway through.
             example: The agent may read the ticket, draft the reply and propose a label, but a person clicks send and closes the ticket.
           - claim: A step that is approved without being read is not a control, so the learner keeps the number of approvals small enough to read.
             why: Twenty prompts a minute trains a person to click yes, which is the same as no approval with extra cost.
             example: Rather than approving every file edit, the learner approves once at the diff, where all edits can be read together.
           - claim: The learner can say what evidence an approver needs at each check-in point.
-            why: An approval without the right information in front of it is a guess with a signature.
-            example: At the "send invoices" step the approver sees the count, the total and three sample rows, not just a "proceed?" prompt.
+            why: An approver without the right information in front of them is guessing.
+            example: At the "send invoices" step the approver sees the count, the total and three sample rows instead of a bare "proceed?" prompt.
       - id: safety/judges-agent-risk/recognizes-injection
         statement: Recognizes prompt injection and data exfiltration paths
         level: base
         behaviors:
           - claim: The learner treats everything an agent reads (web pages, emails, files, calendar entries) as text the model may follow as an instruction.
-            why: A model has one stream of text and no separate channel for "orders from my user"; a planted sentence looks like any other instruction.
+            why: A model has one stream of text and no separate channel for "orders from my user", so a planted sentence looks like any other instruction.
             example: Before pointing an agent at a bookmarked page, the learner asks what the page could tell the agent to do with the access it has.
           - claim: Given an agent's permissions, the learner can name the path a planted instruction would use to get data out.
-            why: Exfiltration needs only two ordinary abilities, read and send, and the attack is the combination, not either step.
-            example: An agent that can read mail and fetch URLs can be told to put a password into a URL; the learner spots that the fetch is the way out.
+            why: Exfiltration needs only two ordinary abilities, read and send, and the attack is the combination of the two.
+            example: An agent that can read mail and fetch URLs can be told to put a password into a URL, and the learner spots that the fetch is the way out.
           - claim: The learner shrinks or gates the outbound ability rather than trying to filter what the agent reads.
             why: You cannot vet every input, but an agent that cannot send, or must ask before sending, cannot carry data out unnoticed.
             example: For a summarizing task the learner removes the agent's mail and network-post tools, leaving read-only access.
@@ -160,7 +160,7 @@ competencies:
             why: A policy that says "use AI responsibly" decides nothing, and every team then decides for itself.
             example: "\"Agents may open pull requests in any repository; merging requires a human review; production credentials are never given to an agent.\""
           - claim: Agent actions are logged where a person can read them later, and someone is named to read them.
-            why: Without a log there is no way to learn what happened after a problem, and a log nobody reads is decoration.
+            why: Without a log there is no way to learn what happened after a problem, and a log nobody reads catches nothing.
             example: Every agent-sent message carries a tag, the tagged messages go to an audit channel, and the team lead reviews a sample weekly.
           - claim: "The policy names the escalation path: what stops the agent, who is told, and who decides whether it restarts."
             why: The first incident is the wrong time to find out who can revoke the agent's access.
