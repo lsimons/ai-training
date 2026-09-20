@@ -7,7 +7,7 @@ Explored 2026-09-19 by a read-only agent. Sources:
 
 ## 1. `archive/lsimons-ai-training`
 
-**Status: scaffolding only. No training content was ever written.** The repo is
+**Status: scaffolding only. The training content itself never got written.** The repo is
 docs infrastructure (specs, plans, scripts) plus a placeholder Python package.
 Plans P02 and P03 are still Draft.
 
@@ -42,11 +42,11 @@ S01 requires each spec to state audience, learning objectives, prerequisites
 and delivery shape (slide deck, handout, exercise). No glossary, taxonomy,
 assessments, or progress tracking anywhere.
 
-**Worth reusing:** the three-track audience split and its topic lists; the
+**Reusable here:** the three-track audience split and its topic lists; the
 tutorial-as-directory layout with shared design assets; multi-format render with
 graceful degradation; the numbered S/P/R/T document system
 (`docs/spec/S01-spec-based-development.md`) and the "every plan ends in a spec"
-rule; the scripts plus mise task ergonomics.
+rule, and the scripts plus mise task ergonomics.
 
 **Must drop for public open content:** the proprietary SBP license and
 private/confidential banner; "tools approved for use inside SBP" and SBP data
@@ -77,15 +77,15 @@ labels: not-covered / mention / explained / hands-on.
   eval-gated routing), hands-on RAG, MCP transports/sampling/roots, and a
   "Watch Out" failure narrative per topic.
 - **Structural finding:** Osmani is a reading course with widgets and few
-  exercises; the others are lab and checkpoint driven. Skills-map cluster 3
+  exercises, while the others are lab and checkpoint driven. Skills-map cluster 3
   ("using coding agents") is where Osmani is thinnest and Anthropic most
   complete. Cluster 4 ("shaping the build") is covered by neither Osmani nor
   DLAI.
 
-**Eleven prioritized recommendations** (SUGGESTIONS block in the generator):
+**Prioritized recommendations** (the SUGGESTIONS block in the generator):
 
 01. A full "working with Claude Code" workflow lesson (explore, plan, code,
-    commit; CLAUDE.md; plan mode; reviewer subagent; PR).
+    commit, plus CLAUDE.md, plan mode, a reviewer subagent, and a PR).
 02. Hooks, subagent design, verification of unsupervised runs.
 03. Error analysis, component evals, and a runnable eval pipeline.
 04. State the workflow-first default and teach environment inspection.
@@ -103,7 +103,7 @@ labels: not-covered / mention / explained / hands-on.
     lesson arc, two comfort levels per exercise, a three-axis self-check
     (correctness, style, design), and redesign the `/teach` skill on the CS50
     Duck pattern (instruction dilution measured at roughly 20-25% leaked code
-    with 20+ rules; blind pairwise ELO evaluation).
+    with 20+ rules, and blind pairwise ELO evaluation).
 
 **Caveats:** depth labels are judgment calls from reader subagents; hosted DLAI
 labs and some Anthropic SCORM checkpoints didn't survive extraction; Osmani

@@ -1,6 +1,6 @@
 ---
 title: Building your first agent
-description: Define one tool, run the loop that lets a model call it, and see why the loop is the whole trick.
+description: Define one tool, run the loop that lets a model call it, and see why the loop is the whole architecture.
 mode: tutorial
 covers:
   - building-agents/agent-loop
@@ -21,14 +21,14 @@ sources:
 import { Predict, Order, Pitfall, Exercise, Recap } from '@components/lesson';
 
 An agent is a model in a loop with tools. That sentence is the whole
-architecture; in this lesson we make it concrete. We define one tool,
+architecture, and in this lesson we make it concrete. We define one tool,
 write the loop, and watch a model use the tool to answer a question it
 couldn't answer alone.
 
 Every example below runs against a fixture: a fake model that behaves
 deterministically, so you can predict what happens and check yourself. The
 complete program is `site/examples/building-agents/agent-loop/agent.py` in
-the repository; swapping in a real model changes one function.
+the repository. Swapping in a real model changes one function.
 
 ## A tool is a function plus a description
 
@@ -70,7 +70,7 @@ wrong times and with the wrong arguments.
 
 <Pitfall title="Describing the implementation instead of the use">
 A first draft often reads "Calls the OpenWeather API with an HTTP GET".
-The model doesn't care how; it needs to know *when* and *with what*.
+The model doesn't care how. It needs to know *when* and *with what*.
 Rule: write the description for the caller; name each argument and its
 type, and say what comes back.
 </Pitfall>
@@ -123,7 +123,7 @@ print(run("What is the weather in Amsterdam?"))
 </Predict>
 
 Notice `max_steps`. Without it, a model that keeps asking for tools runs
-forever and spends your money. Every real loop has a budget.
+forever and spends your money. A real loop has a budget.
 
 <Order id="order-the-loop" objective="building-agents/builds-agent-loop/implements-the-loop"
   title="Order one iteration" hint="What does the loop need to know before it can decide whether to run a tool at all?"

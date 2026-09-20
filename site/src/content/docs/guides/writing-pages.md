@@ -42,8 +42,8 @@ a group's `items`:
 Write internal links and image sources **root-relative**
 (`/guides/my-page/`, `/diagram.png`) rather than with the deploy base path.
 A small rehype plugin in `astro.config.mjs` prepends the base path
-(`/ai-training`) at render time, so the same Markdown works in local
-dev and on GitHub Pages.
+(`/ai-training`) at render time. This lets the same Markdown work in
+local dev and on GitHub Pages.
 
 ```markdown
 See the [contributing page](/contributing/).

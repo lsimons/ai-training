@@ -5,7 +5,7 @@ Explored 2026-09-19 by a read-only agent. Source:
 `docs/site-map.md`, `docs/site-map-public.md`, `docs/site-map-academy.md`,
 `study/ccdv-f.md`, `study/ccar-p.md`, `docs/spec/001-lesson-page.md`.
 
-Three sources: partner Skilljar, public Skilljar (being retired), and Claude
+The sources are partner Skilljar, public Skilljar (being retired), and Claude
 Academy (<https://academy.claude.com>), the public successor. 24 of Academy's
 26 courses are the same lessons in the same order as the Skilljar copies, so
 the public URLs below are reliable equivalents.
@@ -92,18 +92,18 @@ On Academy, progress and badges require sign-in with a Claude account.
 
 ## 3. Best course per topic
 
-| Topic                            | Primary                                                 | Backup / deeper                                            |
-| -------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------- |
-| AI concepts                      | AI capabilities and limitations; AI Fluency framework   | CCDV-F module 1                                            |
-| AI safety                        | CCAR-P module 3 (responsible AI, safety, risk)          | CCDV-F module 4 (prompt injection, guardrails)             |
-| Using AI agents                  | Claude 101, Introduction to Claude Cowork               | Human-agent teams; Claude Platform 101 (managed agents)    |
-| AI-assisted software engineering | Claude Code 101, then Claude Code in action             | AI-native SDLC playbook; CCDV-F module 3                   |
-| Customizing agents               | Intro to agent skills, Intro to subagents, Intro to MCP | MCP advanced topics; API course prompt engineering section |
-| Building agents                  | Building with the Claude API (lessons 76-82 on agents)  | CCDV-F module 2; CCAR-P module 1; Bedrock/Vertex for cloud |
+| Topic                            | Primary                                                 | Backup / deeper                                                       |
+| -------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------- |
+| AI concepts                      | AI capabilities and limitations; AI Fluency framework   | CCDV-F module 1                                                       |
+| AI safety                        | CCAR-P module 3 (responsible AI, safety, risk)          | CCDV-F module 4 (prompt injection, guardrails)                        |
+| Using AI agents                  | Claude 101, Introduction to Claude Cowork               | Human-agent teams; Claude Platform 101 (managed agents)               |
+| AI-assisted software engineering | Claude Code 101, then Claude Code in action             | AI-native SDLC playbook; CCDV-F module 3                              |
+| Customizing agents               | Intro to agent skills, Intro to subagents, Intro to MCP | MCP advanced topics; the prompt engineering section of the API course |
+| Building agents                  | Building with the Claude API (lessons 76-82 on agents)  | CCDV-F module 2; CCAR-P module 1; Bedrock/Vertex for cloud            |
 
 ## 4. License and terms
 
 The course material is Anthropic's copyright, held as private study notes
 under a partner account. **Reference and link only.** Prefer the public
-`academy.claude.com/courses/<slug>` URLs, which need no partner account. Do
+`academy.claude.com/courses/<slug>` URLs, which don't need a partner account. Do
 not copy lesson text, transcripts, quiz answers, slide images, or attachments.

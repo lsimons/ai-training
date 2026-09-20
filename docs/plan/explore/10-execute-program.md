@@ -3,7 +3,8 @@
 Captured 2026-09-19 by working through a lesson and a review in a logged-in
 session (Leo's account) with a driven browser, plus the public FAQ and
 "Why EP?" pages. Source: <https://www.executeprogram.com/>, Gary Bernhardt.
-Proprietary; structure and mechanics only, no lesson text reused.
+Proprietary, so this note records structure and mechanics only and leaves
+the lesson text out.
 
 ## What it is
 
@@ -23,15 +24,16 @@ browser. No multiple choice, no true/false anywhere.
 
 One page, progressive reveal. Each press of **Continue** appends the next
 element below the previous ones; nothing is hidden or paged, so the whole
-lesson is scrollable afterwards. Three element kinds, in a fixed rhythm of
-one or two short paragraphs then one code example:
+lesson is scrollable afterwards. The element kinds, in a fixed rhythm of
+one or two short paragraphs then one code example, are:
 
 1. **Paragraph.** One idea, two to four sentences, inline code terms in
    boxes. Occasionally a note: "this code example reuses elements defined in
    earlier examples".
 2. **Run Code example.** Code shown with an empty RESULT slot and a **Run
    Code** button. The learner presses it, the code actually runs in the
-   browser, and the result appears. No answer required. Used when the point
+   browser, and the result appears. The learner doesn't answer anything. Used
+   when the point
    is to show, not to test.
 3. **Prediction example.** Same layout, but the RESULT slot is a text box
    with **Run** (Enter) and **Hint**. The learner types what the expression
@@ -73,7 +75,7 @@ SQL), which are code problems without teaching.
 one entry per finished lesson: a two-sentence summary on the left and the
 canonical code example with its result on the right, plus a View Lesson
 link. "For 1/33 lessons (more unlock as you progress)." Reference unlocks
-with learning; it is not documentation you can read ahead.
+with learning, so it isn't documentation you can read ahead.
 
 ## Reviews
 
@@ -128,7 +130,7 @@ S01 and S02; spaced review is [spec S05](../../spec/S05-spaced-review.md).
    paragraphs short and forces an example per idea. Our tutorial-mode
    lessons should adopt the rhythm even if we render the whole page.
 4. **Reuse across examples with an explicit note.** State-carrying examples
-   let a lesson build one artifact; the note stops confusion.
+   let a lesson build one artifact, and the note stops confusion.
 5. **The course page is the graph.** Levels with locked tiers and dotted
    prerequisite edges is a good rendering for our per-course lesson view and
    fits the three-lane path idea in spec S02.
@@ -136,9 +138,9 @@ S01 and S02; spaced review is [spec S05](../../spec/S05-spaced-review.md).
    a place to surface "review available". With local-storage progress we can
    do this per browser: store an interval per checkpoint, surface due
    reviews on the course page and in tutor mode, let the learner adjust
-   frequency per item. Worth a small spec of its own.
+   frequency per item. It needs a small spec of its own.
 7. **Reference unlocks with progress.** A generated reference from finished
-   lessons doubles as the recap and as the review's crib. Our recap sections
+   lessons serves as both the recap and the review's crib. Our recap sections
    and topic reference pages could be assembled the same way.
 8. **Every example is executable and tested.** For code lessons we should do
    the same: examples run in CI, expected outputs asserted. For agent
@@ -146,6 +148,6 @@ S01 and S02; spaced review is [spec S05](../../spec/S05-spaced-review.md).
    nearest equivalent.
 
 Not adopted: the subscription and lock-step level gating as a business
-device; our content is open and paths are advisory. Also their "no multiple
+device, since our content is open and paths are advisory. Also their "no multiple
 choice" absolutism: our Foundations material isn't executable, so `choice`
 and `scenario` stay, but prediction should be preferred wherever code runs.
