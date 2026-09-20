@@ -18,7 +18,7 @@ components that render a lesson implement it.
 
 ## Choosing the page kind
 
-Every page has one of the four kinds. The kind is chosen with the Diátaxis
+Every page has one of the four kinds. Choose the kind with the Diátaxis
 compass: does the page serve **action** (doing) or **cognition** (knowing),
 and does it serve **study** (acquiring a craft) or **work** (applying it)?
 
@@ -163,4 +163,4 @@ pitfall and the exercise.
    has nothing to do by hand. Leaning: no; a reflection-style exercise is
    still an exercise.
 2. Where the bibliography file lives and in what format (BibTeX or YAML).
-   Decide when the citation plugin is built.
+   Decide when building the citation plugin.

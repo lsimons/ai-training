@@ -10,8 +10,8 @@ Site: <https://lsimons.github.io/ai-training/> (not yet published; see
 The basic material (AI concepts, AI safety, using AI agents) is written for
 anyone doing knowledge work. The rest is written for software engineers. The
 site is static HTML with interactive lessons that keep your progress in your
-browser, and it can also be run locally from a Claude Code session with Claude
-acting as a tutor.
+browser, and you can also run it locally from a Claude Code session with
+Claude acting as a tutor.
 
 **Status: project just set up; no lesson content yet.** The plan is in
 [`docs/plan/README.md`](./docs/plan/README.md), with exploration notes on the

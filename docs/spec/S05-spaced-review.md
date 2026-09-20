@@ -57,19 +57,19 @@ Five stages, shown to the learner as five pills.
 - The frequency control is the only manual knob, and it is per item, offered
   after answering.
 - Comfort level has no other coupling to reviews.
-- Due items are capped at **12 per session**, oldest due first. The page
+- A session shows at most **12 due items**, oldest due first. The page
   says how many remain.
 - There is no daily limit on lessons, only a suggestion after two lessons in
   one sitting.
 
 ## Where reviews surface
 
-| Place                      | Surface                                                                                                                                                                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Course page                | A "Review due: N items" card above the lesson graph when N > 0, leading to the review page for that course. Also a small count in the sidebar group header.                                                              |
-| Landing page and path page | One line per course with due items                                                                                                                                                                                       |
-| Tutor mode                 | At session start, if items are due, one recall question is asked before anything else. The tutor reads the exported progress file if the learner has exported it, otherwise it asks the learner to open the review page. |
-| Routing                    | Per the topic map: an item failed twice in a row marks its objective "behind" in the path lanes and offers the section that teaches it                                                                                   |
+| Place                      | Surface                                                                                                                                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Course page                | A "Review due: N items" card above the lesson graph when N > 0, leading to the review page for that course. Also a small count in the sidebar group header.                                                                    |
+| Landing page and path page | One line per course with due items                                                                                                                                                                                             |
+| Tutor mode                 | At session start, if items are due, the tutor asks one recall question before anything else. The tutor reads the exported progress file if the learner has exported it, otherwise it asks the learner to open the review page. |
+| Routing                    | Per the topic map: an item failed twice in a row marks its objective "behind" in the path lanes and offers the section that teaches it                                                                                         |
 
 ## The review page
 

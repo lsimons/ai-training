@@ -182,9 +182,9 @@ nothing in it restates what the agent could read from the repository.
 ## Instructions in a monorepo
 
 A repository with several projects in it needs more than one file, and the
-tools handle this the same way: the file at the repository root is read
-always, and a file in a subdirectory is read in addition when the agent
-works on files under that directory. Closer wins on conflict.
+tools handle this the same way: the agent always reads the file at the
+repository root, and also reads a file in a subdirectory when it works on
+files under that directory. Closer wins on conflict.
 
 That gives a natural split. The root file holds what is true everywhere:
 the task runner, the commit convention, the branch rule. Each project's
@@ -239,9 +239,9 @@ does not, it is a candidate to delete.
 </Exercise>
 
 <Recap>
-1. `AGENTS.md` (or `CLAUDE.md`; same content, different tool convention)
-   is read at the start of every session; it is the briefing for a
-   capable contractor's first morning.
+1. The agent reads `AGENTS.md` (or `CLAUDE.md`; same content, different
+   tool convention) at the start of every session; it is the briefing for
+   a capable contractor's first morning.
 2. Put in it what the agent cannot read from the code: commands,
    structure, conventions, and one line for every mistake it keeps making.
 3. Leave out what the code already says, long prose, and rules that apply

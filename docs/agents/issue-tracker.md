@@ -33,8 +33,8 @@ GitHub's default labels (`duplicate`, `good first issue`, `help wanted`,
 1. New issues get `needs-triage`.
 2. A maintainer reads the issue and either asks for more detail
    (`needs-info`), closes it (`wontfix`), or specifies it fully.
-3. A fully specified issue is labelled `ready-for-agent` when an autonomous
-   agent can implement it, or `ready-for-human` when it needs judgement, design
-   or access an agent does not have.
+3. The maintainer labels a fully specified issue `ready-for-agent` when an
+   autonomous agent can implement it, or `ready-for-human` when it needs
+   judgement, design or access an agent does not have.
 4. Agents only pick up `ready-for-agent` issues. Reference the issue number in
    the branch name and the PR.

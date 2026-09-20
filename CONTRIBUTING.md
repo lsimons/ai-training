@@ -44,7 +44,7 @@ The [example presentation](site/public/presentations/example.qmd) is built with 
 
 Render it to HTML and PDF with `mise run site-slides` (or `quarto render site/public/presentations/example.qmd`).
 
-The presentations are modified so rarely that their rendered outputs are checked into git. Re-render and commit the outputs whenever you change a deck.
+The presentations change so rarely that we commit their rendered outputs to git. Re-render and commit the outputs whenever you change a deck.
 
 ## Commit messages
 
@@ -59,4 +59,4 @@ prek install -t pre-commit -t commit-msg
 `mise run lint` runs the same hooks over every file, so CI catches what an
 uninstalled hook would have missed.
 
-Since this is a small hobby project, your contribution may not be noticed for a while if we are busy elsewhere. Sorry!
+Since this is a small hobby project, we may not notice your contribution for a while if we are busy elsewhere. Sorry!

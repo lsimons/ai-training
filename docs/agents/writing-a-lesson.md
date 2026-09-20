@@ -66,7 +66,7 @@ A colleague says: "The model looked up the answer in its database." Which correc
 </Choice>
 ```
 
-`why` is shown when that wrong option is picked. Never put the answer in a
+The learner sees `why` after picking that wrong option. Never put the answer in a
 `why`.
 
 ````mdx

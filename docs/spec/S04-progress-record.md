@@ -52,8 +52,8 @@ reads when the learner exports it.
 ## Storage
 
 - Key: `ai-training-progress-v<N>`. Bump `N` when the meaning of a stored
-  field changes, not when content is added. A bump starts a fresh record;
-  the old key is left in place for a manual export.
+  field changes, not when content is added. A bump starts a fresh record and
+  leaves the old key in place for a manual export.
 - Dates are ISO calendar days in the learner's local time zone.
 - Shape:
 
