@@ -1,17 +1,15 @@
 import { defineCollection } from 'astro:content';
-import { z } from 'astro/zod';
-import { file, glob } from 'astro/loaders';
 import { docsLoader, i18nLoader } from '@astrojs/starlight/loaders';
 import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+import { file, glob } from 'astro/loaders';
+import { z } from 'astro/zod';
 
 /** Lesson frontmatter per spec S03 "Frontmatter". All optional: only lessons carry them. */
 const lessonFields = z.object({
 	mode: z.enum(['tutorial', 'explanation']).optional(),
 	covers: z.array(z.string()).optional(),
 	serves: z.array(z.string()).optional(),
-	assumes: z
-		.array(z.object({ objective: z.string(), lesson: z.string(), section: z.string() }))
-		.optional(),
+	assumes: z.array(z.object({ objective: z.string(), lesson: z.string(), section: z.string() })).optional(),
 	'extends-to': z.array(z.object({ label: z.string(), href: z.string() })).optional(),
 });
 
@@ -56,10 +54,8 @@ export const collections = {
 							id: z.string(),
 							statement: z.string(),
 							level: z.enum(['base', 'expert']),
-							behaviors: z
-								.array(z.object({ claim: z.string(), why: z.string(), example: z.string() }))
-								.default([]),
-						})
+							behaviors: z.array(z.object({ claim: z.string(), why: z.string(), example: z.string() })).default([]),
+						}),
 					),
 					alignment: z
 						.array(
@@ -68,10 +64,10 @@ export const collections = {
 								code: z.string(),
 								asks: z.string(),
 								objectives: z.array(z.string()).default([]),
-							})
+							}),
 						)
 						.default([]),
-				})
+				}),
 			),
 		}),
 	}),

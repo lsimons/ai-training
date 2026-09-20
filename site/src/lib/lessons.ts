@@ -1,5 +1,11 @@
-import { getCollection, type CollectionEntry } from 'astro:content';
-import { DEFAULT_REVISION, KIND_OF_TAG, isReviewable, type CheckpointKind, type CheckpointTag } from './checkpoint-rules';
+import { type CollectionEntry, getCollection } from 'astro:content';
+import {
+	type CheckpointKind,
+	type CheckpointTag,
+	DEFAULT_REVISION,
+	isReviewable,
+	KIND_OF_TAG,
+} from './checkpoint-rules';
 
 export type Lesson = CollectionEntry<'docs'>;
 
@@ -50,7 +56,7 @@ function openingTag(src: string, start: number): string {
 function attrValue(tag: string, name: string): string | undefined {
 	const m = new RegExp(`\\b${name}=(?:"([^"]*)"|\\{([^}]*)\\})`).exec(tag);
 	if (!m) return undefined;
-	return (m[1] ?? m[2]).trim();
+	return (m[1] ?? m[2] ?? '').trim();
 }
 
 function hasAttr(tag: string, name: string): boolean {
@@ -78,9 +84,16 @@ export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 		}
 		const revisionAttr = attrValue(tag, 'revision');
 		const revision = revisionAttr === undefined ? DEFAULT_REVISION : Number(revisionAttr);
-		if (!Number.isInteger(revision) || revision < 1) throw new Error(`${lesson.id}#${id}: revision must be a positive integer, got ${revisionAttr}`);
+		if (!Number.isInteger(revision) || revision < 1)
+			throw new Error(`${lesson.id}#${id}: revision must be a positive integer, got ${revisionAttr}`);
 		const honor = kind === 'predict' && !hasAttr(tag, 'answer');
-		out.push({ id, title, kind, revision, reviewable: isReviewable({ kind, review: reviewAttr === undefined ? undefined : reviewAttr === 'true', honor }) });
+		out.push({
+			id,
+			title,
+			kind,
+			revision,
+			reviewable: isReviewable({ kind, review: reviewAttr === undefined ? undefined : reviewAttr === 'true', honor }),
+		});
 	}
 	return out;
 }
@@ -101,6 +114,6 @@ export function levelsOf(lessons: Lesson[]): Map<string, number> {
 		level.set(l.id, depth);
 		return depth;
 	};
-	lessons.forEach((l) => visit(l, new Set()));
+	for (const l of lessons) visit(l, new Set());
 	return level;
 }
