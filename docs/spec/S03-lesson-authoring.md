@@ -14,7 +14,10 @@ carries the S01 source type. Changed after the release 1
 review: checkpoints are "at least one per served objective" instead of
 exactly one, because tutorial mode also demands a `predict` for every
 example that runs; and prompt blocks may be marked `illustrative` in
-release 1 (see "Examples").
+release 1 (see "Examples"). Checkpoints name the concept ids they
+exercise (`concepts`, required) and an optional standalone `context`, and
+the build writes every checkpoint to one `checkpoints.json` that CI checks
+(2026-09-20, see "Checkpoints" and "Checkpoint export").
 
 ## Introduction
 
@@ -44,16 +47,16 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 
 ## Lesson anatomy
 
-| Part        | Rule                                                                                                                                               |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Length      | 10 to 25 minutes.                                                                                                                                  |
-| Opener      | Where we're going, in the present tense: "In this lesson we build...". Never `you will learn`.                                                     |
-| Sections    | H2s, each with a section kind. Body sections alternate teaching with pitfalls and checkpoints.                                                     |
-| Pitfall     | At least one, placed right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule. Short in tutorial mode. |
-| Checkpoints | At least one per served objective. A checkpoint's `objective` names the one objective it evidences.                                                |
-| Exercise    | Exactly one.                                                                                                                                       |
-| Recap       | Numbered takeaways and the served objectives as "You can now...". Where to go next is the page footer's previous/next.                             |
-| Habit       | Zero, one or two, after the recap. A small task in the learner's own work with a stable `id`. A later spec sets its schedule and storage.          |
+| Part        | Rule                                                                                                                                                 |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Length      | 10 to 25 minutes.                                                                                                                                    |
+| Opener      | Where we're going, in the present tense: "In this lesson we build...". Never `you will learn`.                                                       |
+| Sections    | H2s, each with a section kind. Body sections alternate teaching with pitfalls and checkpoints.                                                       |
+| Pitfall     | At least one, placed right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule. Short in tutorial mode.   |
+| Checkpoints | At least one per served objective. A checkpoint's `objective` names the one objective it evidences, and its `concepts` the concept ids it exercises. |
+| Exercise    | Exactly one.                                                                                                                                         |
+| Recap       | Numbered takeaways and the served objectives as "You can now...". Where to go next is the page footer's previous/next.                               |
+| Habit       | Zero, one or two, after the recap. A small task in the learner's own work with a stable `id`. A later spec sets its schedule and storage.            |
 
 Objectives are frontmatter data that drive checkpoints, routing, and tutor
 mode. They're never printed as a `you will learn` list; the opener and the
@@ -158,6 +161,56 @@ pitfall and the exercise.
   assistive technology.
 - A checkpoint's id is its section id. Authors keep section slugs stable
   once published, because progress and review items hang off them.
+- A checkpoint is a standalone item as well as a section. It names the
+  concepts it exercises, and where its stem depends on the page it has a
+  one-paragraph context. A review page or a tutor can then ask it outside
+  the lesson.
+
+### Checkpoint props
+
+Every checkpoint kind takes these. Kind-specific props (`options`,
+`steps`, `buckets`, `answer`, `broken` and so on) are in the authoring
+guide.
+
+| Prop        | Required | Holds                                                                                                                                                            |
+| ----------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`        | yes      | Stable slug, unique in the page. The section id and the progress key.                                                                                            |
+| `objective` | yes      | The one learning objective id the checkpoint evidences.                                                                                                          |
+| `concepts`  | yes      | The S02 concept ids the checkpoint exercises, at least one, from any topic. The build fails on an unknown id. Rendered as `data-concepts`.                       |
+| `title`     | yes      | The heading.                                                                                                                                                     |
+| `hint`      | yes      | A diagnostic question or nudge, never the answer.                                                                                                                |
+| `context`   | no       | One plain paragraph that makes the item readable outside its lesson. Hidden on the lesson page, shown above the stem on the review page, included in the export. |
+| `review`    | no       | `false` opts the checkpoint out of review (spec S05). Default `true`.                                                                                            |
+| `revision`  | no       | Bumped when the answer changes, which resets outdated review items (spec S05). Default 1.                                                                        |
+
+Difficulty has no tag. The `objective` has a level in S02, so difficulty
+is derivable.
+
+## Checkpoint export
+
+The build writes every checkpoint of every lesson to one file,
+`data/checkpoints.json` under the site base, from the content collections.
+The browser doesn't read it. A consumer outside the page, first the tutor,
+reads it to ask a checkpoint as a standalone item.
+
+- One object, `{ "version": 1, "items": [...] }`, items in lesson order
+  then page order. `version` changes when a field changes meaning.
+- Each item has `id`, `lesson`, `kind`, `objective`, `concepts`, `context`
+  (`null` when absent), `stem` (the children as Markdown source),
+  `options`, `answer`, `hint`, `reviewable` and `revision`.
+- `options` is what the learner is shown and `answer` the correct response,
+  in the form of the kind: `choice` and `scenario` list the option texts
+  and the correct text; `multi-choice` lists the option texts and the
+  correct texts; `match` has the options and the statements, and the answer
+  pairs each statement with its option; `order` lists the steps sorted
+  alphabetically, and the answer is the steps in order; `sort` has the
+  buckets and the item texts, and the answer pairs each item with its
+  bucket; `predict` has no options and the answer string (`null` for the
+  honor-system variant); `repair` has the broken text as options and the
+  model answer as answer.
+- CI checks the built file: it parses, every checkpoint in every lesson
+  page appears once, no item lacks a page, every field is present with its
+  type, and every concept id is a concept in the topic YAML.
 
 ## Exercises
 
