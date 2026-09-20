@@ -53,7 +53,7 @@ has six courses of one lesson each.
 | Lesson graph    | One course page per area, each a one-node graph with a milestone bar and completion ring                      |
 | Topic map       | One topic per area colored from lesson state, and the rest of the map drawn from the YAML with no lessons yet |
 | Interactions    | `predict`, `choice`, `scenario`, `sort`, `order`, `repair` with `self-grade`, two widgets                     |
-| Routing         | Checkpoint fail cards and extension cards on the six lessons; comfort level on the three Engineering lessons  |
+| Routing         | Checkpoint fail cards and extension cards on the six lessons; comfort level, set on the settings page         |
 | Progress record | Read, finished and skipped states; export and import                                                          |
 | Spaced review   | Finishing any slice lesson schedules its checkpoints; one review page per course                              |
 | Tutor mode      | Tested against these six lessons only                                                                         |

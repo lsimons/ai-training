@@ -8,9 +8,6 @@ const catalog = await buildCatalog();
 <div class="not-content progress" data-catalog={JSON.stringify(catalog)}>
 	<div class="progress-overview" data-overview></div>
 
-	<h2 id="comfort">Comfort level</h2>
-	<p>Engineering lessons offer a comfort level (spec: routing only, never content). Current: <strong data-comfort-label>not set</strong>.</p>
-
 	<h2 id="export-import-reset">Export, import, reset</h2>
 	<p>
 		Progress is stored in this browser only, under the local-storage key <code>ai-training-progress-v1</code>. Nothing is sent
@@ -53,7 +50,6 @@ const catalog = await buildCatalog();
 		const overview = root.querySelector<HTMLElement>('[data-overview]')!;
 		const dump = root.querySelector<HTMLElement>('[data-dump]')!;
 		const message = root.querySelector<HTMLElement>('[data-message]')!;
-		const comfortLabel = root.querySelector<HTMLElement>('[data-comfort-label]')!;
 
 		// Entries for ids the build no longer knows are dropped (spec S04 "Content
 		// changes"). This page has the whole catalog, so the pruning lives here.
@@ -108,7 +104,6 @@ const catalog = await buildCatalog();
 				})
 			);
 			dump.textContent = progress.exportJson(rec);
-			comfortLabel.textContent = rec.comfort ?? 'not set';
 		}
 
 		root.querySelector('[data-export]')?.addEventListener('click', () => {

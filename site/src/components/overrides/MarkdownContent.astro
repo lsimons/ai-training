@@ -2,9 +2,9 @@
 /**
  * Starlight `MarkdownContent` override. For lesson pages (frontmatter has
  * `mode`) it wraps the content in a lesson frame carrying the ids the client
- * needs, renders the routing cards (spec S02 "Differentiation by routing")
- * and the comfort-level control for Engineering lessons, and loads the lesson
- * script once. Other pages render as Starlight does.
+ * needs, renders the routing cards (spec S02 "Differentiation by routing"),
+ * and loads the lesson script once. The comfort level that drives the
+ * routing is set on the settings page. Other pages render as Starlight does.
  */
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
 import { getCollection, render } from 'astro:content';
@@ -62,14 +62,6 @@ if (isLesson) {
 {
 	isLesson ? (
 		<div class="lesson" data-lesson={lessonId} data-mode={data.mode} data-area={area} data-engineering={String(engineering)}>
-			{engineering && (
-				<div class="comfort not-content" role="group" aria-label="Comfort level">
-					<span>Comfort level:</span>
-					<button type="button" data-comfort="less" aria-pressed="false">less comfortable</button>
-					<button type="button" data-comfort="more" aria-pressed="false">more comfortable</button>
-					<span class="comfort-note"></span>
-				</div>
-			)}
 			{behind.length > 0 && (
 				<aside class="route-card route-behind not-content" data-route="behind" hidden>
 					<p class="route-title">Worth revisiting first</p>
@@ -127,25 +119,6 @@ if (isLesson) {
 			if (aheadCard) aheadCard.hidden = !(allClean || rec.comfort === 'more');
 		}
 
-		// Comfort level (Engineering only). Changes routing, never content.
-		const comfortButtons = root.querySelectorAll<HTMLButtonElement>('[data-comfort]');
-		const comfortNote = root.querySelector<HTMLElement>('.comfort-note');
-		function drawComfort() {
-			const level = progress.load().comfort;
-			comfortButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.comfort === level)));
-			if (comfortNote)
-				comfortNote.textContent =
-					level === 'less' ? 'The sections this lesson builds on are listed above.' : level === 'more' ? 'Extensions are shown at the end; reviews start at stage 2.' : '';
-		}
-		comfortButtons.forEach((b) =>
-			b.addEventListener('click', () => {
-				const current = progress.load().comfort;
-				progress.setComfort(current === b.dataset.comfort ? undefined : (b.dataset.comfort as 'less' | 'more'));
-				drawComfort();
-				route();
-			})
-		);
-		drawComfort();
 		route();
 
 		// Finish and skip (spec S04 lesson states; finishing schedules reviews, spec S05).
@@ -188,6 +161,5 @@ if (isLesson) {
 			drawLesson();
 		});
 		drawLesson();
-
 	}
 </script>

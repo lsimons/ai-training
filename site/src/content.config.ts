@@ -13,7 +13,6 @@ const lessonFields = z.object({
 		.array(z.object({ objective: z.string(), lesson: z.string(), section: z.string() }))
 		.optional(),
 	'extends-to': z.array(z.object({ label: z.string(), href: z.string() })).optional(),
-	sources: z.array(z.string()).optional(),
 });
 
 const conceptSchema = z.object({ id: z.string(), name: z.string(), definition: z.string() });

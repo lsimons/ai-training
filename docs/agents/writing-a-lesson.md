@@ -28,8 +28,6 @@ assumes:                  # each points at the lesson section that teaches it
 extends-to:
   - label: Decomposing work
     href: /using-agents/decomposition/
-sources:                  # keys in site/src/data/bibliography.yaml
-  - AEC-01
 ---
 
 import { Choice, Predict, Order, Sort, Scenario, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
@@ -159,9 +157,9 @@ page must also say so in prose next to it.
 </Recap>
 ```
 
-`Recap` appends "You can now..." from the served objectives, the sources
-from frontmatter, what comes next from `extends-to`, and the finish button.
-Don't write those by hand.
+`Recap` appends "You can now..." from the served objectives, what comes next
+from `extends-to`, and the finish button. Don't write those by hand. Sources
+are listed on the topic page, from the topic YAML, not on the lesson.
 
 Widgets are their own components under `site/src/components/widgets/` and
 are imported by name. They teach and never grade.

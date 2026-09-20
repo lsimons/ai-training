@@ -54,8 +54,8 @@ Five stages, shown to the learner as five pills.
 | Comfort level `less`  | New items enter at stage 1 and are due in the learner's next session, even the same day                            |
 | Comfort level `more`  | New items enter at stage 2                                                                                         |
 
-- The frequency control is the only manual knob, and it is per item, offered
-  after answering.
+- The frequency control is the only manual knob, and it is per item, on the
+  settings page, which lists every scheduled item with its stage and due date.
 - Comfort level has no other coupling to reviews.
 - A session shows at most **12 due items**, oldest due first. The page
   says how many remain.

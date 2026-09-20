@@ -45,7 +45,7 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 | Pitfall     | At least one, placed right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule. Short in tutorial mode. |
 | Checkpoints | At least one per served objective. A checkpoint's `objective` names the one objective it evidences.                                                |
 | Exercise    | Exactly one.                                                                                                                                       |
-| Recap       | Numbered takeaways, the served objectives as "You can now...", the sources cited on the page, and what comes next.                                 |
+| Recap       | Numbered takeaways, the served objectives as "You can now...", and what comes next.                                                                |
 
 Objectives are frontmatter data that drive checkpoints, routing, and tutor
 mode. They're never printed as a `you will learn` list; the opener and the
@@ -112,9 +112,10 @@ pitfall and the exercise.
 ## Citations and terms
 
 - **Sources are cited by key.** `(@key)` in Markdown resolves against
-  one bibliography file in the repo and renders as a numbered reference
-  with a per-page sources list. Concept definitions, recaps, and behaviors
-  cite papers and vendor documentation this way, never as bare inline URLs.
+  one bibliography file in the repo and renders as a numbered reference.
+  The sources list is on the topic page. Concept definitions, recaps, and
+  behaviors cite papers and vendor documentation this way, never as bare
+  inline URLs.
 - **The first mention of a concept is a term.** A remark plugin marks it in
   Markdown rather than a component, so plain Markdown stays plain. The term
   renders the concept's glossary definition on hover and links to its
