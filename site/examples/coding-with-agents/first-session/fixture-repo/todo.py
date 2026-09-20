@@ -59,7 +59,7 @@ def main(argv):
     elif command == "done" and len(argv) == 3 and argv[2].isdigit():
         message = done(items, int(argv[2]))
     else:
-        print(__doc__.strip(), file=sys.stderr)
+        print((__doc__ or "").strip(), file=sys.stderr)
         return 2
     save(items)
     print(message)

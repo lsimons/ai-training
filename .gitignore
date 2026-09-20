@@ -94,8 +94,13 @@ mise.local.toml
 .vale/styles/proselint/
 .vale/styles/Readability/
 
-# Python bytecode from the scripts/ helpers
+# Python bytecode from the scripts/ helpers, and the uv/pytest/ruff state
+# that `mise run py-*` leaves behind
 __pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
 .vale/styles/Google/
 .vale/styles/ai-tells/
 # Shipped inside the ai-tells zip.
