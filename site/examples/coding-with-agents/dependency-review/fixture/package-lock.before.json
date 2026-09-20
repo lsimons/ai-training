@@ -1,0 +1,19 @@
+{
+  "name": "todo-web",
+  "version": "0.3.0",
+  "lockfileVersion": 3,
+  "packages": {
+    "": {
+      "name": "todo-web",
+      "version": "0.3.0",
+      "dependencies": {
+        "tiny-router": "^4.19.0"
+      }
+    },
+    "node_modules/tiny-router": {
+      "version": "4.19.2",
+      "resolved": "https://registry.example.invalid/tiny-router/-/tiny-router-4.19.2.tgz",
+      "license": "MIT"
+    }
+  }
+}

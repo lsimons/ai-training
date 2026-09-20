@@ -1,0 +1,33 @@
+{
+  "name": "todo-web",
+  "version": "0.3.0",
+  "lockfileVersion": 3,
+  "packages": {
+    "": {
+      "name": "todo-web",
+      "version": "0.3.0",
+      "dependencies": {
+        "date-fmt": "^2.4.0",
+        "tiny-router": "^4.19.0"
+      }
+    },
+    "node_modules/date-fmt": {
+      "version": "2.4.0",
+      "resolved": "https://registry.example.invalid/date-fmt/-/date-fmt-2.4.0.tgz",
+      "license": "MIT",
+      "dependencies": {
+        "iso-week": "^1.0.0"
+      }
+    },
+    "node_modules/iso-week": {
+      "version": "1.0.3",
+      "resolved": "https://registry.example.invalid/iso-week/-/iso-week-1.0.3.tgz",
+      "license": "MIT"
+    },
+    "node_modules/tiny-router": {
+      "version": "4.21.2",
+      "resolved": "https://registry.example.invalid/tiny-router/-/tiny-router-4.21.2.tgz",
+      "license": "MIT"
+    }
+  }
+}
