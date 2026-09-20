@@ -135,6 +135,7 @@ export default defineConfig({
 						{ slug: 'concepts', label: 'Concepts' },
 						{ slug: 'concepts/how-models-work', label: 'How a language model works', attrs: { class: 'lesson-link' } },
 						{ slug: 'safety', label: 'Safety' },
+						{ slug: 'safety/responsible-use', label: 'What may go into an AI tool', attrs: { class: 'lesson-link' } },
 						{ slug: 'safety/agent-risk', label: 'Why agent safety is different', attrs: { class: 'lesson-link' } },
 						{ slug: 'using-agents', label: 'Using agents' },
 						{ slug: 'using-agents/delegating', label: 'Delegating a task to an agent', attrs: { class: 'lesson-link' } },
