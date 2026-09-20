@@ -259,3 +259,35 @@ metaphor rules and go with their family, now and then.
   density, SemicolonUsage for the tacked-on clause). One could drop the
   Google rule from the sweep and keep only this one; this summary keeps
   both because they answer different questions.
+
+## Revision: fix, then gate
+
+The maintainer read the recommendations above and disagreed with the
+frame. What this summary called the house register wasn't chosen; the
+content is agent-written and nothing had told the agents to avoid the
+patterns. The decision became: fix the hits rather than tolerate them,
+and gate what stays fixed.
+
+- Every register rule that fired moved from now-and-then to every run.
+  Nine agents swept the tree area by area: 609 hits (the tree had grown
+  by a set of exploration notes since the evaluation) went to 38, and
+  the 38 are quoted source material (a course title, a screen name, a
+  transcript inside a `<Response>` block, Brilliant's "what's worth
+  building") or a false match on a noun list.
+- Three rules run as House copies: `House.Transitions` is
+  FormalTransitions without "for example" and case-sensitive, so only
+  the sentence-initial "Hence" or "Notably" fires. `House.VerbTricolon`
+  drops the after-colon and `-s` tokens, which matched noun lists; the
+  copy found 49 tricolons, most of them real, against the package's 95.
+  `House.Idioms` is FigurativeIdioms without "blast radius"; the
+  maintainer kept the term, and the package rule has no `exceptions`
+  key for the vocabulary list to reach.
+- AICompoundPhrases went back to the gate and "real consequences" was
+  rewritten.
+- The mottos became sentences: "Hints, not answers." is now "It gives
+  hints and withholds answers."
+- In `site/src/content/docs/**` every register rule and House copy that
+  reads zero is an `error`. SemicolonUsage, CataphoricForecasting and
+  NegatedObject still match inside transcripts and stay warnings there.
+- `AGENTS.md` gained a "Voice" section that names the patterns before
+  the lint does.

@@ -36,17 +36,17 @@ import { Choice, Predict, Order, Sort, Scenario, Repair, Pitfall, Exercise, Reca
 ```
 
 `assumes` may be empty for a first lesson. `extends-to` hrefs may point at
-pages that don't exist yet; they render as plain text until they do.
+pages that don't exist yet, and they render as plain text until they do.
 
 ## Anatomy
 
 One or more opener paragraphs, then H2 sections. Teaching prose is plain Markdown.
 Components go between paragraphs and never inside list items or tables.
-Every served objective gets at least one checkpoint with
-`objective="<that id>"`; each checkpoint names the one objective it
-evidences. One `<Pitfall>`, one `<Exercise>`, one `<Recap>`
+Each served objective gets at least one checkpoint with
+`objective="<that id>"`, and each checkpoint names the one objective it
+evidences. A lesson has one `<Pitfall>`, one `<Exercise>`, and one `<Recap>`
 at the end. Tutorial mode: one or two paragraphs, then an example the
-learner runs or predicts; every example that runs gets a `<Predict>`.
+learner runs or predicts. Each example that runs gets a `<Predict>`.
 
 ## Checkpoints
 
@@ -84,7 +84,7 @@ print(TOOLS["get_weather"]["fn"]("Lisbon"))
 
 `run` names a file under `site/examples/`. `mise run examples` executes it
 and fails if its stdout isn't `answer`. The file holds the complete,
-runnable program; the page shows only the part the learner needs. Omit
+runnable program, and the page shows only the part the learner needs. Omit
 `run` only for the honor-system variant (predict what an agent does), and
 then say in the stem that the learner checks it themselves.
 
@@ -93,7 +93,7 @@ then say in the stem that the learner checks it themselves.
   steps={['Send the messages to the model', 'Check for a final answer', 'Run the tool', 'Append the result']} />
 ```
 
-`steps` is the correct order; the page shuffles it.
+`steps` is the correct order, and the page shuffles it.
 
 ```mdx
 <Sort id="autonomy-levels" objective="..." title="Who decides?" hint="..."
@@ -114,7 +114,7 @@ The agent says it is done and asks permission to `git push`. You have not looked
 </Scenario>
 ```
 
-Every option has a `consequence`; the correct one too.
+Each option has a `consequence`, including the correct one.
 
 ```mdx
 <Repair id="fix-the-brief" objective="..." title="Fix the brief" hint="..."
@@ -168,11 +168,22 @@ are imported by name. They teach and never grade.
 
 ## Rules that bite
 
+- **Voice.** The "Voice" list in `AGENTS.md` is the house's answer to
+  agent prose: no figurative verbs on inanimate subjects, no tacked-on
+  semicolon clause, no count-then-list, no rule of three, no clipped
+  motto, no "not X but Y", no sentence-initial transition word.
+  `mise run prose` reports every hit, and a lesson should read clean before
+  it is committed.
+
 - Component children are Markdown but must be separated from the tags by a
   blank line if they contain block elements (code fences, lists).
+
 - Backticks inside a prop string: use a template literal, as `Repair` does.
+
 - Never a literal `</script>` or `</pre>` in any string.
+
 - Links are root-relative (`/using-agents/`); the build fails on a dead
   internal link, so link only to pages that exist, or use `extends-to`.
+
 - No company names, internal URLs, or text adapted from NC-licensed sources.
   See the licensing rules in `AGENTS.md`.
