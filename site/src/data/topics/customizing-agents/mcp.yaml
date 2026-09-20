@@ -37,13 +37,13 @@ concepts:
   - id: mcp-primitives
     name: MCP primitives
     definition: >-
-      The kinds of thing a server can offer besides tools. Resources are
-      data the client can read into context, such as files or records, with
-      a URI. Prompts are reusable templates the user picks by name. Sampling
-      lets a server ask the client's model to complete text, so the server
-      needs no model access of its own. Roots tell a server which
-      directories or locations it may work in. Most servers only use tools,
-      and the others matter when they show up in a client's menus.
+      The kinds of things a server can offer besides tools. Resources are
+      data the client can read into context, such as files or records, each
+      with a URI. Prompts are reusable templates the user picks by name.
+      Sampling lets a server ask the client's model to complete text, so the
+      server needs no model access of its own. Roots tell a server which
+      directories it may work in. Most servers only use tools, and the
+      others matter only when your client supports them.
   - id: mcp-vs-cli
     name: MCP vs CLI
     definition: >-
@@ -66,14 +66,12 @@ concepts:
     name: MCP security
     definition: >-
       Connecting a server extends the agent's blast radius to everything the
-      server can reach with the credentials it holds. Risks include servers
-      from untrusted sources, tool descriptions that carry injected
-      instructions, tools that return attacker-controlled content, and tools
-      that can send data outward. Vet the source, run with least privilege,
-      approve risky tools per call and review what leaves. A server acts
-      with the identity of the user who connected it, never with a shared
-      service account, so what it can do is bounded by what that user may
-      do and can be traced to them.
+      server can reach. Risks include servers from untrusted sources, tool
+      descriptions that carry injected instructions, tools that return
+      attacker-controlled content, and tools that can send data outward. Vet the source, run with least privilege,
+      approve risky tools per call and review what leaves. Connect a server
+      with your own identity, never with a shared service account, so it can
+      do only what you may do and its actions trace back to you.
 links:
   prerequisites: [customizing-agents/instructions, concepts/what-is-an-agent]
   related: []

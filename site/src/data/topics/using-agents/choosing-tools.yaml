@@ -42,8 +42,7 @@ concepts:
       costly, and the final accountability for a result. Keeping a step human
       is a design choice, and naming those steps early prevents them from
       being automated by default as tools improve. Keeping a human path also
-      means the process keeps working when the tool is down, and AI services
-      are down more often than the systems they are wired into.
+      means the process keeps working when the tool is unavailable.
   - id: reasoning-across-tool-levels
     name: Reasoning across tool levels
     definition: >-
