@@ -4,13 +4,28 @@
  * every function takes the record (and, where a date matters, the day) and
  * returns what it computed. `progress.ts` wraps these with local storage.
  */
-export const VERSION = 1;
-export const STORAGE_KEY = `ai-training-progress-v${VERSION}`;
+export const VERSION = 2;
+/** The oldest record version `migrate` can bring up to `VERSION`. */
+export const OLDEST_MIGRATABLE_VERSION = 1;
+export const storageKeyFor = (version: number) => `ai-training-progress-v${version}`;
+export const STORAGE_KEY = storageKeyFor(VERSION);
+
+/** The keys of older, migratable records, newest first (spec S04 "Storage"). */
+export function priorStorageKeys(): string[] {
+	const keys: string[] = [];
+	for (let v = VERSION - 1; v >= OLDEST_MIGRATABLE_VERSION; v--) keys.push(storageKeyFor(v));
+	return keys;
+}
 
 export type LessonState = 'read' | 'finished' | 'skipped';
 export type CheckpointState = 'passed' | 'skipped' | 'attempted';
 export type Comfort = 'less' | 'more';
 export type ReviewResult = 'pass' | 'fail';
+/** One answered review: the local calendar day and the result. */
+export interface ReviewTrace {
+	at: string;
+	result: ReviewResult;
+}
 
 export interface LessonEntry {
 	state: LessonState;
@@ -25,7 +40,8 @@ export interface ReviewEntry {
 	stage: number | 'done';
 	due: string;
 	last: ReviewResult | null;
-	history: ReviewResult[];
+	/** Oldest first, capped at `HISTORY_LENGTH`. */
+	history: ReviewTrace[];
 	/** The checkpoint's `revision` when scheduled (spec S05 "Content changes"); absent means 1. */
 	revision?: number;
 }
@@ -103,11 +119,15 @@ function isCheckpointEntry(v: unknown): v is CheckpointEntry {
 		typeof v.attempts === 'number'
 	);
 }
+const isResult = (v: unknown): v is ReviewResult => v === 'pass' || v === 'fail';
+function isReviewTrace(v: unknown): v is ReviewTrace {
+	return isObject(v) && isDay(v.at) && isResult(v.result);
+}
 function isReviewEntry(v: unknown): v is ReviewEntry {
 	if (!isObject(v)) return false;
 	const stageOk = v.stage === 'done' || (typeof v.stage === 'number' && v.stage >= 1 && v.stage <= LAST_STAGE);
-	const lastOk = v.last === null || v.last === 'pass' || v.last === 'fail';
-	const historyOk = Array.isArray(v.history) && v.history.every((h) => h === 'pass' || h === 'fail');
+	const lastOk = v.last === null || isResult(v.last);
+	const historyOk = Array.isArray(v.history) && v.history.every(isReviewTrace);
 	const revisionOk = v.revision === undefined || typeof v.revision === 'number';
 	return stageOk && isDay(v.due) && lastOk && historyOk && revisionOk;
 }
@@ -147,12 +167,63 @@ function cleanMap<T>(
 	return out;
 }
 
+// --- Migration (spec S04 "Storage") -----------------------------------------
+
+/**
+ * The day of a version 1 item's last answer, worked back from `due`: a pass at
+ * stage n was due n's interval later, a fail was due the next day. A retired
+ * item, or one never answered, gives `due` itself.
+ */
+function v1LastAnsweredDay(item: Record<string, unknown>): string {
+	const due = isDay(item.due) ? item.due : undefined;
+	if (!due) return '';
+	if (item.last === 'fail') return addDays(due, -1);
+	if (item.last === 'pass' && typeof item.stage === 'number') return addDays(due, -stageDays(item.stage));
+	return due;
+}
+
+/** Version 1 to 2: a bare `history` result becomes `{ at, result }`, dated by the item's last answer. */
+function migrateV1(doc: Record<string, unknown>): Record<string, unknown> {
+	const reviews: Record<string, unknown> = {};
+	if (isObject(doc.reviews)) {
+		for (const [id, item] of Object.entries(doc.reviews)) {
+			if (!isObject(item) || !Array.isArray(item.history)) {
+				reviews[id] = item;
+				continue;
+			}
+			const at = v1LastAnsweredDay(item);
+			reviews[id] = { ...item, history: item.history.map((h) => (isResult(h) ? { at, result: h } : h)) };
+		}
+	}
+	return { ...doc, version: 2, reviews };
+}
+
+/** Each step brings a record from the keyed version to the next one. */
+const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => Record<string, unknown>> = { 1: migrateV1 };
+
+/**
+ * Bring a parsed record of an older version up to `VERSION`, one step at a
+ * time. Anything that is not a record with a known older version is returned
+ * as it came, so `normalize` and `parseImport` can reject it.
+ */
+export function migrate(parsed: unknown): unknown {
+	let doc = parsed;
+	while (isObject(doc) && typeof doc.version === 'number' && doc.version < VERSION) {
+		const step = MIGRATIONS[doc.version];
+		if (!step) return doc;
+		doc = step(doc);
+	}
+	return doc;
+}
+
 /**
  * Coerce a parsed document into a well-formed record, or `null` when it is not
- * a record of this `VERSION`. Malformed fields fall back to empty, and each
- * one is reported in `warnings` when the caller passes an array.
+ * a record of this `VERSION` or of an older version `migrate` knows. Malformed
+ * fields fall back to empty, and each one is reported in `warnings` when the
+ * caller passes an array.
  */
-export function normalize(parsed: unknown, warnings: NormalizeWarning[] = []): ProgressRecord | null {
+export function normalize(raw: unknown, warnings: NormalizeWarning[] = []): ProgressRecord | null {
+	const parsed = migrate(raw);
 	if (!isObject(parsed) || parsed.version !== VERSION) return null;
 	const record = emptyRecord();
 	if (parsed.comfort === 'less' || parsed.comfort === 'more') record.comfort = parsed.comfort;
@@ -302,7 +373,7 @@ export function applyReviewResult(
 	const item = r.reviews[id];
 	if (!item) return undefined;
 	const result: ReviewResult = passed ? 'pass' : 'fail';
-	item.history = [...item.history, result].slice(-HISTORY_LENGTH);
+	item.history = [...item.history, { at: day, result }].slice(-HISTORY_LENGTH);
 	item.last = result;
 	if (passed) {
 		const next = typeof item.stage === 'number' ? item.stage + 1 : LAST_STAGE + 1;
@@ -362,24 +433,26 @@ export type ImportResult =
 	| { ok: false; message: string };
 
 /**
- * Parse an exported file: same version is accepted (malformed fields fall
- * back to empty, and each drop is reported in `warnings` for the caller to
- * log); another version is refused.
+ * Parse an exported file: this version is accepted, an older version with a
+ * migration is migrated, and either way malformed fields fall back to empty
+ * with each drop reported in `warnings` for the caller to log. Any other
+ * version is refused.
  */
 export function parseImport(text: string): ImportResult {
-	let parsed: unknown;
+	let raw: unknown;
 	try {
-		parsed = JSON.parse(text);
+		raw = JSON.parse(text);
 	} catch {
 		return { ok: false, message: 'That file is not valid JSON.' };
 	}
-	if (!isObject(parsed) || typeof parsed.version !== 'number') {
+	if (!isObject(raw) || typeof raw.version !== 'number') {
 		return { ok: false, message: 'That file is not a progress record: it has no numeric "version" field.' };
 	}
-	if (parsed.version !== VERSION) {
+	const parsed = migrate(raw);
+	if (!isObject(parsed) || parsed.version !== VERSION) {
 		return {
 			ok: false,
-			message: `That file is version ${parsed.version}; this site stores version ${VERSION} and has no migration for it.`,
+			message: `That file is version ${raw.version}; this site stores version ${VERSION} and has no migration for it.`,
 		};
 	}
 	const warnings: NormalizeWarning[] = [];

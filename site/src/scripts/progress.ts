@@ -20,16 +20,21 @@ export type {
 	ReviewableCheckpoint,
 	ReviewEntry,
 	ReviewResult,
+	ReviewTrace,
 } from './progress-model';
 export {
 	addDays,
 	DEFAULT_REVISION,
 	emptyRecord,
 	exportJson,
+	migrate,
 	normalize,
+	OLDEST_MIGRATABLE_VERSION,
+	priorStorageKeys,
 	REVIEW_CAP,
 	STAGE_DAYS,
 	STORAGE_KEY,
+	storageKeyFor,
 	today,
 	VERSION,
 } from './progress-model';
@@ -45,15 +50,37 @@ function warnWriteOnce(err: unknown) {
 	console.warn('progress: could not write to local storage; progress will not persist in this browser', err);
 }
 
-/** A stored record of another version starts fresh (spec S04 "Storage"); the old key is left in place. */
+function parseStored(raw: string): ProgressRecord | null {
+	const warnings: model.NormalizeWarning[] = [];
+	const record = model.normalize(JSON.parse(raw), warnings);
+	for (const w of warnings) console.warn(model.describeWarning(w));
+	return record;
+}
+
+/**
+ * The stored record (spec S04 "Storage"). With nothing under this version's
+ * key, the newest older key with a migration is read, migrated and written
+ * under this key; the old key is left in place. A record of an unknown
+ * version, or one that does not parse, starts fresh.
+ */
 export function load(): ProgressRecord {
 	try {
 		const raw = localStorage.getItem(model.STORAGE_KEY);
-		if (!raw) return model.emptyRecord();
-		const warnings: model.NormalizeWarning[] = [];
-		const record = model.normalize(JSON.parse(raw), warnings);
-		for (const w of warnings) console.warn(model.describeWarning(w));
-		return record ?? model.emptyRecord();
+		if (raw) return parseStored(raw) ?? model.emptyRecord();
+		for (const key of model.priorStorageKeys()) {
+			const old = localStorage.getItem(key);
+			if (!old) continue;
+			const record = parseStored(old);
+			if (!record) return model.emptyRecord();
+			console.info(`progress: migrated the record under "${key}" to version ${model.VERSION}`);
+			try {
+				localStorage.setItem(model.STORAGE_KEY, JSON.stringify(record));
+			} catch (err) {
+				warnWriteOnce(err);
+			}
+			return record;
+		}
+		return model.emptyRecord();
 	} catch {
 		return model.emptyRecord();
 	}
@@ -167,7 +194,7 @@ export function setComfort(level: Comfort | undefined): void {
 
 // --- Export and import --------------------------------------------------------
 
-/** Import: same version replaces (malformed fields fall back to empty); another version is refused with a message. */
+/** Import: this version, or an older one `migrate` knows, replaces the record (malformed fields fall back to empty); any other version is refused with a message. */
 export function importJson(text: string): { ok: true } | { ok: false; message: string } {
 	const result = model.parseImport(text);
 	if (!result.ok) return result;

@@ -133,6 +133,12 @@ const catalog = await buildCatalog();
 					label.className = 'cp-stage-label';
 					label.textContent = `stage ${stage} of 5, due ${item.due}`;
 					pills.appendChild(label);
+					const history = document.createElement('span');
+					history.className = 'schedule-history';
+					const lastTrace = item.history[item.history.length - 1];
+					history.textContent = lastTrace
+						? `${item.history.length} answered, last ${lastTrace.result} on ${lastTrace.at}`
+						: 'not answered yet';
 					const sooner = document.createElement('button');
 					sooner.type = 'button';
 					sooner.className = 'cp-sooner';
@@ -148,7 +154,7 @@ const catalog = await buildCatalog();
 					const actions = document.createElement('span');
 					actions.className = 'schedule-actions';
 					actions.append(sooner, later);
-					row.append(name, pills, actions);
+					row.append(name, pills, actions, history);
 					return row;
 				})
 			);

@@ -17,16 +17,20 @@ import {
 	HISTORY_LENGTH,
 	initialDue,
 	initialStage,
+	migrate,
 	type NormalizeWarning,
 	normalize,
+	OLDEST_MIGRATABLE_VERSION,
 	type ProgressRecord,
 	parseImport,
+	priorStorageKeys,
 	pruneOrphanEntries,
 	REVIEW_CAP,
 	type ReviewEntry,
 	resetOutdatedReviewEntries,
 	STORAGE_KEY,
 	stageDays,
+	storageKeyFor,
 	today,
 	VERSION,
 } from '@scripts/progress-model';
@@ -90,7 +94,8 @@ describe('normalize', () => {
 					done: review({ stage: 'done' }),
 					badStage: review({ stage: 7 }),
 					badLast: review({ last: 'meh' as never }),
-					badHistory: review({ history: ['pass', 'x' as never] }),
+					badHistory: review({ history: [{ at: DAY, result: 'pass' }, 'pass' as never] }),
+					badTraceDay: review({ history: [{ at: 'today', result: 'pass' }] }),
 					badRevision: review({ revision: 'one' as never }),
 				},
 				quizzes: 'nope',
@@ -105,7 +110,7 @@ describe('normalize', () => {
 		expect(warnings).toEqual([
 			{ field: 'lessons', kind: 'dropped', count: 2 },
 			{ field: 'checkpoints', kind: 'dropped', count: 1 },
-			{ field: 'reviews', kind: 'dropped', count: 4 },
+			{ field: 'reviews', kind: 'dropped', count: 5 },
 			{ field: 'quizzes', kind: 'not-object', count: 1 },
 		]);
 	});
@@ -216,7 +221,8 @@ describe('reviews', () => {
 		expect(applyReviewResult(r, 'c', true, DAY)).toMatchObject({ stage: 4, due: '2026-03-31' });
 		expect(applyReviewResult(r, 'c', true, DAY)).toMatchObject({ stage: 5, due: '2026-05-09' });
 		expect(applyReviewResult(r, 'c', true, DAY)).toMatchObject({ stage: 'done', due: '2026-05-09' });
-		expect(r.reviews.c?.history).toEqual(['pass', 'pass', 'pass', 'pass', 'pass']);
+		const pass = { at: DAY, result: 'pass' };
+		expect(r.reviews.c?.history).toEqual([pass, pass, pass, pass, pass]);
 	});
 	it('a fail drops to stage 1 due tomorrow, even from done', () => {
 		const r = record({ reviews: { c: review({ stage: 'done', due: '2026-01-01' }) } });
@@ -275,7 +281,7 @@ describe('export and import', () => {
 	it('round-trips a record', () => {
 		const r = record({ comfort: 'more', lessons: { 'a/x': { state: 'finished', at: DAY } } });
 		const text = exportJson(r);
-		expect(text).toContain('\n  "version": 1');
+		expect(text).toContain(`\n  "version": ${VERSION}`);
 		expect(parseImport(text)).toEqual({ ok: true, record: r, warnings: [] });
 	});
 	it('reports what normalize dropped instead of losing it silently', () => {
@@ -298,7 +304,87 @@ describe('export and import', () => {
 			message: expect.stringContaining(`version ${VERSION + 1}`),
 		});
 	});
-	it('the storage key carries the version', () => {
+	it('the storage key carries the version, and the prior keys count down to the oldest migratable one', () => {
 		expect(STORAGE_KEY).toBe(`ai-training-progress-v${VERSION}`);
+		expect(storageKeyFor(1)).toBe('ai-training-progress-v1');
+		expect(priorStorageKeys()).toEqual(['ai-training-progress-v1']);
+		expect(OLDEST_MIGRATABLE_VERSION).toBe(1);
+	});
+});
+
+describe('migrate from version 1', () => {
+	// A version 1 review item: `history` holds bare results.
+	const v1 = (over: Record<string, unknown>) => ({
+		stage: 2,
+		due: '2026-03-13',
+		last: 'pass',
+		history: ['fail', 'pass'],
+		revision: 1,
+		...over,
+	});
+
+	it('dates each result by the last answer, worked back from due and stage', () => {
+		const out = migrate({
+			version: 1,
+			reviews: { passed: v1({}), failed: v1({ stage: 1, due: '2026-03-11', last: 'fail' }) },
+		}) as {
+			version: number;
+			reviews: Record<string, { history: unknown[] }>;
+		};
+		expect(out.version).toBe(VERSION);
+		// Stage 2 is 3 days after the pass, so the pass was on the 10th.
+		expect(out.reviews.passed?.history).toEqual([
+			{ at: '2026-03-10', result: 'fail' },
+			{ at: '2026-03-10', result: 'pass' },
+		]);
+		// A fail is due the next day.
+		expect(out.reviews.failed?.history).toEqual([
+			{ at: '2026-03-10', result: 'fail' },
+			{ at: '2026-03-10', result: 'pass' },
+		]);
+	});
+	it('a retired or unanswered item is dated by due itself', () => {
+		const out = migrate({
+			version: 1,
+			reviews: { done: v1({ stage: 'done', due: DAY }), fresh: v1({ last: null, history: [] }) },
+		}) as { reviews: Record<string, unknown> };
+		expect(out.reviews.done).toMatchObject({
+			history: [
+				{ at: DAY, result: 'fail' },
+				{ at: DAY, result: 'pass' },
+			],
+		});
+		expect(out.reviews.fresh).toMatchObject({ history: [] });
+	});
+	it('leaves other fields, malformed items and unknown history entries for normalize to judge', () => {
+		const out = migrate({
+			version: 1,
+			comfort: 'more',
+			lessons: { 'a/x': { state: 'read', at: DAY } },
+			reviews: { odd: 'x', noHistory: { stage: 1 }, bad: v1({ history: ['pass', 7] }) },
+		}) as { comfort: string; lessons: unknown; reviews: Record<string, unknown> };
+		expect(out.comfort).toBe('more');
+		expect(out.lessons).toEqual({ 'a/x': { state: 'read', at: DAY } });
+		expect(out.reviews.odd).toBe('x');
+		expect(out.reviews.noHistory).toEqual({ stage: 1 });
+		expect(out.reviews.bad).toMatchObject({ history: [{ at: '2026-03-10', result: 'pass' }, 7] });
+		const warnings: NormalizeWarning[] = [];
+		const r = normalize({ version: 1, reviews: { odd: 'x', bad: v1({ history: ['pass', 7] }), ok: v1({}) } }, warnings);
+		expect(Object.keys(r?.reviews ?? {})).toEqual(['ok']);
+		expect(warnings).toEqual([{ field: 'reviews', kind: 'dropped', count: 2 }]);
+	});
+	it('normalize and parseImport accept a version 1 record and keep its schedule', () => {
+		const doc = { version: 1, reviews: { c: v1({}) } };
+		const r = normalize(doc);
+		expect(r?.version).toBe(VERSION);
+		expect(r?.reviews.c).toMatchObject({ stage: 2, due: '2026-03-13', last: 'pass', revision: 1 });
+		expect(parseImport(JSON.stringify(doc))).toEqual({ ok: true, record: r, warnings: [] });
+	});
+	it('a version without a migration step is returned as it came', () => {
+		expect(migrate({ version: 0, reviews: {} })).toEqual({ version: 0, reviews: {} });
+		expect(migrate({ version: VERSION + 1 })).toEqual({ version: VERSION + 1 });
+		expect(migrate('x')).toBe('x');
+		expect(normalize({ version: 0 })).toBeNull();
+		expect(parseImport('{"version":0}')).toMatchObject({ ok: false, message: expect.stringContaining('version 0') });
 	});
 });

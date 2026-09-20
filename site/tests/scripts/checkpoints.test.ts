@@ -311,10 +311,11 @@ describe('review mode', () => {
 		click('.cp-check');
 		expect(q('.cp-stage-label').textContent).toBe('stage 3 of 5');
 		expect(q('.cp-after').hidden).toBe(false);
-		expect(progress.load().reviews[id]?.history).toEqual(['pass']);
+		const pass = [{ at: progress.today(), result: 'pass' }];
+		expect(progress.load().reviews[id]?.history).toEqual(pass);
 		// A second Check records nothing more, and lesson progress is untouched.
 		click('.cp-check');
-		expect(progress.load().reviews[id]?.history).toEqual(['pass']);
+		expect(progress.load().reviews[id]?.history).toEqual(pass);
 		expect(progress.load().checkpoints[id]).toBeUndefined();
 		expect(onResult).toHaveBeenCalledTimes(1);
 	});
@@ -331,7 +332,7 @@ describe('review mode', () => {
 		expect(q('.cp-stage-label').textContent).toBe('stage 1 of 5');
 		expect(q<HTMLButtonElement>('.cp-giveup').disabled).toBe(true);
 		click('.cp-giveup');
-		expect(progress.load().reviews[id]?.history).toEqual(['fail']);
+		expect(progress.load().reviews[id]?.history).toEqual([{ at: progress.today(), result: 'fail' }]);
 	});
 	it('a retired item shows every pill lit', () => {
 		schedule('done');
