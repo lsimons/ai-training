@@ -73,6 +73,16 @@ frontmatter.
 `after` is only read for a coming lesson. A live lesson takes its place in
 the graph from the `assumes` in its page.
 
+The course page also renders the plan as a table under the graph
+(`site/src/components/CoursePlan.astro`), folded into a "Lesson plan"
+`<details>` element. The reader sees the graph before the table. Each
+entry is one row, in plan order, and each field is a column. The title
+becomes a link once the lesson is live, `covers` links to the topic page,
+each `serves` id links to its heading on the competency page, `after` shows
+the titles of those entries and `issue` links to GitHub. The YAML comments
+never reach the collection, so they don't render. Read the plan file for
+those.
+
 `mise run courses` (part of `mise run ci`) fails when a lesson page is missing
 from its plan or listed with a status other than `live`, when a `live` entry
 has no page or its `title`, `covers` or `serves` differ from the page, when a
