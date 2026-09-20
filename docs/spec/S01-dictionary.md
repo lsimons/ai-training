@@ -6,8 +6,8 @@ topic map, the progress record and tutor mode all mean the same thing by the
 same name.
 
 **Status:** In progress - page kinds, content units, section kinds, every
-interaction type except `match` and `multi-choice`, comfort level, progress,
-review and review item, and tutor verbs are implemented (2026-09-20).
+interaction type, comfort level, progress, review and review item, and tutor
+verbs are implemented (2026-09-20).
 Deferred: path, goal, quiz, project, the learner's reference, and the
 `more` skills check.
 

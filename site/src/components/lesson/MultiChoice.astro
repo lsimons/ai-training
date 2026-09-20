@@ -1,0 +1,44 @@
+---
+/**
+ * Select exactly N correct items with no false positives (spec S01
+ * `multi-choice`). Wrong picks show their own `why`; a missed correct item is
+ * only counted, never named.
+ */
+import CheckpointShell from './CheckpointShell.astro';
+
+interface Option {
+	text: string;
+	correct?: boolean;
+	why?: string;
+}
+interface Props {
+	id: string;
+	objective: string;
+	title: string;
+	hint: string;
+	review?: boolean;
+	revision?: number;
+	options: Option[];
+}
+const { id, objective, title, hint, review, revision, options } = Astro.props;
+const correct = options.filter((o) => o.correct).length;
+if (correct < 2) throw new Error(`MultiChoice "${id}" needs at least two correct options, has ${correct}. Use Choice for one.`);
+if (correct === options.length) throw new Error(`MultiChoice "${id}" needs at least one wrong option`);
+---
+
+<CheckpointShell {id} {objective} {title} {hint} {review} {revision} kind="multi-choice">
+	<slot />
+	<Fragment slot="body">
+		<fieldset class="cp-options cp-multi" data-count={correct}>
+			<legend>Select exactly {correct}.</legend>
+			{
+				options.map((o) => (
+					<label data-correct={o.correct ? 'true' : undefined} data-why={o.why}>
+						<input type="checkbox" name={`${id}-multi`} />
+						<span>{o.text}</span>
+					</label>
+				))
+			}
+		</fieldset>
+	</Fragment>
+</CheckpointShell>
