@@ -1,11 +1,12 @@
 /**
  * Renders the page-level components that read the content collections
- * (CourseGraph, TopicMap, Settings) against the fixture lessons in
+ * (CourseGraph, TopicMap, Settings, OverallProgress) against the fixture lessons in
  * tests/lib/content.ts. What the client scripts draw on top is covered by
  * the e2e suite; these tests check the server-rendered frame the scripts
  * bind to.
  */
 import CourseGraph from '@components/CourseGraph.astro';
+import OverallProgress from '@components/OverallProgress.astro';
 import Settings from '@components/Settings.astro';
 import TopicMap from '@components/TopicMap.astro';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
@@ -86,5 +87,21 @@ describe('Settings', () => {
 		const catalog = JSON.parse(/data-catalog="([^"]*)"/.exec(html)?.[1]?.replace(/&quot;/g, '"') ?? '[]');
 		expect(catalog.map((c: { area: string }) => c.area)).toContain('safety');
 		expect(catalog[0].lessons[0].checkpoints[0].title).toBe('What the model does');
+	});
+});
+
+describe('OverallProgress', () => {
+	it('renders the bar, the hidden due-lines list and the continue link inside a not-content container', async () => {
+		const html = await container.renderToString(OverallProgress, { props: { landing: true } });
+		expect(html).toMatch(/<div class="not-content overall[^"]*" data-overall data-landing="true"/);
+		expect(html).toMatch(/<ul class="overall-due[^"]*" data-due-lines hidden><\/ul>/);
+		expect(html).toContain('href="/ai-training/concepts/how-models-work/"');
+		expect(html).toContain('href="/ai-training/map/"');
+		expect(html).not.toContain('data-text');
+	});
+	it('renders the summary line on the progress page layout', async () => {
+		const html = await container.renderToString(OverallProgress, {});
+		expect(html).toContain('data-text');
+		expect(html).not.toContain('href="/ai-training/map/"');
 	});
 });

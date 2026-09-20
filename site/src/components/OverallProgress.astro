@@ -1,8 +1,10 @@
 ---
 /**
  * One bar for the whole site plus a "continue" link to the first unfinished
- * lesson. Used at the top of the progress page and on the landing page,
- * where it also retargets the hero's primary action once there is progress.
+ * lesson, and one line per course with review items due (spec S05 "Where
+ * reviews surface"). Used at the top of the progress page and on the landing
+ * page, where it also retargets the hero's primary action once there is
+ * progress.
  */
 import { buildCatalog } from '@lib/catalog';
 import { href } from '@lib/url';
@@ -23,6 +25,7 @@ const first = catalog.flatMap((c) => c.lessons)[0];
 		<span class="overall-skipped" data-skipped hidden></span>
 	</div>
 	{!landing && <p class="overall-text" data-text>No progress yet.</p>}
+	<ul class="overall-due" data-due-lines hidden></ul>
 	<p class="overall-actions">
 		<a class="overall-continue" data-continue href={first ? href(`/${first.id}/`) : href('/concepts/')}>Start with: {first?.title ?? 'Concepts'}</a>
 		{landing && <a class="overall-map" href={href('/map/')}>Topic map</a>}
@@ -36,6 +39,8 @@ const first = catalog.flatMap((c) => c.lessons)[0];
 	.overall-bar > div { height: 100%; width: 0; background: var(--at-done); transition: width 0.3s; }
 	.overall-skipped { color: var(--sl-color-gray-3); font-size: 0.9rem; }
 	.overall-text { margin: 0.4rem 0 0; color: var(--sl-color-gray-3); font-size: 0.9rem; }
+	.overall-due { margin: 0.5rem 0 0; padding: 0; list-style: none; font-size: 0.9rem; }
+	.overall-due li { margin: 0.2rem 0; }
 	.overall-actions { margin: 0.75rem 0 0; display: flex; flex-wrap: wrap; gap: 0.75rem; }
 	.overall-continue, .overall-map { display: inline-block; padding: 0.45rem 1rem; border-radius: 6px; font-weight: 600; text-decoration: none; }
 	.overall-continue { background: var(--sl-color-accent); color: var(--sl-color-black); }
@@ -43,6 +48,7 @@ const first = catalog.flatMap((c) => c.lessons)[0];
 </style>
 
 <script>
+	import { dueByCourse, dueLine } from '@scripts/due-counts';
 	import * as progress from '@scripts/progress';
 	import { overall, type CatalogCourse } from '@scripts/overview';
 
@@ -55,9 +61,29 @@ const first = catalog.flatMap((c) => c.lessons)[0];
 		const skippedEl = root.querySelector<HTMLElement>('[data-skipped]')!;
 		const text = root.querySelector<HTMLElement>('[data-text]');
 		const cont = root.querySelector<HTMLAnchorElement>('[data-continue]')!;
+		const dueLines = root.querySelector<HTMLElement>('[data-due-lines]')!;
+
+		/** One line per course with items due, each linking to that course's review page. Hidden when none. */
+		function drawDue(rec: progress.ProgressRecord) {
+			const due = dueByCourse(catalog, rec, progress.today());
+			dueLines.hidden = due.length === 0;
+			dueLines.replaceChildren(
+				...due.map((c) => {
+					const li = document.createElement('li');
+					const a = document.createElement('a');
+					a.href = `${base}/${c.area}/review/`;
+					a.dataset.dueLine = c.area;
+					a.textContent = dueLine(c);
+					li.appendChild(a);
+					return li;
+				}),
+			);
+		}
 
 		function draw() {
-			const o = overall(catalog, progress.load());
+			const rec = progress.load();
+			const o = overall(catalog, rec);
+			drawDue(rec);
 			fill.style.width = `${o.percent}%`;
 			bar.setAttribute('aria-valuenow', String(o.percent));
 			pct.textContent = `${o.percent}%`;

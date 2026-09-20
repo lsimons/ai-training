@@ -52,7 +52,8 @@ instrumented (their template half runs in the e2e suite), and
 
 The inline `<script>` blocks in `.astro` components (`Settings.astro`,
 `ProgressOverview.astro`, `OverallProgress.astro`, `CourseGraph.astro`,
-`TopicMap.astro`, `overrides/MarkdownContent.astro`, `pages/[area]/review.astro`)
+`TopicMap.astro`, `overrides/MarkdownContent.astro`, `overrides/Sidebar.astro`,
+`pages/[area]/review.astro`)
 are outside Biome and outside the coverage floor. Only `astro check` and
 the e2e suite see them. When one of them grows logic worth a unit test,
 move that logic into `site/src/scripts/*.ts` and import it, which puts it

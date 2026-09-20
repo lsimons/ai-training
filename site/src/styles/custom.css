@@ -102,6 +102,23 @@
 /* Lesson pages nest under their course in the sidebar. */
 .lesson-link { padding-left: 1.75rem !important; }
 
+/* The due review count next to a course link (overrides/Sidebar.astro adds
+   it on the client; hidden when nothing is due). */
+.sidebar-content .due-count {
+	display: inline-block;
+	margin-inline-start: 0.4rem;
+	padding: 0 0.45em;
+	border-radius: 999px;
+	font-size: var(--sl-text-xs);
+	font-weight: 600;
+	line-height: 1.5;
+	background: var(--sl-color-accent);
+	color: var(--sl-color-black);
+}
+.sidebar-content .due-count[hidden] {
+	display: none;
+}
+
 /* Sidebars. Starlight gives the table of contents half of whatever is left
    after the content column, so on a wide laptop it grows past the left menu.
    Pin it to the same width as the left menu and center the content in the
