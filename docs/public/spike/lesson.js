@@ -122,7 +122,18 @@
   /* progress page */
   const dump = document.querySelector('[data-progress-dump]');
   if (dump) {
-    const draw = () => { dump.textContent = JSON.stringify(store.load(), null, 2); };
+    const overview = document.querySelector('[data-progress-overview]');
+    const catalog = window.aiTrainingCatalog || [];
+    const drawOverview = () => {
+      const r = store.load();
+      overview.innerHTML = catalog.map((course) => `<div class="progress-course"><h3><a href="${course.href}">${course.title}</a></h3>` +
+        course.lessons.map((l) => {
+          const st = r.lessons[l.id]; const state = st ? st.state : 'untouched';
+          const cps = l.checkpoints.map((c) => { const v = r.checkpoints[`${l.id}#${c}`]; return `<span data-state="${v ? v.state : 'none'}" title="${c}: ${v ? v.state : 'not attempted'}"></span>`; }).join('');
+          return `<div class="progress-lesson" data-state="${state}"><span class="dot"></span><a href="${l.href}">${l.title}</a> <span class="cps">${cps}</span></div>`;
+        }).join('') + '</div>').join('');
+    };
+    const draw = () => { dump.textContent = JSON.stringify(store.load(), null, 2); if (overview) drawOverview(); };
     draw(); document.addEventListener('progress-changed', draw);
     document.querySelector('[data-export]').onclick = () => {
       const blob = new Blob([JSON.stringify(store.load(), null, 2)], { type: 'application/json' });
