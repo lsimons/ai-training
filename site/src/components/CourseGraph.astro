@@ -7,8 +7,9 @@
  */
 import { getCollection } from 'astro:content';
 import { areaOf } from '@lib/areas';
+import { dependenciesOf, getCoursePlan, isLive, planLevels } from '@lib/courses';
 import { jsonForScript } from '@lib/json';
-import { checkpointsOf, getLessons, levelsOf } from '@lib/lessons';
+import { checkpointsOf } from '@lib/lessons';
 import { href } from '@lib/url';
 
 interface Props {
@@ -16,18 +17,22 @@ interface Props {
 }
 const { area } = Astro.props;
 const info = areaOf(area);
-const lessons = await getLessons(area);
-const levels = levelsOf(lessons);
+// The plan (site/src/data/courses/<area>.yaml) decides which lessons the graph shows
+// and where. Planned and drafting entries render as "coming" nodes without a link.
+const plan = await getCoursePlan(area);
+const lessons = plan.filter(isLive).map((e) => e.lesson);
+const levels = planLevels(plan, area);
 const maxLevel = Math.max(0, ...levels.values());
-const rows = Array.from({ length: maxLevel + 1 }, (_, i) => lessons.filter((l) => levels.get(l.id) === i));
+const rows = Array.from({ length: maxLevel + 1 }, (_, i) => plan.filter((e) => levels.get(e.id) === i));
+// Only live lessons reach the client: progress never counts a coming lesson.
 const nodes = lessons.map((l) => ({
 	id: l.id,
 	title: l.data.title,
 	mode: l.data.mode,
 	checkpoints: checkpointsOf(l).map((c) => ({ id: c.id, reviewable: c.reviewable, revision: c.revision })),
-	assumes: (l.data.assumes ?? []).filter((a) => a.lesson.startsWith(`${area}/`)).map((a) => a.lesson),
 }));
-const edges = nodes.flatMap((n) => n.assumes.map((from) => ({ from, to: n.id })));
+const edges = plan.flatMap((e) => dependenciesOf(e, area).map((from) => ({ from, to: e.id })));
+const coming = plan.length - lessons.length;
 
 const competencies = (await getCollection('competencies')).find((c) => c.data.area === area)?.data.competencies ?? [];
 const topics = await getCollection('topics');
@@ -62,16 +67,27 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 		{
 			rows.map((row) => (
 				<div class="course-level">
-					{row.map((l) => (
-						<a class="course-node" href={href(`/${l.id}/`)} data-node={l.id} data-state="untouched">
-							<span class="course-node-ring" data-node-ring style="--pct: 0"></span>
-							<span class="course-node-body">
-								<span class="course-node-mode">{l.data.mode}</span>
-								<span class="course-node-title">{l.data.title}</span>
-								<span class="course-node-count" data-node-count></span>
+					{row.map((e) =>
+						isLive(e) ? (
+							<a class="course-node" href={href(`/${e.id}/`)} data-node={e.id} data-state="untouched">
+								<span class="course-node-ring" data-node-ring style="--pct: 0"></span>
+								<span class="course-node-body">
+									<span class="course-node-mode">{e.lesson.data.mode}</span>
+									<span class="course-node-title">{e.lesson.data.title}</span>
+									<span class="course-node-count" data-node-count></span>
+								</span>
+							</a>
+						) : (
+							<span class="course-node" data-node={e.id} data-state="coming" aria-label={`${e.title} (coming)`}>
+								<span class="course-node-ring" style="--pct: 0"></span>
+								<span class="course-node-body">
+									<span class="course-node-mode">coming</span>
+									<span class="course-node-title">{e.title}</span>
+									<span class="course-node-count">{e.status === 'drafting' ? 'being written' : 'planned'}</span>
+								</span>
 							</span>
-						</a>
-					))}
+						)
+					)}
 				</div>
 			))
 		}
@@ -94,6 +110,7 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 			<dt>Counts</dt>
 			<dd>
 				{lessons.length} lesson{lessons.length === 1 ? '' : 's'}, {totalCheckpoints} checkpoint{totalCheckpoints === 1 ? '' : 's'}
+				{coming > 0 && <>, {coming} more coming</>}
 			</dd>
 			<dt>Builds on</dt>
 			<dd>

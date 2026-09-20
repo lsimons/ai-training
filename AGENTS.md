@@ -71,8 +71,11 @@ The layout is what the tree shows. The parts that aren't obvious from it:
   must use `href()` from `site/src/lib/url.ts`, because the rehype plugin
   only sees Markdown.
 - Lessons are `site/src/content/docs/<area>/<lesson>.mdx` with the
-  frontmatter from spec S03; course pages are `<area>/index.mdx`.
-  `docs/agents/writing-a-lesson.md` is the authoring guide.
+  frontmatter from spec S03; course pages are `<area>/index.mdx`. The
+  ordered lesson plan per area, written or not, is
+  `site/src/data/courses/<area>.yaml`, and `mise run courses` checks it
+  against the pages. `docs/agents/writing-a-lesson.md` is the authoring
+  guide.
 - `site/src/styles/lesson.css` is global on purpose: review pages clone
   checkpoint markup out of lesson pages.
 - `site/examples/` holds the runnable fixtures behind `<Predict run=...>`.

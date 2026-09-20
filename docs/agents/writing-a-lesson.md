@@ -36,6 +36,47 @@ import { Choice, MultiChoice, Match, Predict, Order, Sort, Scenario, Repair, Pit
 `assumes` may be empty for a first lesson. `extends-to` hrefs may point at
 pages that don't exist yet, and they render as plain text until they do.
 
+## Course plan
+
+Every lesson, written or not, has an entry in its area's plan file,
+`site/src/data/courses/<area>.yaml`. The course page renders the plan as the
+lesson graph: live entries are the lesson nodes, and planned or drafting
+entries are dimmed "coming" nodes in their planned position. Progress never
+counts a coming lesson. The topic map uses the plan too, and it marks a topic
+with no entry at all as a gap, which is different from "planned, not written".
+
+```yaml
+area: safety
+lessons:
+  - id: safety/agent-risk        # equals the page route once live
+    title: Why agent safety is different
+    covers: safety/agent-risk    # one topic id; a lesson covers one topic
+    serves:                      # objective ids, same as the page frontmatter
+      - safety/judges-agent-risk/names-blast-radius
+    status: live                 # planned | drafting | live
+    minutes: 20                  # target length; keep lessons short
+  - id: safety/verification
+    title: Verifying what an agent tells you
+    covers: safety/verification
+    serves:
+      - safety/verifies-output/checks-claims
+    status: planned
+    issue: 42                    # the lesson's GitHub issue, until live
+    minutes: 15
+    after:                       # lesson ids in this plan it will assume
+      - safety/agent-risk        # (places the node; a live page uses `assumes`)
+```
+
+Entries are in course order. When a lesson goes live, set `status: live`,
+drop `issue`, and make sure `covers` and `serves` match the page frontmatter.
+`after` is only read for a coming lesson. A live lesson takes its place in
+the graph from the `assumes` in its page.
+
+`mise run courses` (part of `mise run ci`) fails when a lesson page is missing
+from its plan or listed with a status other than `live`, when a `live` entry
+has no page or its `covers`/`serves` differ from the page, when a `covers`,
+`serves` or `after` id is unknown, or when two entries share an id.
+
 ## Anatomy
 
 One or more opener paragraphs, then H2 sections. Teaching prose is plain Markdown.
