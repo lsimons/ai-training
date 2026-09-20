@@ -1,0 +1,14 @@
+---
+/**
+ * Starlight `TableOfContents` override: no "On this page" when the only
+ * entry would be the page title ("Overview"). The right column itself stays
+ * (Starlight keeps it whenever `toc` is set), so skimming between pages
+ * doesn't shift the content.
+ */
+import Default from '@astrojs/starlight/components/TableOfContents.astro';
+
+const { toc } = Astro.locals.starlightRoute;
+const onlyTitle = !toc || (toc.items.length === 1 && toc.items[0].children.length === 0);
+---
+
+{!onlyTitle && <Default><slot /></Default>}
