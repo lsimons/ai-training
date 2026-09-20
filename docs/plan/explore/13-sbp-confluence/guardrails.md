@@ -158,7 +158,7 @@ content credentials (C2PA) for generated images.
 - The charter is a template. The lesson should have the learner tailor it,
   not memorize it: which rules would their team drop, tighten, or add?
 - A real organization should have legal review of its own version. Say so.
-- Sample "Watch Out" narrative for L1: a team lets the agent run a
+- Sample pitfall for L1: a team lets the agent run a
   migration with a service account that has production write access; the
   migration succeeds and deletes a column nobody meant to drop. Ask which
   three rules would have prevented it.
