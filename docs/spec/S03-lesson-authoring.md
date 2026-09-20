@@ -17,7 +17,10 @@ example that runs; and prompt blocks may be marked `illustrative` in
 release 1 (see "Examples"). Checkpoints name the concept ids they
 exercise (`concepts`, required) and an optional standalone `context`, and
 the build writes every checkpoint to one `checkpoints.json` that CI checks
-(2026-09-20, see "Checkpoints" and "Checkpoint export").
+(2026-09-20, see "Checkpoints" and "Checkpoint export"). A `predict` is a
+checkpoint only when predicting the output demonstrates a served objective;
+a `Predict` without `objective` is an ungraded example whose output CI
+still asserts (2026-09-20, see "Examples").
 
 ## Introduction
 
@@ -104,8 +107,22 @@ pitfall and the exercise.
   in CI. An example that can't run (an agent transcript, a screenshot) is
   marked that way in the page. Until the example runner exists the rule still
   holds: an example that can't run says so.
-- **Prefer `predict`** for any example that runs. Use `choice` only where
-  nothing runs.
+- **An example that runs has its output asserted in CI, and only some
+  examples are checkpoints** (decided 2026-09-20). The `Predict` component does
+  both jobs. With an `objective` it is a `predict` checkpoint: use it when
+  predicting the output demonstrates a served objective, as in a lesson
+  that teaches the code being run. Without an `objective` it is an
+  ungraded example: the page shows the command and its output, CI runs
+  the fixture and asserts the output, and the block isn't a checkpoint
+  anywhere: it has no progress record, review item, sidebar count, or
+  export entry. Use the ungraded form for a command the learner runs to gather
+  evidence when guessing its output would grade something the lesson
+  doesn't serve, such as reading Python in a lesson about running an
+  agent. The checkpoints of such a lesson test the served behaviors
+  instead (a `scenario` on a permissions prompt, a `sort` on what goes in
+  the brief). Before this date the rule read "prefer `predict` for any
+  example that runs", which turned every shell command in a tutorial into
+  a graded code-reading question. Use `choice` only where nothing runs.
 - **Fixtures are Python.** Every runnable example under `site/examples/` is
   a `.py` script run with `python3`, with no bash fixtures (decided
   2026-09-20). One language and one interpreter keep the runner simple and
