@@ -82,7 +82,8 @@ Here are the action items from the meeting:
 4. **Dana** will book the accessibility check with the agency by 8 October.
 </Response>
 
-This is a good answer for a person. For the tracker it is four paragraphs
+This response is illustrative, like every one on this page, and yours
+reads a little differently. It is a good answer for a person. For the tracker it is four paragraphs
 that someone retypes. While retyping they decide what the priority of item
 2 is, and they decide which year "17 October" is in. Each decision is a
 place for a mistake, and a second person retyping the same notes would
@@ -145,8 +146,9 @@ Now check your own answer. Copy it out of the chat tool into a file named
 `mine.txt` in the same directory and run `python3 check_items.py mine.txt`.
 The checker skips a line that starts with three backticks, so you can
 leave a code fence around the answer in place. If an item fails, the line tells you which field
-is missing or which value is outside the allowed set. That failure is
-about your prompt, so change the prompt, run it again in a fresh chat, and
+is missing or which value is outside the allowed set. The checker also
+exits with status 1 on a failing item, so a script can notice the failure
+without reading the report. That failure is about your prompt, so change the prompt, run it again in a fresh chat, and
 check again.
 
 ## Named keys and allowed values
@@ -208,7 +210,7 @@ python3 check_items.py sample/items.json
 
 Save your own JSON answer as `mine.json` and run the checker on it too.
 Both rounds print the same report, because the checker looks at the
-fields and the values and not at the packaging. Naming the fields is what
+fields and the values, whatever the packaging. Naming the fields is what
 made the two answers comparable, and it is also what makes a missing
 value visible: an item without a due date fails a check instead of
 disappearing into a paragraph.
@@ -221,20 +223,19 @@ is, in enough detail that a program can check it (@DLAI-1).
 
 ## Check the first result
 
-A usable format request names the output type (a JSON array, one line per
-item, a table), the fields of each item, and the allowed values of every
+A usable format request names the output type (a JSON array, or one line
+per item), the fields of each item, and the allowed values of every
 field that has a fixed set of them, including how dates and numbers are
 written. Leave one out and the model fills the gap with its own default,
-and the default changes from run to
-run.
+and that default can change from one run to the next.
 
 <Pitfall title="Return JSON">
-A learner types "Return the action items as JSON" and gets a JSON object
-with an `action_items` key holding four objects with `assignee`, `action`,
-`deadline` and `priority` keys, where the deadline is "Friday 3 October"
-and the priority is "urgent". The import rejects every item. They run the
-same prompt again and get an array of objects with `who`, `what` and
-`when` keys. Both answers are valid JSON, and neither matches the other or
+A learner types "Return the action items as JSON" and gets an array of
+four objects with `assignee`, `action`, `deadline` and `priority` keys,
+where the deadline is "Friday 3 October" and the priority is "urgent".
+The import rejects every item. They run the same prompt again and get a
+JSON object with an `action_items` key holding objects with `who`, `what`
+and `when` keys. Both answers are valid JSON, and neither matches the other or
 the tracker. Rule: name the keys and the allowed values, because "return
 JSON" fixes the packaging and leaves the contents to the model.
 </Pitfall>
@@ -267,8 +268,8 @@ format that looks right on the screen can still fail on the one detail the
 consumer is strict about, such as a date format or an empty field, and
 finding that on item 1 costs one prompt change. Finding it after 200 items
 costs 200 corrections. The checker in this lesson is a stand-in for that
-consumer. At work the consumer is the import button, the spreadsheet, or
-the script, and you use that instead.
+consumer. At work the consumer is the import button or the script that
+reads the file, and you use that instead.
 
 <Choice id="which-request-imports" objective="concepts/prompts-reliably/asks-for-structure"
   concepts={['structured-output']}
@@ -301,7 +302,7 @@ The first result looks right. What do you do next?
 
 </Choice>
 
-<Exercise stretch="Add a fifth field to the request, such as a status that is one of open, blocked or done, then extend the checker's FIELDS list so it checks that field too.">
+<Exercise stretch="Add a fifth field to the request, such as a status that is one of open, blocked or done, then extend the checker's FIELDS list and add an allowed set for it next to PRIORITIES, so it checks the values too.">
 
 Take the checker and the sample notes from this lesson, and write your
 own format request from scratch without looking at the ones on this page.
@@ -329,10 +330,10 @@ answer have caught it?
    each item, and the allowed values of every field that has a fixed set
    of them, including how dates and numbers are written.
 3. "Return JSON" fixes the packaging and leaves the keys and values to the
-   model, which chooses differently on each run. Named keys make runs
+   model, which may choose differently on each run. Named keys make runs
    comparable and make a missing value visible.
-4. Check the first result against its consumer, the import, the
-   spreadsheet or the script, before you produce the rest. Fixing the
+4. Check the first result against its consumer, the import or the script
+   that reads the file, before you produce the rest. Fixing the
    prompt after item 1 costs one change.
 
 </Recap>
