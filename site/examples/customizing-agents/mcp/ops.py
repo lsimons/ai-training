@@ -20,7 +20,7 @@ TOOLS = [
     ("docs_update_page", "write", "Replace the body of a page by id."),
     ("docs_add_comment", "write", "Add a comment to a page by id."),
     ("tasks_search", "read", "Search issues by text or filter. Returns issue keys."),
-    ("tasks_get", "read", "Fetch one issue by key, plus its fields and comments."),
+    ("tasks_get", "read", "Fetch one issue by key and return its fields and comments."),
     ("tasks_list_transitions", "read", "List the status transitions allowed for an issue key."),
     ("tasks_create", "write", "Create an issue in a project. Requires a project key and a summary."),
     ("tasks_update", "write", "Change fields on an issue by key."),
@@ -75,4 +75,6 @@ STEPS = {
 }
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2 or sys.argv[1] not in STEPS:
+        sys.exit("usage: python3 ops.py <step>   step is one of: %s" % ", ".join(sorted(STEPS)))
     STEPS[sys.argv[1]]()
