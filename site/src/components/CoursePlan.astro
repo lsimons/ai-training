@@ -20,13 +20,13 @@ const competencies = (await getCollection('competencies')).flatMap((c) => c.data
 
 <details class="course-plan not-content" data-course-plan={area}>
 	<summary>{planSummary(plan)}</summary>
-	<table>
+	<table aria-label={planSummary(plan)}>
 		<thead>
 			<tr>
 				<th scope="col">#</th>
 				<th scope="col">Lesson</th>
 				<th scope="col">Status</th>
-				<th scope="col">Min</th>
+				<th scope="col">Minutes</th>
 				<th scope="col">Covers</th>
 				<th scope="col">Serves</th>
 				<th scope="col">After</th>

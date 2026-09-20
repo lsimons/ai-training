@@ -1,6 +1,6 @@
 /**
  * Renders the page-level components that read the content collections
- * (CourseGraph, TopicMap, Settings, OverallProgress) against the fixture lessons in
+ * (CourseGraph, CoursePlan, TopicMap, Settings, OverallProgress) against the fixture lessons in
  * tests/lib/content.ts. What the client scripts draw on top is covered by
  * the e2e suite; these tests check the server-rendered frame the scripts
  * bind to.
