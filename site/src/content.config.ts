@@ -11,6 +11,12 @@ const lessonFields = z.object({
 	serves: z.array(z.string()).optional(),
 	assumes: z.array(z.object({ objective: z.string(), lesson: z.string(), section: z.string() })).optional(),
 	'extends-to': z.array(z.object({ label: z.string(), href: z.string() })).optional(),
+	/**
+	 * The date by which the page's sources must be checked again, for a lesson
+	 * whose facts move (a law, a product). Shown as a review line at the top of
+	 * the lesson together with Starlight's `lastUpdated` date.
+	 */
+	'review-by': z.date().optional(),
 });
 
 const conceptSchema = z.object({ id: z.string(), name: z.string(), definition: z.string() });
