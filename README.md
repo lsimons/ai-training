@@ -45,7 +45,7 @@ mise run audit           # zizmor audit of workflows + dependabot config
 mise run ci-watch        # watch GitHub Actions for the current branch
 ```
 
-`mise tasks` lists them all. Content lives in `site/src/content/docs/`; static
+`mise tasks` lists them all. Content is in `site/src/content/docs/`; static
 assets and slide decks in `site/public/`.
 
 ## Project structure

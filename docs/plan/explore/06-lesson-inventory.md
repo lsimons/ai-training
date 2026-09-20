@@ -41,13 +41,13 @@ exercises and build lessons 12-16 h.
 
 ### Part 3: deep dives
 
-| #   | File                          | Summary                                                                        | Length     | Areas    | Audience | Interactive / exercise                                                                       |
-| --- | ----------------------------- | ------------------------------------------------------------------------------ | ---------- | -------- | -------- | -------------------------------------------------------------------------------------------- |
-| 15  | `15-agents-md.md`             | AGENTS.md contents, monorepo hierarchies, comparison, full example             | 2.6k, 15 m | 5, 4     | Engineer | `agents-md-builder` (genuine authoring tool, best widget to carry over); **try-it exercise** |
-| 16  | `16-mcp-deep-dive.md`         | MCP architecture, MCP vs CLI, security failure modes, server decisions         | 3.2k, 20 m | 5, 6, 2  | Engineer | `mcp-deep-viz` with token/cost comparator; decision tree                                     |
-| 17  | `17-agent-skills.md`          | Skills vs tools, spec, progressive disclosure, writing good skills             | 3.3k, 20 m | **5**, 6 | Engineer | `skill-loading-timeline`; embedded example skills                                            |
-| 18  | `18-orchestrators.md`         | Code- vs model-driven orchestration, patterns, SDK vs LangGraph, anti-patterns | 5.1k, 30 m | 6, 5     | Engineer | `orch-playground`; longest lesson                                                            |
-| 19  | `19-where-to-go-from-here.md` | Recap, four learning paths, resources, project checklist                       | 4.0k, 20 m | 3, 6     | Both     | `learning-path` two-question quiz; the only quiz-like element in the site                    |
+| #   | File                          | Summary                                                                        | Length     | Areas    | Audience | Interactive / exercise                                                                    |
+| --- | ----------------------------- | ------------------------------------------------------------------------------ | ---------- | -------- | -------- | ----------------------------------------------------------------------------------------- |
+| 15  | `15-agents-md.md`             | AGENTS.md contents, monorepo hierarchies, comparison, full example             | 2.6k, 15 m | 5, 4     | Engineer | `agents-md-builder` (real authoring tool, best widget to carry over); **try-it exercise** |
+| 16  | `16-mcp-deep-dive.md`         | MCP architecture, MCP vs CLI, security failure modes, server decisions         | 3.2k, 20 m | 5, 6, 2  | Engineer | `mcp-deep-viz` with token/cost comparator; decision tree                                  |
+| 17  | `17-agent-skills.md`          | Skills vs tools, spec, progressive disclosure, writing good skills             | 3.3k, 20 m | **5**, 6 | Engineer | `skill-loading-timeline`; embedded example skills                                         |
+| 18  | `18-orchestrators.md`         | Code- vs model-driven orchestration, patterns, SDK vs LangGraph, anti-patterns | 5.1k, 30 m | 6, 5     | Engineer | `orch-playground`; longest lesson                                                         |
+| 19  | `19-where-to-go-from-here.md` | Recap, four learning paths, resources, project checklist                       | 4.0k, 20 m | 3, 6     | Both     | `learning-path` two-question quiz; the only quiz-like element in the site                 |
 
 ### Observations for integration
 
@@ -77,7 +77,7 @@ Single file: `.claude/skills/teach/SKILL.md`. Invoked as
 - Progress in a `teach-progress.md` in Claude's auto-memory directory: lesson
   table (read / quiz / score / weak spots), a spaced-recall review queue,
   learner notes. Written after every quiz.
-- Lesson list discovered dynamically from frontmatter; never hardcoded.
+- Lesson list read from frontmatter at run time; never hardcoded.
 - Boots the dev server if down, polls until 200, opens the lesson URL, leaves
   the server running.
 - One recall question from the review queue before each new lesson.
@@ -92,7 +92,7 @@ Single file: `.claude/skills/teach/SKILL.md`. Invoked as
 - Terse tone, no praise inflation, fast-forward for experts, respect
   read-without-quiz.
 
-Transfers directly to ai-training tutor mode: dynamic discovery, hint ladder,
+Transfers directly to ai-training tutor mode: frontmatter discovery, hint ladder,
 never-reveal rule, artifact-referencing question, H2 splitting. Progress
 coupling to auto-memory is orthogonal to the site's local-storage model and
 could complement it.
