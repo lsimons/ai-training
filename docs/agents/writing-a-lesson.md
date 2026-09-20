@@ -267,6 +267,41 @@ YAML, not on the lesson.
 Widgets are their own components under `site/src/components/widgets/` and
 are imported by name. They teach and never grade.
 
+## Citations and terms
+
+Both are remark plugins in `site/plugins/`, wired in `site/astro.config.mjs`.
+Neither needs an import in the page.
+
+**Citations.** Write `(@key)` in prose, where `key` is an entry in
+`site/src/data/bibliography.yaml` (`AEC-02`, `DLAI-11`, `Brilliant VER`,
+`Learn Prompting`). It renders as a numbered reference, `[1]`, `[2]`, in
+order of first appearance, and the page gets a `## References` section
+appended after the recap with one entry per cited key. An unknown key
+fails the build with the file name and the key. Cite the way S03 asks:
+concept definitions, recaps, and behaviors cite papers and vendor
+documentation by key, never as a bare inline URL.
+
+```mdx
+The model never runs anything; your loop does (@AEC-13).
+```
+
+A bibliography entry has `type` (`book`, `course`, `reference` or `video`,
+per S01), `title`, `container`, `author`, `license` and `url`. `url` is a
+public URL only where the licensing rules in `AGENTS.md` allow linking the
+source; otherwise `null`. Add a new entry to the YAML and to the source
+table in S02 together.
+
+**Terms.** There is no syntax. In a lesson, the first mention of a concept
+from one of the topics in `covers` is marked automatically: it links to
+`/glossary/#<concept-id>` and carries the glossary definition as its hover
+text. Matching is on the concept `name` from the topic YAML, case-insensitive,
+whole phrase, with an optional plural `s` or `es`, so `tokens` matches the
+concept `Token`. Headings, links and code spans are never marked, and later
+mentions stay plain text. If the first mention is in bold, it stays bold and
+becomes a term as well. To make a concept a term, use its exact name at
+its first mention. To keep a word plain, don't `cover` the topic it belongs
+to.
+
 ## Rules that bite
 
 - **Voice.** The "Voice" list in `AGENTS.md` is the house's answer to
