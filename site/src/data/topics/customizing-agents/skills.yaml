@@ -44,6 +44,15 @@ concepts:
       deterministic. It is tested by watching an agent use it on a real task
       and revising where it hesitated or went wrong, the same iteration
       loop as prompting.
+  - id: plugins
+    name: Plugins
+    definition: >-
+      The unit for distributing customizations together: a plugin bundles
+      skills, hooks, subagents and server connections into one installable
+      package with a version. A marketplace is a catalog of plugins that a
+      team or vendor publishes so others can install from it by name.
+      Installing a plugin runs its hooks and grants its servers access, so
+      treat it like any other dependency and read what it contains.
 links:
   prerequisites: [customizing-agents/instructions]
   related: []

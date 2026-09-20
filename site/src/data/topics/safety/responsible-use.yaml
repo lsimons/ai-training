@@ -10,11 +10,13 @@ concepts:
   - id: data-privacy
     name: Data privacy
     definition: >-
-      Personal data pasted into a prompt leaves your control: it travels to a
-      provider, may be logged, and may be used to improve a service depending
-      on the terms. Names, contact details, health or financial information
-      and anything covered by privacy law should be removed or replaced before
-      prompting unless the tool is approved for that data.
+      Personal data or source code pasted into a prompt leaves your control.
+      Where it goes is set by the tool's terms: how long the provider retains
+      it, whether it may train on it, where it is stored and where it is
+      processed, and which subprocessors it passes through. A tool built on a
+      gateway built on a model vendor has three such policies. Remove or
+      replace names, contact details, health or financial information and
+      anything covered by privacy law unless the tool is approved for it.
   - id: confidentiality
     name: Confidentiality
     definition: >-

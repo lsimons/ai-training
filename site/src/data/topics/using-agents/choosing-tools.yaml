@@ -40,8 +40,10 @@ concepts:
       The steps that stay with a person on purpose: decisions with legal or
       ethical weight, judgments about people, anything irreversible or
       costly, and the final accountability for a result. Keeping a step human
-      is a design choice, not a limitation, and naming those steps early
-      prevents them from being automated by default as tools improve.
+      is a design choice, and naming those steps early prevents them from
+      being automated by default as tools improve. Keeping a human path also
+      means the process keeps working when the tool is down, and AI services
+      are down more often than the systems they are wired into.
   - id: reasoning-across-tool-levels
     name: Reasoning across tool levels
     definition: >-

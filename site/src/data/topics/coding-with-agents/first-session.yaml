@@ -5,8 +5,9 @@ definition: >-
   A coding agent works inside your repository with your tools. This topic
   gets a first session going: installing and configuring the agent, letting
   it read and explain the codebase, making a first small change, understanding
-  what it asks permission for, and managing the session so its context stays
-  useful.
+  what it asks permission for, where the sandbox around it ends, how to keep
+  API keys out of its reach and out of the repository, and managing the
+  session so its context stays useful.
 concepts:
   - id: install-and-setup
     name: Install and setup
@@ -41,6 +42,33 @@ concepts:
       everything for convenience turns a mistake in a command into a mistake
       in your repository or system, so widen access per project and per
       task.
+  - id: sandbox
+    name: Sandbox
+    definition: >-
+      An isolated environment the agent runs in so that a wrong command
+      damages only what is inside it: a container, a virtual machine, a
+      separate user account or a copy of the repository. The sandbox limits
+      which files, network destinations and credentials the agent can reach.
+      It is a control you set up before the session, and a coding agent
+      with no sandbox has exactly the access you have.
+  - id: trust-boundary
+    name: Trust boundary
+    definition: >-
+      The line between what the agent may decide on its own and what is
+      enforced from outside it. Instructions in a prompt are requests the
+      model can ignore or be tricked out of, so a control that matters is
+      enforced by the harness, the operating system or the network. Knowing
+      what the agent sends to its provider, from file contents to command
+      output, is part of drawing that line.
+  - id: secrets-hygiene
+    name: Secrets hygiene
+    definition: >-
+      Handling the API keys and tokens an agent needs so a leak stays small.
+      Use a personal key, never a shared one, and keep it in a password
+      manager or an environment variable. A key never goes into a file the
+      agent can commit. If a key may have been exposed, revoke it first and
+      investigate afterwards, because rotation is cheap and a leaked key is
+      spent by others fast.
   - id: session-and-context
     name: Session and context
     definition: >-
