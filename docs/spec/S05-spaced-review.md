@@ -93,7 +93,7 @@ A header progress bar counts items in this session.
 
 ## Storage
 
-The schedule lives in the progress record's `reviews` map, keyed by
+The schedule is stored in the progress record's `reviews` map, keyed by
 checkpoint id, with the shape shown in the progress record spec.
 
 | Field     | Meaning                                                                                |

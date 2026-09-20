@@ -12,7 +12,7 @@ same name.
 *AI Training* is an open training suite for getting started with AI,
 published as a static site. It has two groups of material: **Foundations**,
 written at one level for every knowledge worker, and **Engineering**, for
-software engineers who have finished Foundations. Learner state lives in the
+software engineers who have finished Foundations. Learner state is stored in the
 browser only; there is no backend.
 
 This spec is the project dictionary. Every other spec, every page, every

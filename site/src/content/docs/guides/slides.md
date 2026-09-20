@@ -10,7 +10,7 @@ to two static outputs that live in `site/public/presentations/`:
   (`example.html`), themed to match the site.
 - **PDF** - a printable version (`example.pdf`) via Quarto's Beamer output.
 
-A worked example lives at
+A worked example is at
 [`site/public/presentations/example.qmd`](/presentations/example.qmd). Open the
 rendered [HTML slides](/presentations/example.html) or the
 [PDF](/presentations/example.pdf).
@@ -33,7 +33,7 @@ keeps the deployed site a pure static build (CI doesn't run Quarto). Re-run
 
 ## Theme
 
-The reveal.js theme lives in `site/public/presentations/reveal.scss` and maps
+The reveal.js theme is defined in `site/public/presentations/reveal.scss` and maps
 the deck's fonts and accent color onto the site's LSD Warm palette. Adjust the
 SCSS variables there to restyle the HTML slides.
 

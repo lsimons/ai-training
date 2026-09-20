@@ -19,7 +19,7 @@ Tools are pinned in `.mise.toml`; run `mise install` once. Then:
 - `mise run lint` - run the prek hooks over every file, plus `actionlint`.
 - `mise run ci` - the full gate: install, lint, check, build. CI runs the same.
 
-Content lives in `site/src/content/docs/`; static assets in `site/public/`.
+Content is in `site/src/content/docs/`; static assets in `site/public/`.
 
 ## Slide decks
 
