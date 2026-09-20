@@ -28,7 +28,8 @@
     {
       "languageId": "markdown,mdx",
       "ignoreRegExpList": [
-        "/`[^`\\n]+`/g"
+        "/`[^`\\n]+`/g",
+        "/^\\s*section: [a-z0-9-]+$/gm"
       ]
     }
   ]
