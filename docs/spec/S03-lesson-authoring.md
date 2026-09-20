@@ -162,5 +162,5 @@ pitfall and the exercise.
 1. Whether explanation-mode lessons may skip the exercise when the topic
    has nothing to do by hand. Leaning: no; a reflection-style exercise is
    still an exercise.
-2. Where the bibliography file lives and in what format (BibTeX or YAML).
+2. Where the bibliography file is stored and in what format (BibTeX or YAML).
    Decide when building the citation plugin.

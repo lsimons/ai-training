@@ -10,7 +10,7 @@ is for software engineers. The plan is in `docs/plan/README.md`.
 
 ## Quick reference
 
-Every repo task lives in `.mise.toml`; `mise tasks` lists them. Run `mise trust`
+Every repo task is defined in `.mise.toml`; `mise tasks` lists them. Run `mise trust`
 and `mise install` once per clone.
 
 | Task                              | What it does                                                         |
@@ -131,7 +131,7 @@ verbatim and must include the base path.
 - Interactive widgets in lesson pages must sit in `class="not-content"`
   containers. Never emit a literal `</script>` or `</pre>` inside widget JS
   strings; it breaks mdformat and the renderer.
-- Learner progress lives in browser local storage only. No backend, no
+- Learner progress is stored in browser local storage only. No backend, no
   telemetry.
 
 **Quality:**
@@ -185,7 +185,7 @@ verbatim and must include the base path.
   and why, on the same line.
 - Never weaken a control to make a check pass: no unpinned actions, no
   dropped `prek.toml` hooks, no `.lychee.toml` exclusions for URLs that are
-  genuinely broken.
+  really broken.
 
 **Supply chain:**
 
