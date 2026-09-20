@@ -274,8 +274,7 @@ lessons:
     serves:
       - safety/judges-agent-risk/sets-oversight
       - safety/handles-data-safely/discloses-ai-use
-    status: planned
-    issue: 19
+    status: live
     minutes: 15
     after:
       - safety/agent-risk
