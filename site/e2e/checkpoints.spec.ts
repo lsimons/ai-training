@@ -172,19 +172,22 @@ test('repair: reveal the model answer, then self-grade', async ({ page }) => {
 	await expect(cp).toHaveAttribute('data-state', 'passed');
 });
 
-test('scenario and honor-system predict in the safety lesson', async ({ page }) => {
+test('scenario: a wrong decision shows its consequence, the right one passes', async ({ page }) => {
 	await page.goto('safety/agent-risk/');
 	const scenario = page.locator('#blast-radius-of-a-tidy-up');
 	await scenario.locator('label').first().click();
 	await scenario.locator('.cp-check').click();
 	await expect(scenario.locator('.cp-feedback')).not.toBeEmpty();
 
-	const honor = page.locator('#predict-the-planted-instruction');
-	await expect(honor).toHaveAttribute('data-reviewable', 'false');
-	await honor.locator('textarea').fill('it will write the file');
-	await honor.locator('input[value=pass]').check();
-	await honor.locator('.cp-check').click();
-	await expect(honor.locator('.cp-feedback')).toHaveText('Recorded as a pass.');
+	const injection = page.locator('#before-the-agent-reads-the-page');
+	await expect(injection).toHaveAttribute('data-reviewable', 'true');
+	await injection.locator('label:not([data-correct])').first().click();
+	await injection.locator('.cp-check').click();
+	await expect(injection.locator('.cp-feedback')).toHaveText(/^One of the pages has a line in white text/);
+	await injection.locator('label[data-correct]').click();
+	await injection.locator('.cp-check').click();
+	await expect(injection.locator('.cp-feedback')).toHaveText(/^Correct\. The agent summarizes the pages/);
+	await expect(injection).toHaveAttribute('data-state', 'passed');
 });
 
 test('the coding lesson marks which examples CI verifies', async ({ page }) => {

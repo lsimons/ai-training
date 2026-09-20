@@ -144,8 +144,8 @@ recipe page counts as an instruction. It's just text on a page."
   "Prompt injection: when the data gives orders" in this lesson, with a
   URL.
 - Must not: re-explain the one-stream-of-text idea at length; predict
-  for the learner what the agent in `predict-the-planted-instruction`
-  does or name the worst it could do with its two permissions.
+  for the learner which row of `exit-path-by-permission` is the way out,
+  or name the correct decision in `before-the-agent-reads-the-page`.
 
 **14.** *Verb.* "critique this"
 
