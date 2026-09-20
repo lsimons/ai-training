@@ -1,0 +1,351 @@
+---
+title: Reviewing what the agent pulled in
+description: A coding agent adds packages fast and with confidence. Review each one in proportion to its risk, with the OpenSSF Scorecard checks as the security step and a written skip list.
+mode: explanation
+covers:
+  - coding-with-agents/quality
+serves:
+  - coding-with-agents/verifies-agent-work/screens-for-security
+assumes:
+  - objective: coding-with-agents/ships-with-agent/runs-a-session
+    lesson: coding-with-agents/first-session
+    section: review-the-diff
+  - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
+extends-to:
+  - label: Verifying agent work
+    href: /coding-with-agents/verification/
+---
+
+import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+
+An agent spent an afternoon on a feature and the pull request is green.
+Somewhere in the diff the lockfile grew by a few hundred lines, because
+the agent added a package for date formatting, one for routing, and two it
+never mentioned, which arrived as dependencies of the first two. The tests
+pass. In this lesson we decide what to do with those four packages. We
+work out which questions each one gets and how much time it deserves, and
+we end with a written verdict that the next person can reuse.
+
+The method here follows the public review guideline for external code
+that the Fuchsia project publishes, extended with governance, security
+and license questions. The Fuchsia guideline covers a large codebase with
+many reviewers. Yours covers one pull request, and the agent that wrote it
+adds another package tomorrow if you let it.
+
+## The lockfile knows what changed
+
+Start from the lockfile, not from the agent's summary. The summary says
+"added `date-fmt` for the due dates". The lockfile says what was
+installed. In npm, `package-lock.json` describes the exact tree that was
+installed so that the next install produces the same tree, and its root
+entry lists the direct dependencies. Everything else under `node_modules/`
+is transitive: a package your code never imports, pulled in by one that
+it does.
+
+The fixture for this lesson is a pair of lockfiles under
+`site/examples/coding-with-agents/dependency-review/fixture/` with
+invented package names, so nothing here is a claim about a real project.
+`classify.py` diffs them and labels every change with one of three kinds.
+
+<Predict id="predict-classify" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  title="Predict the classification" hint="Which package is in the root entry's dependencies and which is not? What happened to tiny-router?"
+  answer={`date-fmt 2.4.0: new direct
+iso-week 1.0.3: new transitive
+tiny-router 4.19.2 -> 4.21.2: version bump`} run="coding-with-agents/dependency-review/classify.py">
+The root entry of `package-lock.after.json` lists `date-fmt` and
+`tiny-router`. `iso-week` appears only as a dependency of `date-fmt`, and
+`tiny-router` moved from 4.19.2 to 4.21.2. What does the script print? Type
+all three lines in the format `name version: kind`.
+
+```python
+for name, version, kind in classify(before, after):
+    print("%s %s: %s" % (name, version, kind))
+```
+
+</Predict>
+
+Each kind gets a different review. A new direct dependency is an
+architecture decision, while somebody upstream decided the transitive one
+for you, and a version bump changes code you already accepted once.
+
+## Principles that keep the review affordable
+
+A full review of every package would take longer than writing the feature.
+The guideline this method follows starts with principles that decide where
+the time goes.
+
+**Effort in proportion to risk.** Find the biggest risks the external code
+brings in, and spend the review there. Compare with the risk of writing the
+same thing yourselves. A date formatter on an internal dashboard and a
+token parser on the login path are different reviews, even at the same
+line count.
+
+**Count the future cost.** A convenient package today is an upgrade,
+a security advisory, and a maintainer question next year. A dependency that
+solves a general class of problems well repays its upkeep every time you
+meet another problem in that class. One that saves you eleven lines does
+not.
+
+**Be wary of surprises.** Code or an API that confuses you at review time
+confuses every reader after you. Confusion is a cost you pay many times.
+
+**No default outcome.** The same principles govern "use the library" and
+"write it ourselves". Writing it yourself is also a decision that needs the
+same questions, because your own code needs tests and a maintainer too.
+
+**Give back, and share.** Report real findings upstream for the parts you
+use. Write the assessment down where the next team can find it, so that
+nobody reviews the same package twice.
+
+## Six dimensions, and which of them apply
+
+The review has six dimensions. A change of each kind gets a different
+subset.
+
+| Change                    | Architecture | Quality | Governance and support | Security | Code | License            |
+| ------------------------- | ------------ | ------- | ---------------------- | -------- | ---- | ------------------ |
+| New direct dependency     | yes          | yes     | yes                    | yes      | yes  | yes                |
+| New transitive dependency | no           | yes     | yes                    | yes      | yes  | yes                |
+| Version bump              | no           | no      | no                     | yes      | yes  | if license changed |
+
+Architecture applies only to a direct dependency, because that's the one
+you chose. You can't answer whether `iso-week` fits your architecture, and
+the question you can answer is whether you accept `date-fmt` with
+`iso-week` attached.
+A version bump skips the questions that were answered when the package
+came in and keeps the two that a new release can change: what the new
+code does, and whether it has a known vulnerability.
+
+<Choice id="bump-dimensions" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  title="Which dimensions for a bump?" hint="Which of the six can change between two releases of the same package?"
+  options={[
+    { text: 'All six. A new version is a new package.', why: 'The project, its maintainers and its place in your architecture did not change between 4.19.2 and 4.21.2. Reviewing them again is repeated work.' },
+    { text: 'Security and code, plus license if it changed.', correct: true },
+    { text: 'None. The agent bumped it to fix a vulnerability, so it is an improvement.', why: 'A fix is the reason for the bump, and the reason is not the review. Read what else changed between the two versions.' },
+    { text: 'Architecture only, because the version constraint in the manifest is an architecture decision.', why: 'The constraint did not change. The installed code did.' },
+  ]}>
+The agent bumped `tiny-router` from 4.19.2 to 4.21.2 while it was working
+on something else. Which dimensions do you review?
+</Choice>
+
+## The questions, per dimension
+
+Each dimension is a short list of questions. Write the answers down, in
+one line each, in the pull request or in an assessment file in the
+repository.
+
+**Architecture.** Check whether the codebase already has something
+similar. Count the sub-dependencies it brings and their size, and compare
+the cost of reviewing and updating them with the benefit. The API has to
+make sense where you call it (from async code, say) on the platform you
+run. Its documentation, or the lack of it, tells you about
+undocumented invariants and unsafe code.
+
+**Quality.** If the maintainer walked away, would we fork it and maintain
+it ourselves? Are there real tests, and do they pass in CI? Duplicated code
+and needless complexity are the two warning signs to look for.
+
+**Governance and support.** More than one maintainer, or one? Authors with a
+track record? Many packages that depend on it? Recent activity? A
+foundation behind it, or one vendor? A project has **open
+governance** when it is clear how its decisions are made. A project can be
+led by one company and still have open governance, if the decision process
+is written down and followed. A project can have many contributors and no
+open governance, if decisions happen in a room nobody can see into.
+
+<Choice id="open-governance" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  title="Which project has open governance?" hint="The definition is about how decisions are made, and whether that is visible."
+  options={[
+    { text: 'A project with two hundred contributors, where the founder merges what they like and there is no written process.', why: 'Contributor count is a support signal. Governance is about how decisions are made, and here that is invisible.' },
+    { text: 'A project led by one company, with a published process for proposals, a named group that decides, and a public record of each decision.', correct: true },
+    { text: 'A project where every contributor signs their copyright over to the lead company.', why: 'A copyright assignment is a license question. It says nothing about how the project decides what to merge.' },
+    { text: 'A project under a foundation, which is enough on its own.', why: 'Foundation backing is a support signal and often comes with governance rules, but the definition asks whether the decision process is clear, and a badge does not answer that.' },
+  ]}>
+Which of these projects has open governance, as defined above?
+</Choice>
+
+**Security.** Run the OpenSSF Scorecard checks, covered in the next
+section. Ask the human questions too: does the package run code at install
+or build time, and does it need network access to do its job? In the Rust
+ecosystem, for example, a `build.rs` file is compiled and run before the
+package builds. That's a normal place for legitimate work and a place a
+reviewer reads.
+
+**Code.** Find the risks. Code that needs a specialist to read
+(concurrency, cryptography, network protocols, unsafe blocks), code on your
+critical path, and code that's too complicated to follow all get read.
+The rest gets skipped, and the skip list is below.
+
+**License.** What does it require: attribution, reproducing a notice file,
+sharing changes under the same terms? Does that fit your project's policy?
+A version bump gets this question only if the license changed.
+
+<Sort id="question-to-dimension" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  title="Which dimension asks this?" hint="Each question comes from exactly one of the six lists above."
+  buckets={['Architecture', 'Quality', 'Governance and support', 'Security', 'Code', 'License']}
+  items={[
+    { text: 'Do we already have a library in the codebase that does this?', bucket: 0 },
+    { text: 'Would we fork and maintain it if the maintainer walked away?', bucket: 1 },
+    { text: 'Is it clear how the project decides what gets merged?', bucket: 2 },
+    { text: 'Are release artifacts signed, and are there open vulnerabilities?', bucket: 3 },
+    { text: 'Can we follow the function our request handler calls on every request?', bucket: 4 },
+    { text: 'Must we reproduce a notice file when we ship?', bucket: 5 },
+  ]} />
+
+## The security checks
+
+OpenSSF Scorecard is an open-source tool that runs a set of automated
+checks against a public repository and scores each check from 0 to 10. It
+also publishes precomputed results for many public projects, so for a
+well-known package you can look up the result at
+`https://scorecard.dev/viewer/?uri=github.com/<owner>/<repo>` and skip
+running anything. For a package it hasn't scored, install the `scorecard`
+command, export a GitHub token so the API doesn't rate-limit you, and run
+it against the repository.
+
+```sh
+scorecard --repo=github.com/<owner>/<repo> --format json
+```
+
+The check names below are Scorecard's, as documented at the time of
+writing. The list changes between releases, so read the current
+documentation before you quote a name in a review.
+
+| Check                    | What it asks                                                                              |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| `Vulnerabilities`        | Are there open, unfixed vulnerabilities in the project or its dependencies, in the Open Source Vulnerabilities (OSV) database? |
+| `Dependency-Update-Tool` | Is a tool such as Dependabot or Renovate configured to keep dependencies current?         |
+| `Maintained`             | Has there been commit or issue activity in the last 90 days, and is the repo not archived? |
+| `Binary-Artifacts`       | Does the source repository contain executable binaries nobody can review?                 |
+| `Branch-Protection`      | Are the default and release branches protected?                                           |
+| `Dangerous-Workflow`     | Do the CI workflows contain patterns that let a pull request run untrusted code?          |
+| `Code-Review`            | Is human review required before a change is merged?                                       |
+| `Token-Permissions`      | Do workflow tokens follow least privilege?                                                |
+| `Signed-Releases`        | Are release artifacts cryptographically signed, or published with provenance?             |
+
+The JSON output has a top-level `score` and a `checks` list. Each check
+has a `name`, a `score` and a one-line `reason`. `triage.py` in the fixture
+directory reads a hand-written result file in that format, for an invented
+project, and prints every check that scored below 5, then a summary line.
+
+<Predict id="predict-triage" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  title="Predict the summary line" hint="Count the checks in the fixture with a score under 5. A score of exactly 5 is not under 5."
+  answer="5 of 10 checks below 5" run="coding-with-agents/dependency-review/triage.sh">
+The fixture has ten checks. `Binary-Artifacts`, `Dangerous-Workflow`,
+`Token-Permissions` and `Vulnerabilities` score 10. `Pinned-Dependencies`
+scores 5. `Branch-Protection` scores 3, `Code-Review` 2, and
+`Dependency-Update-Tool`, `Maintained` and `Signed-Releases` 0. What's the
+last line the script prints?
+
+```python
+findings = [c for c in result["checks"] if c["score"] < THRESHOLD]
+print("%d of %d checks below %d" % (len(findings), len(result["checks"]), THRESHOLD))
+```
+
+</Predict>
+
+A low score is a finding, and a finding is a question for you to answer
+before you reach a verdict.
+`Maintained` at 0 for a package that's complete and has had nothing to fix
+means something different from `Maintained` at 0 for a parser that
+handles untrusted input. `Signed-Releases` at 0 tells you to pin the
+version you reviewed and to read how the project publishes a release.
+Write the finding, write what you concluded from it, and move on.
+
+## Code: what to skip
+
+The code dimension is where a review becomes expensive, so it is also
+where the skip list does the most work. Read the risky parts named above.
+Skip everything on this list, and write in the review that you skipped it:
+
+- Code style. The project's style is the project's business.
+- Code that hasn't changed since somebody on your team reviewed it.
+- Individual test cases. Check that tests exist and run. Don't read them.
+- Platform-specific code for platforms you never build for.
+- Documentation that isn't about the API or about how the implementation
+  works.
+
+Skipping is a decision, and it is recorded. "Skipped the Windows path
+handling, we build for Linux only" is a line the next reviewer can trust.
+Silence about it is not.
+
+<Pitfall title="Reading the whole package">
+A reviewer opened the `date-fmt` repository, started at the top of
+`src/`, and after two hours had read the locale tables, the plural rules
+and the test suite for time zones, and had run out of time before reaching
+`format()`, the one function the code calls. The rule: start from the
+function your code calls, follow it as far as your critical path goes,
+and skip the rest on purpose. A review that reads everything reviews
+nothing well.
+</Pitfall>
+
+## Writing the verdict
+
+The output of the review is a verdict with reasons: accept, accept with
+conditions, or reject and write it ourselves. "No default outcome" cuts
+both ways here. Rejecting a small package and writing the eleven lines
+yourself is a fine outcome, and so is accepting a large one because it
+solves a class of problems you have more of. A verdict without the reasons
+fails the next person, who can't reuse it.
+
+<Scenario id="one-function-package" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  title="One function, one maintainer" hint="Weigh the future cost against what the package saves you, and remember that writing it yourself is also an outcome."
+  options={[
+    { text: 'Accept. The tests pass and the function works.', consequence: 'The package stays. In a year an advisory names it, nobody upstream responds, and your team forks a project it never read to fix a function it could have written.' },
+    { text: 'Reject, and ask the agent to replace the import with the same function written in your codebase, with a test.', correct: true, consequence: 'The agent writes fifteen lines and a test. The lockfile shrinks by one entry, and the verdict says why, so the next agent that reaches for the package finds the reason.' },
+    { text: 'Accept with a condition: pin the exact version so nothing changes without a review.', consequence: 'Pinning stops surprise upgrades and does nothing about the unmaintained code you now own. The advisory still arrives, and the pin means you cannot take a fix either.' },
+    { text: 'Reject the whole pull request until the agent removes every dependency it added.', consequence: 'The feature stalls. Three of the four packages had good answers on every dimension and the rejection throws that review away.' },
+  ]}>
+Of the four packages, one is small: about forty lines, one maintainer, no
+tests, last commit three years ago, `Maintained` at 0. The agent imported
+it for one function, which pads a number with leading zeros. The function
+works. What's your verdict?
+</Scenario>
+
+## Automation, and giving back
+
+Automation takes some of this off the reviewer's desk.
+
+Commit the lockfile and install from it in CI. The lockfile is the record
+of what was reviewed, and an install that ignores it can bring in a version
+nobody looked at. A new package in the diff of the lockfile is then the
+event that starts a review, and nothing gets in without one.
+
+Set a release age floor. Some package managers can refuse to install a
+version published less than a set time ago. pnpm has a
+`minimumReleaseAge` setting in minutes, applied to direct dependencies
+and to transitive ones alike, and its documentation gives the reason: to reduce the
+risk of installing a compromised or defective package before anyone has
+noticed. A project that waits a day before installing a new version gets
+the benefit of everyone else's attention during that day.
+
+Giving back is the last principle, and the one reviewers skip most. If you
+read the critical path and found a real bug, file it upstream. If you
+found nothing, share your written assessment anyway, in the repository or
+with the project, because it saves the next reviewer the same hour.
+
+<Exercise stretch="Run Scorecard on the same package, read the function your code calls on its critical path, and add a security section and a one-line verdict to the assessment.">
+Pick one dependency a coding agent added to a project you work on, or the
+first direct dependency of any open-source project you use. Write a
+one-page assessment as a Markdown file: the package name and version at the
+top, then one short table per dimension from this lesson, each with the
+questions that apply and a one-line answer to each. End with a verdict:
+accept, accept with conditions, or reject, and the reasons. Writing it once
+makes the next review a diff against this one instead of a fresh start.
+
+A good result fits on one page, answers every question that applies to a
+new direct dependency, names what you skipped and why, and has a verdict
+that a colleague could act on without asking you. Reflect: which dimension
+took the longest to answer, and did the time match the risk?
+</Exercise>
+
+<Recap>
+1. Start from the lockfile diff, and classify each change as a new direct dependency, a new transitive dependency, or a version bump. Each kind gets a different review.
+2. Spend review effort in proportion to risk, count the future cost, be wary of surprises, and apply the same principles to writing it yourself, because the review has no default outcome.
+3. The dimensions are architecture (direct dependencies only), quality, governance and support, security, code, and license. A version bump keeps only security, code, and license if it changed.
+4. Run or look up the OpenSSF Scorecard checks, and treat a low score as a question to answer in writing.
+5. Read the code on your critical path and the parts that need a specialist. Skip style, unchanged reviewed code, individual tests, foreign platforms and non-API documentation, and say that you skipped them.
+6. Commit the lockfile, consider a release age floor, write the verdict with reasons, and give real findings back upstream.
+</Recap>

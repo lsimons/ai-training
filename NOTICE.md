@@ -21,3 +21,9 @@ terms. Add an entry whenever you bring in content from elsewhere.
   CC BY-SA 4.0. This project adopts its four documentation kinds and the
   compass; see `docs/spec/S03-lesson-authoring.md`. Where Diátaxis text is
   adapted, the page says so.
+- **Fuchsia, "Review process for external Rust crates"**
+  (<https://fuchsia.dev/fuchsia-src/development/languages/rust/external_crates/review>),
+  The Fuchsia Authors. Licensed under CC BY 4.0. The dependency review
+  lesson (`coding-with-agents/dependency-review`) follows its principles,
+  its applicability table, and its skip list, rewritten in this project's
+  words and extended with governance, security, and license questions.
