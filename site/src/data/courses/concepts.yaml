@@ -93,8 +93,7 @@ lessons:
     covers: concepts/prompting
     serves:
       - concepts/prompts-reliably/structures-a-prompt
-    status: planned
-    issue: 125
+    status: live
     minutes: 10
     after:
       - concepts/prompt-anatomy
