@@ -1,4 +1,6 @@
 export { default as Choice } from './Choice.astro';
+export { default as MultiChoice } from './MultiChoice.astro';
+export { default as Match } from './Match.astro';
 export { default as Scenario } from './Scenario.astro';
 export { default as Predict } from './Predict.astro';
 export { default as Order } from './Order.astro';

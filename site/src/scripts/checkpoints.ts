@@ -56,6 +56,54 @@ function bindChoice(el: HTMLElement): Grader {
 	};
 }
 
+/** Exactly the N correct boxes and nothing else. A wrong pick shows its `why`; a missed item is only counted. */
+function bindMultiChoice(el: HTMLElement): Grader {
+	const wanted = Number($(el, '.cp-multi')?.dataset.count ?? 0);
+	return () => {
+		const picked = [...el.querySelectorAll<HTMLInputElement>('input[type=checkbox]:checked')].map((i) => i.closest('label')!);
+		if (!picked.length) {
+			announce(el, 'note', `Pick ${wanted} answers first.`);
+			return null;
+		}
+		const wrong = picked.filter((l) => l.dataset.correct !== 'true');
+		const right = picked.length - wrong.length;
+		if (wrong.length) {
+			announce(el, 'nope', wrong[0].dataset.why ?? 'One of your picks is not right.');
+			return false;
+		}
+		if (right < wanted) {
+			announce(el, 'nope', `${right} of ${wanted} so far, and nothing wrong. ${wanted - right} more to find.`);
+			return false;
+		}
+		announce(el, 'ok', 'Correct.');
+		return true;
+	};
+}
+
+/** One `<select>` per row. Each row gets its own mark; the rationale shows only when every row is right. */
+function bindMatch(el: HTMLElement): Grader {
+	const rows = [...el.querySelectorAll<HTMLElement>('.cp-match-row')];
+	const rationale = $(el, '.cp-match')?.dataset.rationale ?? '';
+	return () => {
+		const empty = rows.filter((r) => !$<HTMLSelectElement>(r, 'select')!.value).length;
+		if (empty) {
+			announce(el, 'note', `${empty} row${empty === 1 ? '' : 's'} still to fill.`);
+			return null;
+		}
+		let wrong = 0;
+		rows.forEach((r) => {
+			const ok = $<HTMLSelectElement>(r, 'select')!.value === r.dataset.option;
+			r.dataset.state = ok ? 'right' : 'wrong';
+			const fb = $(r, '.cp-row-feedback')!;
+			fb.textContent = ok ? 'Right.' : (r.dataset.why ?? 'Not this one.');
+			if (!ok) wrong++;
+		});
+		const ok = wrong === 0;
+		announce(el, ok ? 'ok' : 'nope', ok ? `Correct. ${rationale}`.trim() : `${wrong} row${wrong === 1 ? '' : 's'} wrong. Each row says which.`);
+		return ok;
+	};
+}
+
 function bindPredict(el: HTMLElement): Grader {
 	const answer = $(el, '.cp-predict')?.dataset.answer;
 	const ta = $<HTMLTextAreaElement>(el, 'textarea')!;
@@ -190,6 +238,8 @@ function bindRepair(el: HTMLElement): Grader {
 
 const binders: Record<string, (el: HTMLElement) => Grader> = {
 	choice: bindChoice,
+	'multi-choice': bindMultiChoice,
+	match: bindMatch,
 	scenario: bindChoice,
 	predict: bindPredict,
 	order: bindOrder,
@@ -294,6 +344,16 @@ function revealAnswer(el: HTMLElement) {
 		const right = $<HTMLElement>(el, 'label[data-correct=true]');
 		right?.classList.add('cp-answer');
 		announce(el, 'note', `The answer is marked. ${right?.dataset.consequence ?? ''}`.trim());
+	} else if (kind === 'multi-choice') {
+		el.querySelectorAll<HTMLElement>('label[data-correct=true]').forEach((l) => l.classList.add('cp-answer'));
+		announce(el, 'note', 'The correct items are marked.');
+	} else if (kind === 'match') {
+		el.querySelectorAll<HTMLElement>('.cp-match-row').forEach((r) => {
+			$<HTMLSelectElement>(r, 'select')!.value = r.dataset.option ?? '';
+			r.dataset.state = 'right';
+			$(r, '.cp-row-feedback')!.textContent = '';
+		});
+		announce(el, 'note', `Each row now shows its answer. ${$(el, '.cp-match')?.dataset.rationale ?? ''}`.trim());
 	} else if (kind === 'predict') {
 		const reveal = $(el, '.cp-reveal');
 		if (reveal) reveal.hidden = false;

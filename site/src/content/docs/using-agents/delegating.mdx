@@ -17,7 +17,7 @@ extends-to:
     href: /using-agents/decomposition/
 ---
 
-import { Choice, Sort, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Sort, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
 
 In this lesson we delegate one small task to an agent and get a result
 we can check. We write the brief and decide how much the agent may do
@@ -83,6 +83,19 @@ them you judge the result by feel and accept a plausible summary as a
 correct one. Good done-criteria are things you can tick: every date in the
 memo appears in the summary; no fact appears that's not in the memo; the
 format has exactly the parts listed.
+
+<MultiChoice id="which-criteria-tick" objective="using-agents/delegates-and-checks/writes-a-brief"
+  title="Which of these can you tick?" hint="For each line ask: could two people check it and reach the same yes or no?"
+  options={[
+    { text: 'Every date in the memo appears in the summary.', correct: true },
+    { text: 'The summary is clear and easy to read.', why: 'Clear to whom? Two readers can disagree, so this is a feeling, and a feeling cannot be ticked.' },
+    { text: 'No fact appears that is not in the memo.', correct: true },
+    { text: 'The output has exactly the five parts listed.', correct: true },
+    { text: 'The summary is about the right length.', why: 'Right for whom? Name a number of lines and it becomes a criterion.' },
+  ]}>
+You are writing the done-criteria for the memo summary. Which of these
+lines are criteria you can tick?
+</MultiChoice>
 
 Put together, the brief looks something like this. Send it to your agent
 now, with the memo pasted underneath.
