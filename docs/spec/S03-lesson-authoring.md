@@ -100,9 +100,9 @@ pitfall and the exercise.
   nothing runs.
 - **Fixtures are Python.** Every runnable example under `site/examples/` is
   a `.py` script run with `python3`, with no bash fixtures (decided
-  2026-09-20). One language keeps the runner simple and the fixtures
-  portable across the platforms learners use. The runner rejects any other
-  file type.
+  2026-09-20). One language and one interpreter keep the runner simple and
+  keep bash idiom (`set -euo pipefail`, `trap`) out of the fixtures. The
+  runner rejects any other file type.
 - **Prompts and responses are recorded, never live.** A prompt block and
   its response block name the model and the month the response was
   recorded. Outputs live in the repo and are never fetched from a
