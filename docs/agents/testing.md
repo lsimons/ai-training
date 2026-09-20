@@ -1,7 +1,7 @@
 # Testing the site
 
-Which check catches what, so a new assertion lands in the layer that can
-hold it. Every layer runs from `mise run ci` and from the CI workflow.
+Which check catches what, and which layer a new assertion belongs in. All
+of the layers run from `mise run ci` and from the CI workflow.
 
 | Layer     | Task                  | Runs                                                                 | Catches                                                                                                            |
 | --------- | --------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -37,7 +37,7 @@ hold it. Every layer runs from `mise run ci` and from the CI workflow.
   `site/e2e/`, one spec file per mechanism. Seed progress with the `seed`
   fixture instead of clicking through an earlier flow, and use auto-waiting
   `expect(locator)` assertions rather than sleeps.
-- **A code example's output** needs no test: `<Predict run="..." answer="...">` names the fixture and `mise run examples` asserts it.
+- **A code example's output** is already asserted: `<Predict run="..." answer="...">` names the fixture and `mise run examples` compares it, so it gets no separate test.
 
 ## Coverage
 
@@ -48,6 +48,14 @@ Do not lower the floor to get a change through: add the test, or move the
 logic into a module that can be tested. `.astro` files are not
 instrumented (their template half runs in the e2e suite), and
 `lesson-context.ts` is excluded because it only reads route locals.
+
+The inline `<script>` blocks in `.astro` components (`Settings.astro`,
+`ProgressOverview.astro`, `OverallProgress.astro`, `CourseGraph.astro`,
+`TopicMap.astro`, `overrides/MarkdownContent.astro`, `pages/[area]/review.astro`)
+are outside Biome and outside the coverage floor. Only `astro check` and
+the e2e suite see them. When one of them grows logic worth a unit test,
+move that logic into `site/src/scripts/*.ts` and import it, which puts it
+under Biome, the strict tsconfig flags and the coverage include set.
 
 ## Running the browser suite
 
@@ -65,10 +73,15 @@ serves the same files under the same `/ai-training` base path.
 
 ## Lint notes
 
-Biome formats and lints the frontmatter and `<script>` blocks of `.astro`
-files and leaves the template alone, so `astro check` stays the check for
-the template. Because Biome cannot see the template, the unused-variable
-rules are off for `.astro` files (`overrides` in `site/biome.json`).
-`noNonNullAssertion` is off: the client scripts use `!` for elements the
-component markup guarantees. A `// biome-ignore` needs the reason on the
-same line.
+Biome formats and lints the frontmatter of `.astro` files and leaves the
+template and the inline `<script>` blocks alone, so `astro check` stays the
+check for those two. Because Biome cannot see the template, the
+unused-variable rules are off for `.astro` files (`overrides` in
+`site/biome.json`). `noNonNullAssertion` is off because the frontmatter of
+`TopicMap.astro` and `overrides/MarkdownContent.astro` and `src/lib/lessons.ts`
+use `!` on lookups the content collections guarantee; `src/scripts/` has
+none left. A `// biome-ignore` needs the reason on the same line.
+
+`exactOptionalPropertyTypes` is deliberately not set in `site/tsconfig.json`:
+Astro passes an absent optional prop as `undefined`, which fails six
+`CheckpointShell` prop checks under that flag.

@@ -83,8 +83,9 @@ dir = "site"
 run = "bunx astro check"
 
 # Biome does both lint and format for the site's TypeScript, JavaScript,
-# JSON and the frontmatter/script halves of .astro files (its Astro support
-# stops at the template; `site-check` covers that). One config: site/biome.json.
+# JSON and the frontmatter of .astro files. It does not see the template or
+# the inline <script> blocks (`site-check` covers those; logic that needs a
+# lint or a unit test goes in site/src/scripts). One config: site/biome.json.
 [tasks.site-lint]
 description = "Biome lint + format check over site/ (config: site/biome.json)"
 dir = "site"
@@ -104,8 +105,9 @@ description = "Vitest unit and component tests with the coverage floor"
 dir = "site"
 run = "bun run test"
 
-# Playwright starts and stops `astro preview` itself (playwright.config.ts
-# `webServer`), so this task only has to build first. `mise run site-e2e --
+# Playwright starts and stops the static server site/scripts/serve-dist.mjs
+# itself (playwright.config.ts `webServer`; not `astro preview`, which
+# detaches), so this task only has to build first. `mise run site-e2e --
 # e2e/review.spec.ts` runs one spec.
 [tasks.site-e2e]
 description = "Build, then run the Playwright walkthrough in site/e2e/. Needs `mise run site-browser` once."
