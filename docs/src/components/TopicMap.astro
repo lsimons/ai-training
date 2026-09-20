@@ -8,6 +8,7 @@ import { getCollection } from 'astro:content';
 import { AREAS } from '@lib/areas';
 import { getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
+import { jsonForScript } from '@lib/json';
 
 const topics = (await getCollection('topics')).map((t) => t.data);
 const lessons = await getLessons();
@@ -55,7 +56,7 @@ const edges = topics.flatMap((t) => t.links.prerequisites.map((from) => ({ from,
 				</div>
 			))
 		}
-		<script is:inline type="application/json" data-edges set:html={JSON.stringify(edges)} />
+		<script is:inline type="application/json" data-edges set:html={jsonForScript(edges)} />
 	</div>
 </div>
 

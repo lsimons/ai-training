@@ -7,19 +7,26 @@
  */
 import { lessonIdOf } from '@lib/lesson-context';
 import { href } from '@lib/url';
+import { DEFAULT_REVISION, isReviewable, type CheckpointKind } from '@lib/checkpoint-rules';
 
 interface Props {
 	id: string;
 	objective: string;
 	title: string;
 	hint: string;
-	kind: 'choice' | 'scenario' | 'predict' | 'order' | 'sort' | 'repair';
-	/** Whether this checkpoint becomes a review item (spec S05 "What is reviewed"). */
-	reviewable?: boolean;
+	kind: CheckpointKind;
+	/** Author opt-out from review (spec S05 "What is reviewed"). Default true. */
+	review?: boolean;
+	/** Bump when the answer changes; outdated review items reset to stage 1 (spec S05). Default 1. */
+	revision?: number;
+	/** Set by Predict when there is no `answer`: honour-system, never reviewed. */
+	honour?: boolean;
 	checkLabel?: string;
 }
 
-const { id, objective, title, hint, kind, reviewable = true, checkLabel = 'Check' } = Astro.props;
+const { id, objective, title, hint, kind, review = true, revision = DEFAULT_REVISION, honour = false, checkLabel = 'Check' } = Astro.props;
+if (!Number.isInteger(revision) || revision < 1) throw new Error(`Checkpoint "${id}": revision must be a positive integer, got ${revision}`);
+const reviewable = isReviewable({ kind, review, honour });
 const lessonId = lessonIdOf(Astro);
 const progressId = `${lessonId}#${id}`;
 ---
@@ -32,6 +39,7 @@ const progressId = `${lessonId}#${id}`;
 	data-progress-id={progressId}
 	data-objective={objective}
 	data-reviewable={String(reviewable)}
+	data-revision={String(revision)}
 	data-title={title}
 >
 	<header class="cp-head">

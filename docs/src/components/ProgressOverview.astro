@@ -30,10 +30,15 @@ const catalog = await buildCatalog();
 <script>
 	import * as progress from '@scripts/progress';
 
+	interface CatalogCheckpoint {
+		id: string;
+		reviewable: boolean;
+		revision: number;
+	}
 	interface CatalogLesson {
 		id: string;
 		title: string;
-		checkpoints: string[];
+		checkpoints: CatalogCheckpoint[];
 	}
 	interface CatalogCourse {
 		area: string;
@@ -49,6 +54,17 @@ const catalog = await buildCatalog();
 		const dump = root.querySelector<HTMLElement>('[data-dump]')!;
 		const message = root.querySelector<HTMLElement>('[data-message]')!;
 		const comfortLabel = root.querySelector<HTMLElement>('[data-comfort-label]')!;
+
+		// Entries for ids the build no longer knows are dropped (spec S04 "Content
+		// changes"). This page has the whole catalog, so the pruning lives here.
+		const allLessons = catalog.flatMap((c) => c.lessons);
+		function pruneOrphans() {
+			progress.pruneOrphans(
+				allLessons.map((l) => l.id),
+				allLessons.flatMap((l) => l.checkpoints.map((c) => `${l.id}#${c.id}`))
+			);
+		}
+		pruneOrphans();
 
 		function draw() {
 			const rec = progress.load();
@@ -80,9 +96,9 @@ const catalog = await buildCatalog();
 						cps.className = 'cps';
 						for (const c of l.checkpoints) {
 							const sq = document.createElement('span');
-							const st = rec.checkpoints[`${l.id}#${c}`];
+							const st = rec.checkpoints[`${l.id}#${c.id}`];
 							sq.dataset.state = st?.state ?? 'none';
-							sq.title = `${c}: ${st?.state ?? 'not attempted'}`;
+							sq.title = `${c.id}: ${st?.state ?? 'not attempted'}`;
 							cps.appendChild(sq);
 						}
 						row.append(dot, link, cps);
@@ -116,6 +132,7 @@ const catalog = await buildCatalog();
 			const text = await file.text();
 			if (!confirm('Replace your progress with the imported file?')) return;
 			const result = progress.importJson(text);
+			if (result.ok) pruneOrphans();
 			message.textContent = result.ok ? 'Imported.' : result.message;
 			input.value = '';
 		});

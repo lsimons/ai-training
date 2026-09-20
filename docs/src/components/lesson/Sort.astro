@@ -11,16 +11,18 @@ interface Props {
 	objective: string;
 	title: string;
 	hint: string;
+	review?: boolean;
+	revision?: number;
 	buckets: string[];
 	items: Item[];
 }
-const { id, objective, title, hint, buckets, items } = Astro.props;
+const { id, objective, title, hint, review, revision, buckets, items } = Astro.props;
 for (const it of items) {
 	if (it.bucket < 0 || it.bucket >= buckets.length) throw new Error(`Sort "${id}": item "${it.text}" points at bucket ${it.bucket}`);
 }
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} kind="sort">
+<CheckpointShell {id} {objective} {title} {hint} {review} {revision} kind="sort">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-sort">
