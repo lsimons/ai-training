@@ -33,6 +33,24 @@ and `mise install` once per clone.
 Also available: `docs-preview`, `docs-browser`, and
 `mise run docs-screenshot out.png /ai-training/`.
 
+### Astro 7 dev server
+
+`astro dev` (what `mise run docs-dev` runs) detaches into a background
+daemon. Killing the shell that started it does **not** stop it, and a stale
+daemon keeps serving old content and old config, which looks like an edit
+"not taking". Manage it with the CLI, from `docs/`:
+
+| Command                 | What it does                                  |
+| ----------------------- | --------------------------------------------- |
+| `bunx astro dev status` | Is a daemon running, on which port and pid    |
+| `bunx astro dev logs`   | Its log                                       |
+| `bunx astro dev stop`   | Stop it; do this before restarting or leaving |
+
+Restart it (stop, then `mise run docs-dev`) after changing
+`astro.config.mjs`, `content.config.ts`, or anything under `src/data/`.
+For a one-off check of the built site prefer `mise run docs-preview` or
+`docs-screenshot`; neither leaves a daemon behind.
+
 ## Structure
 
 This is a *project* site served under the `/ai-training` base path (set in
