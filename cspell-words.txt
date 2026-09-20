@@ -4,6 +4,7 @@
 # inside a code span does not need listing, cspell skips those.
 
 # People
+Chidi
 Flesch
 Kincaid
 Addy

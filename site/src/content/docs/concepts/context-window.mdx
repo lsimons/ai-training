@@ -1,6 +1,6 @@
 ---
 title: What the model can see
-description: Count the tokens of a page of text, work out how many pages fit in a context window, and learn what falls out of view in a long chat.
+description: Measure a page of text in tokens and work out how many pages a context window holds, so a long chat that contradicts itself has an explanation.
 mode: tutorial
 covers:
   - concepts/how-models-work
@@ -48,17 +48,17 @@ The model did not forget in the way a person forgets. It never saw your
 first message when it wrote this answer. In the previous lesson you learned
 that a model reads tokens and predicts the next one from everything it has
 seen so far. This lesson is about the limit on "everything it has seen so
-far", the **context window**. You will measure a page of text in tokens,
-work out how many pages a window holds, and see what happens when a chat
-grows past it.
+far", the **context window**. In this lesson we measure a page of text in
+tokens and work out how many pages a window holds, then watch a chat grow
+past it.
 
 ## Count the tokens of a page
 
 A context window is measured in tokens, so the first step is to get a
-feel for how many tokens a page of text is. Save the script
-`count_tokens.py` from
-[the fixture directory](https://github.com/lsimons/ai-training/tree/main/site/examples/concepts/context-window)
-and run it with no arguments. It counts a built-in sample of meeting notes,
+feel for how many tokens a page of text is. The script is
+`site/examples/concepts/context-window/count_tokens.py` in the repository
+of this course. Save a copy and run it with no arguments. It counts a
+built-in sample of meeting notes,
 about half a page. On a fresh Mac the first `python3` command may offer to
 install the command-line developer tools, and that is expected.
 
@@ -80,20 +80,24 @@ thumb for English, about four characters per token. A word of up to six
 letters counts as one token and a longer word as one token per four
 letters, with each punctuation mark counted as a token of its own. Real
 tokenizers are more detailed than that, and every vendor has its own, so
-the exact count for a model comes from that vendor. The API response of a
-model call reports the tokens it used, and vendors publish a token-counting
-call or a web page that runs their tokenizer
-(@Academy building-with-the-claude-api). For planning, the rule of thumb is
-close enough: a full page of English text is a few hundred tokens.
+the exact count for a model comes from that vendor. A call to the model
+through the vendor's programming interface (API) returns the number of
+tokens it used along with the answer, and vendors publish a token-counting
+call or a web page that runs their tokenizer. For planning, the rule of
+thumb is close enough: a full page of English text is a few hundred tokens.
 
 ## How a tokenizer splits text
 
-The counter treats "delivery" as two tokens and "June" as one. A real
-tokenizer makes the same kind of cut, with a fixed vocabulary of tens of
-thousands of chunks learned from training text. Common words are one chunk.
-A rare word is split into pieces, often at places that have nothing to do
-with syllables or spelling, and a name or a word in another language may
-end up as one token per letter (@AEC-02).
+The counter cuts "delivery" into two tokens by its four-letter rule. That
+rule is a stand-in for what a real tokenizer does. A real tokenizer has a
+fixed vocabulary of tens of thousands of chunks learned from training text,
+and it cuts where that vocabulary happens to have a chunk. A common word
+like "delivery" is in the vocabulary whole and costs one token, however
+long it is. A rare word or a name is split into pieces instead, often at
+places that have nothing to do with syllables or spelling. "Chidi" from the
+sample is two tokens in current tokenizers, and a word in another language
+may end up as one token per letter (@AEC-02). The counter cannot know which
+words are common, so it applies one rule to all of them.
 
 Asking a model how many letters "strawberry" has goes wrong so often for
 the same reason. The model receives the token for "strawberry" as one
@@ -124,11 +128,20 @@ python3 pages_per_window.py 115
 </Predict>
 
 The window sizes are round numbers that stand for the sizes on the market
-in 2026. Small models that run on a laptop have windows at the low end,
-and the large vendor models offer 200,000 tokens or more (@AEC-02). At the
-top end the window holds a few thousand pages of text, which sounds like
-more than you will ever need. The next section shows why it still runs
+in 2026. The 8,000 row is the size of a few years ago, kept for the
+contrast. Small models that run on a laptop have windows at the low end
+today, and the large vendor models offer 200,000 tokens or more (@AEC-02).
+At the top end the window holds a few thousand pages of text, which sounds
+like more than you will ever need. The next section shows why it still runs
 out.
+
+A big window is not free to fill. The model processes every token in the
+window for every response, which makes a fuller window cost more per answer
+and take longer to answer. Nor does the model weigh every part of a full
+window equally well: a fact in the middle of a long paste counts for less
+in the prediction than the same fact at the top or at the bottom, as the
+previous lesson noted under instruction dilution
+(@Academy ai-capabilities-and-limitations).
 
 ## What the window holds
 
@@ -160,12 +173,12 @@ only place a fact can be.
   buckets={['In the window for this response', 'Does not exist for the model']}
   items={[
     { text: 'The instructions the product set up before your first message', bucket: 0 },
-    { text: 'A paragraph you pasted twenty minutes ago in this chat', bucket: 0 },
+    { text: 'The paragraph you pasted two messages ago in a chat that is still short', bucket: 0 },
     { text: 'The first half of the answer the model is writing right now', bucket: 0 },
     { text: 'The result of the web search the assistant just ran', bucket: 0 },
-    { text: 'A chat you had with the same assistant last week', bucket: 1 },
+    { text: 'A chat you had with the same assistant last week, with memory features off', bucket: 1 },
     { text: 'A spreadsheet on your laptop that you mentioned by name', bucket: 1 },
-    { text: 'An article published after the model was trained', bucket: 1 },
+    { text: 'A page of the company wiki that nobody pasted into the chat', bucket: 1 },
   ]} />
 
 ## When the early facts fall out
@@ -202,10 +215,10 @@ long one.
   title="Why did the answer change?"
   hint="Where was the first message when the model produced the latest answer? Count what has been sent to the model since then."
   options={[
-    { text: 'The model changed its mind about the audience as the conversation went on.', why: 'A model has no opinion that persists between responses. Each answer is predicted from the text in the window at that moment.' },
-    { text: 'The first message, with the audience and the page limit, was no longer in the tokens the model saw when it wrote this answer.', correct: true },
+    { text: 'The model changed its mind about the audience as the conversation went on.', why: 'A model has no opinion that persists between responses. Look at what it was given, not at what it wanted.' },
+    { text: 'The first message was no longer among the tokens the model saw for this answer.', correct: true },
     { text: 'The model was trained on more engineering documents than finance documents.', why: 'Training data shapes what the model tends to write, but it does not explain why the model followed the instruction for two hours and then stopped.' },
-    { text: 'Two hours is longer than the model can stay focused.', why: 'Time is not the limit. A model has no clock. The amount of text sent for each response is what changed.' },
+    { text: 'Two hours is longer than the model can stay focused.', why: 'Time is not the limit. A model has no clock. Ask what else changed over those two hours.' },
   ]}>
 
 After two hours of chat, the assistant that had been writing for the
@@ -242,7 +255,7 @@ chat sessions need before the first message falls out of the window?
    (@Academy ai-capabilities-and-limitations).
 3. When a long chat contradicts itself, an early fact has left the window.
    Restate the fact in your next message instead of scolding the model.
-4. A larger window costs more per call, because every token in it is
+4. A fuller window costs more per answer, because every token in it is
    processed for every response, and the model does not use every part of
    a full window equally well (@Academy ai-capabilities-and-limitations).
 
