@@ -1,0 +1,73 @@
+---
+/**
+ * Closes a lesson (spec S03 "Recap"): the author's numbered takeaways, then
+ * "You can now..." from the served objectives, the sources cited, what comes
+ * next from `extends-to`, and the finish button.
+ */
+import { getCollection } from 'astro:content';
+import { lessonEntryOf } from '@lib/lesson-context';
+import { href } from '@lib/url';
+import { getLessons } from '@lib/lessons';
+
+const entry = lessonEntryOf(Astro);
+const data = entry.data;
+const competencies = await getCollection('competencies');
+const objectives = new Map<string, string>();
+for (const area of competencies) for (const c of area.data.competencies) for (const o of c.objectives) objectives.set(o.id, o.statement);
+const served = (data.serves ?? []).map((id) => ({ id, statement: objectives.get(id) }));
+const missing = served.filter((s) => !s.statement).map((s) => s.id);
+if (missing.length) throw new Error(`${entry.id}: serves unknown objective(s): ${missing.join(', ')}`);
+
+const bibliography = await getCollection('bibliography');
+const sources = (data.sources ?? []).map((key) => {
+	const ref = bibliography.find((b) => b.id === key);
+	if (!ref) throw new Error(`${entry.id}: unknown source key ${key}`);
+	return { key, ...ref.data };
+});
+const lessons = await getLessons();
+const next = (data['extends-to'] ?? []).map((n) => ({ ...n, exists: lessons.some((l) => `/${l.id}/` === n.href) }));
+---
+
+<section class="recap" id="recap">
+	<h2>Recap</h2>
+	<slot />
+	<p class="recap-can"><strong>You can now</strong></p>
+	<ul class="recap-objectives">
+		{served.map((s) => <li data-objective={s.id}>{s.statement}</li>)}
+	</ul>
+	{
+		sources.length > 0 && (
+			<>
+				<p><strong>Sources</strong></p>
+				<ul class="recap-sources">
+					{sources.map((s) => (
+						<li>
+							<code>{s.key}</code> {s.title}
+							{s.container && <>, <em>{s.container}</em></>}
+							{s.author && <> ({s.author})</>}
+							{s.license && <>, {s.license}</>}
+							{s.url && <> · <a href={s.url}>link</a></>}
+						</li>
+					))}
+				</ul>
+			</>
+		)
+	}
+	{
+		next.length > 0 && (
+			<p class="recap-next">
+				<strong>Next:</strong>{' '}
+				{next.map((n, i) => (
+					<>
+						{i > 0 && ', '}
+						{n.exists ? <a href={href(n.href)}>{n.label}</a> : <span>{n.label} (not written yet)</span>}
+					</>
+				))}
+			</p>
+		)
+	}
+	<div class="not-content recap-actions">
+		<button type="button" class="recap-finish" data-finish>Mark lesson finished</button>
+		<button type="button" class="recap-skip" data-skip-lesson>I know this, skip it</button>
+	</div>
+</section>

@@ -1,0 +1,62 @@
+---
+/** One reference page per topic (spec S02 "Stable URLs"), rendered from the YAML. */
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { getCollection } from 'astro:content';
+import { getLessons } from '@lib/lessons';
+import { areaOf } from '@lib/areas';
+import { href } from '@lib/url';
+
+export async function getStaticPaths() {
+	const topics = await getCollection('topics');
+	return topics.map((t) => ({ params: { id: t.data.id }, props: { topic: t.data } }));
+}
+
+const { topic } = Astro.props;
+const topics = (await getCollection('topics')).map((t) => t.data);
+const bibliography = await getCollection('bibliography');
+const lessons = (await getLessons()).filter((l) => (l.data.covers ?? []).includes(topic.id));
+const competencies = (await getCollection('competencies')).flatMap((c) => c.data.competencies).filter((c) => c.topics.includes(topic.id));
+const name = (id: string) => topics.find((t) => t.id === id)?.name ?? id;
+const dependants = topics.filter((t) => t.links.prerequisites.includes(topic.id));
+const headings = [
+	{ depth: 2, slug: 'concepts', text: 'Concepts' },
+	{ depth: 2, slug: 'links', text: 'Links' },
+	{ depth: 2, slug: 'lessons', text: 'Lessons' },
+	{ depth: 2, slug: 'sources', text: 'Sources' },
+];
+---
+
+<StarlightPage frontmatter={{ title: topic.name, description: topic.definition }} headings={headings}>
+	<p><em>{areaOf(topic.area).name}</em> · topic <code>{topic.id}</code></p>
+	<p>{topic.definition}</p>
+
+	<h2 id="concepts">Concepts</h2>
+	<dl>
+		{topic.concepts.map((c) => (<><dt id={c.id}><strong>{c.name}</strong></dt><dd>{c.definition} <a href={href(`/glossary/#${c.id}`)}>glossary</a></dd></>))}
+	</dl>
+
+	<h2 id="links">Links</h2>
+	<ul>
+		<li><strong>Builds on:</strong> {topic.links.prerequisites.length ? topic.links.prerequisites.map((p, i) => (<>{i > 0 && ', '}<a href={href(`/topics/${p}/`)}>{name(p)}</a></>)) : 'nothing'}</li>
+		<li><strong>Leads to:</strong> {dependants.length ? dependants.map((d, i) => (<>{i > 0 && ', '}<a href={href(`/topics/${d.id}/`)}>{d.name}</a></>)) : 'nothing yet'}</li>
+		{topic.links.related.length > 0 && <li><strong>Related:</strong> {topic.links.related.map((p, i) => (<>{i > 0 && ', '}<a href={href(`/topics/${p}/`)}>{name(p)}</a></>))}</li>}
+		{competencies.length > 0 && <li><strong>Competencies drawing on it:</strong> {competencies.map((c, i) => (<>{i > 0 && ', '}<a href={href(`/competencies/${c.id}/`)}>{c.statement}</a></>))}</li>}
+	</ul>
+
+	<h2 id="lessons">Lessons</h2>
+	{lessons.length ? <ul>{lessons.map((l) => <li><a href={href(`/${l.id}/`)}>{l.data.title}</a> ({l.data.mode})</li>)}</ul> : <p>No lesson covers this topic yet.</p>}
+
+	<h2 id="sources">Sources</h2>
+	{
+		topic.sources.length ? (
+			<ul>
+				{topic.sources.map((key) => {
+					const ref = bibliography.find((b) => b.id === key);
+					return <li><code>{key}</code> {ref ? <>{ref.data.title}{ref.data.container && <>, <em>{ref.data.container}</em></>}</> : '(unknown key)'}</li>;
+				})}
+			</ul>
+		) : (
+			<p>Original material.</p>
+		)
+	}
+</StarlightPage>

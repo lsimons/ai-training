@@ -1,0 +1,49 @@
+id: concepts/grounding
+area: concepts
+name: Grounding and memory
+definition: >-
+  A model only knows its training data and what is in its context window.
+  Grounding supplies the facts a task needs at the moment of asking, usually
+  by retrieving documents. Memory carries information across turns and
+  sessions. This topic explains both, what they fix, what they do not, and
+  how a crowded context degrades.
+concepts:
+  - id: retrieval-rag
+    name: Retrieval (RAG)
+    definition: >-
+      Retrieval-augmented generation: before the model answers, a search
+      finds the passages most relevant to the question and pastes them into
+      the prompt, so the answer can rest on documents the model never saw in
+      training. It is how assistants answer about your files or a company
+      wiki. Its quality is bounded by the search; irrelevant passages produce
+      confident wrong answers.
+  - id: grounding
+    name: Grounding
+    definition: >-
+      Tying a model's answer to sources it was given rather than to what it
+      remembers. A grounded answer cites the passage it relied on and says so
+      when the sources do not cover the question. Grounding reduces
+      hallucination about the supplied material but does not make the model
+      check facts on its own, and it cannot fix a source that is wrong.
+  - id: short-and-long-term-memory
+    name: Short- and long-term memory
+    definition: >-
+      Short-term memory is the current context window: everything said and
+      seen in this session, gone when it ends. Long-term memory is anything
+      written down outside the window and read back later, such as notes
+      files, summaries or a database the agent searches. Models have no other
+      memory; "it remembered" always means something was stored and re-read.
+  - id: context-rot
+    name: Context rot
+    definition: >-
+      The decline in a model's performance as its context window fills with
+      old turns, tool output and stale instructions. Important details get
+      lost among irrelevant ones, early instructions are followed less
+      reliably and answers drift. Long sessions and large pasted documents
+      cause it. The cure is to keep context short and deliberate: summarise,
+      start fresh, or retrieve only what is needed.
+links:
+  prerequisites: [concepts/what-is-an-agent]
+  related: []
+  specializations: []
+sources: [AEC-05, AEC-08]

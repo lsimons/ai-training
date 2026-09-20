@@ -1,0 +1,56 @@
+id: concepts/how-models-work
+area: concepts
+name: How language models work
+definition: >-
+  A language model turns text into tokens, predicts the next token from
+  everything it has seen so far, and repeats until it stops. This topic covers
+  the pieces behind that loop: tokens, the context window that bounds what the
+  model can see, the split between training and inference, the trade-offs
+  between model families and sizes, and how sampling settings shape the output.
+concepts:
+  - id: token
+    name: Token
+    definition: >-
+      The unit a language model reads and writes. A token is a chunk of text,
+      often a word fragment, punctuation mark or common word, chosen by a fixed
+      tokenizer. Models are priced, limited and timed in tokens, not words or
+      characters. A rough rule for English is three to four characters per
+      token, so a page of text is a few hundred tokens.
+  - id: context-window
+    name: Context window
+    definition: >-
+      The maximum number of tokens a model can take into account at once,
+      counting the instructions, the conversation so far, any documents pasted
+      in and the answer it is producing. Anything outside the window does not
+      exist for the model. Larger windows cost more per call and do not
+      guarantee the model uses everything inside them equally well.
+  - id: training-vs-inference
+    name: Training vs inference
+    definition: >-
+      Training is the one-off, expensive phase where a model's weights are
+      adjusted on a large body of text until it predicts well. Inference is
+      every later use of the frozen model to produce output. Nothing you type
+      during inference changes the weights; the model only "remembers" what is
+      in the current context window.
+  - id: model-family-and-size
+    name: Model family and size
+    definition: >-
+      Vendors publish models in families with several sizes. Larger models
+      usually reason better and follow complex instructions more reliably, but
+      cost more and respond more slowly. Smaller models are cheaper and faster
+      and are often good enough for narrow, well-specified tasks. Choosing a
+      model means matching the size to the difficulty of the job.
+  - id: sampling-and-temperature
+    name: Sampling and temperature
+    definition: >-
+      At each step the model has a probability for every possible next token
+      and picks one by sampling. Temperature scales those probabilities: low
+      values make the model pick the most likely token almost every time, high
+      values spread the choice across less likely options. Low temperature
+      gives consistent, conservative output; high temperature gives variety at
+      the cost of more mistakes.
+links:
+  prerequisites: []
+  related: []
+  specializations: []
+sources: [AEC-02, DLAI-2, DLAI-6]

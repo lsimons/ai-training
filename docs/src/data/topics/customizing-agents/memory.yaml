@@ -1,0 +1,55 @@
+id: customizing-agents/memory
+area: customizing-agents
+name: Memory and session context
+definition: >-
+  An agent forgets everything when a session ends unless something is written
+  down. This topic covers automatic memory notes, curated context files,
+  compaction of a long session, handing work from one session to the next,
+  and turning work the agent repeats into knowledge it can reuse.
+concepts:
+  - id: auto-memory
+    name: Auto-memory
+    definition: >-
+      Notes an agent writes for itself during a session and reads back in
+      later ones: preferences it learned, facts about the project, decisions
+      made. It reduces re-explaining but is unreviewed by default, so it can
+      carry a wrong assumption forward for weeks. Read what the agent
+      remembers now and then, and correct or delete entries that have gone
+      stale.
+  - id: context-files
+    name: Context files
+    definition: >-
+      Files a person curates for the agent to read: project instructions,
+      design notes, a plan, a glossary of domain terms. Unlike auto-memory
+      they are deliberate, versioned and reviewed like code. They are the
+      right place for anything the whole team wants every session to know,
+      and the place to move a fact once auto-memory has proven it useful.
+  - id: compaction
+    name: Compaction
+    definition: >-
+      Replacing a long session's history with a summary so work can continue
+      inside the context window. Compaction keeps the goal and recent state
+      and drops the raw detail, so anything not in the summary is lost.
+      Ask for a summary that names open items and decisions before
+      compacting, and save it to a file when the work will span sessions.
+  - id: session-handoff
+    name: Session handoff
+    definition: >-
+      Ending one session so the next can pick up without loss: a written
+      state of what was done, what remains, what was decided and why, and
+      where the relevant files are, stored in the repository or a plan file.
+      A good handoff lets a fresh session, or a colleague's, start productive
+      in one turn instead of rediscovering the work.
+  - id: turning-repeated-work-into-reusable-knowledge
+    name: Turning repeated work into reusable knowledge
+    definition: >-
+      Noticing when the agent is explained the same thing or walked through
+      the same steps twice, and moving it somewhere durable: a fact into
+      project instructions, a procedure into a skill, a check into a hook, an
+      example into a context file. Each move removes a future explanation and
+      a future mistake. It is the compounding part of working with agents.
+links:
+  prerequisites: [customizing-agents/skills, concepts/grounding]
+  related: []
+  specializations: []
+sources: [AEC-05, Brilliant MEM]

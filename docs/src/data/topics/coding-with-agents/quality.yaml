@@ -1,0 +1,57 @@
+id: coding-with-agents/quality
+area: coding-with-agents
+name: Quality with agents
+definition: >-
+  Agents make it cheap to produce code and just as cheap to produce debt.
+  This topic covers keeping tests meaningful, documentation current,
+  dependencies deliberate, and reviewing agent output for the security and
+  supply-chain problems it introduces more readily than a careful human would.
+concepts:
+  - id: testing
+    name: Testing
+    definition: >-
+      Keeping tests that prove behaviour rather than mirror implementation.
+      Agents write tests readily, and readily write tests that pass by
+      asserting what the code happens to do. Review agent tests for what they
+      would catch if the code were wrong, keep them fast enough to run in an
+      agent's loop, and never let an agent delete or weaken a test to make a
+      change pass.
+  - id: documentation
+    name: Documentation
+    definition: >-
+      Keeping the written explanation of a system current as agents change
+      it. Agents can draft documentation from code well, and equally well
+      leave it stale. Treat docs as part of the change: the brief names what
+      must be updated, the review checks it, and project instructions tell
+      the agent where documentation lives and what style it follows.
+  - id: dependency-hygiene
+    name: Dependency hygiene
+    definition: >-
+      Adding libraries deliberately and keeping them pinned, current and few.
+      An agent asked to solve a problem will often add a package where a few
+      lines would do, or pick one it has seen frequently rather than one that
+      is maintained. Review every new dependency for need, licence,
+      maintenance and size, and lock versions so builds stay reproducible.
+  - id: security-review-of-agent-output
+    name: Security review of agent output
+    definition: >-
+      Checking agent-written code for the classic mistakes it makes easily:
+      unvalidated input, string-built queries and commands, secrets in code,
+      permissive defaults, disabled checks, error handling that hides
+      failures. Agents reproduce common patterns including common
+      vulnerabilities. Static analysis catches some; a reviewer asking "what
+      if the input is hostile" catches more.
+  - id: supply-chain-risk
+    name: Supply-chain risk
+    definition: >-
+      The risk that something you install is not what it seems: a package
+      name the agent hallucinated that an attacker has registered, an action
+      or plugin pinned to a moving tag, a transitive dependency with a known
+      flaw. Agents increase exposure by suggesting names from memory. Verify
+      that packages exist and are the intended ones, pin to exact versions,
+      and audit regularly.
+links:
+  prerequisites: [coding-with-agents/verification, safety/agent-risk]
+  related: []
+  specializations: []
+sources: [DLAI-7, Brilliant SEC]

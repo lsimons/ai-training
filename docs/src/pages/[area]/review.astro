@@ -1,0 +1,125 @@
+---
+/**
+ * The review page, one per course (spec S05 "The review page"). Items are the
+ * course's checkpoints that are due; their markup is fetched from the lesson
+ * pages at runtime and bound in review mode (Give Up, stage pills, frequency).
+ */
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { AREAS } from '@lib/areas';
+import { getLessons, checkpointsOf } from '@lib/lessons';
+import { href } from '@lib/url';
+
+export async function getStaticPaths() {
+	return AREAS.map((a) => ({ params: { area: a.slug }, props: { area: a } }));
+}
+
+const { area } = Astro.props;
+const lessons = await getLessons(area.slug);
+const catalog = lessons.map((l) => ({
+	id: l.id,
+	title: l.data.title,
+	href: href(`/${l.id}/`),
+	checkpoints: checkpointsOf(l).filter((c) => c.reviewable).map((c) => c.id),
+}));
+const formats = [...new Set(lessons.flatMap((l) => checkpointsOf(l).filter((c) => c.reviewable).map((c) => c.kind)))];
+---
+
+<StarlightPage frontmatter={{ title: `Review: ${area.name}`, description: `Review items due for the ${area.name} course.`, tableOfContents: false }}>
+	<div class="not-content review" data-review={area.slug} data-catalog={JSON.stringify(catalog)}>
+		<p>
+			Items from lessons you finished, re-asked at growing intervals. Answer formats in this course:
+			{formats.length ? formats.map((f) => <code>{f}</code>) : 'none yet'}. <strong>Hint</strong> nudges; <strong>Give up</strong>
+			shows the answer after one attempt and counts as a fail.
+		</p>
+		<div class="review-progress" aria-label="Items in this session"><div data-bar></div></div>
+		<p data-status role="status"></p>
+		<div data-items></div>
+		<div class="review-actions">
+			<a href={href(`/${area.slug}/`)}>Back to the course</a>
+		</div>
+	</div>
+</StarlightPage>
+
+<script>
+	import * as progress from '@scripts/progress';
+	import { bindCheckpoint } from '@scripts/checkpoints';
+
+	interface CatalogLesson {
+		id: string;
+		title: string;
+		href: string;
+		checkpoints: string[];
+	}
+
+	const root = document.querySelector<HTMLElement>('.review[data-review]');
+	if (root) {
+		const area = root.dataset.review!;
+		const catalog: CatalogLesson[] = JSON.parse(root.dataset.catalog!);
+		const items = root.querySelector<HTMLElement>('[data-items]')!;
+		const status = root.querySelector<HTMLElement>('[data-status]')!;
+		const bar = root.querySelector<HTMLElement>('[data-bar]')!;
+
+		const due = progress.dueReviews(progress.load(), `${area}/`);
+		const totalDue = Object.entries(progress.load().reviews).filter(([id, it]) => id.startsWith(`${area}/`) && it.stage !== 'done' && it.due <= progress.today()).length;
+		let answered = 0;
+
+		async function fetchSection(progressId: string): Promise<HTMLElement | null> {
+			const [lessonId, cpId] = progressId.split('#');
+			const lesson = catalog.find((l) => l.id === lessonId);
+			if (!lesson || !lesson.checkpoints.includes(cpId)) return null;
+			const html = await (await fetch(lesson.href)).text();
+			const doc = new DOMParser().parseFromString(html, 'text/html');
+			const section = doc.querySelector<HTMLElement>(`[data-checkpoint][data-progress-id="${progressId}"]`);
+			return section ? (document.importNode(section, true) as HTMLElement) : null;
+		}
+
+		function finish() {
+			status.textContent = `Done: ${answered} item${answered === 1 ? '' : 's'} reviewed. ${Math.max(0, totalDue - due.length)} more remain due.`;
+			const btn = document.createElement('a');
+			btn.href = root!.querySelector<HTMLAnchorElement>('.review-actions a')!.href;
+			btn.textContent = 'Finish review';
+			btn.className = 'cp-check';
+			items.appendChild(btn);
+		}
+
+		async function next(i: number) {
+			bar.style.width = `${due.length ? Math.round((i / due.length) * 100) : 100}%`;
+			if (i >= due.length) return finish();
+			status.textContent = `Item ${i + 1} of ${due.length}`;
+			const section = await fetchSection(due[i]);
+			if (!section) {
+				// Orphaned item (content changed): drop it and move on.
+				progress.update((r) => delete r.reviews[due[i]]);
+				return next(i + 1);
+			}
+			delete section.dataset.bound;
+			section.querySelector<HTMLElement>('.cp-skip')?.remove();
+			const giveUp = section.querySelector<HTMLElement>('.cp-giveup');
+			if (giveUp) giveUp.hidden = false;
+			items.replaceChildren(section);
+			let done = false;
+			bindCheckpoint(section, {
+				review: true,
+				onResult: () => {
+					if (done) return;
+					done = true;
+					answered++;
+					const btn = document.createElement('button');
+					btn.type = 'button';
+					btn.textContent = 'Next item';
+					btn.className = 'cp-check';
+					btn.addEventListener('click', () => next(i + 1));
+					section.querySelector('.cp-after')?.appendChild(btn);
+					section.querySelector<HTMLButtonElement>('.cp-check')?.setAttribute('disabled', 'true');
+				},
+			});
+		}
+
+		if (!due.length) {
+			items.innerHTML = '<div class="review-empty">Nothing due. Finish a lesson and come back tomorrow.</div>';
+			bar.style.width = '100%';
+		} else {
+			next(0);
+		}
+	}
+</script>

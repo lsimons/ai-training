@@ -1,0 +1,236 @@
+# Source material keyed as in docs/spec/S02-topic-map.md "Source material".
+# url is null unless the spec gives a public URL.
+AEC-01:
+  title: "What are AI agents: model versus agent, autonomy levels, when a prompt suffices"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-02:
+  title: "How agents think: tokens and context, reasoning strategies, model choice, system prompts"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-03:
+  title: "Tools, giving agents hands: function calling, schema design, the N x M problem"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-04:
+  title: "Agentic design patterns: ReAct, reflection, tool use, planning"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-05:
+  title: "Memory and context: context engineering, memory kinds, memory versus RAG, context rot"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-06:
+  title: "Planning and reasoning: the loop, plan-then-execute, hierarchy"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-07:
+  title: "Multi-agent systems: architectures, roles, the orchestration tax"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-08:
+  title: "Agentic RAG: the retrieve, evaluate, refine loop; when basic RAG is enough"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-09:
+  title: "Evaluating and testing agents: quality pillars, metrics, trajectories, LLM as judge"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-10:
+  title: "Guardrails and safety: why agent safety differs, defence layers, injection, human in the loop"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-11:
+  title: "From prototype to production: eval-gated deploys, rollout, cost"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-12:
+  title: Getting started with Claude Code
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-13:
+  title: "Building your first agent: the loop from scratch, then with an SDK"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-14:
+  title: Agent protocols, MCP and A2A
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-15:
+  title: "AGENTS.md: contents, monorepo hierarchies, with a builder widget"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-16:
+  title: "MCP deep dive: MCP versus CLI, security failure modes, token cost"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-17:
+  title: "Agent skills: skills versus tools, the spec, progressive disclosure"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+AEC-18:
+  title: "Orchestrators: code- versus model-driven, patterns, anti-patterns"
+  container: Agent Engineer Course
+  author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
+  license: Apache-2.0
+  url: null
+DLAI-1:
+  title: ChatGPT Prompt Engineering for Developers
+  container: DeepLearning.AI
+  author: DeepLearning.AI
+  license: Proprietary
+  url: null
+DLAI-2:
+  title: Generative AI for Everyone
+  container: DeepLearning.AI
+  author: DeepLearning.AI
+  license: Proprietary
+  url: null
+DLAI-3:
+  title: AI Prompting for Everyone
+  container: DeepLearning.AI
+  author: DeepLearning.AI
+  license: Proprietary
+  url: null
+DLAI-5:
+  title: "Claude Code: A Highly Agentic Coding Assistant"
+  container: DeepLearning.AI
+  author: DeepLearning.AI
+  license: Proprietary
+  url: null
+DLAI-6:
+  title: Intro to Generative AI for Software Development
+  container: DeepLearning.AI
+  author: DeepLearning.AI
+  license: Proprietary
+  url: null
+DLAI-7:
+  title: Team Software Engineering with AI
+  container: DeepLearning.AI
+  author: DeepLearning.AI
+  license: Proprietary
+  url: null
+DLAI-9:
+  title: "MCP: Build Rich-Context AI Apps with Anthropic"
+  container: DeepLearning.AI
+  author: DeepLearning.AI
+  license: Proprietary
+  url: null
+DLAI-10:
+  title: Agent Skills with Anthropic
+  container: DeepLearning.AI
+  author: DeepLearning.AI
+  license: Proprietary
+  url: null
+DLAI-11:
+  title: "Agentic AI: M1 workflows and autonomy, M2 reflection, M4 evals and error analysis, M5 autonomous agents"
+  container: DeepLearning.AI
+  author: DeepLearning.AI
+  license: Proprietary
+  url: null
+CS50:
+  title: Harvard CS50 and its AI tutor
+  container: Harvard CS50
+  author: Harvard University, CS50
+  license: CC BY-NC-SA 4.0
+  url: null
+Ng:
+  title: "AI engineering skills map: build and deploy AI applications, software engineering fundamentals, use coding agents, shape the build"
+  container: The Batch (newsletter)
+  author: Andrew Ng
+  license: Public newsletter
+  url: null
+Brilliant TAS:
+  title: "Taste: what is worth building"
+  container: Brilliant, Coding with AI skills map
+  author: Brilliant
+  license: Proprietary
+  url: null
+Brilliant INC:
+  title: Developing incrementally
+  container: Brilliant, Coding with AI skills map
+  author: Brilliant
+  license: Proprietary
+  url: null
+Brilliant SPC:
+  title: Specification and design
+  container: Brilliant, Coding with AI skills map
+  author: Brilliant
+  license: Proprietary
+  url: null
+Brilliant MEM:
+  title: Memory (listed under SPC)
+  container: Brilliant, Coding with AI skills map
+  author: Brilliant
+  license: Proprietary
+  url: null
+Brilliant BLD:
+  title: Designing workflows
+  container: Brilliant, Coding with AI skills map
+  author: Brilliant
+  license: Proprietary
+  url: null
+Brilliant VER:
+  title: Verification
+  container: Brilliant, Coding with AI skills map
+  author: Brilliant
+  license: Proprietary
+  url: null
+Brilliant SEC:
+  title: Security and adversarial thinking
+  container: Brilliant, Coding with AI skills map
+  author: Brilliant
+  license: Proprietary
+  url: null
+Brilliant ABS:
+  title: Reasoning across levels of abstraction
+  container: Brilliant, Coding with AI skills map
+  author: Brilliant
+  license: Proprietary
+  url: null
+Learn Prompting:
+  title: The community prompt engineering guide
+  container: Learn Prompting
+  author: Learn Prompting contributors
+  license: "CC BY 4.0 (to 2023-02-15), then CC BY-NC-SA 4.0"
+  url: null
+Diátaxis:
+  title: Diátaxis, a systematic approach to technical documentation authoring
+  container: Diátaxis
+  author: Daniele Procida
+  license: CC BY-SA 4.0
+  url: null

@@ -1,0 +1,134 @@
+---
+/** The progress page (spec S04 "Export and import"): overview per course, export, import, reset, and the raw record. */
+import { AREAS } from '@lib/areas';
+import { getLessons, checkpointsOf } from '@lib/lessons';
+
+const lessons = await getLessons();
+const catalog = AREAS.map((a) => ({
+	area: a.slug,
+	title: a.name,
+	lessons: lessons
+		.filter((l) => l.id.startsWith(`${a.slug}/`))
+		.map((l) => ({ id: l.id, title: l.data.title, checkpoints: checkpointsOf(l).map((c) => c.id) })),
+}));
+---
+
+<div class="not-content progress" data-catalog={JSON.stringify(catalog)}>
+	<div class="progress-overview" data-overview></div>
+
+	<h2 id="comfort">Comfort level</h2>
+	<p>Engineering lessons offer a comfort level (spec: routing only, never content). Current: <strong data-comfort-label>not set</strong>.</p>
+
+	<h2 id="export-import-reset">Export, import, reset</h2>
+	<p>
+		Progress is stored in this browser only, under the local-storage key <code>ai-training-progress-v1</code>. Nothing is sent
+		anywhere. Export it to move to another browser or to show a tutor; import replaces what is here.
+	</p>
+	<div class="progress-actions">
+		<button type="button" data-export>Export JSON</button>
+		<label>Import: <input type="file" accept="application/json" data-import /></label>
+		<button type="button" data-reset>Reset all</button>
+		<span class="progress-message" role="status" data-message></span>
+	</div>
+
+	<h2 id="raw-record">Raw record</h2>
+	<pre class="progress-dump" data-dump></pre>
+</div>
+
+<script>
+	import * as progress from '@scripts/progress';
+
+	interface CatalogLesson {
+		id: string;
+		title: string;
+		checkpoints: string[];
+	}
+	interface CatalogCourse {
+		area: string;
+		title: string;
+		lessons: CatalogLesson[];
+	}
+
+	const root = document.querySelector<HTMLElement>('.progress[data-catalog]');
+	if (root) {
+		const catalog: CatalogCourse[] = JSON.parse(root.dataset.catalog!);
+		const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+		const overview = root.querySelector<HTMLElement>('[data-overview]')!;
+		const dump = root.querySelector<HTMLElement>('[data-dump]')!;
+		const message = root.querySelector<HTMLElement>('[data-message]')!;
+		const comfortLabel = root.querySelector<HTMLElement>('[data-comfort-label]')!;
+
+		function draw() {
+			const rec = progress.load();
+			overview.replaceChildren(
+				...catalog.map((course) => {
+					const card = document.createElement('div');
+					card.className = 'progress-course';
+					const h = document.createElement('h3');
+					const a = document.createElement('a');
+					a.href = `${base}/${course.area}/`;
+					a.textContent = course.title;
+					h.appendChild(a);
+					card.appendChild(h);
+					if (!course.lessons.length) {
+						const p = document.createElement('p');
+						p.textContent = 'No lessons yet.';
+						card.appendChild(p);
+					}
+					for (const l of course.lessons) {
+						const row = document.createElement('div');
+						row.className = 'progress-lesson';
+						row.dataset.state = rec.lessons[l.id]?.state ?? 'untouched';
+						const dot = document.createElement('span');
+						dot.className = 'dot';
+						const link = document.createElement('a');
+						link.href = `${base}/${l.id}/`;
+						link.textContent = l.title;
+						const cps = document.createElement('span');
+						cps.className = 'cps';
+						for (const c of l.checkpoints) {
+							const sq = document.createElement('span');
+							const st = rec.checkpoints[`${l.id}#${c}`];
+							sq.dataset.state = st?.state ?? 'none';
+							sq.title = `${c}: ${st?.state ?? 'not attempted'}`;
+							cps.appendChild(sq);
+						}
+						row.append(dot, link, cps);
+						card.appendChild(row);
+					}
+					return card;
+				})
+			);
+			dump.textContent = progress.exportJson(rec);
+			comfortLabel.textContent = rec.comfort ?? 'not set';
+		}
+
+		root.querySelector('[data-export]')?.addEventListener('click', () => {
+			const blob = new Blob([progress.exportJson(progress.load())], { type: 'application/json' });
+			const a = document.createElement('a');
+			a.href = URL.createObjectURL(blob);
+			a.download = `ai-training-progress-${progress.today()}.json`;
+			a.click();
+			URL.revokeObjectURL(a.href);
+		});
+		root.querySelector('[data-reset]')?.addEventListener('click', () => {
+			if (confirm('Reset all progress in this browser?')) {
+				progress.reset();
+				message.textContent = 'Progress reset.';
+			}
+		});
+		root.querySelector<HTMLInputElement>('[data-import]')?.addEventListener('change', async (e) => {
+			const input = e.target as HTMLInputElement;
+			const file = input.files?.[0];
+			if (!file) return;
+			const text = await file.text();
+			if (!confirm('Replace your progress with the imported file?')) return;
+			const result = progress.importJson(text);
+			message.textContent = result.ok ? 'Imported.' : result.message;
+			input.value = '';
+		});
+
+		draw();
+		document.addEventListener(progress.EVENT, draw);
+	}
+</script>

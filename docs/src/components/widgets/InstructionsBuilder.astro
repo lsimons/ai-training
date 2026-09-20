@@ -1,0 +1,318 @@
+---
+// InstructionsBuilder: tick the facts about a project, fill in the short
+// fields, and watch the resulting AGENTS.md take shape. Teaches only; it
+// never grades. No framework; the script below runs once per instance.
+---
+
+<div class="not-content instructions-builder">
+  <form class="ib-form" autocomplete="off">
+    <p class="ib-intro">
+      Tick what is true for your project and fill in the short fields. The
+      file on the right updates as you type.
+    </p>
+
+    <label class="ib-field">
+      <span>Project name</span>
+      <input type="text" class="ib-name" placeholder="invoice-mailer" />
+    </label>
+
+    <label class="ib-field">
+      <span>One line: what it is</span>
+      <input type="text" class="ib-purpose" placeholder="Sends monthly invoices as PDF over SMTP." />
+    </label>
+
+    <fieldset class="ib-group">
+      <legend>Commands</legend>
+      <label class="ib-check">
+        <input type="checkbox" class="ib-has-runtime" checked />
+        <span>Language and runtime</span>
+      </label>
+      <input type="text" class="ib-runtime" placeholder="Python 3.13, dependencies via uv" />
+
+      <label class="ib-check">
+        <input type="checkbox" class="ib-has-test" checked />
+        <span>Test command</span>
+      </label>
+      <input type="text" class="ib-test" placeholder="uv run pytest" />
+
+      <label class="ib-check">
+        <input type="checkbox" class="ib-has-lint" checked />
+        <span>Lint and format command</span>
+      </label>
+      <input type="text" class="ib-lint" placeholder="uv run ruff check . && uv run ruff format ." />
+    </fieldset>
+
+    <fieldset class="ib-group">
+      <legend>Rules</legend>
+      <label class="ib-check">
+        <input type="checkbox" class="ib-has-branch" />
+        <span>Branch rule</span>
+      </label>
+      <input type="text" class="ib-branch" placeholder="Never commit to main; branch as feat/… or fix/…" />
+
+      <label class="ib-check">
+        <input type="checkbox" class="ib-has-notouch" />
+        <span>Files never to touch</span>
+      </label>
+      <input type="text" class="ib-notouch" placeholder="migrations/, uv.lock, anything under vendor/" />
+
+      <label class="ib-check">
+        <input type="checkbox" class="ib-has-mistake" />
+        <span>A recurring mistake to stop</span>
+      </label>
+      <input type="text" class="ib-mistake" placeholder="Do not add retries around SMTP calls; the queue already retries." />
+    </fieldset>
+  </form>
+
+  <div class="ib-output">
+    <div class="ib-output-head">
+      <span class="ib-filename">AGENTS.md</span>
+      <span class="ib-count" aria-live="polite"></span>
+      <button type="button" class="ib-copy">Copy</button>
+    </div>
+    <pre class="ib-pre" tabindex="0"><code class="ib-code"></code></pre>
+  </div>
+</div>
+
+<style>
+  .instructions-builder {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    background: var(--sl-color-bg-nav);
+    font-size: var(--sl-text-sm);
+  }
+
+  @media (max-width: 50rem) {
+    .instructions-builder {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .ib-intro {
+    margin: 0 0 0.75rem;
+    color: var(--sl-color-gray-2);
+  }
+
+  .ib-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .ib-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .ib-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0.5rem 0.75rem 0.75rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.375rem;
+  }
+
+  .ib-group legend {
+    padding: 0 0.25rem;
+    font-weight: 600;
+  }
+
+  .ib-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+  }
+
+  .ib-check input {
+    accent-color: var(--sl-color-accent);
+  }
+
+  .instructions-builder input[type='text'] {
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.25rem;
+    background: var(--sl-color-bg);
+    color: var(--sl-color-text);
+    font: inherit;
+  }
+
+  .instructions-builder input[type='text']:disabled {
+    opacity: 0.45;
+  }
+
+  .instructions-builder input[type='text']:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 1px;
+  }
+
+  .ib-output {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .ib-output-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .ib-filename {
+    font-family: var(--sl-font-mono);
+    font-weight: 600;
+  }
+
+  .ib-count {
+    flex: 1;
+    color: var(--sl-color-gray-3);
+  }
+
+  .ib-copy {
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--sl-color-accent);
+    border-radius: 0.25rem;
+    background: transparent;
+    color: var(--sl-color-accent);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .ib-copy:hover,
+  .ib-copy:focus-visible {
+    background: var(--sl-color-accent);
+    color: var(--sl-color-text-invert);
+  }
+
+  .ib-pre {
+    flex: 1;
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.375rem;
+    background: var(--sl-color-bg);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+</style>
+
+<script>
+  function text(root: Element, cls: string): string {
+    const el = root.querySelector<HTMLInputElement>('.' + cls);
+    return el ? el.value.trim() : '';
+  }
+
+  function checked(root: Element, cls: string): boolean {
+    const el = root.querySelector<HTMLInputElement>('.' + cls);
+    return el ? el.checked : false;
+  }
+
+  function build(root: Element): string {
+    const name = text(root, 'ib-name') || 'my-project';
+    const purpose = text(root, 'ib-purpose');
+    const lines: string[] = ['# ' + name];
+    if (purpose) lines.push('', purpose);
+
+    const commands: string[] = [];
+    if (checked(root, 'ib-has-runtime')) {
+      commands.push('- Runtime: ' + (text(root, 'ib-runtime') || '<language and version>'));
+    }
+    if (checked(root, 'ib-has-test')) {
+      commands.push('- Test: `' + (text(root, 'ib-test') || '<test command>') + '`');
+    }
+    if (checked(root, 'ib-has-lint')) {
+      commands.push('- Lint and format: `' + (text(root, 'ib-lint') || '<lint command>') + '`');
+    }
+    if (commands.length > 0) {
+      lines.push('', '## Commands', '', ...commands);
+    }
+
+    const rules: string[] = [];
+    if (checked(root, 'ib-has-branch')) {
+      rules.push('- ' + (text(root, 'ib-branch') || '<branch rule>'));
+    }
+    if (checked(root, 'ib-has-notouch')) {
+      rules.push('- Never edit: ' + (text(root, 'ib-notouch') || '<paths>'));
+    }
+    if (checked(root, 'ib-has-mistake')) {
+      rules.push('- ' + (text(root, 'ib-mistake') || '<the mistake to stop, and what to do instead>'));
+    }
+    if (rules.length > 0) {
+      lines.push('', '## Rules', '', ...rules);
+    }
+
+    return lines.join('\n') + '\n';
+  }
+
+  function syncDisabled(root: Element): void {
+    const pairs: Array<[string, string]> = [
+      ['ib-has-runtime', 'ib-runtime'],
+      ['ib-has-test', 'ib-test'],
+      ['ib-has-lint', 'ib-lint'],
+      ['ib-has-branch', 'ib-branch'],
+      ['ib-has-notouch', 'ib-notouch'],
+      ['ib-has-mistake', 'ib-mistake'],
+    ];
+    for (const [box, field] of pairs) {
+      const input = root.querySelector<HTMLInputElement>('.' + field);
+      if (input) input.disabled = !checked(root, box);
+    }
+  }
+
+  function render(root: Element): void {
+    const code = root.querySelector<HTMLElement>('.ib-code');
+    const count = root.querySelector<HTMLElement>('.ib-count');
+    if (!code) return;
+    const out = build(root);
+    code.textContent = out;
+    if (count) {
+      const n = out.split('\n').filter((l) => l.trim().length > 0).length;
+      count.textContent = n + ' non-empty line' + (n === 1 ? '' : 's');
+    }
+  }
+
+  function init(root: Element): void {
+    const form = root.querySelector<HTMLFormElement>('.ib-form');
+    const copy = root.querySelector<HTMLButtonElement>('.ib-copy');
+    if (!form) return;
+
+    form.addEventListener('input', () => {
+      syncDisabled(root);
+      render(root);
+    });
+    form.addEventListener('submit', (ev) => ev.preventDefault());
+
+    if (copy) {
+      copy.addEventListener('click', async () => {
+        const label = copy.textContent;
+        try {
+          await navigator.clipboard.writeText(build(root));
+          copy.textContent = 'Copied';
+        } catch {
+          copy.textContent = 'Select and copy';
+        }
+        window.setTimeout(() => {
+          copy.textContent = label;
+        }, 1500);
+      });
+    }
+
+    syncDisabled(root);
+    render(root);
+  }
+
+  document.querySelectorAll('.instructions-builder').forEach(init);
+</script>

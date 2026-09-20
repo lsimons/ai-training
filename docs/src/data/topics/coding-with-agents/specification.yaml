@@ -1,0 +1,59 @@
+id: coding-with-agents/specification
+area: coding-with-agents
+name: Deciding and specifying
+definition: >-
+  When an agent does the implementing, the engineer's skill concentrates
+  before the code: judging whether something is worth building, defining
+  what success requires, breaking the problem into components with clear
+  dependencies, and designing how the result will be verified before any of
+  it exists.
+concepts:
+  - id: what-is-worth-building
+    name: What is worth building
+    definition: >-
+      Judging an idea before building it: who needs it, what it costs to
+      build and to keep, what it displaces, and what happens if it is not
+      built. Cheap implementation makes this judgement more important, not
+      less, because the cost of building the wrong thing is now mostly the
+      cost of maintaining it. Say no, or say smaller, before the agent starts.
+  - id: success-criteria
+    name: Success criteria
+    definition: >-
+      Concrete, checkable statements of what a finished result must do and
+      must not do, written before the work starts. Good criteria describe
+      observable behaviour, name the edge cases that matter and set limits
+      such as performance or compatibility. They become the agent's target
+      and the reviewer's checklist, and they stop a plausible result from
+      being accepted as a correct one.
+  - id: decomposition-into-components
+    name: Decomposition into components
+    definition: >-
+      Splitting a problem into parts with clear responsibilities and
+      interfaces, each small enough to build and verify on its own. Good
+      components can be implemented in any order that respects their
+      dependencies, tested in isolation and replaced without touching the
+      rest. The split is a design decision the engineer owns; agents follow
+      it well and invent it poorly.
+  - id: dependencies
+    name: Dependencies
+    definition: >-
+      The relationships that force an order: which component needs another
+      to exist first, which decision has to be made before a piece can be
+      specified, which external system must be available. Naming
+      dependencies early sets the sequence of work, shows what can proceed
+      in parallel and exposes the risky assumption that everything else
+      rests on.
+  - id: designing-the-verification
+    name: Designing the verification
+    definition: >-
+      Deciding how each piece of work will be checked before it is built:
+      which tests must pass, what to observe in the running system, which
+      review questions to ask. Designing the check first makes the criteria
+      precise, gives the agent a target it can run itself, and keeps
+      verification from being replaced by a glance at a diff that looks
+      right.
+links:
+  prerequisites: [coding-with-agents/first-session, using-agents/decomposition]
+  related: []
+  specializations: []
+sources: [Brilliant TAS, Brilliant SPC]

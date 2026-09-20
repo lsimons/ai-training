@@ -1,0 +1,45 @@
+---
+/**
+ * Predict the output of real code (spec S01 `predict`). With `answer`, the
+ * page grades by comparison and `run` names the fixture CI executes to assert
+ * that answer. Without `answer`, it is the honour-system variant: the learner
+ * runs it themselves and self-grades.
+ */
+import CheckpointShell from './CheckpointShell.astro';
+
+interface Props {
+	id: string;
+	objective: string;
+	title: string;
+	hint: string;
+	answer?: string;
+	run?: string;
+}
+const { id, objective, title, hint, answer, run } = Astro.props;
+const honour = answer === undefined;
+---
+
+<CheckpointShell {id} {objective} {title} {hint} kind="predict" checkLabel={honour ? 'Record' : 'Check'}>
+	<slot />
+	<Fragment slot="body">
+		<div data-answer={answer} data-run={run} class="cp-predict">
+			<label>
+				<span class="cp-label">{honour ? 'Your prediction' : 'What is printed?'}</span>
+				<textarea rows={honour ? 3 : 1} spellcheck="false"></textarea>
+			</label>
+			{
+				honour ? (
+					<fieldset class="cp-selfgrade">
+						<legend>After running it, how did your prediction hold up?</legend>
+						<label><input type="radio" name={`${id}-selfgrade`} value="pass" /> It matched</label>
+						<label><input type="radio" name={`${id}-selfgrade`} value="partial" /> Partly</label>
+					</fieldset>
+				) : (
+					<pre class="cp-reveal" hidden>{answer}</pre>
+				)
+			}
+			{run && <p class="cp-verified">Output verified in CI from <code>docs/examples/{run}</code>.</p>}
+			{!run && !honour && <p class="cp-verified">This example is not run in CI; the output was checked by hand.</p>}
+		</div>
+	</Fragment>
+</CheckpointShell>

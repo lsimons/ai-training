@@ -1,0 +1,55 @@
+id: using-agents/assistant-work
+area: using-agents
+name: Working with an assistant
+definition: >-
+  The everyday uses of a chat assistant for knowledge work: finding and
+  summarising information, thinking a problem through out loud, producing and
+  reshaping drafts, getting critical feedback on your own work, and working
+  from files and images you supply rather than from the model's memory.
+concepts:
+  - id: finding-information
+    name: Finding information
+    definition: >-
+      Using an assistant to locate, summarise and compare information, in
+      documents you supply or, with a search tool, on the web. It is fast at
+      orientation and at turning a long text into the three things you need
+      to know. It is unreliable on specifics from memory alone, so ask for
+      sources, supply the material yourself where you can, and check anything
+      you will repeat.
+  - id: thought-partner
+    name: Thought partner
+    definition: >-
+      Using the assistant to think, not to answer: explain your problem,
+      ask it to question your assumptions, list what you might be missing,
+      argue the opposite view or lay out options. The value is in your own
+      clearer thinking. Ask for challenge explicitly, because a model left to
+      itself tends to agree with the framing you give it.
+  - id: drafting
+    name: Drafting
+    definition: >-
+      Getting a first version of an email, report, plan or message from a
+      brief, then shaping it. Give the audience, the purpose, the points that
+      must appear and the tone; ask for alternatives when you are unsure.
+      The draft is raw material, not the product. The facts in it are yours
+      to supply and check, and the final voice should be yours.
+  - id: critique
+    name: Critique
+    definition: >-
+      Asking an assistant to review your own work: find weak arguments,
+      unclear passages, missing steps or errors. Because models tend to
+      praise, ask for problems only, ask it to grade against stated criteria,
+      or tell it the text is someone else's. Critique is one of the safest
+      uses, since you remain the author and judge every suggestion.
+  - id: working-with-files-and-images
+    name: Working with files and images
+    definition: >-
+      Giving the assistant a document, spreadsheet, screenshot or photo to
+      work from instead of describing it. This grounds the answer in your
+      material and unlocks tasks such as extracting a table from a picture or
+      comparing two versions of a contract. Mind what is in the file before
+      uploading; attachments are data disclosure just like pasted text.
+links:
+  prerequisites: [concepts/prompting]
+  related: []
+  specializations: []
+sources: [DLAI-3]

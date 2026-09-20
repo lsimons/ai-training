@@ -1,0 +1,57 @@
+id: using-agents/choosing-tools
+area: using-agents
+name: Choosing models and tools
+definition: >-
+  Not every task wants the biggest model or an agent. This topic covers
+  matching a model to a task, weighing cost and speed against quality,
+  choosing between a chat, an agent and an unattended automation, deciding
+  which steps stay human, and re-applying that judgement as tools grow more
+  capable.
+concepts:
+  - id: model-fit
+    name: Model fit
+    definition: >-
+      Matching a model to a task by what the task needs: a small fast model
+      for classification or reformatting, a larger one for multi-step
+      reasoning or ambiguous instructions, a model with tools where fresh
+      facts matter. Fit is tested, not assumed: run a few representative
+      inputs on each candidate and compare, rather than defaulting to the
+      most capable and expensive option.
+  - id: cost-and-speed
+    name: Cost and speed
+    definition: >-
+      The price and delay of a choice, per task and at the volume you expect.
+      A model that costs ten times more and answers slower must be enough
+      better to justify it; an agent that takes twenty tool calls costs
+      twenty times a single answer. For repeated work, small differences per
+      call become the whole budget, so measure before scaling.
+  - id: chat-vs-agent-vs-automation
+    name: Chat vs agent vs automation
+    definition: >-
+      Three ways to apply a model. Chat: you steer every turn, best for
+      thinking and one-off drafts. Agent: you brief it and it works through
+      steps with tools, checking in as agreed, best for bounded tasks with
+      clear done-criteria. Automation: it runs unattended on a trigger, best
+      for repetitive, low-stakes, well-tested tasks. Autonomy rises across the
+      three, so the checks must rise too.
+  - id: what-to-keep-human
+    name: What to keep human
+    definition: >-
+      The steps that stay with a person on purpose: decisions with legal or
+      ethical weight, judgements about people, anything irreversible or
+      costly, and the final accountability for a result. Keeping a step human
+      is a design choice, not a limitation, and naming those steps early
+      prevents them from being automated by default as tools improve.
+  - id: reasoning-across-tool-levels
+    name: Reasoning across tool levels
+    definition: >-
+      Tools rise in abstraction, from autocomplete to chat to agents to
+      systems of agents, and each level hides more of what happens below.
+      The judgement about fit, cost, risk and what to keep human has to be
+      re-applied at each new level rather than carried over. What was safe to
+      trust at one level may not be at the next, and vice versa.
+links:
+  prerequisites: [using-agents/delegating, concepts/limits]
+  related: []
+  specializations: []
+sources: [AEC-12, Brilliant ABS]

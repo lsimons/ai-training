@@ -1,0 +1,157 @@
+---
+/**
+ * Starlight `MarkdownContent` override. For lesson pages (frontmatter has
+ * `mode`) it wraps the content in a lesson frame carrying the ids the client
+ * needs, renders the routing cards (spec S02 "Differentiation by routing")
+ * and the comfort-level control for Engineering lessons, and loads the lesson
+ * script once. Other pages render as Starlight does.
+ */
+import Default from '@astrojs/starlight/components/MarkdownContent.astro';
+import { getCollection } from 'astro:content';
+import { ENGINEERING_AREAS } from '@lib/areas';
+import { href } from '@lib/url';
+
+const entry = Astro.locals.starlightRoute.entry;
+const data = entry.data as typeof entry.data & {
+	mode?: string;
+	serves?: string[];
+	assumes?: { objective: string; lesson: string; section: string }[];
+	'extends-to'?: { label: string; href: string }[];
+};
+const isLesson = Boolean(data.mode);
+const lessonId = entry.id;
+const area = lessonId.split('/')[0];
+const engineering = ENGINEERING_AREAS.includes(area);
+
+let behind: { objective: string; statement: string; href: string; lessonTitle: string }[] = [];
+let ahead: { label: string; href: string; exists: boolean }[] = [];
+if (isLesson) {
+	const docs = await getCollection('docs');
+	const competencies = await getCollection('competencies');
+	const statements = new Map<string, string>();
+	for (const a of competencies) for (const c of a.data.competencies) for (const o of c.objectives) statements.set(o.id, o.statement);
+	behind = (data.assumes ?? []).map((a) => {
+		const lesson = docs.find((d) => d.id === a.lesson);
+		if (!lesson) throw new Error(`${lessonId}: assumes unknown lesson ${a.lesson}`);
+		if (!statements.has(a.objective)) throw new Error(`${lessonId}: assumes unknown objective ${a.objective}`);
+		return { objective: a.objective, statement: statements.get(a.objective)!, href: href(`/${a.lesson}/#${a.section}`), lessonTitle: lesson.data.title };
+	});
+	ahead = (data['extends-to'] ?? []).map((n) => ({
+		label: n.label,
+		href: href(n.href),
+		exists: docs.some((d) => `/${d.id}/` === n.href),
+	}));
+}
+---
+
+{
+	isLesson ? (
+		<div class="lesson" data-lesson={lessonId} data-mode={data.mode} data-area={area} data-engineering={String(engineering)}>
+			{engineering && (
+				<div class="comfort not-content" role="group" aria-label="Comfort level">
+					<span>Comfort level:</span>
+					<button type="button" data-comfort="less" aria-pressed="false">less comfortable</button>
+					<button type="button" data-comfort="more" aria-pressed="false">more comfortable</button>
+					<span class="comfort-note"></span>
+				</div>
+			)}
+			{behind.length > 0 && (
+				<aside class="route-card route-behind not-content" data-route="behind" hidden>
+					<p class="route-title">Worth revisiting first</p>
+					<ul>
+						{behind.map((b) => (
+							<li>
+								<a href={b.href}>{b.statement}</a> <span class="route-where">in {b.lessonTitle}</span>
+							</li>
+						))}
+					</ul>
+				</aside>
+			)}
+			<Default><slot /></Default>
+			{ahead.length > 0 && (
+				<aside class="route-card route-ahead not-content" data-route="ahead" hidden>
+					<p class="route-title">You are ahead. Next:</p>
+					<ul>
+						{ahead.map((n) => (
+							<li>{n.exists ? <a href={n.href}>{n.label}</a> : <span>{n.label} <span class="route-where">(not written yet)</span></span>}</li>
+						))}
+					</ul>
+				</aside>
+			)}
+		</div>
+	) : (
+		<Default><slot /></Default>
+	)
+}
+
+<script>
+	import * as progress from '@scripts/progress';
+	import { bindAll } from '@scripts/checkpoints';
+
+	const root = document.querySelector<HTMLElement>('.lesson[data-lesson]');
+	if (root) {
+		const lessonId = root.dataset.lesson!;
+		const checkpoints = bindAll(root, { onResult: route });
+		progress.markLessonRead(lessonId);
+
+		// Routing: a failed or skipped checkpoint surfaces the assumed objectives;
+		// every checkpoint passed first time surfaces the extensions.
+		const behindCard = root.querySelector<HTMLElement>('[data-route=behind]');
+		const aheadCard = root.querySelector<HTMLElement>('[data-route=ahead]');
+		function route() {
+			const rec = progress.load();
+			const states = checkpoints.map((el) => rec.checkpoints[el.dataset.progressId!]);
+			const anyStuck = states.some((s) => s && s.state !== 'passed');
+			const allClean = states.length > 0 && states.every((s) => s && s.state === 'passed' && s.attempts === 1);
+			if (behindCard) behindCard.hidden = !(anyStuck || rec.comfort === 'less');
+			if (aheadCard) aheadCard.hidden = !(allClean || rec.comfort === 'more');
+		}
+
+		// Comfort level (Engineering only). Changes routing, never content.
+		const comfortButtons = root.querySelectorAll<HTMLButtonElement>('[data-comfort]');
+		const comfortNote = root.querySelector<HTMLElement>('.comfort-note');
+		function drawComfort() {
+			const level = progress.load().comfort;
+			comfortButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.comfort === level)));
+			if (comfortNote)
+				comfortNote.textContent =
+					level === 'less' ? 'The sections this lesson builds on are listed above.' : level === 'more' ? 'Extensions are shown at the end; reviews start at stage 2.' : '';
+		}
+		comfortButtons.forEach((b) =>
+			b.addEventListener('click', () => {
+				const current = progress.load().comfort;
+				progress.setComfort(current === b.dataset.comfort ? undefined : (b.dataset.comfort as 'less' | 'more'));
+				drawComfort();
+				route();
+			})
+		);
+		drawComfort();
+		route();
+
+		// Finish and skip (spec S04 lesson states; finishing schedules reviews, spec S05).
+		const finish = root.querySelector<HTMLButtonElement>('[data-finish]');
+		const skip = root.querySelector<HTMLButtonElement>('[data-skip-lesson]');
+		function drawLesson() {
+			const l = progress.load().lessons[lessonId];
+			if (finish) {
+				finish.disabled = l?.state === 'finished';
+				finish.textContent = l?.state === 'finished' ? `Finished ✓ (${l.at})` : 'Mark lesson finished';
+			}
+			if (skip) {
+				skip.disabled = l?.state === 'skipped' || l?.state === 'finished';
+				skip.textContent = l?.state === 'skipped' ? `Skipped (${l.at})` : 'I know this, skip it';
+			}
+		}
+		finish?.addEventListener('click', () => {
+			const reviewable = checkpoints.filter((el) => el.dataset.reviewable === 'true').map((el) => el.dataset.progressId!);
+			progress.finishLesson(lessonId, reviewable);
+			drawLesson();
+		});
+		skip?.addEventListener('click', () => {
+			progress.skipLesson(lessonId);
+			drawLesson();
+		});
+		drawLesson();
+
+	}
+</script>

@@ -1,0 +1,37 @@
+---
+/** Fix a broken artefact, reveal the model answer, then self-grade (spec S01 `repair`, `self-grade`). Not reviewed. */
+import CheckpointShell from './CheckpointShell.astro';
+
+interface Props {
+	id: string;
+	objective: string;
+	title: string;
+	hint: string;
+	broken: string;
+	model: string;
+}
+const { id, objective, title, hint, broken, model } = Astro.props;
+---
+
+<CheckpointShell {id} {objective} {title} {hint} kind="repair" reviewable={false} checkLabel="Record grade">
+	<slot />
+	<Fragment slot="body">
+		<div class="cp-repair">
+			<label>
+				<span class="cp-label">Your version</span>
+				<textarea rows={Math.max(4, broken.split('\n').length + 2)} spellcheck="false" set:text={broken}></textarea>
+			</label>
+			<button type="button" class="cp-reveal-btn">Reveal the model answer</button>
+			<div class="cp-model" hidden>
+				<span class="cp-label">Model answer</span>
+				<pre set:text={model}></pre>
+			</div>
+			<fieldset class="cp-selfgrade" hidden>
+				<legend>Compared with the model answer, yours is:</legend>
+				<label><input type="radio" name={`${id}-selfgrade`} value="pass" /> As good, or covers the same points</label>
+				<label><input type="radio" name={`${id}-selfgrade`} value="partial" /> Partly there</label>
+				<label><input type="radio" name={`${id}-selfgrade`} value="retry" /> I want to edit it and try again</label>
+			</fieldset>
+		</div>
+	</Fragment>
+</CheckpointShell>

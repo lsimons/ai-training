@@ -1,0 +1,79 @@
+area: safety
+competencies:
+  - id: safety/handles-data-safely
+    statement: Uses AI safely with confidential and personal data
+    topics: [safety/responsible-use]
+    objectives:
+      - id: safety/handles-data-safely/decides-what-to-share
+        statement: Decides what may go into a prompt and what may not
+        level: base
+        behaviours: []
+      - id: safety/handles-data-safely/discloses-ai-use
+        statement: Discloses AI use where the audience expects it
+        level: base
+        behaviours: []
+      - id: safety/handles-data-safely/respects-licenses
+        statement: Respects licenses and attribution in AI-assisted output
+        level: base
+        behaviours: []
+    alignment: []
+  - id: safety/verifies-output
+    statement: Verifies AI output before relying on it
+    topics: [safety/failure-modes, safety/verification]
+    objectives:
+      - id: safety/verifies-output/checks-claims
+        statement: Checks claims and sources on anything that leaves their desk
+        level: base
+        behaviours: []
+      - id: safety/verifies-output/spots-sycophancy
+        statement: Spots agreement that is not evidence
+        level: base
+        behaviours: []
+      - id: safety/verifies-output/calibrates-trust
+        statement: Matches the depth of checking to the cost of being wrong
+        level: base
+        behaviours: []
+      - id: safety/verifies-output/keeps-a-check-habit
+        statement: Builds verification into a team's routine rather than their own
+        level: expert
+        behaviours: []
+    alignment: []
+  - id: safety/judges-agent-risk
+    statement: Judges the risk of letting an agent act
+    topics: [safety/agent-risk, safety/governance]
+    objectives:
+      - id: safety/judges-agent-risk/names-blast-radius
+        statement: Names what an agent action can reach and break
+        level: base
+        behaviours:
+          - claim: Before letting an agent act, the learner lists what the agent's tools and credentials can reach, not only what the task needs.
+            why: An agent acts with everything it has been given, and a wrong step lands wherever that access extends.
+            example: Asked to let an agent tidy one folder, the learner notices it has been given write access to the whole shared drive and narrows that first.
+          - claim: The learner separates actions that can be undone from actions that cannot.
+            why: A reversible mistake costs a retry; an irreversible one costs whatever was sent, deleted or paid.
+            example: Drafting an email is reversible, sending it is not, so the learner lets the agent draft and keeps sending for themselves.
+          - claim: The learner names who else is affected when the agent gets it wrong.
+            why: Blast radius is measured in people and systems, not in the size of the task.
+            example: A script that renames files in a personal folder affects one person; the same script on a shared calendar affects everyone invited, and the learner treats them differently.
+      - id: safety/judges-agent-risk/chooses-human-in-loop
+        statement: Chooses where a human must approve
+        level: base
+        behaviours:
+          - claim: Approval is placed right before the irreversible or externally visible step, not at the start of the task.
+            why: Approving the plan up front does not catch the mistake the agent makes halfway through.
+            example: The agent may read the ticket, draft the reply and propose a label, but a person clicks send and closes the ticket.
+          - claim: A step that is approved without being read is not a control, so the learner keeps the number of approvals small enough to read.
+            why: Twenty prompts a minute trains a person to click yes, which is the same as no approval with extra cost.
+            example: Rather than approving every file edit, the learner approves once at the diff, where all edits can be read together.
+          - claim: The learner can say what evidence an approver needs at each check-in point.
+            why: An approval without the right information in front of it is a guess with a signature.
+            example: At the "send invoices" step the approver sees the count, the total and three sample rows, not just a "proceed?" prompt.
+      - id: safety/judges-agent-risk/recognises-injection
+        statement: Recognises prompt injection and data exfiltration paths
+        level: base
+        behaviours: []
+      - id: safety/judges-agent-risk/sets-oversight
+        statement: Sets policy, logging and escalation for agents in an organisation
+        level: expert
+        behaviours: []
+    alignment: []

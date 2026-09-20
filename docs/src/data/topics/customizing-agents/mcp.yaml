@@ -1,0 +1,67 @@
+id: customizing-agents/mcp
+area: customizing-agents
+name: Connecting tools with MCP
+definition: >-
+  The Model Context Protocol is a standard way to expose tools and data to
+  an agent through a server the agent's client connects to. This topic covers
+  the server and client roles, the transports that connect them, when a plain
+  command-line tool is the better choice, what a tool costs in tokens, and
+  the security consequences of connecting one.
+concepts:
+  - id: server
+    name: Server
+    definition: >-
+      The process that exposes tools, resources and prompts over the
+      protocol. A server wraps something, a database, an API, a file system,
+      a browser, and describes each tool with a name, a purpose and a
+      parameter schema the model can read. Write or install a server once
+      and any compliant agent can use it, which is the protocol's point.
+  - id: client
+    name: Client
+    definition: >-
+      The side inside the agent application that connects to servers, lists
+      the tools they offer, passes those descriptions to the model, executes
+      the model's tool calls against the right server and returns results.
+      The client is where connection configuration, approval prompts and
+      permission checks live, so it is where a user controls what a server
+      may do.
+  - id: transport
+    name: Transport
+    definition: >-
+      How client and server exchange messages. A local server usually runs as
+      a child process talking over standard input and output; a remote one
+      is reached over HTTP, often with streaming. The transport decides where
+      the server's code runs and what credentials it holds, which makes it a
+      security decision as much as a plumbing one.
+  - id: mcp-vs-cli
+    name: MCP vs CLI
+    definition: >-
+      An agent can often reach the same system through a protocol server or
+      by running a command-line tool it already knows. A server gives typed
+      tools, discoverability and a stable interface across agents. A CLI is
+      already installed, costs no tool descriptions in context and is easy to
+      audit. Prefer the CLI when it exists and is good; add a server when
+      the interface needs shaping.
+  - id: tool-cost
+    name: Tool cost
+    definition: >-
+      Every connected tool adds its description to the context on every
+      turn, and every call adds its result. A server with dozens of tools
+      can consume a large share of the window before the task starts, and
+      verbose results crowd out the conversation. Connect only the servers a
+      project needs, prefer servers with few well-described tools, and
+      watch result sizes.
+  - id: mcp-security
+    name: MCP security
+    definition: >-
+      Connecting a server extends the agent's blast radius to everything the
+      server can reach with the credentials it holds. Risks include servers
+      from untrusted sources, tool descriptions that carry injected
+      instructions, tools that return attacker-controlled content, and tools
+      that can send data outward. Vet the source, run with least privilege,
+      approve risky tools per call and review what leaves.
+links:
+  prerequisites: [customizing-agents/instructions, concepts/what-is-an-agent]
+  related: []
+  specializations: []
+sources: [AEC-14, AEC-16, DLAI-9]

@@ -1,0 +1,78 @@
+area: customizing-agents
+competencies:
+  - id: customizing-agents/configures-agent
+    statement: Configures an agent for a project
+    topics: [customizing-agents/instructions, customizing-agents/hooks-permissions, customizing-agents/memory]
+    objectives:
+      - id: customizing-agents/configures-agent/writes-project-instructions
+        statement: Writes instructions that remove a recurring agent mistake
+        level: base
+        behaviours:
+          - claim: Each instruction is traceable to a mistake the agent actually made, not to a mistake someone imagined.
+            why: Instructions written from imagination pad the file, dilute the ones that matter and are never tested.
+            example: After the agent ran `npm install` twice against a pinned lockfile, the learner adds "install with `npm ci`, never `npm install`" and nothing else that day.
+          - claim: An instruction says what to do and how the agent can tell it did it, in one or two lines.
+            why: Vague guidance such as "write clean code" gives the agent nothing to check itself against.
+            example: "\"Run `mise run ci` before reporting done; it must exit 0\" replaces \"make sure everything works\"."
+          - claim: The learner removes an instruction when the mistake stops recurring or when a hook or a check now enforces it.
+            why: A project file that only grows becomes a wall the agent skims, and the rules that still matter get lost in it.
+            example: Once a pre-commit hook rejects unformatted files, the learner deletes the "always run the formatter" line from the instructions.
+      - id: customizing-agents/configures-agent/sets-permissions
+        statement: Sets permissions to the least the work needs
+        level: base
+        behaviours: []
+      - id: customizing-agents/configures-agent/adds-a-hook
+        statement: Adds a hook that enforces a rule the instructions cannot
+        level: base
+        behaviours: []
+      - id: customizing-agents/configures-agent/manages-memory
+        statement: Manages what the agent carries between sessions
+        level: expert
+        behaviours: []
+    alignment:
+      - framework: Brilliant Coding with AI
+        code: MEM-1, MEM-2
+        asks: Manage memory; turn repeated work into reusable knowledge
+        objectives: [customizing-agents/configures-agent/manages-memory, customizing-agents/writes-skill/packages-a-procedure]
+  - id: customizing-agents/writes-skill
+    statement: Writes a reusable agent skill
+    topics: [customizing-agents/skills, customizing-agents/instructions]
+    objectives:
+      - id: customizing-agents/writes-skill/chooses-skill-over-tool
+        statement: Chooses between a skill, a tool and an instruction for a need
+        level: base
+        behaviours: []
+      - id: customizing-agents/writes-skill/packages-a-procedure
+        statement: Packages a repeatable procedure as a skill another person's agent can use
+        level: base
+        behaviours: []
+      - id: customizing-agents/writes-skill/discloses-progressively
+        statement: Structures a skill so the agent loads only what it needs
+        level: base
+        behaviours: []
+    alignment:
+      - framework: Brilliant Coding with AI
+        code: MEM-1, MEM-2
+        asks: Manage memory; turn repeated work into reusable knowledge
+        objectives: [customizing-agents/configures-agent/manages-memory, customizing-agents/writes-skill/packages-a-procedure]
+  - id: customizing-agents/connects-tools-safely
+    statement: Connects an agent to tools and data safely
+    topics: [customizing-agents/mcp, customizing-agents/hooks-permissions, safety/agent-risk]
+    objectives:
+      - id: customizing-agents/connects-tools-safely/adds-a-tool
+        statement: Adds a tool via MCP or CLI with least privilege
+        level: base
+        behaviours: []
+      - id: customizing-agents/connects-tools-safely/weighs-tool-cost
+        statement: Explains the token and risk cost of a tool before adding it
+        level: base
+        behaviours: []
+      - id: customizing-agents/connects-tools-safely/hardens-a-connection
+        statement: Hardens a tool connection against injection and exfiltration
+        level: expert
+        behaviours: []
+    alignment:
+      - framework: Brilliant Coding with AI
+        code: SEC-4
+        asks: Mitigate AI- and agent-specific risks
+        objectives: [building-agents/runs-in-production/mitigates-agent-risks, customizing-agents/connects-tools-safely/hardens-a-connection]
