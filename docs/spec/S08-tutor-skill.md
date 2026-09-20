@@ -49,13 +49,13 @@ can open any lesson in a tutor session.
 
 ## Distribution
 
-| Rule            | Decision                                                                                                                                                                                                                                                       |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Source of truth | The skill directory `.claude/skills/tutor/` in the GitHub repo `lsimons/ai-training`, on `main`.                                                                                                                                                               |
-| Install         | The `skills` CLI, which installs a skill from a GitHub repo into Claude Code or opencode: `npx skills add lsimons/ai-training --skill tutor`. The exact command is printed by the lesson page block and the getting-started page, and both print the same one. |
-| Not offered     | A plugin marketplace entry, a `curl` one-liner, a manual copy of the file. One install path keeps the instructions on the page short and the support surface small.                                                                                            |
-| Precondition    | The repo is public, which it is as of the "ready to go public" release. The install command fails on a private repo, so the page never showed it before that.                                                                                                  |
-| Invocation      | `/tutor` in Claude Code, the matching slash command in opencode. The skill's `description` field says what it does so the agent can also pick it up from a plain request.                                                                                      |
+| Rule            | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Source of truth | The skill directory `.claude/skills/tutor/` in the GitHub repo `lsimons/ai-training`, on `main`.                                                                                                                                                                                                                                                                                                                                                                   |
+| Install         | The `skills` CLI, which installs a skill from a GitHub repo into Claude Code or opencode: `npx skills add lsimons/ai-training --skill tutor -g`. The `-g` flag installs to the learner's user directory, so the skill is found from any project rather than only from the directory the command ran in. `npx skills list -g` shows it afterwards. The exact command is printed by the lesson page block and the getting-started page, and both print the same one. |
+| Not offered     | A plugin marketplace entry, a `curl` one-liner, a manual copy of the file. One install path keeps the instructions on the page short and the support surface small.                                                                                                                                                                                                                                                                                                |
+| Precondition    | The repo is public, which it is as of the "ready to go public" release. The install command fails on a private repo, so the page never showed it before that.                                                                                                                                                                                                                                                                                                      |
+| Invocation      | `/tutor <lesson URL>` in Claude Code. opencode has no per-skill slash command, so there the learner writes a plain request that names the skill: `Use the tutor skill on <lesson URL>`. The skill's `description` field says what it does so either agent can also pick it up from a plain request.                                                                                                                                                                |
 
 ## Bootstrap contract
 
@@ -73,9 +73,18 @@ The bootstrap has no ground rules, no verbs and no dialogues. Those are in
 the published instruction file, so a rule change reaches every installed
 skill on the next deploy.
 
-The bootstrap uses the agent's built-in fetch tool (Claude Code's
-`WebFetch`, opencode's `webfetch`) and no other tool. It doesn't read files
-on the learner's machine except the progress export the learner hands it.
+The bootstrap needs the two files verbatim. The agents' built-in fetch
+tools (Claude Code's `WebFetch`, opencode's `webfetch`) summarize a page
+against a prompt with a smaller model, so a bundle fetched that way comes
+back paraphrased: dialogues shortened, checkpoint `options` reworded, the
+`version` integer possibly gone. The bootstrap therefore fetches with `curl`
+through the shell tool first, one command per file. Under the recommended
+flags that is one approval per fetch. Only when the shell tool is
+unavailable does it fall back to the built-in fetch tool with a prompt that
+asks for the full content unchanged, and then it tells the learner in one
+sentence that the lesson text may be incomplete. The bootstrap uses no
+other tool, and it doesn't read files on the learner's machine except the
+progress export the learner hands it.
 
 ## Published instruction file
 
@@ -92,14 +101,14 @@ https://lsimons.github.io/ai-training/data/tutor.md
 | `bundle_url`        | The bundle URL template, `https://lsimons.github.io/ai-training/data/lessons/{area}/{lesson}.json`, so the derivation rule ships with the rules. |
 | `site`              | The site's base URL, for citations.                                                                                                              |
 
-| Section (body)     | Holds                                                                                                                                                                                                                |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ground rules       | Give hints rather than answers. Stay on the node. Show, don't tell. Re-read the rules when the conversation is long. Redirect to the page after three asks on one checkpoint.                                        |
-| Starting a session | Read the bundle. If the learner has pasted a progress export, ask one recall question for the first item in `reviews` that is due today or earlier. Otherwise point at the course review page. Then offer the verbs. |
-| Verbs              | The S01 tutor verbs table, including *critique this* (the tutor writes a deliberately imperfect answer and the learner critiques it against the behaviors). Each verb says what part of the bundle it draws on.      |
-| Citing             | How to cite from the bundle: the lesson URL for prose, `topic_url` for a concept, `competency_url` for a behavior, the glossary URL for a concept id.                                                                |
-| Exemplar dialogues | Two to four short dialogues that show the hint ladder and never reveal an answer.                                                                                                                                    |
-| Out of scope       | What the tutor declines: other lessons in the same session, grading for a certificate, reading browser storage, changing the learner's files.                                                                        |
+| Section (body)     | Holds                                                                                                                                                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ground rules       | Give hints rather than answers. Stay on the node. Show, don't tell. Re-read the rules when the conversation is long. Redirect to the page after three asks on one checkpoint.                                          |
+| Starting a session | Read the bundle. If the learner has pasted a progress export, ask one recall question for the first item in `reviews` that is due today or earlier. Otherwise point at the course review page. Then offer the verbs.   |
+| Verbs              | The S01 tutor verbs table, including *critique this* (the tutor writes a deliberately imperfect answer and the learner critiques it against the behaviors). Each verb says what part of the bundle it draws on.        |
+| Citing             | How to cite from the bundle: `url` for prose, `topics[].url` for a concept, `objectives[].competency_url` for a behavior, and `{site}/glossary/#<concept>` for a concept id, with `site` from this file's frontmatter. |
+| Exemplar dialogues | Two to four short dialogues that show the hint ladder and never reveal an answer.                                                                                                                                      |
+| Out of scope       | What the tutor declines: a second lesson in the same session, a grade for a certificate, the learner's browser storage, and any edit to the learner's files.                                                           |
 
 The file's body is the text that was in `.claude/skills/tutor/SKILL.md`,
 moved and rewritten for a reader who has the bundle rather than the repo.
@@ -131,23 +140,24 @@ treats it as "this isn't a lesson page" and asks for a lesson URL.
 
 ### Format
 
-| Field           | Type    | Holds                                                                                                                                                                                                                        |
-| --------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `version`       | integer | Bundle format version, equal to the instruction file's `version`.                                                                                                                                                            |
-| `id`            | string  | The lesson's page route, `<area>/<lesson>`.                                                                                                                                                                                  |
-| `url`           | string  | The lesson page's absolute URL.                                                                                                                                                                                              |
-| `title`         | string  | Frontmatter `title`.                                                                                                                                                                                                         |
-| `mode`          | string  | `tutorial` or `explanation`.                                                                                                                                                                                                 |
-| `prose`         | string  | The lesson body as Markdown, with components rendered to their plain-text equivalent (a `Pitfall` becomes a paragraph with a "Pitfall" heading, a `Prompt` a fenced block) and widgets omitted.                              |
-| `topics[]`      | array   | Per covered topic: `id`, `name`, `definition`, `url`, `concepts[] {id, name, definition}`.                                                                                                                                   |
-| `objectives[]`  | array   | Per served objective: `id`, `statement`, `level`, `competency_url`, `behaviors[] {claim, why, example}`.                                                                                                                     |
-| `assumes[]`     | array   | Per assumed objective: `objective`, `lesson`, `section`, `url` (the section's absolute URL). The tutor points here when the gap is upstream.                                                                                 |
-| `checkpoints[]` | array   | The lesson's items from the site-wide `checkpoints.json` export, in page order, with that export's fields (`id`, `kind`, `objective`, `concepts`, `context`, `stem`, `options`, `answer`, `hint`, `reviewable`, `revision`). |
-| `extends_to[]`  | array   | Per `extends-to` entry: `label`, `url`.                                                                                                                                                                                      |
+| Field           | Type    | Holds                                                                                                                                                                                                                                       |
+| --------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `version`       | integer | Bundle format version, equal to the instruction file's `version`.                                                                                                                                                                           |
+| `id`            | string  | The lesson id per S01 "Identifiers", `<area>/<lesson>`, equal to the page route.                                                                                                                                                            |
+| `url`           | string  | The lesson page's absolute URL.                                                                                                                                                                                                             |
+| `title`         | string  | Frontmatter `title`.                                                                                                                                                                                                                        |
+| `mode`          | string  | `tutorial` or `explanation`.                                                                                                                                                                                                                |
+| `prose`         | string  | The lesson body as Markdown, with components rendered to their plain-text equivalent (a `Pitfall` becomes a paragraph with a "Pitfall" heading, a `Prompt` a fenced block) and widgets omitted.                                             |
+| `topics[]`      | array   | Per covered topic: `id`, `name`, `definition`, `url`, `concepts[] {id, name, definition}`.                                                                                                                                                  |
+| `objectives[]`  | array   | Per served objective: `id`, `statement`, `level`, `competency_url`, `behaviors[] {claim, why, example}`.                                                                                                                                    |
+| `assumes[]`     | array   | Per assumed objective: `objective`, `lesson`, `section`, `url` (the section's absolute URL). The tutor points here when the gap is upstream.                                                                                                |
+| `checkpoints[]` | array   | The lesson's items from the site-wide `checkpoints.json` export, in page order, with that export's fields minus `lesson` (`id`, `kind`, `objective`, `concepts`, `context`, `stem`, `options`, `answer`, `hint`, `reviewable`, `revision`). |
+| `extends_to[]`  | array   | Per `extends-to` entry: `label`, `url`.                                                                                                                                                                                                     |
 
 The bundle contains the answers, because the page does too (S04, "The
-answer is in the page"). The tutor's ground rules, and never the format,
-are what keep the answer from the learner.
+answer is in the page"), and the tutor needs `answer` to grade *quiz me*.
+The tutor's ground rules, and never the format, are what keep the answer
+from the learner.
 
 ### Build
 
@@ -158,8 +168,10 @@ are what keep the answer from the learner.
 - The build fails when a live lesson has no bundle, and `mise run site-build`
   is the check. A small test asserts that every bundle parses and that its
   `id` matches its path.
-- The bundle's `prose` is the Markdown after the rehype plugin has made
-  links absolute, so a link in the prose is one the tutor can quote.
+- The bundle build rewrites every root-relative link in `prose` to an
+  absolute URL from Astro's `site` plus `base`, so a link in the prose is
+  one the tutor can quote. The rehype plugin that does this for pages runs
+  on HTML and prepends the base only, so the bundle build can't reuse it.
 
 ## Lesson page block
 
@@ -167,9 +179,10 @@ Every lesson page ends with an "Open in tutor" block, after the recap and
 before the footer. It is a `not-content` container and contains, in this
 order:
 
-1. The install command, once, in a code span with a copy button.
-2. The paste-ready line for this lesson, in a code span with a copy
+1. The install command, once, in a fenced code block with a copy button.
+2. The paste-ready line for this lesson, in a fenced code block with a copy
    button: `/tutor https://lsimons.github.io/ai-training/<area>/<lesson>/`.
+   Under it, one line for opencode: `In opencode, ask: Use the tutor skill on <the same URL>`.
 3. One sentence: the tutor can't read the progress stored in this browser,
    so export it from the settings page and paste the file if a recall
    question is wanted.
@@ -181,17 +194,18 @@ pages.
 
 ## Getting-started page
 
-One how-to page under guides, `guides/tutor.md`, reached from the lesson
-page block and from the landing page. It has these sections and no others:
+One how-to page under guides, `guides/tutor.md`, titled "How to study
+with the tutor", reached from the lesson page block and from the landing
+page. It has these sections and no others:
 
-| Section                   | Content                                                                                                                                                                                                             |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Install                   | Prerequisites (Claude Code or opencode, Node for `npx`), the install command, how to see that the skill is listed.                                                                                                  |
-| First session             | Open `coding-with-agents/first-session`, copy its paste-ready line, run it, and what a correct first reply looks like (the tutor names the lesson and offers the verbs).                                            |
-| What the tutor does       | The verbs, in one line each, and the hint-only rule.                                                                                                                                                                |
-| What the tutor doesn't do | Read browser storage (export progress instead), leave the lesson, give answers, change files.                                                                                                                       |
-| Recommended flags         | `claude --safe-mode --permission-mode manual` for Claude Code, as a suggestion: the tutor never needs to run a command or edit a file, and the flags stop it from doing either. The opencode equivalent when known. |
-| When it fails             | The offline message, what to check (network, the URL is a lesson page), and where to file an issue.                                                                                                                 |
+| Section                   | Content                                                                                                                                                                                                                     |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install                   | Prerequisites (Claude Code or opencode, Node for `npx`), the install command with `-g`, and `npx skills list -g` to see that the skill is listed.                                                                           |
+| First session             | Open `coding-with-agents/first-session`, copy its paste-ready line (Claude Code) or type the plain request (opencode), run it, and what a correct first reply looks like (the tutor names the lesson and offers the verbs). |
+| What the tutor does       | The verbs, in one line each, and the hint-only rule.                                                                                                                                                                        |
+| What the tutor doesn't do | Read browser storage (export progress instead). Leave the lesson. Give an answer. Edit a file.                                                                                                                              |
+| Recommended flags         | `claude --safe-mode --permission-mode manual` for Claude Code, as a suggestion: the tutor never needs to run a command or edit a file, and the flags stop it from doing either. The opencode equivalent when known.         |
+| When it fails             | The offline message and what it means. Two things to check: the network, and whether the URL is a lesson page. Where to file an issue.                                                                                      |
 
 The page is a how-to per S01, so it records no progress and sits in no
 path. `coding-with-agents/first-session` links to it as the way to get help
