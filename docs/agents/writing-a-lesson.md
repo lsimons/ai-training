@@ -42,8 +42,8 @@ Every lesson, written or not, has an entry in its area's plan file,
 `site/src/data/courses/<area>.yaml`. The course page renders the plan as the
 lesson graph: live entries are the lesson nodes, and planned or drafting
 entries are dimmed "coming" nodes in their planned position. Progress never
-counts a coming lesson. The topic map uses the plan too, and it marks a topic
-with no entry at all as a gap, which is different from "planned, not written".
+counts a coming lesson. The topic map uses the plan too. A topic with no entry
+at all is a gap, and a topic with a planned entry shows as "lesson coming".
 
 ```yaml
 area: safety
@@ -68,14 +68,17 @@ lessons:
 ```
 
 Entries are in course order. When a lesson goes live, set `status: live`,
-drop `issue`, and make sure `covers` and `serves` match the page frontmatter.
+drop `issue`, and make sure `title`, `covers` and `serves` match the page
+frontmatter.
 `after` is only read for a coming lesson. A live lesson takes its place in
 the graph from the `assumes` in its page.
 
 `mise run courses` (part of `mise run ci`) fails when a lesson page is missing
 from its plan or listed with a status other than `live`, when a `live` entry
-has no page or its `covers`/`serves` differ from the page, when a `covers`,
-`serves` or `after` id is unknown, or when two entries share an id.
+has no page or its `title`, `covers` or `serves` differ from the page, when a
+`covers`, `serves` or `after` id is unknown, or when two entries share an id.
+The collection schema rejects an unknown key, so a misspelled field fails
+`mise run site-check`.
 
 ## Anatomy
 

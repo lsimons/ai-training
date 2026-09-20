@@ -7,8 +7,9 @@
  * - two entries share an id, or an entry's id isn't under its area;
  * - a lesson page (an MDX file with `mode`) isn't in its area's plan, or is
  *   there with a status other than `live`;
- * - an entry marked `live` has no page, or its `covers`/`serves` differ from
- *   the page frontmatter;
+ * - an entry marked `live` has no page, or its `title`, `covers` or `serves`
+ *   differ from the page frontmatter;
+ * - a plan has no `lessons` list, or an entry has no `id`;
  * - a `covers` id isn't a topic, a `serves` id isn't an objective, or an
  *   `after` id isn't an entry in the same plan.
  *
@@ -79,9 +80,17 @@ for (const file of yamlFiles(coursesDir)) {
 	const rel = `src/data/courses/${basename(file)}`;
 	const area = basename(file, '.yaml');
 	const plan = parse(readFileSync(file, 'utf8'));
-	if (plan.area !== area) fail(`${rel}: area is ${JSON.stringify(plan.area)}, expected ${area} (the file name)`);
-	const ids = new Set((plan.lessons ?? []).map((e) => e.id));
-	for (const e of plan.lessons ?? []) {
+	if (plan?.area !== area) fail(`${rel}: area is ${JSON.stringify(plan?.area)}, expected ${area} (the file name)`);
+	if (!Array.isArray(plan?.lessons)) {
+		fail(`${rel}: no lessons list`);
+		continue;
+	}
+	const ids = new Set(plan.lessons.map((e) => e?.id));
+	for (const [i, e] of plan.lessons.entries()) {
+		if (typeof e?.id !== 'string' || !e.id) {
+			fail(`${rel} lessons[${i}]: entry without an id`);
+			continue;
+		}
 		const where = `${rel} ${e.id}`;
 		if (seen.has(e.id)) fail(`${where}: duplicate id, also in ${seen.get(e.id)}`);
 		seen.set(e.id, rel);
@@ -96,6 +105,7 @@ for (const file of yamlFiles(coursesDir)) {
 				fail(`${where}: status is live but src/content/docs/${e.id}.mdx has no lesson page`);
 				continue;
 			}
+			if (e.title !== page.title) fail(`${where}: title ${JSON.stringify(e.title)} differs from the page's ${JSON.stringify(page.title)}`);
 			const pageCovers = page.covers ?? [];
 			if (!sameList(pageCovers, [e.covers])) fail(`${where}: covers ${JSON.stringify(e.covers)} differs from the page's ${JSON.stringify(pageCovers)}`);
 			if (!sameList(e.serves ?? [], page.serves ?? [])) fail(`${where}: serves ${JSON.stringify(e.serves ?? [])} differs from the page's ${JSON.stringify(page.serves ?? [])}`);
