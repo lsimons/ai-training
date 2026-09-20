@@ -127,10 +127,22 @@
 	}
 }
 
-/* "Content co-authored by AI." on every page, below the Starlight footer. */
-.ai-notice {
-	margin: 1.5rem 0 0;
-	text-align: center;
+/* Footer (overrides/Footer.astro): previous/next first, then one line with
+   the edit link, the last-updated date, and "Content co-authored by AI." */
+.site-footer {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	margin-top: 3rem;
+}
+.site-footer-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 1.5rem;
+	align-items: center;
 	font-size: var(--sl-text-xs);
 	color: var(--sl-color-gray-3);
+}
+.ai-notice {
+	margin: 0 0 0 auto;
 }

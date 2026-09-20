@@ -1,10 +1,19 @@
 ---
 /**
- * Starlight `Footer` override: the default footer (edit link, last updated,
- * pagination) followed by the AI co-authorship notice every page carries.
+ * Starlight `Footer` override. Reordered: the previous/next cards come
+ * first, right after the content; then one small line with the edit link,
+ * the last-updated date, and the AI co-authorship notice every page carries.
  */
-import Default from '@astrojs/starlight/components/Footer.astro';
+import EditLink from '@astrojs/starlight/components/EditLink.astro';
+import LastUpdated from '@astrojs/starlight/components/LastUpdated.astro';
+import Pagination from '@astrojs/starlight/components/Pagination.astro';
 ---
 
-<Default><slot /></Default>
-<p class="ai-notice">Content co-authored by AI.</p>
+<footer class="site-footer">
+	<Pagination />
+	<div class="site-footer-meta">
+		<EditLink />
+		<LastUpdated />
+		<p class="ai-notice">Content co-authored by AI.</p>
+	</div>
+</footer>
