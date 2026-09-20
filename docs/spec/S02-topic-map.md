@@ -90,24 +90,24 @@ Tutor mode cites these URLs when it points a learner somewhere.
 
 Each course renders as a graph of its lessons.
 
-| Element         | Rendering                                                                                                                                         |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lessons         | Boxes placed in **levels**: rows of lessons that share a depth in the prerequisite order                                                          |
-| Edges           | Dotted lines from the lessons that teach an assumed objective to the lessons that assume it; derived from `assumes` at build time                 |
-| Milestone bar   | Percent of lessons finished with four labeled stops: getting started, halfway, almost there, complete. Skipped lessons count toward neither side. |
-| Completion ring | Lessons and checkpoints done                                                                                                                      |
-| Review due card | "Review due: N items" when review items are due. Links to the course's review page                                                                |
-| About panel     | Goals, counts, prerequisites                                                                                                                      |
+| Element         | Rendering                                                                                                                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lessons         | Boxes placed in **levels**: rows of lessons that share a depth in the prerequisite order                                                                                                                |
+| Edges           | Dotted lines from the lessons that teach an assumed objective to the lessons that assume it; derived from `assumes` at build time                                                                       |
+| Milestone bar   | The course percent per [S04 "Progress display"](S04-progress-record.md#progress-display) (finished / (all − skipped) lessons) with four labeled stops: getting started, halfway, almost there, complete |
+| Completion ring | The same percent as the milestone bar, in compact form, with the skipped count next to it                                                                                                               |
+| Review due card | "Review due: N items" when review items are due. Links to the course's review page                                                                                                                      |
+| About panel     | Goals, counts, prerequisites                                                                                                                                                                            |
 
 Node styling shows the learner's state from the progress record:
 
-| State       | Meaning                             | Styling                                  |
-| ----------- | ----------------------------------- | ---------------------------------------- |
-| finished    | Recap reached, checkpoints resolved | Filled                                   |
-| in progress | Read, not finished                  | Outlined with a partial ring             |
-| skipped     | Learner marked "I know this"        | Struck through and gray                  |
-| untouched   | -                                   | Plain                                    |
-| dimmed      | Assumed objectives not yet passed   | Dimmed, never locked; paths are advisory |
+| State       | Meaning                                               | Styling                                  |
+| ----------- | ----------------------------------------------------- | ---------------------------------------- |
+| finished    | Recap reached with every checkpoint passed or skipped | Filled                                   |
+| in progress | Read, not finished                                    | Outlined with a partial ring             |
+| skipped     | Learner marked "I know this"                          | Struck through and gray                  |
+| untouched   | -                                                     | Plain                                    |
+| dimmed      | Assumed objectives not yet passed                     | Dimmed, never locked; paths are advisory |
 
 ## Source material
 
