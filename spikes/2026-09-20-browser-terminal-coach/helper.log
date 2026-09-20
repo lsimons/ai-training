@@ -1,14 +1,10 @@
-05:15:38 started backgrounded · 64428071 · AI training: spike/terminal (idle — send a prompt to start)
-05:15:38 session flags: --safe-mode --permission-mode manual --model claude-fable-5-1 --effort low --strict-mcp-config --no-chrome
-05:15:38 background session "AI training: spike/terminal" 64428071 (64428071-446c-4be0-92a4-9e8538647c5f) in /Users/lsimons/git/lsimons/ai-training-spike-terminal
-05:15:38 helper listening on 127.0.0.1:4400 · claude session 64428071 (stays alive after you close the page: claude stop 64428071)
+05:22:17 session flags: --safe-mode --permission-mode manual --model claude-fable-5-1 --effort low --strict-mcp-config --no-chrome
+05:22:17 background session "AI training: spike/terminal" 64428071 (64428071-446c-4be0-92a4-9e8538647c5f) in /Users/lsimons/git/lsimons/ai-training-spike-terminal
+05:22:17 helper listening on 127.0.0.1:4400 · claude session 64428071 (stays alive after you close the page: claude stop 64428071)
 
 Open this URL (the token is single-process; restart the helper to rotate it):
 
   http://localhost:4322/ai-training/spike/terminal/?token=testtoken
 
-05:16:01 allowed: http://localhost:4322
-05:16:01 browser attached, pty 75608
-05:16:13 rejected: bad token from http://localhost:4322
-05:16:40 coach: You've got context on the project. Since you're in a spike, ask Claude to examine the spike code itself — read the prototype and explain what's already implemented, or ask it to help you build the next part.
-05:16:41 browser detached
+
+>>> Page at http://localhost:4322 wants to attach to your Claude Code session. Allow? [y/N]

@@ -24,6 +24,16 @@ the terminal.
     @media (max-width: 72rem) { #spike-layout { grid-template-columns: 1fr; } }
     #spike-term { height: 70vh; min-height: 480px; border-radius: 8px; padding: 8px 0 0 8px; box-sizing: border-box; }
     #spike-term .xterm { height: 100%; }
+    /* macOS overlay scrollbars float over the last text column; Claude Code manages its own scroll region anyway. */
+    #spike-term .xterm-viewport { scrollbar-width: none; }
+    #spike-term .xterm-viewport::-webkit-scrollbar { display: none; }
+    #spike-term-wrap { position: relative; }
+    #spike-consent {
+      position: absolute; inset: 0; display: none; align-items: center; justify-content: center; border-radius: 8px;
+      background: rgba(0,0,0,.72); color: #fff; text-align: center; padding: 2rem; font-size: 1.1em; line-height: 1.5;
+    }
+    #spike-consent.show { display: flex; }
+    #spike-consent kbd { background: #fff; color: #000; padding: .1em .5em; border-radius: 4px; font-weight: 700; }
     #spike-term.light { background: #ffffff; border: 1px solid #ddd; }
     #spike-term.dark { background: #1e1e1e; }
     #spike-coach {
@@ -54,7 +64,10 @@ the terminal.
     <span id="spike-term-status">connecting…</span>
   </div>
   <div id="spike-layout">
-    <div id="spike-term"></div>
+    <div id="spike-term-wrap">
+      <div id="spike-term"></div>
+      <div id="spike-consent"><div>🔐 <b>Waiting for your permission.</b><br />Switch to the terminal where the helper is running and answer <kbd>y</kbd> to let this page attach to your Claude Code session.<br /><small>It denies automatically after 30 seconds.</small></div></div>
+    </div>
     <aside id="spike-coach"><div class="who">Coach</div><div id="spike-coach-entries"><div class="empty">Waiting: ask, or pause for 20 seconds after a reply.</div></div></aside>
   </div>
   <pre id="spike-screen-dump" hidden></pre>
@@ -93,13 +106,13 @@ the terminal.
       if (!token) { $('spike-token').classList.add('show'); status.textContent = 'needs token'; return; }
       status.textContent = 'connecting…';
       ws = new WebSocket('ws://127.0.0.1:4400/term?cols=' + term.cols + '&rows=' + term.rows + '&token=' + encodeURIComponent(token));
-      ws.onopen = () => { status.textContent = 'waiting for permission in the helper terminal…'; term.focus(); };
-      ws.onclose = (e) => { status.textContent = 'disconnected: ' + (e.reason || 'is the helper running on :4400?'); if (e.code === 4001) { sessionStorage.removeItem('spike-token'); token = null; $('spike-token').classList.add('show'); } };
+      ws.onopen = () => { status.textContent = 'waiting for permission in the helper terminal…'; $('spike-consent').classList.add('show'); };
+      ws.onclose = (e) => { $('spike-consent').classList.remove('show'); status.textContent = 'disconnected: ' + (e.reason || 'is the helper running on :4400?'); if (e.code === 4001) { sessionStorage.removeItem('spike-token'); token = null; $('spike-token').classList.add('show'); } };
       ws.onerror = () => (status.textContent = 'cannot reach helper on :4400');
       ws.onmessage = (ev) => {
         const m = JSON.parse(ev.data);
         if (m.type === 'out') term.write(m.data);
-        else if (m.type === 'ready') { status.textContent = 'attached'; $('spike-token').classList.remove('show'); }
+        else if (m.type === 'ready') { status.textContent = 'attached'; $('spike-token').classList.remove('show'); $('spike-consent').classList.remove('show'); term.focus(); }
         else if (m.type === 'session') { $('spike-term-session').textContent = '“' + m.name + '” (' + m.id + ') · ' + m.cwd.replace(/^\/Users\/[^/]+/, '~'); window.__session = m; }
         else if (m.type === 'coach-start') status.textContent = 'coach is reading (' + m.reason + ')…';
         else if (m.type === 'coach') { status.textContent = 'coach: ' + Math.round(m.ms / 1000) + 's, $' + (m.cost ?? 0).toFixed(3) + ', ' + m.turns + ' turns'; showCoach(m); window.__lastCoach = m; }
@@ -111,7 +124,7 @@ the terminal.
     }
     function dump(text, key, val) { const p = $('spike-screen-dump'); p.hidden = false; p.textContent = text; window['__' + key] = val ?? text; }
     term.onData((d) => send({ type: 'in', data: d }));
-    new ResizeObserver(() => { fit.fit(); send({ type: 'resize', cols: term.cols, rows: term.rows }); }).observe($('spike-term'));
+    new ResizeObserver(() => { fit.fit(); send({ type: 'resize', cols: term.cols, rows: term.rows }); }).observe($('spike-term-wrap'));
     $('btn-token').onclick = () => { token = $('spike-token-input').value.trim(); sessionStorage.setItem('spike-token', token); connect(); };
     connect();
     // --- coach panel (docked, never covers the terminal) ----------------------
