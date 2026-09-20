@@ -1,0 +1,141 @@
+---
+/**
+ * The settings page (spec S04 "learner" fields, spec S05 "frequency
+ * control"): the comfort level, and the review schedule with a per-item
+ * "See this sooner" / "See this less often". Nothing here changes content;
+ * comfort changes routing and where new review items enter (spec S05).
+ */
+import { buildCatalog } from '@lib/catalog';
+
+const catalog = await buildCatalog();
+---
+
+<div class="not-content settings" data-catalog={JSON.stringify(catalog)}>
+	<h2 id="comfort">Comfort level</h2>
+	<p>
+		Applies to the Engineering lessons. It changes what the lesson suggests around the content, never the content itself.{' '}
+		<em>Less comfortable</em> lists the sections a lesson builds on at its top, and puts new review items in your next
+		session. <em>More comfortable</em> shows the extensions at the end of a lesson, and starts new review items at stage 2.
+		Click the chosen level again to unset it.
+	</p>
+	<div class="comfort" role="group" aria-label="Comfort level">
+		<button type="button" data-comfort="less" aria-pressed="false">less comfortable</button>
+		<button type="button" data-comfort="more" aria-pressed="false">more comfortable</button>
+		<span class="comfort-note" data-comfort-note></span>
+	</div>
+
+	<h2 id="review-schedule">Review schedule</h2>
+	<p>
+		Every checkpoint of a lesson you finished comes back for review at growing intervals: 1, 3, 7, 21, then 60 days. A pass
+		moves an item up a stage; a fail drops it to stage 1. Nudge an item here if that pace is wrong for you.
+	</p>
+	<div class="review-schedule" data-schedule></div>
+</div>
+
+<script>
+	import * as progress from '@scripts/progress';
+
+	interface CatalogCheckpoint {
+		id: string;
+		title: string;
+	}
+	interface CatalogLesson {
+		id: string;
+		title: string;
+		checkpoints: CatalogCheckpoint[];
+	}
+	interface CatalogCourse {
+		area: string;
+		title: string;
+		lessons: CatalogLesson[];
+	}
+
+	const root = document.querySelector<HTMLElement>('.settings[data-catalog]');
+	if (root) {
+		const catalog: CatalogCourse[] = JSON.parse(root.dataset.catalog!);
+		const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+		const schedule = root.querySelector<HTMLElement>('[data-schedule]')!;
+		const comfortButtons = root.querySelectorAll<HTMLButtonElement>('[data-comfort]');
+		const comfortNote = root.querySelector<HTMLElement>('[data-comfort-note]')!;
+
+		function drawComfort() {
+			const level = progress.load().comfort;
+			comfortButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.comfort === level)));
+			comfortNote.textContent = level === 'less' ? 'Set: less comfortable.' : level === 'more' ? 'Set: more comfortable.' : 'Not set.';
+		}
+		comfortButtons.forEach((b) =>
+			b.addEventListener('click', () => {
+				const current = progress.load().comfort;
+				progress.setComfort(current === b.dataset.comfort ? undefined : (b.dataset.comfort as 'less' | 'more'));
+				drawComfort();
+			})
+		);
+
+		/** Human names for a progress id `<lesson>#<checkpoint>`; null when the build no longer knows it. */
+		function describe(progressId: string): { lesson: CatalogLesson; checkpoint: CatalogCheckpoint } | null {
+			const [lessonId, cpId] = progressId.split('#');
+			const lesson = catalog.flatMap((c) => c.lessons).find((l) => l.id === lessonId);
+			const checkpoint = lesson?.checkpoints.find((c) => c.id === cpId);
+			return lesson && checkpoint ? { lesson, checkpoint } : null;
+		}
+
+		function drawSchedule() {
+			const rec = progress.load();
+			const rows = Object.entries(rec.reviews)
+				.filter(([, item]) => item.stage !== 'done')
+				.sort((a, b) => a[1].due.localeCompare(b[1].due));
+			if (!rows.length) {
+				schedule.innerHTML = '<p class="review-empty">Nothing scheduled. Finish a lesson and its checkpoints appear here.</p>';
+				return;
+			}
+			schedule.replaceChildren(
+				...rows.map(([id, item]) => {
+					const row = document.createElement('div');
+					row.className = 'schedule-item';
+					row.dataset.reviewItem = id;
+					const known = describe(id);
+					const name = document.createElement('a');
+					name.className = 'schedule-name';
+					name.href = `${base}/${id.replace('#', '/#')}`;
+					name.textContent = known ? `${known.checkpoint.title} (${known.lesson.title})` : id;
+					const stage = Number(item.stage);
+					const pills = document.createElement('span');
+					pills.className = 'cp-stage';
+					for (let i = 0; i < 5; i++) {
+						const p = document.createElement('span');
+						p.dataset.on = String(i < stage);
+						pills.appendChild(p);
+					}
+					const label = document.createElement('em');
+					label.className = 'cp-stage-label';
+					label.textContent = `stage ${stage} of 5, due ${item.due}`;
+					pills.appendChild(label);
+					const sooner = document.createElement('button');
+					sooner.type = 'button';
+					sooner.className = 'cp-sooner';
+					sooner.textContent = 'See this sooner';
+					sooner.disabled = stage <= 1;
+					sooner.addEventListener('click', () => progress.adjustReviewStage(id, -1));
+					const later = document.createElement('button');
+					later.type = 'button';
+					later.className = 'cp-later';
+					later.textContent = 'See this less often';
+					later.disabled = stage >= 5;
+					later.addEventListener('click', () => progress.adjustReviewStage(id, +1));
+					const actions = document.createElement('span');
+					actions.className = 'schedule-actions';
+					actions.append(sooner, later);
+					row.append(name, pills, actions);
+					return row;
+				})
+			);
+		}
+
+		function draw() {
+			drawComfort();
+			drawSchedule();
+		}
+		draw();
+		document.addEventListener(progress.EVENT, draw);
+	}
+</script>

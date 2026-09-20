@@ -1,0 +1,10 @@
+---
+/**
+ * Starlight `Footer` override: the default footer (edit link, last updated,
+ * pagination) followed by the AI co-authorship notice every page carries.
+ */
+import Default from '@astrojs/starlight/components/Footer.astro';
+---
+
+<Default><slot /></Default>
+<p class="ai-notice">Content co-authored by AI.</p>

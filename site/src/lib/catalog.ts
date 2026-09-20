@@ -4,6 +4,7 @@ import { getLessons, checkpointsOf } from './lessons';
 /** The site's courses and lessons in path order, serializable for client scripts. */
 export interface CatalogCheckpoint {
 	id: string;
+	title: string;
 	reviewable: boolean;
 	revision: number;
 }
@@ -28,7 +29,7 @@ export async function buildCatalog(): Promise<CatalogCourse[]> {
 			.map((l) => ({
 				id: l.id,
 				title: l.data.title,
-				checkpoints: checkpointsOf(l).map((c) => ({ id: c.id, reviewable: c.reviewable, revision: c.revision })),
+				checkpoints: checkpointsOf(l).map((c) => ({ id: c.id, title: c.title, reviewable: c.reviewable, revision: c.revision })),
 			})),
 	}));
 }

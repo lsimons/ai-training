@@ -128,6 +128,7 @@ export default defineConfig({
 			customCss: ['./src/styles/custom.css', './src/styles/lesson.css'],
 			sidebar: [
 				{ slug: 'progress', label: 'Your progress' },
+				{ slug: 'settings', label: 'Settings' },
 				{
 					label: 'Foundations',
 					items: [
@@ -183,8 +184,10 @@ export default defineConfig({
 				},
 			],
 			components: {
-				// Lesson frame: routing cards, comfort level, finish/skip, checkpoint script.
+				// Lesson frame: routing cards, finish/skip, checkpoint script.
 				MarkdownContent: './src/components/overrides/MarkdownContent.astro',
+				// The default footer plus the "Content co-authored by AI." notice.
+				Footer: './src/components/overrides/Footer.astro',
 			},
 		}),
 	],

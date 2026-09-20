@@ -5,6 +5,7 @@ export type Lesson = CollectionEntry<'docs'>;
 
 export interface CheckpointInfo {
 	id: string;
+	title: string;
 	kind: CheckpointKind;
 	reviewable: boolean;
 	/** Bumped by authors when the answer changes (spec S05 "Content changes"). */
@@ -70,6 +71,7 @@ export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 		if (!CHECKPOINT_KINDS.includes(kind)) throw new Error(`${lesson.id}: unknown checkpoint kind ${kind}`);
 		const id = attrValue(tag, 'id');
 		if (!id) throw new Error(`${lesson.id}: <${m[1]}> without an id: ${tag.slice(0, 80)}`);
+		const title = attrValue(tag, 'title') ?? id;
 		const reviewAttr = attrValue(tag, 'review');
 		if (reviewAttr !== undefined && reviewAttr !== 'true' && reviewAttr !== 'false') {
 			throw new Error(`${lesson.id}#${id}: review must be {true} or {false}, got ${reviewAttr}`);
@@ -78,7 +80,7 @@ export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 		const revision = revisionAttr === undefined ? DEFAULT_REVISION : Number(revisionAttr);
 		if (!Number.isInteger(revision) || revision < 1) throw new Error(`${lesson.id}#${id}: revision must be a positive integer, got ${revisionAttr}`);
 		const honor = kind === 'predict' && !hasAttr(tag, 'answer');
-		out.push({ id, kind, revision, reviewable: isReviewable({ kind, review: reviewAttr === undefined ? undefined : reviewAttr === 'true', honor }) });
+		out.push({ id, title, kind, revision, reviewable: isReviewable({ kind, review: reviewAttr === undefined ? undefined : reviewAttr === 'true', honor }) });
 	}
 	return out;
 }
