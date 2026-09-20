@@ -1,0 +1,20 @@
+---
+/**
+ * A prompt block (spec S01). Pair with `Response`. Names the model and the
+ * month recorded; `illustrative` marks a transcript that was written, not
+ * recorded, and must be shown as such.
+ */
+interface Props {
+	model: string;
+	recorded: string;
+}
+const { model, recorded } = Astro.props;
+const illustrative = model === 'illustrative' || recorded === 'illustrative';
+---
+
+<figure class="prompt-block" data-illustrative={illustrative}>
+	<figcaption>
+		{illustrative ? 'Prompt (illustrative, not a recorded transcript)' : `Prompt · ${model}, recorded ${recorded}`}
+	</figcaption>
+	<div class="prompt-body"><slot /></div>
+</figure>

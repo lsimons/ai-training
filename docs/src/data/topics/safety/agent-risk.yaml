@@ -1,0 +1,55 @@
+id: safety/agent-risk
+area: safety
+name: Agent risk
+definition: >-
+  An agent that can act can also do harm, and a model can be talked into
+  acting by text it reads. This topic teaches how to size what an agent can
+  reach, grant it the least it needs, keep a human at the right decision
+  points, and recognise the two classic attacks: prompt injection and data
+  exfiltration.
+concepts:
+  - id: blast-radius
+    name: Blast radius
+    definition: >-
+      Everything an agent's action can reach and change: the files it can
+      write, the accounts it can act as, the systems its credentials open,
+      the people its messages reach. Blast radius is decided by what the agent
+      is connected to, not by what you asked it to do. Sizing it before a
+      task is the first step in deciding how much autonomy to allow.
+  - id: permissions-and-least-privilege
+    name: Permissions and least privilege
+    definition: >-
+      Giving an agent only the access the current task needs: read where it
+      needs to read, write only in the working folder, no network or
+      credentials unless required. Least privilege limits what a mistake or
+      an attack can do. Convenient broad access is the usual failure; a
+      separate account, a sandbox or a scoped token is the usual fix.
+  - id: human-in-the-loop
+    name: Human in the loop
+    definition: >-
+      A required human decision at a chosen point in an agent's work, such as
+      before sending, paying, deleting or deploying. The human sees what the
+      agent proposes and approves, edits or stops it. Placing the checkpoint
+      at the irreversible step, rather than everywhere, keeps the agent
+      useful while keeping accountability with a person.
+  - id: prompt-injection
+    name: Prompt injection
+    definition: >-
+      An attack where text the agent reads, such as a web page, email,
+      document or code comment, contains instructions that the model follows
+      as if they came from its user. The model cannot reliably tell data from
+      commands. Any agent that reads untrusted content and can act is exposed,
+      and the defence is limiting what it can do, not hoping it will refuse.
+  - id: exfiltration
+    name: Exfiltration
+    definition: >-
+      Data leaving a boundary it should not cross, often as the second half of
+      an injection: the agent is tricked into putting secrets, private files
+      or conversation contents into a URL, a message or a public location.
+      Any tool that can send data outward is an exfiltration path. Review
+      those tools first and restrict where an agent may send anything.
+links:
+  prerequisites: [concepts/what-is-an-agent, safety/verification]
+  related: []
+  specializations: []
+sources: [AEC-10]

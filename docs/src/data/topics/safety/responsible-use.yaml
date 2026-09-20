@@ -1,0 +1,47 @@
+id: safety/responsible-use
+area: safety
+name: Responsible use
+definition: >-
+  Using AI responsibly means knowing what may go into a prompt and what may
+  not, respecting the confidentiality of other people's information, honouring
+  the licenses of material you feed in and produce, and telling your audience
+  when AI helped where they would expect to know.
+concepts:
+  - id: data-privacy
+    name: Data privacy
+    definition: >-
+      Personal data pasted into a prompt leaves your control: it travels to a
+      provider, may be logged, and may be used to improve a service depending
+      on the terms. Names, contact details, health or financial information
+      and anything covered by privacy law should be removed or replaced before
+      prompting unless the tool is approved for that data.
+  - id: confidentiality
+    name: Confidentiality
+    definition: >-
+      Information you are trusted to keep inside a boundary: customer
+      contracts, unreleased plans, source code, colleagues' conversations.
+      Pasting it into an AI tool is a disclosure to a third party, even if
+      nobody reads it. The test is whether you would email the same text to
+      that provider; if not, summarise, redact or use a sanctioned tool.
+  - id: licensing-and-attribution
+    name: Licensing and attribution
+    definition: >-
+      Material you give a model and material it produces both carry
+      obligations. Feeding in copyrighted text or code you may not
+      redistribute does not launder it, and output that reproduces a source
+      needs the same attribution the source demands. Keep track of where
+      inputs came from and check that output which looks copied is credited
+      or replaced.
+  - id: disclosure
+    name: Disclosure
+    definition: >-
+      Saying that AI was used, to the extent the audience expects. A
+      reader of a report, a reviewer of code or a party to a contract
+      generally wants to know whether a machine drafted the text and who
+      checked it. Disclosure is about trust, not shame: state what the AI did,
+      what you did, and who is accountable for the result.
+links:
+  prerequisites: [concepts/limits]
+  related: []
+  specializations: []
+sources: [DLAI-2]

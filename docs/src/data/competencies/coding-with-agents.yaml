@@ -1,0 +1,148 @@
+area: coding-with-agents
+competencies:
+  - id: coding-with-agents/specifies-work
+    statement: Specifies work well enough for an agent to implement and for anyone to verify
+    topics: [coding-with-agents/specification, using-agents/decomposition]
+    objectives:
+      - id: coding-with-agents/specifies-work/judges-worth-building
+        statement: Judges whether something is worth building before building it
+        level: base
+        behaviours: []
+      - id: coding-with-agents/specifies-work/defines-success
+        statement: Defines what a successful outcome requires
+        level: base
+        behaviours: []
+      - id: coding-with-agents/specifies-work/decomposes-into-components
+        statement: Decomposes a problem into components with clear dependencies
+        level: base
+        behaviours: []
+      - id: coding-with-agents/specifies-work/designs-the-check
+        statement: Designs how the work will be verified before it is built
+        level: base
+        behaviours: []
+    alignment:
+      - framework: Brilliant Coding with AI
+        code: TAS-1..4
+        asks: Judge what is worth building, define success, weigh cost
+        objectives: [coding-with-agents/specifies-work/judges-worth-building, coding-with-agents/specifies-work/defines-success]
+      - framework: Brilliant Coding with AI
+        code: SPC-3, SPC-4, SPC-6
+        asks: Decompose, analyse dependencies, design verification
+        objectives: [coding-with-agents/specifies-work/decomposes-into-components, coding-with-agents/specifies-work/designs-the-check]
+      - framework: Ng, AI engineering skills map
+        code: Shaping the build
+        asks: Deciding what goes in the spec
+        objectives: [coding-with-agents/specifies-work]
+  - id: coding-with-agents/ships-with-agent
+    statement: Ships a change with a coding agent through plan, implement and verify
+    topics: [coding-with-agents/first-session, coding-with-agents/workflow, coding-with-agents/context]
+    objectives:
+      - id: coding-with-agents/ships-with-agent/runs-a-session
+        statement: Runs a session from setup to a reviewed diff
+        level: base
+        behaviours:
+          - claim: The learner has the agent describe the codebase and confirm the plan before it edits anything.
+            why: A wrong model of the repository produces a confident change in the wrong place, and it is cheaper to correct a sentence than a diff.
+            example: The learner asks "where is the config loaded and which tests cover it?" and checks the answer against the tree before saying "go ahead".
+          - claim: Every session ends with the learner reading the full diff, not the agent's summary of it.
+            why: The summary is the agent's account of what it meant to do; the diff is what it did.
+            example: The summary says "added validation"; the diff also shows a deleted test, which the learner catches and asks about.
+          - claim: The learner keeps a session to one task and starts a new one when the task changes.
+            why: A long session carries stale assumptions in context, and the agent keeps acting on the earlier task's constraints.
+            example: After the bug fix is committed, the learner opens a fresh session for the refactor instead of typing "now also" into the same one.
+      - id: coding-with-agents/ships-with-agent/works-in-increments
+        statement: Works in small increments, sequenced for early feedback
+        level: base
+        behaviours: []
+      - id: coding-with-agents/ships-with-agent/keeps-change-reversible
+        statement: Keeps every change reversible
+        level: base
+        behaviours: []
+      - id: coding-with-agents/ships-with-agent/gives-the-right-context
+        statement: Gives the agent the files, constraints and limits the task needs
+        level: base
+        behaviours:
+          - claim: The learner names the files the task touches and the files it must not touch.
+            why: Left to search, an agent finds the nearest plausible file, and the nearest one is often the wrong one.
+            example: "\"Change the retry logic in `src/http/client.ts`; the tests are in `tests/http/`; leave `src/http/legacy/` alone\" instead of \"fix the retries\"."
+          - claim: "Constraints that are not in the code are stated in the brief: style, compatibility, what must keep working."
+            why: The agent cannot infer a rule it cannot see, and a project convention lives in people's heads until it is written down.
+            example: The learner adds "this must stay compatible with Node 20 and must not add a dependency" because neither fact is visible in the file being edited.
+          - claim: The learner gives the verification command along with the task.
+            why: An agent that knows how the work will be checked runs the check itself and reports honestly against it.
+            example: "\"Done when `npm test -- http` passes and the lint task is clean\" lets the agent close its own loop before handing back."
+      - id: coding-with-agents/ships-with-agent/keeps-understanding
+        statement: Keeps their own understanding of the code as the agent produces more of it
+        level: expert
+        behaviours: []
+    alignment:
+      - framework: Brilliant Coding with AI
+        code: INC-1, INC-2, INC-5
+        asks: Working increments, early feedback, reversibility
+        objectives: [coding-with-agents/ships-with-agent/works-in-increments, coding-with-agents/ships-with-agent/keeps-change-reversible]
+      - framework: Brilliant Coding with AI
+        code: INC-3, INC-4
+        asks: Maintain understanding and coherence
+        objectives: [coding-with-agents/ships-with-agent/keeps-understanding]
+      - framework: Brilliant Coding with AI
+        code: SPC-5, BLD-1
+        asks: Manage constraints; direct an agent to a specification
+        objectives: [using-agents/delegates-and-checks/writes-a-brief, coding-with-agents/ships-with-agent/gives-the-right-context]
+      - framework: Ng, AI engineering skills map
+        code: Using coding agents
+        asks: Plan, execute, verify, monitor at calibrated autonomy
+        objectives: [using-agents/delegates-and-checks, coding-with-agents/ships-with-agent]
+  - id: coding-with-agents/verifies-agent-work
+    statement: Verifies agent-written code before trusting it
+    topics: [coding-with-agents/verification, coding-with-agents/quality, safety/agent-risk]
+    objectives:
+      - id: coding-with-agents/verifies-agent-work/reviews-others-code
+        statement: Reviews code they did not write, against the specification
+        level: base
+        behaviours: []
+      - id: coding-with-agents/verifies-agent-work/observes-and-debugs
+        statement: Observes the running system and isolates a fault systematically
+        level: base
+        behaviours: []
+      - id: coding-with-agents/verifies-agent-work/automates-the-check
+        statement: Turns a check into a bounded, self-checking loop
+        level: base
+        behaviours: []
+      - id: coding-with-agents/verifies-agent-work/screens-for-security
+        statement: Screens agent output for security and supply-chain problems
+        level: base
+        behaviours: []
+    alignment:
+      - framework: Brilliant Coding with AI
+        code: VER-2..6
+        asks: Verify against spec, review, observe, debug, automate
+        objectives: [coding-with-agents/verifies-agent-work/*]
+      - framework: Brilliant Coding with AI
+        code: SEC-3, SEC-5
+        asks: Evaluate AI code for vulnerabilities; supply-chain risk
+        objectives: [coding-with-agents/verifies-agent-work/screens-for-security]
+  - id: coding-with-agents/works-in-team
+    statement: Works with agents alongside a team
+    topics: [coding-with-agents/team, coding-with-agents/workflow]
+    objectives:
+      - id: coding-with-agents/works-in-team/attributes-honestly
+        statement: Attributes agent work honestly in commits and reviews
+        level: base
+        behaviours: []
+      - id: coding-with-agents/works-in-team/follows-team-norms
+        statement: Follows the team's review and CI norms for agent changes
+        level: base
+        behaviours: []
+      - id: coding-with-agents/works-in-team/runs-parallel-work
+        statement: Runs several agent sessions without losing coherence
+        level: expert
+        behaviours: []
+      - id: coding-with-agents/works-in-team/sets-team-practice
+        statement: Sets the team's practice for agent use
+        level: expert
+        behaviours: []
+    alignment:
+      - framework: Brilliant Coding with AI
+        code: BLD-4, BLD-5
+        asks: Organise and oversee a workflow
+        objectives: [coding-with-agents/works-in-team/runs-parallel-work, building-agents/orchestrates-agents/picks-a-pattern]

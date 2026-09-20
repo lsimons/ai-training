@@ -1,0 +1,47 @@
+id: safety/verification
+area: safety
+name: Verifying outputs
+definition: >-
+  Verification is the habit of checking AI output before relying on it, in
+  proportion to the cost of being wrong. This topic covers routine checking
+  habits, following claims back to their sources, treating endorsed answers
+  differently from raw ones, and extending "trust but verify" to actions
+  agents take.
+concepts:
+  - id: checking-habits
+    name: Checking habits
+    definition: >-
+      Small routines that catch model errors before they spread: read the
+      output against the request you made, look for claims you did not
+      supply, run the code, open the link, do one calculation by hand. The
+      depth scales with stakes. A habit is better than a rule because it runs
+      even when you are in a hurry, which is when errors slip through.
+  - id: source-checking
+    name: Source checking
+    definition: >-
+      Following a claim, citation or quote back to where it is supposed to
+      come from and confirming it says what the model reported. Models
+      produce references that look right more easily than references that are
+      right. Anything with a page number, URL, statute, version or study
+      behind it should be opened before it goes to anyone else.
+  - id: endorsed-answers
+    name: Endorsed answers
+    definition: >-
+      An answer that a qualified human has reviewed and marked as correct,
+      distinct from raw model output. Some teaching and support systems show
+      the mark so readers know which answers carry human accountability. The
+      idea transfers to teams: separate what the model said from what a
+      person has checked, and make the difference visible in the artefact.
+  - id: trust-but-verify-for-agents
+    name: '"Trust but verify" for agents'
+    definition: >-
+      When an agent acts rather than answers, verification moves from reading
+      text to checking effects: what files changed, what was sent, what was
+      deleted. Let the agent proceed on low-stakes steps, then inspect the
+      result against what you asked for, and require a pause before any step
+      that is hard to reverse. Trust is granted per action, not per tool.
+links:
+  prerequisites: [safety/failure-modes]
+  related: []
+  specializations: []
+sources: [CS50]

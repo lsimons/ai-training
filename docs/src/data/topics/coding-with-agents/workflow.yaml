@@ -1,0 +1,71 @@
+id: coding-with-agents/workflow
+area: coding-with-agents
+name: Plan, implement, verify
+definition: >-
+  A repeatable rhythm for shipping with a coding agent: plan before editing,
+  drive the change from a specification or a failing test, land it in small
+  working increments ordered so feedback arrives early, keep every step
+  reversible, and record the work in commits and pull requests a team can
+  review.
+concepts:
+  - id: plan-mode
+    name: Plan mode
+    definition: >-
+      Having the agent explore and propose before it edits anything. In plan
+      mode it reads the code, asks questions and writes down the steps it
+      intends to take; you correct the plan while corrections are cheap. Most
+      agent mistakes are cheaper to catch in a plan than in a diff, so use it
+      for any change touching more than a couple of files.
+  - id: spec-driven-change
+    name: Spec-driven change
+    definition: >-
+      Writing the specification of a change, including its success criteria,
+      as a document the agent works from and the reviewer checks against.
+      The spec stays the source of truth while the agent iterates; when the
+      code and the spec disagree, one of them is updated deliberately. It
+      suits changes where the design matters more than any single test.
+  - id: test-driven-change
+    name: Test-driven change
+    definition: >-
+      Writing or having the agent write a failing test that captures the
+      desired behaviour, then implementing until it passes, then cleaning up.
+      The test gives the agent an unambiguous target it can run on its own
+      and gives you proof that the change does what was asked. It suits
+      bounded behavioural changes and bug fixes.
+  - id: working-increments
+    name: Working increments
+    definition: >-
+      Landing a change as a series of small steps, each of which leaves the
+      system working and tested. Increments keep the diff reviewable, keep
+      the agent's context focused and make it obvious which step introduced
+      a problem. An agent will happily produce a large change in one go;
+      asking for increments is part of the brief.
+  - id: sequencing-for-early-feedback
+    name: Sequencing for early feedback
+    definition: >-
+      Ordering increments so the riskiest assumption or the most visible
+      behaviour is tested first. Build the thin end-to-end path before the
+      details, the integration before the polish, the part you are least sure
+      about before the part you are certain of. Early feedback turns a
+      possible rewrite into a small correction.
+  - id: reversibility
+    name: Reversibility
+    definition: >-
+      Keeping every change easy to undo: committed in small steps, on a
+      branch, with no destructive operations mixed in, and with data
+      migrations that can be rolled back. Reversibility is what makes it safe
+      to let an agent try something. If a step cannot be reversed, it is the
+      step that needs a human to look before it runs.
+  - id: commits-and-prs
+    name: Commits and PRs
+    definition: >-
+      Recording agent-assisted work in the team's normal units: focused
+      commits with messages that say why, and pull requests that explain the
+      change, link the specification and state what was verified and how.
+      Good commit boundaries make review and revert possible; a PR that
+      describes the agent's role lets reviewers calibrate their attention.
+links:
+  prerequisites: [coding-with-agents/first-session, coding-with-agents/specification]
+  related: []
+  specializations: []
+sources: [DLAI-5, DLAI-6, Brilliant INC]

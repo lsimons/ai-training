@@ -1,0 +1,64 @@
+---
+/** One page per competency (spec S02 "Stable URLs"): objectives, behaviours, alignment, lessons serving it. */
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { getCollection } from 'astro:content';
+import { getLessons } from '@lib/lessons';
+import { areaOf } from '@lib/areas';
+import { href } from '@lib/url';
+
+export async function getStaticPaths() {
+	const areas = await getCollection('competencies');
+	return areas.flatMap((a) => a.data.competencies.map((c) => ({ params: { id: c.id }, props: { competency: c, area: a.data.area } })));
+}
+
+const { competency, area } = Astro.props;
+const topics = (await getCollection('topics')).map((t) => t.data);
+const lessons = await getLessons();
+const serving = (objectiveId: string) => lessons.filter((l) => (l.data.serves ?? []).includes(objectiveId));
+const headings = [
+	{ depth: 2, slug: 'objectives', text: 'Learning objectives' },
+	...(competency.alignment.length ? [{ depth: 2, slug: 'alignment', text: 'Alignment' }] : []),
+];
+---
+
+<StarlightPage frontmatter={{ title: competency.statement, description: `Competency ${competency.id}` }} headings={headings}>
+	<p><em>{areaOf(area).name}</em> · competency <code>{competency.id}</code></p>
+	<p>
+		<strong>Draws on:</strong>{' '}
+		{competency.topics.map((t, i) => (<>{i > 0 && ', '}<a href={href(`/topics/${t}/`)}>{topics.find((x) => x.id === t)?.name ?? t}</a></>))}
+	</p>
+
+	<h2 id="objectives">Learning objectives</h2>
+	{
+		competency.objectives.map((o) => (
+			<section>
+				<h3 id={o.id.split('/').pop()}>{o.statement} <small>({o.level})</small></h3>
+				{o.behaviours.length ? (
+					<table>
+						<thead><tr><th>Claim</th><th>Why</th><th>Example</th></tr></thead>
+						<tbody>{o.behaviours.map((b) => <tr><td>{b.claim}</td><td>{b.why}</td><td>{b.example}</td></tr>)}</tbody>
+					</table>
+				) : (
+					<p><em>Behaviours not written yet.</em></p>
+				)}
+				{serving(o.id).length ? (
+					<p>Served by: {serving(o.id).map((l, i) => (<>{i > 0 && ', '}<a href={href(`/${l.id}/`)}>{l.data.title}</a></>))}</p>
+				) : (
+					<p>No lesson serves this objective yet.</p>
+				)}
+			</section>
+		))
+	}
+
+	{
+		competency.alignment.length > 0 && (
+			<>
+				<h2 id="alignment">Alignment</h2>
+				<table>
+					<thead><tr><th>Framework</th><th>Code</th><th>Asks</th></tr></thead>
+					<tbody>{competency.alignment.map((a) => <tr><td>{a.framework}</td><td>{a.code}</td><td>{a.asks}</td></tr>)}</tbody>
+				</table>
+			</>
+		)
+	}
+</StarlightPage>

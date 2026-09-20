@@ -1,0 +1,59 @@
+id: building-agents/tool-use
+area: building-agents
+name: Tool use
+definition: >-
+  Tools give a model hands. This topic covers how a model requests a function
+  call and receives the result, how to design a tool schema the model uses
+  correctly, why connecting many models to many tools became a standards
+  problem, how to handle tool errors, and when to let the model call several
+  tools at once.
+concepts:
+  - id: function-calling
+    name: Function calling
+    definition: >-
+      The mechanism by which a model asks for a tool to run. The developer
+      sends tool definitions with the prompt; the model replies with a
+      structured request naming a tool and its arguments instead of prose;
+      the application executes it and sends the result back as a new
+      message. The model never runs code itself; it emits a request the
+      harness fulfils.
+  - id: tool-schema-design
+    name: Tool schema design
+    definition: >-
+      Writing the name, description and parameter schema that tell the model
+      what a tool does and how to call it. The description is a prompt: it
+      must say when to use the tool, what it returns and what it must not be
+      used for. Few, well-named, strictly typed parameters with examples
+      outperform flexible ones. Most tool misuse is a schema problem, not a
+      model problem.
+  - id: n-x-m-integration-problem
+    name: N x M integration problem
+    definition: >-
+      With N agent applications and M tools or data sources, every pairing
+      needs its own integration unless both sides speak a shared protocol.
+      This is what made a standard for tool connections necessary: a tool
+      exposed once through the protocol works with every compliant agent,
+      turning N times M integrations into N plus M.
+  - id: error-handling
+    name: Error handling
+    definition: >-
+      What happens when a tool fails, times out or returns something
+      unexpected. The result should go back to the model as a clear,
+      structured error it can reason about, not an exception that ends the
+      run or an empty string it treats as success. Design tools to fail
+      loudly and informatively, and decide in the harness how many retries
+      a step gets.
+  - id: parallel-calls
+    name: Parallel calls
+    definition: >-
+      Letting the model request several independent tool calls in one turn,
+      which the harness executes concurrently and returns together. It cuts
+      latency and round trips for read-heavy work such as fetching several
+      files. Calls that depend on each other's results must stay sequential,
+      and side-effecting tools need care because concurrent execution can
+      reorder them.
+links:
+  prerequisites: [concepts/what-is-an-agent]
+  related: []
+  specializations: []
+sources: [AEC-03]

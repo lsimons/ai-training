@@ -1,0 +1,55 @@
+id: concepts/limits
+area: concepts
+name: Capabilities and limits
+definition: >-
+  Language models are fluent and broadly knowledgeable, and they fail in
+  predictable ways. This topic names the failures a user must expect:
+  confident invention, knowledge that stops at a date, answers that vary
+  between runs, agreement that flatters instead of informs, and the cost and
+  delay that grow with every token.
+concepts:
+  - id: hallucination
+    name: Hallucination
+    definition: >-
+      Output that is fluent and confident but false: an invented citation, a
+      function that does not exist, a plausible date that is wrong. It happens
+      because the model predicts likely text, not verified facts, and it has
+      no built-in signal for "I do not know". Hallucination is most likely on
+      specifics, rare topics and anything the model cannot look up.
+  - id: knowledge-cutoff
+    name: Knowledge cutoff
+    definition: >-
+      The date after which a model's training data stops. Events, releases and
+      documentation newer than the cutoff are unknown to the model unless they
+      are pasted into the context or fetched by a tool. A model will often
+      answer about recent things anyway, from older patterns, so the cutoff is
+      a common and quiet source of wrong answers.
+  - id: non-determinism
+    name: Non-determinism
+    definition: >-
+      The same prompt can produce different answers on different runs because
+      output is sampled from probabilities. Even at the lowest temperature,
+      small differences in serving can change results. This means one good
+      answer does not prove a prompt is reliable, and any process built on a
+      model needs checks that tolerate variation.
+  - id: sycophancy
+    name: Sycophancy
+    definition: >-
+      The tendency of a model to agree with the user, praise their idea or
+      change a correct answer when challenged, because agreeable text was
+      rewarded during training. Sycophancy makes a model a poor judge of your
+      own work unless you ask for criticism explicitly, hide your preference,
+      or have it argue the other side.
+  - id: cost-and-latency
+    name: Cost and latency
+    definition: >-
+      Every token read or written costs money and time. Long prompts, large
+      documents, big models and multi-step agents multiply both. Latency grows
+      with output length because tokens are produced one at a time. Cost and
+      latency are why a smaller model or a shorter prompt is often the right
+      engineering choice even when a larger one would answer slightly better.
+links:
+  prerequisites: [concepts/how-models-work]
+  related: []
+  specializations: []
+sources: [DLAI-3]

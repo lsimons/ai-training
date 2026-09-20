@@ -1,0 +1,36 @@
+---
+/** Single-select multiple choice. Wrong picks show their own `why` (spec S01 `choice`). */
+import CheckpointShell from './CheckpointShell.astro';
+
+interface Option {
+	text: string;
+	correct?: boolean;
+	why?: string;
+}
+interface Props {
+	id: string;
+	objective: string;
+	title: string;
+	hint: string;
+	options: Option[];
+}
+const { id, objective, title, hint, options } = Astro.props;
+const correct = options.filter((o) => o.correct).length;
+if (correct !== 1) throw new Error(`Choice "${id}" needs exactly one correct option, has ${correct}`);
+---
+
+<CheckpointShell {id} {objective} {title} {hint} kind="choice">
+	<slot />
+	<Fragment slot="body">
+		<div class="cp-options" role="radiogroup" aria-label={title}>
+			{
+				options.map((o) => (
+					<label data-correct={o.correct ? 'true' : undefined} data-why={o.why}>
+						<input type="radio" name={`${id}-choice`} />
+						<span>{o.text}</span>
+					</label>
+				))
+			}
+		</div>
+	</Fragment>
+</CheckpointShell>

@@ -1,0 +1,84 @@
+id: building-agents/evaluation
+area: building-agents
+name: Evaluation and testing
+definition: >-
+  You cannot improve an agent you cannot measure. This topic covers naming
+  the qualities that matter, turning them into rubrics and metrics that
+  resist gaming, grading the path the agent took as well as its answer, using
+  a model as a judge, maintaining golden sets, analysing errors and observing
+  the agent in use.
+concepts:
+  - id: quality-pillars
+    name: Quality pillars
+    definition: >-
+      The distinct dimensions along which an agent can be good or bad:
+      correctness of the result, faithfulness to sources, safety of actions,
+      efficiency in steps and tokens, and adherence to instructions and
+      format. Naming them separately matters because they trade off; an
+      agent can score well on one while failing another, and one number
+      hides that.
+  - id: rubrics
+    name: Rubrics
+    definition: >-
+      Written criteria that turn "good" into scorable statements: what a
+      passing answer must contain, what disqualifies it, how partial credit
+      is given. A rubric lets different graders, human or model, agree, and
+      it makes the definition of quality reviewable and improvable. Writing
+      one usually exposes disagreement about what the agent is for.
+  - id: metrics-that-cannot-be-gamed
+    name: Metrics that cannot be gamed
+    definition: >-
+      A metric that can improve without the real quality improving will be
+      optimised until it does exactly that. Length, keyword presence and
+      self-reported success are easy to game; tests the agent cannot see,
+      human spot checks and outcomes measured downstream are harder. Choose
+      metrics that require the quality itself to move, and watch for
+      divergence between the number and what users see.
+  - id: trajectory-evaluation
+    name: Trajectory evaluation
+    definition: >-
+      Grading the sequence of steps an agent took, not only its final
+      output: did it call the right tools, in a sensible order, without
+      dangerous or wasteful actions, and did it recover from errors. Two
+      runs with the same answer can have very different trajectories, and
+      the unsafe or lucky one will fail in production. Trajectories are also
+      where error analysis starts.
+  - id: llm-as-judge
+    name: LLM as judge
+    definition: >-
+      Using a model to grade outputs against a rubric, so evaluation scales
+      beyond what humans can read. It works well for criteria a careful
+      reader could apply and poorly for facts the judge cannot check. Judges
+      have biases, toward length, toward their own style, toward the first
+      option, so calibrate them against human grades on a sample and re-check
+      when the model changes.
+  - id: golden-sets
+    name: Golden sets
+    definition: >-
+      A curated set of inputs with expected outputs or qualities, covering
+      typical cases, edge cases and past failures, run every time the agent,
+      prompt or model changes. The golden set is the agent's regression
+      suite. It should be representative of real use, grow with every
+      production incident and stay small enough to run often.
+  - id: error-analysis
+    name: Error analysis
+    definition: >-
+      Reading failed runs one by one, classifying what went wrong and where,
+      and counting the categories. It replaces guessing about what to fix
+      with evidence: the most common failure is usually one thing, such as a
+      tool schema or a retrieval miss, and fixing it moves the metric more
+      than any general tuning. It is the highest-value activity in improving
+      an agent.
+  - id: observability
+    name: Observability
+    definition: >-
+      Recording what an agent does in real use so it can be inspected later:
+      each model call, tool call, result, latency and cost, tied together as
+      a trace per run. Observability turns a user complaint into a traceable
+      run, feeds error analysis and the golden set, and shows drift when a
+      model or dependency changes. Without it, production is a black box.
+links:
+  prerequisites: [building-agents/agent-loop, coding-with-agents/verification]
+  related: []
+  specializations: []
+sources: [AEC-09, DLAI-11, Brilliant VER]

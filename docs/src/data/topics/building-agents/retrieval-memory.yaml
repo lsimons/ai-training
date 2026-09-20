@@ -1,0 +1,41 @@
+id: building-agents/retrieval-memory
+area: building-agents
+name: Agentic retrieval and memory
+definition: >-
+  Retrieval and memory are how an agent knows things outside its context
+  window. This topic covers retrieval as a loop the agent drives rather than
+  a single lookup, the choices for where and how memory is stored, and the
+  many cases where a plain retrieval step is all a system needs.
+concepts:
+  - id: agentic-rag-loop
+    name: Agentic RAG loop
+    definition: >-
+      Retrieval driven by the agent: it forms a query, reads what comes
+      back, judges whether it answers the question, and reformulates,
+      searches elsewhere or drills into a document before answering. Compared
+      with one fixed search per question, it handles vague queries and
+      multi-hop questions much better, at the cost of more calls and a loop
+      that needs a bound.
+  - id: memory-storage-choices
+    name: Memory storage choices
+    definition: >-
+      Where an agent's long-term memory lives and how it is found again:
+      plain files the agent reads whole, key-value notes, a searchable index
+      over text, a database queried by tool, or summaries folded into the
+      system prompt. Each trades simplicity against scale and precision.
+      Start with files the human can read and edit; add indexing when volume
+      demands it.
+  - id: when-basic-rag-suffices
+    name: When basic RAG suffices
+    definition: >-
+      Many systems need only the simple form: embed documents, retrieve the
+      top matches for the question, put them in the prompt, answer. It is
+      enough when questions are direct, the corpus is well chunked and
+      latency matters. Reach for agentic retrieval only when evaluation
+      shows failures on multi-step or ambiguous questions that a better
+      index cannot fix.
+links:
+  prerequisites: [building-agents/agent-loop, concepts/grounding]
+  related: []
+  specializations: []
+sources: [AEC-05, AEC-08]

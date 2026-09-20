@@ -1,0 +1,48 @@
+id: using-agents/delegating
+area: using-agents
+name: Delegating to an agent
+definition: >-
+  Delegating to an agent is like delegating to a capable new colleague who
+  will fill every gap with a guess. This topic covers writing a brief with a
+  goal, limits and done-criteria, supplying the context the task needs,
+  choosing how far the agent may go before checking in, and reviewing the
+  result against the brief.
+concepts:
+  - id: task-brief
+    name: Task brief
+    definition: >-
+      The short written statement you hand an agent: the goal, the context
+      it needs, the limits it must stay inside and the criteria that make
+      the work done. Whatever a brief leaves out, the agent fills in with a
+      plausible default, so what it must not touch matters as much as what it
+      must do. Writing done-criteria first turns review into a check.
+  - id: giving-context
+    name: Giving context
+    definition: >-
+      Supplying the agent with the information and materials the task depends
+      on: the relevant files, the approved source of numbers, the constraint
+      you know and it cannot, the example of what good looks like. An agent
+      that has to guess sources takes the most available one, not the right
+      one. Point at things by name and location rather than by description.
+  - id: choosing-a-degree-of-autonomy
+    name: Choosing a degree of autonomy
+    definition: >-
+      Deciding, per task, how much the agent may do before you look: draft
+      only, act but ask before anything irreversible, or run to completion.
+      The choice follows from how costly a mistake is and how easily it is
+      undone, not from how capable the agent seems. Start with less autonomy
+      on a new kind of task and widen it as the results earn trust.
+  - id: checking-results
+    name: Checking results
+    definition: >-
+      Reviewing what the agent delivered against the brief's done-criteria
+      rather than against a general impression. Read the changes, not the
+      agent's summary of them; run what can be run; look for work outside
+      the limits you set. A plausible result is easy to accept and often
+      subtly wrong, so the brief is the yardstick, and any gap goes back into
+      the next brief.
+links:
+  prerequisites: [concepts/what-is-an-agent, safety/verification]
+  related: []
+  specializations: []
+sources: [DLAI-11, Ng]

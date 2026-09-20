@@ -1,0 +1,34 @@
+---
+/** Generated from every topic's concept definitions (spec S02 "Stable URLs": /glossary/#<concept>). */
+import { getCollection } from 'astro:content';
+import { href } from '@lib/url';
+
+const topics = (await getCollection('topics')).map((t) => t.data);
+const entries = topics
+	.flatMap((t) => t.concepts.map((c) => ({ ...c, topic: t })))
+	.sort((a, b) => a.name.localeCompare(b.name));
+const seen = new Set<string>();
+for (const e of entries) {
+	if (seen.has(e.id)) throw new Error(`Duplicate concept id ${e.id} (in ${e.topic.id})`);
+	seen.add(e.id);
+}
+---
+
+<dl class="glossary">
+	{
+		entries.map((e) => (
+			<>
+				<dt id={e.id}>
+					{e.name} <a class="glossary-topic" href={href(`/topics/${e.topic.id}/`)}>{e.topic.name}</a>
+				</dt>
+				<dd>{e.definition}</dd>
+			</>
+		))
+	}
+</dl>
+
+<style>
+	.glossary dt { font-weight: 700; margin-top: 1rem; }
+	.glossary-topic { font-weight: 400; font-size: 0.85rem; margin-left: 0.5rem; color: var(--sl-color-gray-3); }
+	.glossary dd { margin: 0.25rem 0 0 0; }
+</style>
