@@ -123,9 +123,10 @@ print(run("What is the weather in Amsterdam?"))
 A real model API returns the same two cases in a different format. The
 reply has a stop reason field that says whether the model finished or
 wants a tool, and each tool result names the id of the request it
-answers, so the model can match them up when it asked for several tools at
-once. Every round sends the whole message list and the tool definitions
-again, because the model doesn't keep state between calls
+answers, so the model can match them up when it asked for more than one
+tool at once. With a stateless model API, the usual kind, every round
+sends the whole message list and the tool definitions again, because the
+model doesn't keep state between calls
 (@Academy building-with-the-claude-api). The `answer` key in `fake_model`
 plays the role of the stop reason, and translating that field is most of
 the work of swapping in a real model.
@@ -135,9 +136,9 @@ forever and spends your money. A real loop has a budget.
 
 A real loop also keeps going when a tool fails. When the function raises
 or times out, the error text goes into the message list as the tool
-result, marked as an error. The model can then retry with better arguments or tell the
-user what went wrong. An exception that escapes the loop ends the run with
-nothing to show. How many retries a step gets is a decision for the loop,
+result, marked as an error. The model can then retry with better arguments
+or tell the user what went wrong. An exception that escapes the loop ends
+the run with nothing to show. How many retries a step gets is a decision for the loop,
 and after the same error twice in a row it should stop and say which limit
 fired.
 
