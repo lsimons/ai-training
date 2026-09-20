@@ -11,7 +11,7 @@
  * checkpoint stem still resolves when a review page clones it. Only code is
  * left alone.
  */
-import { walkText, CODE_ONLY } from './mdast-walk.mjs';
+import { CODE_ONLY, walkText } from './mdast-walk.mjs';
 
 const CITATION = /\(@([^()\n]+?)\)/g;
 const DOCS_DIR = /[\\/]src[\\/]content[\\/]docs[\\/]/;
@@ -47,7 +47,7 @@ export function remarkCitations({ bibliography }) {
 			if (n === -1) {
 				if (!(key in bibliography)) {
 					throw new Error(
-						`${file.path}: unknown citation key "${key}". Keys are defined in site/src/data/bibliography.yaml.`
+						`${file.path}: unknown citation key "${key}". Keys are defined in site/src/data/bibliography.yaml.`,
 					);
 				}
 				order.push(key);
@@ -65,7 +65,7 @@ export function remarkCitations({ bibliography }) {
 				CITATION.lastIndex = 0;
 				if (m) {
 					throw new Error(
-						`${file.path}: citation ${m[0]} inside a ${parent.type}. Cite in the paragraph text instead; a reference link cannot render there.`
+						`${file.path}: citation ${m[0]} inside a ${parent.type}. Cite in the paragraph text instead; a reference link cannot render there.`,
 					);
 				}
 			},
@@ -86,7 +86,7 @@ export function remarkCitations({ bibliography }) {
 					data: { hProperties: { id: `ref-${i + 1}` } },
 					children: [{ type: 'paragraph', children: referenceText(key, bibliography[key]) }],
 				})),
-			}
+			},
 		);
 	};
 }
@@ -103,7 +103,7 @@ function splitText(node, numberOf, page) {
 	for (const m of node.value.matchAll(CITATION)) {
 		const index = /** @type {number} */ (m.index);
 		if (index > last) out.push({ type: 'text', value: node.value.slice(last, index) });
-		const key = m[1].trim();
+		const key = (m[1] ?? '').trim();
 		const n = numberOf(key);
 		out.push({
 			type: 'link',
