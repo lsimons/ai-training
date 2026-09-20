@@ -19,11 +19,8 @@ accept = ["100..=299", "403", "429"]
 # - localhost: dev-server URLs are not reachable in CI.
 # - linkedin: bot-protected, returns 403/999 to checkers.
 # - `[{}]` / `%7B`: JSX expressions in .mdx that lychee mis-parses as URLs.
-# - This repository on GitHub: private for now, so unauthenticated checks get
-#   404. Remove this line when the repository goes public.
 exclude = [
   '^https?://lsimons\.github\.io/',
-  '^https://github\.com/lsimons/ai-training(/|$)',
   '^http://localhost',
   '^https://www\.linkedin\.com',
   '[{}]',

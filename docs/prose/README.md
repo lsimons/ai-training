@@ -6,7 +6,7 @@ the process for deciding about a new style package.
 
 Every Markdown file in the repository is a model for the Markdown written
 after it: authors and agents read these files and copy their patterns. So the
-exploration notes under `docs/plan/` are in scope even though the site never
+specs and agent docs under `docs/` are in scope even though the site never
 publishes them.
 
 ## Where a rule can go

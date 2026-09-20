@@ -24,7 +24,6 @@ HITS: prose_eval.Hits = {
     ("path", "expected"),
     [
         ("site/src/content/docs/basics/what-is-ai.mdx", "lessons"),
-        ("docs/plan/00-plan.md", "plan"),
         ("docs/spec/S01-dictionary.md", "spec"),
         ("docs/agents/writing-a-lesson.md", "agent-docs"),
         ("docs/prose/README.md", "agent-docs"),

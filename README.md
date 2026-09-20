@@ -4,8 +4,17 @@ An open training suite for getting started with AI: concepts, safety, using
 AI agents, AI-assisted software engineering, and customizing and building AI
 agents.
 
-Site: <https://lsimons.github.io/ai-training/> (not yet published, see
-[Publishing](#publishing)).
+Site: <https://lsimons.github.io/ai-training/>
+
+## ⚠️ Pre-release content - use with care
+
+This site is published early so that it can be shared and improved in the
+open, while most of the planned lessons are still unwritten and existing
+pages can change or move without notice. Lessons are written by AI agents
+under human review, so expect gaps and mistakes. Check claims against the
+cited sources before you rely on them, and open an
+[issue](https://github.com/lsimons/ai-training/issues) when you find a
+problem.
 
 The basic material (AI concepts, AI safety, using AI agents) is written for
 anyone doing knowledge work. The rest is written for software engineers. The
@@ -13,7 +22,7 @@ site is static HTML with interactive lessons that keep your progress in your
 browser, and you can also run it locally from a Claude Code session with
 Claude acting as a tutor.
 
-**Status: release 1, one lesson per area, is live in the repository.** The
+**Status: release 1, one or two lessons per area, is live.** The
 design is in [`docs/spec/`](./docs/spec/) and the open work is in the
 [issue tracker](https://github.com/lsimons/ai-training/issues).
 
@@ -84,10 +93,10 @@ the target path.
 
 ## Publishing
 
-The repository is private for now. Once public, enable GitHub Pages with the
-source set to **GitHub Actions**; a push to `main` then builds and deploys the
-site to `https://lsimons.github.io/ai-training/`. Then restrict the
-`github-pages` environment's deployment branches to `main`.
+GitHub Pages serves the site with the source set to **GitHub Actions**. A
+push to `main` builds and deploys it to
+`https://lsimons.github.io/ai-training/`, and the `github-pages` environment
+only accepts deployments from `main`.
 
 ## Contributing
 

@@ -224,7 +224,7 @@ patterns below after the fact. Write so that it has nothing to say.
 
 ## Process
 
-- Git remote is GitHub, `lsimons/ai-training` (private for now). Use `gh`.
+- Git remote is GitHub, `lsimons/ai-training`. Use `gh`.
 - Issues and triage labels: `docs/agents/issue-tracker.md`. Running a triage
   pass with the maintainer: `docs/agents/triage.md`.
 - Running many builder and reviewer agents in parallel against the issues,
@@ -233,7 +233,8 @@ patterns below after the fact. Write so that it has nothing to say.
   invoke `/tutor`.
 - Commits follow [Conventional Commits](https://conventionalcommits.org/)
   (`type(scope): description`), and commitlint enforces it.
-- Deploy to GitHub Pages is manual dispatch only while the repo is private.
+- A push to `main` deploys to GitHub Pages (`.github/workflows/deploy.yml`).
+  The site is pre-release and says so on the front page and in the README.
 
 ## Session completion
 

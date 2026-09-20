@@ -44,8 +44,6 @@ def area(path: str) -> str:
     """Where a sentence lives says who reads it and how much it matters."""
     if path.startswith("site/src/content/docs/"):
         return "lessons"
-    if path.startswith("docs/plan/"):
-        return "plan"
     if path.startswith("docs/spec/"):
         return "spec"
     if path.startswith(("docs/agents/", "docs/prose/", ".claude/")):
