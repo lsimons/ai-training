@@ -152,3 +152,20 @@ enum
 
 # Possessive Vale splits oddly ("someone else's").
 else's
+
+# Exemptions for write-good.TooWordy, not spellings. Vale adds every term
+# here to the exceptions of rules that support them. These tokens are
+# domain vocabulary or plain English in this repository: "objective" is a
+# defined term (spec S01), "multiple choice" is a checkpoint kind, and
+# evaluate, implement, monitor, advise and demonstrate are what the
+# material is about. "it is" and "it was" are ordinary English.
+[Oo]bjective
+[Oo]bjectives
+[Mm]ultiple
+[Ee]valuate
+[Ii]mplement
+[Mm]onitor
+[Aa]dvise
+[Dd]emonstrate
+[Ii]t is
+[Ii]t was
