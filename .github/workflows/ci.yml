@@ -43,6 +43,13 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('site/bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-
 
+      - name: Cache uv dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}
+          restore-keys: ${{ runner.os }}-uv-
+
       - name: Cache prek hook environments
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -56,8 +63,23 @@ jobs:
       - name: Install
         run: mise run site-install-frozen
 
+      # The frozen task, not `py-install`: a pyproject.toml change that
+      # uv.lock does not reflect must fail here rather than be silently
+      # re-resolved on the runner into an unreviewed version set.
+      - name: Install Python tools
+        run: mise run py-install-frozen
+
       - name: Lint
         run: mise run lint
+
+      - name: Python lint (ruff)
+        run: mise run py-lint
+
+      - name: Python typecheck (basedpyright)
+        run: mise run py-typecheck
+
+      - name: Python tests (pytest)
+        run: mise run py-test
 
       # The synced `write-good` style is gitignored; fetch it before linting.
       - name: Fetch Vale styles
