@@ -256,6 +256,10 @@ page must also say so in prose next to it.
 1. First takeaway.
 2. Second takeaway.
 </Recap>
+
+<Habit id="name-the-blast-radius">
+The next time you hand an agent a task, say out loud what it can reach before you press enter.
+</Habit>
 ```
 
 `Recap` appends "You can now..." from the served objectives and the finish
@@ -266,6 +270,15 @@ YAML, not on the lesson.
 
 Widgets are their own components under `site/src/components/widgets/` and
 are imported by name. They teach and never grade.
+
+`Habit` (spec S07) goes after `Recap`. Zero, one or two per lesson, each
+with a kebab-case `id` that is unique in the lesson, doesn't match a section
+slug, and never changes once published. The text is one or two sentences in
+the imperative that name a moment in the learner's own work, not a task to
+do in the lesson. The site brings the habit back 1, 3 and 7 days after the
+lesson is finished, so write something that recurs at work within a week.
+The component is specified in S07 and has no implementation yet, so leave
+habits out of a lesson until it does.
 
 ## Citations and terms
 

@@ -53,6 +53,7 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 | Checkpoints | At least one per served objective. A checkpoint's `objective` names the one objective it evidences.                                                |
 | Exercise    | Exactly one.                                                                                                                                       |
 | Recap       | Numbered takeaways and the served objectives as "You can now...". Where to go next is the page footer's previous/next.                             |
+| Habit       | Zero, one or two, after the recap. A small task in the learner's own work with a stable `id`. A later spec sets its schedule and storage.          |
 
 Objectives are frontmatter data that drive checkpoints, routing, and tutor
 mode. They're never printed as a `you will learn` list; the opener and the
