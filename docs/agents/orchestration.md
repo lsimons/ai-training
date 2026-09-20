@@ -3,7 +3,8 @@
 How one coordinating agent runs many implementation and review agents in
 parallel against the GitHub issues, and what a session of that looks like.
 Written after the session of 2026-09-20 that took twelve `ready-for-agent`
-issues to twelve merged pull requests.
+issues to twelve merged pull requests, and extended after the two waves
+later that day, the second of which ran on an integration branch.
 
 The coordinator never edits code itself. It triages the issues, dispatches the agents, relays review findings and
 decides what goes back to a builder, and it runs the merge queue. Everything
@@ -38,6 +39,9 @@ both, so the builder and the reviewer never talk to each other.
 
    - the issue number and the instruction to load the `build` skill;
    - the branch name (`feat/<issue>-<slug>`);
+   - the setup a fresh worktree needs before any check runs: `mise run site-install-frozen` before the `site-*` tasks and `mise run prose-sync` before `mise run prose`. Without the sync Vale runs only
+     the House rules and says nothing, and the `ai-tells` errors appear in
+     CI instead (issue #103);
    - the definition of done: `mise run ci` green locally, pushed, a pull
      request against `main` whose body says `Closes #N`, GitHub CI green,
      not merged;
@@ -48,7 +52,10 @@ both, so the builder and the reviewer never talk to each other.
      writes for the future state (for example, write fixtures in Python
      because another builder is removing bash support);
    - what not to run: `site-dev` and anything on a fixed port that siblings
-     share.
+     share;
+   - when the issue asks for a comment on GitHub, edit only the comment
+     whose id the builder's own `gh issue comment` call returned. One
+     builder overwrote two siblings' comments by id.
 
    Tell the builder not to ask questions, to make the call, and to state
    the call in the pull request body.
@@ -59,7 +66,14 @@ both, so the builder and the reviewer never talk to each other.
    licensing check where a source is cited, a supply-chain check where a
    dependency or pin changes. Name the specific risks to probe, such as an
    exclusion added to a validator, a claim in a lesson that needs a public
-   source, or a package name that must not exist on npm. The reviewer posts
+   source, or a package name that must not exist on npm. A reviewer of
+   lesson content compares the new sentences against the cited sources and
+   reports near-verbatim text, since paraphrase is the license condition
+   for most of them. Where the change is data with a rule behind it (a
+   course plan whose lessons must cover the topics their competencies draw
+   on), ask the reviewer for a throwaway script that checks the rule
+   mechanically. Reading found the plans convincing, and the script found
+   the same defect in four of the six. The reviewer posts
    the review on the pull request with `gh pr review --comment` (GitHub
    refuses `--request-changes` on a pull request the same account opened),
    findings ordered by severity, each with `file:line` and a concrete
@@ -76,7 +90,9 @@ both, so the builder and the reviewer never talk to each other.
    designs) is reported to the maintainer instead.
 
 5. **Merge queue.** The maintainer approves each pull request in a message
-   to the coordinator, who merges with `gh pr merge --rebase`. After every
+   to the coordinator, who merges with `gh pr merge --rebase`. The
+   coordinator plays a chime when a pull request is ready for that call,
+   which is the maintainer's preference. After every
    merge, wait a minute and list the open pull requests with their
    `mergeable` state. Anything `CONFLICTING` goes back to its builder with
    the likely conflict files named. When a big change is in the queue (new
@@ -107,6 +123,79 @@ Never amend or force-push a commit another branch is stacked on. A builder
 asked to add one more change to such a branch appends a commit instead, and
 says so.
 
+## Integration branches for content waves
+
+Content or data work in a wave (lesson passes, course plans, spec text)
+has a cost per pull request that has little to do with the size of the
+change: a review round, a revision, a rebase, two CI runs, a maintainer
+approval, and a deploy. Wave 2 of the 2026-09-20 session was six pull
+requests for six areas, and the six merges were six deploys of the same
+kind of change. For that kind of wave the coordinator collects the approved
+branches on one integration branch and opens one pull request for the wave.
+Code work that changes shared modules or adds gates gets a separate pull
+request, because its review and its CI run are what protect the other
+branches.
+
+Builders work as before: one issue, one branch from `origin/main`, pushed
+when its local checks pass, and without a pull request. Reviewers check
+the branch out in their own worktree and review it as before. The review
+goes on the issue as a comment, because the pull request doesn't exist
+yet, with the same findings by severity and the same `Verdict:` line, and
+the revisions and re-checks follow it there.
+
+The coordinator keeps the integration branch, `wave/<n>-<slug>`, in a
+dedicated worktree. When a branch is approved, it is rebased onto the wave
+branch rather than merged into it. The wave history then has no merge
+commits, and the later rebase merge into `main` keeps one commit per
+change:
+
+```sh
+git fetch origin
+git rebase --onto wave/3-course-plans origin/main origin/feat/31-safety-plan
+git branch -f wave/3-course-plans HEAD
+git checkout wave/3-course-plans
+```
+
+The wave branch now holds the earlier branches and this one, in the order
+they were approved. When every approved branch is in, the coordinator runs
+`mise run ci` once on the wave branch, pushes it, and opens one pull
+request against `main`. Its body holds a table with one row per branch:
+the issue, the branch, a link to the review comment, and a link to the
+re-check comment where there was one. The review record is then on GitHub
+next to the pull request that shipped it. The maintainer approves the wave, and
+the coordinator merges it with `gh pr merge --rebase` as usual. The deploy
+happens once.
+
+The cases that come up:
+
+- **A branch fails review.** It is left out of the wave, and the rest go
+  on. Its builder revises on the issue, the reviewer re-checks there, and
+  the branch joins the wave if the pull request is still open or waits for
+  the next one. Nothing on the wave branch depends on it.
+- **A rebase conflict between branches in the wave.** The rebase of the
+  second branch stops on the conflict. The coordinator doesn't resolve it.
+  It tells the builder whose branch came second to resolve the conflict on
+  the integration branch, in the coordinator's worktree or in a fresh one
+  checked out on `wave/<n>-<slug>`, and to push the result to the wave
+  branch. The first branch is left as it was rebased.
+- **A follow-up after the branch is on the wave.** A builder that pushes
+  one more commit to its own branch, after a review finding on the wave
+  pull request, tells the coordinator the SHA. The coordinator
+  cherry-picks that commit onto the wave branch. Rebasing the branch onto
+  the wave again would replay commits the wave already holds.
+- **A change stacked on the wave.** A lesson whose course needs the plan
+  entry the wave adds starts from the wave branch and opens a draft pull
+  request with `--base wave/<n>-<slug>`, and its builder triggers CI with
+  `gh workflow run ci.yml --ref <branch>` because `pull_request` runs only
+  against `main`. After the wave merges, the coordinator changes its base with
+  `gh pr edit N --base main` and the builder runs `git rebase origin/main`, which drops the wave commits as already applied. Then it
+  is an ordinary pull request.
+- **The port.** Only one agent at a time runs `site-e2e`, which serves on
+  port 4400. The coordinator's `mise run ci` on the wave branch is that
+  run, so it waits until `lsof -i :4400` is empty, and no builder runs
+  `mise run ci`, `site-dev` or `site-screenshot` locally while the wave is
+  open. Builders run the individual tasks their change touches instead.
+
 ## What collides, and how to avoid it
 
 - **Shared config files.** `.mise.toml`, `.github/workflows/ci.yml` and
@@ -129,9 +218,11 @@ says so.
   a lesson builder that started earlier still adds a `.sh` file. Say the
   future rule in every builder prompt, and check each finished pull request
   against rules merged since it started.
-- **Ports.** Anything that serves the site on a fixed port (`site-e2e`,
-  `site-screenshot`, a stale `astro dev` daemon) breaks a sibling doing the
-  same. Only the builder changing that tooling runs it, on a spare port.
+- **Ports.** Anything that serves the site on a fixed port (`site-e2e` on
+  4400, `site-screenshot`, a stale `astro dev` daemon) breaks a sibling
+  doing the same. Only the builder changing that tooling runs it, after
+  `lsof -i :4400` comes back empty, and in integration mode the
+  coordinator's wave run is the one e2e run.
 
 ## Working with the platform
 
@@ -144,10 +235,13 @@ says so.
   on such a branch, spawn a fresh agent in a new worktree checked out on
   the branch, with the pull request and review as its whole brief.
 - The `code-review` skill spawns its own sub-agents (angles and verifiers).
-  Their notifications arrive at the coordinator too. Ignore them and act on
-  the reviewer's consolidated verdict.
-- GitHub reports `mergeable: UNKNOWN` for a minute after `main` moves. Wait
-  and list again. A pull request in `CONFLICTING` state gets no
+  Their notifications arrive at the coordinator too, and sometimes only
+  there. The reviewer then gets an empty result from the skill. Ignore the
+  notifications at the coordinator, act on the reviewer's consolidated
+  verdict, and tell every reviewer to fall back on its own probing when the
+  skill returns nothing.
+- GitHub reports `mergeable: UNKNOWN` for about a minute after every merge.
+  Wait and list again. A pull request in `CONFLICTING` state gets no
   `pull_request` CI run at all, so a builder that pushes into a conflict
   sees no run and should rebase rather than wait.
 - Rebase merges keep every commit. An intermediate commit that would fail a
@@ -172,3 +266,32 @@ specification, a misattributed framework, an unverified interpreter
 download in place of a lockfile pin, a validator exclusion that hid typo
 links, and a crash in the e2e static server. Each of those would have
 shipped without the review pass.
+
+## Session record, 2026-09-20, waves 2 and 3
+
+Wave 2 ran in per-pull-request mode. Twenty-five issues were in scope at
+the start of the day, twenty pull requests merged, sixteen issues closed,
+about twenty-two review passes, fifteen pull requests sent back at least
+once, zero merged with an open blocking finding. Review caught a tutor
+exemplar dialogue that leaked a graded checkpoint's answer, a reset that
+resurrected a migrated progress record, a skills-check input rename that
+broke self-graded checkpoints, a spec bootstrap contract that WebFetch couldn't
+meet, near-verbatim Academy sentences in three lesson pull requests,
+four wrong concept tags, a sidebar badge invisible in the light theme, and
+a widget whose bars had never rendered on `main`.
+
+Wave 3 was the first run of the integration mode. Nine issues (#30
+to #35, then #60, #61 and #19) plus a plan-table request from the maintainer
+became eleven branches, and the wave and stacked pull requests that merged
+were #108 with the six course plans and the plan table, #109 with two
+lesson changes, and #110 with the EU AI Act lesson stacked on the plans. A
+write-back pull request followed with the issue numbers of the 103 lesson
+issues the plans opened (deliverable 2 of #30 to #35). About twenty review
+passes, nine of the eleven branches sent back once. Review caught the competency-topic
+mismatch in four of the six plans, an exercise that had the learner paste
+their own confidential document, a sort item with two defensible answers,
+and a course-plan table that scrolled the page sideways on a phone, and it
+verified a July 2026 amendment to the EU AI Act and every article
+reference against EUR-Lex before the maintainer's own check. The wave
+pull requests, two of them, replaced what would have been nine pull
+requests and nine deploys.
