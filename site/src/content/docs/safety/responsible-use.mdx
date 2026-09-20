@@ -1,0 +1,361 @@
+---
+title: What may go into an AI tool
+description: Where a prompt goes once you press enter, and which of the data you handle may follow it. How to try a new tool with dummy data, and when to say that AI helped.
+mode: explanation
+covers:
+  - safety/responsible-use
+serves:
+  - safety/handles-data-safely/decides-what-to-share
+  - safety/handles-data-safely/discloses-ai-use
+  - safety/handles-data-safely/respects-licenses
+assumes:
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: Why agent safety is different
+    href: /safety/agent-risk/
+---
+
+import { Choice, Scenario, Sort, Repair, Pitfall, Exercise, Recap } from '@components/lesson';
+
+Most people who use an AI tool at work picked it themselves. It was free,
+or a colleague recommended it, or it came with a product they already had.
+Nobody asked, and nobody reviewed it. Security teams call this **shadow
+AI**, and the term sounds like an accusation. It isn't one. It is a
+description of how most tools arrive. The risk is in what goes into them.
+In this lesson we follow a prompt
+from your screen to the places it ends up. We then sort the data you handle
+into four tiers, and we set the two boundaries that separate trying a tool
+from using it. We end with two habits for the output side: saying that AI
+helped, and checking what the output was copied from.
+
+The lesson doesn't depend on which product you use. Have the terms page
+or trust page of a tool you use nearby, because the exercise at the end
+asks you to look four facts up in it.
+
+## Can I...?
+
+Start with your gut. Sort these requests before reading on, and come back
+after the lesson to see whether you would move any of them.
+
+<Sort id="can-i-sort" objective="safety/handles-data-safely/decides-what-to-share"
+  title="Can I...?" hint="Whose information is it, and can it be taken back once it has been sent?"
+  buckets={['Yes', 'Only with approval', 'Never']}
+  items={[
+    { text: 'Review my own draft report with it', bucket: 0 },
+    { text: 'Discuss how our team plans its work', bucket: 0 },
+    { text: 'Mention a colleague by name and work email', bucket: 0 },
+    { text: 'Paste a document a customer gave us in confidence', bucket: 1 },
+    { text: 'Describe a customer\'s internal systems in detail', bucket: 1 },
+    { text: 'Paste a password or an API key', bucket: 2 },
+    { text: 'Upload an HR file, medical note or identity number', bucket: 2 },
+    { text: 'Send the output to a customer without reading it', bucket: 2 },
+  ]} />
+
+The rest of the lesson explains why the answers fall where they do.
+
+## Where a prompt goes
+
+When you press enter, the text of your prompt leaves your computer and is
+processed on the provider's servers, in a region the provider chooses. The
+response comes back the same way. So far that is like sending an email. The
+differences are in what happens afterwards, and they are set by the terms
+of the tool, so the facts below are things to look up for your own tool
+rather than facts this lesson can state for you.
+
+**Retention.** The provider keeps the conversation for some time. It may be
+thirty days for abuse checks, or as long as your account exists, or until
+you delete it, and deleting it in the interface may or may not delete it on
+the server. Find the number.
+
+**Training.** Some tiers use your conversations to train future models.
+Consumer subscriptions often do, and business tiers usually don't, and the
+default can be a setting you have to switch. Find the sentence in the terms
+that says so, and find the setting.
+
+**Region.** Where the data is stored and where it is processed are two
+separate questions. A vendor that promises storage in your region may still
+process prompts elsewhere. Ask both.
+
+**The chain.** A tool is rarely one company. An assistant built into an
+office product may send your text to a gateway, which sends it to a model
+vendor, and each link has its own retention, training and region terms. A
+tool built on a gateway built on a model vendor has three such policies.
+The vendor list is usually published as "subprocessors".
+
+**Web search.** When an assistant searches the web for you, it writes a
+short query derived from your prompt and sends that to a search provider,
+which is often a fourth company with its own terms. The search provider
+never sees your whole prompt, but it sees enough to know what you were
+asking about. Keep sensitive detail out of prompts that trigger search, or
+turn search off for that conversation.
+
+There is one more thing to notice about "where it goes". The prompt is more
+than the text you typed. Depending on the tool, it can include the files
+you uploaded earlier in the conversation, the documents a connector can
+reach, your recent history, and details about your device or account.
+Before you decide what may go in, know what already goes in.
+
+<Pitfall title="Assuming the chat is storage">
+A team keeps its meeting notes as a running conversation with an assistant,
+because it is convenient to ask "what did we decide last month?". Six months
+later the provider changes its retention policy, and the conversation is
+gone. A chat tool is a processing service with no backup and no restore.
+Copy out anything you need to keep, and keep it where your organization
+keeps documents.
+</Pitfall>
+
+## What may go in: four tiers
+
+The "Can I...?" answers come from asking two questions about any piece of
+information: whose is it, and what role do we hold with respect to it.
+Privacy law names two roles. A **controller** decides what happens to the
+data and why. A **processor** handles it on the controller's behalf and may
+only do what the controller allows. Most of the time you don't need the
+words, and one plain sentence covers it: information you hold for someone
+else is theirs to decide about.
+
+That gives four tiers.
+
+| Tier                            | Meaning                                                                                                                | Rule for AI tools            |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| Public                          | Anyone may see it                                                                                                      | Fine                         |
+| Internal confidential           | Ours. Not for disclosure, and we decide what happens to it                                                             | Approved tools only          |
+| Held to serve someone else      | Details about a customer or partner that we keep in order to work with them, including personal data of their people   | Approved tools, with care    |
+| Someone else's own data         | Part of a customer's product, records or service. We only process it for them                                          | Only with their agreement    |
+
+"Approved" means a tool your organization has looked at and said yes to.
+The terms it checked are the ones from the previous section, and if you
+are the one choosing, those are the terms you check.
+
+Two categories cut across all four tiers and get their own rules.
+
+**Personal data.** Identity numbers, identity documents, medical content,
+HR file content, financial records with account numbers. Leave it out
+unless the tool is approved for that kind of data. A useful test is
+whether you would put the same text in an email to a colleague who has no
+reason to see it.
+
+**Secrets.** Passwords, API keys, tokens, certificates. Never, in any tool,
+at any tier. Replace them with placeholders such as `<API_KEY>`. A secret
+that has been pasted into a conversation has to be treated as leaked and
+rotated, whoever pasted it and however trusted the tool.
+
+There is a personal version of this too. Many people ask an assistant
+about their health, their mental state or their relationships. That is
+allowed, and it can be useful. Know that the content is retained under the
+same terms as everything else and is hard to get back. Be aware whom you
+are telling.
+
+<Repair id="replace-the-secrets" objective="safety/handles-data-safely/decides-what-to-share"
+  title="Make the prompt safe to send" hint="Which parts of the prompt does the model need in order to help, and which parts are only there because you pasted the whole thing?"
+  broken={`Our deploy script fails. Here is the config:
+DB_HOST=db.internal.example
+DB_USER=admin
+DB_PASSWORD=Tr0ub4dor&3
+CONTACT=maria.lopez@customer.example, +31 6 1234 5678
+What is wrong with it?`}
+  model={`Our deploy script fails. Here is the config, with the values replaced:
+DB_HOST=<host>
+DB_USER=<user>
+DB_PASSWORD=<password>
+CONTACT=<contact email>, <contact phone>
+What is wrong with it?
+
+If the model needs a real value to diagnose the problem, it can say which one, and you can decide then whether that value may go in.`}>
+A colleague is about to send this prompt to a general-purpose assistant.
+Rewrite it so that it can still get help, with nothing in it that would be
+an incident if the conversation leaked.
+</Repair>
+
+<Scenario id="web-search-on-a-sensitive-topic" objective="safety/handles-data-safely/decides-what-to-share"
+  title="Search or no search?" hint="How many companies see part of this prompt if search stays on, and what does each of them keep?"
+  options={[
+    { text: 'Ask as planned, with the customer name and the incident details, and let the assistant search.', consequence: 'The assistant sends a query naming the customer and the type of breach to a search provider. That provider keeps the query under its own terms, which you have not read.' },
+    { text: 'Turn off web search, or use a general prompt without the customer name, and look up the specific law yourself.', correct: true, consequence: 'The model vendor sees a general question about notification rules. Nobody outside the chain you already checked learns who the customer is or what happened.' },
+    { text: 'Refuse to use the assistant for anything about this incident.', consequence: 'Safe, and a legitimate choice, but you gave up a useful tool for drafting and structuring work that never needed the customer name in it at all.' },
+  ]}>
+A customer has had a security incident and you are helping them work out
+who must be notified. You want to ask an assistant which notification rules
+apply. The assistant has web search on by default. What do you do?
+</Scenario>
+
+## Trying a tool without exposing anything
+
+A new tool appears every week, and "use only approved tools" doesn't tell
+you how a tool gets approved. There is a level below approval that anyone
+may use without asking, as long as it stays there. Call it experimenting.
+
+Experimenting means the tool only ever sees dummy, synthetic or public
+data, and has no access to real systems. Under those conditions the terms
+of the tool don't matter much, because nothing that goes in is anyone's
+to protect. A short self-check, with the reason for each item, keeps you
+inside the line.
+
+| Check                                                                                                               | Why                                                                  |
+| ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| I use only dummy, synthetic or public data. No real company data, customer data or production systems.              | Real data, even internal, needs a proper assessment and can be exposed |
+| I have checked that no real names, email addresses, IP addresses or production values are in the test data.        | "Anonymized" real data can often be re-identified                     |
+| The tool has no read or write access to production systems, and no access to real company systems or data stores. | Even read access exposes information, and write access can cause outages |
+| I have set a spending limit where the tool bills by use.                                                            | Experiments left running keep billing                                 |
+| I delete accounts, data and integrations when the experiment ends.                                                  | Forgotten accounts become vulnerabilities over time                   |
+| I have written down what I'm testing and share what I learn.                                                        | Others learn from it and avoid duplicate work                         |
+| I report security concerns or incidents to whoever handles security.                                                | Fast reporting limits damage                                          |
+
+The checklist has two boundaries, and both are easy to cross by accident.
+
+**Experimenting ends the moment real information appears.** Opening the
+tool in a meeting with a customer, pointing it at non-public notes, or
+letting it read your real inbox is no longer experimenting, however new
+the tool is. The question to ask before each use is "is anything in this
+session real?".
+
+**Moving up needs an owner.** A tool that people start to rely on needs
+someone who is responsible for it: who patches it, who watches for
+vulnerabilities, who grants and removes access, who cleans up when it is
+retired. Without an owner the tool stays at the experimenting level, no
+matter how useful it is.
+
+<Scenario id="experiment-meets-real-data" objective="safety/handles-data-safely/decides-what-to-share"
+  title="Still an experiment?" hint="Which item on the checklist stops being true the moment the recording goes in?"
+  options={[
+    { text: 'Go ahead. It is still a trial, and the recording is only one file.', consequence: 'The recording holds the voices, names and plans of everyone in the meeting. A tool nobody has assessed now retains all of it, under terms nobody has read.' },
+    { text: 'Ask the customer for permission first, then upload.', consequence: 'Permission from the customer covers their side, but the tool itself has still not been assessed, and your own colleagues in the recording were not asked either.' },
+    { text: 'Stop the experiment here. Write down what you learned from the dummy tests and propose the tool for assessment, naming who would own it.', correct: true, consequence: 'The trial ends with a note and a proposal. If the tool is approved, the next recording can go in under known terms and with an owner.' },
+  ]}>
+You have been trying a meeting-summary tool with recordings of yourself
+reading a script. It works well. This afternoon you have a real call with a
+customer, and it would be a perfect test. What do you do?
+</Scenario>
+
+## Questions to ask your organization or a vendor
+
+At some point a tool moves from experimenting to real use, and someone has
+to ask the vendor questions. They apply just as well to the person in your
+organization who approved a tool, and the answers belong in a place the
+whole team can find.
+
+1. What data is shared with you when I use the AI features, and does the
+   AI bypass any of the permissions I already have?
+2. What is stored, for how long, and encrypted how?
+3. Who else receives it (subprocessors, model vendors), and can I turn them
+   off?
+4. Is my data used to train models? Where is that written?
+5. Which certifications cover the AI features specifically, and in which
+   role do you act, processor or controller?
+6. How is intellectual property protected: indemnity, citations, content
+   credentials on generated media?
+7. How do you reduce over-reliance on wrong answers: grounding in my own
+   data, citations, confidence signals?
+8. How do you detect and handle prompt injection, both in what I type and
+   in the documents the AI reads?
+
+If a vendor can't answer question 4 with a sentence you can find in their
+terms, treat the answer as "yes".
+
+## Saying that AI helped
+
+So far the lesson has been about what goes in. Two habits apply to what
+comes out, and the first is disclosure.
+
+Disclosure means saying that AI was used, to the extent the audience
+expects to know. A reader of a report wants to know whether a machine
+drafted the text and who checked it. A code reviewer wants to know which
+parts were generated. A party to a contract wants to know that a person is
+accountable for the wording. Disclosure is about trust, so the useful form
+states what the AI did, what you did, and who is accountable. A line such
+as "Drafted with an AI assistant and reviewed by the author" is enough
+for most documents, and it is the norm to expect from others.
+
+The reason disclosure sits in a safety lesson is the failure modes you met
+in the concepts course. The model is confident when it is wrong. Someone
+reading a text that was produced in seconds and checked by nobody deserves
+to know that, and you are accountable for the result whether or not the
+tool is mentioned.
+
+<Choice id="when-to-disclose" objective="safety/handles-data-safely/discloses-ai-use"
+  title="Who needs to know?" hint="Who is relying on the text, and what would they do differently if they knew a machine drafted it?"
+  options={[
+    { text: 'Nobody. The text is yours once you have edited it, and mentioning AI only invites doubt.', why: 'Editing makes you accountable for the text. It does not change what the reader expects to be told about how it was produced.' },
+    { text: 'The customer, with a line that says the summary was drafted with an AI assistant and reviewed by you.', correct: true },
+    { text: 'Only your manager, in private, in case something goes wrong later.', why: 'The reader who relies on the text is the customer. A private note to your manager protects you and tells the customer nothing.' },
+    { text: 'Everyone, with the full prompt and model output attached.', why: 'More than the audience needs. Disclosure states what the AI did and who checked it. The transcript is for you.' },
+  ]}>
+You used an assistant to draft a summary of a project's status for a
+customer. You edited it and checked the figures against the tracker. Who
+needs to know that AI was involved, and how?
+</Choice>
+
+## Where the output came from
+
+The second output habit is checking what the model may have copied.
+
+Material you give a model and material it produces both carry
+obligations. Feeding in text or code you may not redistribute doesn't
+launder it. Output that reproduces a source needs the attribution the
+source demands, and code output can reproduce public code closely enough
+that its license applies. Some coding assistants offer a filter that blocks
+suggestions matching public code. Without it there is a chance of
+reproducing licensed code word for word, and the legal position of such
+output is unsettled. The honest summary is that nobody can promise you the
+output is free of other people's work, so the check is yours.
+
+The habit is small. Keep track of where your inputs came from. When output
+looks copied, unusually specific or polished in a way the rest isn't, or a
+block of code that arrived complete with someone else's comments, search
+for a phrase from it. If it matches a source, credit it as the source
+demands or replace it.
+
+<Choice id="the-suspiciously-complete-function" objective="safety/handles-data-safely/respects-licenses"
+  title="The function that arrived finished" hint="What does the presence of someone else's comments tell you about where the text came from?"
+  options={[
+    { text: 'Use it. The tool produced it, so the tool\'s license covers it.', why: 'A tool\'s terms cover your use of the tool. They cannot grant you rights to code the model reproduced from somewhere else.' },
+    { text: 'Search for a distinctive line from it. If it matches a public source, follow that source\'s license or write your own version.', correct: true },
+    { text: 'Delete the comments and use the code. Without the comments nobody can tell.', why: 'Removing the evidence of copying does not remove the obligation, and it makes the copy harder to trace when a reviewer asks.' },
+  ]}>
+A coding assistant returns a forty-line function in one go, including a
+header comment with an author name and a year that is not yours. It does
+exactly what you asked. What do you do?
+</Choice>
+
+## Putting it together
+
+Before a prompt goes in, run down the list.
+
+1. **Where does it go?** Retention, training, region, and the chain of
+   vendors, for this tool. Look them up once, write them down for the team.
+2. **Whose is it?** Public, ours, held for someone else, or someone else's
+   own. The tier sets the rule.
+3. **Anything personal or secret?** Leave it out or replace it with a
+   placeholder, whatever the tier.
+4. **Is this session real?** If yes, the tool must be approved and owned.
+   If no, keep it that way.
+
+And when the output goes out: say that AI helped, and check what it may
+have been copied from.
+
+<Exercise stretch="Now do the same for a second tool you use, and compare the two answers side by side.">
+Take one AI tool you use at work. Find its terms, privacy page or trust
+page, and write down four facts as four short lines: how long it retains
+conversations, whether and how it may train on them (and where the
+setting is, if there is one), where it stores and where it processes data,
+and which subprocessors it lists. Spend no more than fifteen minutes. This
+is the lookup the lesson keeps pointing at, and once you have done it for
+one tool you can do it for any tool.
+
+A good result has a source for each line: a page, a section, a sentence.
+If you couldn't find one of the four, write "could not find" for that
+line, because that is itself the finding. Then answer one question: given
+those four facts, which tier of information from this lesson would you be
+comfortable putting into this tool?
+</Exercise>
+
+<Recap>
+1. A prompt is processed on the provider's servers under the tool's terms. Retention, training, region and the chain of subprocessors are facts to look up for your own tool, once, and write down for your team.
+2. Web search sends a derived query to a separate provider with its own terms. Keep sensitive detail out of prompts that search, or turn search off.
+3. Sort information into four tiers by asking whose it is and what role you hold. Information you hold for someone else is theirs to decide about.
+4. Personal data stays out unless the tool is approved for it. Secrets stay out of every tool, and a pasted secret is a leaked secret.
+5. Experimenting with dummy data needs no approval. It ends the moment anything real appears, and moving up needs an owner.
+6. Say that AI helped, to the extent the audience expects, and check output that looks copied before you use it.
+</Recap>
