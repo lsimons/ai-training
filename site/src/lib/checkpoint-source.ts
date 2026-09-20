@@ -119,10 +119,13 @@ export function parseAttrs(tag: string): Map<string, CheckpointAttr> {
  * children as Markdown (empty for a self-closing tag). `where` names the
  * lesson in error messages. The scanner only knows the tags in
  * `KIND_OF_TAG`, so a new kind enters there first. A `<Predict>` with no
- * `objective` is an ungraded example, not a checkpoint, and is skipped.
+ * `objective` is an ungraded example, not a checkpoint, and is skipped,
+ * but its `id` still counts: every tag's string `id` must be unique in
+ * the page, because each one becomes a DOM id.
  */
 export function scanCheckpointTags(src: string, where: string): CheckpointTagInfo[] {
 	const out: CheckpointTagInfo[] = [];
+	const ids = new Set<string>();
 	for (const m of src.matchAll(TAG_START)) {
 		const tag = m[1] as CheckpointTag;
 		const kind: CheckpointKind | undefined = KIND_OF_TAG[tag];
@@ -134,6 +137,11 @@ export function scanCheckpointTags(src: string, where: string): CheckpointTagInf
 			attrs = parseAttrs(opening);
 		} catch (e) {
 			throw new Error(`${where}: <${tag}> ${(e as Error).message}: ${opening.slice(0, 80)}`);
+		}
+		const id = attrs.get('id');
+		if (id && !id.expr) {
+			if (ids.has(id.value)) throw new Error(`${where}: id "${id.value}" is used twice`);
+			ids.add(id.value);
 		}
 		// A Predict without an objective is an ungraded example (spec S03 "Examples"): CI runs its fixture,
 		// the page shows the output, and it is not a checkpoint anywhere.
