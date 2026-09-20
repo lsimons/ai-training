@@ -2,14 +2,14 @@
 
 How to write a lesson page with the lesson components. The rules the page
 must follow are in `docs/spec/S03-lesson-authoring.md`; the ids it declares
-come from `docs/spec/S02-topic-map.md` and the YAML under `docs/src/data/`.
+come from `docs/spec/S02-topic-map.md` and the YAML under `site/src/data/`.
 This file is the mechanics.
 
 ## File and frontmatter
 
-A lesson is an MDX file at `docs/src/content/docs/<area>/<lesson>.mdx`. Its
+A lesson is an MDX file at `site/src/content/docs/<area>/<lesson>.mdx`. Its
 lesson id is `<area>/<lesson>`. The course page for the area is
-`docs/src/content/docs/<area>/index.mdx`.
+`site/src/content/docs/<area>/index.mdx`.
 
 ```mdx
 ---
@@ -28,7 +28,7 @@ assumes:                  # each points at the lesson section that teaches it
 extends-to:
   - label: Decomposing work
     href: /using-agents/decomposition/
-sources:                  # keys in docs/src/data/bibliography.yaml
+sources:                  # keys in site/src/data/bibliography.yaml
   - AEC-01
 ---
 
@@ -82,7 +82,7 @@ print(TOOLS["get_weather"]["fn"]("Lisbon"))
 </Predict>
 ````
 
-`run` names a file under `docs/examples/`. `mise run examples` executes it
+`run` names a file under `site/examples/`. `mise run examples` executes it
 and fails if its stdout is not `answer`. The file holds the complete,
 runnable program; the page shows only the part the learner needs. Omit
 `run` only for the honour-system variant (predict what an agent does), and
@@ -163,7 +163,7 @@ page must also say so in prose next to it.
 from frontmatter, what comes next from `extends-to`, and the finish button.
 Do not write those by hand.
 
-Widgets are their own components under `docs/src/components/widgets/` and
+Widgets are their own components under `site/src/components/widgets/` and
 are imported by name. They teach and never grade.
 
 ## Rules that bite

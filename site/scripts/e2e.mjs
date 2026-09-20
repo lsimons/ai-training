@@ -1,7 +1,7 @@
 /**
  * Browser walkthrough of every release-1 mechanism (spec S06 "What release 1
- * exercises") against a built site. Run with `mise run docs-e2e`; needs
- * `mise run docs-browser` once. Exits non-zero on any page error or failed
+ * exercises") against a built site. Run with `mise run site-e2e`; needs
+ * `mise run site-browser` once. Exits non-zero on any page error or failed
  * assertion. Screenshots land in /tmp/ai-training-e2e-*.png.
  */
 import { chromium } from 'playwright';

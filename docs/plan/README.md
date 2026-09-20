@@ -117,14 +117,14 @@ See the `explore/` reports for detail on each.
 4. ~~Write the dictionary / taxonomy spec.~~ Draft 2026-09-19 in
    [spec S01](../spec/S01-dictionary.md).
 5. ~~Design the interactive lesson component set and the local-storage progress
-   model.~~ Built 2026-09-20 with the release-1 slice: `docs/src/components/`,
-   `docs/src/scripts/progress.ts`, authoring guide in
+   model.~~ Built 2026-09-20 with the release-1 slice: `site/src/components/`,
+   `site/src/scripts/progress.ts`, authoring guide in
    `docs/agents/writing-a-lesson.md`. Not yet: citation and term remark
    plugins (S03), `match` and `multi-choice`, the map's side drawer, path
    lanes, quizzes.
 6. ~~Design tutor mode.~~ First version 2026-09-20 as
    `.claude/skills/tutor/SKILL.md`, with the verbs and the review recall
    question. Untested against learners.
-7. Replace the template pages under `docs/src/content/docs/` with real
+7. Replace the template pages under `site/src/content/docs/` with real
    content, area by area. Release 1 (one lesson per area) landed
    2026-09-20; the template authoring guides remain under "Contributing".
