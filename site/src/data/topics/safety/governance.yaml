@@ -5,8 +5,9 @@ definition: >-
   Once agents work inside an organization, individual care is not enough.
   This topic covers the shared controls: a policy that says what is allowed,
   logs that make agent actions reviewable, awareness that a model update can
-  change behavior overnight, and a clear route for escalating when something
-  goes wrong.
+  change behavior overnight, a clear route for escalating when something
+  goes wrong, the regulation that applies to AI use, and a method for
+  assessing a use case's risk before it starts.
 concepts:
   - id: policy
     name: Policy
@@ -42,6 +43,25 @@ concepts:
       who to tell, how fast and what to preserve. People report faster when
       the route is known and blameless, and the organization learns from
       near-misses instead of only from disasters.
+  - id: regulation
+    name: Regulation
+    definition: >-
+      Law that applies to how an organization builds and uses AI, with the
+      EU AI Act as the main example. It defines what counts as an AI system,
+      sorts uses into risk tiers from prohibited to minimal, and puts
+      different duties on the provider who builds a system and the deployer
+      who uses it. Deployers owe transparency to the people affected and must
+      make sure their staff have enough AI literacy for the tools they use.
+  - id: risk-assessment
+    name: Risk assessment
+    definition: >-
+      A short, written method for judging an AI use case before it starts.
+      Name the domains it touches, such as personal data, money, safety or
+      reputation, then rate impact and likelihood on agreed scales and
+      combine them into a level. A level above the agreed threshold needs
+      extra controls or a decision, in writing, from someone with the
+      authority to accept the risk. The record is what makes the decision
+      reviewable later.
 links:
   prerequisites: [safety/agent-risk]
   related: []
