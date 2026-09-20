@@ -35,6 +35,17 @@ hooks = [
   }
 ]
 
+# Python lint and format. The rev is the pin: the ruff-pre-commit repo at
+# tag vX.Y.Z depends on ruff==X.Y.Z exactly, so no additional_dependencies
+# entry is needed. Keep it equal to `ruff` in pyproject.toml's dev group.
+[[repos]]
+repo = "https://github.com/astral-sh/ruff-pre-commit"
+rev = "v0.16.7"
+hooks = [
+  { id = "ruff-check", args = ["--fix"] },
+  { id = "ruff-format" },
+]
+
 # Markdown linting
 [[repos]]
 repo = "https://github.com/DavidAnson/markdownlint-cli2"
