@@ -128,7 +128,7 @@ checkpoint grades.
 > **L:** critique this
 >
 > **T:** Here is my answer to "what's the blast radius of an agent that
-> reads web pages, has my mailbox, and is asked to summarize the three
+> reads web pages, has my mailbox, and is asked for a summary of the three
 > articles I bookmarked". Find what's wrong with it against the
 > objective's behaviors.
 >
