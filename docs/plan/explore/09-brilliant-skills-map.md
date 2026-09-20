@@ -171,15 +171,15 @@ code).
 
 ## 4. Comparison with our specs
 
-| Brilliant                         | Ours ([spec S01](../../spec/S01-dictionary.md), [spec S02](../../spec/S02-topic-map.md)) | Note                                                                                                                           |
-| --------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Tier                              | Group / area                                                                             | Theirs are thematic bands; ours are audience bands. Both are three to six.                                                     |
-| Big idea (noun)                   | Topic                                                                                    | Same register. Theirs carry a one-sentence "why now" summary; ours carry concepts and edges.                                   |
-| Learning objective (verb, coded)  | Competency                                                                               | Same register. Theirs are coded and finer: 37 versus our 18 for a narrower subject.                                            |
-| Skill (claim, why, example)       | Behaviour                                                                                | We have one draft base behaviour per competency; they have 2 to 6 well-formed skills per objective. This is the level we lack. |
-| Standard                          | (none)                                                                                   | An external framework a lesson is matched to. We have no alignment layer.                                                      |
-| Targeted skill and lesson         | Learning objective and checkpoint                                                        | Same idea: a lesson-sized unit that proves a standard.                                                                         |
-| Lesson, 5 to 10 min, skills check | Lesson, 10 to 25 min, checkpoints                                                        | Ours are two to three times longer. Their level review is our course quiz.                                                     |
+| Brilliant                         | Ours ([spec S01](../../spec/S01-dictionary.md), [spec S02](../../spec/S02-topic-map.md)) | Note                                                                                                                          |
+| --------------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Tier                              | Group / area                                                                             | Theirs are thematic bands; ours are audience bands. Both are three to six.                                                    |
+| Big idea (noun)                   | Topic                                                                                    | Same register. Theirs carry a one-sentence "why now" summary; ours carry concepts and edges.                                  |
+| Learning objective (verb, coded)  | Competency                                                                               | Same register. Theirs are coded and finer: 37 versus our 18 for a narrower subject.                                           |
+| Skill (claim, why, example)       | Behavior                                                                                 | We have one draft base behavior per competency; they have 2 to 6 well-formed skills per objective. This is the level we lack. |
+| Standard                          | (none)                                                                                   | An external framework a lesson is matched to. We have no alignment layer.                                                     |
+| Targeted skill and lesson         | Learning objective and checkpoint                                                        | Same idea: a lesson-sized unit that proves a standard.                                                                        |
+| Lesson, 5 to 10 min, skills check | Lesson, 10 to 25 min, checkpoints                                                        | Ours are two to three times longer. Their level review is our course quiz.                                                    |
 
 ## 5. Implications
 
@@ -190,7 +190,7 @@ Item 7 is applied as routing: one exercise per lesson with a stretch goal,
 prerequisite and extension routing from checkpoints, comfort level as a
 routing default.
 
-1. **Adopt the skill triple.** Each behaviour under a competency should be a
+1. **Adopt the skill triple.** Each behavior under a competency should be a
    one-sentence claim, a short why, and one concrete example. This is what
    makes the map usable by authors and by tutor mode. It also gives
    checkpoints something exact to test.

@@ -121,7 +121,7 @@ function cleanMap<T>(field: string, value: unknown, guard: (v: unknown) => v is 
  * Coerce a parsed document into a well-formed record, or `null` when it is not
  * a record of this `VERSION`. Malformed fields fall back to empty.
  */
-export function normalise(parsed: unknown): ProgressRecord | null {
+export function normalize(parsed: unknown): ProgressRecord | null {
 	if (!isObject(parsed) || parsed.version !== VERSION) return null;
 	const record = emptyRecord();
 	if (parsed.comfort === 'less' || parsed.comfort === 'more') record.comfort = parsed.comfort;
@@ -147,7 +147,7 @@ export function load(): ProgressRecord {
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY);
 		if (!raw) return emptyRecord();
-		return normalise(JSON.parse(raw)) ?? emptyRecord();
+		return normalize(JSON.parse(raw)) ?? emptyRecord();
 	} catch {
 		return emptyRecord();
 	}
@@ -365,7 +365,7 @@ export function importJson(text: string): { ok: true } | { ok: false; message: s
 			message: `That file is version ${parsed.version}; this site stores version ${VERSION} and has no migration for it.`,
 		};
 	}
-	const record = normalise(parsed);
+	const record = normalize(parsed);
 	if (!record) return { ok: false, message: 'That file is not a progress record.' };
 	save(record);
 	return { ok: true };

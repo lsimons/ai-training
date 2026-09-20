@@ -1,5 +1,5 @@
 ---
-/** One page per competency (spec S02 "Stable URLs"): objectives, behaviours, alignment, lessons serving it. */
+/** One page per competency (spec S02 "Stable URLs"): objectives, behaviors, alignment, lessons serving it. */
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { getCollection } from 'astro:content';
 import { getLessons } from '@lib/lessons';
@@ -33,13 +33,13 @@ const headings = [
 		competency.objectives.map((o) => (
 			<section>
 				<h3 id={o.id.split('/').pop()}>{o.statement} <small>({o.level})</small></h3>
-				{o.behaviours.length ? (
+				{o.behaviors.length ? (
 					<table>
 						<thead><tr><th>Claim</th><th>Why</th><th>Example</th></tr></thead>
-						<tbody>{o.behaviours.map((b) => <tr><td>{b.claim}</td><td>{b.why}</td><td>{b.example}</td></tr>)}</tbody>
+						<tbody>{o.behaviors.map((b) => <tr><td>{b.claim}</td><td>{b.why}</td><td>{b.example}</td></tr>)}</tbody>
 					</table>
 				) : (
-					<p><em>Behaviours not written yet.</em></p>
+					<p><em>Behaviors not written yet.</em></p>
 				)}
 				{serving(o.id).length ? (
 					<p>Served by: {serving(o.id).map((l, i) => (<>{i > 0 && ', '}<a href={href(`/${l.id}/`)}>{l.data.title}</a></>))}</p>

@@ -25,7 +25,7 @@ with video, slides, source zip, captions), `notes.md` (CS50's lecture notes),
 `projects.md` plus `projects/<name>.md`. Project specs have a fixed heading
 shape: **When to Do It / How to Get Help / Background / Getting Started /
 Understanding / Specification / Hints / Testing / How to Submit /
-Acknowledgements**. Recommended reading order: notes, transcript, quiz,
+Acknowledgments**. Recommended reading order: notes, transcript, quiz,
 project spec.
 
 ## 2. CS50 pedagogy and vocabulary (educator workshops)

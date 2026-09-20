@@ -10,7 +10,7 @@ concepts:
   - id: testing
     name: Testing
     definition: >-
-      Keeping tests that prove behaviour rather than mirror implementation.
+      Keeping tests that prove behavior rather than mirror implementation.
       Agents write tests readily, and readily write tests that pass by
       asserting what the code happens to do. Review agent tests for what they
       would catch if the code were wrong, keep them fast enough to run in an
@@ -30,7 +30,7 @@ concepts:
       Adding libraries deliberately and keeping them pinned, current and few.
       An agent asked to solve a problem will often add a package where a few
       lines would do, or pick one it has seen frequently rather than one that
-      is maintained. Review every new dependency for need, licence,
+      is maintained. Review every new dependency for need, license,
       maintenance and size, and lock versions so builds stay reproducible.
   - id: security-review-of-agent-output
     name: Security review of agent output

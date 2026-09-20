@@ -31,7 +31,7 @@ concepts:
       distinct from raw model output. Some teaching and support systems show
       the mark so readers know which answers carry human accountability. The
       idea transfers to teams: separate what the model said from what a
-      person has checked, and make the difference visible in the artefact.
+      person has checked, and make the difference visible in the artifact.
   - id: trust-but-verify-for-agents
     name: '"Trust but verify" for agents'
     definition: >-

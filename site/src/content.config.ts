@@ -57,7 +57,7 @@ export const collections = {
 							id: z.string(),
 							statement: z.string(),
 							level: z.enum(['base', 'expert']),
-							behaviours: z
+							behaviors: z
 								.array(z.object({ claim: z.string(), why: z.string(), example: z.string() }))
 								.default([]),
 						})

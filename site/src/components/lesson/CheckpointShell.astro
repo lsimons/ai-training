@@ -19,14 +19,14 @@ interface Props {
 	review?: boolean;
 	/** Bump when the answer changes; outdated review items reset to stage 1 (spec S05). Default 1. */
 	revision?: number;
-	/** Set by Predict when there is no `answer`: honour-system, never reviewed. */
-	honour?: boolean;
+	/** Set by Predict when there is no `answer`: honor-system, never reviewed. */
+	honor?: boolean;
 	checkLabel?: string;
 }
 
-const { id, objective, title, hint, kind, review = true, revision = DEFAULT_REVISION, honour = false, checkLabel = 'Check' } = Astro.props;
+const { id, objective, title, hint, kind, review = true, revision = DEFAULT_REVISION, honor = false, checkLabel = 'Check' } = Astro.props;
 if (!Number.isInteger(revision) || revision < 1) throw new Error(`Checkpoint "${id}": revision must be a positive integer, got ${revision}`);
-const reviewable = isReviewable({ kind, review, honour });
+const reviewable = isReviewable({ kind, review, honor });
 const lessonId = lessonIdOf(Astro);
 const progressId = `${lessonId}#${id}`;
 ---

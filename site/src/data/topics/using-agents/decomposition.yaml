@@ -4,7 +4,7 @@ name: Decomposing work
 definition: >-
   Large tasks fail as single prompts. This topic teaches breaking work into
   pieces an agent can complete and you can check, iterating on the pieces as
-  the results reveal what you actually needed, and recognising the point where
+  the results reveal what you actually needed, and recognizing the point where
   another round of delegation costs more than doing the step yourself.
 concepts:
   - id: task-decomposition
@@ -26,11 +26,11 @@ concepts:
   - id: when-to-stop-and-do-it-yourself
     name: When to stop and do it yourself
     definition: >-
-      Recognising the point where explaining, correcting and re-checking an
+      Recognizing the point where explaining, correcting and re-checking an
       agent costs more than doing the step directly. Signs include a third
       round on the same piece, a task that depends on knowledge only you
       hold, or a check that takes longer than the work. Taking the step back
-      is a judgement call, not a failure of the tool or of you.
+      is a judgment call, not a failure of the tool or of you.
 links:
   prerequisites: [using-agents/delegating]
   related: []

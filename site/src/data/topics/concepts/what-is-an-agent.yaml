@@ -13,7 +13,7 @@ concepts:
     definition: >-
       A model takes text in and produces text out, once. An agent is software
       that calls a model repeatedly, gives it tools, feeds the tool results
-      back and stops when a goal is met. The model supplies judgement; the
+      back and stops when a goal is met. The model supplies judgment; the
       agent supplies hands, memory and a loop. Most of what makes an agent
       useful or dangerous lives in the software around the model.
   - id: tool

@@ -56,7 +56,7 @@ The result you want is a one-page summary in this fixed format:
 3. One closing line naming who to ask.
 
 Before you write anything, predict: if you paste the memo and type
-"summarise this", what will you get back? Probably a paragraph. Possibly a
+"summarize this", what will you get back? Probably a paragraph. Possibly a
 decent one. Almost certainly not this format, and you will have no way to
 say whether it is right except that it reads well. That gap is what a brief
 closes.
@@ -66,7 +66,7 @@ closes.
 A brief has four parts: the goal, the context the work needs, the limits it
 must stay within, and how you will know it is done. The agent fills in
 whatever you leave unsaid with plausible defaults. That is why what it must
-*not* do carries as much weight as what it must do, and why "summarise this"
+*not* do carries as much weight as what it must do, and why "summarize this"
 is a request but not a brief.
 
 Start with the goal and the limits together. The goal is the format above.
@@ -90,7 +90,7 @@ Put together, the brief looks something like this. Send it to your agent
 now, with the memo pasted underneath.
 
 <Prompt model="illustrative" recorded="illustrative">
-Summarise the memo below into this exact format: a one-line title; three
+Summarize the memo below into this exact format: a one-line title; three
 bullets covering what is happening, what I must do, and by when; one closing
 line naming who to ask.
 
@@ -125,17 +125,17 @@ shape and the facts.
 <Repair id="fix-the-brief" objective="using-agents/delegates-and-checks/writes-a-brief"
   title="Fix the brief" hint="Which of the four parts is missing, and what would the agent fill in on its own?"
   broken={`Can you make a short summary of the office move memo for the team? Keep it clear.`}
-  model={`Summarise the memo below for the product team in this format: one-line title, three bullets (what is happening, what I must do, by when), one closing line naming who to ask. Use only the memo pasted below as your source. Do not add advice or leave out any deadline. Done when every deadline in the memo appears, nothing appears that is not in the memo, and the output has exactly those five parts.`}>
+  model={`Summarize the memo below for the product team in this format: one-line title, three bullets (what is happening, what I must do, by when), one closing line naming who to ask. Use only the memo pasted below as your source. Do not add advice or leave out any deadline. Done when every deadline in the memo appears, nothing appears that is not in the memo, and the output has exactly those five parts.`}>
 A colleague sends this to their agent and gets a friendly paragraph with a
 made-up "see you on the new floor!" at the end. Rewrite the brief so it
 states goal, context, limits and done-criteria.
 </Repair>
 
 <Pitfall title="Trusting the agent to know what 'done' means">
-A learner sends "summarise the memo, keep it short" and gets three tidy
+A learner sends "summarize the memo, keep it short" and gets three tidy
 bullets that omit the locker deadline. The summary reads well, so they
 forward it, and half the team loses the contents of their locker. Nothing in
-the brief said every deadline had to survive, so the agent optimised for
+the brief said every deadline had to survive, so the agent optimized for
 short. The rule: write the done-criteria before you send the task, and make
 them things you can tick, not adjectives.
 </Pitfall>
@@ -158,7 +158,7 @@ The degree to pick depends on two things: how bad a wrong action is, and
 how easy it is to undo. Drafting the summary is cheap and reversible, so the
 agent acts and you review after. Emailing that summary to the whole team is
 cheap to do but awkward to take back, so the agent proposes and you approve.
-Deciding which desks people get is a judgement about people, so you decide,
+Deciding which desks people get is a judgment about people, so you decide,
 with the agent at most laying out the options.
 
 Try it: rerun the task, but this time add one line to the brief that sets

@@ -7,7 +7,7 @@ competencies:
       - id: building-agents/builds-agent-loop/defines-a-tool
         statement: Defines a tool with a schema the model uses correctly
         level: base
-        behaviours:
+        behaviors:
           - claim: The tool description says when to use the tool and when not to, not only what it does.
             why: The model chooses tools from their descriptions, and a description that only names the function leads to it being called for the wrong job.
             example: "\"Look up a customer by exact account id; do not use for name searches, use `search_customers` instead\" cuts wrong calls that \"Get customer\" invites."
@@ -20,12 +20,12 @@ competencies:
       - id: building-agents/builds-agent-loop/implements-the-loop
         statement: Implements the loop with error handling and a stop condition
         level: base
-        behaviours:
+        behaviors:
           - claim: The loop has an explicit iteration limit and a token or cost budget, and stops cleanly when either is hit.
             why: A model that keeps finding one more thing to do will run until the bill or the timeout stops it.
             example: "The loop stops after twelve turns or a set spend and returns \"stopped: budget reached\" together with what it has so far."
           - claim: The loop ends when the model replies without a tool call, and the learner can point to the line that checks this.
-            why: The natural stop condition of an agent loop is the model deciding it is done; if the code does not honour that, the loop never ends or ends by accident.
+            why: The natural stop condition of an agent loop is the model deciding it is done; if the code does not honor that, the loop never ends or ends by accident.
             example: The learner shows the branch that returns the final text when the response has no tool calls, and the test that covers it.
           - claim: A tool failure is fed back into the conversation as a result, and the loop continues or stops by policy, never by an unhandled exception.
             why: Real tools time out, return garbage and hit rate limits, and the agent has to keep working through that.
@@ -33,11 +33,11 @@ competencies:
       - id: building-agents/builds-agent-loop/adds-retrieval
         statement: Adds retrieval or memory and knows when basic RAG is enough
         level: base
-        behaviours: []
+        behaviors: []
       - id: building-agents/builds-agent-loop/uses-an-sdk
         statement: Rebuilds the loop on an agent SDK and explains what the SDK took over
         level: expert
-        behaviours: []
+        behaviors: []
     alignment:
       - framework: Ng, AI engineering skills map
         code: Building and deploying AI applications
@@ -50,19 +50,19 @@ competencies:
       - id: building-agents/evaluates-agents/writes-a-rubric
         statement: Turns "good" into scorable criteria
         level: base
-        behaviours: []
+        behaviors: []
       - id: building-agents/evaluates-agents/builds-a-golden-set
         statement: Builds a representative input set with expected qualities
         level: base
-        behaviours: []
+        behaviors: []
       - id: building-agents/evaluates-agents/grades-trajectories
         statement: Grades the path the agent took, not only the final answer
         level: base
-        behaviours: []
+        behaviors: []
       - id: building-agents/evaluates-agents/avoids-gamed-metrics
         statement: Chooses metrics that cannot improve without the real quality improving
         level: expert
-        behaviours: []
+        behaviors: []
     alignment:
       - framework: Brilliant Coding with AI
         code: VER-7
@@ -79,19 +79,19 @@ competencies:
       - id: building-agents/orchestrates-agents/picks-a-pattern
         statement: Picks a design pattern for a task and says why
         level: base
-        behaviours: []
+        behaviors: []
       - id: building-agents/orchestrates-agents/justifies-orchestration-cost
         statement: Justifies the coordination cost of more than one agent
         level: base
-        behaviours: []
+        behaviors: []
       - id: building-agents/orchestrates-agents/composes-patterns
         statement: Composes patterns and names the failure modes of the composition
         level: expert
-        behaviours: []
+        behaviors: []
     alignment:
       - framework: Brilliant Coding with AI
         code: BLD-4, BLD-5
-        asks: Organise and oversee a workflow
+        asks: Organize and oversee a workflow
         objectives: [coding-with-agents/works-in-team/runs-parallel-work, building-agents/orchestrates-agents/picks-a-pattern]
       - framework: Ng, AI engineering skills map
         code: Building and deploying AI applications
@@ -104,19 +104,19 @@ competencies:
       - id: building-agents/runs-in-production/gates-on-evals
         statement: Gates a deploy on evaluation results
         level: base
-        behaviours: []
-      - id: building-agents/runs-in-production/layers-defences
+        behaviors: []
+      - id: building-agents/runs-in-production/layers-defenses
         statement: Layers policy, filtering and monitoring around the agent
         level: base
-        behaviours: []
+        behaviors: []
       - id: building-agents/runs-in-production/mitigates-agent-risks
         statement: Mitigates injection, exfiltration and over-permission in a running agent
         level: base
-        behaviours: []
+        behaviors: []
       - id: building-agents/runs-in-production/manages-cost-and-rollout
         statement: Manages cost and rolls out changes without breaking users
         level: expert
-        behaviours: []
+        behaviors: []
     alignment:
       - framework: Brilliant Coding with AI
         code: SEC-4

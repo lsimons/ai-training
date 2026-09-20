@@ -5,7 +5,7 @@ definition: >-
   Not every task wants the biggest model or an agent. This topic covers
   matching a model to a task, weighing cost and speed against quality,
   choosing between a chat, an agent and an unattended automation, deciding
-  which steps stay human, and re-applying that judgement as tools grow more
+  which steps stay human, and re-applying that judgment as tools grow more
   capable.
 concepts:
   - id: model-fit
@@ -38,7 +38,7 @@ concepts:
     name: What to keep human
     definition: >-
       The steps that stay with a person on purpose: decisions with legal or
-      ethical weight, judgements about people, anything irreversible or
+      ethical weight, judgments about people, anything irreversible or
       costly, and the final accountability for a result. Keeping a step human
       is a design choice, not a limitation, and naming those steps early
       prevents them from being automated by default as tools improve.
@@ -47,7 +47,7 @@ concepts:
     definition: >-
       Tools rise in abstraction, from autocomplete to chat to agents to
       systems of agents, and each level hides more of what happens below.
-      The judgement about fit, cost, risk and what to keep human has to be
+      The judgment about fit, cost, risk and what to keep human has to be
       re-applied at each new level rather than carried over. What was safe to
       trust at one level may not be at the next, and vice versa.
 links:

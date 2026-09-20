@@ -77,8 +77,8 @@ export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 		const revisionAttr = attrValue(tag, 'revision');
 		const revision = revisionAttr === undefined ? DEFAULT_REVISION : Number(revisionAttr);
 		if (!Number.isInteger(revision) || revision < 1) throw new Error(`${lesson.id}#${id}: revision must be a positive integer, got ${revisionAttr}`);
-		const honour = kind === 'predict' && !hasAttr(tag, 'answer');
-		out.push({ id, kind, revision, reviewable: isReviewable({ kind, review: reviewAttr === undefined ? undefined : reviewAttr === 'true', honour }) });
+		const honor = kind === 'predict' && !hasAttr(tag, 'answer');
+		out.push({ id, kind, revision, reviewable: isReviewable({ kind, review: reviewAttr === undefined ? undefined : reviewAttr === 'true', honor }) });
 	}
 	return out;
 }

@@ -34,7 +34,7 @@ keeps the deployed site a pure static build (CI does not run Quarto). Re-run
 ## Theme
 
 The reveal.js theme lives in `site/public/presentations/reveal.scss` and maps
-the deck's fonts and accent colour onto the site's LSD Warm palette. Adjust the
+the deck's fonts and accent color onto the site's LSD Warm palette. Adjust the
 SCSS variables there to restyle the HTML slides.
 
 ## Add a deck

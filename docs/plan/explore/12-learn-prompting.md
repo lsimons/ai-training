@@ -130,7 +130,7 @@ mattering.
    definitions, and the prompt hacking trio (injection, leaking,
    jailbreaking) plus the 2023 defensive measures are adaptable. Use them as
    one-paragraph concept definitions in the concept register and as the
-   Safety area's named-defence list, rewritten for current models and cited
+   Safety area's named-defense list, rewritten for current models and cited
    to the original papers. Add a `NOTICE.md` entry pointing at commit
    `71e1d57`. Nothing from `main` or the live site may be adapted; the
    offensive-measures taxonomy names can be used as vocabulary with a link.
@@ -161,11 +161,11 @@ mattering.
    objectives; the lesson opener ("In this lesson we will...") and the recap
    already carry that role. Noted only so it is not proposed again.
 
-Not adopted: the four-colour difficulty emoji (our two comfort levels per
+Not adopted: the four-color difficulty emoji (our two comfort levels per
 lesson already do this, and emoji in titles hurt search and screen
 readers); the Learn Prompting Method and Pitfalls pages (NC, and generic);
 Basic Applications (NC, pasted transcripts); Tooling reviews and Hot Topics
 (dead products); image prompting and prompt tuning (out of scope);
-translations (out of scope). The technique catalogue itself is superseded
+translations (out of scope). The technique catalog itself is superseded
 for engineers by vendor prompting guides and by the Prompt Report taxonomy,
 which is a paper and can be cited directly.

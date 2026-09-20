@@ -91,14 +91,14 @@ See the `explore/` reports for detail on each.
 1. ~~Interview Leo on project approach and goals.~~ Done 2026-09-19, see above.
 2. ~~Build a topic map.~~ First draft 2026-09-19 in
    [spec S02](../spec/S02-topic-map.md): topics and concepts per area,
-   verb-led competencies with draft base behaviours,
-   prerequisite edges, three paths, and the release-1 thin slice. Behaviours
+   verb-led competencies with draft base behaviors,
+   prerequisite edges, three paths, and the release-1 thin slice. Behaviors
    and definitions still to write.
 3. ~~Agents explore the source projects in more depth.~~ Done 2026-09-19:
    [explore/06](./explore/06-lesson-inventory.md) (lesson inventories,
    `/teach` skill) and
    [explore/07](./explore/07-scorm-interactions-and-duck-tutor.md) (SCORM
-   interaction catalogue, CS50 Duck tutor design). The Duck papers are not
+   interaction catalog, CS50 Duck tutor design). The Duck papers are not
    in the repo and still need fetching. Added later the same day:
    [explore/08](./explore/08-diataxis.md) (Diátaxis) and
    [explore/09](./explore/09-brilliant-skills-map.md) (Brilliant's coding

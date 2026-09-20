@@ -24,7 +24,7 @@ the two axes cover the whole territory.
 
 The **compass** is the authoring tool: ask "action or cognition?" and "study
 or work?" and the answer names the kind. The most common failure is blurring
-neighbours, above all tutorials into how-to guides.
+neighbors, above all tutorials into how-to guides.
 
 Process guidance: use it as a guide, not a plan; improve one small thing at a
 time and publish it; never create empty section scaffolding; let structure
@@ -49,7 +49,7 @@ learners at work and stay outside courses and paths.
    - Maintain the narrative of the expected: show expected output, flag the
      likely signs of going wrong. Our pitfall sections are this, kept
      short.
-   - Minimise explanation; link to an explanation page or short instead.
+   - Minimize explanation; link to an explanation page or short instead.
    - One path, no choices or alternatives. Hence comfort levels apply to
      alternative exercises and shorts, never to branches inside a lesson.
    - Safe and repeatable: a contrived setting the learner can reset. For

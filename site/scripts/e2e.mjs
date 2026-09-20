@@ -68,8 +68,8 @@ expect(await fb(cp), 'Recorded as a pass.', 'repair pass'); expect(await cp.getA
 await page.goto(`${B}/safety/agent-risk/`);
 cp = page.locator('#blast-radius-of-a-tidy-up'); await cp.locator('label').first().click(); await cp.locator('.cp-check').first().click(); expect(await fb(cp), nonEmpty, 'scenario feedback');
 cp = page.locator('#predict-the-planted-instruction');
-expect(await cp.getAttribute('data-reviewable'), 'false', 'honour predict not reviewable');
-await cp.locator('textarea').fill('it will write the file'); await cp.locator('input[value=pass]').check(); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Recorded as a pass.', 'honour predict');
+expect(await cp.getAttribute('data-reviewable'), 'false', 'honor predict not reviewable');
+await cp.locator('textarea').fill('it will write the file'); await cp.locator('input[value=pass]').check(); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Recorded as a pass.', 'honor predict');
 
 // coding lesson: predict with run + repair exists
 await page.goto(`${B}/coding-with-agents/first-session/`);

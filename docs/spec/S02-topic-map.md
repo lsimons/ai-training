@@ -2,7 +2,7 @@
 
 **Purpose:** Name what the site teaches (topics and their concepts, per area,
 with prerequisite links), name what a learner should be able to do afterwards
-(competencies, their learning objectives and behaviours), say how the map
+(competencies, their learning objectives and behaviors), say how the map
 differentiates between learners.
 
 **Status:** Draft
@@ -11,7 +11,7 @@ differentiates between learners.
 
 Vocabulary is per the [project dictionary](S01-dictionary.md). In short:
 **topics** and **concepts** are what is taught and form the map; **competencies**,
-**learning objectives** and **behaviours** are what a learner can do afterwards
+**learning objectives** and **behaviors** are what a learner can do afterwards
 and point into the map; **lessons** cover topics and serve objectives.
 
 ## Shape
@@ -37,8 +37,8 @@ covers one topic and teaches one to five of its concepts.
 | **Topic**              | noun         | two to eight concepts            | The graph edges: `prerequisite` (the arrow in the map), `related`, `specialization` |
 | **Concept**            | noun         | one paragraph definition         | Inherits its topic's edges; has a glossary anchor                                   |
 | **Competency**         | verb phrase  | three to six learning objectives | The topics it draws on, possibly across areas; its alignment rows                   |
-| **Learning objective** | verb phrase  | two to six behaviours; one level | What lessons serve and assume, what checkpoints prove                               |
-| **Behaviour**          | claim triple | -                                | What one checkpoint question or tutor question tests                                |
+| **Learning objective** | verb phrase  | two to six behaviors; one level  | What lessons serve and assume, what checkpoints prove                               |
+| **Behavior**           | claim triple | -                                | What one checkpoint question or tutor question tests                                |
 
 ### Lesson frontmatter
 
@@ -55,17 +55,17 @@ One YAML file per topic and one per area's competencies. The map page, one
 reference page per topic, one per competency and the glossary all render
 from these files.
 
-| File                                       | Contents                                                                                                                                                               |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `site/src/data/topics/<area>/<topic>.yaml` | `name`, `definition`, `concepts[] {id, name, definition}`, `links {prerequisites[], related[], specializations[]}`, `sources[]`                                        |
-| `site/src/data/competencies/<area>.yaml`   | `competencies[] {id, statement, topics[], objectives[] {id, statement, level, behaviours[] {claim, why, example}}, alignment[] {framework, code, asks, objectives[]}}` |
+| File                                       | Contents                                                                                                                                                              |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site/src/data/topics/<area>/<topic>.yaml` | `name`, `definition`, `concepts[] {id, name, definition}`, `links {prerequisites[], related[], specializations[]}`, `sources[]`                                       |
+| `site/src/data/competencies/<area>.yaml`   | `competencies[] {id, statement, topics[], objectives[] {id, statement, level, behaviors[] {claim, why, example}}, alignment[] {framework, code, asks, objectives[]}}` |
 
 ### Stable URLs
 
 | Page       | URL                                  | Notes                                                                           |
 | ---------- | ------------------------------------ | ------------------------------------------------------------------------------- |
 | Topic      | `/topics/<area>/<topic>/`            | The map opens it in a side drawer and updates the URL, so the view is shareable |
-| Competency | `/competencies/<area>/<competency>/` | Lists objectives, behaviours, alignment and the lessons that serve it           |
+| Competency | `/competencies/<area>/<competency>/` | Lists objectives, behaviors, alignment and the lessons that serve it            |
 | Glossary   | `/glossary/#<concept>`               | Generated from every topic's concept definitions                                |
 
 Tutor mode cites these URLs when it points a learner somewhere.
@@ -75,23 +75,23 @@ Tutor mode cites these URLs when it points a learner somewhere.
 - Concept definitions are one plain paragraph of at most about 80 words,
   no lists or links inside, readable both in the glossary and as hover text
   on the map. Depth belongs in the topic page prose and in cited sources.
-- No short codes. A reference from one behaviour to another uses the
+- No short codes. A reference from one behavior to another uses the
   objective slug.
-- The topic map colours each topic by the state of the lessons that cover
+- The topic map colors each topic by the state of the lessons that cover
   it, using the same three states as the lesson graph below.
 
 ## Course page as lesson graph
 
 Each course renders as a graph, not a list.
 
-| Element         | Rendering                                                                                                                                          |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lessons         | Boxes placed in **levels**: rows of lessons that share a depth in the prerequisite order                                                           |
-| Edges           | Dotted lines from the lessons that teach an assumed objective to the lessons that assume it; derived from `assumes` at build time                  |
-| Milestone bar   | Percent of lessons finished with four labelled stops: getting started, halfway, almost there, complete. Skipped lessons count toward neither side. |
-| Completion ring | Lessons and checkpoints done                                                                                                                       |
-| Review due card | "Review due: N items" when review items are due, leading to the course's review page                                                               |
-| About panel     | Goals, counts, prerequisites                                                                                                                       |
+| Element         | Rendering                                                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lessons         | Boxes placed in **levels**: rows of lessons that share a depth in the prerequisite order                                                          |
+| Edges           | Dotted lines from the lessons that teach an assumed objective to the lessons that assume it; derived from `assumes` at build time                 |
+| Milestone bar   | Percent of lessons finished with four labeled stops: getting started, halfway, almost there, complete. Skipped lessons count toward neither side. |
+| Completion ring | Lessons and checkpoints done                                                                                                                      |
+| Review due card | "Review due: N items" when review items are due, leading to the course's review page                                                              |
+| About panel     | Goals, counts, prerequisites                                                                                                                      |
 
 Node styling shows the learner's state from the progress record:
 
@@ -99,7 +99,7 @@ Node styling shows the learner's state from the progress record:
 | ----------- | ----------------------------------- | ---------------------------------------- |
 | finished    | Recap reached, checkpoints resolved | Filled                                   |
 | in progress | Read, not finished                  | Outlined with a partial ring             |
-| skipped     | Learner marked "I know this"        | Struck through and grey                  |
+| skipped     | Learner marked "I know this"        | Struck through and gray                  |
 | untouched   | -                                   | Plain                                    |
 | dimmed      | Assumed objectives not yet passed   | Dimmed, never locked; paths are advisory |
 
@@ -128,7 +128,7 @@ The topic tables below name the material each topic can start from. Keys:
 | `AEC-07` | Multi-agent systems: architectures, roles, the orchestration tax                              |
 | `AEC-08` | Agentic RAG: the retrieve, evaluate, refine loop; when basic RAG is enough                    |
 | `AEC-09` | Evaluating and testing agents: quality pillars, metrics, trajectories, LLM as judge           |
-| `AEC-10` | Guardrails and safety: why agent safety differs, defence layers, injection, human in the loop |
+| `AEC-10` | Guardrails and safety: why agent safety differs, defense layers, injection, human in the loop |
 | `AEC-11` | From prototype to production: eval-gated deploys, rollout, cost                               |
 | `AEC-12` | Getting started with Claude Code; written around an internal proxy, needs a public rewrite    |
 | `AEC-13` | Building your first agent: the loop from scratch, then with an SDK                            |
@@ -170,7 +170,7 @@ Competencies:
 | ---------------------------- | -------------------------------------------------------------- | ---------------------------------- |
 | `concepts/explains-models`   | Explains how a language model produces text and where it fails | how-models-work, limits, grounding |
 | `concepts/prompts-reliably`  | Writes prompts that get reliable results                       | prompting, how-models-work         |
-| `concepts/recognises-agents` | Recognises an agent, its tools and its degree of autonomy      | what-is-an-agent, limits           |
+| `concepts/recognizes-agents` | Recognizes an agent, its tools and its degree of autonomy      | what-is-an-agent, limits           |
 
 Learning objectives:
 
@@ -182,9 +182,9 @@ Learning objectives:
 | `prompts-reliably`  | `structures-a-prompt`        | base  | Turns a vague request into instruction, context, example and format |
 | `prompts-reliably`  | `iterates-on-output`         | base  | Improves a result by changing the prompt, not by retrying           |
 | `prompts-reliably`  | `asks-for-structure`         | base  | Asks for output in a shape the next step can use                    |
-| `recognises-agents` | `tells-agent-from-assistant` | base  | Tells a chat assistant from an agent by what it can do unprompted   |
-| `recognises-agents` | `places-on-autonomy-scale`   | base  | Places a product or workflow on the autonomy scale                  |
-| `recognises-agents` | `names-the-loop`             | base  | Describes the observe, think, act loop and the tools in it          |
+| `recognizes-agents` | `tells-agent-from-assistant` | base  | Tells a chat assistant from an agent by what it can do unprompted   |
+| `recognizes-agents` | `places-on-autonomy-scale`   | base  | Places a product or workflow on the autonomy scale                  |
+| `recognizes-agents` | `names-the-loop`             | base  | Describes the observe, think, act loop and the tools in it          |
 
 ### Area `safety`: Safety
 
@@ -196,10 +196,10 @@ Topics:
 | Topic id                 | Name                     | Concepts                                                                                         | Prerequisites                           | Source material                                               |
 | ------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------ | --------------------------------------- | ------------------------------------------------------------- |
 | `safety/responsible-use` | Responsible use          | data privacy, confidentiality, licensing and attribution, disclosure                             | concepts/limits                         | new; `DLAI-2` week 3                                          |
-| `safety/failure-modes`   | Recognising failure      | hallucination in practice, bias, overreliance, automation complacency                            | concepts/limits                         | new                                                           |
+| `safety/failure-modes`   | Recognizing failure      | hallucination in practice, bias, overreliance, automation complacency                            | concepts/limits                         | new                                                           |
 | `safety/verification`    | Verifying outputs        | checking habits, source checking, endorsed answers, "trust but verify" for agents                | failure-modes                           | new; `CS50` endorsed answers as an idea                       |
 | `safety/agent-risk`      | Agent risk               | blast radius, permissions and least privilege, human in the loop, prompt injection, exfiltration | concepts/what-is-an-agent, verification | `AEC-10`, the best knowledge-worker safety material available |
-| `safety/governance`      | Governance and oversight | policy, logging and audit, model change risk, escalation                                         | agent-risk                              | `AEC-10` defence layers; `AEC-11` engineer parts              |
+| `safety/governance`      | Governance and oversight | policy, logging and audit, model change risk, escalation                                         | agent-risk                              | `AEC-10` defense layers; `AEC-11` engineer parts              |
 
 Competencies:
 
@@ -222,8 +222,8 @@ Learning objectives:
 | `verifies-output`     | `keeps-a-check-habit`   | expert | Builds verification into a team's routine rather than their own   |
 | `judges-agent-risk`   | `names-blast-radius`    | base   | Names what an agent action can reach and break                    |
 | `judges-agent-risk`   | `chooses-human-in-loop` | base   | Chooses where a human must approve                                |
-| `judges-agent-risk`   | `recognises-injection`  | base   | Recognises prompt injection and data exfiltration paths           |
-| `judges-agent-risk`   | `sets-oversight`        | expert | Sets policy, logging and escalation for agents in an organisation |
+| `judges-agent-risk`   | `recognizes-injection`  | base   | Recognizes prompt injection and data exfiltration paths           |
+| `judges-agent-risk`   | `sets-oversight`        | expert | Sets policy, logging and escalation for agents in an organization |
 
 ### Area `using-agents`: Using agents
 
@@ -253,7 +253,7 @@ Learning objectives:
 | `delegates-and-checks`      | `adjusts-mid-task`               | base   | Adjusts the brief when the work reveals new information     |
 | `chooses-tool-and-autonomy` | `picks-chat-agent-or-automation` | base   | Picks chat, agent or automation for a task and says why     |
 | `chooses-tool-and-autonomy` | `keeps-the-human-steps`          | base   | Names the steps that stay human and why                     |
-| `chooses-tool-and-autonomy` | `reasons-across-levels`          | expert | Re-applies judgement when the tool level rises              |
+| `chooses-tool-and-autonomy` | `reasons-across-levels`          | expert | Re-applies judgment when the tool level rises               |
 
 ## Engineering
 
@@ -355,7 +355,7 @@ Topics:
 | `building-agents/orchestration`    | Orchestration and multi-agent | code- vs model-driven orchestration, sequential / hierarchical / collaborative, orchestration tax                                       | patterns                                              | `AEC-07`, `AEC-18`                               |
 | `building-agents/retrieval-memory` | Agentic retrieval and memory  | agentic RAG loop, memory storage choices, when basic RAG suffices                                                                       | agent-loop, concepts/grounding                        | `AEC-05`, `AEC-08`                               |
 | `building-agents/evaluation`       | Evaluation and testing        | quality pillars, rubrics, metrics that cannot be gamed, trajectory evaluation, LLM as judge, golden sets, error analysis, observability | agent-loop, coding-with-agents/verification           | `AEC-09`; `DLAI-11` M4; `Brilliant VER`          |
-| `building-agents/production`       | Guardrails and production     | defence layers, eval-gated deploys, rollout strategies, cost, agent-specific security risks, protocols (MCP, A2A)                       | evaluation, safety/governance, customizing-agents/mcp | `AEC-10`, `AEC-11`, `AEC-14`; `Brilliant SEC`    |
+| `building-agents/production`       | Guardrails and production     | defense layers, eval-gated deploys, rollout strategies, cost, agent-specific security risks, protocols (MCP, A2A)                       | evaluation, safety/governance, customizing-agents/mcp | `AEC-10`, `AEC-11`, `AEC-14`; `Brilliant SEC`    |
 
 Competencies:
 
@@ -382,14 +382,14 @@ Learning objectives:
 | `orchestrates-agents` | `justifies-orchestration-cost` | base   | Justifies the coordination cost of more than one agent                   |
 | `orchestrates-agents` | `composes-patterns`            | expert | Composes patterns and names the failure modes of the composition         |
 | `runs-in-production`  | `gates-on-evals`               | base   | Gates a deploy on evaluation results                                     |
-| `runs-in-production`  | `layers-defences`              | base   | Layers policy, filtering and monitoring around the agent                 |
+| `runs-in-production`  | `layers-defenses`              | base   | Layers policy, filtering and monitoring around the agent                 |
 | `runs-in-production`  | `mitigates-agent-risks`        | base   | Mitigates injection, exfiltration and over-permission in a running agent |
 | `runs-in-production`  | `manages-cost-and-rollout`     | expert | Manages cost and rolls out changes without breaking users                |
 
-## Behaviours: worked example
+## Behaviors: worked example
 
-Only one objective has behaviours so far; the rest are to write.
-Every objective's behaviours take this form: one-sentence claim, a why, one
+Only one objective has behaviors so far; the rest are to write.
+Every objective's behaviors take this form: one-sentence claim, a why, one
 example; two to six per objective. For
 `using-agents/delegates-and-checks/writes-a-brief` (`base`):
 
@@ -402,12 +402,12 @@ example; two to six per objective. For
 ## Alignment
 
 An alignment row maps an external framework's item to the objectives here
-that address it. The YAML keeps the rows per competency; this section summarises
+that address it. The YAML keeps the rows per competency; this section summarizes
 them for the two frameworks known so far.
 
 ### Frameworks
 
-**Brilliant's *Coding with AI* skills map** organises AI-era programming
+**Brilliant's *Coding with AI* skills map** organizes AI-era programming
 skill into seven "big ideas", each with a three-letter code and numbered
 objectives underneath (`INC-2`, `VER-7`). This spec cites the codes as facts;
 the "asks" column paraphrases what each objective asks for.
@@ -416,7 +416,7 @@ the "asks" column paraphrases what each objective asks for.
 | ---- | -------------------------------------- | ------------------------------------------------------------------------- |
 | TAS  | Taste: what is worth building          | Judge ideas, define success, weigh value against cost                     |
 | INC  | Developing incrementally               | Working increments, early feedback, understanding, reversibility          |
-| SPC  | Specification and design               | Decompose, analyse dependencies, manage constraints, design the check     |
+| SPC  | Specification and design               | Decompose, analyze dependencies, manage constraints, design the check     |
 | MEM  | Memory (listed under SPC)              | Manage what is held in memory; turn repeated work into reusable knowledge |
 | BLD  | Designing workflows                    | Direct an agent to a spec, adjust, divide and delegate, oversee           |
 | VER  | Verification                           | Verify against spec, review, observe, debug, automate, measure            |
@@ -434,10 +434,10 @@ agents, and shaping the build (deciding what goes in the spec).
 | Brilliant Coding with AI      | TAS-1..4                               | Judge what is worth building, define success, weigh cost  | `coding-with-agents/specifies-work/judges-worth-building`, `defines-success`                                                  |
 | Brilliant Coding with AI      | INC-1, INC-2, INC-5                    | Working increments, early feedback, reversibility         | `coding-with-agents/ships-with-agent/works-in-increments`, `keeps-change-reversible`                                          |
 | Brilliant Coding with AI      | INC-3, INC-4                           | Maintain understanding and coherence                      | `coding-with-agents/ships-with-agent/keeps-understanding`                                                                     |
-| Brilliant Coding with AI      | SPC-3, SPC-4, SPC-6                    | Decompose, analyse dependencies, design verification      | `coding-with-agents/specifies-work/decomposes-into-components`, `designs-the-check`                                           |
+| Brilliant Coding with AI      | SPC-3, SPC-4, SPC-6                    | Decompose, analyze dependencies, design verification      | `coding-with-agents/specifies-work/decomposes-into-components`, `designs-the-check`                                           |
 | Brilliant Coding with AI      | SPC-5, BLD-1                           | Manage constraints; direct an agent to a specification    | `using-agents/delegates-and-checks/writes-a-brief`, `coding-with-agents/ships-with-agent/gives-the-right-context`             |
 | Brilliant Coding with AI      | BLD-2, BLD-3                           | Adjust on new information; divide and delegate            | `using-agents/delegates-and-checks/adjusts-mid-task`, `using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation` |
-| Brilliant Coding with AI      | BLD-4, BLD-5                           | Organise and oversee a workflow                           | `coding-with-agents/works-in-team/runs-parallel-work`, `building-agents/orchestrates-agents/picks-a-pattern`                  |
+| Brilliant Coding with AI      | BLD-4, BLD-5                           | Organize and oversee a workflow                           | `coding-with-agents/works-in-team/runs-parallel-work`, `building-agents/orchestrates-agents/picks-a-pattern`                  |
 | Brilliant Coding with AI      | VER-2..6                               | Verify against spec, review, observe, debug, automate     | `coding-with-agents/verifies-agent-work/*`                                                                                    |
 | Brilliant Coding with AI      | VER-7                                  | Measure quality and evaluate AI systems                   | `building-agents/evaluates-agents/*`                                                                                          |
 | Brilliant Coding with AI      | MEM-1, MEM-2                           | Manage memory; turn repeated work into reusable knowledge | `customizing-agents/configures-agent/manages-memory`, `customizing-agents/writes-skill/packages-a-procedure`                  |

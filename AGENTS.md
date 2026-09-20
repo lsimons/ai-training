@@ -13,28 +13,29 @@ is for software engineers. The plan is in `docs/plan/README.md`.
 Every repo task lives in `.mise.toml`; `mise tasks` lists them. Run `mise trust`
 and `mise install` once per clone.
 
-| Task                           | What it does                                                     |
-| ------------------------------ | ---------------------------------------------------------------- |
-| `mise run site-install`        | Install the site dependencies (bun); may update `bun.lock`       |
-| `mise run site-install-frozen` | Same, but fails if `bun.lock` is out of date                     |
-| `mise run site-dev`            | Dev server at <http://localhost:4321/ai-training/>               |
-| `mise run site-build`          | Build the static site into `site/dist`                           |
-| `mise run site-check`          | Astro type/content check                                         |
-| `mise run examples`            | Run lesson example fixtures, assert the shown output             |
-| `mise run site-e2e`            | Build + headless-browser walkthrough of every mechanism          |
-| `mise run lint`                | prek hooks over every file + `actionlint`                        |
-| `mise run prose-sync`          | Fetch the pinned Vale style package (network)                    |
-| `mise run prose`               | Vale prose lint; misspellings gate, style warnings advise        |
-| `mise run prose-extended`      | Vale with the passive-voice rule too; advisory, run now and then |
-| `mise run prose-eval -- <pkg>` | Every hit of a Vale package as JSON, for deciding rule by rule   |
-| `mise run ci`                  | Full gate: install + lint + prose + examples + check + build     |
-| `mise run links`               | `lychee` broken-link check (network; not part of `ci`)           |
-| `mise run audit`               | `zizmor` audit of workflows + dependabot config                  |
-| `mise run site-audit`          | `bun audit` of the site dependency tree (network)                |
-| `mise run site-slides`         | Render the example `.qmd` deck to HTML + PDF                     |
-| `mise run site-favicon`        | Regenerate the favicon + apple-touch-icon                        |
-| `mise run site-clean`          | Remove build artifacts                                           |
-| `mise run ci-watch`            | Watch GitHub Actions for the current branch                      |
+| Task                           | What it does                                                         |
+| ------------------------------ | -------------------------------------------------------------------- |
+| `mise run site-install`        | Install the site dependencies (bun); may update `bun.lock`           |
+| `mise run site-install-frozen` | Same, but fails if `bun.lock` is out of date                         |
+| `mise run site-dev`            | Dev server at <http://localhost:4321/ai-training/>                   |
+| `mise run site-build`          | Build the static site into `site/dist`                               |
+| `mise run site-check`          | Astro type/content check                                             |
+| `mise run examples`            | Run lesson example fixtures, assert the shown output                 |
+| `mise run site-e2e`            | Build + headless-browser walkthrough of every mechanism              |
+| `mise run lint`                | prek hooks over every file + `actionlint`                            |
+| `mise run prose-sync`          | Fetch the pinned Vale style package (network)                        |
+| `mise run prose`               | Vale prose lint; misspellings gate, style warnings advise            |
+| `mise run spell`               | cspell, American English; names and jargon in `cspell-words.txt`     |
+| `mise run prose-extended`      | Vale with the passive-voice rule too; advisory, run now and then     |
+| `mise run prose-eval -- <pkg>` | Every hit of a Vale package as JSON, for deciding rule by rule       |
+| `mise run ci`                  | Full gate: install + lint + prose + spell + examples + check + build |
+| `mise run links`               | `lychee` broken-link check (network; not part of `ci`)               |
+| `mise run audit`               | `zizmor` audit of workflows + dependabot config                      |
+| `mise run site-audit`          | `bun audit` of the site dependency tree (network)                    |
+| `mise run site-slides`         | Render the example `.qmd` deck to HTML + PDF                         |
+| `mise run site-favicon`        | Regenerate the favicon + apple-touch-icon                            |
+| `mise run site-clean`          | Remove build artifacts                                               |
+| `mise run ci-watch`            | Watch GitHub Actions for the current branch                          |
 
 Also available: `site-preview`, `site-browser`, and
 `mise run site-screenshot out.png /ai-training/`.
@@ -145,6 +146,11 @@ verbatim and must include the base path.
 - Internal links are root-relative; the rehype plugin adds the base path.
   `starlight-links-validator` fails `mise run site-build` on a dead one, so
   the build is the check. Do not disable it.
+- Spelling is American English, checked by `mise run spell` (cspell) over
+  every tracked `.md`/`.mdx` file and the YAML under `site/src/data/`. Add
+  names and jargon to `cspell-words.txt`, grouped, one per line; never a
+  British spelling. Inline code spans are skipped, so identifiers need no
+  entry.
 - `mise run prose` (Vale) runs over every tracked `.md`/`.mdx` file and the
   YAML under `site/src/data/`, minus `site/examples/`. Only errors fail:
   misspellings and wrongly cased terms. Add real jargon or names to

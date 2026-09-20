@@ -21,7 +21,7 @@ concepts:
     definition: >-
       One or more worked input-output pairs placed in the prompt so the model
       can copy the pattern. Few-shot examples are the most reliable way to fix
-      a format, tone or edge-case behaviour that is hard to describe in words.
+      a format, tone or edge-case behavior that is hard to describe in words.
       Two or three well-chosen examples usually beat a long paragraph of rules,
       and a bad example teaches the mistake just as well.
   - id: role-and-system-prompt
@@ -31,7 +31,7 @@ concepts:
       A system prompt typically assigns a role, sets tone, states standing
       rules and lists what the model must never do. In chat products the
       vendor writes one you cannot see; in agents and custom applications the
-      developer writes it, and it is where recurring behaviour is fixed.
+      developer writes it, and it is where recurring behavior is fixed.
   - id: iteration
     name: Iteration
     definition: >-

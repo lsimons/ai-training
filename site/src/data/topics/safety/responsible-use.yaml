@@ -22,7 +22,7 @@ concepts:
       contracts, unreleased plans, source code, colleagues' conversations.
       Pasting it into an AI tool is a disclosure to a third party, even if
       nobody reads it. The test is whether you would email the same text to
-      that provider; if not, summarise, redact or use a sanctioned tool.
+      that provider; if not, summarize, redact or use a sanctioned tool.
   - id: licensing-and-attribution
     name: Licensing and attribution
     definition: >-

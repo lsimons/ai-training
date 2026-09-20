@@ -7,7 +7,7 @@ competencies:
       - id: concepts/explains-models/explains-generation
         statement: Explains tokens, context and sampling in plain words
         level: base
-        behaviours:
+        behaviors:
           - claim: A model produces text one token at a time, each chosen from a probability distribution over what could come next.
             why: Once the learner sees output as a chain of likely next pieces, both fluent nonsense and surprising variation stop being mysterious.
             example: Asked why the same question gave two different answers, the learner says the model picked a different likely token early on and the rest followed from it, rather than saying the model "changed its mind".
@@ -20,7 +20,7 @@ competencies:
       - id: concepts/explains-models/names-failure-modes
         statement: Names the common ways output goes wrong and why
         level: base
-        behaviours:
+        behaviors:
           - claim: A hallucination is a fluent, confident statement with nothing behind it, and fluency is no signal of truth.
             why: Confident wording is exactly what the training rewards, so the learner must stop using tone as a check.
             example: Given a citation with a real-looking journal name, author and year, the learner looks it up before trusting it and is not surprised when it does not exist.
@@ -33,7 +33,7 @@ competencies:
       - id: concepts/explains-models/explains-grounding
         statement: Explains what grounding and retrieval add and what they do not fix
         level: base
-        behaviours: []
+        behaviors: []
     alignment: []
   - id: concepts/prompts-reliably
     statement: Writes prompts that get reliable results
@@ -42,30 +42,30 @@ competencies:
       - id: concepts/prompts-reliably/structures-a-prompt
         statement: Turns a vague request into instruction, context, example and format
         level: base
-        behaviours: []
+        behaviors: []
       - id: concepts/prompts-reliably/iterates-on-output
         statement: Improves a result by changing the prompt, not by retrying
         level: base
-        behaviours: []
+        behaviors: []
       - id: concepts/prompts-reliably/asks-for-structure
         statement: Asks for output in a shape the next step can use
         level: base
-        behaviours: []
+        behaviors: []
     alignment: []
-  - id: concepts/recognises-agents
-    statement: Recognises an agent, its tools and its degree of autonomy
+  - id: concepts/recognizes-agents
+    statement: Recognizes an agent, its tools and its degree of autonomy
     topics: [concepts/what-is-an-agent, concepts/limits]
     objectives:
-      - id: concepts/recognises-agents/tells-agent-from-assistant
+      - id: concepts/recognizes-agents/tells-agent-from-assistant
         statement: Tells a chat assistant from an agent by what it can do unprompted
         level: base
-        behaviours: []
-      - id: concepts/recognises-agents/places-on-autonomy-scale
+        behaviors: []
+      - id: concepts/recognizes-agents/places-on-autonomy-scale
         statement: Places a product or workflow on the autonomy scale
         level: base
-        behaviours: []
-      - id: concepts/recognises-agents/names-the-loop
+        behaviors: []
+      - id: concepts/recognizes-agents/names-the-loop
         statement: Describes the observe, think, act loop and the tools in it
         level: base
-        behaviours: []
+        behaviors: []
     alignment: []

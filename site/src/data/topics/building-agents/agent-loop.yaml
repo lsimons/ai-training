@@ -41,7 +41,7 @@ concepts:
       re-reading the same files as context fills, or spending the whole
       budget on exploration. Each burns money and can cause harm through
       side effects. Limits, detection of repeated states and visible
-      progress reporting are the defences.
+      progress reporting are the defenses.
 links:
   prerequisites: [building-agents/tool-use]
   related: []

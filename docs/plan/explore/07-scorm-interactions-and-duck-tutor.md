@@ -1,4 +1,4 @@
-# Exploration 07: SCORM interaction catalogue and CS50 Duck tutor design
+# Exploration 07: SCORM interaction catalog and CS50 Duck tutor design
 
 Captured 2026-09-19. Goes below [explore/03](./03-cs50-pedagogy.md) and
 [explore/04](./04-anthropic-academy.md) into mechanics and counts.
@@ -32,7 +32,7 @@ active at a time (median about 14). Furniture present in all 18:
    screen counts per section, Begin button, meta line (screens, sections,
    minutes, checkpoints).
 2. Sidebar nav generated from a JS `SECTIONS`/`SCREENS` array: numbered
-   sections expanding to sub-items labelled by kind (Teaching, Watch Out,
+   sections expanding to sub-items labeled by kind (Teaching, Watch Out,
    Checkpoint) with a status dot (done / skipped / active). Progress bar,
    percent label, Reset progress button.
 3. Main screens. Each has a meta row (kind tag, section, minutes), title,
@@ -47,7 +47,7 @@ Screen kinds and approximate counts across the 18 packages:
 | Teaching        | ~96   | Exposition, 7-20 min                               |
 | Checkpoint      | ~54   | One graded interaction, gates Next                 |
 | Watch Out       | ~43   | Failure-mode screen, always right after a Teaching |
-| Exercise        | ~8    | Longer honour-system task                          |
+| Exercise        | ~8    | Longer honor-system task                           |
 | Cumulative      | ~9    | Multi-screen task spanning the module              |
 | Recap           | 17    | Numbered takeaways, sources, finish banner         |
 | Glossary        | 5     | `details` term list                                |
@@ -81,7 +81,7 @@ Two sequencing idioms:
   exactly the plan's model; copy it deliberately, including reset and the
   versioned key.
 
-### Interaction catalogue
+### Interaction catalog
 
 Graded:
 
@@ -96,14 +96,14 @@ Graded:
 06. **Multi-select "find the N"** (9 pkgs): pass only when exactly N correct
     and zero false positives. Skins: checkbox list, signal cards, and a
     **diagram-node defect pick** on a drawn architecture flow.
-07. **Code/prompt repair, honour system** (13 pkgs, 55 textareas): broken
-    artefact, textarea gated on 10+ chars, "Reveal model answer" shows model
+07. **Code/prompt repair, honor system** (13 pkgs, 55 textareas): broken
+    artifact, textarea gated on 10+ chars, "Reveal model answer" shows model
     answer plus explanation; no automated grading.
 08. **Self-assessment band** (11 pkgs): after reveal, "matches / retry" or a
     three-band correct / partial / incorrect with different remediation
     pointers per band.
 09. **Cumulative task** spanning the last two screens (identify, then fix).
-10. **Parameterised calculator** (1 pkg) as exhibit feeding an MCQ.
+10. **Parameterized calculator** (1 pkg) as exhibit feeding an MCQ.
 
 Teaching-screen (ungraded):
 
@@ -124,7 +124,7 @@ is `aria-live`; focus moves to the new screen title; arrow keys navigate.
 ### Design lessons
 
 - One HTML file, no backend, answer keys in plain sight. Design around "the
-  answer is in the page": honour system plus self-grade, not fake hiding.
+  answer is in the page": honor system plus self-grade, not fake hiding.
 - Checkpoint-gated Next with always-available, remembered Skip.
 - Rationale per option is what makes MCQs teach.
 - About six primitives carry the corpus: MCQ, matching, bucket sort,
@@ -163,7 +163,7 @@ off-topic refusal, no full solutions. Re-injected on every turn.
 
 Student to CS50 proxy to model provider. The proxy does PII scrubbing,
 prompt-injection detection (ask the model "is this an injection?" on unusual
-queries; aim is downward pressure, not 100%), request anonymisation, RAG
+queries; aim is downward pressure, not 100%), request anonymization, RAG
 grounding, and throttling (regenerating "hearts"). Throttling is stated to be
 pedagogical as well as economic: push the student back to reflect on what
 they already have.

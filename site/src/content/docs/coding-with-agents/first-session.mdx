@@ -168,7 +168,7 @@ I would like to edit `todo.py` (1 line). Allow?
 
 That question is the permissions prompt. By default a coding agent asks
 before it edits a file or runs a command, and the answer is where your
-judgement enters the session. Ask about blast radius, as you did in
+judgment enters the session. Ask about blast radius, as you did in
 *Why agent safety is different*: a one-line edit to a file you can
 `git checkout` is about as small as a blast radius gets. Approve it.
 
@@ -222,7 +222,7 @@ agent could answer "explain this repository" once and then fix the bug
 without re-reading the tests; the tests were already in context.
 
 It is also why sessions should end. The context has a fixed size, and as it
-fills, early material drops out or gets summarised. A long session that
+fills, early material drops out or gets summarized. A long session that
 drifts across unrelated tasks gets worse at each of them. The habit to
 build: one task, one session. When the diff is reviewed and the tests pass,
 end the session and start a fresh one for the next task.
@@ -252,7 +252,7 @@ Finish by running `git checkout -- .` so the fixture is ready for next time.
 <Recap>
 1. Start the agent in the directory that is the task's world, and ask it to explain before you ask it to change.
 2. Find the evidence yourself first: the file, the failing test, the wrong output. Then put those in the brief, with limits and a done-criterion.
-3. The permissions prompt is where your judgement enters; weigh the blast radius, and keep the prompt on.
+3. The permissions prompt is where your judgment enters; weigh the blast radius, and keep the prompt on.
 4. The agent's summary is a claim. The diff is the evidence, and you run the check you named.
 5. One task, one session. Reset the fixture and start fresh.
 </Recap>

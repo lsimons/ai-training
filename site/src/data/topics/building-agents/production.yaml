@@ -4,12 +4,12 @@ name: Guardrails and production
 definition: >-
   Running an agent for real means surrounding it with controls and treating
   its changes like any other risky deployment. This topic covers layered
-  defences, gating deploys on evaluation results, rolling changes out
+  defenses, gating deploys on evaluation results, rolling changes out
   gradually, managing cost, the security risks specific to agents, and the
   protocols agents use to talk to tools and to each other.
 concepts:
-  - id: defence-layers
-    name: Defence layers
+  - id: defense-layers
+    name: Defense layers
     definition: >-
       No single control stops every bad outcome, so production agents stack
       several: policy in the system prompt, input and output filtering,
@@ -31,7 +31,7 @@ concepts:
       Releasing a change to a fraction of traffic first, comparing its
       metrics with the current version, and widening or reverting based on
       what is observed. Shadow runs, canaries and gradual percentages all
-      apply to agents. Because model behaviour is non-deterministic and
+      apply to agents. Because model behavior is non-deterministic and
       evaluation is imperfect, gradual rollout is the check that
       evaluation cannot give.
   - id: cost
@@ -55,9 +55,9 @@ concepts:
     name: Protocols (MCP, A2A)
     definition: >-
       Standards for how agents connect to things. The Model Context Protocol
-      standardises how an agent reaches tools and data through servers.
-      Agent-to-agent protocols standardise how one agent discovers, delegates
-      to and exchanges results with another across organisations. Shared
+      standardizes how an agent reaches tools and data through servers.
+      Agent-to-agent protocols standardize how one agent discovers, delegates
+      to and exchanges results with another across organizations. Shared
       protocols reduce integration work and also widen the attack surface,
       so each connection is a trust decision.
 links:

@@ -70,7 +70,7 @@ Tutorial-mode lessons follow these rules:
   learner can see.
 - **Keep the narrative of the expected.** Show expected output and flag the
   likely signs of going wrong; pitfall sections do this.
-- **Minimise explanation.** Link to an explanation page or a short instead.
+- **Minimize explanation.** Link to an explanation page or a short instead.
 - **One path, no choices.** Differentiation happens through routing between
   lessons, never through branches inside one.
 - **Safe and repeatable.** A contrived setting the learner can reset.
@@ -113,7 +113,7 @@ pitfall and the exercise.
 
 - **Every source is cited by key.** `(@key)` in Markdown resolves against
   one bibliography file in the repo and renders as a numbered reference
-  with a per-page sources list. Concept definitions, recaps and behaviours
+  with a per-page sources list. Concept definitions, recaps and behaviors
   cite papers and vendor documentation this way, never as bare inline URLs.
 - **The first mention of a concept is a term.** It is marked in Markdown by
   a remark plugin, not a component, so plain Markdown stays plain. The term
@@ -138,7 +138,7 @@ pitfall and the exercise.
 - Done outside the page: in a terminal, an editor or a chat.
 - Runs in a contrived, resettable setting (a fixture repository, a
   sandbox), never in the learner's own project.
-- The learner self-grades against a model answer. Honour system.
+- The learner self-grades against a model answer. Honor system.
 - One per lesson, written once, optionally ending with a one-line stretch
   goal. No variants per comfort level.
 

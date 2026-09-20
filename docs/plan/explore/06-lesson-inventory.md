@@ -28,7 +28,7 @@ exercises and build lessons 12-16 h.
 | 07  | `07-multi-agent-systems.md`           | Architectures, communication, roles, refund walkthrough, orchestration tax            | 4.7k, 25 m | 1, 6        | Engineer           | `multi-agent-viz`; **design exercise** (3 scenarios), convertible to a scenario checkpoint |
 | 08  | `08-agentic-rag.md`                   | Basic RAG limits, retrieve/evaluate/refine loop, when basic RAG is enough             | 3.6k, 20 m | 1, 6        | Engineer           | `rag-viz`; ELI5; **build exercise** (2-4 h)                                                |
 | 09  | `09-evaluating-and-testing-agents.md` | Four quality pillars, metrics, trajectories, LLM-as-judge, eval harness               | 6.5k, 35 m | 1, 2, 6     | Engineer           | `eval-dashboard` (largest widget); ELI5; **eval-suite exercise** (3-5 h)                   |
-| 10  | `10-guardrails-and-safety.md`         | Why agent safety differs, defence layers, prompt injection, human-in-the-loop         | 6.4k, 35 m | **2**, 1, 6 | Both               | `pillars-viz` + `guardrails-viz`; safety checklist. Best KW safety material in either repo |
+| 10  | `10-guardrails-and-safety.md`         | Why agent safety differs, defense layers, prompt injection, human-in-the-loop         | 6.4k, 35 m | **2**, 1, 6 | Both               | `pillars-viz` + `guardrails-viz`; safety checklist. Best KW safety material in either repo |
 
 ### Part 2: building and shipping
 
@@ -71,7 +71,7 @@ exercises and build lessons 12-16 h.
 ### The `/teach` skill
 
 Single file: `.claude/skills/teach/SKILL.md`. Invoked as
-`/teach [lesson | resume | review | status]`. Key behaviours:
+`/teach [lesson | resume | review | status]`. Key behaviors:
 
 - Tutor, not lecturer: the learner reads in the browser; never paste lessons.
 - Progress in a `teach-progress.md` in Claude's auto-memory directory: lesson
@@ -85,7 +85,7 @@ Single file: `.claude/skills/teach/SKILL.md`. Invoked as
   boundaries with a quiz per chunk. Widgets are part of the lesson: ask the
   learner what they observed.
 - Quiz: 3-5 questions, one at a time, each mapped to an objective; recall,
-  apply, contrast; no true/false; one question must reference a page artefact.
+  apply, contrast; no true/false; one question must reference a page artifact.
 - Hard rule: never state the answer to an open question. Three hint tiers:
   reframe, locate, scaffold. Pass = all objectives touched, at most one miss;
   never blocks moving on.
@@ -93,7 +93,7 @@ Single file: `.claude/skills/teach/SKILL.md`. Invoked as
   read-without-quiz.
 
 Transfers directly to ai-training tutor mode: dynamic discovery, hint ladder,
-never-reveal rule, artefact-referencing question, H2 splitting. Progress
+never-reveal rule, artifact-referencing question, H2 splitting. Progress
 coupling to auto-memory is orthogonal to the site's local-storage model and
 could complement it.
 
@@ -105,7 +105,7 @@ lesson table. Lesson types (`video`, `video_reading`, `video_notebook`,
 
 | Seq | Course                                          | Level, length      | Coverage                                                                                          | Areas   | Audience  |
 | --- | ----------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------- | ------- | --------- |
-| 1   | ChatGPT Prompt Engineering for Developers       | beginner, 1h40     | Two prompting principles; summarise / infer / transform / expand; chatbot                         | 1       | KW        |
+| 1   | ChatGPT Prompt Engineering for Developers       | beginner, 1h40     | Two prompting principles; summarize / infer / transform / expand; chatbot                         | 1       | KW        |
 | 2   | Generative AI for Everyone                      | beginner, 5h       | Intro; projects; business and society                                                             | 1, 2    | KW        |
 | 3   | AI Prompting for Everyone                       | beginner, 7h       | Finding information; AI as thought partner (incl. sycophancy); multimedia and code                | 1, 3, 2 | KW        |
 | 4   | AI Python for Beginners                         | beginner, 11h30    | Python basics through packages and APIs                                                           | 4 entry | KW to eng |

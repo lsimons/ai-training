@@ -5,7 +5,7 @@ definition: >-
   An agent that can act can also do harm, and a model can be talked into
   acting by text it reads. This topic teaches how to size what an agent can
   reach, grant it the least it needs, keep a human at the right decision
-  points, and recognise the two classic attacks: prompt injection and data
+  points, and recognize the two classic attacks: prompt injection and data
   exfiltration.
 concepts:
   - id: blast-radius
@@ -39,7 +39,7 @@ concepts:
       document or code comment, contains instructions that the model follows
       as if they came from its user. The model cannot reliably tell data from
       commands. Any agent that reads untrusted content and can act is exposed,
-      and the defence is limiting what it can do, not hoping it will refuse.
+      and the defense is limiting what it can do, not hoping it will refuse.
   - id: exfiltration
     name: Exfiltration
     definition: >-

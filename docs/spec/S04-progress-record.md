@@ -18,7 +18,7 @@ reads when the learner exports it.
   storage. There is no server, no account and no telemetry.
 - **Nothing leaves the browser** unless the learner exports the file.
 - **The answer is in the page.** A static site cannot hide answer keys, so
-  the record tracks passes on the honour system; it holds no secrets.
+  the record tracks passes on the honor system; it holds no secrets.
 - **Resettable.** The learner can reset one course or the whole record,
   after a confirmation.
 

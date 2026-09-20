@@ -7,15 +7,15 @@ competencies:
       - id: safety/handles-data-safely/decides-what-to-share
         statement: Decides what may go into a prompt and what may not
         level: base
-        behaviours: []
+        behaviors: []
       - id: safety/handles-data-safely/discloses-ai-use
         statement: Discloses AI use where the audience expects it
         level: base
-        behaviours: []
+        behaviors: []
       - id: safety/handles-data-safely/respects-licenses
         statement: Respects licenses and attribution in AI-assisted output
         level: base
-        behaviours: []
+        behaviors: []
     alignment: []
   - id: safety/verifies-output
     statement: Verifies AI output before relying on it
@@ -24,19 +24,19 @@ competencies:
       - id: safety/verifies-output/checks-claims
         statement: Checks claims and sources on anything that leaves their desk
         level: base
-        behaviours: []
+        behaviors: []
       - id: safety/verifies-output/spots-sycophancy
         statement: Spots agreement that is not evidence
         level: base
-        behaviours: []
+        behaviors: []
       - id: safety/verifies-output/calibrates-trust
         statement: Matches the depth of checking to the cost of being wrong
         level: base
-        behaviours: []
+        behaviors: []
       - id: safety/verifies-output/keeps-a-check-habit
         statement: Builds verification into a team's routine rather than their own
         level: expert
-        behaviours: []
+        behaviors: []
     alignment: []
   - id: safety/judges-agent-risk
     statement: Judges the risk of letting an agent act
@@ -45,7 +45,7 @@ competencies:
       - id: safety/judges-agent-risk/names-blast-radius
         statement: Names what an agent action can reach and break
         level: base
-        behaviours:
+        behaviors:
           - claim: Before letting an agent act, the learner lists what the agent's tools and credentials can reach, not only what the task needs.
             why: An agent acts with everything it has been given, and a wrong step lands wherever that access extends.
             example: Asked to let an agent tidy one folder, the learner notices it has been given write access to the whole shared drive and narrows that first.
@@ -58,7 +58,7 @@ competencies:
       - id: safety/judges-agent-risk/chooses-human-in-loop
         statement: Chooses where a human must approve
         level: base
-        behaviours:
+        behaviors:
           - claim: Approval is placed right before the irreversible or externally visible step, not at the start of the task.
             why: Approving the plan up front does not catch the mistake the agent makes halfway through.
             example: The agent may read the ticket, draft the reply and propose a label, but a person clicks send and closes the ticket.
@@ -68,10 +68,10 @@ competencies:
           - claim: The learner can say what evidence an approver needs at each check-in point.
             why: An approval without the right information in front of it is a guess with a signature.
             example: At the "send invoices" step the approver sees the count, the total and three sample rows, not just a "proceed?" prompt.
-      - id: safety/judges-agent-risk/recognises-injection
-        statement: Recognises prompt injection and data exfiltration paths
+      - id: safety/judges-agent-risk/recognizes-injection
+        statement: Recognizes prompt injection and data exfiltration paths
         level: base
-        behaviours:
+        behaviors:
           - claim: The learner treats everything an agent reads (web pages, emails, files, calendar entries) as text the model may follow as an instruction.
             why: A model has one stream of text and no separate channel for "orders from my user"; a planted sentence looks like any other instruction.
             example: Before pointing an agent at a bookmarked page, the learner asks what the page could tell the agent to do with the access it has.
@@ -80,9 +80,9 @@ competencies:
             example: An agent that can read mail and fetch URLs can be told to put a password into a URL; the learner spots that the fetch is the way out.
           - claim: The learner shrinks or gates the outbound ability rather than trying to filter what the agent reads.
             why: You cannot vet every input, but an agent that cannot send, or must ask before sending, cannot carry data out unnoticed.
-            example: For a summarising task the learner removes the agent's mail and network-post tools, leaving read-only access.
+            example: For a summarizing task the learner removes the agent's mail and network-post tools, leaving read-only access.
       - id: safety/judges-agent-risk/sets-oversight
-        statement: Sets policy, logging and escalation for agents in an organisation
+        statement: Sets policy, logging and escalation for agents in an organization
         level: expert
-        behaviours: []
+        behaviors: []
     alignment: []

@@ -13,7 +13,7 @@ concepts:
     definition: >-
       Reading an agent's diff as a reviewer, not an author: you have no
       memory of why each line exists, so every line has to justify itself.
-      Look for changes outside the brief, silent behaviour changes, deleted
+      Look for changes outside the brief, silent behavior changes, deleted
       tests, copied patterns applied wrongly and comments that describe
       intent rather than what the code does. Read the code, not the agent's
       summary of it.
