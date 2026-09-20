@@ -78,7 +78,7 @@ Five stages, shown to the learner as five pills.
 
 ## The review page
 
-One page per course at `/<area>/<course>/review/`.
+One page per course at `/<area>/review/`.
 
 1. A short reminder of answer formats for this course.
 2. Items one at a time, each showing the stem, the interaction, **Run** or
