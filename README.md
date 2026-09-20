@@ -13,9 +13,9 @@ site is static HTML with interactive lessons that keep your progress in your
 browser, and you can also run it locally from a Claude Code session with
 Claude acting as a tutor.
 
-**Status: project just set up, without lesson content yet.** The plan is in
-[`docs/plan/README.md`](./docs/plan/README.md), with exploration notes on the
-source material in [`docs/plan/explore/`](./docs/plan/explore/).
+**Status: release 1, one lesson per area, is live in the repository.** The
+design is in [`docs/spec/`](./docs/spec/) and the open work is in the
+[issue tracker](https://github.com/lsimons/ai-training/issues).
 
 ## Origins
 
@@ -25,8 +25,8 @@ fork of Addy Osmani's [agent-engineer](https://github.com/addyosmani/agent-engin
 course with a Starlight setup from Ivar Soares Urdalen. It adopts the
 pedagogy of Harvard's [CS50](https://cs50.harvard.edu/) and references the
 public courses on [Claude Academy](https://academy.claude.com/). See
-[`docs/plan/README.md`](./docs/plan/README.md) for what's reused from where and
-under which terms.
+[`NOTICE.md`](./NOTICE.md) and spec [S02](./docs/spec/S02-topic-map.md) for
+what's reused from where and under which terms.
 
 ## Development
 
@@ -66,7 +66,6 @@ ai-training/
 │   ├── package.json              # site dependencies (ranges; bun.lock pins them)
 │   └── bun.lock                  # committed; never gitignore this
 ├── docs/spec/                    # numbered specs (S01 is the dictionary)
-├── docs/plan/                    # the rough plan and exploration notes
 ├── docs/agents/                  # agent-facing process docs (issue tracker)
 ├── AGENTS.md                     # AI agent instructions
 ├── CLAUDE.md -> AGENTS.md        # Claude Code compatibility
