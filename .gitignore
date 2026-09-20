@@ -100,3 +100,8 @@ __pycache__/
 .vale/styles/ai-tells/
 # Shipped inside the ai-tells zip.
 .vale/styles/config/templates/
+# Harper (vale-cli/Harper), pinned in .vale-eval.ini only. Its zip also
+# ships a .vale-config and a dictionary.
+.vale/styles/Harper/
+.vale/styles/.vale-config/
+.vale/styles/config/dictionaries/
