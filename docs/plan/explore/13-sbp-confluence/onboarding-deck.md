@@ -10,8 +10,8 @@ out.
 
 ## Framings (areas 2 and 4)
 
-- **Capability outruns reliability.** Model capability grows several-fold
-  a year; reliability does not keep pace, and the mistakes are new kinds of
+- **Capability outruns reliability.** Model capability grows many times over
+  each year; reliability doesn't keep pace, and the mistakes are new kinds of
   mistakes. Teams can suddenly produce far more software than their quality
   controls were built to check. The lesson for area 4: when throughput
   jumps, review and verification are the bottleneck, and they must be
@@ -19,7 +19,7 @@ out.
   probabilistic output" in [`guardrails.md`](./guardrails.md).
 - **Time to value is a curve, not a step.** Individual adoption of coding
   agents tends to move through phases: autocomplete-style use first, then
-  delegating whole tasks, then running several agents at once. Gains are
+  delegating whole tasks, then running more than one agent at once. Gains are
   small for months and then large; spend rises with them. Teach the shape,
   not any figure, and cite the DORA report on the return on AI-assisted
   development for the evidence base. Sets expectations for learners who try
@@ -31,8 +31,8 @@ out.
   framework before attributing it.
 - **It is the people, actually.** Working at agent speed is tiring; people
   report trouble switching off. Adoption has to be sustainable: give teams
-  the tools and the time to learn them properly, and do not promise the
-  productivity gains onward until they are real and lasting. Belongs next
+  the tools and the time to learn them properly, and don't promise the
+  productivity gains onward until they're real and lasting. Belongs next
   to "productivity gains raise the bar, not the ceiling".
 - **Data hygiene is a prerequisite.** Assistants grounded in your own data
   are only as good as that data; the first step is to remove the stale
@@ -62,7 +62,7 @@ worth keeping as a checklist, unbranded and ungraded:
    sector-specific compliance.
 
 Named standards along the way, for the references list: ISO/IEC 42001 for
-AI management, ISO/IEC 15026 for assurance cases, IEC 62443 and IEC 61508
+AI management, ISO/IEC 15026 for assurance cases, IEC 62443, and IEC 61508
 for security- and safety-critical systems.
 
 ## A syllabus for coding with agents (areas 4 and 5)
@@ -77,7 +77,7 @@ as a checklist against the S02 topics for both Engineering areas:
 - Skills
 - MCP and MCP servers
 - Orchestration with agent teams
-- Automated linting, testing, checks and hooks
+- Automated linting, testing, checks, and hooks
 - Pull-request automation and automated review
 - Model choice and reasoning effort
 - Prompting, review prompting, adversarial prompting
@@ -90,12 +90,12 @@ current plan and deserves one.
 From the prompting block, run in pairs for about thirty minutes each, with
 the technique fixed and the prompt free:
 
-- **Self-consistency for code.** Generate error-handling code several
+- **Self-consistency for code.** Generate error-handling code three or four
   times, compare the answers, and keep the consistent core. *(do)*
 - **Tree of thoughts for a design choice.** Explore algorithm optimizations,
-  or compare IT strategies and their trade-offs, by branching and pruning
+  or compare IT strategies and their trade-offs by branching and pruning
   reasoning paths. *(judge)*
-- **Role prompts.** Write role prompts for several roles or tasks and refine
+- **Role prompts.** Write role prompts for three roles or tasks and refine
   them until the output changes in the way you intended. *(do)*
 
 From the handout, "beyond the basics":

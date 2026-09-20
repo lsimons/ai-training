@@ -4,7 +4,7 @@ Ready-to-use ideas and lesson briefs on the operational side of AI safety
 (guardrails, containment, tool onboarding, MCP security), on regulation
 (the EU AI Act), and on what makes optional exercises get done. Nothing in
 this directory is a decision. Future agents should read each file
-critically, check it against the specs, and adopt, adapt or reject item by
+critically, check it against the specs, and adopt, adapt, or reject item by
 item.
 
 The material was drawn from Schuberg Philis's internal AI wiki and its AI
@@ -18,8 +18,8 @@ licenses in [`references.md`](./references.md).
 
 1. Read spec S01 for vocabulary and spec S02 for the topic map before
    proposing topics. Topic names below are suggestions.
-2. Treat every claim, flag, version number and figure as needing a check.
-   Agent flags, environment variables and sandbox options change between
+2. Treat every claim, flag, version number, and figure as needing a check.
+   Agent flags, environment variables, and sandbox options change between
    releases; the regulation lesson must be written from the Regulation.
 3. Where a file says "regenerate" or "verify", do that rather than adapting
    the text.
@@ -35,7 +35,7 @@ licenses in [`references.md`](./references.md).
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [`guardrails.md`](./guardrails.md)                                 | An engineering guardrails charter, plain-language rules for everyone, a "can I?" table, key hygiene, disclosure                                  |
 | [`agent-risk-scenarios.md`](./agent-risk-scenarios.md)             | Six security domains, fifteen risk scenarios with countermeasures, rating scales, an assessment template                                         |
-| [`tool-onboarding-tiers.md`](./tool-onboarding-tiers.md)           | Three levels for bringing an AI tool into an organization, with the level 1 and level 2 checklists                                               |
+| [`tool-onboarding-tiers.md`](./tool-onboarding-tiers.md)           | Three levels for bringing an AI tool into an organization, plus both checklists                                                                  |
 | [`sandboxing-and-containment.md`](./sandboxing-and-containment.md) | What a coding agent sends, six isolation approaches, a layered containment pattern, configuration hygiene                                        |
 | [`mcp-security.md`](./mcp-security.md)                             | Delegated identity, capability scoping, bulk-write safety, prompt guardrails, residual risks, CLI vs MCP                                         |
 | [`eu-ai-act.md`](./eu-ai-act.md)                                   | What the regulation lesson must cover and how to source it                                                                                       |
@@ -112,7 +112,7 @@ Engineering, and what must be regenerated or verified.
   checklist, read the trace. More: run the hardened container, trace it
   yourself, add one layer (a proxy allowlist or a review-gate repository).
 - **Verify:** redo the trace on a current agent version and a fresh
-  checkout; flags, environment variable names and sandbox options change
+  checkout; flags, environment variable names, and sandbox options change
   between releases; decide whether to adapt the Apache-2.0 threat model
   text with attribution or summarize it.
 
@@ -123,11 +123,11 @@ Engineering, and what must be regenerated or verified.
   prompt; name two categories of hidden content (environment details,
   recent history); know that this can be checked.
 - **Outline:** the trace as a story, in plain words, with one `Predict`
-  and one reflection: what is in your working directory right now that you
+  and one reflection: what's in your working directory right now that you
   would not want in a prompt?
 - **Verify:** the trace itself; keep the narrative version-neutral.
 
-### L4. The EU AI Act in one lesson
+### L4. One lesson on the EU AI act
 
 - **Area:** Safety, for everyone.
 - **Proposed topic:** regulation. **Assumes:** nothing beyond the concepts
@@ -139,7 +139,7 @@ Engineering, and what must be regenerated or verified.
 - **Outline:** as specified in [`eu-ai-act.md`](./eu-ai-act.md).
 - **Checkpoints:** tier sorting for six scenarios; provider-or-deployer for
   three; one "is this an AI system?" question.
-- **Regenerate:** everything, from the Regulation and Commission material.
+- **Regenerate:** everything from the Regulation and the Commission's material.
   Add a review date to the lesson.
 
 ### L5. Connecting an agent to your systems
@@ -149,9 +149,9 @@ Engineering, and what must be regenerated or verified.
   deep-dive material carried over from the fork (Osmani 14 and 16) or the
   site's equivalent.
 - **Objectives:** explain delegated identity and why it beats a service
-  account; scope a server's capabilities by read, write and "cannot"; add
+  account; scope a server's capabilities by read, write and "can't"; add
   compensating controls where the server has no write rate limit; write a
-  five-rule prompt guardrail block and say what it does not guarantee;
+  five-rule prompt guardrail block and say what it doesn't guarantee;
   choose between a CLI and an MCP server for a given system.
 - **Outline.** *Into*: the model proposes forty edits to a wiki; what stops
   it? *Through*: identity principle; capability inventory; bulk-write
@@ -225,16 +225,16 @@ Engineering, and what must be regenerated or verified.
   as the two exercise flavours, require at least one of each per course,
   and adopt the two-part exercise text (how to complete, why do this) with
   a closing reflection prompt. The first exercise in every lesson should be
-  tiny and produce something visible.
+  small and produce something visible.
 - **Framings list** (`ideas.md`) as a shared source for lesson
-  introductions, so the same image is not used twice across areas.
+  introductions, so the same image isn't used twice across areas.
 
 ## Fold into existing lessons
 
 | Item                                                                         | Target                                              |
 | ---------------------------------------------------------------------------- | --------------------------------------------------- |
 | Eight-step team workflow, durable plan file, settings as permission boundary | `coding-with-agents/first-session` or its successor |
-| Agent definitions in the repo, no hardcoded model or permission mode         | `customizing-agents/instructions`                   |
+| Agent definitions in the repo, no hardcoded model, or permission mode        | `customizing-agents/instructions`                   |
 | Testing stochastic components                                                | `building-agents`, the evals lesson when it exists  |
 | Residency versus processing; agents that are just prompts                    | `concepts`, a tooling-landscape lesson              |
 | Saying no as a design outcome                                                | `safety/agent-risk` as a Watch Out box              |

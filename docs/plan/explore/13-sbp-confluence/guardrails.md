@@ -3,7 +3,7 @@
 Twenty-one rules in five groups, written in "we" voice so a team can copy
 the charter, tailor it and agree it with a client before work starts. The
 heading structure is the lesson skeleton for L1 in the [README](./README.md).
-Part 2 is the everyday version for people who are not engineers.
+Part 2 is the everyday version for people who aren't engineers.
 
 ## Part 1: the charter
 
@@ -18,11 +18,11 @@ systems.
 1. Only people with the domain knowledge and judgment to evaluate the result
    direct the AI and judge its output.
 2. We pick the model that fits the task, weighing capability against cost;
-   the most capable model is not the default for everything.
+   the most capable model isn't the default for everything.
 3. Source code goes only to AI services that contractually retain none of
    it.
 4. Other sensitive information, in particular personal data of the client's
-   people or customers, does not go to external AI services, beyond what a
+   people or customers, doesn't go to external AI services, beyond what a
    user needs to log in.
 5. Data residency requirements are checked per provider before we use it.
 6. We comply with applicable law and regulation, including the EU AI Act.
@@ -51,9 +51,9 @@ systems.
 1. Only tools that have passed a risk assessment are used on a project.
 2. AI tooling is kept separate from production systems, and deployments go
    through the normal secure delivery pipeline. Read access may be granted;
-   write access is not.
+   write access isn't.
 3. Intellectual property created with AI is handled as agreed with the
-   client; it does not stay with the AI provider.
+   client; it doesn't stay with the AI provider.
 4. Every use of AI is documented in the project documentation.
 5. The delivery process keeps working if an AI tool becomes unavailable.
 
@@ -62,7 +62,7 @@ systems.
 1. AI tools get only the access to data and environments that the project
    needs.
 2. The same access control policy applies to AI tools as to human and
-   service accounts, defined and documented per project.
+   service accounts: defined and documented per project.
 3. AI tool permissions that are no longer needed are reviewed and removed
    at least quarterly.
 
@@ -72,11 +72,11 @@ These came with the charter's onboarding material and belong in the lesson
 prose, not in the rules:
 
 - Stop when uncertain, fatigued or under pressure; stay critical of AI
-  output. Accountability does not transfer to the tool.
-- Hosted AI tools run at roughly two-nines availability. That is not
+  output. Accountability doesn't transfer to the tool.
+- Hosted AI tools run at roughly two-nines availability. That isn't
   mission-critical grade. Plan for the tool being down.
 - Productivity gains raise the bar, not the ceiling. Treat them as either an
-  accepted dependency or a risk to mitigate; do not promise them onward.
+  accepted dependency or a risk to mitigate; don't promise them onward.
 - Broad, long-lived tokens in an agent's hands create an unacceptable blast
   radius. Scope tokens tightly in both permission and duration.
 - Treat coding agents as untrusted contributors with unusually powerful
@@ -92,11 +92,11 @@ learner to look those facts up for their own tool.
   the provider, in the region the provider chooses. Find out which region,
   how long conversations are kept, and whether the contract rules out
   training on your data. Consumer subscriptions often do train on it;
-  business tiers usually do not.
+  business tiers usually don't.
 - **Never put personal data in.** No identity numbers, identity documents,
   medical or HR file content, financial records with account numbers. A
   useful test: nothing you would not put in an email to a colleague.
-- **Never paste secrets.** No passwords, API keys, tokens or certificates.
+- **Never paste secrets.** No passwords, API keys, tokens, or certificates.
   Use placeholders instead. A leaked secret is an incident, whoever leaked
   it.
 - **Other people's data needs their permission.** Client code, reports and
@@ -105,7 +105,7 @@ learner to look those facts up for their own tool.
 - **You own the output.** The model is confident when it is wrong. Review
   everything before it reaches production or another person. You are
   accountable for the result, not the tool.
-- **A chat tool is not storage.** Assume no backup and no restore. Copy out
+- **A chat tool isn't storage.** Assume no backup and no restore. Copy out
   what you need to keep.
 - **Web search leaks part of your prompt.** When the assistant searches the
   web, a derived query goes to a search provider with its own retention
@@ -119,18 +119,18 @@ learner to look those facts up for their own tool.
 
 A three-state table is more memorable than prose. Generic version:
 
-| Question                                        | Answer                                     |
-| ----------------------------------------------- | ------------------------------------------ |
-| Review our own code with it?                    | Yes                                        |
-| Paste our own source code?                      | Yes                                        |
-| Discuss architecture and design?                | Yes                                        |
-| Use colleagues' names and email addresses?      | Yes, normal business use                   |
-| Paste a client's source code?                   | Only with the client's approval            |
-| Share a client's infrastructure details?        | Only with the client's approval            |
-| Use web search for a sensitive topic?           | Avoid; the search provider keeps the query |
-| Paste API keys or passwords?                    | Never                                      |
-| Upload identity numbers, HR or medical records? | Never                                      |
-| Trust the output in production without review?  | Never                                      |
+| Question                                         | Answer                                     |
+| ------------------------------------------------ | ------------------------------------------ |
+| Review our own code with it?                     | Yes                                        |
+| Paste our own source code?                       | Yes                                        |
+| Discuss architecture and design?                 | Yes                                        |
+| Use colleagues' names and email addresses?       | Yes, normal business use                   |
+| Paste a client's source code?                    | Only with the client's approval            |
+| Share a client's infrastructure details?         | Only with the client's approval            |
+| Use web search for a sensitive topic?            | Avoid; the search provider keeps the query |
+| Paste API keys or passwords?                     | Never                                      |
+| Upload identity numbers, HR, or medical records? | Never                                      |
+| Trust the output in production without review?   | Never                                      |
 
 ### API key hygiene
 
@@ -143,8 +143,8 @@ For anyone with direct API access:
   text in a file or document.
 - If you suspect a key is compromised, revoke it first and tell people
   second.
-- Do not route another party's workload through a shared account: it
-  breaks data separation, billing attribution and ownership of liability.
+- Don't route another party's workload through a shared account: it
+  breaks data separation, billing attribution, and ownership of liability.
 
 ### Disclosure
 

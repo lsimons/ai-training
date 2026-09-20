@@ -7,7 +7,7 @@ pattern built from public tools. Feeds L2 and L3 in the
 ## 1. What does your agent actually send?
 
 A trace of a popular terminal coding agent (a 2.0.x release, autumn 2025)
-on a laptop, with telemetry switched off and a custom API endpoint
+on a laptop with telemetry switched off and a custom API endpoint
 configured. Method: a host firewall that records connections, packet
 capture into a protocol analyzer, then a local TLS-intercepting proxy to
 read the requests, then a block test.
@@ -17,7 +17,7 @@ Findings:
 - DNS lookups went to exactly three hosts: the npm registry, the vendor's
   API host, and the configured endpoint.
 - Even with the auto-updater disabled, the agent shelled out to the package
-  manager to check the latest published version, hitting the registry.
+  manager to check the current published version, hitting the registry.
 - Even with telemetry disabled, one small authenticated call went to the
   vendor's API host and returned an empty object.
 - On startup the agent fired a "warmup" request to the configured endpoint.
@@ -42,7 +42,7 @@ it on a fresh checkout with no real history and redact every credential.
 
 | Approach                              | For                                                                                                 | Against                                                               |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| The agent's built-in sandbox          | Easy to start                                                                                       | Limited control over what is enforced                                 |
+| The agent's built-in sandbox          | Easy to start                                                                                       | Limited control over what's enforced                                  |
 | Hardened container (docker or podman) | Full control; one container per project; same setup for the team; can hold credentials in a sidecar | Setup effort                                                          |
 | Hardened devcontainer                 | Fits the editor workflow                                                                            | Docker-in-docker is awkward; easy to leave unmaintained               |
 | Hardened virtual machine              | Set up once, use for everything; easy to see and monitor; strong isolation                          | Projects share one VM and can bleed into each other; VM upkeep; heavy |
@@ -63,9 +63,9 @@ example because it has a written threat model:
   session's duration.
 - Flags for an ephemeral session (no persisted state) and read-only
   workspaces, combined for reviewing untrusted repositories.
-- The threat model spells out what is protected (host filesystem outside
-  the workspaces, long-lived keys), what is exposed per session (the
-  workspaces, opted-in short-lived tokens), what is exposed across sessions
+- The threat model spells out what's protected (host filesystem outside
+  the workspaces, long-lived keys), what's exposed per session (the
+  workspaces, opted-in short-lived tokens), what's exposed across sessions
   (persisted OAuth state, shell and conversation history), and the
   **runtime code-fetch risk**: `npx`, `uvx`, `pnpm dlx` and toolchain
   installers fetch and run arbitrary code on first use.
@@ -81,7 +81,7 @@ with public building blocks.
 
 | Layer                                      | What it does                                                                                                                                                                                                                                                                                                                   | Public building blocks                |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
-| **Isolation**                              | One container per agent on its own network, with the dev toolchain inside and only the workspace mounted                                                                                                                                                                                                                       | docker, podman, devcontainers         |
+| **Isolation**                              | One container per agent on its own network, with the dev toolchain inside, and only the workspace mounted                                                                                                                                                                                                                      | docker, podman, devcontainers         |
 | **Enforcement outside the trust boundary** | A wrapper spawns the agent as a child process, points `HTTP_PROXY`/`HTTPS_PROXY` at itself and intercepts TLS with an ephemeral CA. It enforces a default-deny host allowlist, a shell-command allowlist with path containment and injection checks, and **redacts secrets from tool results before they reach the model API** | mitmproxy, a small custom proxy       |
 | **Review gate**                            | The agent pushes to a throwaway local git server; a human reviews there; only then does anything reach the real remote                                                                                                                                                                                                         | Forgejo, Gitea, a bare repo           |
 | **Supply-chain hygiene**                   | Pre-commit secret scanning; a minimum release age for dependencies so day-zero packages are never installed                                                                                                                                                                                                                    | gitleaks, `minimumReleaseAge` in pnpm |
@@ -90,7 +90,7 @@ with public building blocks.
 The one sentence to teach: controls are enforced **outside the agent's
 trust boundary**. Permission prompts and hooks inside the harness are
 useful, but the agent can be talked into anything the harness allows; a
-proxy it cannot see cannot be talked into anything.
+proxy it can't see can't be talked into anything.
 
 Secret redaction on the way *out* deserves its own beat. Most people think
 about secrets going *in*; an agent that reads a `.env` file and quotes it in
@@ -107,7 +107,7 @@ Small, concrete, vendor-specific but generalizable:
   start.
 - Switch off telemetry, error reporting, non-essential traffic,
   experimental betas and the auto-updater with the documented environment
-  variables. Then verify with a trace (section 1), because "off" was not
+  variables. Then verify with a trace (section 1), because "off" wasn't
   entirely off.
 - Install the agent through a package manager with a minimum release age
   rather than a bare `npm install -g`.
@@ -123,7 +123,7 @@ internet that were generated by a tool which advertises that it makes
 mistakes, and executing them without review. The flag that enables it in
 one agent literally contains the word "dangerously"; in another it is
 `--yolo`. "The warning is right there in the flag." Inside a container this
-narrows the blast radius compared to the host, but it does not make it
+narrows the blast radius compared to the host, but it doesn't make it
 safe: the workspace, any opted-in credential and full network egress are
 still exposed.
 
@@ -141,13 +141,13 @@ unsuitable for serious work. The lesson: guardrails are a property of the
 
 - Choose tools with least privilege so you never need to reach for the
   skip-permissions flag.
-- Do not hardcode tools, model or permission mode in agent definitions;
+- Don't hardcode tools, model or permission mode in agent definitions;
   decide those at run time.
 - Store agent definitions in the repository so everyone runs the same ones.
-- Track plan state in git, not the issue tracker; the agent cannot read the
+- Track plan state in git, not the issue tracker; the agent can't read the
   tracker, and the plan should travel with the code.
-- Expect friction: the container could not commit because the password
-  manager prompted for the signing key on the host, and could not run tests
+- Expect friction: the container couldn't commit because the password
+  manager prompted for the signing key on the host, and couldn't run tests
   because native modules were built for another platform. Design the
   sandbox for the whole workflow, not just for the model calls.
 
