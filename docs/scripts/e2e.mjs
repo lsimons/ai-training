@@ -11,79 +11,131 @@ const errs = []; page.on('pageerror', e => errs.push('PAGEERROR ' + e.message));
 const log = (...a) => console.log(...a);
 const fb = (cp) => cp.locator('.cp-feedback').textContent();
 
+// Assertions collect failures and are reported at the end, so one miss does
+// not hide the rest of the walkthrough.
+const failures = [];
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+function expect(actual, expected, label) {
+	const ok = expected instanceof RegExp ? expected.test(String(actual)) : typeof expected === 'function' ? expected(actual) : same(actual, expected);
+	log(`${ok ? 'ok  ' : 'FAIL'} ${label}:`, actual);
+	if (!ok) failures.push(`${label}: got ${JSON.stringify(actual)}, expected ${expected instanceof RegExp ? expected : typeof expected === 'function' ? '<predicate>' : JSON.stringify(expected)}`);
+}
+const nonEmpty = (s) => typeof s === 'string' && s.trim().length > 0;
+const atLeast = (n) => (v) => Number(v) >= n;
+
 // concepts lesson: choice wrong/right, widget, finish
 await page.goto(`${B}/concepts/how-models-work/`);
 await page.locator('[data-sampler] input[type=range]').fill('0.1');
-log('sampler top:', await page.locator('[data-sampler] .bar span:last-child').first().textContent());
+expect(await page.locator('[data-sampler] .bar span:last-child').first().textContent(), nonEmpty, 'sampler top');
 let cp = page.locator('#what-the-model-does');
-await cp.locator('label').nth(2).click(); await cp.locator('.cp-check').click(); log('choice wrong:', await fb(cp));
-await cp.locator('label[data-correct]').click(); await cp.locator('.cp-check').click(); log('choice right:', await fb(cp), '|', await cp.getAttribute('data-state'));
-log('behind card visible after miss:', await page.locator('[data-route=behind]').count() ? !(await page.locator('[data-route=behind]').isHidden()) : 'n/a (no assumes)');
+expect(await page.locator('[data-finish]').isDisabled(), true, 'finish disabled before checkpoints passed');
+await cp.locator('label').nth(2).click(); await cp.locator('.cp-check').first().click();
+expect(await fb(cp), 'Search is a separate tool some products add on top. The model itself only predicts tokens; it has no built-in search.', 'choice wrong');
+await cp.locator('label[data-correct]').click(); await cp.locator('.cp-check').first().click();
+expect(await fb(cp), 'Correct.', 'choice right'); expect(await cp.getAttribute('data-state'), 'passed', 'choice state');
+if (await page.locator('[data-route=behind]').count()) expect(await page.locator('[data-route=behind]').isHidden(), false, 'behind card visible after miss');
+else log('behind card: n/a (no assumes)');
 await page.locator('#name-the-failure label[data-correct]').click(); await page.locator('#name-the-failure .cp-check').click();
-await page.click('[data-finish]'); log('finish label:', await page.locator('[data-finish]').textContent());
-await page.reload(); log('finish persisted:', await page.locator('[data-finish]').textContent(), '| disabled', await page.locator('[data-finish]').isDisabled());
+expect(await page.locator('#name-the-failure').getAttribute('data-state'), 'passed', 'second choice state');
+expect(await page.locator('[data-finish]').isDisabled(), false, 'finish enabled once all checkpoints passed');
+await page.click('[data-finish]'); expect(await page.locator('[data-finish]').textContent(), /^Finished ✓ \(\d{4}-\d{2}-\d{2}\)$/, 'finish label');
+await page.reload(); expect(await page.locator('[data-finish]').textContent(), /^Finished ✓/, 'finish persisted'); expect(await page.locator('[data-finish]').isDisabled(), true, 'finish disabled after finishing');
 
 // building-agents: predict + order, comfort toggle, routing
 await page.goto(`${B}/building-agents/agent-loop/`);
-log('comfort control present:', await page.locator('[data-comfort=less]').count());
-await page.click('[data-comfort=less]'); log('behind card shown for less:', !(await page.locator('[data-route=behind]').isHidden()));
-await page.click('[data-comfort=less]');
-cp = page.locator('#predict-tool-call'); await cp.locator('textarea').fill('27°C, rain'); await cp.locator('.cp-check').click(); log('predict wrong:', await fb(cp));
-await cp.locator('textarea').fill(' 27°c, sun'); await cp.locator('.cp-check').click(); log('predict right:', await fb(cp));
-cp = page.locator('#predict-loop'); await cp.locator('textarea').fill('It is 14°C, rain there.'); await cp.locator('.cp-check').click(); log('predict2:', await fb(cp));
-cp = page.locator('#order-the-loop'); await cp.locator('.cp-check').click(); log('order shuffled:', await fb(cp));
+expect(await page.locator('[data-comfort=less]').count(), 1, 'comfort control present');
+await page.click('[data-comfort=less]'); expect(await page.locator('[data-route=behind]').isHidden(), false, 'behind card shown for less');
+await page.click('[data-comfort=less]'); expect(await page.locator('[data-route=behind]').isHidden(), true, 'behind card hidden again after toggling less off');
+cp = page.locator('#predict-tool-call'); await cp.locator('textarea').fill('27°C, rain'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Not quite. Trace it once more.', 'predict wrong');
+await cp.locator('textarea').fill(' 27°c, sun'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Correct. That is exactly the output.', 'predict right (normalised)');
+cp = page.locator('#predict-loop'); await cp.locator('textarea').fill('It is 14°C, rain there.'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Correct. That is exactly the output.', 'predict2');
+cp = page.locator('#order-the-loop'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Not the right order yet.', 'order shuffled');
 for (let pos = 1; pos <= 5; pos++) for (let k = 0; k < 5; k++) { const idx = await cp.locator('ol li').evaluateAll((lis, pos) => lis.findIndex(l => Number(l.dataset.pos) === pos), pos); if (idx > pos - 1) await cp.locator('ol li').nth(idx).locator('button[data-move=up]').click(); }
-await cp.locator('.cp-check').click(); log('order sorted:', await fb(cp));
-log('ahead card hidden (not all first-try):', await page.locator('[data-route=ahead]').isHidden());
-await page.click('[data-finish]');
+await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Correct order.', 'order sorted');
+expect(await page.locator('[data-route=ahead]').isHidden(), true, 'ahead card hidden (not all first-try)');
+expect(await page.locator('[data-finish]').isDisabled(), false, 'agent-loop finish enabled');
+await page.click('[data-finish]'); expect(await page.locator('[data-finish]').textContent(), /^Finished ✓/, 'agent-loop finished');
 
 // using-agents: sort + repair + scenario in safety
 await page.goto(`${B}/using-agents/delegating/`);
 cp = page.locator('#autonomy-levels');
-const chips = await cp.locator('.cp-pool .cp-chip').count(); log('sort chips:', chips);
+const chips = await cp.locator('.cp-pool .cp-chip').count(); expect(chips, atLeast(2), 'sort chips');
 for (let i = 0; i < chips; i++) { const chip = cp.locator('.cp-pool .cp-chip').first(); const b = await chip.getAttribute('data-bucket'); await chip.click(); await cp.locator(`.cp-bucket[data-bucket="${b}"] .cp-bucket-target`).click(); }
-await cp.locator('.cp-check').click(); log('sort all right:', await fb(cp));
-cp = page.locator('#fix-the-brief'); await cp.locator('.cp-check').click(); log('repair before reveal:', await fb(cp));
-await cp.locator('.cp-reveal-btn').click(); await cp.locator('input[value=pass]').check(); await cp.locator('.cp-check').click(); log('repair pass:', await fb(cp), '|', await cp.getAttribute('data-state'));
+await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'All placed correctly.', 'sort all right');
+cp = page.locator('#fix-the-brief'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Write your fix, then reveal the model answer and compare.', 'repair before reveal');
+await cp.locator('.cp-reveal-btn').click(); await cp.locator('input[value=pass]').check(); await cp.locator('.cp-check').first().click();
+expect(await fb(cp), 'Recorded as a pass.', 'repair pass'); expect(await cp.getAttribute('data-state'), 'passed', 'repair state');
 await page.goto(`${B}/safety/agent-risk/`);
-cp = page.locator('#blast-radius-of-a-tidy-up'); await cp.locator('label').first().click(); await cp.locator('.cp-check').click(); log('scenario:', (await fb(cp)).slice(0, 80));
-cp = page.locator('#predict-the-planted-instruction'); await cp.locator('textarea').fill('it will write the file'); await cp.locator('input[value=pass]').check(); await cp.locator('.cp-check').click(); log('honour predict:', await fb(cp));
+cp = page.locator('#blast-radius-of-a-tidy-up'); await cp.locator('label').first().click(); await cp.locator('.cp-check').first().click(); expect(await fb(cp), nonEmpty, 'scenario feedback');
+cp = page.locator('#predict-the-planted-instruction');
+expect(await cp.getAttribute('data-reviewable'), 'false', 'honour predict not reviewable');
+await cp.locator('textarea').fill('it will write the file'); await cp.locator('input[value=pass]').check(); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Recorded as a pass.', 'honour predict');
 
 // coding lesson: predict with run + repair exists
 await page.goto(`${B}/coding-with-agents/first-session/`);
-log('coding checkpoints:', await page.locator('[data-checkpoint]').count(), 'verified notes:', await page.locator('.cp-verified').count());
+expect(await page.locator('[data-checkpoint]').count(), 4, 'coding checkpoints'); expect(await page.locator('.cp-verified').count(), 3, 'verified notes');
 await page.goto(`${B}/customizing-agents/instructions/`);
-log('builder widget:', await page.locator('.instructions-builder').count(), 'pre text length:', (await page.locator('.instructions-builder pre').textContent()).length);
+expect(await page.locator('.instructions-builder').count(), 1, 'builder widget'); expect((await page.locator('.instructions-builder pre').textContent()).length, atLeast(1), 'builder pre text length');
 
 // course page
 await page.goto(`${B}/concepts/`);
-log('course node state:', await page.locator('[data-node]').getAttribute('data-state'), '| ring', await page.locator('[data-ring-label]').textContent(), '| review card hidden:', await page.locator('[data-review-card]').isHidden());
+expect(await page.locator('[data-node]').getAttribute('data-state'), 'finished', 'course node state');
+expect(await page.locator('[data-ring-label]').textContent(), '100%', 'course ring');
+expect(await page.locator('[data-review-card]').isHidden(), true, 'review card hidden (nothing due)');
 // force a review due: set due date to today in storage
 await page.evaluate(() => { const k='ai-training-progress-v1'; const r=JSON.parse(localStorage.getItem(k)); for (const id in r.reviews) r.reviews[id].due='2000-01-01'; localStorage.setItem(k, JSON.stringify(r)); });
-await page.reload(); log('review card after due:', await page.locator('[data-review-card]').textContent());
+await page.reload(); expect((await page.locator('[data-review-card]').textContent()).trim(), 'Review due: 2 items', 'review card after due');
 await page.goto(`${B}/concepts/review/`); await page.waitForSelector('.review [data-checkpoint]', { timeout: 5000 });
-log('review status:', await page.locator('[data-status]').textContent(), '| kind', await page.locator('.review [data-checkpoint]').getAttribute('data-kind'));
-cp = page.locator('.review [data-checkpoint]'); await cp.locator('label').first().click(); await cp.locator('.cp-check').click(); log('review answer:', (await fb(cp)).slice(0,60), '| stage:', await cp.locator('.cp-stage-label').textContent());
+expect(await page.locator('[data-status]').textContent(), 'Item 1 of 2', 'review status'); expect(await page.locator('.review [data-checkpoint]').getAttribute('data-kind'), 'choice', 'review kind');
+cp = page.locator('.review [data-checkpoint]');
+expect(await cp.locator('.cp-giveup').isDisabled(), true, 'give up disabled before an attempt');
+// Item 1: a correct answer records a pass and closes the item.
+await cp.locator('label[data-correct]').first().click(); await cp.locator('.cp-check').first().click();
+expect(await fb(cp), 'Correct.', 'review correct answer'); expect(await cp.locator('.cp-stage-label').textContent(), 'stage 2 of 5', 'review stage after pass');
+expect(await cp.locator('.cp-check').first().isDisabled(), true, 'review check disabled after result');
+expect(await cp.locator('.cp-giveup').isDisabled(), true, 'give up disabled after result');
 await cp.locator('button:has-text("Next item")').click(); await page.waitForTimeout(500);
-cp = page.locator('.review [data-checkpoint]'); await cp.locator('.cp-check').click(); await cp.locator('.cp-giveup').click(); log('give up:', (await fb(cp)).slice(0,60), '| stage:', await cp.locator('.cp-stage-label').textContent());
-await cp.locator('button:has-text("Next item")').click(); await page.waitForTimeout(300); log('review end:', await page.locator('[data-status]').textContent());
+expect(await page.locator('[data-status]').textContent(), 'Item 2 of 2', 'review status item 2');
+cp = page.locator('.review [data-checkpoint]');
+expect(await cp.locator('.cp-giveup').isDisabled(), true, 'give up disabled before an attempt (item 2)');
+// Item 2: a wrong answer records nothing yet; the learner may retry or Give Up.
+await cp.locator('label:not([data-correct])').first().click(); await cp.locator('.cp-check').first().click();
+expect(await fb(cp), nonEmpty, 'review wrong answer');
+expect(await cp.locator('.cp-check').first().isDisabled(), false, 'review check still enabled after wrong answer');
+expect(await cp.locator('.cp-giveup').isDisabled(), false, 'give up enabled after one attempt');
+await cp.locator('.cp-giveup').click();
+expect(await cp.locator('.cp-stage-label').textContent(), 'stage 1 of 5', 'review stage after give up');
+expect(await cp.locator('.cp-giveup').isDisabled(), true, 'give up disabled after result (item 2)');
+expect(await cp.locator('.cp-check').first().isDisabled(), true, 'review check disabled after give up');
+const hist = await page.evaluate(() => { const r=JSON.parse(localStorage.getItem('ai-training-progress-v1')); return Object.entries(r.reviews).filter(([id]) => id.startsWith('concepts/')).map(([, x]) => x.history.length); });
+expect(hist, [1, 1], 'exactly one result recorded per review item');
+await cp.locator('button:has-text("Next item")').click(); await page.waitForTimeout(300);
+expect(await page.locator('[data-status]').textContent(), 'Done: 2 items reviewed. 0 more remain due.', 'review end');
 
 // map, topic, competency, glossary, progress
-await page.goto(`${B}/map/`); log('map topics:', await page.locator('.topic-node').count(), '| finished:', await page.locator('.topic-node[data-state=finished]').count(), '| edges:', await page.locator('.topic-map-edges path').count());
-await page.goto(`${B}/topics/concepts/how-models-work/`); log('topic page h1:', await page.locator('h1').textContent());
-await page.goto(`${B}/competencies/concepts/explains-models/`); log('competency rows:', await page.locator('tbody tr').count());
-await page.goto(`${B}/progress/`); log('progress courses:', await page.locator('.progress-course').count(), 'lessons:', await page.locator('.progress-lesson').count());
+await page.goto(`${B}/map/`);
+expect(await page.locator('.topic-node').count(), atLeast(1), 'map topics'); expect(await page.locator('.topic-node[data-state=finished]').count(), atLeast(1), 'map finished topics'); log('map edges:', await page.locator('.topic-map-edges path').count());
+await page.goto(`${B}/topics/concepts/how-models-work/`); expect(await page.locator('h1').textContent(), nonEmpty, 'topic page h1');
+await page.goto(`${B}/competencies/concepts/explains-models/`); expect(await page.locator('tbody tr').count(), atLeast(1), 'competency rows');
+await page.goto(`${B}/progress/`);
+expect(await page.locator('.progress-course').count(), atLeast(1), 'progress courses'); expect(await page.locator('.progress-lesson').count(), atLeast(1), 'progress lessons');
 const record = await page.locator('[data-dump]').textContent();
 const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-export]')]); const path = await dl.path();
-page.once('dialog', d => d.accept()); await page.click('[data-reset]'); await page.waitForTimeout(200); log('after reset lessons:', JSON.parse(await page.locator('[data-dump]').textContent()).lessons);
+page.once('dialog', d => d.accept()); await page.click('[data-reset]'); await page.waitForTimeout(200);
+expect(JSON.parse(await page.locator('[data-dump]').textContent()).lessons, {}, 'after reset lessons');
+expect(await page.locator('[data-message]').textContent(), 'Progress reset.', 'reset message');
 page.once('dialog', d => d.accept()); await page.setInputFiles('[data-import]', path); await page.waitForTimeout(400);
-log('import restored:', (await page.locator('[data-dump]').textContent()) === record, '|', await page.locator('[data-message]').textContent());
+expect((await page.locator('[data-dump]').textContent()) === record, true, 'import restored');
+expect(await page.locator('[data-message]').textContent(), 'Imported.', 'import message');
 await page.screenshot({ path: '/tmp/ai-training-e2e-progress.png', fullPage: true });
 await page.goto(`${B}/concepts/`); await page.screenshot({ path: '/tmp/ai-training-e2e-course.png', fullPage: true });
 await page.goto(`${B}/map/`); await page.screenshot({ path: '/tmp/ai-training-e2e-map.png', fullPage: true });
 await page.goto(`${B}/using-agents/delegating/`); await page.screenshot({ path: '/tmp/ai-training-e2e-lesson.png', fullPage: true });
-log('errors:', errs);
+expect(errs, [], 'page errors');
 await browser.close();
-const failed = errs.length > 0;
-if (failed) { console.error('e2e: page errors'); process.exit(1); }
-console.log('e2e: ok');
+if (failures.length) {
+	console.error(`\ne2e: ${failures.length} assertion failure(s)`);
+	for (const f of failures) console.error('  - ' + f);
+	process.exit(1);
+}
+console.log(`e2e: ok`);
