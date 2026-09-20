@@ -375,6 +375,23 @@ export function scheduleReview(r: ProgressRecord, cp: ReviewableCheckpoint, day:
 	return true;
 }
 
+/**
+ * A Check press in the skills check (spec S04 "Skills check"): the checkpoint
+ * result as in the body, and on a pass the review item for `review` (the
+ * checkpoint as the build knows it; absent when it is not reviewable).
+ */
+export function applySkillsCheckResult(
+	r: ProgressRecord,
+	id: string,
+	passed: boolean,
+	review: ReviewableCheckpoint | undefined,
+	day: string,
+): CheckpointEntry {
+	const entry = applyCheckpointResult(r, id, passed);
+	if (passed && review) scheduleReview(r, review, day);
+	return entry;
+}
+
 /** A Check press: counts an attempt; a pass sticks, a fail never overrides an earlier pass. */
 export function applyCheckpointResult(r: ProgressRecord, id: string, passed: boolean): CheckpointEntry {
 	const c = r.checkpoints[id] ?? { state: 'attempted', attempts: 0 };

@@ -11,6 +11,8 @@ import {
 	rotateIfSolved,
 	selfGradeFeedback,
 	shuffle,
+	skillsCheckNote,
+	skillsCheckOffer,
 	sortFeedback,
 	stageDisplay,
 } from '@scripts/checkpoint-logic';
@@ -75,6 +77,18 @@ describe('feedback', () => {
 		expect(sortFeedback(2, false).text).toBe('2 items still to place.');
 		expect(sortFeedback(0, true).kind).toBe('ok');
 		expect(sortFeedback(0, false).text).toBe('Some items are in the wrong bucket.');
+	});
+});
+
+describe('skills check texts', () => {
+	it('pluralizes the offer', () => {
+		expect(skillsCheckOffer(1)).toBe('Answer 1 question');
+		expect(skillsCheckOffer(2)).toBe('Answer 2 questions');
+	});
+	it('counts passes while open, then sums up', () => {
+		expect(skillsCheckNote(1, 1, 2)).toBe('Passed 1 of 1 so far.');
+		expect(skillsCheckNote(2, 2, 2)).toBe('Passed 2 of 2. Every objective is covered. Go on to the recap.');
+		expect(skillsCheckNote(2, 1, 2)).toBe('Passed 1 of 2. The ones you missed are taught below.');
 	});
 });
 

@@ -124,6 +124,20 @@ export function matchVerdict(
 	return { ok: true, feedback: { kind: 'ok', text: `Correct. ${rationale}`.trim() } };
 }
 
+const questions = (n: number) => `${n} question${n === 1 ? '' : 's'}`;
+
+/** The skills check card's texts (spec S04 "Skills check"): the offer, and the note after each answer. */
+export function skillsCheckOffer(open: number): string {
+	return `Answer ${questions(open)}`;
+}
+
+export function skillsCheckNote(answered: number, passed: number, total: number): string {
+	if (answered < total) return `Passed ${passed} of ${answered} so far.`;
+	const tail =
+		passed === total ? 'Every objective is covered. Go on to the recap.' : 'The ones you missed are taught below.';
+	return `Passed ${passed} of ${total}. ${tail}`;
+}
+
 /** How many of the stage pills light up, and the label under them, for a review item. */
 export function stageDisplay(stage: number | 'done' | undefined): { lit: number; label: string } {
 	if (stage === 'done') return { lit: 5, label: 'retired' };

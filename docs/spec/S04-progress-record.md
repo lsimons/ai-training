@@ -113,15 +113,21 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
 - **The questions.** The card shows a copy of each chosen checkpoint's
   markup, with Hint but without Skip, and each copy takes one Check. The
   copy records under the same checkpoint id as the lesson body.
-- **Pass.** The checkpoint is recorded `passed` with one attempt, exactly as
-  if answered in the body, and the body copy shows as passed at once. If
-  the checkpoint is reviewable, its review item is created right then,
-  under the "Lesson finished" rules of the spaced review spec (the comfort
-  level's initial stage and due date). Finishing the lesson later leaves
-  that item's schedule alone.
-- **Fail.** The checkpoint is recorded `attempted` with one attempt, no
-  review item is created, and the lesson proceeds as normal: the body copy
-  is still open, with unlimited retries there.
+- **Pass.** The checkpoint is recorded `passed` and counts one attempt,
+  exactly as if answered in the body, and the body copy shows as passed at
+  once. If the checkpoint is reviewable, its review item is created right
+  then, under the "Lesson finished" rules of the spaced review spec (the
+  comfort level's initial stage and due date). Finishing the lesson later
+  leaves that item's schedule alone.
+- **Fail.** The checkpoint is recorded `attempted` and counts one attempt,
+  no review item is created, and the lesson proceeds as normal: the body
+  copy is still open, with unlimited retries there.
+- **Copies.** The card's copies carry the body checkpoint's progress id,
+  and their nested ids and input names are prefixed so the page keeps
+  unique ids and separate radio groups. The skip rule is applied against
+  the record when the learner presses the button, so a checkpoint passed
+  in the body after the page loaded is not asked, and the button's count
+  follows.
 - **After the last answer** the card says how many passed, and its dismiss
   button reads "Close".
 

@@ -122,8 +122,9 @@ if (isLesson) {
 
 <script>
 	import { openSkillsCheck } from '@lib/skills-check';
+	import { skillsCheckNote, skillsCheckOffer } from '@scripts/checkpoint-logic';
 	import * as progress from '@scripts/progress';
-	import { bindAll, bindCheckpoint, drawState } from '@scripts/checkpoints';
+	import { bindAll, bindCheckpoint, copyForSkillsCheck, drawState } from '@scripts/checkpoints';
 
 	const root = document.querySelector<HTMLElement>('.lesson[data-lesson]');
 	if (root) {
@@ -133,74 +134,75 @@ if (isLesson) {
 		// `bindAll` so they carry no listeners, no `data-bound` and no shuffle,
 		// and inserted after it so the lesson's own list never includes them.
 		const skillsCard = root.querySelector<HTMLElement>('[data-skills-check]');
-		const skillsOpen = skillsCard ? openSkillsCheckItems(skillsCard) : [];
-		function openSkillsCheckItems(card: HTMLElement): { body: HTMLElement; copy: HTMLElement }[] {
-			const rec = progress.load();
-			if (rec.comfort !== 'more') return [];
-			const chosen = (card.dataset.items ?? '')
+		const skillsItems = skillsCard && progress.load().comfort === 'more' ? skillsCheckItems(skillsCard) : [];
+		function skillsCheckItems(card: HTMLElement): { body: HTMLElement; copy: HTMLElement; progressId: string }[] {
+			return (card.dataset.items ?? '')
 				.split(' ')
 				.map((id) => root!.querySelector<HTMLElement>(`[data-checkpoint][id="${id}"]`))
 				.filter((el): el is HTMLElement => el !== null)
-				.map((body) => ({ body, progressId: body.dataset.progressId! }));
-			return openSkillsCheck(chosen, rec.checkpoints).map(({ body }) => ({ body, copy: copyCheckpoint(body) }));
+				.map((body) => ({ body, copy: copyForSkillsCheck(body), progressId: body.dataset.progressId! }));
 		}
-		/** A pristine copy for the card: no duplicate id, its own radio groups, no Skip (the card has Dismiss). */
-		function copyCheckpoint(body: HTMLElement): HTMLElement {
-			const copy = document.importNode(body, true);
-			copy.removeAttribute('id');
-			copy.dataset.skillsItem = body.id;
-			for (const input of copy.querySelectorAll<HTMLInputElement>('input[name]')) input.name = `${input.name}-skills`;
-			copy.querySelector('.cp-skip')?.remove();
-			return copy;
-		}
+		/** The skip rule against the record as it is now: a checkpoint passed in the body meanwhile is not asked. */
+		const openSkillsItems = () => openSkillsCheck(skillsItems, progress.load().checkpoints);
+		let skillsStarted = false;
 
 		const checkpoints = bindAll(root, {
 			onResult: () => {
 				route();
 				drawLesson();
+				if (!skillsStarted) offerSkillsCheck();
 			},
 		});
 		progress.markLessonRead(lessonId);
 
-		if (skillsCard && skillsOpen.length > 0) {
+		/** Show the offer with the current open count, or hide the card when nothing is left to ask. */
+		function offerSkillsCheck() {
+			if (!skillsCard || skillsItems.length === 0) return;
+			const open = openSkillsItems().length;
+			skillsCard.hidden = open === 0;
+			const start = skillsCard.querySelector<HTMLButtonElement>('[data-skills-start]');
+			if (start) start.textContent = skillsCheckOffer(open);
+		}
+
+		if (skillsCard && skillsItems.length > 0) {
 			const note = skillsCard.querySelector<HTMLElement>('[data-skills-note]')!;
 			const start = skillsCard.querySelector<HTMLButtonElement>('[data-skills-start]')!;
 			const dismiss = skillsCard.querySelector<HTMLButtonElement>('[data-skills-dismiss]')!;
 			const items = skillsCard.querySelector<HTMLElement>('[data-skills-items]')!;
-			const total = skillsOpen.length;
-			const questions = `${total} question${total === 1 ? '' : 's'}`;
-			let answered = 0;
-			let passed = 0;
-			note.textContent = `One checkpoint per objective this lesson teaches, one try each. A pass counts as if you answered it in the lesson, and the review schedule picks it up.`;
-			start.textContent = `Answer ${questions}`;
-			skillsCard.hidden = false;
+			note.textContent =
+				'One checkpoint per objective this lesson teaches, one try each. A pass counts as if you answered it in the lesson, and the review schedule picks it up.';
+			offerSkillsCheck();
 
 			start.addEventListener('click', () => {
+				const asked = openSkillsItems();
+				if (asked.length === 0) {
+					skillsCard.hidden = true;
+					return;
+				}
+				skillsStarted = true;
 				start.hidden = true;
 				items.hidden = false;
-				for (const { body, copy } of skillsOpen) {
+				const total = asked.length;
+				let answered = 0;
+				let passed = 0;
+				for (const { body, copy } of asked) {
 					items.appendChild(copy);
+					const reviewable = copy.dataset.reviewable === 'true';
+					const revision = Number(copy.dataset.revision ?? progress.DEFAULT_REVISION);
 					bindCheckpoint(copy, {
+						// One write: the checkpoint result, and on a reviewable pass its review item.
+						record: (id, ok) => progress.recordSkillsCheck(id, ok, reviewable ? { id, revision } : undefined),
 						onResult: (el, ok) => {
 							// One Check per item: the result is recorded, so lock the copy.
 							el.querySelector<HTMLButtonElement>('.cp-check')?.setAttribute('disabled', 'true');
 							const after = el.querySelector<HTMLElement>('.cp-after');
 							if (after) after.hidden = false;
-							if (ok && el.dataset.reviewable === 'true') {
-								progress.scheduleReview({
-									id: el.dataset.progressId!,
-									revision: Number(el.dataset.revision ?? progress.DEFAULT_REVISION),
-								});
-							}
 							drawState(body);
 							route();
 							drawLesson();
 							answered++;
 							if (ok) passed++;
-							note.textContent =
-								answered < total
-									? `Passed ${passed} of ${answered} so far.`
-									: `Passed ${passed} of ${total}. ${passed === total ? 'Every objective is covered; the recap is yours.' : 'The ones you missed are taught below.'}`;
+							note.textContent = skillsCheckNote(answered, passed, total);
 							if (answered === total) dismiss.textContent = 'Close';
 						},
 					});

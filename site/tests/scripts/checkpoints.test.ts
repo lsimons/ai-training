@@ -5,7 +5,7 @@
  * markup changes, the fixture here changes with it, and the e2e suite is the
  * check that the two still agree.
  */
-import { bindAll, bindCheckpoint } from '@scripts/checkpoints';
+import { bindAll, bindCheckpoint, copyForSkillsCheck } from '@scripts/checkpoints';
 import * as progress from '@scripts/progress';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -282,6 +282,60 @@ describe('repair', () => {
 		click('.cp-check');
 		expect(feedback()).toBe('Recorded as a pass.');
 		expect(state()).toBe('passed');
+	});
+});
+
+describe('skills check copy', () => {
+	const repairBody = `
+		<div class="cp-repair">
+			<textarea>broken</textarea>
+			<button class="cp-reveal-btn">Reveal</button>
+			<div class="cp-model" hidden><pre>fixed</pre></div>
+			<fieldset class="cp-selfgrade" hidden>
+				<label><input type="radio" name="r-selfgrade" value="pass" /></label>
+				<label><input type="radio" name="r-selfgrade" value="partial" /></label>
+			</fieldset>
+		</div>`;
+	it('a repair copy with renamed radios still grades, and records under the original id', () => {
+		const body = shell('repair', 'r', repairBody);
+		const copy = copyForSkillsCheck(body);
+		document.body.appendChild(copy);
+		expect(copy.id).toBe('');
+		expect(copy.dataset.skillsItem).toBe('r');
+		expect(copy.dataset.progressId).toBe(`${LESSON}#r`);
+		expect(copy.querySelector('.cp-skip')).toBeNull();
+		expect(copy.querySelector<HTMLInputElement>('input[value=pass]')?.name).toBe('skills-r-selfgrade');
+		const record = vi.fn();
+		bindCheckpoint(copy, { record });
+		copy.querySelector<HTMLElement>('.cp-reveal-btn')?.click();
+		const pass = copy.querySelector<HTMLInputElement>('input[value=pass]');
+		if (pass) pass.checked = true;
+		copy.querySelector<HTMLElement>('.cp-check')?.click();
+		expect(copy.querySelector('.cp-feedback')?.textContent).toBe('Recorded as a pass.');
+		expect(record).toHaveBeenCalledWith(`${LESSON}#r`, true);
+		// `record` replaces the default write, so the record is untouched here.
+		expect(progress.load().checkpoints[`${LESSON}#r`]).toBeUndefined();
+		// The body's own radio group is separate from the copy's.
+		expect(body.querySelector<HTMLInputElement>('input[value=pass]')?.checked).toBe(false);
+	});
+	it('a match copy rewrites its nested ids and the attributes that point at them', () => {
+		const matchBody = `
+			<div class="cp-match" data-rationale="r">
+				<div class="cp-match-row" data-option="0">
+					<label for="m-row-0">A</label>
+					<select id="m-row-0" aria-describedby="m-row-0-fb"><option value="">-</option><option value="0">x</option></select>
+					<span class="cp-row-feedback" id="m-row-0-fb"></span>
+				</div>
+			</div>`;
+		const body = shell('match', 'm', matchBody);
+		const copy = copyForSkillsCheck(body);
+		document.body.appendChild(copy);
+		expect(copy.querySelector('label')?.getAttribute('for')).toBe('skills-m-row-0');
+		expect(copy.querySelector('select')?.id).toBe('skills-m-row-0');
+		expect(copy.querySelector('select')?.getAttribute('aria-describedby')).toBe('skills-m-row-0-fb');
+		expect(copy.querySelector('.cp-row-feedback')?.id).toBe('skills-m-row-0-fb');
+		const ids = [...document.querySelectorAll('[id]')].map((e) => e.id);
+		expect(new Set(ids).size).toBe(ids.length);
 	});
 });
 

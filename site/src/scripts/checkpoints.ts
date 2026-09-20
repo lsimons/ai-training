@@ -28,7 +28,33 @@ import * as progress from './progress';
 export interface BindOptions {
 	/** Review mode adds Give Up, stage pills and the frequency control, and records to `reviews`. */
 	review?: boolean;
+	/**
+	 * Lesson mode only: replaces the default `progress.recordCheckpoint` write.
+	 * The skills check uses it to record the result and schedule the review in
+	 * one update (spec S04 "Skills check").
+	 */
+	record?: (id: string, passed: boolean) => void;
 	onResult?: (el: HTMLElement, passed: boolean) => void;
+}
+
+/**
+ * A copy of a checkpoint section for the skills check card (spec S04 "Skills
+ * check"). Take it before the original is bound, so it carries no listeners,
+ * no `data-bound` and no shuffle. The copy drops the section `id`, prefixes
+ * every nested `id`, `for`, `aria-describedby` and input `name` with
+ * `skills-` (so the document keeps unique ids and the copy's radio groups
+ * are its own, while the `[name$="-selfgrade"]` lookups still match), and
+ * has no Skip button: the card offers Dismiss instead.
+ */
+export function copyForSkillsCheck(body: HTMLElement): HTMLElement {
+	const copy = document.importNode(body, true);
+	copy.removeAttribute('id');
+	copy.dataset.skillsItem = body.id;
+	for (const attr of ['id', 'for', 'aria-describedby', 'name']) {
+		for (const el of copy.querySelectorAll(`[${attr}]`)) el.setAttribute(attr, `skills-${el.getAttribute(attr)}`);
+	}
+	$(copy, '.cp-skip')?.remove();
+	return copy;
 }
 
 function $<T extends Element = HTMLElement>(root: ParentNode, sel: string): T | null {
@@ -300,7 +326,8 @@ export function bindCheckpoint(el: HTMLElement, opts: BindOptions = {}): void {
 			}
 			return;
 		}
-		progress.recordCheckpoint(id, result);
+		if (opts.record) opts.record(id, result);
+		else progress.recordCheckpoint(id, result);
 		drawState(el);
 		opts.onResult?.(el, result);
 	});
