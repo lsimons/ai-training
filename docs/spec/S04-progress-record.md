@@ -4,11 +4,11 @@
 lives, how it is versioned, and how it moves between browsers.
 
 **Status:** In progress - the record, its storage key, lesson states, checkpoint
-states, the review map, comfort level, progress display, export, import and
-reset are implemented (2026-09-20). Record version 2 (review `history`
-entries carry the day) and the migration from version 1 on load and on
-import are implemented (2026-09-20). Deferred: goals and quizzes exist in the record
-shape only, with no page that writes them.
+states, the review map, comfort level, progress display, the skills check,
+export, import and reset are implemented (2026-09-20). Record version 2
+(review `history` entries carry the day) and the migration from version 1 on
+load and on import are implemented (2026-09-20). Deferred: goals and quizzes
+exist in the record shape only, with no page that writes them.
 
 ## Introduction
 
@@ -85,6 +85,45 @@ milestone bar always show the same number for the same record.
 
 The shared computation is `progressPercent()` in `site/src/scripts/overview.ts`,
 which both the overall bar and the course graph import.
+
+### Skills check
+
+The skills check is the `more` comfort level's routing effect from the
+[dictionary](S01-dictionary.md) ("Comfort level"): a learner who already
+knows the material passes the lesson's checkpoints up front and moves on. It
+is in this spec because it writes checkpoint states, and the review item it
+creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
+
+- **Item choice.** One checkpoint per objective in the lesson's `serves`,
+  in `serves` order: the lesson's first checkpoint for that objective that
+  is reviewable, else its first checkpoint of any kind. An objective without
+  a checkpoint contributes nothing. The choice is made at build time from
+  the lesson source, so the card and the lesson body always agree.
+- **Who sees it.** Only a learner whose record has `comfort: more`, and only
+  on Engineering lessons, because Foundations has no comfort levels. The
+  card sits at the top of the lesson, above the body.
+- **Skip rule.** An objective whose chosen checkpoint is already `passed`
+  is not asked. When every chosen checkpoint is passed, no check is offered
+  and the card stays hidden.
+- **Offered, never forced.** The card reads "Skip ahead?" with a button
+  "Answer N questions" and a button "Not now". Nothing happens until the
+  learner presses the first. "Not now" hides the card for this page view,
+  and nothing about the dismissal is stored, so the offer returns on the
+  next visit while a chosen checkpoint is still open.
+- **The questions.** The card shows a copy of each chosen checkpoint's
+  markup, with Hint but without Skip, and each copy takes one Check. The
+  copy records under the same checkpoint id as the lesson body.
+- **Pass.** The checkpoint is recorded `passed` with one attempt, exactly as
+  if answered in the body, and the body copy shows as passed at once. If
+  the checkpoint is reviewable, its review item is created right then,
+  under the "Lesson finished" rules of the spaced review spec (the comfort
+  level's initial stage and due date). Finishing the lesson later leaves
+  that item's schedule alone.
+- **Fail.** The checkpoint is recorded `attempted` with one attempt, no
+  review item is created, and the lesson proceeds as normal: the body copy
+  is still open, with unlimited retries there.
+- **After the last answer** the card says how many passed, and its dismiss
+  button reads "Close".
 
 ## Storage
 

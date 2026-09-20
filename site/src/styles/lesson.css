@@ -110,6 +110,19 @@
 .route-title { font-weight: 700; margin: 0 0 0.25rem; }
 .route-where { color: var(--sl-color-gray-3); font-size: 0.9rem; }
 .route-card ul { margin: 0; padding-left: 1.25rem; }
+/* skills check card (spec S04 "Skills check"): copies of checkpoint markup
+   inside a route card, so the checkpoint rules above apply to the copies too. */
+.skills-check { border-left: 4px solid var(--sl-color-accent); }
+.skills-note { margin: 0 0 0.5rem; font-size: 0.9rem; color: var(--sl-color-gray-2); }
+.skills-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.skills-actions button {
+	padding: 0.35rem 0.85rem; border-radius: 4px; border: 1px solid var(--sl-color-gray-4);
+	background: var(--sl-color-bg-nav); color: var(--sl-color-text); cursor: pointer; font: inherit; font-size: 0.9rem;
+}
+.skills-actions .cp-check { background: var(--sl-color-accent); color: var(--sl-color-black); border-color: transparent; font-weight: 600; }
+.skills-items .checkpoint { margin: 1rem 0 0; background: var(--sl-color-bg); }
+.skills-items .checkpoint:last-child { margin-bottom: 0.25rem; }
+
 .comfort { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; font-size: 0.9rem; margin: 0 0 1rem; }
 .comfort button[aria-pressed='true'] { background: var(--sl-color-accent-low); border-color: var(--sl-color-accent); }
 .comfort-note { color: var(--sl-color-gray-3); }

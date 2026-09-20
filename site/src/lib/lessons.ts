@@ -11,6 +11,8 @@ export type Lesson = CollectionEntry<'docs'>;
 
 export interface CheckpointInfo {
 	id: string;
+	/** The learning objective it grades (spec S03 "Checkpoints"); empty when the tag has none. */
+	objective: string;
 	title: string;
 	kind: CheckpointKind;
 	reviewable: boolean;
@@ -77,6 +79,7 @@ export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 		if (!kind) throw new Error(`${lesson.id}: unknown checkpoint tag <${m[1]}>`);
 		const id = attrValue(tag, 'id');
 		if (!id) throw new Error(`${lesson.id}: <${m[1]}> without an id: ${tag.slice(0, 80)}`);
+		const objective = attrValue(tag, 'objective') ?? '';
 		const title = attrValue(tag, 'title') ?? id;
 		const reviewAttr = attrValue(tag, 'review');
 		if (reviewAttr !== undefined && reviewAttr !== 'true' && reviewAttr !== 'false') {
@@ -89,6 +92,7 @@ export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 		const honor = kind === 'predict' && !hasAttr(tag, 'answer');
 		out.push({
 			id,
+			objective,
 			title,
 			kind,
 			revision,

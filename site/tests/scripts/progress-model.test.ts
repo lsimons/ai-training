@@ -29,6 +29,7 @@ import {
 	type ReviewEntry,
 	resetOutdatedReviewEntries,
 	STORAGE_KEY,
+	scheduleReview,
 	stageDays,
 	storageKeyFor,
 	today,
@@ -205,6 +206,13 @@ describe('lessons', () => {
 		expect(r.lessons['a/x']).toEqual({ state: 'finished', at: DAY });
 		expect(r.reviews['a/x#old']?.stage).toBe(3);
 		expect(r.reviews['a/x#new']).toEqual({ stage: 1, due: '2026-03-11', last: null, history: [], revision: 2 });
+	});
+	it("scheduleReview creates one item at the comfort level's stage and keeps an existing one", () => {
+		const r = record({ comfort: 'more', reviews: { 'a/x#old': review({ stage: 3, due: '2026-05-01' }) } });
+		expect(scheduleReview(r, { id: 'a/x#new', revision: 2 }, DAY)).toBe(true);
+		expect(r.reviews['a/x#new']).toEqual({ stage: 2, due: '2026-03-13', last: null, history: [], revision: 2 });
+		expect(scheduleReview(r, { id: 'a/x#old', revision: 1 }, DAY)).toBe(false);
+		expect(r.reviews['a/x#old']?.stage).toBe(3);
 	});
 });
 
