@@ -96,13 +96,15 @@ export default defineConfig({
 				{
 					label: 'Foundations',
 					items: [
-						{ label: 'Concepts', items: [{ slug: 'concepts', label: 'Course' }, { slug: 'concepts/how-models-work', label: 'How a language model works' }] },
+						{ slug: 'concepts', label: 'Concepts' },
+						{ slug: 'concepts/how-models-work', label: 'How a language model works', attrs: { class: 'lesson-link' } },
 					],
 				},
 				{
 					label: 'Engineering',
 					items: [
-						{ label: 'Building agents', items: [{ slug: 'building-agents', label: 'Course' }, { slug: 'building-agents/agent-loop', label: 'Building your first agent' }] },
+						{ slug: 'building-agents', label: 'Building agents' },
+						{ slug: 'building-agents/agent-loop', label: 'Building your first agent', attrs: { class: 'lesson-link' } },
 					],
 				},
 				{ slug: 'progress', label: 'Your progress' },
