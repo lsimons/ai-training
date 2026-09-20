@@ -45,6 +45,12 @@ prek
 zizmor
 davinci
 MRKL
+Fuchsia
+OpenSSF
+Scorecard
+Dependabot
+Renovate
+pnpm
 
 # Course and certification codes
 CCAO

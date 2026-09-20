@@ -145,6 +145,7 @@ export default defineConfig({
 					items: [
 						{ slug: 'coding-with-agents', label: 'Coding with agents' },
 						{ slug: 'coding-with-agents/first-session', label: 'Your first session with a coding agent', attrs: { class: 'lesson-link' } },
+						{ slug: 'coding-with-agents/dependency-review', label: 'Reviewing what the agent pulled in', attrs: { class: 'lesson-link' } },
 						{ slug: 'customizing-agents', label: 'Customizing agents' },
 						{ slug: 'customizing-agents/instructions', label: 'Project instructions: AGENTS.md', attrs: { class: 'lesson-link' } },
 						{ slug: 'customizing-agents/mcp', label: 'Connecting an agent to your systems', attrs: { class: 'lesson-link' } },
