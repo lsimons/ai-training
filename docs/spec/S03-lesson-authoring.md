@@ -98,6 +98,11 @@ pitfall and the exercise.
   holds: an example that can't run says so.
 - **Prefer `predict`** for any example that runs. Use `choice` only where
   nothing runs.
+- **Fixtures are Python.** Every runnable example under `site/examples/` is
+  a `.py` script run with `python3`, with no bash fixtures (decided
+  2026-09-20). One language keeps the runner simple and the fixtures
+  portable across the platforms learners use. The runner rejects any other
+  file type.
 - **Prompts and responses are recorded, never live.** A prompt block and
   its response block name the model and the month the response was
   recorded. Outputs live in the repo and are never fetched from a
