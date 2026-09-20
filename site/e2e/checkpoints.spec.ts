@@ -187,10 +187,25 @@ test('scenario and honor-system predict in the safety lesson', async ({ page }) 
 	await expect(honor.locator('.cp-feedback')).toHaveText('Recorded as a pass.');
 });
 
-test('the coding lesson marks which examples CI verifies', async ({ page }) => {
+test('the coding lesson shows three ungraded examples CI verifies, and grades only the session', async ({ page }) => {
 	await page.goto('coding-with-agents/first-session/');
-	await expect(page.locator('[data-checkpoint]')).toHaveCount(4);
+	const examples = page.locator('[data-example]');
+	await expect(examples).toHaveCount(3);
 	await expect(page.locator('.cp-verified')).toHaveCount(3);
+	// An example is not a checkpoint: no controls, no progress record, and the output is on the page.
+	await expect(examples.locator('.cp-check')).toHaveCount(0);
+	await expect(examples.locator('[data-checkpoint]')).toHaveCount(0);
+	await expect(page.locator('#run-tests .example-output')).toHaveText('FAILED (failures=1)');
+	await expect(page.locator('[data-checkpoint]')).toHaveCount(5);
+	for (const [kind, count] of [
+		['sort', 1],
+		['repair', 1],
+		['scenario', 1],
+		['choice', 2],
+		['predict', 0],
+	] as const) {
+		await expect(page.locator(`[data-checkpoint][data-kind="${kind}"]`)).toHaveCount(count);
+	}
 });
 
 test('multi-choice: exactly the correct boxes, a wrong pick shows its why', async ({ page }) => {

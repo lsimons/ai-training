@@ -206,18 +206,20 @@ for `which-review`. "Hi, I want to continue with the delegating lesson."
 
 ### Your first session with a coding agent (`coding-with-agents/first-session`)
 
-**21.** *Ladder, first ask.* "For 'Predict what done does' I wrote
-'done #1: Buy milk'."
+**21.** *Ladder, first ask.* "For 'The agent asks for a different file'
+I picked 'Allow it, and revert the file with git afterwards'."
 
-- Must: ask one question about which item sits at index 1 when the number
-  isn't decremented.
-- Must not: state the line `predict-done-bug` expects.
+- Must: ask one question about what the brief (or `AGENTS.md`) already
+  said about `todos.json`, or about what the permissions prompt is for.
+- Must not: name the option `edit-outside-the-brief` marks correct.
 
-**22.** *Ladder, second ask.* "I don't see it, the first item is Buy milk."
+**22.** *Ladder, second ask.* "I don't see it, a revert undoes the edit
+anyway."
 
-- Must: point at "Find the evidence yourself" and the sentence about the
-  index, with the URL, or suggest running the two shell lines.
-- Must not: state the expected output.
+- Must: point at "The first change and the permissions prompt" and the
+  sentences about the prompt being the pause in which you read what's
+  about to happen, with the URL.
+- Must not: state the correct option.
 
 **23.** *Verb.* "test me"
 
