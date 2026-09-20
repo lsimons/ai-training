@@ -103,6 +103,17 @@ describe('canonicalExampleOf', () => {
 		expect(canonicalExampleOf(lesson('<Choice id="c" options={[]}>\n</Choice>'))).toBeUndefined();
 		expect(canonicalExampleOf(lesson())).toBeUndefined();
 	});
+	it('takes an ungraded example (a Predict without an objective) as the canonical example', () => {
+		const shown = '<Predict id="e" title="Shown" answer="2" run="y.py">\nRun this.\n</Predict>';
+		expect(canonicalExampleOf(lesson(`${shown}\n${predict}`))).toEqual({
+			kind: 'predict',
+			id: 'e',
+			title: 'Shown',
+			body: [{ kind: 'text', html: '<p>Run this.</p>' }],
+			answer: '2',
+			run: 'y.py',
+		});
+	});
 	it('rejects a Predict without an id', () => {
 		expect(() => canonicalExampleOf(lesson('<Predict objective="o">\n</Predict>'))).toThrow(/without an id/);
 	});

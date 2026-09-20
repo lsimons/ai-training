@@ -88,7 +88,10 @@ Each served objective gets at least one checkpoint with
 `objective="<that id>"`, and each checkpoint names the one objective it
 evidences. A lesson has one `<Pitfall>`, one `<Exercise>`, and one `<Recap>`
 at the end. Tutorial mode: one or two paragraphs, then an example the
-learner runs or predicts. Each example that runs gets a `<Predict>`.
+learner runs or predicts. Each example that runs gets a `<Predict>`, and
+its output is asserted in CI either way. Give it an `objective` only when
+predicting the output demonstrates a served objective. Otherwise leave
+`objective` off, and the block is an ungraded example (below).
 
 ## Checkpoints
 
@@ -189,6 +192,28 @@ rejects any other file type. A fixture that needs to run a command or copy
 a file does it with `subprocess` and `shutil`. Omit `run` only for the
 honor-system variant (predict what an agent does), and then say in the stem
 that the learner checks it themselves.
+
+````mdx
+<Predict id="run-list" title="Show the list"
+  answer="1. [ ] Buy milk" run="coding-with-agents/first-session/list.py">
+Run this, and compare what you see with the output below.
+
+```sh
+python3 todo.py list
+```
+
+</Predict>
+````
+
+Without `objective`, a `Predict` is an ungraded example (S03 "Examples"):
+the page shows the command and its output, CI still runs the fixture, and
+the block isn't a checkpoint. It has no controls and no progress record,
+and the review pages, the sidebar due count, and the export skip it. `answer`
+and `run` are required, and `hint`, `concepts` and `context` are rejected. Use it for
+a command the learner runs to gather evidence when guessing the output
+would test something the lesson doesn't serve (reading Python in a lesson
+about running an agent). An ungraded example can be the canonical example
+for the learner's reference like any other `Predict`.
 
 **The Python floor is 3.9.** The fixture is what the learner runs on their
 own machine, and the `Predict` answer must match there. A stock Mac's

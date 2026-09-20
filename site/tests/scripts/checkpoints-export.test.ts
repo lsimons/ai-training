@@ -12,7 +12,7 @@ afterAll(() => {
 const TOPIC =
 	'id: a/t\narea: a\nname: T\ndefinition: d\nconcepts:\n  - id: c1\n    name: C\n    definition: d\nlinks: {prerequisites: [], related: [], specializations: []}\n';
 const PAGE =
-	'---\ntitle: X\nmode: tutorial\n---\n\n<Choice id="one" objective="o" title="T" hint="h" concepts={[\'c1\']}\n  options={[{ text: \'a\', correct: true }]}>\nStem.\n</Choice>\n\n<Sort id="two" objective="o" title="T" hint="h" concepts={[\'c1\']} buckets={[]} items={[]} />\n';
+	'---\ntitle: X\nmode: tutorial\n---\n\n<Choice id="one" objective="o" title="T" hint="h" concepts={[\'c1\']}\n  options={[{ text: \'a\', correct: true }]}>\nStem.\n</Choice>\n\n<Sort id="two" objective="o" title="T" hint="h" concepts={[\'c1\']} buckets={[]} items={[]} />\n\n<Predict id="shown" title="Shown" answer="1" run="x.py">\nRun this.\n</Predict>\n';
 const item = (id: string, over: Record<string, unknown> = {}) => ({
 	id,
 	lesson: 'a/x',
@@ -91,6 +91,11 @@ describe('checkCheckpoints', () => {
 describe('helpers', () => {
 	it('conceptIds collects every concept id under the topics directory', () => {
 		expect([...conceptIds(join(tree(GOOD), 'data/topics'))]).toEqual(['c1']);
+	});
+	it('pageCheckpointIds skips an ungraded example (a Predict without an objective), so the export need not list it', () => {
+		const { ids } = pageCheckpointIds(join(tree(GOOD), 'content'));
+		expect([...ids]).not.toContain('a/x#shown');
+		expect(check(tree(GOOD)).errors).toEqual([]);
 	});
 	it('pageCheckpointIds reads lesson pages only, not the course page, with the same scanner as the build', () => {
 		const spaced = PAGE.replace('<Choice id="one"', '<Choice id = "one"');

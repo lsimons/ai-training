@@ -115,6 +115,35 @@ describe('Predict', () => {
 		const html = await render(Predict, { ...base, answer: 'x' });
 		expect(html).toContain('not run in CI');
 	});
+	it('ungraded example (no objective): output shown, CI note, and no checkpoint markup', async () => {
+		const html = await render(
+			Predict,
+			{ id: 'run-list', title: 'Show the list', answer: '1. [ ] Buy milk', run: 'x/list.py' },
+			{ default: 'Run this.' },
+		);
+		expect(html).toContain('<section class="example not-content" id="run-list" data-example data-run="x/list.py">');
+		expect(html).toMatch(/<pre class="example-output">1\. \[ \] Buy milk<\/pre>/);
+		expect(html).toContain('Output verified in CI from');
+		expect(html).toContain('Run this.');
+		for (const s of [
+			'data-checkpoint',
+			'data-progress-id',
+			'data-reviewable',
+			'class="checkpoint',
+			'cp-check',
+			'textarea',
+		]) {
+			expect(html).not.toContain(s);
+		}
+	});
+	it('ungraded example needs answer and run, and takes no hint, concepts or context', async () => {
+		const example = { id: 'e', title: 'T', answer: '1', run: 'x.py' };
+		await expect(render(Predict, { id: 'e', title: 'T', answer: '1' })).rejects.toThrow(/needs answer and run/);
+		await expect(render(Predict, { id: 'e', title: 'T', run: 'x.py' })).rejects.toThrow(/needs answer and run/);
+		await expect(render(Predict, { ...example, hint: 'h' })).rejects.toThrow(/takes no hint, concepts or context/);
+		await expect(render(Predict, { ...example, concepts: ['token'] })).rejects.toThrow(/takes no hint/);
+		await expect(render(Predict, { ...example, context: 'c' })).rejects.toThrow(/takes no hint/);
+	});
 	it('honor system: self-grade radios, Record label, never reviewed', async () => {
 		const html = await render(Predict, base);
 		expect(html).toContain('name="cp-selfgrade"');
