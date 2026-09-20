@@ -1,10 +1,16 @@
 /** Overall progress figures derived from the catalog and the progress record. */
 import type { ProgressRecord } from './progress';
 
+/** Mirrors `lib/catalog.ts` (that module imports astro:content, which client scripts cannot). */
+export interface CatalogCheckpoint {
+	id: string;
+	reviewable: boolean;
+	revision: number;
+}
 export interface CatalogLesson {
 	id: string;
 	title: string;
-	checkpoints: string[];
+	checkpoints: CatalogCheckpoint[];
 }
 export interface CatalogCourse {
 	area: string;
@@ -36,7 +42,7 @@ export function overall(catalog: CatalogCourse[], rec: ProgressRecord): Overall 
 		else if (s === 'skipped') skipped++;
 		else if (s === 'read') started++;
 		checkpoints += l.checkpoints.length;
-		passed += l.checkpoints.filter((c) => rec.checkpoints[`${l.id}#${c}`]?.state === 'passed').length;
+		passed += l.checkpoints.filter((c) => rec.checkpoints[`${l.id}#${c.id}`]?.state === 'passed').length;
 	}
 	const units = all.length + checkpoints;
 	const done = finished + skipped + passed;

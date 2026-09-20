@@ -9,6 +9,7 @@ import { getCollection } from 'astro:content';
 import { getLessons, checkpointsOf, levelsOf } from '@lib/lessons';
 import { areaOf } from '@lib/areas';
 import { href } from '@lib/url';
+import { jsonForScript } from '@lib/json';
 
 interface Props {
 	area: string;
@@ -23,7 +24,7 @@ const nodes = lessons.map((l) => ({
 	id: l.id,
 	title: l.data.title,
 	mode: l.data.mode,
-	checkpoints: checkpointsOf(l).map((c) => c.id),
+	checkpoints: checkpointsOf(l).map((c) => ({ id: c.id, reviewable: c.reviewable, revision: c.revision })),
 	assumes: (l.data.assumes ?? []).filter((a) => a.lesson.startsWith(`${area}/`)).map((a) => a.lesson),
 }));
 const edges = nodes.flatMap((n) => n.assumes.map((from) => ({ from, to: n.id })));
@@ -76,7 +77,7 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 				</div>
 			))
 		}
-		<script is:inline type="application/json" data-edges set:html={JSON.stringify(edges)} />
+		<script is:inline type="application/json" data-edges set:html={jsonForScript(edges)} />
 	</div>
 
 	<aside class="course-about">
@@ -112,12 +113,16 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 
 	interface Node {
 		id: string;
-		checkpoints: string[];
+		checkpoints: { id: string; reviewable: boolean; revision: number }[];
 	}
 
 	document.querySelectorAll<HTMLElement>('.course[data-course]').forEach((root) => {
 		const area = root.dataset.course!;
 		const nodes: Node[] = JSON.parse(root.dataset.nodes!);
+		// Items whose answer changed since they were scheduled restart at stage 1 (spec S05 "Content changes").
+		progress.resetOutdatedReviews(
+			nodes.flatMap((n) => n.checkpoints.filter((c) => c.reviewable).map((c) => ({ id: `${n.id}#${c.id}`, revision: c.revision })))
+		);
 
 		function draw() {
 			const rec = progress.load();
@@ -127,7 +132,7 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 			const totalUnits = nodes.length + nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 			for (const n of nodes) {
 				const l = rec.lessons[n.id];
-				const passed = n.checkpoints.filter((c) => rec.checkpoints[`${n.id}#${c}`]?.state === 'passed').length;
+				const passed = n.checkpoints.filter((c) => rec.checkpoints[`${n.id}#${c.id}`]?.state === 'passed').length;
 				const state = l?.state === 'finished' ? 'finished' : l?.state === 'skipped' ? 'skipped' : l?.state === 'read' ? 'in-progress' : 'untouched';
 				if (state === 'finished') finishedLessons++;
 				if (state === 'skipped') skippedLessons++;
@@ -152,8 +157,8 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 			if (ring) ring.style.setProperty('--pct', String(pctUnits));
 			const label = root.querySelector<HTMLElement>('[data-ring-label]');
 			if (label) label.textContent = `${pctUnits}%`;
-			// Review due card.
-			const due = progress.dueReviews(rec, `${area}/`);
+			// Review due card: every due item, not just one session's worth.
+			const due = progress.dueReviewIds(rec, `${area}/`);
 			const card = root.querySelector<HTMLElement>('[data-review-card]');
 			if (card) card.hidden = due.length === 0;
 			const cnt = root.querySelector<HTMLElement>('[data-review-count]');

@@ -227,17 +227,40 @@ export function bindCheckpoint(el: HTMLElement, opts: BindOptions = {}): void {
 	const grade = binder(el);
 	const id = el.dataset.progressId!;
 
+	const giveUp = $<HTMLButtonElement>(el, '.cp-giveup');
+	if (giveUp) giveUp.disabled = true;
+
+	/**
+	 * Review mode records one result per item (spec S05 "The review page"): a
+	 * pass on Check, or a fail on Give Up. A wrong Check does not record; it
+	 * enables Give Up and the learner may try again. After the one result,
+	 * Give Up is disabled so an answer can never record two fails.
+	 */
+	let reviewRecorded = false;
+	function recordReviewOnce(passed: boolean) {
+		if (reviewRecorded) return;
+		reviewRecorded = true;
+		progress.recordReview(id, passed);
+		if (giveUp) giveUp.disabled = true;
+		drawStage(el);
+		const after = $(el, '.cp-after');
+		if (after) after.hidden = false;
+		drawState(el);
+		opts.onResult?.(el, passed);
+	}
+
 	$(el, '.cp-check')?.addEventListener('click', () => {
 		const result = grade();
 		if (result === null) return;
 		if (opts.review) {
-			progress.recordReview(id, result);
-			drawStage(el);
-			const after = $(el, '.cp-after');
-			if (after) after.hidden = false;
-		} else {
-			progress.recordCheckpoint(id, result);
+			if (result) {
+				recordReviewOnce(true);
+			} else if (giveUp && !reviewRecorded) {
+				giveUp.disabled = false;
+			}
+			return;
 		}
+		progress.recordCheckpoint(id, result);
 		drawState(el);
 		opts.onResult?.(el, result);
 	});
@@ -254,20 +277,12 @@ export function bindCheckpoint(el: HTMLElement, opts: BindOptions = {}): void {
 		opts.onResult?.(el, false);
 	});
 
-	// Review-only controls.
-	const giveUp = $<HTMLButtonElement>(el, '.cp-giveup');
-	if (giveUp) {
-		giveUp.disabled = true;
-		$(el, '.cp-check')?.addEventListener('click', () => (giveUp.disabled = false));
-		giveUp.addEventListener('click', () => {
-			revealAnswer(el);
-			progress.recordReview(id, false);
-			drawStage(el);
-			const after = $(el, '.cp-after');
-			if (after) after.hidden = false;
-			opts.onResult?.(el, false);
-		});
-	}
+	// Review-only: Give Up shows the answer and records the fail (once).
+	giveUp?.addEventListener('click', () => {
+		if (giveUp.disabled || reviewRecorded) return;
+		revealAnswer(el);
+		recordReviewOnce(false);
+	});
 	$(el, '.cp-sooner')?.addEventListener('click', () => {
 		progress.adjustReviewStage(id, -1);
 		drawStage(el);

@@ -7,9 +7,10 @@
  * script once. Other pages render as Starlight does.
  */
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import { ENGINEERING_AREAS } from '@lib/areas';
 import { href } from '@lib/url';
+import { knownPagePaths } from '@lib/links';
 
 const entry = Astro.locals.starlightRoute.entry;
 const data = entry.data as typeof entry.data & {
@@ -30,16 +31,30 @@ if (isLesson) {
 	const competencies = await getCollection('competencies');
 	const statements = new Map<string, string>();
 	for (const a of competencies) for (const c of a.data.competencies) for (const o of c.objectives) statements.set(o.id, o.statement);
-	behind = (data.assumes ?? []).map((a) => {
+	// `assumes[].section` must be a `## ` heading of the target lesson. The slugs
+	// come from Starlight's own rendering, so they match the anchors it emits.
+	const sectionSlugs = new Map<string, string[]>();
+	for (const a of data.assumes ?? []) {
+		if (sectionSlugs.has(a.lesson)) continue;
 		const lesson = docs.find((d) => d.id === a.lesson);
 		if (!lesson) throw new Error(`${lessonId}: assumes unknown lesson ${a.lesson}`);
+		const { headings } = await render(lesson);
+		sectionSlugs.set(a.lesson, headings.filter((h) => h.depth === 2).map((h) => h.slug));
+	}
+	behind = (data.assumes ?? []).map((a) => {
+		const lesson = docs.find((d) => d.id === a.lesson)!;
 		if (!statements.has(a.objective)) throw new Error(`${lessonId}: assumes unknown objective ${a.objective}`);
+		const slugs = sectionSlugs.get(a.lesson)!;
+		if (!slugs.includes(a.section)) {
+			throw new Error(`${lessonId}: assumes section "${a.section}" which is not a "## " heading of ${a.lesson}; its sections are: ${slugs.join(', ')}`);
+		}
 		return { objective: a.objective, statement: statements.get(a.objective)!, href: href(`/${a.lesson}/#${a.section}`), lessonTitle: lesson.data.title };
 	});
+	const pages = await knownPagePaths();
 	ahead = (data['extends-to'] ?? []).map((n) => ({
 		label: n.label,
 		href: href(n.href),
-		exists: docs.some((d) => `/${d.id}/` === n.href),
+		exists: pages.has(n.href),
 	}));
 }
 ---
@@ -91,7 +106,12 @@ if (isLesson) {
 	const root = document.querySelector<HTMLElement>('.lesson[data-lesson]');
 	if (root) {
 		const lessonId = root.dataset.lesson!;
-		const checkpoints = bindAll(root, { onResult: route });
+		const checkpoints = bindAll(root, {
+			onResult: () => {
+				route();
+				drawLesson();
+			},
+		});
 		progress.markLessonRead(lessonId);
 
 		// Routing: a failed or skipped checkpoint surfaces the assumed objectives;
@@ -130,12 +150,25 @@ if (isLesson) {
 
 		// Finish and skip (spec S04 lesson states; finishing schedules reviews, spec S05).
 		const finish = root.querySelector<HTMLButtonElement>('[data-finish]');
+		const finishNote = root.querySelector<HTMLElement>('[data-finish-note]');
 		const skip = root.querySelector<HTMLButtonElement>('[data-skip-lesson]');
+		/** `finished` needs every checkpoint passed or skipped (spec S04 "Lesson states"). */
+		function openCheckpoints(): number {
+			const rec = progress.load();
+			return checkpoints.filter((el) => {
+				const state = rec.checkpoints[el.dataset.progressId!]?.state;
+				return state !== 'passed' && state !== 'skipped';
+			}).length;
+		}
 		function drawLesson() {
 			const l = progress.load().lessons[lessonId];
+			const open = openCheckpoints();
 			if (finish) {
-				finish.disabled = l?.state === 'finished';
+				finish.disabled = l?.state === 'finished' || open > 0;
 				finish.textContent = l?.state === 'finished' ? `Finished ✓ (${l.at})` : 'Mark lesson finished';
+			}
+			if (finishNote) {
+				finishNote.textContent = l?.state !== 'finished' && open > 0 ? `Pass or skip ${open} more checkpoint${open === 1 ? '' : 's'} to finish this lesson.` : '';
 			}
 			if (skip) {
 				skip.disabled = l?.state === 'skipped' || l?.state === 'finished';
@@ -143,7 +176,10 @@ if (isLesson) {
 			}
 		}
 		finish?.addEventListener('click', () => {
-			const reviewable = checkpoints.filter((el) => el.dataset.reviewable === 'true').map((el) => el.dataset.progressId!);
+			if (openCheckpoints() > 0) return;
+			const reviewable = checkpoints
+				.filter((el) => el.dataset.reviewable === 'true')
+				.map((el) => ({ id: el.dataset.progressId!, revision: Number(el.dataset.revision ?? progress.DEFAULT_REVISION) }));
 			progress.finishLesson(lessonId, reviewable);
 			drawLesson();
 		});

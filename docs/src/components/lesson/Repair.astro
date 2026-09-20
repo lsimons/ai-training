@@ -9,11 +9,12 @@ interface Props {
 	hint: string;
 	broken: string;
 	model: string;
+	revision?: number;
 }
-const { id, objective, title, hint, broken, model } = Astro.props;
+const { id, objective, title, hint, broken, model, revision } = Astro.props;
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} kind="repair" reviewable={false} checkLabel="Record grade">
+<CheckpointShell {id} {objective} {title} {hint} {revision} kind="repair" checkLabel="Record grade">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-repair">
