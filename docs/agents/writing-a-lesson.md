@@ -30,7 +30,7 @@ extends-to:
     href: /using-agents/decomposition/
 ---
 
-import { Choice, Predict, Order, Sort, Scenario, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Match, Predict, Order, Sort, Scenario, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
 ```
 
 `assumes` may be empty for a first lesson. `extends-to` hrefs may point at
@@ -66,6 +66,40 @@ A colleague says: "The model looked up the answer in its database." Which correc
 
 The learner sees `why` after picking that wrong option. Never put the answer in a
 `why`.
+
+```mdx
+<MultiChoice id="which-criteria-tick" objective="..." title="Which of these can you tick?" hint="..."
+  options={[
+    { text: 'Every date in the memo appears in the summary.', correct: true },
+    { text: 'The summary is clear.', why: 'Clear to whom? A feeling cannot be ticked.' },
+    { text: 'No fact appears that is not in the memo.', correct: true },
+  ]}>
+Which of these lines are done-criteria you can tick?
+</MultiChoice>
+```
+
+Same `options` as `Choice`, with two or more `correct` and at least one
+wrong. The page tells the learner how many to select. A wrong pick shows
+its `why`; a missed correct item is only counted ("1 of 2 so far"), never
+named. Use `Choice` when one option is right.
+
+```mdx
+<Match id="smallest-access" objective="..." title="What is the smallest access that still does the job?" hint="..."
+  options={['Draft replies that wait in the outbox', 'A scratch copy of the folder', 'Reading only']}
+  rows={[
+    { statement: 'Reply to the emails in one folder', option: 0, why: 'Which access keeps the send step for you?' },
+    { statement: 'Clean up the downloads folder', option: 1, why: 'Which access makes a wrong deletion cost only a copy?' },
+  ]}
+  rationale="The task is done just as well, and the blast radius shrinks.">
+Match each task to the smallest access that still gets it done.
+</Match>
+```
+
+Each row is a statement with a `<select>` of the `options`. `option` is
+the index of the right one. After Check every row is marked right or wrong
+and a wrong row shows its `why`. `rationale` shows once every row is
+right. Options may be reused across rows, and an option no row uses is a wrong
+answer for every row.
 
 ````mdx
 <Predict id="predict-tool-call" objective="building-agents/builds-agent-loop/defines-a-tool"

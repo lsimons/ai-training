@@ -17,7 +17,7 @@ extends-to:
     href: /safety/verification/
 ---
 
-import { Choice, Predict, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Match, Predict, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
 
 A chat assistant that gets something wrong hands you a wrong paragraph. You
 read it, you frown, you delete it. The damage stops there. An agent that gets
@@ -104,6 +104,24 @@ up an agent once, with broad access, and reuse it for every task after.
 Access granted for one job is available to every job, including the one
 where the instructions were misread. Set the access for the task in front
 of you, not for every task you might ever give it.
+
+<Match id="smallest-access" objective="safety/judges-agent-risk/names-blast-radius"
+  title="What is the smallest access that still does the job?" hint="For each task, what is the one thing the agent must be able to do, and what happens if it does that one thing wrong?"
+  options={[
+    'Draft replies that wait in the outbox',
+    'A scratch copy of the folder',
+    'Reading only, no mail and no commands',
+    'Full access to the account for the session',
+  ]}
+  rows={[
+    { statement: 'Reply to the emails in one folder', option: 0, why: 'A reply that is not sent yet can still be read and stopped. Which access keeps that step for you?' },
+    { statement: 'Clean up the downloads folder', option: 1, why: 'The task deletes things. Which access makes a wrong deletion cost only a copy?' },
+    { statement: 'Read web pages and report back', option: 2, why: 'The web pages are untrusted input. Which access means a hostile page has nothing to spend?' },
+  ]}
+  rationale="In each case the task is done just as well, and the blast radius shrinks to something you can recreate or stop.">
+Match each task to the smallest access that still gets it done. One option
+is never the right answer.
+</Match>
 
 <Pitfall title="Granting access for convenience">
 You set up an agent to sort your inbox and give it full mailbox access

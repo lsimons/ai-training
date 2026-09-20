@@ -1,0 +1,55 @@
+---
+/**
+ * Assign one option to each statement row (spec S01 `match`). Each row is a
+ * `<select>`, so it is keyboard operable without extra scripting. Per-row
+ * feedback after Check; `rationale` shows on a full pass.
+ */
+import CheckpointShell from './CheckpointShell.astro';
+
+interface Row {
+	statement: string;
+	/** Index into `options`. */
+	option: number;
+	/** Shown next to the row when it is wrong. Never the answer. */
+	why?: string;
+}
+interface Props {
+	id: string;
+	objective: string;
+	title: string;
+	hint: string;
+	review?: boolean;
+	revision?: number;
+	options: string[];
+	rows: Row[];
+	/** Shown once every row is right. */
+	rationale: string;
+}
+const { id, objective, title, hint, review, revision, options, rows, rationale } = Astro.props;
+if (rows.length < 2) throw new Error(`Match "${id}" needs at least two rows`);
+for (const r of rows) {
+	if (r.option < 0 || r.option >= options.length) throw new Error(`Match "${id}": row "${r.statement}" points at option ${r.option}`);
+}
+---
+
+<CheckpointShell {id} {objective} {title} {hint} {review} {revision} kind="match">
+	<slot />
+	<Fragment slot="body">
+		<div class="cp-match" data-rationale={rationale}>
+			{
+				rows.map((r, i) => (
+					<div class="cp-match-row" data-option={r.option} data-why={r.why}>
+						<label for={`${id}-row-${i}`}>{r.statement}</label>
+						<select id={`${id}-row-${i}`}>
+							<option value="">Choose…</option>
+							{options.map((o, j) => (
+								<option value={j}>{o}</option>
+							))}
+						</select>
+						<span class="cp-row-feedback" aria-live="polite"></span>
+					</div>
+				))
+			}
+		</div>
+	</Fragment>
+</CheckpointShell>
