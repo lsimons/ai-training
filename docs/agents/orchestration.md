@@ -299,3 +299,27 @@ amendment to the EU AI Act and every article reference against EUR-Lex
 before the maintainer's own check. The wave
 pull requests, two of them, replaced what would have been nine pull
 requests and nine deploys.
+
+## Session record, 2026-09-21, wave 4
+
+Five Concepts lesson issues (#117, #119, #121, #123, #125) became five
+branches and one wave pull request, #222, merged the same evening with the
+maintainer's standing approval for a green wave. Three of the lessons had
+`after: concepts/prompt-anatomy`, and the build rejects an `assumes` entry
+whose lesson page doesn't exist, so those three started from the #119
+branch once it was pushed, and #119 appended its review fixes instead of
+rewriting. Ten review passes, five branches sent back once, all five
+approved on the re-check, zero merged with an open finding. Review caught a
+fictional freight company that turned out to be real (used by two lessons),
+a fixture that parsed the pitfall's own JSON object as lines, a misreading
+of the few-shot paper's example counts, two sort items with two defensible
+buckets, a "put the instruction first" rule that contradicts the vendor
+docs, and a system prompt too close to an Academy example. Two things the
+builder prompt should have said: the sidebar in `astro.config.mjs` is
+manual, and `mise run prose-sync` has to run before `mise run prose` or
+the builder reports a clean page that isn't. The wave's `mise run ci`
+found the semantic conflict the branches couldn't: three e2e specs assumed
+Concepts had one live lesson. Every branch added its sidebar line at the
+same spot, and the coordinator resolved those add/add conflicts on the wave
+branch by keeping every line in course order, since no builder's work was
+at stake.
