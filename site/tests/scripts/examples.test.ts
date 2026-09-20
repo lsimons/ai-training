@@ -1,3 +1,4 @@
+import type { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -5,11 +6,30 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
 	checkExamples,
 	checkSource,
+	FLOOR,
 	findPredictTags,
+	interpreters,
 	parseProps,
+	pythonVersion,
 	runFixture,
 	walkMdx,
 } from '../../scripts/lib/examples.mjs';
+
+/**
+ * A stand-in for `spawnSync` that answers `python3` and `python3.9` with the
+ * given versions. The lib reads only `error`, `status`, `stdout` and `stderr`,
+ * so the cast covers the fields of `SpawnSyncReturns` it never touches.
+ */
+function fakeSpawn(versions: Record<string, string | { error?: string; status?: number; stderr?: string }>) {
+	const fake = (cmd: string) => {
+		const v = versions[cmd];
+		if (v === undefined) return { error: new Error(`spawnSync ${cmd} ENOENT`), status: null, stdout: '', stderr: '' };
+		if (typeof v === 'string') return { status: 0, stdout: `${v}\n`, stderr: '' };
+		if (v.error) return { error: new Error(v.error), status: null, stdout: '', stderr: '' };
+		return { status: v.status ?? 1, stdout: '', stderr: v.stderr ?? '' };
+	};
+	return fake as unknown as typeof spawnSync;
+}
 
 describe('findPredictTags', () => {
 	const cases: [string, string, Record<string, string | undefined>][] = [
@@ -92,6 +112,61 @@ describe('checkSource', () => {
 	it('ignores an honor-system predict', () => {
 		expect(checkSource('f.mdx', '<Predict id="a" title="t">', ok)).toEqual({ found: 0, checked: 0, failures: [] });
 	});
+	it('runs every interpreter, labels a failure with the one that produced it, and checks the file type once', () => {
+		const interps = [
+			{ label: 'python 3.14.7', cmd: 'python3' },
+			{ label: 'python 3.9.25', cmd: 'python3.9' },
+		];
+		const seen: string[] = [];
+		const byInterp = (_name: string, interp: { cmd: string }) => {
+			seen.push(interp.cmd);
+			return interp.cmd === 'python3.9' ? { status: 1, stdout: '', stderr: 'TypeError' } : ok();
+		};
+		const res = checkSource('f.mdx', '<Predict id="a" answer="hello" run="x.py">', byInterp, interps);
+		expect(seen).toEqual(['python3', 'python3.9']);
+		expect(res.checked).toBe(2);
+		expect(res.failures).toHaveLength(1);
+		expect(res.failures[0]).toMatch(/x\.py \[python 3\.9\.25\] exited 1\nTypeError/);
+		const bad = checkSource('f.mdx', '<Predict id="a" answer="hello" run="x.sh">', byInterp, interps);
+		expect(bad.failures).toEqual([
+			'f.mdx #a: unsupported fixture type .sh; fixtures are Python scripts (S03 "Examples")',
+		]);
+		expect(seen).toHaveLength(2);
+	});
+});
+
+describe('pythonVersion and interpreters', () => {
+	it('reads the version from the interpreter', () => {
+		expect(pythonVersion('python3', fakeSpawn({ python3: '3.14.7' }))).toEqual({ version: '3.14.7' });
+	});
+	it('reports a spawn error, a non-zero exit with stderr, and a silent non-zero exit', () => {
+		expect(pythonVersion('nope', fakeSpawn({}))).toEqual({ error: 'spawnSync nope ENOENT' });
+		expect(pythonVersion('x', fakeSpawn({ x: { status: 2, stderr: 'bad\n' } }))).toEqual({ error: 'bad' });
+		expect(pythonVersion('x', fakeSpawn({ x: { status: 2 } }))).toEqual({ error: 'exited 2' });
+	});
+	it('lists the current pin and the floor with their versions', () => {
+		expect(interpreters(fakeSpawn({ python3: '3.14.7', 'python3.9': '3.9.25' }))).toEqual({
+			list: [
+				{ label: 'python 3.14.7', cmd: 'python3' },
+				{ label: 'python 3.9.25', cmd: `python${FLOOR}` },
+			],
+		});
+	});
+	it('fails when the floor is missing, is the wrong version, or when python3 is itself the floor', () => {
+		expect(interpreters(fakeSpawn({ python3: '3.14.7' })).error).toMatch(/cannot run python3\.9 .*mise install/);
+		expect(interpreters(fakeSpawn({ python3: '3.14.7', 'python3.9': '3.10.1' })).error).toBe(
+			'python3.9 is Python 3.10.1, expected 3.9.x',
+		);
+		expect(interpreters(fakeSpawn({ python3: '3.9.6', 'python3.9': '3.9.25' })).error).toMatch(
+			/python3 is Python 3\.9\.6, the floor/,
+		);
+	});
+	it('finds both pinned interpreters on this machine', () => {
+		const res = interpreters();
+		expect(res.error).toBeUndefined();
+		expect(res.list?.map((i) => i.cmd)).toEqual(['python3', 'python3.9']);
+		expect(res.list?.[1]?.label).toMatch(/^python 3\.9\.\d+$/);
+	});
 });
 
 describe('runFixture and checkExamples', () => {
@@ -122,8 +197,23 @@ describe('runFixture and checkExamples', () => {
 		});
 		expect(runFixture(examples, 'x.rb').error).toContain('unsupported fixture type .rb');
 	});
-	it('checks a content tree against its fixtures', () => {
-		expect(checkExamples(content, examples)).toEqual({ found: 2, checked: 2, failures: [] });
+	it('runs a fixture with the interpreter it is given', () => {
+		writeFileSync(join(examples, 'version.py'), 'import sys\nprint(sys.version_info[0], sys.version_info[1])\n');
+		const floor = FLOOR.split('.').join(' ');
+		expect(runFixture(examples, 'version.py', { label: 'floor', cmd: `python${FLOOR}` })).toMatchObject({
+			status: 0,
+			stdout: floor,
+		});
+	});
+	it('checks a content tree against its fixtures on both interpreters', () => {
+		const res = checkExamples(content, examples);
+		expect(res).toMatchObject({ found: 2, checked: 4, failures: [] });
+		expect(res.interpreters).toHaveLength(2);
+		expect(res.interpreters[1]).toMatch(/^python 3\.9\./);
+	});
+	it('fails without running anything when an interpreter is missing', () => {
+		const res = checkExamples(content, examples, undefined, { error: 'no floor' });
+		expect(res).toEqual({ found: 0, checked: 0, failures: ['no floor'], interpreters: [] });
 	});
 	it('fails when no example exists at all', () => {
 		const empty = join(dir, 'empty');
@@ -131,10 +221,11 @@ describe('runFixture and checkExamples', () => {
 		const res = checkExamples(empty, examples);
 		expect(res.failures[0]).toContain('no <Predict run=...> examples found');
 	});
-	it('the real lesson tree has examples that pass', () => {
+	it('the real lesson tree has examples that pass on both interpreters', () => {
 		const root = new URL('../..', import.meta.url).pathname;
 		const res = checkExamples(join(root, 'src/content/docs'), join(root, 'examples'));
 		expect(res.failures).toEqual([]);
+		expect(res.checked).toBe(res.found * 2);
 		expect(res.checked).toBeGreaterThan(0);
 	});
 });

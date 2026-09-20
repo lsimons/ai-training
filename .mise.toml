@@ -30,8 +30,14 @@ zizmor = "1.30.1"
 # missing, so shellcheck is pinned here too rather than left to the host.
 actionlint = "1.7.12"
 shellcheck = "0.11.0"
-# Runs the lesson example fixtures (`mise run examples`).
-python = "3.14.7"
+# Two interpreters, both for `mise run examples`. The first is the current
+# Python and the `python3` on PATH. The second is the floor for the lesson
+# fixtures under site/examples/ (spec S03 "Examples"), on PATH as
+# `python3.9`: a learner on a stock Mac types `python3` and gets 3.9, so
+# every fixture must print the lesson's answer there too, and the runner
+# executes each fixture on both. Pinned here rather than fetched by uv at
+# task time so mise.lock holds its checksum like every other tool.
+python = ["3.14.7", "3.9.25"]
 # Installs the pinned Python dev tools (ruff, basedpyright, pytest) from
 # uv.lock into .venv (`mise run py-install-frozen`).
 uv = "0.12.13"
@@ -75,8 +81,10 @@ description = "Preview the production build"
 dir = "site"
 run = "bun run preview"
 
+# Every fixture runs on both pinned interpreters (`python3` and
+# `python3.9`, see [tools]); the runner fails if either is missing.
 [tasks.examples]
-description = "Run every lesson example fixture and assert the output the lesson shows"
+description = "Run every lesson example fixture on the current Python and the 3.9 floor, asserting the output the lesson shows"
 dir = "site"
 run = "bun scripts/check-examples.mjs"
 
