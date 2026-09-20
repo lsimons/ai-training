@@ -59,8 +59,8 @@ For a one-off check of the built site prefer `mise run site-preview` or
 ## Structure
 
 This is a *project* site served under the `/ai-training` base path (set in
-`site/astro.config.mjs`), so content links and image sources are written
-root-relative (`/guides/foo/`, `/guides/foo.png`) and a small rehype plugin in
+`site/astro.config.mjs`), so write content links and image sources
+root-relative (`/guides/foo/`, `/guides/foo.png`); a small rehype plugin in
 the config prepends the base at render time (for both `<a href>` and
 `<img src>`). Raw HTML `<a>` tags and the landing page's hero actions are used
 verbatim and must include the base path.
@@ -148,8 +148,10 @@ verbatim and must include the base path.
   YAML under `site/src/data/`, minus `site/examples/`. Only errors fail:
   misspellings and wrongly cased terms. Add real jargon or names to
   `.vale/styles/config/vocabularies/ai-training/accept.txt` (one regex per
-  line); fix typos in the text. Passive-voice and cliche warnings print but
-  never fail the build.
+  line); fix typos in the text. Cliche warnings print but never fail the
+  build. `mise run prose-extended` adds the passive-voice rule from
+  `.vale-extended.ini`; most of its hits are idiom, so run it now and then
+  and rewrite only the sentences that hide who does what.
 - `mise run links` (lychee) checks *external* URLs only. It is not part of
   `ci` because it is a network call that flakes.
 - Re-render and commit a deck's HTML/PDF whenever you change its `.qmd`.
