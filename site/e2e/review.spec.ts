@@ -72,7 +72,7 @@ test('the review page records one result per item: pass on Check, fail on Give U
 	const record = await storedRecord(page);
 	const histories = Object.entries(record.reviews ?? {})
 		.filter(([id]) => id.startsWith('concepts/'))
-		.map(([, x]) => (x as { history: string[] }).history.length);
+		.map(([, x]) => (x as { history: unknown[] }).history.length);
 	expect(histories).toEqual([1, 1]);
 
 	await page.getByRole('button', { name: 'Next item' }).click();

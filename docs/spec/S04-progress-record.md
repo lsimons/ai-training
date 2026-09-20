@@ -5,7 +5,9 @@ lives, how it is versioned, and how it moves between browsers.
 
 **Status:** In progress - the record, its storage key, lesson states, checkpoint
 states, the review map, comfort level, progress display, export, import and
-reset are implemented (2026-09-20). Deferred: goals and quizzes exist in the record
+reset are implemented (2026-09-20). Record version 2 (review `history`
+entries carry the day) and the migration from version 1 on load and on
+import are implemented (2026-09-20). Deferred: goals and quizzes exist in the record
 shape only, with no page that writes them.
 
 ## Introduction
@@ -27,14 +29,14 @@ reads when the learner exports it.
 
 ## What gets recorded
 
-| Per        | Fields                                                                             |
-| ---------- | ---------------------------------------------------------------------------------- |
-| lesson     | `state`: `read`, `finished` or `skipped`; the date it changed                      |
-| checkpoint | `state`: `passed`, `skipped` or `attempted`; the number of attempts                |
-| review     | Per checkpoint: `stage`, `due`, `last`, `history`. Written by the review schedule. |
-| habit      | Per habit: `next`, `history`. Written by the habit schedule, set in a later spec.  |
-| quiz       | Per course: score and date                                                         |
-| learner    | Chosen comfort level, chosen goals                                                 |
+| Per        | Fields                                                                                                                                                                  |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| lesson     | `state`: `read`, `finished` or `skipped`; the date it changed                                                                                                           |
+| checkpoint | `state`: `passed`, `skipped` or `attempted`; the number of attempts                                                                                                     |
+| review     | Per checkpoint: `stage`, `due`, `last`, `history`. Each `history` entry is `{ "at": <day>, "result": "pass" or "fail" }`, oldest first. Written by the review schedule. |
+| habit      | Per habit: `next`, `history`. Written by the habit schedule, set in a later spec.                                                                                       |
+| quiz       | Per course: score and date                                                                                                                                              |
+| learner    | Chosen comfort level, chosen goals                                                                                                                                      |
 
 ### Lesson states
 
@@ -87,14 +89,27 @@ which both the overall bar and the course graph import.
 ## Storage
 
 - Key: `ai-training-progress-v<N>`. Bump `N` when the meaning of a stored
-  field changes, not when content is added. A bump starts a fresh record and
-  leaves the old key in place for a manual export.
+  field changes, not when content is added. The current version is 2.
+- Migration. Each bump comes with a step that brings a record from the
+  version before it to the new one, and the steps run in a chain (1 to 2,
+  later 2 to 3) on load and on import. When nothing is stored under the
+  current key, load reads the newest older key that has a migration,
+  migrates the record and writes it under the current key. The old key is
+  left in place for a manual export. A record of a version with no
+  migration (a future one, or one older than the chain reaches) starts
+  fresh, and its key is left in place too.
+- Version 1 to 2: a review `history` entry was a bare `"pass"` or `"fail"`
+  and becomes `{ "at", "result" }`. The `at` day is worked back from the
+  item's `due` and `stage`: a pass at stage `n` was due `n`'s interval
+  later, a fail was due the next day, and a retired or never answered item
+  gives `due` itself. Every entry of one item gets that same day, because
+  version 1 kept no other date.
 - Dates are ISO calendar days in the learner's local time zone.
 - Shape:
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "comfort": "less",
   "goals": [{ "competency": "building-agents/builds-agent-loop", "level": "base" }],
   "lessons": {
@@ -108,7 +123,11 @@ which both the overall bar and the course graph import.
       "stage": 2,
       "due": "2026-09-23",
       "last": "pass",
-      "history": ["fail", "pass", "pass"]
+      "history": [
+        { "at": "2026-09-12", "result": "fail" },
+        { "at": "2026-09-13", "result": "pass" },
+        { "at": "2026-09-20", "result": "pass" }
+      ]
     }
   },
   "quizzes": {
@@ -121,8 +140,9 @@ which both the overall bar and the course graph import.
 
 - Export downloads the whole record as one JSON file, including `version`.
 - Import replaces the record with the file's contents after a confirmation.
-- A file with an older `version` is migrated when a migration exists and
-  otherwise refused with a message naming the versions.
+- A file with an older `version` is migrated through the same chain as
+  Storage describes (version 1 files migrate to 2), and a file of any other
+  version is refused with a message naming the versions.
 - Both live on one progress page, which is linked from the course page and the
   sidebar.
 
@@ -132,7 +152,7 @@ which both the overall bar and the course graph import.
 | --------------------------------- | --------------------------------------------------------------------------- |
 | A lesson or checkpoint id changes | Its entries are orphaned and dropped silently on next load; keep ids stable |
 | Content added                     | Nothing; new ids simply have no entry                                       |
-| A stored field changes meaning    | Bump `N`                                                                    |
+| A stored field changes meaning    | Bump `N` and add the migration step from `N - 1`                            |
 
 ## Related specs
 

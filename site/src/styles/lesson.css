@@ -120,6 +120,7 @@
 .schedule-item { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 1rem; align-items: center; padding: 0.6rem 0.9rem; border: 1px solid var(--sl-color-gray-5); border-radius: 6px; font-size: 0.9rem; }
 .schedule-name { grid-column: 1 / -1; font-weight: 600; text-decoration: none; color: var(--sl-color-text-accent); }
 .schedule-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.schedule-history { grid-column: 1 / -1; color: var(--sl-color-gray-3); font-size: 0.85rem; }
 .schedule-actions button { padding: 0.25rem 0.7rem; border-radius: 4px; border: 1px solid var(--sl-color-gray-4); background: var(--sl-color-bg-nav); color: var(--sl-color-text); cursor: pointer; font: inherit; font-size: 0.85rem; }
 .schedule-actions button:disabled { opacity: 0.5; cursor: default; }
 

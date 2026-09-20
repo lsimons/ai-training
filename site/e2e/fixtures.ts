@@ -6,7 +6,9 @@
  */
 import { test as base, expect, type Page } from '@playwright/test';
 
-export const STORAGE_KEY = 'ai-training-progress-v1';
+export const VERSION = 2;
+export const storageKeyFor = (version: number) => `ai-training-progress-v${version}`;
+export const STORAGE_KEY = storageKeyFor(VERSION);
 
 /** A partial progress record to seed before the first navigation. */
 export interface Seed {
@@ -19,13 +21,17 @@ export interface Seed {
 			stage: number | 'done';
 			due: string;
 			last: null | 'pass' | 'fail';
-			history: ('pass' | 'fail')[];
+			history: { at: string; result: 'pass' | 'fail' }[];
 			revision?: number;
 		}
 	>;
 }
 
-export const test = base.extend<{ errors: string[]; seed: (seed: Seed) => Promise<void> }>({
+export const test = base.extend<{
+	errors: string[];
+	seed: (seed: Seed) => Promise<void>;
+	seedRaw: (version: number, record: object) => Promise<void>;
+}>({
 	// `auto: true` runs this for every test, so no spec has to ask for it.
 	errors: [
 		async ({ page }, use) => {
@@ -44,24 +50,37 @@ export const test = base.extend<{ errors: string[]; seed: (seed: Seed) => Promis
 		},
 		{ auto: true },
 	],
-	seed: async ({ page }, use) => {
-		await use(async (seed) => {
-			const record = { version: 1, goals: [], lessons: {}, checkpoints: {}, reviews: {}, quizzes: {}, ...seed };
+	/** Store a record as it is, under the key for `version`, for tests of the migration path. */
+	seedRaw: async ({ page }, use) => {
+		await use(async (version, record) => {
 			await page.addInitScript(
 				([key, value]) => {
 					if (!localStorage.getItem(key)) localStorage.setItem(key, value);
 				},
-				[STORAGE_KEY, JSON.stringify(record)] as const,
+				[storageKeyFor(version), JSON.stringify(record)] as const,
 			);
+		});
+	},
+	seed: async ({ seedRaw }, use) => {
+		await use(async (seed) => {
+			await seedRaw(VERSION, {
+				version: VERSION,
+				goals: [],
+				lessons: {},
+				checkpoints: {},
+				reviews: {},
+				quizzes: {},
+				...seed,
+			});
 		});
 	},
 });
 
 export { expect };
 
-/** The stored progress record as the page sees it. */
-export async function storedRecord(page: Page): Promise<Record<string, Record<string, unknown>>> {
-	return page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}'), STORAGE_KEY);
+/** The stored progress record as the page sees it, under this version's key unless another is given. */
+export async function storedRecord(page: Page, key = STORAGE_KEY): Promise<Record<string, Record<string, unknown>>> {
+	return page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? '{}'), key);
 }
 
 /** Answer a choice or scenario checkpoint with its correct option and press Check. */

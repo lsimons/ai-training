@@ -100,12 +100,12 @@ A progress bar in the header counts the items in this session.
 The schedule is stored in the progress record's `reviews` map, keyed by
 checkpoint id, with the structure shown in the progress record spec.
 
-| Field     | Meaning                                                                                |
-| --------- | -------------------------------------------------------------------------------------- |
-| `stage`   | 1 to 5, or `done`                                                                      |
-| `due`     | ISO calendar day in the learner's local time zone; the item is due when `due <= today` |
-| `last`    | `pass` or `fail` (Give Up records `fail`)                                              |
-| `history` | Results, oldest first, capped at the last 20                                           |
+| Field     | Meaning                                                                                               |
+| --------- | ----------------------------------------------------------------------------------------------------- |
+| `stage`   | 1 to 5, or `done`                                                                                     |
+| `due`     | ISO calendar day in the learner's local time zone; the item is due when `due <= today`                |
+| `last`    | `pass` or `fail` (Give Up records `fail`)                                                             |
+| `history` | Answers as `{ at, result }` (the local day and `pass` or `fail`), oldest first, capped at the last 20 |
 
 - Because the schedule is inside the progress record, it moves with the
   learner by export and import, and it resets when the record resets.
@@ -119,7 +119,7 @@ checkpoint id, with the structure shown in the progress record spec.
 | ------------------------------ | ------------------------------------------------------------------------------------------------ |
 | A checkpoint's id changes      | Its review item is orphaned and dropped silently on next load, as for every progress entry       |
 | A checkpoint's answer changes  | Authors bump a `revision` field on the checkpoint; items with an older revision reset to stage 1 |
-| Progress record version bumped | All reviews reset with the rest of the record                                                    |
+| Progress record version bumped | Reviews migrate with the rest of the record (S04 "Storage"); the schedule is unchanged           |
 
 ## Related specs
 
