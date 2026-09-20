@@ -52,6 +52,8 @@ invented package names, so nothing here is a claim about a real project.
 `classify.py` diffs them and labels every change with one of three kinds.
 
 <Predict id="predict-classify" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['dependency-hygiene']}
+  context="The lesson compares two npm lockfiles with a small script that classifies each changed package as a version bump, a new direct dependency or a new transitive one, and prints them sorted by name."
   title="Predict the classification" hint="Which packages are in the root entry's dependencies and which is not? What happened to the router? The script sorts by name."
   answer={`date-fmt 2.4.0: new direct
 microroute-js 4.19.2 -> 4.21.2: version bump
@@ -130,6 +132,8 @@ came in and keeps the two that a new release can change: what the new
 code does, and whether it has a known vulnerability.
 
 <Choice id="bump-dimensions" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['dependency-hygiene', 'security-review-of-agent-output']}
+  context="The lesson reviews a new dependency on six dimensions: architecture, quality, governance and support, security, code, and license."
   title="Which dimensions for a bump?" hint="Which of the six can change between two releases of the same package?"
   options={[
     { text: 'All six. A new version is a new package.', why: 'The project, its maintainers and its place in your architecture did not change between 4.19.2 and 4.21.2. Reviewing them again is repeated work.' },
@@ -167,6 +171,8 @@ is written down and followed. A project can have many contributors and no
 open governance, if decisions happen in a room nobody can see into.
 
 <Choice id="open-governance" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['dependency-hygiene']}
+  context="The lesson defines open governance as: it is clear how the project decides what gets merged, and that process is visible to outsiders."
   title="Which project has open governance?" hint="The definition is about how decisions are made, and whether that is visible."
   options={[
     { text: 'A project with two hundred contributors, where the founder merges what they like and there is no written process.', why: 'Contributor count is a support signal. Governance is about how decisions are made, and here that is invisible.' },
@@ -194,6 +200,8 @@ sharing changes under the same terms? Does that fit your project's policy?
 A version bump gets this question only if the license changed.
 
 <Sort id="question-to-dimension" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['dependency-hygiene']}
+  context="The lesson reviews a new dependency on six dimensions, each with its own list of questions. Each question here comes from exactly one list."
   title="Which dimension asks this?" hint="Each question comes from exactly one of the six lists above."
   buckets={['Architecture', 'Quality', 'Governance and support', 'Security', 'Code', 'License']}
   items={[
@@ -242,6 +250,8 @@ directory reads a hand-written result file in that format, for an invented
 project, and prints every check that scored below 5, then a summary line.
 
 <Predict id="predict-triage" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['supply-chain-risk', 'security-review-of-agent-output']}
+  context="The lesson reads an OpenSSF Scorecard result with a script that lists every check scoring under THRESHOLD, which is 5, and then prints a summary line."
   title="Predict the summary line" hint="Count the checks in the fixture with a score under 5. A score of exactly 5 is not under 5."
   answer="5 of 10 checks below 5" run="coding-with-agents/dependency-review/triage_summary.py">
 The fixture has ten checks. `Binary-Artifacts`, `Dangerous-Workflow`,
@@ -302,6 +312,8 @@ solves a class of problems you have more of. A verdict without the reasons
 fails the next person, who can't reuse it.
 
 <Scenario id="one-function-package" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['dependency-hygiene', 'supply-chain-risk']}
+  context="An agent opened a pull request with four dependency changes, and you are writing a verdict for each change."
   title="One function, one maintainer" hint="Weigh the future cost against what the package saves you, and remember that writing it yourself is also an outcome."
   options={[
     { text: 'Accept. The tests pass and the function works.', consequence: 'The package stays. In a year an advisory names it, nobody upstream responds, and your team forks a project it never read to fix a function it could have written.' },

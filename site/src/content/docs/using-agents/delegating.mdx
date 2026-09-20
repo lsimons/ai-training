@@ -89,6 +89,8 @@ memo appears in the summary; no fact appears that's not in the memo; the
 format has exactly the parts listed.
 
 <MultiChoice id="which-criteria-tick" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['task-brief']}
+  context="The running example of the lesson is asking an agent to summarize an office-move memo for a team."
   title="Which of these can you tick?" hint="For each line ask: could two people check it and reach the same yes or no?"
   options={[
     { text: 'Every date in the memo appears in the summary.', correct: true },
@@ -138,6 +140,7 @@ wording. That's fine, because the brief fixed the structure and the facts
 rather than the wording.
 
 <Repair id="fix-the-brief" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['task-brief', 'giving-context']}
   title="Fix the brief" hint="Which of the four parts is missing, and what would the agent fill in on its own?"
   broken={`Can you make a short summary of the office move memo for the team? Keep it clear.`}
   model={`Summarize the memo below for the product team in this format: one-line title, three bullets (what is happening, what I must do, by when), one closing line naming who to ask. Use only the memo pasted below as your source. Do not add advice or leave out any deadline. Done when every deadline in the memo appears, nothing appears that is not in the memo, and the output has exactly those five parts.`}>
@@ -188,6 +191,8 @@ before doing anything else." Notice that the agent behaves differently even
 though the task didn't change.
 
 <Sort id="autonomy-levels" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy']}
+  context="Each item is a task you could hand to an agent. Place it by how much of the decision stays with you."
   title="Who decides?" hint="For each item ask two things: how bad is a wrong action, and how easily can you undo it?"
   buckets={['Human decides', 'Agent proposes, human approves', 'Agent acts, human reviews after']}
   items={[
@@ -233,6 +238,8 @@ review something to check, and the review shows what the next brief has to
 say (@Academy ai-fluency-framework-foundations).
 
 <Choice id="which-review" objective="using-agents/delegates-and-checks/reviews-against-brief"
+  concepts={['checking-results']}
+  context="The running example of the lesson is asking an agent to summarize an office-move memo for a team, with done-criteria in the brief."
   title="Which review is a review?" hint="Which of these could a second person repeat and reach the same answer?"
   options={[
     { text: 'Read it through; it sounds right and the tone is good, so accept it.', why: 'Tone and plausibility are feelings. A summary can sound right and still drop a deadline.' },

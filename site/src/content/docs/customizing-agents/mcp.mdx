@@ -154,6 +154,8 @@ holds the table above as a list of `(name, kind, description)` tuples,
 and `CANNOT` holds the five operations from the can't list.
 
 <Predict id="predict-the-inventory" objective="customizing-agents/connects-tools-safely/weighs-tool-cost"
+  concepts={['tool-cost', 'mcp-primitives']}
+  context="The lesson lists the tools of a fictional MCP server, teamdocs, in a table with a kind column, read or write, followed by a paragraph naming the operations the server cannot do. TOOLS holds the table rows and CANNOT the operations."
   title="Count the inventory" hint="Count the table rows by kind, then count the operations the paragraph after the table says the server can't do."
   answer="8 read, 7 write, 5 cannot" run="customizing-agents/mcp/inventory.py">
 
@@ -175,6 +177,8 @@ id, and a well-written server does the same for every tool whose input
 comes from another tool's output.
 
 <Sort id="mark-the-inventory" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['mcp-security', 'client']}
+  context="teamdocs is a fictional MCP server for a team wiki and task tracker. The MCP client can require a confirmation before each call of a named tool."
   title="Mark the inventory" hint="Which calls change something on the other side? Everything else can run without asking."
   buckets={['Runs without confirmation', 'Confirm before each call']}
   items={[
@@ -240,6 +244,8 @@ class WriteCap:
 ```
 
 <Predict id="predict-the-cap" objective="customizing-agents/connects-tools-safely/hardens-a-connection"
+  concepts={['mcp-security', 'server']}
+  context="WriteCap is a small proxy class from the lesson that counts write calls per user per minute and refuses those over the limit. allow() returns ok or a refused message, and reads are not counted."
   title="Predict the cap" hint="Reads don't count. Which write call is the first one over the limit, and what happens when the minute changes?"
   answer={`ok
 ok
@@ -277,6 +283,8 @@ replaces the control that would have prevented the writes.
 </Pitfall>
 
 <Scenario id="forty-edits" objective="customizing-agents/connects-tools-safely/hardens-a-connection"
+  concepts={['mcp-security', 'tool-cost']}
+  context="teamdocs is a fictional MCP server that gives an agent read and write access to a team wiki."
   title="The forty edits" hint="Which option keeps the decision with you for each change, and which options only reduce the damage after the fact?"
   options={[
     { text: 'Approve the batch. Version history covers mistakes.', consequence: 'Forty pages change in one turn. You find out which ones were wrong from colleagues over the next week, and revert them one by one.' },
@@ -340,6 +348,8 @@ server is the control, and it also tells you whether the server is well
 made.
 
 <Sort id="preventive-or-safety-net" objective="customizing-agents/connects-tools-safely/hardens-a-connection"
+  concepts={['mcp-security']}
+  context="The lesson hardens an agent connection to a wiki server. Each control either stops a bad write from happening or helps you after it has happened."
   title="Preventive or safety net?" hint="Does the control stop the action from happening, or does it help you after it has happened?"
   buckets={['Preventive control', 'Safety net']}
   items={[
@@ -395,6 +405,7 @@ description (@Academy claude-code-101).
 Treat the table as a design axis, and decide per system.
 
 <Choice id="cli-or-mcp" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['mcp-vs-cli', 'tool-cost']}
   title="Which connection?" hint="Which option gives the least privilege the task needs, and where would you read the permission policy afterwards?"
   options={[
     { text: 'Install the forge MCP server with a token that has repository write scope, so the agent can do anything the task turns out to need.', why: 'A write-scoped token grants every write the server offers, and the policy is on a settings page you don\'t see during the session.' },

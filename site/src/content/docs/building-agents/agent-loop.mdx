@@ -51,6 +51,8 @@ TOOLS = {
 Predict before you run.
 
 <Predict id="predict-tool-call" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool', 'loop-from-scratch']}
+  context="In the lesson, TOOLS is a Python dict that maps a tool name to its description and to the plain function fn that runs it. get_weather returns a fixed string per city."
   title="Predict the output" hint="The tool is a plain function. Look up Lisbon in the dict."
   answer="27°C, sun" run="building-agents/agent-loop/tool_call.py">
 
@@ -109,6 +111,8 @@ def run(question, model=fake_model, max_steps=5):
 This reuses `TOOLS` and `fake_model` from above.
 
 <Predict id="predict-loop" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['loop-from-scratch', 'agent-loop']}
+  context="In the lesson, run() is a hand-written agent loop over a scripted model: the model asks for the get_weather tool, the loop runs it and appends the result, and the model answers from that result."
   title="Predict the loop" hint="Trace two rounds: first the model asks for a tool, then it sees the tool result and answers."
   answer="It is 14°C, rain there." run="building-agents/agent-loop/loop.py">
 
@@ -152,6 +156,7 @@ it stops, and what it puts in the message list. Having written the loop
 once, you know which of those to check in the SDK's version.
 
 <Order id="order-the-loop" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['loop-from-scratch', 'agent-loop']}
   title="Order one iteration" hint="What does the loop need to know before it can decide whether to run a tool at all?"
   steps={[
     'Send the message list to the model',

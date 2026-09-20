@@ -106,6 +106,7 @@ where the instructions were misread. Set the access for the task in front
 of you, not for every task you might ever give it.
 
 <Match id="smallest-access" objective="safety/judges-agent-risk/names-blast-radius"
+  concepts={['permissions-and-least-privilege', 'blast-radius']}
   title="What is the smallest access that still does the job?" hint="For each task, what is the one thing the agent must be able to do, and what happens if it does that one thing wrong?"
   options={[
     'Draft replies that wait in the outbox',
@@ -179,6 +180,7 @@ The agent did the tedious part. It paused where the blast radius crossed
 from your inbox into other people's.
 
 <Scenario id="blast-radius-of-a-tidy-up" objective="safety/judges-agent-risk/names-blast-radius"
+  concepts={['blast-radius']}
   title="How big is the tidy-up?" hint="Ask what the agent can reach with the access it has, not what you asked it to do."
   options={[
     { text: 'The downloads folder: that is the only place I asked it to work.', consequence: 'You start it and walk away. It follows a shortcut in downloads that points at your documents folder and tidies that too.' },
@@ -236,6 +238,7 @@ the reason you need it even when you trust the agent. You may
 trust the agent. You can't trust everything the agent reads.
 
 <Predict id="predict-the-planted-instruction" objective="safety/judges-agent-risk/recognizes-injection"
+  concepts={['prompt-injection', 'exfiltration']}
   title="What will the agent do with the planted page?" hint="Which of its permissions can the planted sentence actually spend? List them before you guess.">
 You are going to check this one yourself, in a sandbox you can throw away.
 
@@ -257,6 +260,7 @@ agent's permissions actually allowed, not what it happened to do.
 </Predict>
 
 <Choice id="where-to-put-the-approval" objective="safety/judges-agent-risk/chooses-human-in-loop"
+  concepts={['human-in-the-loop']}
   title="Where must a person say yes?" hint="Which single step is both irreversible and reaches outside your own account?"
   options={[
     { text: 'Before it reads any email, since reading is where injection can start.', why: 'Reading is the step you would have to approve hundreds of times, and approving it does not stop what the agent does with what it read.' },

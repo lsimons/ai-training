@@ -41,6 +41,8 @@ approved. Sort these requests before reading on, and come back after the
 lesson to see whether you would move any of them.
 
 <Sort id="can-i-sort" objective="safety/handles-data-safely/decides-what-to-share"
+  concepts={['data-privacy', 'confidentiality']}
+  context="Each item is something you might do with a general-purpose AI assistant at work. Sort it by whether you may do it."
   title="Can I...?" hint="Whose information is it, and can it be taken back once it has been sent?"
   buckets={['Yes', 'Only with their approval', 'Never']}
   items={[
@@ -151,6 +153,7 @@ same terms as everything else and is hard to get back. Be aware whom you
 are telling.
 
 <Repair id="replace-the-secrets" objective="safety/handles-data-safely/decides-what-to-share"
+  concepts={['confidentiality', 'data-privacy']}
   title="Make the prompt safe to send" hint="Which parts of the prompt does the model need in order to help, and which parts are only there because you pasted the whole thing?"
   broken={`Our deploy script fails. Here is the config:
 DB_HOST=db.internal.example
@@ -172,6 +175,7 @@ an incident if the conversation leaked.
 </Repair>
 
 <Scenario id="web-search-on-a-sensitive-topic" objective="safety/handles-data-safely/decides-what-to-share"
+  concepts={['confidentiality']}
   title="Search or no search?" hint="How many companies see part of this prompt if search stays on, and what does each of them keep?"
   options={[
     { text: 'Ask as planned, with the customer name and the incident details, and let the assistant search.', consequence: 'The assistant sends a query naming the customer and the type of breach to a search provider. That provider keeps the query under its own terms, which you have not read.' },
@@ -220,6 +224,8 @@ retired. Without an owner the tool stays at the experimenting level, no
 matter how useful it is.
 
 <Scenario id="experiment-meets-real-data" objective="safety/handles-data-safely/decides-what-to-share"
+  concepts={['confidentiality', 'data-privacy']}
+  context="The lesson gives a checklist for trying a tool that nobody has assessed yet. Its first item: the tool only ever sees dummy, synthetic or public data, never real company or customer data."
   title="Still an experiment?" hint="Which item on the checklist stops being true the moment the recording goes in?"
   options={[
     { text: 'Go ahead. It is still a trial, and the recording is only one file.', consequence: 'The recording holds the voices, names and plans of everyone in the meeting. A tool nobody has assessed now retains all of it, under terms nobody has read.' },
@@ -281,6 +287,7 @@ to know that, and you are accountable for the result whether or not the
 tool is mentioned.
 
 <Choice id="when-to-disclose" objective="safety/handles-data-safely/discloses-ai-use"
+  concepts={['disclosure']}
   title="Who needs to know?" hint="Who is relying on the text, and what would they do differently if they knew a machine drafted it?"
   options={[
     { text: 'Nobody. The text is yours once you have edited it, and mentioning AI only invites doubt.', why: 'Editing makes you accountable for the text. It does not change what the reader expects to be told about how it was produced.' },
@@ -314,6 +321,7 @@ comments, search for a phrase from it. If it matches a source, credit it
 as the source demands or replace it.
 
 <Choice id="the-suspiciously-complete-function" objective="safety/handles-data-safely/respects-licenses"
+  concepts={['licensing-and-attribution']}
   title="The function that arrived finished" hint="What does the presence of someone else's comments tell you about where the text came from?"
   options={[
     { text: 'Use it. The tool produced it, so the tool\'s license covers it.', why: 'A tool\'s terms cover your use of the tool. They cannot grant you rights to code the model reproduced from somewhere else.' },
