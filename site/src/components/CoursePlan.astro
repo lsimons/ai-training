@@ -1,0 +1,69 @@
+---
+/**
+ * The course plan (site/src/data/courses/<area>.yaml) as one read-only table
+ * under the lesson graph, folded into a `<details>` so the graph stays first.
+ * One row per entry in plan order. The YAML comments never reach the
+ * collection, so they don't render.
+ */
+import { getCollection } from 'astro:content';
+import { afterTitles, idTail, issueUrl, objectiveCells, planSummary } from '@lib/course-plan-table';
+import { getCoursePlan, isLive } from '@lib/courses';
+import { href } from '@lib/url';
+
+interface Props {
+	area: string;
+}
+const { area } = Astro.props;
+const plan = await getCoursePlan(area);
+const competencies = (await getCollection('competencies')).flatMap((c) => c.data.competencies);
+---
+
+<details class="course-plan not-content" data-course-plan={area}>
+	<summary>{planSummary(plan)}</summary>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">Lesson</th>
+				<th scope="col">Status</th>
+				<th scope="col">Min</th>
+				<th scope="col">Covers</th>
+				<th scope="col">Serves</th>
+				<th scope="col">After</th>
+				<th scope="col">Issue</th>
+			</tr>
+		</thead>
+		<tbody>
+			{
+				plan.map((e, i) => {
+					const issue = issueUrl(e.issue);
+					return (
+						<tr data-plan-entry={e.id} data-status={e.status}>
+							<td>{i + 1}</td>
+							<td>
+								{isLive(e) ? <a href={href(`/${e.id}/`)}>{e.title}</a> : e.title}
+								<small class="course-plan-id">{e.id}</small>
+							</td>
+							<td>{e.status}</td>
+							<td>{e.minutes}</td>
+							<td>
+								<a href={href(`/topics/${e.covers}/`)} title={e.covers}>{idTail(e.covers)}</a>
+							</td>
+							<td>
+								{objectiveCells(e.serves, competencies).map((o) =>
+									o.path ? (
+										<a class="course-plan-objective" href={href(o.path)} title={o.id}>{o.tail}</a>
+									) : (
+										<span class="course-plan-objective" title={o.id}>{o.tail}</span>
+									)
+								)}
+							</td>
+							<td>{afterTitles(e.after, plan).join(', ')}</td>
+							<td>{issue && <a href={issue}>#{e.issue}</a>}</td>
+						</tr>
+					);
+				})
+			}
+		</tbody>
+	</table>
+</details>
