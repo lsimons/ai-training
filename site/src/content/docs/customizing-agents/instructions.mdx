@@ -96,6 +96,13 @@ Notice how short the output is even with every box ticked. That's the
 target. A real project's file grows over time, but it grows one line per
 lesson learned, not one paragraph per feature.
 
+Claude Code can write a first draft of the file with its `/init` command,
+from what it finds in the repository. Treat that draft as a list of
+candidates and delete every line the agent could have found itself. The
+vendor's own advice matches the exercise at the end of this lesson: start
+a project without the file and add one line each time you have to correct
+the agent (@Academy claude-code-101).
+
 ## What doesn't belong
 
 The failure mode of instruction files isn't that they're missing. It is
@@ -203,6 +210,12 @@ Resist the urge to copy the root rules into each child file so that it
 reads standalone. The agent sees both; the copy only adds a second place
 to keep in sync.
 
+Your personal preferences belong in neither file. Claude Code also reads
+a user-level `CLAUDE.md` from your home configuration directory, in every
+project and only for you. How you like a change explained or which shell
+you use goes there, so the shared file holds only what the whole team
+needs (@Academy claude-code-101).
+
 ## When instructions aren't enough
 
 An instruction is a request. The agent reads it, usually follows it, and
@@ -215,7 +228,12 @@ that runs before every shell command, inspects the command the agent is
 about to run, and exits non-zero when it matches `git push` to `main`
 means the push never happens, however far back the instruction file has
 scrolled. "Never push to `main`" in `AGENTS.md` is advised; the hook is
-enforced. A hook that runs the formatter after every edit works the same
+enforced. The message a blocking hook prints goes back to the agent, so
+it learns why the action was refused and can change course instead of
+retrying. Hooks in the project's shared settings file are committed with
+the code, so the whole team gets the same enforcement without each person
+setting it up (@Academy claude-code-101). A hook that runs the formatter
+after every edit works the same
 way for a procedure the agent often forgets. And when a rule isn't a
 prohibition but a procedure, a
 multi-step thing the agent should do the same way every time, it is

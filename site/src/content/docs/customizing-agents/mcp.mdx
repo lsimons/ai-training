@@ -33,15 +33,33 @@ plain command-line tool have been the better connection? The tool list,
 the limits, and the transcript are invented for the lesson, so take the
 reasoning from it and not the numbers.
 
-## The protocol in two paragraphs
+## The protocol in short
 
 MCP is a standard way to give an agent tools it didn't ship with. A
 *server* wraps a system and describes each tool with a name, a purpose and
 a parameter schema. The *client*, inside the agent application, connects
 to servers, passes the tool descriptions to the model, and runs the
-model's tool calls against the right server. A local server is a child
+model's tool calls against the right server. The model calls a tool from
+a server the same way it calls one built into the agent. What the
+protocol changes is who writes the tool and where it runs
+(@Academy introduction-to-model-context-protocol). A local server is a child
 process on your machine, while a remote one is reached over HTTP and
 runs code, often someone else's, with credentials you gave it.
+
+Tools are the primitive most servers offer, and the protocol defines
+others. *Resources* are data with a URI that the client reads into
+context, such as a file or a record, and the client decides when.
+*Prompts* are templates the user picks by name. *Sampling* lets a server
+ask the client's model to generate text, so the server needs no model key
+of its own. The specification asks the client to keep a person able to
+see and deny each request, because a server that samples spends your
+model budget and can steer your model
+(@Academy model-context-protocol-advanced-topics). *Roots* are
+directories the client tells a server it may work in. The specification
+asks the server to respect them, so they bound a well-behaved server and
+prove nothing about a hostile one. For the operator's questions in this
+lesson, sampling and roots are the two to check: does this server ask to
+sample, and does your client show you what it asks?
 
 That last point is where the operator's questions start. The protocol
 says how a tool is described and called. It tells a server to check
@@ -123,7 +141,12 @@ clients every tool description is sent to the model on every turn, used
 or unused, so a server with dozens of tools spends part of your context
 window before the task starts. Fifteen short descriptions are cheap. A
 server that exposes every endpoint of a large API isn't, and you pay for
-it on every message.
+it on every message. Some clients, Claude Code among them, hold the
+descriptions back and let the model search for a tool by name when it
+needs one. That lowers the per-turn cost, and it also means a tool that
+isn't in context is a tool the model has to think to look for. Disable
+the servers a project doesn't use rather than relying on that
+(@Academy claude-code-101).
 
 The complete program for this lesson is
 `site/examples/customizing-agents/mcp/ops.py` in the repository. `TOOLS`
@@ -355,6 +378,11 @@ browser the agent's shell can't open, and there is no token you may
 store, a remote server with an OAuth flow may be the only connection
 that works.
 
+When the model gets the CLI's flags wrong, a skill that documents the
+commands for the task is a cheaper fix than a server. It loads only when
+the task matches, and otherwise costs a name and a description
+(@Academy claude-code-101).
+
 | Question                     | CLI                                                     | MCP server                                                    |
 | ---------------------------- | ------------------------------------------------------- | ------------------------------------------------------------- |
 | Setup                        | Already installed and logged in for most developers     | Configure the client, authenticate, approve tools             |
@@ -387,6 +415,12 @@ small, and each one prevents a common problem.
   rather than by running a package fetcher at start-up, and configure the
   package manager to refuse releases younger than a few days, so a freshly
   published compromised version can't reach you the day it appears.
+- Scope a server to where it is needed. Claude Code scopes a server to
+  you in this project, to you in every project, or to the project itself
+  through a committed `.mcp.json` that every teammate's client reads
+  (@Academy claude-code-101). The committed list is convenient, and it is
+  also a way for one pull request to install a server on every
+  teammate's machine, so review a change to it like a dependency change.
 - List the allowed tools per server in the client configuration instead
   of allowing every tool, and run browser-driving servers in their
   isolated mode.
