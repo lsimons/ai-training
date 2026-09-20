@@ -36,6 +36,12 @@ import { Choice, MultiChoice, Match, Predict, Order, Sort, Scenario, Repair, Pit
 `assumes` may be empty for a first lesson. `extends-to` hrefs may point at
 pages that don't exist yet, and they render as plain text until they do.
 
+A lesson whose facts move (a law, a product) sets `review-by: 2027-03-20`,
+the date by which its sources must be checked again, and Starlight's
+`lastUpdated: 2026-09-20` for the day they were last checked. The page then
+shows "Sources checked on September 20, 2026. Review due by March 20, 2027."
+above the lesson body. Move both dates when you re-check the sources.
+
 ## Course plan
 
 Every lesson, written or not, has an entry in its area's plan file,

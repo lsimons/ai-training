@@ -1,0 +1,24 @@
+---
+/**
+ * The review line of a lesson that sets `review-by` (spec S03 "Frontmatter").
+ * The MarkdownContent override renders it above the lesson body. Renders
+ * nothing without a `reviewBy` date.
+ */
+import { isoDate, reviewLine } from '@lib/review-line';
+
+interface Props {
+	reviewBy?: Date | undefined;
+	lastUpdated?: Date | boolean | undefined;
+}
+
+const { reviewBy, lastUpdated } = Astro.props;
+const text = reviewLine(reviewBy, lastUpdated);
+---
+
+{
+	text && reviewBy && (
+		<p class="lesson-review not-content" data-review-by={isoDate(reviewBy)}>
+			{text}
+		</p>
+	)
+}
