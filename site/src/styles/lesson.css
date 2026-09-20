@@ -187,7 +187,7 @@
 .course-about-note { color: var(--sl-color-gray-3); margin: 0.75rem 0 0; font-size: 0.9rem; }
 
 /* ---- course plan table (components/CoursePlan.astro) ---- */
-.course-plan { margin-top: 1.5rem; font-size: 0.8rem; }
+.course-plan { margin-top: 1.5rem; font-size: 0.8rem; overflow-x: auto; }
 .course-plan > summary { cursor: pointer; font-weight: 600; color: var(--sl-color-gray-2); }
 .course-plan table { display: table; width: 100%; margin: 0.75rem 0 0; border-collapse: collapse; }
 .course-plan th, .course-plan td { padding: 0.35rem 0.4rem; border-bottom: 1px solid var(--sl-color-gray-6); text-align: left; vertical-align: top; }
