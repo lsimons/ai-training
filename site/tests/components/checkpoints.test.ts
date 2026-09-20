@@ -11,11 +11,14 @@ import Predict from '@components/lesson/Predict.astro';
 import Repair from '@components/lesson/Repair.astro';
 import Sort from '@components/lesson/Sort.astro';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
+
+// The shell checks `concepts` against the topics collection, which the fixtures in tests/lib/content.ts supply.
+vi.mock('astro:content', async () => (await import('../lib/content')).mockContent());
 
 // Only `entry.id` is read (lib/lesson-context.ts); the rest of Starlight's route data is not needed here.
 const locals = { starlightRoute: { entry: { id: 'concepts/how-models-work' } } } as unknown as App.Locals;
-const base = { id: 'cp', objective: 'o1', title: 'Title', hint: 'A hint' };
+const base = { id: 'cp', objective: 'o1', title: 'Title', hint: 'A hint', concepts: ['token'] };
 
 let container: AstroContainer;
 beforeAll(async () => {
@@ -39,6 +42,26 @@ describe('CheckpointShell (through Choice)', () => {
 			expect(html).toContain(cls);
 		}
 		expect(html).toContain('href="/ai-training/concepts/how-models-work/#cp"');
+	});
+	it('carries the concept ids, and an unknown or empty concepts list fails the build', async () => {
+		const options = [{ text: 'a', correct: true }];
+		const html = await render(Choice, { ...base, concepts: ['token', 'context-window'], options });
+		expect(html).toContain('data-concepts="token context-window"');
+		await expect(render(Choice, { ...base, concepts: ['token', 'nope'], options })).rejects.toThrow(
+			/Checkpoint "cp": unknown concept id "nope"/,
+		);
+		await expect(render(Choice, { ...base, concepts: [], options })).rejects.toThrow(/at least one concept id/);
+		await expect(render(Choice, { ...base, concepts: undefined, options })).rejects.toThrow(/must be an array/);
+	});
+	it('renders the context paragraph hidden above the stem, and nothing without one', async () => {
+		const options = [{ text: 'a', correct: true }];
+		const html = await render(
+			Choice,
+			{ ...base, context: 'The lesson shows a widget.', options },
+			{ default: 'Stem.' },
+		);
+		expect(html).toMatch(/<p class="cp-context" hidden>The lesson shows a widget\.<\/p>\s*<div class="cp-stem">Stem\./);
+		expect(await render(Choice, { ...base, options })).not.toContain('cp-context');
 	});
 	it('review={false} opts out, and a bad revision fails the build', async () => {
 		const html = await render(Choice, { ...base, review: false, options: [{ text: 'a', correct: true }] });

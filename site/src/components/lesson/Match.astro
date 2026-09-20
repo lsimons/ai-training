@@ -20,6 +20,10 @@ interface Props {
 	objective: string;
 	title: string;
 	hint: string;
+	/** S02 concept ids the checkpoint exercises, at least one (spec S03 "Checkpoints"). */
+	concepts: string[];
+	/** One paragraph that makes the item readable outside its lesson; the review page shows it. */
+	context?: string;
 	review?: boolean;
 	revision?: number;
 	options: string[];
@@ -27,7 +31,7 @@ interface Props {
 	/** Shown once every row is right. */
 	rationale: string;
 }
-const { id, objective, title, hint, review, revision, options, rows, rationale } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, options, rows, rationale } = Astro.props;
 if (rows.length < 2) throw new Error(`Match "${id}" needs at least two rows`);
 for (const r of rows) {
 	if (r.option < 0 || r.option >= options.length)
@@ -35,7 +39,7 @@ for (const r of rows) {
 }
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {review} {revision} kind="match">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} kind="match">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-match" data-rationale={rationale}>

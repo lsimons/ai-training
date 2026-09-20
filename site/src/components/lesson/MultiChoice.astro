@@ -16,18 +16,22 @@ interface Props {
 	objective: string;
 	title: string;
 	hint: string;
+	/** S02 concept ids the checkpoint exercises, at least one (spec S03 "Checkpoints"). */
+	concepts: string[];
+	/** One paragraph that makes the item readable outside its lesson; the review page shows it. */
+	context?: string;
 	review?: boolean;
 	revision?: number;
 	options: Option[];
 }
-const { id, objective, title, hint, review, revision, options } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, options } = Astro.props;
 const correct = options.filter((o) => o.correct).length;
 if (correct < 2)
 	throw new Error(`MultiChoice "${id}" needs at least two correct options, has ${correct}. Use Choice for one.`);
 if (correct === options.length) throw new Error(`MultiChoice "${id}" needs at least one wrong option`);
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {review} {revision} kind="multi-choice">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} kind="multi-choice">
 	<slot />
 	<Fragment slot="body">
 		<fieldset class="cp-options cp-multi" data-count={correct}>

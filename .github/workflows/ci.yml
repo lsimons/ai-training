@@ -109,6 +109,10 @@ jobs:
       - name: Build
         run: mise run site-build
 
+      # Reads dist/data/checkpoints.json back, so it runs after the build.
+      - name: Checkpoint export
+        run: mise run checkpoints
+
   # The browser walkthrough is its own job so a lint or unit failure above
   # reports before the browser install and the build finish here. It builds
   # the site again rather than passing dist/ around: the build is fast and

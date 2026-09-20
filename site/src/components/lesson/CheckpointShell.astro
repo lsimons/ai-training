@@ -7,6 +7,7 @@ import { type CheckpointKind, DEFAULT_REVISION, isReviewable } from '@lib/checkp
  * pills) are rendered hidden and enabled by the review page. The review
  * frequency is adjusted on the settings page, not here.
  */
+import { assertKnownConcepts, knownConceptIds } from '@lib/concepts';
 import { lessonIdOf } from '@lib/lesson-context';
 import { href } from '@lib/url';
 
@@ -15,6 +16,13 @@ interface Props {
 	objective: string;
 	title: string;
 	hint: string;
+	/** The S02 concept ids the checkpoint exercises, at least one. The build fails on an unknown id. */
+	concepts: string[];
+	/**
+	 * One plain paragraph that makes the item readable outside its lesson. Rendered hidden here
+	 * (the lesson is the context) and shown above the stem by the review page.
+	 */
+	context?: string;
 	kind: CheckpointKind;
 	/** Author opt-out from review (spec S05 "What is reviewed"). Default true. */
 	review?: boolean;
@@ -30,6 +38,8 @@ const {
 	objective,
 	title,
 	hint,
+	concepts,
+	context,
 	kind,
 	review = true,
 	revision = DEFAULT_REVISION,
@@ -38,6 +48,8 @@ const {
 } = Astro.props;
 if (!Number.isInteger(revision) || revision < 1)
 	throw new Error(`Checkpoint "${id}": revision must be a positive integer, got ${revision}`);
+if (!Array.isArray(concepts)) throw new Error(`Checkpoint "${id}": concepts must be an array of concept ids`);
+assertKnownConcepts(`Checkpoint "${id}"`, concepts, await knownConceptIds());
 const reviewable = isReviewable({ kind, review, honor });
 const lessonId = lessonIdOf(Astro);
 const progressId = `${lessonId}#${id}`;
@@ -53,12 +65,14 @@ const progressId = `${lessonId}#${id}`;
 	data-reviewable={String(reviewable)}
 	data-revision={String(revision)}
 	data-title={title}
+	data-concepts={concepts.join(' ')}
 >
 	<header class="cp-head">
 		<span class="cp-kind">Checkpoint · {kind}</span>
 		<span class="cp-state" aria-live="polite"></span>
 	</header>
 	<h3 class="cp-title">{title}</h3>
+	{context && <p class="cp-context" hidden>{context}</p>}
 	<div class="cp-stem"><slot /></div>
 	<div class="cp-body"><slot name="body" /></div>
 	<div class="cp-controls">

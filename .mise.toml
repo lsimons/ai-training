@@ -96,6 +96,16 @@ description = "Check the course plan files against the lesson pages, topics and 
 dir = "site"
 run = "bun scripts/check-courses.mjs"
 
+# The build writes the checkpoint export (spec S03 "Checkpoint export") to
+# site/dist/data/checkpoints.json from src/pages/data/checkpoints.json.ts.
+# This reads it back and checks it against the lesson pages and the topic
+# YAML, so it runs after `site-build`.
+# site/scripts/lib/checkpoints.mjs lists what it rejects in its header comment.
+[tasks.checkpoints]
+description = "Check the built checkpoints.json export against the lesson pages and the topic concepts (after site-build)"
+dir = "site"
+run = "bun scripts/check-checkpoints.mjs"
+
 [tasks.site-check]
 description = "Astro type/content check"
 dir = "site"
@@ -306,7 +316,7 @@ cspell --no-progress $files
 # `site-e2e` is last because it builds the site again and needs the browser
 # from `site-browser`; in the workflow it is its own job after the build.
 [tasks.ci]
-description = "Full CI gate: install + lint + Python lint/typecheck/test + prose + spell + examples + course plans + Astro check + Biome + unit tests + build + e2e"
+description = "Full CI gate: install + lint + Python lint/typecheck/test + prose + spell + examples + course plans + Astro check + Biome + unit tests + build + checkpoint export + e2e"
 run = [
   "mise run site-install-frozen",
   "mise run py-install-frozen",
@@ -323,6 +333,7 @@ run = [
   "mise run site-lint",
   "mise run site-test",
   "mise run site-build",
+  "mise run checkpoints",
   "mise run site-e2e",
 ]
 
