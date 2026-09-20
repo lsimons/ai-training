@@ -4,6 +4,8 @@
  * from Starlight's route locals, so each render passes a fake route.
  */
 import Choice from '@components/lesson/Choice.astro';
+import Match from '@components/lesson/Match.astro';
+import MultiChoice from '@components/lesson/MultiChoice.astro';
 import Order from '@components/lesson/Order.astro';
 import Predict from '@components/lesson/Predict.astro';
 import Repair from '@components/lesson/Repair.astro';
@@ -130,5 +132,65 @@ describe('Repair', () => {
 		expect(html).toContain('fixed</pre>');
 		expect(html).toContain('data-reviewable="false"');
 		expect(html).toContain('>Record grade</button>');
+	});
+});
+
+describe('MultiChoice and Match', () => {
+	it('MultiChoice renders checkboxes with the count of correct items, and validates its options', async () => {
+		const html = await render(MultiChoice, {
+			...base,
+			options: [
+				{ text: 'a', correct: true },
+				{ text: 'b', why: 'No.' },
+				{ text: 'c', correct: true },
+			],
+		});
+		expect(html).toContain('data-kind="multi-choice"');
+		expect(html).toContain('data-count="2"');
+		expect(html).toContain('Select exactly 2.');
+		expect(html.match(/type="checkbox"/g)).toHaveLength(3);
+		expect(html).toContain('data-reviewable="true"');
+		await expect(
+			render(MultiChoice, { ...base, options: [{ text: 'a', correct: true }, { text: 'b' }] }),
+		).rejects.toThrow(/at least two correct options/);
+		await expect(
+			render(MultiChoice, {
+				...base,
+				options: [
+					{ text: 'a', correct: true },
+					{ text: 'b', correct: true },
+				],
+			}),
+		).rejects.toThrow(/at least one wrong option/);
+	});
+	it('Match renders one select per row with the answer index and the rationale, and validates its rows', async () => {
+		const html = await render(Match, {
+			...base,
+			options: ['Drafts', 'Copy'],
+			rows: [
+				{ statement: 'Reply', option: 0, why: 'Keep the send step.' },
+				{ statement: 'Clean up', option: 1 },
+			],
+			rationale: 'Smaller is safer.',
+		});
+		expect(html).toContain('data-kind="match"');
+		expect(html).toContain('data-rationale="Smaller is safer."');
+		expect(html).toMatch(/<div class="cp-match-row" data-option="0" data-why="Keep the send step\."/);
+		expect(html.match(/<select /g)).toHaveLength(2);
+		expect(html).toContain('id="cp-row-0-fb"');
+		await expect(
+			render(Match, { ...base, options: ['a'], rows: [{ statement: 's', option: 0 }], rationale: '' }),
+		).rejects.toThrow(/at least two rows/);
+		await expect(
+			render(Match, {
+				...base,
+				options: ['a'],
+				rows: [
+					{ statement: 's', option: 0 },
+					{ statement: 't', option: 1 },
+				],
+				rationale: '',
+			}),
+		).rejects.toThrow(/points at option 1/);
 	});
 });
