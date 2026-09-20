@@ -359,7 +359,7 @@ Topics:
 | `building-agents/orchestration`    | Orchestration and multi-agent | code- vs model-driven orchestration, sequential / hierarchical / collaborative, orchestration tax                                      | patterns                                              | `AEC-07`, `AEC-18`                                 |
 | `building-agents/retrieval-memory` | Agentic retrieval and memory  | agentic RAG loop, memory storage choices, when basic RAG suffices                                                                      | agent-loop, concepts/grounding                        | `AEC-05`, `AEC-08`                                 |
 | `building-agents/evaluation`       | Evaluation and testing        | quality pillars, rubrics, metrics that can't be gamed, trajectory evaluation, LLM as judge, golden sets, error analysis, observability | agent-loop, coding-with-agents/verification           | `AEC-09`; `DLAI-11` M4; `Brilliant VER`            |
-| `building-agents/production`       | Guardrails and production     | defense layers, eval-gated deploys, rollout strategies, cost, API operations, agent-specific security risks, protocols (MCP, A2A)      | evaluation, safety/governance, customizing-agents/mcp | `AEC-10`, `AEC-11`, `AEC-14`; `Brilliant SEC`      |
+| `building-agents/production`       | Guardrails and production     | defense layers, eval-gated deploys, rollout strategies, cost, provider operations, agent-specific security risks, protocols (MCP, A2A) | evaluation, safety/governance, customizing-agents/mcp | `AEC-10`, `AEC-11`, `AEC-14`; `Brilliant SEC`      |
 
 Competencies:
 
