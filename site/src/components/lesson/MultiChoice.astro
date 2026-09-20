@@ -22,7 +22,8 @@ interface Props {
 }
 const { id, objective, title, hint, review, revision, options } = Astro.props;
 const correct = options.filter((o) => o.correct).length;
-if (correct < 2) throw new Error(`MultiChoice "${id}" needs at least two correct options, has ${correct}. Use Choice for one.`);
+if (correct < 2)
+	throw new Error(`MultiChoice "${id}" needs at least two correct options, has ${correct}. Use Choice for one.`);
 if (correct === options.length) throw new Error(`MultiChoice "${id}" needs at least one wrong option`);
 ---
 

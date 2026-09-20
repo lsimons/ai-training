@@ -30,7 +30,8 @@ interface Props {
 const { id, objective, title, hint, review, revision, options, rows, rationale } = Astro.props;
 if (rows.length < 2) throw new Error(`Match "${id}" needs at least two rows`);
 for (const r of rows) {
-	if (r.option < 0 || r.option >= options.length) throw new Error(`Match "${id}": row "${r.statement}" points at option ${r.option}`);
+	if (r.option < 0 || r.option >= options.length)
+		throw new Error(`Match "${id}": row "${r.statement}" points at option ${r.option}`);
 }
 ---
 
