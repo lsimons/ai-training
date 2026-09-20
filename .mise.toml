@@ -169,7 +169,8 @@ run = "vale sync"
 # keys included). Going through `git ls-files` is what excludes site/dist,
 # node_modules and the synced style package without a second ignore list.
 # site/examples is left out: the fixture repos there are test inputs, not
-# prose.
+# prose. docs/prose/reports quotes flagged sentences on purpose and would
+# flag again. CLAUDE.md is a symlink to AGENTS.md and would count twice.
 #
 # Two passes. Vale's exit code covers everything at or above
 # MinAlertLevel, with no way to print a class of finding without failing on
@@ -180,7 +181,7 @@ run = "vale sync"
 description = "Vale prose lint over Markdown, MDX and the site data YAML. Errors gate; warnings advise."
 run = """
 set -e
-files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**')
+files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md')
 # shellcheck disable=SC2086
 vale --no-exit $files
 # shellcheck disable=SC2086
@@ -194,10 +195,17 @@ vale --minAlertLevel=error $files
 description = "Vale prose lint with the extended (passive-voice) rules; advisory only"
 run = """
 set -e
-files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**')
+files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md')
 # shellcheck disable=SC2086
 vale --no-exit --config .vale-extended.ini $files
 """
+
+# Evaluate a Vale style package before deciding, rule by rule, where it
+# goes (.vale.ini, .vale-extended.ini or off). Every hit as JSON plus word
+# counts per area, into docs/prose/reports/<package>/. See docs/prose/README.md.
+[tasks.prose-eval]
+description = "Collect every hit of a Vale package for review: mise run prose-eval -- <package>"
+run = "scripts/prose-eval.sh"
 
 # Sequential rather than `depends`, which mise runs in parallel:
 # `site-check` and `site-build` both write `site/.astro`. The workflow runs
