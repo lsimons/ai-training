@@ -169,7 +169,7 @@ patterns below after the fact. Write so that it has nothing to say.
 
 ## Process
 
-- Git remote is GitHub, `lsimons/ai-training` (private for now); use `gh`.
+- Git remote is GitHub, `lsimons/ai-training` (private for now). Use `gh`.
 - Issues and triage labels: `docs/agents/issue-tracker.md`.
 - Tutor mode: `.claude/skills/tutor/SKILL.md`. Run the site locally and
   invoke `/tutor`.
