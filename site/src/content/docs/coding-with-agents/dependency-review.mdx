@@ -21,26 +21,28 @@ extends-to:
 import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
 
 An agent spent an afternoon on a feature and the pull request is green.
-Somewhere in the diff the lockfile grew by a few hundred lines, because
-the agent added a package for date formatting, one for routing, and two it
-never mentioned, which arrived as dependencies of the first two. The tests
-pass. In this lesson we decide what to do with those four packages. We
-work out which questions each one gets and how much time it deserves, and
-we end with a written verdict that the next person can reuse.
+Somewhere in the diff the lockfile grew, because the agent added a package
+for date formatting and a forty-line one for zero-padding numbers, the
+first of which brought in a third it never mentioned, and it bumped the
+router the project already used. The tests pass. In this lesson we decide what to do
+with those four changes. We work out which questions each one gets and how
+much time it deserves, and we end with a written verdict that the next
+person can reuse.
 
 The method here follows the public review guideline for external code
-that the Fuchsia project publishes, extended with governance, security
-and license questions. The Fuchsia guideline covers a large codebase with
-many reviewers. Yours covers one pull request, and the agent that wrote it
-adds another package tomorrow if you let it.
+that the Fuchsia project publishes. It adds a separate governance
+dimension and uses the OpenSSF Scorecard checks as the security step. The
+Fuchsia guideline covers a large codebase with many reviewers. Yours
+covers one pull request, and the agent that wrote it adds another package
+tomorrow if you let it.
 
 ## The lockfile knows what changed
 
-Start from the lockfile, not from the agent's summary. The summary says
-"added `date-fmt` for the due dates". The lockfile says what was
-installed. In npm, `package-lock.json` describes the exact tree that was
-installed so that the next install produces the same tree, and its root
-entry lists the direct dependencies. Everything else under `node_modules/`
+Start from the lockfile. The summary says "added `date-fmt` for the due
+dates", and the lockfile says what was installed. In npm,
+`package-lock.json` describes the exact tree that was installed so that
+the next install produces the same tree, and its root entry lists the
+direct dependencies. Everything else under `node_modules/`
 is transitive: a package your code never imports, pulled in by one that
 it does.
 
@@ -50,14 +52,16 @@ invented package names, so nothing here is a claim about a real project.
 `classify.py` diffs them and labels every change with one of three kinds.
 
 <Predict id="predict-classify" objective="coding-with-agents/verifies-agent-work/screens-for-security"
-  title="Predict the classification" hint="Which package is in the root entry's dependencies and which is not? What happened to tiny-router?"
+  title="Predict the classification" hint="Which packages are in the root entry's dependencies and which is not? What happened to the router? The script sorts by name."
   answer={`date-fmt 2.4.0: new direct
-iso-week 1.0.3: new transitive
-tiny-router 4.19.2 -> 4.21.2: version bump`} run="coding-with-agents/dependency-review/classify.py">
-The root entry of `package-lock.after.json` lists `date-fmt` and
-`tiny-router`. `iso-week` appears only as a dependency of `date-fmt`, and
-`tiny-router` moved from 4.19.2 to 4.21.2. What does the script print? Type
-all three lines in the format `name version: kind`.
+microroute-js 4.19.2 -> 4.21.2: version bump
+week-of-year-iso 1.0.3: new transitive
+zero-pad-left-lite 0.2.1: new direct`} run="coding-with-agents/dependency-review/classify.py">
+The root entry of `package-lock.after.json` lists `date-fmt`,
+`microroute-js` and `zero-pad-left-lite`. `week-of-year-iso` appears only
+as a dependency of `date-fmt`, and `microroute-js` moved from 4.19.2 to
+4.21.2. What does the script print? Type all four lines in the format
+`name version: kind`.
 
 ```python
 for name, version, kind in classify(before, after):
@@ -111,9 +115,9 @@ subset.
 | Version bump              | no           | no      | no                     | yes      | yes  | if license changed |
 
 Architecture applies only to a direct dependency, because that's the one
-you chose. You can't answer whether `iso-week` fits your architecture, and
-the question you can answer is whether you accept `date-fmt` with
-`iso-week` attached.
+you chose. You can't answer whether `week-of-year-iso` fits your
+architecture, and the question you can answer is whether you accept
+`date-fmt` with `week-of-year-iso` attached.
 A version bump skips the questions that were answered when the package
 came in and keeps the two that a new release can change: what the new
 code does, and whether it has a known vulnerability.
@@ -126,7 +130,7 @@ code does, and whether it has a known vulnerability.
     { text: 'None. The agent bumped it to fix a vulnerability, so it is an improvement.', why: 'A fix is the reason for the bump, and the reason is not the review. Read what else changed between the two versions.' },
     { text: 'Architecture only, because the version constraint in the manifest is an architecture decision.', why: 'The constraint did not change. The installed code did.' },
   ]}>
-The agent bumped `tiny-router` from 4.19.2 to 4.21.2 while it was working
+The agent bumped `microroute-js` from 4.19.2 to 4.21.2 while it was working
 on something else. Which dimensions do you review?
 </Choice>
 
@@ -220,7 +224,7 @@ documentation before you quote a name in a review.
 | `Maintained`             | Has there been commit or issue activity in the last 90 days, and is the repo not archived? |
 | `Binary-Artifacts`       | Does the source repository contain executable binaries nobody can review?                 |
 | `Branch-Protection`      | Are the default and release branches protected?                                           |
-| `Dangerous-Workflow`     | Do the CI workflows contain patterns that let a pull request run untrusted code?          |
+| `Dangerous-Workflow`     | Do the CI workflows contain dangerous patterns, such as checking out untrusted pull-request code or passing untrusted input to a script? |
 | `Code-Review`            | Is human review required before a change is merged?                                       |
 | `Token-Permissions`      | Do workflow tokens follow least privilege?                                                |
 | `Signed-Releases`        | Are release artifacts cryptographically signed, or published with provenance?             |
@@ -268,8 +272,8 @@ Skip everything on this list, and write in the review that you skipped it:
   works.
 
 Skipping is a decision, and it is recorded. "Skipped the Windows path
-handling, we build for Linux only" is a line the next reviewer can trust.
-Silence about it is not.
+handling, we build for Linux only" is a line the next reviewer can trust,
+and silence about it is not.
 
 <Pitfall title="Reading the whole package">
 A reviewer opened the `date-fmt` repository, started at the top of
@@ -277,15 +281,15 @@ A reviewer opened the `date-fmt` repository, started at the top of
 and the test suite for time zones, and had run out of time before reaching
 `format()`, the one function the code calls. The rule: start from the
 function your code calls, follow it as far as your critical path goes,
-and skip the rest on purpose. A review that reads everything reviews
-nothing well.
+and skip the rest on purpose. A reviewer who reads everything doesn't
+reach the part that matters.
 </Pitfall>
 
 ## Writing the verdict
 
 The output of the review is a verdict with reasons: accept, accept with
-conditions, or reject and write it ourselves. "No default outcome" cuts
-both ways here. Rejecting a small package and writing the eleven lines
+conditions, or reject and write it ourselves. "No default outcome"
+applies to both outcomes here. Rejecting a small package and writing the eleven lines
 yourself is a fine outcome, and so is accepting a large one because it
 solves a class of problems you have more of. A verdict without the reasons
 fails the next person, who can't reuse it.
@@ -296,11 +300,12 @@ fails the next person, who can't reuse it.
     { text: 'Accept. The tests pass and the function works.', consequence: 'The package stays. In a year an advisory names it, nobody upstream responds, and your team forks a project it never read to fix a function it could have written.' },
     { text: 'Reject, and ask the agent to replace the import with the same function written in your codebase, with a test.', correct: true, consequence: 'The agent writes fifteen lines and a test. The lockfile shrinks by one entry, and the verdict says why, so the next agent that reaches for the package finds the reason.' },
     { text: 'Accept with a condition: pin the exact version so nothing changes without a review.', consequence: 'Pinning stops surprise upgrades and does nothing about the unmaintained code you now own. The advisory still arrives, and the pin means you cannot take a fix either.' },
-    { text: 'Reject the whole pull request until the agent removes every dependency it added.', consequence: 'The feature stalls. Three of the four packages had good answers on every dimension and the rejection throws that review away.' },
+    { text: 'Reject the whole pull request until the agent removes every dependency it added.', consequence: 'The feature stalls. The other three changes had good answers on every dimension and the rejection throws that review away.' },
   ]}>
-Of the four packages, one is small: about forty lines, one maintainer, no
-tests, last commit three years ago, `Maintained` at 0. The agent imported
-it for one function, which pads a number with leading zeros. The function
+Of the four changes, one is a small package, `zero-pad-left-lite`: about
+forty lines, one maintainer, no tests, last commit three years ago,
+`Maintained` at 0. The agent imported it for one function, which pads a
+number with leading zeros. The function
 works. What's your verdict?
 </Scenario>
 
@@ -321,7 +326,7 @@ risk of installing a compromised or defective package before anyone has
 noticed. A project that waits a day before installing a new version gets
 the benefit of everyone else's attention during that day.
 
-Giving back is the last principle, and the one reviewers skip most. If you
+Giving back is the last principle, and the easiest one to skip. If you
 read the critical path and found a real bug, file it upstream. If you
 found nothing, share your written assessment anyway, in the repository or
 with the project, because it saves the next reviewer the same hour.

@@ -4,6 +4,9 @@ The lockfiles are hand-written fixtures in the shape npm writes
 (lockfileVersion 3): the root entry "" lists the direct dependencies, and
 every installed package has a "node_modules/<name>" entry with a version.
 A change is one of three kinds, and each kind gets a different review.
+Removed packages are out of scope for the lesson and are not reported.
+Only the root entry's "dependencies" count as direct, so a devDependency
+would be labeled transitive here; the fixture has none.
 
 Standard library only, Python 3.9 or later.
 """
