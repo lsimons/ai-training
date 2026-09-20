@@ -102,12 +102,14 @@ The layout is what the tree shows. The parts that aren't obvious from it:
   (Apache-2.0) and Diátaxis (CC BY-SA) content may be adapted with
   attribution and an entry in `NOTICE.md`. CS50 (CC BY-NC-SA) may be cited
   and its ideas used, but its text may not be adapted (verbatim inclusion
-  only, marked per page). Anthropic Academy and DeepLearning.AI material
-  may only be linked or used as inspiration, never copied. Learn Prompting
-  supplies vocabulary only, and prompting concepts are written from the
-  papers. The Schuberg Philis AI wiki supplied ideas only, rewritten, and
-  none of its text. Prefer public `academy.claude.com` URLs when linking
-  Anthropic courses.
+  only, marked per page). Claude Academy (`academy.claude.com`, cited as
+  `Academy <slug>`) may be linked, and its concepts and ideas may be
+  paraphrased in our own words, but no text, quiz question, image or other
+  data is copied from it. DeepLearning.AI material may only be linked or
+  used as inspiration, never copied. Learn Prompting supplies vocabulary
+  only, and prompting concepts are written from the papers. The Schuberg
+  Philis AI wiki supplied ideas only, rewritten, and none of its text. Link
+  Anthropic courses at their public `academy.claude.com` URL.
 - Interactive widgets in lesson pages must sit in `class="not-content"`
   containers. Never emit a literal `</script>` or `</pre>` inside widget JS
   strings. It breaks mdformat and the renderer.

@@ -53,4 +53,4 @@ links:
   prerequisites: [customizing-agents/instructions, safety/agent-risk]
   related: []
   specializations: []
-sources: []
+sources: [Academy claude-code-101, Academy claude-code-in-action, Academy introduction-to-subagents, Academy ai-native-sdlc-playbook]

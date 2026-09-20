@@ -56,4 +56,4 @@ links:
   prerequisites: [concepts/what-is-an-agent]
   related: []
   specializations: []
-sources: [AEC-03]
+sources: [AEC-03, Academy claude-platform-101, Academy building-with-the-claude-api, Academy introduction-to-model-context-protocol]

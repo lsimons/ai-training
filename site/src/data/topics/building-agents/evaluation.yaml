@@ -81,4 +81,4 @@ links:
   prerequisites: [building-agents/agent-loop, coding-with-agents/verification]
   related: []
   specializations: []
-sources: [AEC-09, DLAI-11, Brilliant VER]
+sources: [AEC-09, DLAI-11, Brilliant VER, Academy building-with-the-claude-api, Academy ai-native-sdlc-playbook]

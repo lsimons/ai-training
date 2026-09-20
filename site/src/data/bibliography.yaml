@@ -1,7 +1,9 @@
 # Source material keyed as in docs/spec/S02-topic-map.md "Source material".
 # type is per spec S01 "Source" (book, course, reference or video). url is a
 # public URL only where the licensing rules in AGENTS.md allow a link to the
-# source (agent-engineer-course, DeepLearning.AI, CS50, Diátaxis); otherwise null.
+# source (agent-engineer-course, DeepLearning.AI, Claude Academy, CS50,
+# Diátaxis, Fuchsia, OpenSSF); otherwise null. Academy keys are
+# `Academy <slug>`, one per cited course, and link to the public course page.
 AEC-01:
   type: course
   title: "What are AI agents: model versus agent, autonomy levels, when a prompt suffices"
@@ -191,6 +193,118 @@ DLAI-11:
   author: DeepLearning.AI
   license: Proprietary
   url: https://www.deeplearning.ai/courses/agentic-ai/
+Academy ai-capabilities-and-limitations:
+  type: course
+  title: AI capabilities and limitations
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/ai-capabilities-and-limitations
+Academy ai-fluency-framework-foundations:
+  type: course
+  title: "AI Fluency: Framework and foundations"
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/ai-fluency-framework-foundations
+Academy ai-fluency-for-builders:
+  type: course
+  title: AI Fluency for builders
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/ai-fluency-for-builders
+Academy claude-101:
+  type: course
+  title: Claude 101
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/claude-101
+Academy introduction-to-claude-cowork:
+  type: course
+  title: Introduction to Claude Cowork
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/introduction-to-claude-cowork
+Academy building-effective-human-agent-teams:
+  type: course
+  title: Building effective human-agent teams
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/building-effective-human-agent-teams
+Academy deploying-claude-enterprise-with-confidence:
+  type: course
+  title: Deploying Claude Enterprise with confidence
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/deploying-claude-enterprise-with-confidence
+Academy claude-code-101:
+  type: course
+  title: Claude Code 101
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/claude-code-101
+Academy claude-code-in-action:
+  type: course
+  title: Claude Code in action
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/claude-code-in-action
+Academy ai-native-sdlc-playbook:
+  type: course
+  title: The AI-native SDLC playbook
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/ai-native-sdlc-playbook
+Academy introduction-to-agent-skills:
+  type: course
+  title: Introduction to agent skills
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/introduction-to-agent-skills
+Academy introduction-to-subagents:
+  type: course
+  title: Introduction to subagents
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/introduction-to-subagents
+Academy introduction-to-model-context-protocol:
+  type: course
+  title: Introduction to Model Context Protocol
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/introduction-to-model-context-protocol
+Academy model-context-protocol-advanced-topics:
+  type: course
+  title: "Model Context Protocol: Advanced topics"
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/model-context-protocol-advanced-topics
+Academy claude-platform-101:
+  type: course
+  title: Claude Platform 101
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/claude-platform-101
+Academy building-with-the-claude-api:
+  type: course
+  title: Building with the Claude API
+  container: Claude Academy
+  author: Anthropic
+  license: Proprietary
+  url: https://academy.claude.com/courses/building-with-the-claude-api
 CS50:
   type: course
   title: Harvard CS50 and its AI tutor

@@ -55,4 +55,4 @@ links:
   prerequisites: [building-agents/agent-loop]
   related: []
   specializations: []
-sources: [AEC-04, AEC-06, DLAI-11]
+sources: [AEC-04, AEC-06, DLAI-11, Academy building-with-the-claude-api]

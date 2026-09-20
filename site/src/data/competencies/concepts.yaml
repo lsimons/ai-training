@@ -134,7 +134,7 @@ competencies:
         level: base
         behaviors:
           - claim: "The learner describes the loop as: the agent observes (reads a result), thinks (decides the next step), acts (calls a tool), and repeats until it decides it is done."
-            why: Naming the loop makes the agent's behavior predictable and points at where a step can go wrong.
+            why: Naming the loop makes the agent's behavior predictable and points at where a step can go wrong (@Academy claude-platform-101).
             example: Watching a coding agent, the learner narrates "it ran the tests, read the failure, and now it is editing the file".
           - claim: The learner can name which tools were used in a given run and what each observation was.
             why: A tool call is where the agent touches the world, so the tool list is the list of things that can have side effects.

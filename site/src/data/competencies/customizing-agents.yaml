@@ -15,7 +15,7 @@ competencies:
             why: Vague guidance such as "write clean code" gives the agent nothing to check itself against.
             example: "\"Run `mise run ci` before reporting done; it must exit 0\" replaces \"make sure everything works\"."
           - claim: The learner removes an instruction when the mistake stops recurring or when a hook or a check now enforces it.
-            why: A project file that only grows gets skimmed, and the rules that still matter get lost in it.
+            why: A project file that only grows gets skimmed, and the rules that still matter get lost in it (@Academy claude-code-in-action).
             example: Once a pre-commit hook rejects unformatted files, the learner deletes the "always run the formatter" line from the instructions.
       - id: customizing-agents/configures-agent/sets-permissions
         statement: Sets permissions to the least the work needs
@@ -35,7 +35,7 @@ competencies:
         level: base
         behaviors:
           - claim: The learner reaches for a hook when a rule must hold every time, and for an instruction when it is guidance.
-            why: An instruction is read and sometimes ignored, but a hook runs whether or not the model remembered.
+            why: An instruction is read and sometimes ignored, but a hook runs whether or not the model remembered (@Academy claude-code-in-action).
             example: "\"Run the formatter before committing\" becomes a pre-commit hook after the third unformatted commit."
           - claim: A hook fails loudly and says what to do, and it runs fast enough that nobody disables it.
             why: A silent hook is a mystery to the agent and a slow hook is a hook someone turns off.
@@ -99,7 +99,7 @@ competencies:
         level: base
         behaviors:
           - claim: The skill's front matter says in one or two lines what it is for, so the agent can decide whether to load it without reading it.
-            why: Every skill's description is in context on every turn, and a long one is paid for on every turn.
+            why: Every skill's description is in context on every turn, and a long one is paid for on every turn (@Academy introduction-to-agent-skills).
             example: The description is "Cut and publish a release of this package" and nothing more.
           - claim: The main skill file holds the common path, and rare cases, long references and templates go into files the skill points to.
             why: A skill that loads everything up front costs the context of the rare case on every run.
