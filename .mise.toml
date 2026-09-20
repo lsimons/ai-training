@@ -209,6 +209,10 @@ vale --no-exit --config .vale-extended.ini $files
 description = "Collect every hit of a Vale package for review: mise run prose-eval -- <package>"
 run = "scripts/prose-eval.py"
 
+[tasks.prose-metrics]
+description = "Score every file on a Vale metric package (Readability) for docs/prose/reports"
+run = "scripts/prose-metrics.py"
+
 # Spell check in American English over the same files as `prose`. cspell's
 # en-US dictionary is separate from en-GB, so British spellings fail. Names
 # and jargon go in cspell-words.txt; inline code spans are skipped.
