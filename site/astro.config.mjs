@@ -80,7 +80,9 @@ function loadTopics() {
 				// The sidebar groups by `area`; a topic filed under another
 				// area's directory would silently drop out of it.
 				if (topic.area !== area) {
-					throw new Error(`src/data/topics/${area}/${f}: area is "${topic.area}" but the file is in the ${area} directory`);
+					throw new Error(
+						`src/data/topics/${area}/${f}: area is "${topic.area}" but the file is in the ${area} directory`,
+					);
 				}
 				return topic;
 			})
@@ -113,7 +115,10 @@ export default defineConfig({
 		// appends is never scanned for terms. Both emit root-relative or
 		// in-page links, so they run before rehypeBaseLinks, which adds the
 		// deploy base.
-		remarkPlugins: [[remarkTerms, { topics }], [remarkCitations, { bibliography }]],
+		remarkPlugins: [
+			[remarkTerms, { topics }],
+			[remarkCitations, { bibliography }],
+		],
 		rehypePlugins: [rehypeBaseLinks],
 	},
 	// The Quarto slide deck is a static file at /presentations/example.html.

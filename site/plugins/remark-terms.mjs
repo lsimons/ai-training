@@ -52,9 +52,11 @@ export function remarkTerms({ topics }) {
 		walkText(tree, {
 			onNode: (node) => {
 				if (node.type !== 'link' || typeof node.url !== 'string') return;
-				const m = GLOSSARY_LINK.exec(node.url);
-				if (m && !conceptIds.has(m[1])) {
-					throw new Error(`${file.path}: link to unknown glossary anchor "${node.url}". No concept has the id "${m[1]}".`);
+				const id = GLOSSARY_LINK.exec(node.url)?.[1];
+				if (id && !conceptIds.has(id)) {
+					throw new Error(
+						`${file.path}: link to unknown glossary anchor "${node.url}". No concept has the id "${id}".`,
+					);
 				}
 			},
 			onText: (node) => (pending.length > 0 ? markTerms(node, pending) : [node]),
@@ -73,18 +75,19 @@ function markTerms(node, pending) {
 	const out = [];
 	let rest = node.value;
 	while (pending.length > 0 && rest.length > 0) {
-		/** @type {{ index: number, length: number, i: number } | null} */
+		/** @type {{ index: number, length: number, concept: (typeof pending)[number] } | null} */
 		let best = null;
-		for (let i = 0; i < pending.length; i++) {
-			const m = pending[i].pattern.exec(rest);
+		for (const concept of pending) {
+			const m = concept.pattern.exec(rest);
 			if (!m) continue;
 			const index = /** @type {number} */ (m.index);
 			if (!best || index < best.index || (index === best.index && m[0].length > best.length)) {
-				best = { index, length: m[0].length, i };
+				best = { index, length: m[0].length, concept };
 			}
 		}
 		if (!best) break;
-		const [concept] = pending.splice(best.i, 1);
+		const { concept } = best;
+		pending.splice(pending.indexOf(concept), 1);
 		if (best.index > 0) out.push({ type: 'text', value: rest.slice(0, best.index) });
 		out.push({
 			type: 'link',
