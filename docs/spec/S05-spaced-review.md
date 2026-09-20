@@ -52,6 +52,7 @@ Five stages, shown to the learner as five pills.
 | Event                 | Effect                                                                                                             |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Lesson finished       | Each of its checkpoints enters at stage 1, due one day later                                                       |
+| Skills check pass     | That checkpoint enters now, by the same rule; finishing the lesson later leaves it alone (S04 "Skills check")      |
 | Pass                  | Item moves up one stage. Passing stage 5 retires the item (`done`) and keeps it visible in the learner's reference |
 | Fail or Give Up       | Item drops to stage 1, due tomorrow                                                                                |
 | "See this sooner"     | Item drops one stage                                                                                               |

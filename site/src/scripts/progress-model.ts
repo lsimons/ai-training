@@ -352,17 +352,27 @@ export function applyLessonFinished(
 	day: string,
 ): void {
 	r.lessons[lessonId] = { state: 'finished', at: day };
-	for (const cp of reviewable) {
-		if (r.reviews[cp.id]) continue;
-		const stage = initialStage(r.comfort);
-		r.reviews[cp.id] = {
-			stage,
-			due: initialDue(r.comfort, stage, day),
-			last: null,
-			history: [],
-			revision: cp.revision,
-		};
-	}
+	for (const cp of reviewable) scheduleReview(r, cp, day);
+}
+
+/**
+ * Create the review item for one checkpoint on `day` at the comfort level's
+ * initial stage. An item that exists already keeps its schedule. Returns
+ * whether an item was created. Called by `applyLessonFinished` for every
+ * reviewable checkpoint, and by the skills check for a passed one (spec S04
+ * "Skills check").
+ */
+export function scheduleReview(r: ProgressRecord, cp: ReviewableCheckpoint, day: string): boolean {
+	if (r.reviews[cp.id]) return false;
+	const stage = initialStage(r.comfort);
+	r.reviews[cp.id] = {
+		stage,
+		due: initialDue(r.comfort, stage, day),
+		last: null,
+		history: [],
+		revision: cp.revision,
+	};
+	return true;
 }
 
 /** A Check press: counts an attempt; a pass sticks, a fail never overrides an earlier pass. */

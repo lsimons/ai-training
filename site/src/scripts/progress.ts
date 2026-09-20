@@ -157,6 +157,17 @@ export function finishLesson(lessonId: string, reviewable: ReviewableCheckpoint[
 	update((r) => model.applyLessonFinished(r, lessonId, reviewable, model.today()));
 }
 
+/**
+ * A skills check pass creates the checkpoint's review item now instead of at
+ * lesson finish (spec S04 "Skills check"). Saves only when an item was created.
+ */
+export function scheduleReview(cp: ReviewableCheckpoint): boolean {
+	const r = load();
+	const created = model.scheduleReview(r, cp, model.today());
+	if (created) save(r);
+	return created;
+}
+
 export function recordCheckpoint(id: string, passed: boolean): model.CheckpointEntry {
 	let entry: model.CheckpointEntry | undefined;
 	update((r) => {

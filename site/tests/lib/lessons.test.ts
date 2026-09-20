@@ -25,20 +25,22 @@ describe('getLessons', () => {
 });
 
 describe('checkpointsOf', () => {
-	it('reads every checkpoint tag with its kind, title, revision and reviewability', () => {
+	it('reads every checkpoint tag with its objective, kind, title, revision and reviewability', () => {
+		const o1 = { objective: 'o1' };
 		expect(checkpointsOf(lesson('concepts/how-models-work'))).toEqual([
-			{ id: 'what-the-model-does', title: 'What the model does', kind: 'choice', revision: 1, reviewable: true },
-			{ id: 'honor', title: 'Run it', kind: 'predict', revision: 1, reviewable: false },
-			{ id: 'graded', title: 'Graded', kind: 'predict', revision: 2, reviewable: true },
-			{ id: 'fix', title: 'Fix', kind: 'repair', revision: 1, reviewable: false },
-			{ id: 'opt-out', title: 'Order', kind: 'order', revision: 1, reviewable: false },
+			{ id: 'what-the-model-does', ...o1, title: 'What the model does', kind: 'choice', revision: 1, reviewable: true },
+			{ id: 'honor', ...o1, title: 'Run it', kind: 'predict', revision: 1, reviewable: false },
+			{ id: 'graded', ...o1, title: 'Graded', kind: 'predict', revision: 2, reviewable: true },
+			{ id: 'fix', ...o1, title: 'Fix', kind: 'repair', revision: 1, reviewable: false },
+			{ id: 'opt-out', ...o1, title: 'Order', kind: 'order', revision: 1, reviewable: false },
 		]);
 		expect(checkpointsOf(lesson('safety/agent-risk'))[0]?.kind).toBe('scenario');
 		expect(checkpointsOf(lesson('safety/deeper'))).toEqual([]);
 	});
-	it('falls back to the id as title and handles a missing body', () => {
+	it('falls back to the id as title, an empty objective, and handles a missing body', () => {
 		const l = asLesson({ id: 'x/y', data: { title: 'X' }, body: '<Choice id="only-id" options={[]}>' });
 		expect(checkpointsOf(l)[0]?.title).toBe('only-id');
+		expect(checkpointsOf(l)[0]?.objective).toBe('');
 		expect(checkpointsOf(asLesson({ id: 'x/y', data: { title: 'X' } }))).toEqual([]);
 	});
 	it('rejects a tag without an id, a bad review value, a bad revision and an unterminated tag', () => {

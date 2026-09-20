@@ -135,6 +135,15 @@ describe('wrappers write through storage', () => {
 		expect(stored().lessons['a/x'].state).toBe('finished');
 		expect(stored().reviews['a/x#c'].stage).toBe(1);
 	});
+	it('scheduleReview saves only when it creates an item', () => {
+		const listener = vi.fn();
+		document.addEventListener(progress.EVENT, listener);
+		expect(progress.scheduleReview({ id: 'a/x#c', revision: 1 })).toBe(true);
+		expect(stored().reviews['a/x#c'].stage).toBe(1);
+		expect(progress.scheduleReview({ id: 'a/x#c', revision: 1 })).toBe(false);
+		expect(listener).toHaveBeenCalledTimes(1);
+		document.removeEventListener(progress.EVENT, listener);
+	});
 	it('checkpoint results and skips', () => {
 		expect(progress.recordCheckpoint('a/x#c', false)).toEqual({ state: 'attempted', attempts: 1 });
 		expect(progress.recordCheckpoint('a/x#c', true)).toEqual({ state: 'passed', attempts: 2 });

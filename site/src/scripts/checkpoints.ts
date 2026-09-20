@@ -236,7 +236,8 @@ const binders: Record<CheckpointKind, (el: HTMLElement) => Grader> = {
 	repair: bindRepair,
 };
 
-function drawState(el: HTMLElement) {
+/** Redraw the state label and `data-state` from the record. Exported so the skills check can refresh the lesson's copy of a checkpoint it answered. */
+export function drawState(el: HTMLElement) {
 	const id = el.dataset.progressId ?? '';
 	const c = progress.load().checkpoints[id];
 	const s = $(el, '.cp-state');

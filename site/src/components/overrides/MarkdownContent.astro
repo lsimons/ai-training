@@ -9,7 +9,9 @@ import { getCollection, render } from 'astro:content';
  */
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
 import { ENGINEERING_AREAS } from '@lib/areas';
+import { checkpointsOf, type Lesson } from '@lib/lessons';
 import { knownPagePaths } from '@lib/links';
+import { chooseSkillsCheck } from '@lib/skills-check';
 import { href } from '@lib/url';
 
 const entry = Astro.locals.starlightRoute.entry;
@@ -26,7 +28,12 @@ const engineering = ENGINEERING_AREAS.includes(area);
 
 let behind: { objective: string; statement: string; href: string; lessonTitle: string }[] = [];
 let ahead: { label: string; href: string; exists: boolean }[] = [];
+// The skills check (spec S04 "Skills check"): one checkpoint per served
+// objective, offered to comfort `more` on Engineering lessons. Foundations
+// has no comfort levels (spec S01).
+let skillsCheck: string[] = [];
 if (isLesson) {
+	if (engineering) skillsCheck = chooseSkillsCheck(data.serves ?? [], checkpointsOf(entry as Lesson));
 	const docs = await getCollection('docs');
 	const competencies = await getCollection('competencies');
 	const statements = new Map<string, string>();
@@ -73,6 +80,17 @@ if (isLesson) {
 {
 	isLesson ? (
 		<div class="lesson" data-lesson={lessonId} data-mode={data.mode} data-area={area} data-engineering={String(engineering)}>
+			{skillsCheck.length > 0 && (
+				<aside class="route-card skills-check not-content" data-skills-check data-items={skillsCheck.join(' ')} hidden>
+					<p class="route-title" data-skills-title>Skip ahead?</p>
+					<p class="skills-note" data-skills-note></p>
+					<div class="skills-actions">
+						<button type="button" class="cp-check" data-skills-start></button>
+						<button type="button" data-skills-dismiss>Not now</button>
+					</div>
+					<div class="skills-items" data-skills-items hidden></div>
+				</aside>
+			)}
 			{behind.length > 0 && (
 				<aside class="route-card route-behind not-content" data-route="behind" hidden>
 					<p class="route-title">Worth revisiting first</p>
@@ -103,12 +121,39 @@ if (isLesson) {
 }
 
 <script>
+	import { openSkillsCheck } from '@lib/skills-check';
 	import * as progress from '@scripts/progress';
-	import { bindAll } from '@scripts/checkpoints';
+	import { bindAll, bindCheckpoint, drawState } from '@scripts/checkpoints';
 
 	const root = document.querySelector<HTMLElement>('.lesson[data-lesson]');
 	if (root) {
 		const lessonId = root.dataset.lesson!;
+
+		// Skills check (spec S04 "Skills check"). The copies are taken before
+		// `bindAll` so they carry no listeners, no `data-bound` and no shuffle,
+		// and inserted after it so the lesson's own list never includes them.
+		const skillsCard = root.querySelector<HTMLElement>('[data-skills-check]');
+		const skillsOpen = skillsCard ? openSkillsCheckItems(skillsCard) : [];
+		function openSkillsCheckItems(card: HTMLElement): { body: HTMLElement; copy: HTMLElement }[] {
+			const rec = progress.load();
+			if (rec.comfort !== 'more') return [];
+			const chosen = (card.dataset.items ?? '')
+				.split(' ')
+				.map((id) => root!.querySelector<HTMLElement>(`[data-checkpoint][id="${id}"]`))
+				.filter((el): el is HTMLElement => el !== null)
+				.map((body) => ({ body, progressId: body.dataset.progressId! }));
+			return openSkillsCheck(chosen, rec.checkpoints).map(({ body }) => ({ body, copy: copyCheckpoint(body) }));
+		}
+		/** A pristine copy for the card: no duplicate id, its own radio groups, no Skip (the card has Dismiss). */
+		function copyCheckpoint(body: HTMLElement): HTMLElement {
+			const copy = document.importNode(body, true);
+			copy.removeAttribute('id');
+			copy.dataset.skillsItem = body.id;
+			for (const input of copy.querySelectorAll<HTMLInputElement>('input[name]')) input.name = `${input.name}-skills`;
+			copy.querySelector('.cp-skip')?.remove();
+			return copy;
+		}
+
 		const checkpoints = bindAll(root, {
 			onResult: () => {
 				route();
@@ -116,6 +161,55 @@ if (isLesson) {
 			},
 		});
 		progress.markLessonRead(lessonId);
+
+		if (skillsCard && skillsOpen.length > 0) {
+			const note = skillsCard.querySelector<HTMLElement>('[data-skills-note]')!;
+			const start = skillsCard.querySelector<HTMLButtonElement>('[data-skills-start]')!;
+			const dismiss = skillsCard.querySelector<HTMLButtonElement>('[data-skills-dismiss]')!;
+			const items = skillsCard.querySelector<HTMLElement>('[data-skills-items]')!;
+			const total = skillsOpen.length;
+			const questions = `${total} question${total === 1 ? '' : 's'}`;
+			let answered = 0;
+			let passed = 0;
+			note.textContent = `One checkpoint per objective this lesson teaches, one try each. A pass counts as if you answered it in the lesson, and the review schedule picks it up.`;
+			start.textContent = `Answer ${questions}`;
+			skillsCard.hidden = false;
+
+			start.addEventListener('click', () => {
+				start.hidden = true;
+				items.hidden = false;
+				for (const { body, copy } of skillsOpen) {
+					items.appendChild(copy);
+					bindCheckpoint(copy, {
+						onResult: (el, ok) => {
+							// One Check per item: the result is recorded, so lock the copy.
+							el.querySelector<HTMLButtonElement>('.cp-check')?.setAttribute('disabled', 'true');
+							const after = el.querySelector<HTMLElement>('.cp-after');
+							if (after) after.hidden = false;
+							if (ok && el.dataset.reviewable === 'true') {
+								progress.scheduleReview({
+									id: el.dataset.progressId!,
+									revision: Number(el.dataset.revision ?? progress.DEFAULT_REVISION),
+								});
+							}
+							drawState(body);
+							route();
+							drawLesson();
+							answered++;
+							if (ok) passed++;
+							note.textContent =
+								answered < total
+									? `Passed ${passed} of ${answered} so far.`
+									: `Passed ${passed} of ${total}. ${passed === total ? 'Every objective is covered; the recap is yours.' : 'The ones you missed are taught below.'}`;
+							if (answered === total) dismiss.textContent = 'Close';
+						},
+					});
+				}
+			});
+			dismiss.addEventListener('click', () => {
+				skillsCard.hidden = true;
+			});
+		}
 
 		// Routing: a failed or skipped checkpoint surfaces the assumed objectives;
 		// every checkpoint passed first time surfaces the extensions.
