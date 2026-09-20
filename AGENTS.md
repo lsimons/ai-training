@@ -26,6 +26,7 @@ and `mise install` once per clone.
 | `mise run prose-sync`          | Fetch the pinned Vale style package (network)                    |
 | `mise run prose`               | Vale prose lint; misspellings gate, style warnings advise        |
 | `mise run prose-extended`      | Vale with the passive-voice rule too; advisory, run now and then |
+| `mise run prose-eval -- <pkg>` | Every hit of a Vale package as JSON, for deciding rule by rule   |
 | `mise run ci`                  | Full gate: install + lint + prose + examples + check + build     |
 | `mise run links`               | `lychee` broken-link check (network; not part of `ci`)           |
 | `mise run audit`               | `zizmor` audit of workflows + dependabot config                  |
@@ -148,10 +149,13 @@ verbatim and must include the base path.
   YAML under `site/src/data/`, minus `site/examples/`. Only errors fail:
   misspellings and wrongly cased terms. Add real jargon or names to
   `.vale/styles/config/vocabularies/ai-training/accept.txt` (one regex per
-  line); fix typos in the text. Cliche warnings print but never fail the
-  build. `mise run prose-extended` adds the passive-voice rule from
-  `.vale-extended.ini`; most of its hits are idiom, so run it now and then
-  and rewrite only the sentences that hide who does what.
+  line); fix typos in the text. Style warnings (cliches, weasel words,
+  wordy phrases, "There is") print but never fail the build; a doubled word
+  does. `mise run prose-extended` adds the passive-voice and
+  sentence-initial-"So" rules from `.vale-extended.ini`; most of their hits
+  are idiom, so run it now and then and rewrite only the sentences that
+  hide who does what. `docs/prose/README.md` records which rule runs where
+  and why, and how to evaluate a new style package.
 - `mise run links` (lychee) checks *external* URLs only. It is not part of
   `ci` because it is a network call that flakes.
 - Re-render and commit a deck's HTML/PDF whenever you change its `.qmd`.

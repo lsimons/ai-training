@@ -205,7 +205,7 @@ vale --no-exit --config .vale-extended.ini $files
 # counts per area, into docs/prose/reports/<package>/. See docs/prose/README.md.
 [tasks.prose-eval]
 description = "Collect every hit of a Vale package for review: mise run prose-eval -- <package>"
-run = "scripts/prose-eval.sh"
+run = "scripts/prose-eval.py"
 
 # Sequential rather than `depends`, which mise runs in parallel:
 # `site-check` and `site-build` both write `site/.astro`. The workflow runs

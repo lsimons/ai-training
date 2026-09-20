@@ -37,7 +37,15 @@ skips `docs/prose/reports/`.
 
 ## Decisions
 
-| Package    | Rule    | Where        | Why                                                                                                          |
-| ---------- | ------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
-| write-good | Cliches | Every run    | Rare, and a hit is nearly always worth a rewrite                                                             |
-| write-good | Passive | Now and then | Regex over "is/are/be + participle"; most hits are idiom, a minority hide who does what and are worth fixing |
+| Package    | Rule      | Where        | Why                                                                                                          |
+| ---------- | --------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| write-good | Illusions | Gate         | A doubled word is a typo every time; zero hits today                                                         |
+| write-good | Cliches   | Every run    | Rare, and a hit is nearly always worth a rewrite                                                             |
+| write-good | Weasel    | Every run    | Low volume; a hit asks "do I know the number?", and about a quarter deserve the rewrite                      |
+| write-good | ThereIs   | Every run    | Rare; "There is no X" is fine and stays, the flabby opener is what it catches. Level lowered to warning      |
+| write-good | TooWordy  | Every run    | With nine domain terms exempted in `accept.txt` (objective, evaluate, ...) what remains is worth reading     |
+| write-good | So        | Now and then | The lessons open a consequence with "So" on purpose; this catches a run of them                              |
+| write-good | Passive   | Now and then | Regex over "is/are/be + participle"; most hits are idiom, a minority hide who does what and are worth fixing |
+| write-good | E-Prime   | Off          | Bans every "to be"; definitions are "X is Y" and it flags a word, not a pattern. Would bury Passive          |
+
+The write-good evaluation is in `reports/write-good/summary.md`.
