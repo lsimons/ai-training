@@ -1,5 +1,5 @@
 import { AREAS, areaOf, ENGINEERING_AREAS } from '@lib/areas';
-import { CHECKPOINT_KINDS, DEFAULT_REVISION, isReviewable } from '@lib/checkpoint-rules';
+import { DEFAULT_REVISION, isReviewable, KIND_OF_TAG } from '@lib/checkpoint-rules';
 import { jsonForScript } from '@lib/json';
 import { href } from '@lib/url';
 import { describe, expect, it } from 'vitest';
@@ -23,8 +23,10 @@ describe('areas', () => {
 });
 
 describe('checkpoint rules', () => {
-	it('knows the six kinds and the default revision', () => {
-		expect(CHECKPOINT_KINDS).toHaveLength(6);
+	it('maps every component tag to its kind and knows the default revision', () => {
+		expect(Object.keys(KIND_OF_TAG)).toHaveLength(8);
+		expect(KIND_OF_TAG.MultiChoice).toBe('multi-choice');
+		expect(KIND_OF_TAG.Match).toBe('match');
 		expect(DEFAULT_REVISION).toBe(1);
 	});
 	it('repair and honor predicts are never reviewed; review={false} opts out; the rest are reviewed', () => {
@@ -34,6 +36,8 @@ describe('checkpoint rules', () => {
 		expect(isReviewable({ kind: 'choice', review: false })).toBe(false);
 		expect(isReviewable({ kind: 'sort', review: true })).toBe(true);
 		expect(isReviewable({ kind: 'order' })).toBe(true);
+		expect(isReviewable({ kind: 'multi-choice' })).toBe(true);
+		expect(isReviewable({ kind: 'match' })).toBe(true);
 	});
 });
 
