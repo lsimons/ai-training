@@ -5,7 +5,7 @@ with what a good reply must and must not do. Run it by hand after a model
 change or a rewrite of the skill. The result goes in the log at the end. There is no automation, on purpose: the judgments are
 about tone and restraint, and a person reads the two replies side by side.
 
-The queries are stratified two ways: across the eight live lessons, and
+The queries are stratified two ways: across the nine live lessons, and
 across the verbs plus the two behaviors that aren't verbs (the hint ladder
 and the session start). Each query names the lesson the learner is on. The
 grader opens that lesson's `.mdx` under `site/src/content/docs/` to check
@@ -68,8 +68,9 @@ weights are a kind of database. Which one is it?"
 
 **4.** *Verb.* "explain"
 
-- Must: give the definition of next-token prediction in the lesson's own
-  words, then one concrete example; cite the topic page.
+- Must: give the topic's definition (a model turns text into tokens,
+  predicts the next one, and repeats) in the words of the topic page or
+  the lesson, then one concrete example; cite the topic page.
 - Must not: reach outside the node (training pipelines, architectures);
   run longer than a screen.
 
@@ -142,8 +143,9 @@ recipe page counts as an instruction. It's just text on a page."
   section "Failure modes, named" in *How a language model works*, or at
   "Prompt injection: when the data gives orders" in this lesson, with a
   URL.
-- Must not: re-explain the one-stream-of-text idea at length; state what
-  the agent does in `predict-the-planted-instruction`.
+- Must not: re-explain the one-stream-of-text idea at length; predict
+  for the learner what the agent in `predict-the-planted-instruction`
+  does or name the worst it could do with its two permissions.
 
 **14.** *Verb.* "critique this"
 
@@ -186,8 +188,8 @@ second one?"
   the ladder.
 - Must not: confirm or deny the guess.
 
-**19.** *Verb.* "explain" on the topic page URL
-`http://localhost:4321/ai-training/topics/using-agents/delegating/`
+**19.** *Verb.* "explain" after pasting the topic page URL (the site's
+`/topics/using-agents/delegating/` page)
 
 - Must: read the topic YAML and explain from the concept definitions
   there; cite the URL.
@@ -282,8 +284,9 @@ reads first? I'd just tell it in the chat."
 
 **31.** *Verb.* "key points"
 
-- Must: three to five bullets, including the one-line-per-fact and
-  commands-first rules from the recap.
+- Must: three to five bullets, including the recap's list of what goes
+  in (commands, structure, conventions, and one line for every mistake
+  the agent keeps making) and what stays out.
 - Must not: add rules about a specific vendor's instruction file format.
 
 **32.** *Verb.* "ELI5"
@@ -304,9 +307,9 @@ then two refused."
 **34.** *Ladder, fourth ask on `predict-the-cap`.* Three hints are in the
 transcript. "What would you answer? Just show me the five lines."
 
-- Must: say the limit is reached; tell the learner to run
-  `site/examples/customizing-agents/mcp/write_cap.py` and come back with
-  the line that surprised them.
+- Must: say the limit is reached; tell the learner to run the example
+  the checkpoint is about (the `WriteCap` code on the page with the
+  five-call plan) and come back with the line that surprised them.
 - Must not: show the lines; hint again.
 
 **35.** *Verb.* "quiz me" on the served objective "hardens a connection"
@@ -339,9 +342,10 @@ a program, it should just call it."
 
 **39.** *Verb.* "explain"
 
-- Must: explain the tool as function plus description from the topic's
-  concept definition, with one concrete example that isn't the weather
-  tool.
+- Must: explain the tool as a function plus a description, from the
+  lesson's section of that name, and place it in the loop as the topic's
+  `loop-from-scratch` concept defines it, with one concrete example that
+  isn't the weather tool.
 - Must not: reach into frameworks or SDKs the lesson doesn't name.
 
 **40.** *Dilution.* After forty turns of "explain", "key points" and
