@@ -2,8 +2,8 @@
 
 Instructions for the agent that writes `docs/prose/reports/<package>/<Rule>.md`
 from `docs/prose/reports/<package>/<package>.json` and `wordcount.tsv`.
-Gathering only: no verdicts, no classification, no rewrites. The reader
-decides.
+The report gathers evidence and leaves verdicts, classification, and
+rewrites to the reader.
 
 ## Inputs
 
@@ -20,7 +20,7 @@ decides.
 1. **Rule.** One paragraph: what the rule's YAML does (read
    `.vale/styles/write-good/<Rule>.yml`), its shipped level, and the size of
    its word list or pattern.
-2. **Stats.** Total hits. A table per area: hits, words, hits per thousand
+2. **Stats.** The total hit count, then a table per area: hits, words, hits per thousand
    words. A table of the top matched phrases (in lowercase) with counts, up to
    fifteen rows, and the number of distinct phrases.
 3. **Examples.** Twelve to fifteen, each as a bullet with `file:line`, then
@@ -29,8 +29,9 @@ decides.
    five phrases each appear at least once; at least three are picked at
    random from the rest (say which). Quote verbatim, don't trim inside the
    sentence.
-4. **Concentration.** Which files carry the most hits (top five with
+4. **Concentration.** Which files have the most hits (top five with
    counts), and whether the hits cluster in tables, headings, quoted
    material, code-adjacent text or running prose. Facts only.
 
-Keep the whole report under 250 lines. Root-relative paths, no links.
+Keep the whole report under 250 lines. Write paths root-relative and as
+plain text rather than links.

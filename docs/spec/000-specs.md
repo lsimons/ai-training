@@ -8,14 +8,14 @@ what ships. Each spec reads on its own.
 
 ## Spec index
 
-| #   | Title                                          | Purpose                                                                                                                                                                                                                    | Status |
-| --- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| S01 | [Project dictionary](S01-dictionary.md)        | Fix the words this project uses for its content, its knowledge model, its interactions and its learners, so that every page, data file and component means the same thing by the same name.                                | Draft  |
-| S02 | [Topic map and competencies](S02-topic-map.md) | Name what the site teaches (topics and concepts, with prerequisite links), name what a learner should be able to do afterwards (competencies, objectives, behaviors), and say how the map differentiates between learners. | Draft  |
-| S03 | [Lesson authoring](S03-lesson-authoring.md)    | Fix the rules every lesson page follows: page kind, anatomy and frontmatter, examples, citations, terms and prompts, checkpoints, exercises, and widgets.                                                                  | Draft  |
-| S04 | [Progress record](S04-progress-record.md)      | Define the learner's progress record: what it stores, where it lives, how it is versioned, and how it moves between browsers.                                                                                              | Draft  |
-| S05 | [Spaced review](S05-spaced-review.md)          | Define how the site brings a learner back to what they learned, without a backend: which items are reviewed, on what schedule, where reviews surface, and what's stored.                                                   | Draft  |
-| S06 | [Release 1](S06-release-1.md)                  | Define the first release: one lesson per area, chosen so the shape of the site is visible end to end and every mechanism is exercised at least once.                                                                       | Draft  |
+| #   | Title                                          | Purpose                                                                                                                                                                                                              | Status |
+| --- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| S01 | [Project dictionary](S01-dictionary.md)        | Fix the words this project uses for its content, its knowledge model, its interactions and its learners, so that every page, data file and component means the same thing by the same name.                          | Draft  |
+| S02 | [Topic map and competencies](S02-topic-map.md) | Name what the site teaches (topics and concepts, with prerequisite links) and what a learner should be able to do afterwards (competencies, objectives, behaviors). Say how the map differentiates between learners. | Draft  |
+| S03 | [Lesson authoring](S03-lesson-authoring.md)    | Fix the rules every lesson page follows: page kind, anatomy and frontmatter, examples, citations, terms and prompts, checkpoints, exercises, and widgets.                                                            | Draft  |
+| S04 | [Progress record](S04-progress-record.md)      | Define the learner's progress record: what it stores, where it lives, how it is versioned, and how it moves between browsers.                                                                                        | Draft  |
+| S05 | [Spaced review](S05-spaced-review.md)          | Define how the site brings a learner back to what they learned, without a backend: which items are reviewed, on what schedule, where reviews surface, and what's stored.                                             | Draft  |
+| S06 | [Release 1](S06-release-1.md)                  | Define the first release: one lesson per area, chosen so the structure of the site is visible end to end and every mechanism is exercised at least once.                                                             | Draft  |
 
 ## Naming scheme
 
@@ -32,7 +32,7 @@ what ships. Each spec reads on its own.
   When a later spec needs a term or rule, it links back; when an earlier
   spec would need a later detail, it states only what it needs and leaves
   the detail to the later spec without naming it.
-- Every spec uses the terms of [S01 Project dictionary](S01-dictionary.md).
+- Specs use the terms of [S01 Project dictionary](S01-dictionary.md).
   The dictionary defines words; rules about writing, storing, and shipping
   belong in the later specs.
 - Cross-references are relative links with the spec's title, for example
@@ -43,7 +43,7 @@ what ships. Each spec reads on its own.
   the spec. Describe a mechanism as this project does it, not as the source
   it was borrowed from does it.
 
-## Shape of a spec
+## Structure of a spec
 
 1. `# Title (SNN)`
 2. `**Purpose:**` one or two sentences saying what the spec decides.
@@ -74,7 +74,7 @@ index above mirrors the same string.
 
 1. Check `docs/spec/` for a spec that already covers the feature. Amend it
    rather than adding a new one.
-2. Pick the next free number and create `SNN-<slug>.md` following the shape
+2. Pick the next free number and create `SNN-<slug>.md` following the structure
    above.
 3. Add a row to the spec index in this file.
 4. Commit with a `docs(spec):` prefix.

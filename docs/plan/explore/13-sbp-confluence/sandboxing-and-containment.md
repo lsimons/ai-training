@@ -21,16 +21,16 @@ Findings:
 - Even with telemetry disabled, one small authenticated call went to the
   vendor's API host and returned an empty object.
 - On startup the agent fired a "warmup" request to the configured endpoint.
-  Its system prompt carried the working directory, platform, OS version,
+  Its system prompt contained the working directory, platform, OS version,
   date and model, and the **current git branch and the last five commit
   subjects**. None of this is visible in the UI.
 - Blocking the registry and the vendor host at the firewall: the agent
   started and worked without visible errors.
-- One ordinary question produced a handful of calls to the configured
-  endpoint and nothing else.
+- One ordinary question produced a few calls to the configured endpoint
+  and nothing else.
 
 Conclusion as written: not great that the tool phones home on startup, but
-nothing significant leaks beyond the fact that it is being used. The lesson
+nothing important leaks beyond that it is being used. The lesson
 is the method and the mindset: **you can find out, and you should.**
 
 Teaching uses: a `Predict` before the findings ("which hosts will it
@@ -38,7 +38,7 @@ contact?"), a checkpoint on what the hidden system prompt contained, and
 the motivation for everything below. If the site reproduces the trace, do
 it on a fresh checkout with no real history and redact every credential.
 
-## 2. Six ways to isolate an agent
+## 2. Ways to isolate an agent
 
 | Approach                              | For                                                                                                 | Against                                                               |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -76,16 +76,16 @@ example because it has a written threat model:
 
 ## 3. A layered containment pattern
 
-Five layers that no single vendor documents together. Teach the pattern
-with public building blocks.
+The layers below come from different vendors, and none documents them
+together. Teach the pattern with public building blocks.
 
-| Layer                                      | What it does                                                                                                                                                                                                                                                                                                                   | Public building blocks                |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
-| **Isolation**                              | One container per agent on its own network, with the dev toolchain inside, and only the workspace mounted                                                                                                                                                                                                                      | docker, podman, devcontainers         |
-| **Enforcement outside the trust boundary** | A wrapper spawns the agent as a child process, points `HTTP_PROXY`/`HTTPS_PROXY` at itself and intercepts TLS with an ephemeral CA. It enforces a default-deny host allowlist, a shell-command allowlist with path containment and injection checks, and **redacts secrets from tool results before they reach the model API** | mitmproxy, a small custom proxy       |
-| **Review gate**                            | The agent pushes to a throwaway local git server; a human reviews there; only then does anything reach the real remote                                                                                                                                                                                                         | Forgejo, Gitea, a bare repo           |
-| **Supply-chain hygiene**                   | Pre-commit secret scanning; a minimum release age for dependencies so day-zero packages are never installed                                                                                                                                                                                                                    | gitleaks, `minimumReleaseAge` in pnpm |
-| **Observation**                            | Declarative policies compiled to kernel-level probes watch network, file, process and privilege-escalation events around the container. "Sees everything, blocks nothing."                                                                                                                                                     | Tetragon, Falco                       |
+| Layer                                      | What it does                                                                                                                                                                                                                                                                                                                          | Public building blocks                |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| **Isolation**                              | One container per agent on its own network, with the dev toolchain inside, and nothing mounted except the workspace                                                                                                                                                                                                                   | docker, podman, devcontainers         |
+| **Enforcement outside the trust boundary** | A wrapper spawns the agent as a child process, points `HTTP_PROXY`/`HTTPS_PROXY` at itself and intercepts TLS with an ephemeral CA. It enforces a default-deny host allowlist and a shell-command allowlist with path containment and injection checks. It also **redacts secrets from tool results before they reach the model API** | mitmproxy, a small custom proxy       |
+| **Review gate**                            | The agent pushes to a throwaway local git server; a human reviews there; only then does anything reach the real remote                                                                                                                                                                                                                | Forgejo, Gitea, a bare repo           |
+| **Supply-chain hygiene**                   | Pre-commit secret scanning; a minimum release age for dependencies so day-zero packages are never installed                                                                                                                                                                                                                           | gitleaks, `minimumReleaseAge` in pnpm |
+| **Observation**                            | Declarative policies compiled to kernel-level probes watch network, file, process and privilege-escalation events around the container. "Sees everything, doesn't block anything."                                                                                                                                                    | Tetragon, Falco                       |
 
 The one sentence to teach: controls are enforced **outside the agent's
 trust boundary**. Permission prompts and hooks inside the harness are
@@ -114,14 +114,15 @@ Small, concrete, vendor-specific but generalizable:
 - Editor integrations may not read the same settings file as the CLI. Check
   where each one gets its endpoint and key.
 - Open the agent in the subdirectory of the service you are working on, not
-  at the repository root. Smaller blast radius, smaller context.
+  at the repository root. That gives a smaller blast radius and a smaller
+  context.
 
 ## 5. Unsupervised mode
 
 The argument: running the agent with all permission prompts disabled means downloading instructions from the
 internet that were generated by a tool which advertises that it makes
 mistakes, and executing them without review. The flag that enables it in
-one agent literally contains the word "dangerously"; in another it is
+one agent literally contains the word "dangerously", and in another it is
 `--yolo`. "The warning is right there in the flag." Inside a container this
 narrows the blast radius compared to the host, but it doesn't make it
 safe: the workspace, any opted-in credential and full network egress are
@@ -132,7 +133,7 @@ Contrast with a first-party middle ground: one agent offers
 that may suit most users but has little track record. Teach the axes (filesystem scope, approval policy,
 network) rather than the flags.
 
-Counter-example: at least one open-source coding agent ships with *only* an
+Counter-example: at least one coding agent that's open source ships with *only* an
 unsupervised mode and no guardrail layer at all. Its own author calls it
 unsuitable for serious work. The lesson: guardrails are a property of the
 **harness**, not the model.
@@ -145,7 +146,7 @@ unsuitable for serious work. The lesson: guardrails are a property of the
   decide those at run time.
 - Store agent definitions in the repository so everyone runs the same ones.
 - Track plan state in git, not the issue tracker; the agent can't read the
-  tracker, and the plan should travel with the code.
+  tracker, and the plan should be committed next to the code.
 - Expect friction: the container couldn't commit because the password
   manager prompted for the signing key on the host, and couldn't run tests
   because native modules were built for another platform. Design the
@@ -157,7 +158,8 @@ unsuitable for serious work. The lesson: guardrails are a property of the
   enable the built-in sandbox and read the trace. More comfortable: run the
   agent in the public hardened container, trace it, then add one layer of
   the containment pattern.
-- L3 is a short for everyone: the trace findings only, no setup.
+- L3 is a short for everyone: it presents the trace findings and skips the
+  setup.
 - `Predict` candidates: which hosts the agent contacts; what a blocked host
   does to startup; what a `.env` in the workspace does to the tool results.
 - Keep the vendor-hosted option honest: the trade is convenience against

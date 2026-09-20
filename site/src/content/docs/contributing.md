@@ -10,7 +10,7 @@ in the repository root.
 
 ## The site
 
-Tools are pinned in `.mise.toml`; run `mise install` once. Then:
+Tools are pinned in `.mise.toml`. Run `mise install` once. Then:
 
 - `mise run site-install` - install the site dependencies (bun).
 - `mise run site-dev` - start the live-reloading dev server.
@@ -19,7 +19,7 @@ Tools are pinned in `.mise.toml`; run `mise install` once. Then:
 - `mise run lint` - run the prek hooks over every file, plus `actionlint`.
 - `mise run ci` - the full gate: install, lint, check, build. CI runs the same.
 
-Content is in `site/src/content/docs/`; static assets in `site/public/`.
+Content is in `site/src/content/docs/`, and static assets are in `site/public/`.
 
 ## Slide decks
 

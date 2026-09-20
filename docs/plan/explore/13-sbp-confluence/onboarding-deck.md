@@ -4,7 +4,7 @@ A one-day onboarding deck (about eighty slides) and its ten-slide Claude Code
 handout. Most of the content repeats the wiki material already captured in
 this directory: the guardrails charter, the hyper-intelligent toddler, the
 three prerequisites for value, the prompting technique list, the EU AI Act
-outline and the maturity ladder. What follows is only what the decks add.
+outline and the maturity ladder. This note records only what the decks add.
 Company strategy, adoption figures, customer cases and the schedule are left
 out.
 
@@ -17,11 +17,11 @@ out.
   jumps, review and verification are the bottleneck, and they must be
   redesigned, not just sped up. Pairs with "deterministic gates for
   probabilistic output" in [`guardrails.md`](./guardrails.md).
-- **Time to value is a curve, not a step.** Individual adoption of coding
-  agents tends to move through phases: autocomplete-style use first, then
+- **Time to value grows gradually.** Individual adoption of coding
+  agents moves through phases: autocomplete-style use first, then
   delegating whole tasks, then running more than one agent at once. Gains are
-  small for months and then large; spend rises with them. Teach the shape,
-  not any figure, and cite the DORA report on the return on AI-assisted
+  small for months and then large, and spend rises with them. Teach the
+  curve rather than any figure, and cite the DORA report on the return on AI-assisted
   development for the evidence base. Sets expectations for learners who try
   an agent once and see nothing.
 - **AI literacy has three verbs.** Understanding what AI is and how it works
@@ -45,23 +45,24 @@ out.
 
 ## A controls progression (area 2, engineers)
 
-The deck's maturity ladder is left out as such, but the "what needs to be in
+The deck's maturity ladder itself is left out, but the "what needs to be in
 place" list behind it is a generic progression of engineering controls
-worth keeping as a checklist, unbranded and ungraded:
+that works as a checklist, unbranded and ungraded:
 
-1. Approved tooling only; no client data in public models; AI literacy for
-   everyone; responsible-AI requirements written down.
-2. A human reviews all output; static analysis and tests collect baseline
-   evidence; security guardrails in place.
-3. Spec-driven development; automated test validation; guarded deploy
-   pipelines; identity and permissions enforced for agents; audit trails.
+1. Approved tooling only, no client data in public models, AI literacy for
+   everyone, and responsible-AI requirements written down.
+2. A human reviews all output, static analysis plus tests collect baseline
+   evidence, and security guardrails are in place.
+3. Spec-driven development, automated test validation, guarded deploy
+   pipelines, identity and permissions enforced for agents, and audit
+   trails.
 4. Independent inspection from outside the team; per-agent identity;
    observability and monitoring of all AI usage; architecture hardened for
    resilience.
 5. External validation; transparency and a way to contest outcomes;
    sector-specific compliance.
 
-Named standards along the way, for the references list: ISO/IEC 42001 for
+Standards the deck names, for the references list: ISO/IEC 42001 for
 AI management, ISO/IEC 15026 for assurance cases, IEC 62443, and IEC 61508
 for security- and safety-critical systems.
 
@@ -130,7 +131,7 @@ the answer must fill). Cheap to teach alongside few-shot.
 
 ## Verdict
 
-Nothing here changes the lesson list in the [README](./README.md). Fold the
+The decks don't change the lesson list in the [README](./README.md). Fold the
 framings into L1 and the Foundations introductions, add the syllabus check
 and the exercises to `ideas.md` or `literacy.md` when those are acted on,
 and add the public resources to `references.md`.

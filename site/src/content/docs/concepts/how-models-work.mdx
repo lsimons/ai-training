@@ -21,14 +21,14 @@ import Sampler from '@components/widgets/Sampler.astro';
 You type a question, and a paragraph comes back that reads like a person
 wrote it. It is tempting to picture a mind on the other side that looked up
 the answer. Nothing like that happens. In this lesson we replace that
-picture with the real one, which is simpler and explains more: a language
+picture with the real one. It is simpler and it explains more: a language
 model predicts the next piece of text, one piece at a time.
 
 ## Text becomes tokens
 
 A model never sees letters or words. Its input is cut into **tokens**, short
 chunks of text that are usually a word, part of a word, or a punctuation
-mark. "Unbelievable" might be three tokens; "the" is one. Each token has a
+mark. "Unbelievable" might be three tokens, and "the" is one. Each token has a
 number, and the model works only with those numbers.
 
 This has consequences you notice. Models are bad at counting letters
@@ -50,15 +50,15 @@ scores, but the mechanism is the real one.
 
 <Sampler />
 
-Two things to notice. The distribution is fixed by the input; only the
-*pick* is random. And **temperature** doesn't add knowledge, it only
+The input fixes the distribution, so the randomness is in the *pick*
+alone. Along the same line, **temperature** doesn't add knowledge: it
 flattens or sharpens the same distribution. At low temperature the model
 almost always picks the top token and sounds confident and repetitive. At
 high temperature it wanders.
 
 <Pitfall title="Asking the model why">
-You ask a model to solve a puzzle, it gets it wrong, and you ask "why did
-you say that?". It produces a fluent explanation. That explanation is
+You ask a model to solve a puzzle and it gets it wrong. You ask "why did
+you say that?" and it produces a fluent explanation. That explanation is
 *also* next-token prediction conditioned on your question. It is a
 plausible story about the earlier text, not a readout of what happened
 inside. Rule: treat self-explanations as new output to be checked, not as
@@ -70,11 +70,11 @@ evidence.
 A neural network with billions of adjustable numbers, the **weights**,
 produces the scores. During training the network reads enormous
 amounts of text and is nudged, each time, so that the token that really
-came next scores higher. Nothing is stored as facts or rules. What emerges
+came next scores higher, and it doesn't store facts or rules. What emerges
 is a compressed statistical model of the text it saw: grammar, style,
 common facts, common code, common arguments.
 
-That's why models know a great deal about things that appear often in
+So models know a great deal about things that appear often in
 writing and are unreliable about things that appear rarely, recently, or
 only in your organization's private documents. Knowledge is
 frequency-weighted and frozen at the training cutoff.
@@ -141,9 +141,9 @@ sentence, why prediction rather than lookup produces it.
 
 <Recap>
 
-1. Input is tokens, not words; that alone explains several odd weaknesses.
+1. Input is tokens rather than words, and that alone explains several odd weaknesses.
 2. Output is one token at a time, sampled from a distribution the model
-   scores; temperature reshapes the distribution and adds nothing.
+   scores. Temperature reshapes the distribution and doesn't add knowledge.
 3. The scores come from weights fitted to training text, so knowledge is
    frequency-weighted and stops at the cutoff.
 4. Hallucination, sycophancy, dilution, and staleness all follow from that.

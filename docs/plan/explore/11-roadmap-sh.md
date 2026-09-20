@@ -12,7 +12,7 @@ notice, not an open license. Everything including text and images is
 copyrighted; use is allowed for personal purposes only; republishing
 content or images anywhere is forbidden without consent. The site is
 "community created" but the terms aren't. This note records structure,
-mechanics, and topic titles as facts. No roadmap text may be reused.
+mechanics, and topic titles as facts. Reusing roadmap text is forbidden.
 
 ## What it is
 
@@ -45,10 +45,10 @@ Node types and counts:
 | `horizontal`, `vertical` | 18          | 23        | Dotted or solid connector lines drawn as nodes                   |
 | edges                    | 41          | 25        | Real edges, `solid` or `dashed`, few; most structure is visual   |
 
-So the map is a **drawing, not a graph**. Grouping is by position and by
+So the map is a **drawing rather than a graph**. Grouping is by position and by
 connector lines; only 41 of 279 nodes in AI Engineer are joined by real
 edges, and there is no prerequisite semantics. Topic and subtopic are the
-only nodes that carry content, and the parent relation is stored on the
+only nodes that have content, and the parent relation is stored on the
 rendered SVG (`data-parent-id`) rather than in the JSON.
 
 ### Content per node
@@ -100,7 +100,7 @@ our `concepts` topics, all `building-agents`, `customizing-agents/mcp`,
 and the security half of `safety`. Not present anywhere on roadmap.sh: our
 knowledge-worker material (responsible use, verifying output, delegating,
 choosing tools) and most of `coding-with-agents` except as a list of tool
-names. Their unit is a technology or term; ours is a competency.
+names. Their unit is a technology or term, while ours is a competency.
 
 ## Interaction on the roadmap page
 
@@ -115,7 +115,7 @@ names. Their unit is a technology or term; ours is a competency.
   one-paragraph content, a **Learn with AI** box with **Quick Explain**,
   **Teach Me**, **Quiz me**, then Premium Resources (sponsored) and Free
   Resources as typed badges. Done strikes the node through on the map and
-  fills it gray; Skip and Learning have their own styles. Toggling Done
+  fills it gray, and Skip and Learning have their own styles. Toggling Done
   again clears it.
 - Each topic also has a standalone page at `/<roadmap>/<slug>@<id>` with
   the same content and links for search engines and sharing.
@@ -126,8 +126,8 @@ names. Their unit is a technology or term; ours is a competency.
 ## The AI layer
 
 Everything is generated on demand, streamed, and counted against a quota.
-Every AI surface carries "AI can make mistakes, verify important
-information".
+Each of the three AI features tried ends its output with "AI can make
+mistakes, verify important information".
 
 ### `Quick Explain`
 
@@ -153,7 +153,7 @@ which produces a titled quiz of nine questions. Formats: Multi-Choice,
 Open-Ended, Mixed. Per question: four options, **Check Answer**, **Skip
 Question**; after checking, the correct option is marked and a one-sentence
 rationale appears ("Option 3 is correct because..."); wrong options are
-disabled; **Next Question**. Progress "Question 1 of 9, 11% complete".
+disabled, then **Next Question**. Progress "Question 1 of 9, 11% complete".
 Costs one of two free quizzes.
 
 ### `Teach Me`
@@ -215,9 +215,9 @@ Items 1, 3, 6, and 7 declined for now.
 2. **Per-node status with three states** (learning, done, skip) written
    back onto the map as node styling, and a coarse milestone bar above the
    map. Our progress model has the states already; the visible strike
-   through and the milestone bar are the cheap wins.
+   through and the milestone bar are cheap to add.
 3. **Typed resource links** (`@official@`, `@article@`, `@video@`, ...)
-   rendered as badges, ordered by type, capped per node. Adopt the type set
+   rendered as badges in type order, with a cap per node. Adopt the type set
    for our `source` records and the eight-link cap.
 4. **One-paragraph node content, links for depth.** Their discipline of a
    single plain paragraph per node is exactly the register we want for
@@ -231,13 +231,13 @@ Items 1, 3, 6, and 7 declined for now.
 6. **Generated lesson anatomy as a checklist.** Their generated lessons
    contain the same parts our spec S01 lesson has (sections, callouts, an
    inline check, a summary, recall questions, a next card) plus a
-   step-through widget. Confirms the lesson shape; also a warning that a
+   step-through widget. Confirms the lesson structure, and warns that a
    competent generated lesson is now cheap, so our value is in the
    competency structure, the verified examples, the exercises, review and
    tutor grounding, not in prose alone.
 7. **Project pages as specifications** with requirements, technologies,
    what you will learn and community solutions. A good template for our
-   `project` unit; peer solutions are out of scope without a backend.
+   `project` unit, though peer solutions are out of scope without a backend.
 8. **Deep-linkable topic pages** beside the map, one URL per node, good for
    search and for the tutor to cite.
 

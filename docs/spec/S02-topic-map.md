@@ -1,8 +1,8 @@
 # Topic map and competencies (S02)
 
 **Purpose:** Name what the site teaches (topics and their concepts, per area,
-with prerequisite links), name what a learner should be able to do afterwards
-(competencies, their learning objectives and behaviors), say how the map
+with prerequisite links) and what a learner should be able to do afterwards
+(competencies, their learning objectives and behaviors). Say how the map
 differentiates between learners.
 
 **Status:** Draft
@@ -12,7 +12,7 @@ differentiates between learners.
 Vocabulary is per the [project dictionary](S01-dictionary.md). In short:
 **topics** and **concepts** are what's taught and form the map; **competencies**,
 **learning objectives** and **behaviors** are what a learner can do afterwards
-and point into the map; **lessons** cover topics and serve objectives.
+and point into the map. **Lessons** cover topics and serve objectives.
 
 ## Shape
 
@@ -27,7 +27,7 @@ and point into the map; **lessons** cover topics and serve objectives.
 | Engineering | Customizing agents | `customizing-agents` | Software engineers |
 | Engineering | Building agents    | `building-agents`    | Software engineers |
 
-An area owns three to seven topics and two to four competencies. A lesson
+An area has three to seven topics and two to four competencies. A lesson
 covers one topic and teaches one to five of its concepts.
 
 ### Taught and learned
@@ -45,7 +45,7 @@ covers one topic and teaches one to five of its concepts.
 A lesson names, by id, the topics it **covers**, the objectives it
 **serves**, the objectives it **assumes** (each pointing at the lesson
 section that teaches it) and the lessons, topics, or shorts it **extends
-to**. Paths are lists of lesson ids; goals are competency levels. Lesson
+to**. Paths are lists of lesson ids, and goals are competency levels. Lesson
 lists per topic and per objective are derived from frontmatter at build
 time, never stored twice.
 
@@ -82,7 +82,7 @@ Tutor mode cites these URLs when it points a learner somewhere.
 
 ## Course page as lesson graph
 
-Each course renders as a graph, not a list.
+Each course renders as a graph of its lessons.
 
 | Element         | Rendering                                                                                                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -90,7 +90,7 @@ Each course renders as a graph, not a list.
 | Edges           | Dotted lines from the lessons that teach an assumed objective to the lessons that assume it; derived from `assumes` at build time                 |
 | Milestone bar   | Percent of lessons finished with four labeled stops: getting started, halfway, almost there, complete. Skipped lessons count toward neither side. |
 | Completion ring | Lessons and checkpoints done                                                                                                                      |
-| Review due card | "Review due: N items" when review items are due, leading to the course's review page                                                              |
+| Review due card | "Review due: N items" when review items are due. Links to the course's review page                                                                |
 | About panel     | Goals, counts, prerequisites                                                                                                                      |
 
 Node styling shows the learner's state from the progress record:
@@ -110,11 +110,11 @@ The topic tables below name the material each topic can start from. Keys:
 | Key               | Source                                                                                                                                         | License                   | Use here                                                                      |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------- |
 | `AEC-NN`          | Lesson NN of *agent-engineer-course*, a fork of Addy Osmani's course maintained by the author                                                  | Apache-2.0                | May be adapted, with attribution in `NOTICE.md`                               |
-| `DLAI-N`          | DeepLearning.AI course N in the reading order below; `M1`..`M5` are modules of a course                                                        | Proprietary               | Topic coverage and sequencing as inspiration only; nothing copied or embedded |
+| `DLAI-N`          | DeepLearning.AI course N in the reading order below, where `M1`..`M5` are modules of a course                                                  | Proprietary               | Topic coverage and sequencing as inspiration only; nothing copied or embedded |
 | `Brilliant XXX`   | A big idea (three-letter code) in Brilliant's *Coding with AI* skills map; see "Alignment"                                                     | Proprietary               | Ideas and codes as facts; no text                                             |
 | `Ng`              | Andrew Ng's AI engineering skills map: build and deploy AI applications, software engineering fundamentals, use coding agents, shape the build | Public newsletter         | Ordering and area split                                                       |
 | `CS50`            | Harvard CS50 and its AI tutor                                                                                                                  | CC BY-NC-SA 4.0           | Ideas and vocabulary, cited; no text adapted                                  |
-| `Learn Prompting` | The community prompt engineering guide                                                                                                         | CC BY-NC-SA 4.0 (current) | Vocabulary only; prompting concepts are written from the original papers      |
+| `Learn Prompting` | The community-written guide to prompt engineering                                                                                              | CC BY-NC-SA 4.0 (current) | Vocabulary only; prompting concepts are written from the original papers      |
 | new               | No usable source; written from scratch                                                                                                         | -                         | -                                                                             |
 
 | Key      | agent-engineer-course lesson                                                                  |
@@ -181,7 +181,7 @@ Learning objectives:
 | `explains-models`   | `explains-grounding`         | base  | Explains what grounding and retrieval add and what they don't fix    |
 | `prompts-reliably`  | `structures-a-prompt`        | base  | Turns a vague request into instruction, context, example, and format |
 | `prompts-reliably`  | `iterates-on-output`         | base  | Improves a result by changing the prompt, not by retrying            |
-| `prompts-reliably`  | `asks-for-structure`         | base  | Asks for output in a shape the next step can use                     |
+| `prompts-reliably`  | `asks-for-structure`         | base  | Asks for output in a format the next step can use                    |
 | `recognizes-agents` | `tells-agent-from-assistant` | base  | Tells a chat assistant from an agent by what it can do unprompted    |
 | `recognizes-agents` | `places-on-autonomy-scale`   | base  | Places a product or workflow on the autonomy scale                   |
 | `recognizes-agents` | `names-the-loop`             | base  | Describes the observe-think-act loop and the tools in it             |
@@ -252,18 +252,18 @@ Learning objectives:
 | `delegates-and-checks`      | `reviews-against-brief`          | base   | Reviews the result against the brief, not against a feeling |
 | `delegates-and-checks`      | `adjusts-mid-task`               | base   | Adjusts the brief when the work reveals new information     |
 | `chooses-tool-and-autonomy` | `picks-chat-agent-or-automation` | base   | Picks chat, agent or automation for a task and says why     |
-| `chooses-tool-and-autonomy` | `keeps-the-human-steps`          | base   | Names the steps that stay human and why                     |
+| `chooses-tool-and-autonomy` | `keeps-the-human-steps`          | base   | Names the steps that remain a human's job and why           |
 | `chooses-tool-and-autonomy` | `reasons-across-levels`          | expert | Re-applies judgment when the tool level rises               |
 
 ## Engineering
 
 ### Area `coding-with-agents`: Coding with agents
 
-Two topics exist because Brilliant's map shows where human skill
-concentrates once an agent does the implementing: **specification** (taste,
-success criteria, decomposition, designing the verification) and
-**verification** as its own topic rather than a corner of quality.
-Reversibility joins workflow for the same reason.
+**Specification** (taste, success criteria, decomposition, designing the
+verification) and **verification** are topics of their own because
+Brilliant's map shows where human skill concentrates once an agent does the
+implementing. Verification gets its own topic rather than a corner of
+quality, and reversibility joins workflow for the same reason.
 
 Topics:
 
@@ -288,25 +288,25 @@ Competencies:
 
 Learning objectives:
 
-| Competency            | Objective                    | Level  | Statement                                                                  |
-| --------------------- | ---------------------------- | ------ | -------------------------------------------------------------------------- |
-| `specifies-work`      | `judges-worth-building`      | base   | Judges whether something is worth building before building it              |
-| `specifies-work`      | `defines-success`            | base   | Defines what a successful outcome requires                                 |
-| `specifies-work`      | `decomposes-into-components` | base   | Decomposes a problem into components with clear dependencies               |
-| `specifies-work`      | `designs-the-check`          | base   | Designs how the work gets verified before it is built                      |
-| `ships-with-agent`    | `runs-a-session`             | base   | Runs a session from setup to a reviewed diff                               |
-| `ships-with-agent`    | `works-in-increments`        | base   | Works in small increments, sequenced for early feedback                    |
-| `ships-with-agent`    | `keeps-change-reversible`    | base   | Keeps every change reversible                                              |
-| `ships-with-agent`    | `gives-the-right-context`    | base   | Gives the agent the files, constraints, and limits the task needs          |
-| `ships-with-agent`    | `keeps-understanding`        | expert | Keeps their own understanding of the code as the agent produces more of it |
-| `verifies-agent-work` | `reviews-others-code`        | base   | Reviews code they didn't write, against the specification                  |
-| `verifies-agent-work` | `observes-and-debugs`        | base   | Observes the running system and isolates a fault systematically            |
-| `verifies-agent-work` | `automates-the-check`        | base   | Turns a check into a bounded, self-checking loop                           |
-| `verifies-agent-work` | `screens-for-security`       | base   | Screens agent output for security and supply-chain problems                |
-| `works-in-team`       | `attributes-honestly`        | base   | Attributes agent work honestly in commits and reviews                      |
-| `works-in-team`       | `follows-team-norms`         | base   | Follows the team's review and CI norms for agent changes                   |
-| `works-in-team`       | `runs-parallel-work`         | expert | Runs several agent sessions without losing coherence                       |
-| `works-in-team`       | `sets-team-practice`         | expert | Sets the team's practice for agent use                                     |
+| Competency            | Objective                    | Level  | Statement                                                         |
+| --------------------- | ---------------------------- | ------ | ----------------------------------------------------------------- |
+| `specifies-work`      | `judges-worth-building`      | base   | Judges whether something should be built before building it       |
+| `specifies-work`      | `defines-success`            | base   | Defines what a successful outcome requires                        |
+| `specifies-work`      | `decomposes-into-components` | base   | Decomposes a problem into components with clear dependencies      |
+| `specifies-work`      | `designs-the-check`          | base   | Designs how the work gets verified before it is built             |
+| `ships-with-agent`    | `runs-a-session`             | base   | Runs a session from setup to a reviewed diff                      |
+| `ships-with-agent`    | `works-in-increments`        | base   | Works in small increments, sequenced for early feedback           |
+| `ships-with-agent`    | `keeps-change-reversible`    | base   | Keeps every change reversible                                     |
+| `ships-with-agent`    | `gives-the-right-context`    | base   | Gives the agent the files, constraints, and limits the task needs |
+| `ships-with-agent`    | `keeps-understanding`        | expert | Still understands the code as the agent produces more of it       |
+| `verifies-agent-work` | `reviews-others-code`        | base   | Reviews code they didn't write, against the specification         |
+| `verifies-agent-work` | `observes-and-debugs`        | base   | Observes the running system and isolates a fault systematically   |
+| `verifies-agent-work` | `automates-the-check`        | base   | Turns a check into a bounded, self-checking loop                  |
+| `verifies-agent-work` | `screens-for-security`       | base   | Screens agent output for security and supply-chain problems       |
+| `works-in-team`       | `attributes-honestly`        | base   | Attributes agent work as agent work in commits and reviews        |
+| `works-in-team`       | `follows-team-norms`         | base   | Follows the team's review and CI norms for agent changes          |
+| `works-in-team`       | `runs-parallel-work`         | expert | Runs several agent sessions without losing coherence              |
+| `works-in-team`       | `sets-team-practice`         | expert | Sets the team's practice for agent use                            |
 
 ### Customizing agents (`customizing-agents`)
 
@@ -335,7 +335,7 @@ Learning objectives:
 | `configures-agent`      | `writes-project-instructions` | base   | Writes instructions that remove a recurring agent mistake                 |
 | `configures-agent`      | `sets-permissions`            | base   | Sets permissions to the least the work needs                              |
 | `configures-agent`      | `adds-a-hook`                 | base   | Adds a hook that enforces a rule the instructions can't                   |
-| `configures-agent`      | `manages-memory`              | expert | Manages what the agent carries between sessions                           |
+| `configures-agent`      | `manages-memory`              | expert | Manages what the agent remembers between sessions                         |
 | `writes-skill`          | `chooses-skill-over-tool`     | base   | Chooses between a skill, a tool, and an instruction for a need            |
 | `writes-skill`          | `packages-a-procedure`        | base   | Packages a repeatable procedure as a skill another person's agent can use |
 | `writes-skill`          | `discloses-progressively`     | base   | Structures a skill so the agent loads only what it needs                  |
@@ -347,15 +347,15 @@ Learning objectives:
 
 Topics:
 
-| Topic id                           | Name                          | Concepts                                                                                                                               | Prerequisites                                         | Source material                                  |
-| ---------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------ |
-| `building-agents/tool-use`         | Tool use                      | function calling, tool schema design, N x M integration problem, error handling, parallel calls                                        | concepts/what-is-an-agent                             | `AEC-03`                                         |
-| `building-agents/agent-loop`       | The agent loop and harness    | loop from scratch, Agent SDK, stop conditions, unbounded-loop pitfalls                                                                 | tool-use                                              | `AEC-13`, the most exercise-shaped source lesson |
-| `building-agents/patterns`         | Design patterns               | ReAct, reflection, planning, plan-then-execute vs reactive, hierarchical planning                                                      | agent-loop                                            | `AEC-04`, `AEC-06`; `DLAI-11` M2, M5             |
-| `building-agents/orchestration`    | Orchestration and multi-agent | code- vs model-driven orchestration, sequential / hierarchical / collaborative, orchestration tax                                      | patterns                                              | `AEC-07`, `AEC-18`                               |
-| `building-agents/retrieval-memory` | Agentic retrieval and memory  | agentic RAG loop, memory storage choices, when basic RAG suffices                                                                      | agent-loop, concepts/grounding                        | `AEC-05`, `AEC-08`                               |
-| `building-agents/evaluation`       | Evaluation and testing        | quality pillars, rubrics, metrics that can't be gamed, trajectory evaluation, LLM as judge, golden sets, error analysis, observability | agent-loop, coding-with-agents/verification           | `AEC-09`; `DLAI-11` M4; `Brilliant VER`          |
-| `building-agents/production`       | Guardrails and production     | defense layers, eval-gated deploys, rollout strategies, cost, agent-specific security risks, protocols (MCP, A2A)                      | evaluation, safety/governance, customizing-agents/mcp | `AEC-10`, `AEC-11`, `AEC-14`; `Brilliant SEC`    |
+| Topic id                           | Name                          | Concepts                                                                                                                               | Prerequisites                                         | Source material                                    |
+| ---------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------- |
+| `building-agents/tool-use`         | Tool use                      | function calling, tool schema design, N x M integration problem, error handling, parallel calls                                        | concepts/what-is-an-agent                             | `AEC-03`                                           |
+| `building-agents/agent-loop`       | The agent loop and harness    | loop from scratch, Agent SDK, stop conditions, unbounded-loop pitfalls                                                                 | tool-use                                              | `AEC-13`, the source lesson closest to an exercise |
+| `building-agents/patterns`         | Design patterns               | ReAct, reflection, planning, plan-then-execute vs reactive, hierarchical planning                                                      | agent-loop                                            | `AEC-04`, `AEC-06`; `DLAI-11` M2, M5               |
+| `building-agents/orchestration`    | Orchestration and multi-agent | code- vs model-driven orchestration, sequential / hierarchical / collaborative, orchestration tax                                      | patterns                                              | `AEC-07`, `AEC-18`                                 |
+| `building-agents/retrieval-memory` | Agentic retrieval and memory  | agentic RAG loop, memory storage choices, when basic RAG suffices                                                                      | agent-loop, concepts/grounding                        | `AEC-05`, `AEC-08`                                 |
+| `building-agents/evaluation`       | Evaluation and testing        | quality pillars, rubrics, metrics that can't be gamed, trajectory evaluation, LLM as judge, golden sets, error analysis, observability | agent-loop, coding-with-agents/verification           | `AEC-09`; `DLAI-11` M4; `Brilliant VER`            |
+| `building-agents/production`       | Guardrails and production     | defense layers, eval-gated deploys, rollout strategies, cost, agent-specific security risks, protocols (MCP, A2A)                      | evaluation, safety/governance, customizing-agents/mcp | `AEC-10`, `AEC-11`, `AEC-14`; `Brilliant SEC`      |
 
 Competencies:
 
@@ -388,9 +388,9 @@ Learning objectives:
 
 ## Behaviors: worked example
 
-Only one objective has behaviors so far; the rest are to write.
+Only one objective has behaviors so far, and the rest are to write.
 Every objective's behaviors take this form: one-sentence claim, a why, one
-example; two to six per objective. For
+example, with two to six per objective. For
 `using-agents/delegates-and-checks/writes-a-brief` (`base`):
 
 | #   | Claim                                                                                   | Why                                                                                                                              | Example                                                                                                                                                            |
@@ -424,29 +424,29 @@ the "asks" column paraphrases what each objective asks for.
 | ABS  | Reasoning across levels of abstraction | Reason at the right level; re-apply reasoning as tooling rises           |
 
 **Andrew Ng's AI engineering skills map** names four skills: building and
-deploying AI applications, software engineering fundamentals, using coding
-agents, and shaping the build (deciding what goes in the spec).
+deploying AI applications, software engineering fundamentals, coding-agent
+use, and shaping the build (deciding what goes in the spec).
 
 ### Rows
 
-| Framework                     | Code / item                            | Asks                                                      | Our objectives                                                                                                                |
-| ----------------------------- | -------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Brilliant Coding with AI      | TAS-1..4                               | Judge what's worth building, define success, weigh cost   | `coding-with-agents/specifies-work/judges-worth-building`, `defines-success`                                                  |
-| Brilliant Coding with AI      | INC-1, INC-2, INC-5                    | Working increments, early feedback, reversibility         | `coding-with-agents/ships-with-agent/works-in-increments`, `keeps-change-reversible`                                          |
-| Brilliant Coding with AI      | INC-3, INC-4                           | Maintain understanding and coherence                      | `coding-with-agents/ships-with-agent/keeps-understanding`                                                                     |
-| Brilliant Coding with AI      | SPC-3, SPC-4, SPC-6                    | Decompose, analyze dependencies, design verification      | `coding-with-agents/specifies-work/decomposes-into-components`, `designs-the-check`                                           |
-| Brilliant Coding with AI      | SPC-5, BLD-1                           | Manage constraints; direct an agent to a specification    | `using-agents/delegates-and-checks/writes-a-brief`, `coding-with-agents/ships-with-agent/gives-the-right-context`             |
-| Brilliant Coding with AI      | BLD-2, BLD-3                           | Adjust on new information; divide and delegate            | `using-agents/delegates-and-checks/adjusts-mid-task`, `using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation` |
-| Brilliant Coding with AI      | BLD-4, BLD-5                           | Organize and oversee a workflow                           | `coding-with-agents/works-in-team/runs-parallel-work`, `building-agents/orchestrates-agents/picks-a-pattern`                  |
-| Brilliant Coding with AI      | VER-2..6                               | Verify against spec, review, observe, debug, automate     | `coding-with-agents/verifies-agent-work/*`                                                                                    |
-| Brilliant Coding with AI      | VER-7                                  | Measure quality and evaluate AI systems                   | `building-agents/evaluates-agents/*`                                                                                          |
-| Brilliant Coding with AI      | MEM-1, MEM-2                           | Manage memory; turn repeated work into reusable knowledge | `customizing-agents/configures-agent/manages-memory`, `customizing-agents/writes-skill/packages-a-procedure`                  |
-| Brilliant Coding with AI      | SEC-3, SEC-5                           | Evaluate AI code for vulnerabilities; supply-chain risk   | `coding-with-agents/verifies-agent-work/screens-for-security`                                                                 |
-| Brilliant Coding with AI      | SEC-4                                  | Mitigate AI- and agent-specific risks                     | `building-agents/runs-in-production/mitigates-agent-risks`, `customizing-agents/connects-tools-safely/hardens-a-connection`   |
-| Brilliant Coding with AI      | ABS-1..3                               | Reason across levels of abstraction and tooling           | `using-agents/chooses-tool-and-autonomy/reasons-across-levels`                                                                |
-| Ng, AI engineering skills map | Using coding agents                    | Plan, execute, verify, monitor at calibrated autonomy     | `using-agents/delegates-and-checks`, `coding-with-agents/ships-with-agent`                                                    |
-| Ng, AI engineering skills map | Shaping the build                      | Deciding what goes in the spec                            | `coding-with-agents/specifies-work`                                                                                           |
-| Ng, AI engineering skills map | Building and deploying AI applications | Build, evaluate, ship                                     | `building-agents/*`                                                                                                           |
+| Framework                     | Code / item                            | Asks                                                                       | Our objectives                                                                                                                |
+| ----------------------------- | -------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Brilliant Coding with AI      | TAS-1..4                               | Judge what should be built and define success, weighing value against cost | `coding-with-agents/specifies-work/judges-worth-building`, `defines-success`                                                  |
+| Brilliant Coding with AI      | INC-1, INC-2, INC-5                    | Working increments, early feedback, reversibility                          | `coding-with-agents/ships-with-agent/works-in-increments`, `keeps-change-reversible`                                          |
+| Brilliant Coding with AI      | INC-3, INC-4                           | Maintain understanding and coherence                                       | `coding-with-agents/ships-with-agent/keeps-understanding`                                                                     |
+| Brilliant Coding with AI      | SPC-3, SPC-4, SPC-6                    | Decompose, analyze dependencies, design verification                       | `coding-with-agents/specifies-work/decomposes-into-components`, `designs-the-check`                                           |
+| Brilliant Coding with AI      | SPC-5, BLD-1                           | Manage constraints; direct an agent to a specification                     | `using-agents/delegates-and-checks/writes-a-brief`, `coding-with-agents/ships-with-agent/gives-the-right-context`             |
+| Brilliant Coding with AI      | BLD-2, BLD-3                           | Adjust on new information; divide and delegate                             | `using-agents/delegates-and-checks/adjusts-mid-task`, `using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation` |
+| Brilliant Coding with AI      | BLD-4, BLD-5                           | Organize and oversee a workflow                                            | `coding-with-agents/works-in-team/runs-parallel-work`, `building-agents/orchestrates-agents/picks-a-pattern`                  |
+| Brilliant Coding with AI      | VER-2..6                               | Verify against spec, review, observe, debug, automate                      | `coding-with-agents/verifies-agent-work/*`                                                                                    |
+| Brilliant Coding with AI      | VER-7                                  | Measure quality and evaluate AI systems                                    | `building-agents/evaluates-agents/*`                                                                                          |
+| Brilliant Coding with AI      | MEM-1, MEM-2                           | Manage memory; turn repeated work into reusable knowledge                  | `customizing-agents/configures-agent/manages-memory`, `customizing-agents/writes-skill/packages-a-procedure`                  |
+| Brilliant Coding with AI      | SEC-3, SEC-5                           | Evaluate AI code for vulnerabilities; supply-chain risk                    | `coding-with-agents/verifies-agent-work/screens-for-security`                                                                 |
+| Brilliant Coding with AI      | SEC-4                                  | Mitigate AI- and agent-specific risks                                      | `building-agents/runs-in-production/mitigates-agent-risks`, `customizing-agents/connects-tools-safely/hardens-a-connection`   |
+| Brilliant Coding with AI      | ABS-1..3                               | Reason across levels of abstraction and tooling                            | `using-agents/chooses-tool-and-autonomy/reasons-across-levels`                                                                |
+| Ng, AI engineering skills map | Using coding agents                    | Plan, execute, verify, monitor at calibrated autonomy                      | `using-agents/delegates-and-checks`, `coding-with-agents/ships-with-agent`                                                    |
+| Ng, AI engineering skills map | Shaping the build                      | Deciding what goes in the spec                                             | `coding-with-agents/specifies-work`                                                                                           |
+| Ng, AI engineering skills map | Building and deploying AI applications | Build, evaluate, ship                                                      | `building-agents/*`                                                                                                           |
 
 ### Not covered
 
@@ -468,14 +468,14 @@ current objective and an extension, all inside the same course graph.
 | Lesson frontmatter                 | `assumes` lists the objectives a lesson relies on, each pointing at the section that teaches it. `extends-to` lists the next lesson, a specialization topic, or a short. |
 | Failed or skipped checkpoint       | Shows a card naming the assumed objective and the section to revisit.                                                                                                    |
 | Every checkpoint passed first time | Shows the lesson's extensions.                                                                                                                                           |
-| Comfort level `less`               | Inserts the assumed objectives' sections into the path before each lesson; keeps tutor mode hint-heavy.                                                                  |
-| Comfort level `more`               | Offers a skills check at the start of a lesson (one checkpoint per served objective), skips what's passed, surfaces extensions.                                          |
-| Exercise                           | One per lesson, written once, ending with an optional one-line stretch goal. No variants.                                                                                |
+| Comfort level `less`               | Inserts the assumed objectives' sections into the path before each lesson, and keeps tutor mode hint-heavy.                                                              |
+| Comfort level `more`               | Offers a skills check at the start of a lesson (one checkpoint per served objective), skips what's passed, offers the extensions.                                        |
+| Exercise                           | One per lesson, written once with no variants, ending with an optional one-line stretch goal.                                                                            |
 | Path                               | Renders three lanes: behind (assumed objectives not yet passed), on target (the path's next lesson), ahead (extensions). "You are here" marks the learner.               |
 | Review item                        | A review item failed twice in a row marks its objective "behind" in the path lanes and offers the section that teaches it, exactly like a failed checkpoint.             |
-| Tutor mode                         | On a wrong answer asks a diagnostic question; if the gap is upstream it points at the upstream section rather than re-explaining.                                        |
+| Tutor mode                         | On a wrong answer asks a diagnostic question. If the gap is upstream, it points at the upstream section rather than re-explaining.                                       |
 
-All routing reads the map and the local progress record; nothing else.
+All routing reads only the map and the local progress record.
 
 ### Worked example
 
@@ -486,18 +486,18 @@ Take the lesson *Your first session with a coding agent*:
 | serves       | `ships-with-agent/runs-a-session`, `ships-with-agent/gives-the-right-context`                                                                  |
 | assumes      | `delegates-and-checks/writes-a-brief` (section "Writing the brief" in *Delegating a task to an agent*), `judges-agent-risk/names-blast-radius` |
 | extends-to   | *Plan, implement, verify*; a short on permission modes                                                                                         |
-| checkpoint 1 | Fix a weak brief. A fail routes to the Delegating section; a clean run offers the extensions.                                                  |
+| checkpoint 1 | Fix a weak brief. A fail routes to the Delegating section, and a clean run offers the extensions.                                              |
 | exercise     | A scripted change in the fixture repository. Stretch goal: "now ask the agent for a refactor you choose, and review it the same way".          |
 
 ## Cross-area edges
 
-| Edge                                                                                        | Type         | Why                                                                             |
-| ------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------- |
-| `safety/agent-risk` -> `coding-with-agents/quality`, `customizing-agents/hooks-permissions` | prerequisite | Safety is a gate into Engineering, not a track of its own after Foundations     |
-| `concepts/what-is-an-agent` -> five topics                                                  | prerequisite | The hub of the map and the anchor for its first visual                          |
-| `coding-with-agents/context` and `customizing-agents/instructions`                          | related      | The same subject taught from the user side and the author side                  |
-| `coding-with-agents/verification` -> `building-agents/evaluation`                           | prerequisite | You verify one piece of work before you measure a system                        |
-| `building-agents/evaluation` before `patterns` and `orchestration`                          | path order   | Ng's ordering puts evaluation and error analysis early; not a hard prerequisite |
+| Edge                                                                                        | Type         | Why                                                                                    |
+| ------------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------- |
+| `safety/agent-risk` -> `coding-with-agents/quality`, `customizing-agents/hooks-permissions` | prerequisite | Safety gates Engineering instead of continuing as a track of its own after Foundations |
+| `concepts/what-is-an-agent` -> five topics                                                  | prerequisite | The hub of the map and the anchor for its first visual                                 |
+| `coding-with-agents/context` and `customizing-agents/instructions`                          | related      | The same subject taught from the user side and the author side                         |
+| `coding-with-agents/verification` -> `building-agents/evaluation`                           | prerequisite | You verify one piece of work before you measure a system                               |
+| `building-agents/evaluation` before `patterns` and `orchestration`                          | path order   | Ng's ordering puts evaluation and error analysis early; not a hard prerequisite        |
 
 Several competencies draw on topics from two areas. That's expected;
 competencies aren't confined to their area's topics.
@@ -520,12 +520,13 @@ competencies aren't confined to their area's topics.
    Engineering as a `building-agents` topic only. Leaning: keep a short
    version in Foundations because knowledge workers meet RAG-based products
    daily.
-2. Whether `safety/governance` is worth a Foundations lesson or only the
+2. Whether `safety/governance` deserves a Foundations lesson or only the
    `expert` objective `sets-oversight`. Leaning: one short lesson.
 3. Naming of `hooks-permissions`; it is Claude Code specific where the rest
    isn't. Decide when writing the lesson.
-4. Whether Foundations should carry any `expert` objectives at all. Two are drafted above (`keeps-a-check-habit`, `sets-oversight`);
-   drop them if Foundations stops at `base` by design.
+4. Whether Foundations should have any `expert` objectives at all.
+   `keeps-a-check-habit` and `sets-oversight` are drafted above. Drop them if
+   Foundations stops at `base` by design.
 5. Whether `coding-with-agents/specification` deserves a competency of its
    own or folds into `ships-with-agent`. Kept separate for now because
    specifying is where human skill concentrates once an agent implements.

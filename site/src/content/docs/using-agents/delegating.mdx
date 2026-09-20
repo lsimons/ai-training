@@ -21,13 +21,13 @@ sources: []
 import { Choice, Sort, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
 
 In this lesson we delegate one small task to an agent and get a result
-we can check. We write the brief, decide how much the agent may do
-before it comes back to us, and then review what it produced against the
+we can check. We write the brief and decide how much the agent may do
+before it comes back to us. Then we review what it produced against the
 brief rather than against a gut feeling. The task is deliberately small so
 you can run it as often as you like and throw the results away.
 
-You need any chat-capable agent you already have access to. Nothing here
-depends on a particular product.
+You need any chat-capable agent you already have access to. The lesson
+doesn't depend on which product you use.
 
 ## The task
 
@@ -52,30 +52,29 @@ that you can judge the agent's work later.
 The result you want is a one-page summary in this fixed format:
 
 1. A one-line title.
-2. Three bullets: what's happening, what you must do, and by when.
+2. A bullet each for what's happening, what you must do, and by when.
 3. One closing line naming who to ask.
 
 Before you write anything, predict: if you paste the memo and type
 "summarize this", what do you get back? Probably a paragraph. Possibly a
-decent one. Almost certainly not this format, and you have no way to
-say whether it is right except that it reads well. That gap is what a brief
-closes.
+decent one. Unlikely to be in this format, and you have no way to say
+whether it is right except that it reads well. A brief is how you get the format and the check.
 
 ## Writing the brief
 
 A brief has four parts: the goal, the context the work needs, the limits it
 must stay within, and how you know it is done. The agent fills in
-whatever you leave unsaid with plausible defaults. That's why what it must
-*not* do carries as much weight as what it must do, and why "summarize this"
-is a request but not a brief.
+whatever you leave unsaid with plausible defaults, so what it must not do
+matters as much as what it must do. "Summarize this" is a request but not a
+brief.
 
 Start with the goal and the limits together. The goal is the format above.
-The limits are the things a helpful agent would otherwise do for you:
-rephrase the dates, add advice the memo didn't give, drop the printer
-because it seemed minor. Write the limits as plain prohibitions.
+The limits are the things a helpful agent would otherwise do for you. It
+might rephrase the dates or add advice the memo didn't give, or drop the
+printer because it seemed minor. Write the limits as plain prohibitions.
 
 Now the context. Tell the agent which information to use and where it is.
-Here that's easy: the memo, pasted in full, and nothing else. State it
+Here that's easy: the memo, pasted in full, is the only source. State it
 anyway. An agent that has to guess its sources picks the most available
 one, not the right one, and "the latest information" is an invitation to
 invent.
@@ -117,10 +116,10 @@ Questions go to the office manager, who holds a walk-through next Tuesday
 at ten.
 </Response>
 
-The response above is illustrative, written to show the shape of a good
+The response above is illustrative, written to show the structure of a good
 result rather than recorded from one model, and your result differs in
-wording. That's fine; the brief didn't fix the wording, it fixed the
-shape and the facts.
+wording. That's fine, because the brief fixed the structure and the facts
+rather than the wording.
 
 <Repair id="fix-the-brief" objective="using-agents/delegates-and-checks/writes-a-brief"
   title="Fix the brief" hint="Which of the four parts is missing, and what would the agent fill in on its own?"
@@ -136,13 +135,13 @@ A learner sends "summarize the memo, keep it short" and gets three tidy
 bullets that omit the locker deadline. The summary reads well, so they
 forward it, and half the team loses the contents of their locker. Nothing in
 the brief said every deadline had to survive, so the agent optimized for
-short. The rule: write the done-criteria before you send the task, and make
-them things you can tick, not adjectives.
+short. The rule: write the done-criteria before you send the task and make them
+things you can tick rather than adjectives.
 </Pitfall>
 
 ## Choosing autonomy
 
-A brief says what to do. It doesn't yet say how far the agent may go
+A brief says what to do. It doesn't yet say which actions the agent may take
 before it checks in with you. For a summary that's barely a question; the
 agent writes, you read. For anything that touches the world (sending,
 deleting, paying, publishing) it is the main question.
@@ -152,7 +151,7 @@ tasks. At the first, **the human decides**: the agent gathers or drafts,
 and you take every action yourself. At the second, **the agent proposes and
 the human approves**: it prepares the action and waits for a yes before
 taking it. At the third, **the agent acts and the human reviews after**: it
-does the work and you check the outcome.
+takes the action and you check the outcome.
 
 The degree to pick depends on two things: how bad a wrong action is, and
 how easy it is to undo. Drafting the summary is cheap and reversible, so the

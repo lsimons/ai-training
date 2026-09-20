@@ -1,6 +1,6 @@
 ---
 title: Your first session with a coding agent
-description: Start a coding agent in a small repository, give it the context it needs, make one change behind a permissions prompt, and review the diff before you trust it.
+description: Start a coding agent in a small repository and give it the context it needs. Then make one change behind a permissions prompt and review the diff before you trust it.
 mode: tutorial
 covers:
   - coding-with-agents/first-session
@@ -23,14 +23,14 @@ sources:
 
 import { Predict, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
 
-In this lesson we run one complete session with a coding agent: open it
-in a small repository, ask it to explain the code, point it at a failing
-test, let it make one change, and read the diff before we accept it. The
-repository is a fixture that ships with this course, so nothing you do here
+In this lesson we run one complete session with a coding agent. We open
+it in a small repository and ask it to explain the code. We point it at a
+failing test and let it make one change. Then we read the diff before we
+accept it. The repository is a fixture that ships with this course, so nothing you do here
 can touch your own work.
 
 A coding agent is an agent that works in your terminal or editor with the
-tools a programmer has: it reads files, edits them, and runs commands. Claude
+tools a programmer has: it reads and edits files, and it runs commands. Claude
 Code is one example; there are others, and this lesson uses none of
 their specific features. Wherever it says "your coding agent", use the one
 you have installed.
@@ -65,8 +65,8 @@ python3 todo.py list
 ## Start the agent and ask it to explain
 
 Start your coding agent from inside `fixture-repo`. The directory you start
-in is the agent's world: it reads from it, edits in it, and runs commands
-in it. Starting one level too high hands it your whole home directory.
+in is the agent's world: it reads and edits files there, and it runs
+commands there. Starting one level too high hands it your whole home directory.
 
 Your first message isn't a task. It is a question, and its purpose is to
 check that the agent is looking at the same code you are.
@@ -85,14 +85,14 @@ command line but indexes the list with it directly, which looks like an
 off-by-one.
 </Response>
 
-The transcripts in this lesson are illustrative: they show the shape of a
-good exchange, not a recording of one model. Your agent phrases things
-differently, and may or may not spot the off-by-one unprompted. Either is
-fine; you are about to hand it the evidence.
+The transcripts in this lesson are illustrative: they show what a good
+exchange looks like and don't record a specific model's words. Your agent
+phrases things differently, and may or may not spot the off-by-one
+unprompted. Either is fine, because you are about to hand it the evidence.
 
 Notice what the agent read without being asked: `AGENTS.md`. Most coding
-agents load a project-instructions file at start. Four lines there set the
-rules for the whole session, and you didn't have to repeat them.
+agents load a project-instructions file at start. The lines in that file
+set the rules for the whole session, and you didn't have to repeat them.
 
 ## Find the evidence yourself
 
@@ -112,7 +112,7 @@ python3 -m unittest -q 2>&1 | tail -1
 Read the failing test. `test_done_marks_the_numbered_item` calls
 `todo.done(items, 1)` and expects `"done #1: Buy milk"`. The program says
 something else. Prove it against the committed list, on a copy so the
-fixture stays clean.
+committed file doesn't change.
 
 <Predict id="predict-done-bug" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
   title="Predict what done does" hint="The function uses the number as the index without subtracting one. Which item sits at index 1?"
@@ -125,8 +125,8 @@ TODO_FILE=/tmp/todos.json python3 todo.py done 1
 ```
 </Predict>
 
-You now hold three concrete things: the file with the bug, the test that
-catches it, and the wrong output. That's the context the agent needs. A
+You now have concrete evidence: the file with the bug, the failing test,
+and the wrong output. That's the context the agent needs. A
 brief without them makes the agent go and find them, and it may find
 something else instead.
 
@@ -179,7 +179,7 @@ and this lesson is about building the habit of reading.
 ## Review the diff
 
 The agent says it is done. It may even say the tests pass. Don't take its
-word for either; look at what changed.
+word for either. Look at what changed.
 
 ```sh
 git diff
@@ -201,8 +201,8 @@ python3 -m unittest -q 2>&1 | tail -1
 OK
 ```
 
-That output isn't asserted by this course, because your agent produced the
-edit; it is what you should see if the fix is the one above. If you see
+This course doesn't assert that output, because your agent produced the
+edit. It is what you should see if the fix is the one above. If you see
 anything else, read the diff again before you ask the agent for more.
 
 <Pitfall title="Accepting a diff you did not read">
@@ -217,12 +217,12 @@ every time.
 ## Sessions and context
 
 Everything you have said and everything the agent has read in this session
-sits in its context window: the agent's working memory. That's why the
-agent could answer "explain this repository" once and then fix the bug
-without re-reading the tests; the tests were already in context.
+is in its context window, the agent's working memory. The context window
+is how the agent could answer "explain this repository" once and then fix
+the bug without re-reading the tests. The tests were already in context.
 
 It is also why sessions should end. The context has a fixed size, and as it
-fills up, and early material drops out or gets summarized. A long session that
+fills up, early material drops out or is summarized. A long session that
 drifts across unrelated tasks gets worse at each of them. The habit to
 build: one task, one session. When you've reviewed the diff and the tests pass,
 end the session and start a fresh one for the next task.
@@ -254,5 +254,5 @@ Finish by running `git checkout -- .` so the fixture is ready for next time.
 2. Find the evidence yourself first: the file, the failing test, the wrong output. Then put those in the brief, with limits and a done-criterion.
 3. The permissions prompt is where your judgment enters; weigh the blast radius, and keep the prompt on.
 4. The agent's summary is a claim. The diff is the evidence, and you run the check you named.
-5. One task, one session. Reset the fixture and start fresh.
+5. Give each task its own session. Reset the fixture and start fresh.
 </Recap>

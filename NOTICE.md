@@ -1,7 +1,7 @@
 # Notices
 
 Content in this repository is licensed under CC BY-SA 4.0 and code under the
-Apache License 2.0; see [LICENSE](./LICENSE) and [LICENSE-CODE](./LICENSE-CODE).
+Apache License 2.0. See [LICENSE](./LICENSE) and [LICENSE-CODE](./LICENSE-CODE).
 Material incorporated from third parties is listed here with its origin and
 terms. Add an entry whenever you bring in content from elsewhere.
 

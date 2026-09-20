@@ -4,7 +4,7 @@ An open training suite for getting started with AI: concepts, safety, using
 AI agents, AI-assisted software engineering, and customizing and building AI
 agents.
 
-Site: <https://lsimons.github.io/ai-training/> (not yet published; see
+Site: <https://lsimons.github.io/ai-training/> (not yet published, see
 [Publishing](#publishing)).
 
 The basic material (AI concepts, AI safety, using AI agents) is written for
@@ -13,7 +13,7 @@ site is static HTML with interactive lessons that keep your progress in your
 browser, and you can also run it locally from a Claude Code session with
 Claude acting as a tutor.
 
-**Status: project just set up; no lesson content yet.** The plan is in
+**Status: project just set up, without lesson content yet.** The plan is in
 [`docs/plan/README.md`](./docs/plan/README.md), with exploration notes on the
 source material in [`docs/plan/explore/`](./docs/plan/explore/).
 
