@@ -10,3 +10,10 @@ lessons:
       - coding-with-agents/ships-with-agent/gives-the-right-context
     status: live
     minutes: 25
+  - id: coding-with-agents/dependency-review
+    title: Reviewing what the agent pulled in
+    covers: coding-with-agents/quality
+    serves:
+      - coding-with-agents/verifies-agent-work/screens-for-security
+    status: live
+    minutes: 20
