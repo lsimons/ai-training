@@ -29,7 +29,9 @@ export default getViteConfig({
 			// their template half is exercised by the e2e suite, and the
 			// Container API tests only render a few of them. Widen this once
 			// component tests cover the rest.
-			include: ['src/lib/**/*.ts', 'src/scripts/**/*.ts', 'scripts/lib/**/*.mjs'],
+			// `plugins/` holds the remark plugins astro.config.mjs wires in;
+			// tests/plugins runs them through unified on small MDX inputs.
+			include: ['src/lib/**/*.ts', 'src/scripts/**/*.ts', 'scripts/lib/**/*.mjs', 'plugins/**/*.mjs'],
 			// `lesson-context.ts` reads Starlight's route locals and has no
 			// logic of its own; it is exercised by the component tests and
 			// the build. The two CLI entrypoints under scripts/ are thin argv
