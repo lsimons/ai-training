@@ -6,10 +6,11 @@
 //   cd docs && bun run scripts/gen-favicon.mjs
 //
 // Writes public/favicon.svg and public/apple-touch-icon.png.
-import sharp from 'sharp';
+
 import { writeFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import sharp from 'sharp';
 
 const docsDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 

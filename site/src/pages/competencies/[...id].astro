@@ -1,14 +1,16 @@
 ---
+import { getCollection } from 'astro:content';
 /** One page per competency (spec S02 "Stable URLs"): objectives, behaviors, alignment, lessons serving it. */
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import { getCollection } from 'astro:content';
-import { getLessons } from '@lib/lessons';
 import { areaOf } from '@lib/areas';
+import { getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
 
 export async function getStaticPaths() {
 	const areas = await getCollection('competencies');
-	return areas.flatMap((a) => a.data.competencies.map((c) => ({ params: { id: c.id }, props: { competency: c, area: a.data.area } })));
+	return areas.flatMap((a) =>
+		a.data.competencies.map((c) => ({ params: { id: c.id }, props: { competency: c, area: a.data.area } })),
+	);
 }
 
 const { competency, area } = Astro.props;

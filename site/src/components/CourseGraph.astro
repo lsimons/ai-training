@@ -6,10 +6,10 @@
  * from the progress record on the client.
  */
 import { getCollection } from 'astro:content';
-import { getLessons, checkpointsOf, levelsOf } from '@lib/lessons';
 import { areaOf } from '@lib/areas';
-import { href } from '@lib/url';
 import { jsonForScript } from '@lib/json';
+import { checkpointsOf, getLessons, levelsOf } from '@lib/lessons';
+import { href } from '@lib/url';
 
 interface Props {
 	area: string;
@@ -32,7 +32,9 @@ const edges = nodes.flatMap((n) => n.assumes.map((from) => ({ from, to: n.id }))
 const competencies = (await getCollection('competencies')).find((c) => c.data.area === area)?.data.competencies ?? [];
 const topics = await getCollection('topics');
 const covered = new Set(lessons.flatMap((l) => l.data.covers ?? []));
-const prerequisites = [...new Set(topics.filter((t) => covered.has(t.data.id)).flatMap((t) => t.data.links.prerequisites))]
+const prerequisites = [
+	...new Set(topics.filter((t) => covered.has(t.data.id)).flatMap((t) => t.data.links.prerequisites)),
+]
 	.filter((p) => !p.startsWith(`${area}/`))
 	.map((p) => topics.find((t) => t.data.id === p))
 	.filter((t): t is NonNullable<typeof t> => Boolean(t));

@@ -18,7 +18,8 @@ interface Props {
 }
 const { id, objective, title, hint, review, revision, buckets, items } = Astro.props;
 for (const it of items) {
-	if (it.bucket < 0 || it.bucket >= buckets.length) throw new Error(`Sort "${id}": item "${it.text}" points at bucket ${it.bucket}`);
+	if (it.bucket < 0 || it.bucket >= buckets.length)
+		throw new Error(`Sort "${id}": item "${it.text}" points at bucket ${it.bucket}`);
 }
 ---
 
