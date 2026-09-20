@@ -1,16 +1,8 @@
 ---
 /** The progress page (spec S04 "Export and import"): overview per course, export, import, reset, and the raw record. */
-import { AREAS } from '@lib/areas';
-import { getLessons, checkpointsOf } from '@lib/lessons';
+import { buildCatalog } from '@lib/catalog';
 
-const lessons = await getLessons();
-const catalog = AREAS.map((a) => ({
-	area: a.slug,
-	title: a.name,
-	lessons: lessons
-		.filter((l) => l.id.startsWith(`${a.slug}/`))
-		.map((l) => ({ id: l.id, title: l.data.title, checkpoints: checkpointsOf(l).map((c) => c.id) })),
-}));
+const catalog = await buildCatalog();
 ---
 
 <div class="not-content progress" data-catalog={JSON.stringify(catalog)}>
