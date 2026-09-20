@@ -34,6 +34,12 @@ The site's own checks, in the order `ci` runs them after the prose tasks:
 machine. `docs/agents/testing.md` says which layer a new assertion belongs
 in.
 
+The Python tasks are prefixed `py-`: `py-install-frozen` (uv sync from
+`uv.lock`), `py-lint` (ruff check and format check), `py-format` (ruff
+fixes), `py-typecheck` (basedpyright) and `py-test` (pytest with coverage).
+They cover `scripts/`, `tests/` and the Python fixtures under
+`site/examples/`, and `pyproject.toml` holds their config.
+
 ### Astro 7 dev server
 
 `astro dev` (what `mise run site-dev` runs) detaches into a background
@@ -179,12 +185,20 @@ patterns below after the fact. Write so that it has nothing to say.
   should type. `mise run prose-extended` adds passive-voice, first-person
   and semicolon rules; most hits are idiom, so rewrite only what hides who
   does what.
+- Python (`mise run py-lint`, `py-typecheck`, `py-test`): ruff check and
+  format are clean over every `.py` file, basedpyright is clean at `strict`
+  over `scripts/` and `tests/` and at `standard` (Python 3.9) over
+  `site/examples/`, and coverage of `scripts/` stays at or above 80%.
+  `scripts/` keeps its logic in functions that `tests/` imports, with a
+  thin `__main__` block. Prefer fixing the cause over a `# noqa` or a
+  `# type: ignore`. Where one stays, it names the rule and the reason on
+  the same line.
 - Re-render and commit a deck's HTML/PDF whenever you change its `.qmd`.
 - No unexplained rule disables in `.markdownlint-cli2.jsonc`; say which files
   and why, on the same line.
-- Never weaken a control to make a check pass: no unpinned actions, no
-  dropped `prek.toml` hooks, no `.lychee.toml` exclusions for URLs that are
-  really broken.
+- Never weaken a control to make a check pass. That covers unpinning an
+  action, dropping a `prek.toml` hook, excluding a really broken URL in
+  `.lychee.toml`, lowering the coverage floor, and deleting a test.
 
 **Supply chain:**
 
@@ -193,6 +207,11 @@ patterns below after the fact. Write so that it has nothing to say.
   deliberately changing dependencies, and commit the result.
 - Dependencies in `site/package.json` stay as ranges; `bun.lock` is the pin,
   and dependabot moves the constraint.
+- `uv.lock` is committed and must stay in the tree. `mise run ci` and CI
+  install with `py-install-frozen`. The dev group in `pyproject.toml` is
+  exact-pinned. Use `mise run py-install` when deliberately changing it,
+  commit the result, and move the `ruff-pre-commit` rev in `prek.toml` to
+  the same ruff version.
 - `mise run site-audit` (`bun audit`) must be clean. Fix an advisory in a
   *transitive* package with the `overrides` block in `site/package.json`.
 - Pin GitHub Actions to full-length commit SHAs. `zizmor` enforces it.
