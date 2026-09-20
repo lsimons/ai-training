@@ -4,7 +4,9 @@
  * "You can now..." from the served objectives, and the finish button. Where
  * to go next is the page footer's previous/next, which follows the sidebar
  * order (lesson, then the next course). `extends-to` only feeds the "You
- * are ahead" card. Sources live on the topic pages.
+ * are ahead" card. The topic page lists a topic's sources, and a page that
+ * cites `(@key)` gets a References section after its content from the
+ * citation remark plugin.
  */
 import { getCollection } from 'astro:content';
 import { lessonEntryOf } from '@lib/lesson-context';

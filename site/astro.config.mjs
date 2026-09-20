@@ -75,7 +75,15 @@ function loadTopics() {
 		const dir = new URL(`${area}/`, root);
 		return readdirSync(dir)
 			.filter((f) => f.endsWith('.yaml'))
-			.map((f) => parseYaml(readFileSync(new URL(f, dir), 'utf8')))
+			.map((f) => {
+				const topic = parseYaml(readFileSync(new URL(f, dir), 'utf8'));
+				// The sidebar groups by `area`; a topic filed under another
+				// area's directory would silently drop out of it.
+				if (topic.area !== area) {
+					throw new Error(`src/data/topics/${area}/${f}: area is "${topic.area}" but the file is in the ${area} directory`);
+				}
+				return topic;
+			})
 			.sort((a, b) => a.name.localeCompare(b.name));
 	});
 }
@@ -100,10 +108,12 @@ export default defineConfig({
 	site: 'https://lsimons.github.io',
 	base,
 	markdown: {
-		// Citations `(@key)` and first-mention terms (spec S03 "Citations and
-		// terms"). Both emit root-relative or in-page links, so they run before
-		// rehypeBaseLinks, which adds the deploy base.
-		remarkPlugins: [[remarkCitations, { bibliography }], [remarkTerms, { topics }]],
+		// First-mention terms, then citations `(@key)` (spec S03 "Citations and
+		// terms"). Terms run first so the References list the citation plugin
+		// appends is never scanned for terms. Both emit root-relative or
+		// in-page links, so they run before rehypeBaseLinks, which adds the
+		// deploy base.
+		remarkPlugins: [[remarkTerms, { topics }], [remarkCitations, { bibliography }]],
 		rehypePlugins: [rehypeBaseLinks],
 	},
 	// The Quarto slide deck is a static file at /presentations/example.html.
@@ -123,10 +133,11 @@ export default defineConfig({
 			// The glossary anchors (`/glossary/#<concept>`) are rendered by the
 			// Glossary component, so the validator, which only reads Markdown
 			// headings, cannot see them and would reject every term link the
-			// remark-terms plugin emits. Those links are built from concept ids
-			// that exist in the topic YAML by construction, so the hash check on
-			// that one page is excluded rather than the links dropped. Every
-			// other link is still validated.
+			// remark-terms plugin emits. That one prefix is excluded here, and
+			// remark-terms covers it instead: it fails the build on any Markdown
+			// link to `/glossary/#<id>` whose id is not a concept, on every page,
+			// and its own links are built from concept ids. Every other link is
+			// still validated by the plugin below.
 			plugins: [
 				starlightLinksValidator({
 					exclude: ({ link }) => link.startsWith(`${base}/glossary/#`),
