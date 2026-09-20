@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { CHECKPOINT_KINDS, DEFAULT_REVISION, isReviewable, type CheckpointKind } from './checkpoint-rules';
+import { DEFAULT_REVISION, KIND_OF_TAG, isReviewable, type CheckpointKind } from './checkpoint-rules';
 
 export type Lesson = CollectionEntry<'docs'>;
 
@@ -12,7 +12,7 @@ export interface CheckpointInfo {
 	revision: number;
 }
 
-const TAG_START = /<(Choice|Scenario|Predict|Order|Sort|Repair)\b/g;
+const TAG_START = new RegExp(`<(${Object.keys(KIND_OF_TAG).join('|')})\\b`, 'g');
 
 /** Every lesson: a docs entry with `mode` in its frontmatter. */
 export async function getLessons(area?: string): Promise<Lesson[]> {
@@ -67,8 +67,8 @@ export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 	const out: CheckpointInfo[] = [];
 	for (const m of src.matchAll(TAG_START)) {
 		const tag = openingTag(src, m.index);
-		const kind = m[1].toLowerCase() as CheckpointKind;
-		if (!CHECKPOINT_KINDS.includes(kind)) throw new Error(`${lesson.id}: unknown checkpoint kind ${kind}`);
+		const kind: CheckpointKind | undefined = KIND_OF_TAG[m[1]];
+		if (!kind) throw new Error(`${lesson.id}: unknown checkpoint tag <${m[1]}>`);
 		const id = attrValue(tag, 'id');
 		if (!id) throw new Error(`${lesson.id}: <${m[1]}> without an id: ${tag.slice(0, 80)}`);
 		const title = attrValue(tag, 'title') ?? id;

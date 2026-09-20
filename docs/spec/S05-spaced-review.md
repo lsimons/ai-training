@@ -6,7 +6,8 @@ surface, and what's stored.
 
 **Status:** In progress - the schedule, one review page per course, Give Up,
 stage pills, the per-item frequency control, `review: false`, `revision`
-resets, the course review card and the tutor's recall question are
+resets, the course review card, the tutor's recall question and every
+reviewable interaction type (`match` and `multi-choice` included) are
 implemented (2026-09-20). Deferred: variants, the sidebar due count, the
 landing page due lines, and the routing rule for items failed twice.
 
@@ -27,8 +28,8 @@ the only mechanism that brings a learner back to old material.
 
 - Every **checkpoint** in a lesson becomes a **review item** when the lesson
   is finished, regardless of whether it was passed or skipped in the lesson.
-- Reviewable interaction types: `predict`, `choice`, `match`, `sort`,
-  `order`, `scenario`.
+- Reviewable interaction types: `predict`, `choice`, `multi-choice`,
+  `match`, `sort`, `order`, `scenario`.
 - Not reviewed: `repair`, `self-grade`, `exercise` and `reflection`. They
   are too long or not gradable.
 - Authors may mark a checkpoint `review: false` (a one-off that doesn't

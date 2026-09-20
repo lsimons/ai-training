@@ -27,6 +27,8 @@
 .checkpoint .cp-stem > :first-child { margin-top: 0; }
 .cp-options label { display: flex; gap: 0.5rem; align-items: baseline; padding: 0.3rem 0; cursor: pointer; }
 .cp-options label.cp-answer { outline: 2px solid var(--at-done); outline-offset: 2px; border-radius: 4px; }
+.cp-multi { border: 0; padding: 0; margin: 0; }
+.cp-multi legend { font-size: 0.85rem; color: var(--sl-color-gray-3); padding: 0; }
 .cp-label { display: block; font-size: 0.8rem; color: var(--sl-color-gray-3); margin-top: 0.5rem; }
 .checkpoint textarea { width: 100%; font-family: var(--sl-font-mono); font-size: 0.9rem; padding: 0.4rem; border: 1px solid var(--sl-color-gray-4); border-radius: 4px; background: var(--sl-color-bg); color: var(--sl-color-text); }
 .checkpoint pre { background: var(--sl-color-gray-6); padding: 0.5rem 0.75rem; border-radius: 4px; font-size: 0.9rem; white-space: pre-wrap; }
@@ -54,6 +56,18 @@
 .cp-order li::marker { color: var(--sl-color-gray-3); }
 .cp-move { margin-left: auto; display: flex; gap: 0.25rem; }
 .cp-move button { padding: 0 0.5rem; }
+
+/* match */
+.cp-match { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
+.cp-match-row { display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 0.75rem; align-items: center; padding: 0.4rem 0.6rem; border: 1px solid var(--sl-color-gray-5); border-radius: 4px; background: var(--sl-color-bg-nav); }
+.cp-match-row select { font: inherit; font-size: 0.9rem; padding: 0.25rem 0.4rem; border: 1px solid var(--sl-color-gray-4); border-radius: 4px; background: var(--sl-color-bg); color: var(--sl-color-text); max-width: 100%; }
+.cp-match-row[data-state='right'] { border-color: var(--at-done); }
+.cp-match-row[data-state='wrong'] { border-color: var(--at-warn); }
+.cp-row-feedback { grid-column: 1 / -1; font-size: 0.85rem; }
+.cp-row-feedback:empty { display: none; }
+.cp-match-row[data-state='right'] .cp-row-feedback { color: var(--at-done-text); }
+.cp-match-row[data-state='wrong'] .cp-row-feedback { color: var(--at-warn); }
+@media (max-width: 40rem) { .cp-match-row { grid-template-columns: 1fr; } }
 
 /* sort */
 .cp-sort { display: grid; gap: 0.75rem; margin-top: 0.5rem; }

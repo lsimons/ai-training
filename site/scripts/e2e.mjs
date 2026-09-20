@@ -90,11 +90,29 @@ cp = page.locator('#autonomy-levels');
 const chips = await cp.locator('.cp-pool .cp-chip').count(); expect(chips, atLeast(2), 'sort chips');
 for (let i = 0; i < chips; i++) { const chip = cp.locator('.cp-pool .cp-chip').first(); const b = await chip.getAttribute('data-bucket'); await chip.click(); await cp.locator(`.cp-bucket[data-bucket="${b}"] .cp-bucket-target`).click(); }
 await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'All placed correctly.', 'sort all right');
+// multi-choice: exactly the N correct boxes, no false positives
+cp = page.locator('#which-criteria-tick'); expect(await cp.getAttribute('data-reviewable'), 'true', 'multi-choice reviewable');
+await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Pick 3 answers first.', 'multi-choice nothing picked');
+await cp.locator('label[data-correct]').first().click(); await cp.locator('.cp-check').first().click(); expect(await fb(cp), '1 of 3 so far, and nothing wrong. 2 more to find.', 'multi-choice partial');
+await cp.locator('label:not([data-correct])').first().click(); await cp.locator('.cp-check').first().click(); expect(await fb(cp), /^Clear to whom\?/, 'multi-choice wrong pick shows its why');
+await cp.locator('label:not([data-correct])').first().click();
+for (const l of await cp.locator('label[data-correct]').all()) if (!(await l.locator('input').isChecked())) await l.click();
+await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Correct.', 'multi-choice right'); expect(await cp.getAttribute('data-state'), 'passed', 'multi-choice state');
 cp = page.locator('#fix-the-brief'); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Write your fix, then reveal the model answer and compare.', 'repair before reveal');
 await cp.locator('.cp-reveal-btn').click(); await cp.locator('input[value=pass]').check(); await cp.locator('.cp-check').first().click();
 expect(await fb(cp), 'Recorded as a pass.', 'repair pass'); expect(await cp.getAttribute('data-state'), 'passed', 'repair state');
 await page.goto(`${B}/safety/agent-risk/`);
 cp = page.locator('#blast-radius-of-a-tidy-up'); await cp.locator('label').first().click(); await cp.locator('.cp-check').first().click(); expect(await fb(cp), nonEmpty, 'scenario feedback');
+// match: one select per row, per-row feedback, rationale on a full pass
+cp = page.locator('#smallest-access'); expect(await cp.getAttribute('data-reviewable'), 'true', 'match reviewable');
+await cp.locator('.cp-check').first().click(); expect(await fb(cp), '3 rows still to fill.', 'match nothing filled');
+const rows = await cp.locator('.cp-match-row').all();
+for (const r of rows) await r.locator('select').selectOption('3');
+await cp.locator('.cp-check').first().click(); expect(await fb(cp), '3 rows wrong. Each row says which.', 'match all wrong');
+expect(await rows[0].getAttribute('data-state'), 'wrong', 'match row state'); expect(await rows[0].locator('.cp-row-feedback').textContent(), /^A reply that is not sent yet/, 'match row why');
+for (const r of rows) await r.locator('select').selectOption(await r.getAttribute('data-option'));
+await cp.locator('.cp-check').first().click(); expect(await fb(cp), /^Correct\. In each case the task is done just as well/, 'match right with rationale');
+expect(await cp.getAttribute('data-state'), 'passed', 'match state');
 cp = page.locator('#predict-the-planted-instruction');
 expect(await cp.getAttribute('data-reviewable'), 'false', 'honor predict not reviewable');
 await cp.locator('textarea').fill('it will write the file'); await cp.locator('input[value=pass]').check(); await cp.locator('.cp-check').first().click(); expect(await fb(cp), 'Recorded as a pass.', 'honor predict');

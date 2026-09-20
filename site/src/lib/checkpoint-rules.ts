@@ -3,9 +3,21 @@
  * one source of truth for both the rendered `data-reviewable` attribute
  * (CheckpointShell) and the build-time catalog (`checkpointsOf`).
  */
-export type CheckpointKind = 'choice' | 'scenario' | 'predict' | 'order' | 'sort' | 'repair';
+export type CheckpointKind = 'choice' | 'multi-choice' | 'match' | 'scenario' | 'predict' | 'order' | 'sort' | 'repair';
 
-export const CHECKPOINT_KINDS: CheckpointKind[] = ['choice', 'scenario', 'predict', 'order', 'sort', 'repair'];
+export const CHECKPOINT_KINDS: CheckpointKind[] = ['choice', 'multi-choice', 'match', 'scenario', 'predict', 'order', 'sort', 'repair'];
+
+/** Component name (the MDX tag) to checkpoint kind (the `data-kind` value). */
+export const KIND_OF_TAG: Record<string, CheckpointKind> = {
+	Choice: 'choice',
+	MultiChoice: 'multi-choice',
+	Match: 'match',
+	Scenario: 'scenario',
+	Predict: 'predict',
+	Order: 'order',
+	Sort: 'sort',
+	Repair: 'repair',
+};
 
 /** Default `revision` for a checkpoint that does not declare one. */
 export const DEFAULT_REVISION = 1;
