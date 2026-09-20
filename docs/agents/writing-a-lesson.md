@@ -103,9 +103,9 @@ A concept id is the `id` of a `concepts` entry in a topic YAML under
 `blast-radius`), and it may come from any topic, not only the one the
 lesson covers. The build fails on an unknown id.
 
-`context` is optional: one paragraph of plain text (no Markdown, and no
-double quotes because it is a JSX string) that makes the item readable
-outside its lesson. The lesson page doesn't show it, because the lesson is
+`context` is optional: one paragraph of plain text (no Markdown, and none
+of the quote character that delimits the prop value) that makes the item
+readable outside its lesson. The lesson page doesn't show it, because the lesson is
 the context there. The review page shows it above the stem, and the export
 (below) includes it. Write one for every reviewed checkpoint (`review` not
 `false`, and not a `Repair` or an honor-system `Predict`) whose stem or

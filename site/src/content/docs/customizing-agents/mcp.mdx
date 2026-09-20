@@ -154,7 +154,7 @@ holds the table above as a list of `(name, kind, description)` tuples,
 and `CANNOT` holds the five operations from the can't list.
 
 <Predict id="predict-the-inventory" objective="customizing-agents/connects-tools-safely/weighs-tool-cost"
-  concepts={['tool-cost', 'mcp-primitives']}
+  concepts={['tool-cost', 'server']}
   context="The lesson lists the tools of a fictional MCP server, teamdocs, in a table with a kind column, read or write, followed by a paragraph naming the operations the server cannot do. TOOLS holds the table rows and CANNOT the operations."
   title="Count the inventory" hint="Count the table rows by kind, then count the operations the paragraph after the table says the server can't do."
   answer="8 read, 7 write, 5 cannot" run="customizing-agents/mcp/inventory.py">
@@ -283,7 +283,7 @@ replaces the control that would have prevented the writes.
 </Pitfall>
 
 <Scenario id="forty-edits" objective="customizing-agents/connects-tools-safely/hardens-a-connection"
-  concepts={['mcp-security', 'tool-cost']}
+  concepts={['mcp-security', 'human-in-the-loop']}
   context="teamdocs is a fictional MCP server that gives an agent read and write access to a team wiki."
   title="The forty edits" hint="Which option keeps the decision with you for each change, and which options only reduce the damage after the fact?"
   options={[

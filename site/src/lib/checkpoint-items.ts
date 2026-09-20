@@ -1,6 +1,7 @@
 import type { CheckpointKind } from './checkpoint-rules';
+import { type CheckpointAttr, propValue } from './checkpoint-source';
 import { assertKnownConcepts, knownConceptIds } from './concepts';
-import { type CheckpointInfo, checkpointsOf, checkpointTagsOf, getLessons, type Lesson } from './lessons';
+import { checkpointOf, checkpointTagsOf, getLessons, type Lesson } from './lessons';
 
 /**
  * A checkpoint as a standalone item (spec S03 "Checkpoint export"): what the
@@ -42,31 +43,13 @@ interface ItemLike {
 	bucket: number;
 }
 
-/**
- * The value of an expression prop (`options={[...]}`), evaluated. The
- * expressions are JavaScript literals written by the lesson authors in this
- * repository and evaluated at build only, so `Function` is the parser here
- * rather than a second JSX-literal grammar.
- */
-function evaluate(where: string, name: string, expr: string): unknown {
-	try {
-		return new Function(`return (${expr});`)();
-	} catch (e) {
-		throw new Error(`${where}: cannot evaluate ${name}={...}: ${(e as Error).message}`);
-	}
-}
-
 /** `options` and `answer` for one checkpoint, per kind. */
 function shapeOf(
 	where: string,
 	kind: CheckpointKind,
-	attrs: Map<string, { value: string; expr: boolean }>,
+	attrs: Map<string, CheckpointAttr>,
 ): { options: unknown; answer: unknown } {
-	const prop = (name: string): unknown => {
-		const a = attrs.get(name);
-		if (!a) return undefined;
-		return a.expr ? evaluate(where, name, a.value) : a.value;
-	};
+	const prop = (name: string): unknown => propValue(where, attrs, name);
 	switch (kind) {
 		case 'choice':
 		case 'scenario': {
@@ -106,12 +89,9 @@ function shapeOf(
 
 /** The standalone items of one lesson. Concept ids are not checked here; `buildCheckpointExport` does that. */
 export function checkpointItemsOf(lesson: Lesson): CheckpointItem[] {
-	const tags = checkpointTagsOf(lesson);
-	return checkpointsOf(lesson).map((c: CheckpointInfo, i) => {
-		const tag = tags[i];
-		if (!tag) throw new Error(`${lesson.id}#${c.id}: no tag at index ${i}`);
-		const where = `${lesson.id}#${c.id}`;
-		const { options, answer } = shapeOf(where, c.kind, tag.attrs);
+	return checkpointTagsOf(lesson).map((tag) => {
+		const c = checkpointOf(lesson, tag);
+		const { options, answer } = shapeOf(`${lesson.id}#${c.id}`, c.kind, tag.attrs);
 		return {
 			id: c.id,
 			lesson: lesson.id,
