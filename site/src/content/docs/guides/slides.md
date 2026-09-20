@@ -10,7 +10,7 @@ to two static outputs that live in `site/public/presentations/`:
   (`example.html`), themed to match the site.
 - **PDF** - a printable version (`example.pdf`) via Quarto's Beamer output.
 
-There is a worked example at
+A worked example lives at
 [`site/public/presentations/example.qmd`](/presentations/example.qmd). Open the
 rendered [HTML slides](/presentations/example.html) or the
 [PDF](/presentations/example.pdf).

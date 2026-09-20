@@ -4,7 +4,7 @@ This document is the entry point for the *AI Training* specifications.
 
 Specs are the durable design record of the site: what it contains, what it
 teaches, how lessons are written, how learning is recorded and reviewed, and
-what ships. Each spec reads completely on its own.
+what ships. Each spec reads on its own.
 
 ## Spec index
 
@@ -27,7 +27,7 @@ what ships. Each spec reads completely on its own.
 
 ## Reading order and cross-references
 
-- Specs are numbered in dependency order. A spec may refer back to a
+- Specs are numbered in dependency order. A spec may refer to a
   lower-numbered spec and must not refer forward to a higher-numbered one.
   When a later spec needs a term or rule, it links back; when an earlier
   spec would need a later detail, it states only what it needs and leaves

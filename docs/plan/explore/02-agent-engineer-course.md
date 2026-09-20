@@ -89,8 +89,8 @@ Leo's own work: the Starlight port, the rewrite for the Claude stack
 (Google/Gemini/Vertex+ADK replaced; lesson 12 renamed), the production toolbox,
 folding in Addy's 2026 blog insights (lessons 07/09/10/13/15/17/18), landing
 page, README and attribution, theme, Pages deploy, widget fixes, all tooling,
-AGENTS.md, and the `/teach` skill. Lesson prose structure and the widgets are
-largely upstream Addy content, edited throughout by Leo. Attribution is in
+AGENTS.md, and the `/teach` skill. Lesson prose structure and the widgets come
+from upstream Addy content, edited throughout by Leo. Attribution is in
 `README.md` ("Origins"), `AGENTS.md`, and `index.mdx` ("About this course").
 
 ## License and reuse
