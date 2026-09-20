@@ -8,7 +8,8 @@
       "version": "0.3.0",
       "dependencies": {
         "date-fmt": "^2.4.0",
-        "tiny-router": "^4.19.0"
+        "microroute-js": "^4.19.0",
+        "zero-pad-left-lite": "^0.2.0"
       }
     },
     "node_modules/date-fmt": {
@@ -16,17 +17,22 @@
       "resolved": "https://registry.example.invalid/date-fmt/-/date-fmt-2.4.0.tgz",
       "license": "MIT",
       "dependencies": {
-        "iso-week": "^1.0.0"
+        "week-of-year-iso": "^1.0.0"
       }
     },
-    "node_modules/iso-week": {
+    "node_modules/week-of-year-iso": {
       "version": "1.0.3",
-      "resolved": "https://registry.example.invalid/iso-week/-/iso-week-1.0.3.tgz",
+      "resolved": "https://registry.example.invalid/week-of-year-iso/-/week-of-year-iso-1.0.3.tgz",
       "license": "MIT"
     },
-    "node_modules/tiny-router": {
+    "node_modules/zero-pad-left-lite": {
+      "version": "0.2.1",
+      "resolved": "https://registry.example.invalid/zero-pad-left-lite/-/zero-pad-left-lite-0.2.1.tgz",
+      "license": "MIT"
+    },
+    "node_modules/microroute-js": {
       "version": "4.21.2",
-      "resolved": "https://registry.example.invalid/tiny-router/-/tiny-router-4.21.2.tgz",
+      "resolved": "https://registry.example.invalid/microroute-js/-/microroute-js-4.21.2.tgz",
       "license": "MIT"
     }
   }
