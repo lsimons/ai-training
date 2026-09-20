@@ -19,5 +19,5 @@ terms. Add an entry whenever you bring in content from elsewhere.
   own license on that page.
 - **Diátaxis** (<https://diataxis.fr/>), Daniele Procida. Licensed under
   CC BY-SA 4.0. This project adopts its four documentation kinds and the
-  compass; see `docs/plan/explore/08-diataxis.md`. Where Diátaxis text is
+  compass; see `docs/spec/S03-lesson-authoring.md`. Where Diátaxis text is
   adapted, the page says so.

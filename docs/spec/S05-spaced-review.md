@@ -4,7 +4,11 @@
 without a backend: which items are reviewed, on what schedule, where reviews
 surface, and what's stored.
 
-**Status:** Draft
+**Status:** In progress - the schedule, one review page per course, Give Up,
+stage pills, the per-item frequency control, `review: false`, `revision`
+resets, the course review card and the tutor's recall question are
+implemented (2026-09-20). Deferred: variants, the sidebar due count, the
+landing page due lines, and the routing rule for items failed twice.
 
 ## Introduction
 
