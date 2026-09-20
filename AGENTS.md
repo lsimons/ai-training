@@ -154,7 +154,7 @@ verbatim and must include the base path.
 - `mise run prose` (Vale) runs over every tracked `.md`/`.mdx` file and the
   YAML under `site/src/data/`, minus `site/examples/`. Only errors fail:
   wrongly cased names, a doubled word, and the proselint tripwires
-  (annotations left in text, slurs, "PIN number", date forms). Spelling is
+  (annotations left in text, slurs, redundant acronyms, date forms). Spelling is
   cspell's job, not Vale's. The Vale vocabulary in
   `.vale/styles/config/vocabularies/ai-training/accept.txt` holds the
   canonical casing of names ("Quarto", "Anthropic") and the TooWordy
