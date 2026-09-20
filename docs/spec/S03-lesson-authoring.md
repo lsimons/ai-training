@@ -150,6 +150,10 @@ pitfall and the exercise.
   why: what the learner can do afterwards, or what it protects them from.
   It closes with one reflection question, which is also what the model
   answer speaks to.
+- An exercise is either a *do* (run, build, try, automate) or a *judge*
+  (compare, measure, assess, red-team). Both are the one `Exercise` kind.
+  The distinction is authoring guidance, so a course doesn't end up with
+  only one flavor by accident.
 
 ## Widgets
 
