@@ -100,7 +100,9 @@ describe('Predict', () => {
 describe('Order and Sort', () => {
 	it('Order numbers the steps in the correct order with move buttons', async () => {
 		const html = await render(Order, { ...base, steps: ['first', 'second'] });
-		expect(html).toMatch(/<li data-pos="1">[\s\S]*first[\s\S]*<li data-pos="2">[\s\S]*second/);
+		expect(html).toMatch(
+			/<li data-pos="1" draggable="true">[\s\S]*first[\s\S]*<li data-pos="2" draggable="true">[\s\S]*second/,
+		);
 		expect(html).toContain('data-move="up"');
 		expect(html).toContain('aria-label="Move &quot;first&quot; up"');
 	});
@@ -114,7 +116,9 @@ describe('Order and Sort', () => {
 			],
 		});
 		expect(html.match(/class="cp-chip"/g)).toHaveLength(2);
+		expect(html.match(/draggable="true"/g)).toHaveLength(2);
 		expect(html).toContain('data-bucket="1"');
+		expect(html).toContain('Unplaced (drag an item to a bucket, or select it and then click the bucket)');
 		expect(html.match(/class="cp-bucket-target"/g)).toHaveLength(2);
 	});
 	it('Sort rejects an item pointing outside the buckets', async () => {

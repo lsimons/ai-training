@@ -1,5 +1,5 @@
 ---
-/** Put steps in sequence (spec S01 `order`). `steps` is the correct order; the page shuffles. */
+/** Put steps in sequence by dragging rows or with the arrows (spec S01 `order`). `steps` is the correct order; the page shuffles. */
 import CheckpointShell from './CheckpointShell.astro';
 
 interface Props {
@@ -20,7 +20,7 @@ const { id, objective, title, hint, review, revision, steps } = Astro.props;
 		<ol class="cp-order" aria-label="Steps to order">
 			{
 				steps.map((s, i) => (
-					<li data-pos={i + 1}>
+					<li data-pos={i + 1} draggable="true">
 						<span class="cp-step">{s}</span>
 						<span class="cp-move">
 							<button type="button" data-move="up" aria-label={`Move "${s}" up`}>↑</button>

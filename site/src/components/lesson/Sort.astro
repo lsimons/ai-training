@@ -1,5 +1,5 @@
 ---
-/** Place chips into labeled buckets, click-to-select then click-a-bucket (spec S01 `sort`). */
+/** Place chips into labeled buckets by drag-and-drop, or click-to-select then click-a-bucket (spec S01 `sort`). */
 import CheckpointShell from './CheckpointShell.astro';
 
 interface Item {
@@ -28,11 +28,11 @@ for (const it of items) {
 	<Fragment slot="body">
 		<div class="cp-sort">
 			<div class="cp-pool-wrap">
-				<button type="button" class="cp-pool-target">Unplaced (select an item, then a bucket)</button>
+				<button type="button" class="cp-pool-target">Unplaced (drag an item to a bucket, or select it and then click the bucket)</button>
 				<div class="cp-pool">
 					{
 						items.map((it) => (
-							<button type="button" class="cp-chip" data-bucket={it.bucket} aria-pressed="false">
+							<button type="button" class="cp-chip" data-bucket={it.bucket} aria-pressed="false" draggable="true">
 								{it.text}
 							</button>
 						))

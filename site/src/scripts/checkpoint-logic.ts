@@ -50,6 +50,15 @@ export function rotateIfSolved<T>(items: readonly T[], positionOf: (item: T) => 
 	return out;
 }
 
+/**
+ * Where a dragged row lands relative to the row under the pointer (`order`
+ * drag-and-drop): before it when the pointer is in its top half, after it
+ * otherwise. `rect` is the hovered row's bounding box.
+ */
+export function dropPlacement(pointerY: number, rect: { top: number; height: number }): 'before' | 'after' {
+	return pointerY < rect.top + rect.height / 2 ? 'before' : 'after';
+}
+
 /** The `choice` and `scenario` verdict (spec S01 `choice`: a wrong pick shows its own `why`). */
 export function choiceFeedback(ok: boolean, why: string | undefined, consequence: string | undefined): Feedback {
 	if (ok) return { kind: 'ok', text: consequence ? `Correct. ${consequence}` : 'Correct.' };

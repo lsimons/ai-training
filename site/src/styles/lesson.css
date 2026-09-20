@@ -54,6 +54,11 @@
 .cp-order { list-style: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
 .cp-order li { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.5rem; border: 1px solid var(--sl-color-gray-5); border-radius: 4px; margin: 0.25rem 0; background: var(--sl-color-bg-nav); }
 .cp-order li::marker { color: var(--sl-color-gray-3); }
+/* Rows drag. The arrow buttons keep the pointer from the shared button rule above. */
+.cp-order li { cursor: grab; }
+.cp-order li:active { cursor: grabbing; }
+.cp-order li::before { content: '⋮⋮'; color: var(--sl-color-gray-3); letter-spacing: -0.15em; font-size: 0.8rem; }
+.cp-order li.cp-dragging { opacity: 0.5; }
 .cp-move { margin-left: auto; display: flex; gap: 0.25rem; }
 .cp-move button { padding: 0 0.5rem; }
 
@@ -75,6 +80,10 @@
 .cp-pool, .cp-bucket-items { display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 2.2rem; padding: 0.4rem; border: 1px dashed var(--sl-color-gray-4); border-radius: 4px; }
 .cp-chip { border-radius: 999px !important; padding: 0.2rem 0.7rem !important; font-size: 0.85rem !important; }
 .cp-chip[aria-pressed='true'] { outline: 2px solid var(--sl-color-accent); background: var(--sl-color-accent-low) !important; }
+.checkpoint .cp-chip { cursor: grab; }
+.checkpoint .cp-chip:active { cursor: grabbing; }
+.cp-chip.cp-dragging { opacity: 0.5; }
+.cp-bucket.cp-drop-hover .cp-bucket-items, .cp-pool-wrap.cp-drop-hover .cp-pool { border-style: solid; border-color: var(--sl-color-accent); background: var(--sl-color-accent-low); }
 .cp-buckets { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0.5rem; }
 .cp-bucket-target, .cp-pool-target { width: 100%; text-align: left; font-weight: 600; }
 .cp-bucket-target::after, .cp-pool-target::after { content: ' ↓'; color: var(--sl-color-gray-3); }

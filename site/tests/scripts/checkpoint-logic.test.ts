@@ -1,6 +1,7 @@
 import {
 	answersMatch,
 	choiceFeedback,
+	dropPlacement,
 	historyDisplay,
 	isSequential,
 	matchVerdict,
@@ -48,6 +49,16 @@ describe('shuffle', () => {
 		expect(rotateIfSolved([1, 2, 3], pos)).toEqual([2, 3, 1]);
 		expect(rotateIfSolved([2, 1, 3], pos)).toEqual([2, 1, 3]);
 		expect(rotateIfSolved([1], pos)).toEqual([1]);
+	});
+});
+
+describe('dropPlacement', () => {
+	it('lands before the hovered row in its top half and after it otherwise', () => {
+		const rect = { top: 100, height: 40 };
+		expect(dropPlacement(100, rect)).toBe('before');
+		expect(dropPlacement(119, rect)).toBe('before');
+		expect(dropPlacement(120, rect)).toBe('after');
+		expect(dropPlacement(139, rect)).toBe('after');
 	});
 });
 
