@@ -87,6 +87,8 @@ mise.local.toml
 .claude/settings.local.json
 .claude/worktrees
 
-# Vale styles fetched by `mise run prose-sync` from the release URL pinned
-# in .vale.ini.
+# Vale styles fetched by `mise run prose-sync` (or `vale --config
+# .vale-eval.ini sync` for packages under evaluation) from the release URLs
+# pinned in .vale.ini and .vale-eval.ini.
 .vale/styles/write-good/
+.vale/styles/proselint/
