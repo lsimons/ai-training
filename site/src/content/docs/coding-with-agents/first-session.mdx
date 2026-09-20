@@ -19,7 +19,7 @@ extends-to:
     href: /coding-with-agents/workflow/
 ---
 
-import { Predict, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Predict, Repair, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
 
 In this lesson we run one complete session with a coding agent. We open
 it in a small repository and ask it to explain the code. We point it at a
@@ -56,19 +56,21 @@ The program needs Python 3.9 or newer and nothing else. On a Mac, the
 developer tools for the terminal (the Xcode Command Line Tools). Accept it,
 wait for the install to finish, and run the command again.
 
-<Predict id="predict-list" objective="coding-with-agents/ships-with-agent/runs-a-session"
-  concepts={['codebase-understanding']}
-  context="The fixture is a small to-do list command in Python: todo.py is the program and todos.json holds its three committed items."
-  title="Predict the list" hint="Three items are committed in todos.json. How does todo.py mark a finished one?"
+<Predict id="run-list" title="Show the list"
   answer={`1. [ ] Buy milk
 2. [x] Call the plumber
 3. [ ] Water the plants`} run="coding-with-agents/first-session/list.py">
-What does this print? Type all three lines.
+Run this, and compare what you see with the output below.
 
 ```sh
 python3 todo.py list
 ```
 </Predict>
+
+The examples in this lesson aren't graded. Each one is a command you run
+in the fixture, with the output the course itself checks on every build.
+The checkpoints come later, and they ask about the session, because
+working with the agent is what this lesson teaches.
 
 ## Start the agent and ask it to explain
 
@@ -112,12 +114,9 @@ you have checked it (@Academy claude-code-101).
 Before you ask for a fix, see the failure with your own eyes. It takes ten
 seconds, and it gives you something exact to point at.
 
-<Predict id="predict-tests" objective="coding-with-agents/ships-with-agent/runs-a-session"
-  concepts={['codebase-understanding', 'first-change']}
-  context="The fixture repository has four unit tests in test_todo.py, and its README says one of them fails on purpose."
-  title="Predict the verdict" hint="Four tests, and the README says one fails on purpose. What is the last line unittest prints in quiet mode?"
+<Predict id="run-tests" title="Run the tests"
   answer="FAILED (failures=1)" run="coding-with-agents/first-session/tests.py">
-What's the last line of output?
+Run the tests and keep only the last line of the output.
 
 ```sh
 python3 -m unittest -q 2>&1 | tail -1
@@ -129,18 +128,20 @@ Read the failing test. `test_done_marks_the_numbered_item` calls
 something else. Prove it against the committed list, on a copy so the
 committed file doesn't change.
 
-<Predict id="predict-done-bug" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
-  concepts={['first-change', 'codebase-understanding']}
-  context="In the fixture, todo.py done N should mark item N finished, and done() has an off-by-one bug that the failing test catches. The items are Buy milk, Call the plumber and Water the plants."
-  title="Predict what done does" hint="The function uses the number as the index without subtracting one. Which item sits at index 1?"
+<Predict id="run-done" title="Prove the bug"
   answer="done #1: Call the plumber" run="coding-with-agents/first-session/done_bug.py">
-What does this print?
+Mark item 1 as done on a copy of the list. The program answers with the
+item it marked.
 
 ```sh
 cp todos.json /tmp/todos.json
 TODO_FILE=/tmp/todos.json python3 todo.py done 1
 ```
 </Predict>
+
+Item 1 is "Buy milk", and the program marked "Call the plumber". The
+function takes the number you typed and uses it as the list index without
+subtracting one.
 
 You now have concrete evidence: the file with the bug, the failing test,
 and the wrong output. That's the context the agent needs. A
@@ -156,6 +157,27 @@ Think back to the brief you wrote in *Delegating a task to an agent*: goal,
 context, limits, done-criteria. For a coding agent the context is files and
 commands, the limits are which files it may touch, and the done-criterion
 is usually a test.
+
+Before you write it, decide what belongs in it. Some of the evidence you
+gathered is exactly what the agent needs. Some of it the agent reads
+faster than you can type it, and some of it has nothing to do with the
+task.
+
+<Sort id="what-goes-in-the-brief" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['first-change', 'task-brief']}
+  context="A learner is about to brief a coding agent to fix an off-by-one bug in a small Python to-do program. A failing unit test already shows the bug, and the project has a short AGENTS.md file that the agent loads at start."
+  title="What goes in the brief?" hint="For each item, ask two things: does the agent need it to do this task, and can it get it faster than you can type it?"
+  buckets={['Goes in the brief', 'The agent finds this itself', 'Leave it out']}
+  items={[
+    { text: 'The name of the failing test', bucket: 0 },
+    { text: 'Which file the agent may edit', bucket: 0 },
+    { text: 'Which file it must not touch', bucket: 0 },
+    { text: 'The command that shows the task is done', bucket: 0 },
+    { text: 'The full text of todo.py', bucket: 1 },
+    { text: 'The four lines of AGENTS.md', bucket: 1 },
+    { text: 'The git history of the fixture', bucket: 2 },
+    { text: 'Your guess at how long the fix should take', bucket: 2 },
+  ]} />
 
 <Repair id="repair-the-brief" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
   concepts={['first-change', 'task-brief']}
@@ -197,6 +219,22 @@ Some agents offer to stop asking for the rest of the session. Decline that
 for now. The prompt is the pause in which you read what's about to happen,
 and this lesson is about building the habit of reading.
 
+<Scenario id="edit-outside-the-brief" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['permissions', 'first-change']}
+  context="A learner briefed a coding agent to fix a bug in todo.py, a small Python to-do program. The brief and the project's AGENTS.md both say the agent must not touch todos.json, the data file. The agent stops at the permissions prompt before every edit."
+  title="The agent asks for a different file" hint="Which document already answered this question before the agent asked it?"
+  options={[
+    { text: 'Allow it. The agent has read more of the code than you have, and it probably knows what it is doing.', consequence: 'The agent edits the committed data file. The test still fails, because it uses a temporary file, and now there are two changes to undo instead of one.' },
+    { text: 'Deny the edit, and ask why it needs to change a file the brief said to leave alone.', correct: true, consequence: 'The agent re-reads the test, sees that it uses a temporary file, and comes back with the one-line change to done() in todo.py.' },
+    { text: 'Stop the session, reset the fixture and start over with the same brief.', consequence: 'You lose only time, but you learn nothing about why the agent went there. The next session may make the same move, and you will face the same prompt.' },
+    { text: 'Allow it, and revert the file with git afterwards.', consequence: 'The rest of the agent\'s work builds on the edited file. After the revert, its account of the fix no longer matches the code.' },
+  ]}>
+You send the repaired brief. The agent reads `todo.py` and `test_todo.py`,
+and then asks: "I would like to edit `todos.json` to mark item 2 as not
+done, so the test passes. Allow?" The brief said not to touch `todos.json`,
+and so does `AGENTS.md`. What do you do?
+</Scenario>
+
 ## Review the diff
 
 The agent says it is done. It may even say the tests pass. Don't take its
@@ -235,6 +273,21 @@ you also confirm the test didn't move. Read every line the agent changed,
 every time.
 </Pitfall>
 
+<Choice id="the-diff-moved-the-test" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['first-change', 'codebase-understanding']}
+  context="A learner briefed a coding agent to fix an off-by-one bug in todo.py, a small Python program, by making a failing unit test pass without changing the test. The agent reports that it is done and that every test passes."
+  title="The diff moved the test" hint="What did the brief say about the test, and what does a passing run prove if the test itself changed?"
+  options={[
+    { text: 'Accept it. The done-criterion was a passing test run, and the tests pass.', why: 'The brief said the test must not change. A passing run proves nothing once the test expects the buggy output.' },
+    { text: 'Ask the agent to undo its change to the test and make the original test pass by editing todo.py alone.', correct: true },
+    { text: 'Put the test back by hand and keep the rest of the diff.', why: 'That leaves the reason unexamined. The change to todo.py may only work together with the moved test, and you would not find out until later.' },
+    { text: 'Run the tests again yourself to confirm they pass.', why: 'They will pass, because the test now expects the buggy output. Running the check again tells you nothing you did not know.' },
+  ]}>
+The agent says it is done and that all four tests pass. You run `git diff`.
+The diff changes one line in `todo.py`, and it also changes the expected
+string in `test_todo.py`. What do you do?
+</Choice>
+
 ## Sessions and context
 
 Everything you have said and everything the agent has read in this session
@@ -254,6 +307,21 @@ agent judges important, which isn't always what you need next. When you ask
 for one, say what it should keep: the task, the files touched, and the
 check that still has to run (@Academy claude-code-in-action).
 
+<Choice id="same-session-or-new" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['session-and-context']}
+  context="A learner has just finished one task with a coding agent: a bug fix in a small Python program, reviewed in the diff, with the tests passing. Everything the agent read and was told about that task is still in the session's context window."
+  title="Same session, or a new one?" hint="What is still in the agent's context from the first task, and does the second task want any of it?"
+  options={[
+    { text: 'Type the refactor request into the same session. The agent already knows the code.', why: 'It also still holds the bug-fix brief, with its limits and its done-criterion, and it keeps acting on them while it does the refactor.' },
+    { text: 'End the session, and start a new one with a new brief for the refactor.', correct: true },
+    { text: 'Ask the agent to summarize the session first, then continue in it with the refactor.', why: 'A summary makes the context shorter. The first task\'s constraints stay in it, and the session is still about two tasks.' },
+    { text: 'Keep the session open and start a second agent in the same directory for the refactor.', why: 'Two agents in one working tree edit each other\'s files. One task, one session, and one agent at a time in a directory.' },
+  ]}>
+The fix is in, you have read the diff, and the tests pass. Now you want the
+agent to replace the done-mark strings in `todo.py` with a constant. Where
+do you ask for it?
+</Choice>
+
 If you do want a second change in the same repository, reset first so the
 next session starts from a known state.
 
@@ -263,7 +331,7 @@ python3 -m unittest -q 2>&1 | tail -1
 ```
 
 That puts the bug back, and the last line is `FAILED (failures=1)` again.
-Same command as the checkpoint above, same answer.
+Same command as the example above, same output.
 
 <Exercise stretch="Now ask the agent for a refactor you choose, for example replacing the done-mark strings with a constant, and review it the same way: read the diff, run the tests, reset if you do not like it.">
 In a fresh session, with the fixture reset, fix the bug with your coding
