@@ -108,7 +108,7 @@ tells and quote them.
 | BareReaches               |    5 |       4 | Off, the term's definition                |
 | NounString                |    4 |       0 | Now and then                              |
 | 33 rules with 1 to 3 hits |   55 |      20 | See below                                 |
-| 74 rules with no hits     |    0 |       0 | 15 gate, 31 every run, 28 with the family |
+| 74 rules with no hits     |    0 |       0 | 14 gate, 32 every run, 28 with the family |
 
 ## The punctuation counters
 
@@ -225,17 +225,18 @@ the rewrite was mechanical:
 
 ## The zero-hit rules
 
-74 rules had no hits. Fifteen name a phrase nobody types by accident and
+74 rules had no hits. Fourteen name a phrase nobody types by accident and
 **gate**: EmDashUsage (any unspaced dash; Google.EmDash already catches
 the spaced one), DoubleHyphen, ClosingPleasantries ("I hope this helps"),
 OpeningCliches ("In today's fast-paced"), ConclusionMarkers ("In
 conclusion"), UnpackExplore ("Let's unpack"), DespiteChallenges,
-RhetoricalSelfAnswer ("The result? A..."), AICompoundPhrases ("rich
-tapestry"), PromotionalPuffery ("nestled in"), UrgencyInflation ("cannot
+RhetoricalSelfAnswer ("The result? A..."), PromotionalPuffery ("nestled in"), UrgencyInflation ("cannot
 be overstated"), and the four listicle-heading rules.
 
-Thirty-one run at **every run** as warnings, where a hit deserves a look
+Thirty-two run at **every run** as warnings, where a hit deserves a look
 but may be deliberate: RestatementMarkers ("In other words"),
+AICompoundPhrases ("rich tapestry", but also "real consequences", the
+first hit on new content, which moved it out of the gate),
 AIAdjectiveNounPairs ("comprehensive tests"), StrategyBuzzwords,
 AbsoluteAssertions, VagueAttributions, the hedging and contrast rules,
 the heading rules, and the syntax rules (ParticipialPadding,
