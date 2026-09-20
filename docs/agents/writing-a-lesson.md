@@ -123,12 +123,23 @@ a file does it with `subprocess` and `shutil`. Omit `run` only for the
 honor-system variant (predict what an agent does), and then say in the stem
 that the learner checks it themselves.
 
+**The Python floor is 3.9.** The fixture is what the learner runs on their
+own machine, and the `Predict` answer must match there. A stock Mac's
+`python3` is 3.9, and a fixture that needs anything newer breaks the lesson
+there. `.mise.toml` pins both the current Python and the 3.9 floor
+(`python = ["3.14.7", "3.9.25"]`), each locked in `mise.lock`. The
+`examples` task runs every fixture twice, on `python3` (the current pin)
+and on `python3.9`, and asserts the same stdout for both. Fixtures use the
+standard library only. A lesson never asks the learner to `pip install`.
+
 A Python fixture is also code a learner copies, so `mise run py-lint` and
 `mise run py-typecheck` check it: ruff (check and format) at the Python 3.9
-target, and basedpyright at `standard` as Python 3.9. Keep to syntax that
-Python 3.9 accepts (`match` statements and `X | Y` unions in runtime
-annotations are newer), and run `mise run py-format` before committing.
-The config is `site/examples/ruff.toml` and
+target, and basedpyright at `standard` as Python 3.9. ruff rejects syntax
+newer than 3.9 (a `match` statement, an `except` clause without brackets
+around its types) as a syntax error. Runtime-evaluated `X | Y` unions pass
+ruff and fail when 3.9 imports the module, which is what the `python3.9`
+run in `mise run examples` catches. Run `mise run py-format` before
+committing. The config is `site/examples/ruff.toml` and
 `site/examples/pyrightconfig.json`. pytest skips the fixture's own tests,
 so `mise run examples` stays the check on what the lesson shows.
 
