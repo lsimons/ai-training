@@ -109,7 +109,7 @@ class Session {
     for (let i = 0; i < b.length; i++) lines.push(b.getLine(i)?.translateToString(true) ?? '');
     return lines.join('\n').trim();
   }
-  // Perceived-as-typing: one character at a time, ~30ms with jitter, a beat
+  // Perceived-as-typing: one character at a time, ~23ms with jitter, a beat
   // longer after spaces and punctuation. A real keystroke cancels it.
   typeFor(text, submit = true) {
     this.cancelTyping();
@@ -117,7 +117,7 @@ class Session {
     const step = () => {
       if (i >= chars.length) { this.typing = null; if (submit) this.pty.write('\r'); return; }
       const ch = chars[i++]; this.pty.write(ch);
-      const pause = 22 + Math.random() * 25 + (ch === ' ' ? 30 : /[.,;:!?]/.test(ch) ? 90 : 0);
+      const pause = 15 + Math.random() * 16 + (ch === ' ' ? 20 : /[.,;:!?]/.test(ch) ? 60 : 0);
       this.typing = setTimeout(step, pause);
     };
     step();
