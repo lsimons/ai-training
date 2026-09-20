@@ -125,7 +125,7 @@ came in and keeps the two that a new release can change: what the new
 code does, and whether it has a known vulnerability.
 
 <Choice id="bump-dimensions" objective="coding-with-agents/verifies-agent-work/screens-for-security"
-  concepts={['dependency-hygiene', 'security-review-of-agent-output']}
+  concepts={['dependency-hygiene']}
   context="The lesson reviews a new dependency on six dimensions: architecture, quality, governance and support, security, code, and license."
   title="Which dimensions for a bump?" hint="Which of the six can change between two releases of the same package?"
   options={[
@@ -243,7 +243,7 @@ directory reads a hand-written result file in that format, for an invented
 project, and prints every check that scored below 5, then a summary line.
 
 <Predict id="predict-triage" objective="coding-with-agents/verifies-agent-work/screens-for-security"
-  concepts={['supply-chain-risk', 'security-review-of-agent-output']}
+  concepts={['supply-chain-risk']}
   context="The lesson reads an OpenSSF Scorecard result with a script that lists every check scoring under THRESHOLD, which is 5, and then prints a summary line."
   title="Predict the summary line" hint="Count the checks in the fixture with a score under 5. A score of exactly 5 is not under 5."
   answer="5 of 10 checks below 5" run="coding-with-agents/dependency-review/triage_summary.py">

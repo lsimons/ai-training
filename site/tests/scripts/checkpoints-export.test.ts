@@ -92,7 +92,19 @@ describe('helpers', () => {
 	it('conceptIds collects every concept id under the topics directory', () => {
 		expect([...conceptIds(join(tree(GOOD), 'data/topics'))]).toEqual(['c1']);
 	});
-	it('pageCheckpointIds reads lesson pages only, not the course page', () => {
-		expect([...pageCheckpointIds(join(tree(GOOD), 'content'))].sort()).toEqual(['a/x#one', 'a/x#two']);
+	it('pageCheckpointIds reads lesson pages only, not the course page, with the same scanner as the build', () => {
+		const spaced = PAGE.replace('<Choice id="one"', '<Choice id = "one"');
+		const { ids, errors } = pageCheckpointIds(join(tree(GOOD, { 'content/a/x.mdx': spaced }), 'content'));
+		expect([...ids].sort()).toEqual(['a/x#one', 'a/x#two']);
+		expect(errors).toEqual([]);
+	});
+	it('pageCheckpointIds reports a tag without a string id and a tag the scanner rejects', () => {
+		const noId = PAGE.replace('<Choice id="one"', '<Choice id={x}');
+		expect(pageCheckpointIds(join(tree(GOOD, { 'content/a/x.mdx': noId }), 'content')).errors).toEqual([
+			'a/x: <Choice> without an id="..."',
+		]);
+		const broken = PAGE.replace('<Choice id="one"', '<Choice id="one" {...rest}');
+		const { errors } = check(tree(GOOD, { 'content/a/x.mdx': broken }));
+		expect(errors[0]).toMatch(/a\/x: <Choice> unexpected/);
 	});
 });

@@ -1,5 +1,6 @@
 ---
 import { type CheckpointKind, DEFAULT_REVISION, isReviewable } from '@lib/checkpoint-rules';
+import { CONCEPTS_FORM } from '@lib/checkpoint-source';
 /**
  * Shared frame for every checkpoint kind (spec S03 "Checkpoints"): a section
  * whose id is the checkpoint id, a heading, the stem, the interaction, and the
@@ -48,11 +49,13 @@ const {
 } = Astro.props;
 if (!Number.isInteger(revision) || revision < 1)
 	throw new Error(`Checkpoint "${id}": revision must be a positive integer, got ${revision}`);
-if (!Array.isArray(concepts)) throw new Error(`Checkpoint "${id}": concepts must be an array of concept ids`);
-assertKnownConcepts(`Checkpoint "${id}"`, concepts, await knownConceptIds());
-const reviewable = isReviewable({ kind, review, honor });
 const lessonId = lessonIdOf(Astro);
 const progressId = `${lessonId}#${id}`;
+if (!Array.isArray(concepts) || !concepts.every((c) => typeof c === 'string')) {
+	throw new Error(`${progressId}: ${CONCEPTS_FORM} is required`);
+}
+assertKnownConcepts(progressId, concepts, await knownConceptIds());
+const reviewable = isReviewable({ kind, review, honor });
 ---
 
 <section

@@ -48,10 +48,14 @@ describe('CheckpointShell (through Choice)', () => {
 		const html = await render(Choice, { ...base, concepts: ['token', 'context-window'], options });
 		expect(html).toContain('data-concepts="token context-window"');
 		await expect(render(Choice, { ...base, concepts: ['token', 'nope'], options })).rejects.toThrow(
-			/Checkpoint "cp": unknown concept id "nope"/,
+			/concepts\/how-models-work#cp: unknown concept id "nope"/,
 		);
-		await expect(render(Choice, { ...base, concepts: [], options })).rejects.toThrow(/at least one concept id/);
-		await expect(render(Choice, { ...base, concepts: undefined, options })).rejects.toThrow(/must be an array/);
+		await expect(render(Choice, { ...base, concepts: [], options })).rejects.toThrow(
+			/concepts\/how-models-work#cp: concepts needs at least one concept id/,
+		);
+		await expect(render(Choice, { ...base, concepts: undefined, options })).rejects.toThrow(
+			/concepts\/how-models-work#cp: concepts=\{\['concept-id', \.\.\.\]\} is required/,
+		);
 	});
 	it('renders the context paragraph hidden above the stem, and nothing without one', async () => {
 		const options = [{ text: 'a', correct: true }];

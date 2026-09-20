@@ -148,7 +148,7 @@ commands, the limits are which files it may touch, and the done-criterion
 is usually a test.
 
 <Repair id="repair-the-brief" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
-  concepts={['first-change', 'session-and-context']}
+  concepts={['first-change', 'task-brief']}
   title="Fix the brief" hint="If you handed this to a colleague who had never seen the repository, what would they have to go and find out first?"
   broken={`The done command is broken, please fix it.`}
   model={`Fix the off-by-one in the done() function in todo.py: "done 1" currently marks the second item. The failing test is test_done_marks_the_numbered_item in test_todo.py; make it pass without changing the test. Only edit todo.py. Do not touch todos.json. Done when python3 -m unittest -q reports OK.`}>

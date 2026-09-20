@@ -36,10 +36,22 @@ describe('parseAttrs', () => {
 		expect(attrs.get('options')).toEqual({ value: '[{ text: "x}y", why: `a > b` }]', expr: true });
 		expect(attrs.get('honor')).toEqual({ value: '', expr: false });
 	});
-	it('rejects an unterminated string or expression and an unquoted value', () => {
+	it('accepts whitespace around = and a self-closing end', () => {
+		const attrs = parseAttrs('<Sort id = "a"\n  buckets =\n  {[]} items= {[]} />');
+		expect([...attrs.entries()]).toEqual([
+			['id', { value: 'a', expr: false }],
+			['buckets', { value: '[]', expr: true }],
+			['items', { value: '[]', expr: true }],
+		]);
+	});
+	it('rejects an unterminated string or expression, an unquoted value, and a token it cannot read', () => {
 		expect(() => parseAttrs('<Choice id="a>')).toThrow(/unterminated string for id/);
 		expect(() => parseAttrs('<Choice options={[>')).toThrow(/unterminated expression for options/);
 		expect(() => parseAttrs('<Choice id=a>')).toThrow(/unquoted value for id/);
+		expect(() => parseAttrs('<Choice id="a" {/* note */} title="t">')).toThrow(
+			/unexpected "\{\/\* note \*\/\} title=\\"" where a prop name should be/,
+		);
+		expect(() => parseAttrs('<Choice id="a" {...rest}>')).toThrow(/unexpected/);
 	});
 });
 
@@ -137,13 +149,30 @@ describe('checkpointsOf', () => {
 		);
 		expect(at('<Choice id="a" options={[')).toThrow(/unterminated tag/);
 	});
-	it('requires concepts as a non-empty array expression', () => {
+	it('requires concepts as a non-empty array expression of strings, evaluated like the component sees it', () => {
 		const at = (b: string) => () => checkpointsOf(body(b));
 		expect(at('<Choice id="a" options={[]}>\n</Choice>')).toThrow(
 			/x\/y#a: concepts=\{\['concept-id', \.\.\.\]\} is required/,
 		);
 		expect(at('<Choice id="a" concepts="token" options={[]}>\n</Choice>')).toThrow(/is required/);
 		expect(at('<Choice id="a" concepts={[]} options={[]}>\n</Choice>')).toThrow(/at least one concept id/);
+		expect(at('<Choice id="a" concepts={[1]} options={[]}>\n</Choice>')).toThrow(/must be an array of concept ids/);
+		expect(at('<Choice id="a" concepts={"c"} options={[]}>\n</Choice>')).toThrow(/must be an array of concept ids/);
+		expect(at('<Choice id="a" concepts={[nope]} options={[]}>\n</Choice>')).toThrow(/cannot evaluate concepts/);
+		// A commented-out id is not a concept: the evaluated array is what counts.
+		expect(
+			checkpointsOf(body("<Choice id=\"a\" concepts={['c', /* 'd' */]} options={[]}>\n</Choice>"))[0]?.concepts,
+		).toEqual(['c']);
+	});
+	it('reads an expression-valued string prop, and rejects one that is not a string', () => {
+		const one = checkpointsOf(
+			body('<Choice id="a" concepts={["c"]} hint={"h " + 1} context={\'ctx\'} options={[]}>\n</Choice>'),
+		)[0];
+		expect(one?.hint).toBe('h 1');
+		expect(one?.context).toBe('ctx');
+		expect(() => checkpointsOf(body('<Choice id="a" concepts={["c"]} hint={3} options={[]}>\n</Choice>'))).toThrow(
+			/x\/y#a: hint must be a string, got number/,
+		);
 	});
 	it('skips a > inside quotes, braces and template literals', () => {
 		const b = '<Choice id="a" concepts={["c"]} title="b > c" options={[{ text: `x > y`, why: "p > q" }]}>\n</Choice>';
