@@ -1,0 +1,13 @@
+# Course plan for the Safety area (docs/agents/writing-a-lesson.md, "Course plan").
+# One entry per lesson, in course order. Planned entries come from issue #31.
+area: safety
+lessons:
+  - id: safety/agent-risk
+    title: Why agent safety is different
+    covers: safety/agent-risk
+    serves:
+      - safety/judges-agent-risk/names-blast-radius
+      - safety/judges-agent-risk/chooses-human-in-loop
+      - safety/judges-agent-risk/recognizes-injection
+    status: live
+    minutes: 20
