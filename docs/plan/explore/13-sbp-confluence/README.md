@@ -31,17 +31,18 @@ licenses in [`references.md`](./references.md).
 
 ## Files
 
-| File                                                               | What it holds                                                                                                   |
-| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| [`guardrails.md`](./guardrails.md)                                 | An engineering guardrails charter, plain-language rules for everyone, a "can I?" table, key hygiene, disclosure |
-| [`agent-risk-scenarios.md`](./agent-risk-scenarios.md)             | Six security domains, fifteen risk scenarios with countermeasures, rating scales, an assessment template        |
-| [`tool-onboarding-tiers.md`](./tool-onboarding-tiers.md)           | Three levels for bringing an AI tool into an organization, with the level 1 and level 2 checklists              |
-| [`sandboxing-and-containment.md`](./sandboxing-and-containment.md) | What a coding agent sends, six isolation approaches, a layered containment pattern, configuration hygiene       |
-| [`mcp-security.md`](./mcp-security.md)                             | Delegated identity, capability scoping, bulk-write safety, prompt guardrails, residual risks, CLI vs MCP        |
-| [`eu-ai-act.md`](./eu-ai-act.md)                                   | What the regulation lesson must cover and how to source it                                                      |
-| [`ideas.md`](./ideas.md)                                           | Framings, practices, templates and small concepts to fold into lessons                                          |
-| [`literacy.md`](./literacy.md)                                     | Three task kinds, an exercise template, uptake data from a gamified programme, exercise ideas per area          |
-| [`references.md`](./references.md)                                 | Public artifacts to cite, with licenses and what each is for                                                    |
+| File                                                               | What it holds                                                                                                                                    |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`guardrails.md`](./guardrails.md)                                 | An engineering guardrails charter, plain-language rules for everyone, a "can I?" table, key hygiene, disclosure                                  |
+| [`agent-risk-scenarios.md`](./agent-risk-scenarios.md)             | Six security domains, fifteen risk scenarios with countermeasures, rating scales, an assessment template                                         |
+| [`tool-onboarding-tiers.md`](./tool-onboarding-tiers.md)           | Three levels for bringing an AI tool into an organization, with the level 1 and level 2 checklists                                               |
+| [`sandboxing-and-containment.md`](./sandboxing-and-containment.md) | What a coding agent sends, six isolation approaches, a layered containment pattern, configuration hygiene                                        |
+| [`mcp-security.md`](./mcp-security.md)                             | Delegated identity, capability scoping, bulk-write safety, prompt guardrails, residual risks, CLI vs MCP                                         |
+| [`eu-ai-act.md`](./eu-ai-act.md)                                   | What the regulation lesson must cover and how to source it                                                                                       |
+| [`ideas.md`](./ideas.md)                                           | Framings, practices, templates and small concepts to fold into lessons                                                                           |
+| [`literacy.md`](./literacy.md)                                     | Three task kinds, an exercise template, uptake data from a gamified programme, exercise ideas per area                                           |
+| [`references.md`](./references.md)                                 | Public artifacts to cite, with licenses and what each is for                                                                                     |
+| [`onboarding-deck.md`](./onboarding-deck.md)                       | Additions from an onboarding day: capability versus reliability, time to value, a controls progression, a coding-with-agents syllabus, exercises |
 
 ## Proposed lessons
 
