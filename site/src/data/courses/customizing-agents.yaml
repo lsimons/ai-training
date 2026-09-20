@@ -28,24 +28,10 @@ lessons:
     status: live
     minutes: 20
     # mode: tutorial
-    # exercise (do): write the instruction file for the invoice-mailer fixture from a session transcript
+    # exercise (do): in a throwaway project, run three tasks without an instruction file, note the wrong guesses, and write an AGENTS.md of at most fifteen lines from them
     # shorts: none
     # assumes (other areas): coding-with-agents/ships-with-agent/gives-the-right-context
     # introduces: agents-md-claude-md, sections, monorepo-hierarchy, when-instructions-are-not-enough
-  - id: customizing-agents/instructions-pruning
-    title: Keeping the instruction file short
-    covers: customizing-agents/instructions
-    serves:
-      - customizing-agents/configures-agent/writes-project-instructions
-    status: planned
-    minutes: 10
-    after:
-      - customizing-agents/instructions
-    # mode: explanation
-    # exercise (judge): take a generated first-draft instruction file of forty lines and mark each line keep, move or delete, with the mistake or check that justifies the verdict
-    # shorts: The user-level instruction file as the personal layer (Academy claude-code-101)
-    # assumes (other areas): coding-with-agents/ships-with-agent/gives-the-right-context
-    # introduces: none (deepens sections and when-instructions-are-not-enough: a line stays while a mistake recurs, moves when a hook or check enforces it, and a generated draft is a list of candidates)
 
   # --- skills ---------------------------------------------------------------
   - id: customizing-agents/skill-or-tool-or-instruction
@@ -72,7 +58,7 @@ lessons:
     after:
       - customizing-agents/skill-or-tool-or-instruction
     # mode: tutorial
-    # exercise (do): write a skill that cuts a release of the fixture package, with the trigger in the description, the commands in order and the check that says the result is right, then run it once
+    # exercise (do): write a skill that cuts a release of the fixture package, with the trigger in the description, the commands in order and the check that says the result is right
     # shorts: The skill specification, field by field (Academy introduction-to-agent-skills)
     # assumes (other areas): coding-with-agents/ships-with-agent/runs-a-session
     # introduces: skill-spec, writing-a-good-skill
@@ -105,7 +91,7 @@ lessons:
     # assumes (other areas): concepts/explains-models/explains-generation
     # introduces: progressive-disclosure
   - id: customizing-agents/plugins
-    title: Installing a plugin is installing a dependency
+    title: Reading a plugin before you install it
     covers: customizing-agents/skills
     serves:
       - customizing-agents/writes-skill/chooses-skill-over-tool
@@ -114,7 +100,7 @@ lessons:
     after:
       - customizing-agents/first-skill
     # mode: explanation
-    # exercise (judge): read the contents of one public plugin and list what it adds to the session: skills, hooks that will run, subagents, and servers with the access they ask for
+    # exercise (judge): read the contents of one public plugin and list what it adds to the session: skills, hooks that will run, subagents, and servers with the access they ask for, then say whether to install it or copy one skill out of it
     # shorts: Marketplaces and version pins for plugins (Academy claude-code-in-action)
     # assumes (other areas): coding-with-agents/verifies-agent-work/screens-for-security
     # introduces: plugins
@@ -133,7 +119,7 @@ lessons:
     # exercise (do): put a five-rule guardrail block in an agent's system prompt and test it against an injected instruction in a sandbox page
     # shorts: none
     # assumes (other areas): none beyond the in-area assumes
-    # introduces: server, client, transport, mcp-primitives, mcp-vs-cli, tool-cost, mcp-security (delegated identity is the section "Whose identity does the agent act under?", which closes the #13 gap)
+    # introduces: server, client, transport, mcp-primitives, mcp-vs-cli, tool-cost, mcp-security (delegated identity is the section "Whose identity does the agent act under?", which #17 asked for)
   - id: customizing-agents/mcp-first-server
     title: Connecting your first tool server
     covers: customizing-agents/mcp
@@ -233,22 +219,7 @@ lessons:
     # exercise (do): write a pre-tool hook that rejects a commit when the lockfile changed and the manifest did not, with the message that says what to do, then make the mistake on purpose and watch it fire
     # shorts: The hook exit-code contract, and what the agent sees when a hook blocks (Academy claude-code-101)
     # assumes (other areas): coding-with-agents/verifies-agent-work/automates-the-check
-    # introduces: hooks
-  - id: customizing-agents/hook-or-instruction
-    title: Instruction, permission or hook?
-    covers: customizing-agents/hooks-permissions
-    serves:
-      - customizing-agents/configures-agent/adds-a-hook
-      - customizing-agents/configures-agent/writes-project-instructions
-    status: planned
-    minutes: 10
-    after:
-      - customizing-agents/first-hook
-    # mode: explanation
-    # exercise (judge): take ten rules from a team's instruction file and sort each into stays an instruction, becomes a permission entry, or becomes a hook, then delete the instruction lines a hook now enforces
-    # shorts: Hooks as approval gates in a team's delivery pipeline (Academy ai-native-sdlc-playbook)
-    # assumes (other areas): safety/judges-agent-risk/chooses-human-in-loop
-    # introduces: none (joins when-instructions-are-not-enough, allowlists and hooks into one decision)
+    # introduces: hooks (the pitfall carries the rule from when-instructions-are-not-enough: a rule that must hold every time is a hook, and guidance stays an instruction)
   - id: customizing-agents/subagents
     title: Delegating to a subagent with narrower permissions
     covers: customizing-agents/hooks-permissions
@@ -289,7 +260,7 @@ lessons:
     after:
       - customizing-agents/memory-review
     # mode: tutorial
-    # exercise (do): run a session until it fills, ask for a summary that names open items and decisions, compact, and check which of three planted facts survived
+    # exercise (do): load the fixture transcript that holds three planted facts, ask for a summary that names open items and decisions, compact on command, and check which of the three facts survived
     # shorts: Context rot in a long session, and what a compaction summary drops (Academy claude-code-101)
     # assumes (other areas): concepts/explains-models/explains-grounding
     # introduces: compaction
@@ -312,14 +283,14 @@ lessons:
     covers: customizing-agents/memory
     serves:
       - customizing-agents/configures-agent/manages-memory
-      - customizing-agents/writes-skill/packages-a-procedure
+      - customizing-agents/configures-agent/adds-a-hook
     status: planned
-    minutes: 10
+    minutes: 15
     after:
       - customizing-agents/session-handoff
-      - customizing-agents/hook-or-instruction
+      - customizing-agents/first-hook
     # mode: explanation
-    # exercise (judge): read three session transcripts that each work out how to regenerate the API client, and decide for each repeated step whether it becomes an instruction, a skill, a hook or a context file entry
-    # shorts: none
-    # assumes (other areas): none
-    # introduces: turning-repeated-work-into-reusable-knowledge
+    # exercise (judge): read three session transcripts that each work out how to regenerate the API client and repeat two corrections, decide for each repeated step whether it becomes an instruction, a skill, a hook or a context file entry, and delete the instruction lines a hook now enforces
+    # shorts: Hooks as approval gates in a team's delivery pipeline (Academy ai-native-sdlc-playbook)
+    # assumes (other areas): safety/judges-agent-risk/chooses-human-in-loop
+    # introduces: turning-repeated-work-into-reusable-knowledge (this is the one lesson where the learner makes the full instruction, skill, hook or context file decision; it serves adds-a-hook through its first behavior, a hook for a rule that must hold every time)
