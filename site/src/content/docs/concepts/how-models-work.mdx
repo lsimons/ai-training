@@ -81,10 +81,10 @@ That first training stage produces a text continuer, and a text continuer
 has no idea that you want an answer. Type a question into a raw model and
 it may reply with more questions, in the pattern of a worksheet. A second,
 shorter stage fixes this: the network is trained on example replies that
-people have rated, and it learns to treat your text as a request and to
-answer it. Those ratings leave marks of their own.
-People tend to rate agreeable replies and long replies higher, so the
-finished model leans toward both (@Academy ai-capabilities-and-limitations).
+people have rated, and it learns that your text is a question to answer.
+Those ratings have side effects. People tend to rate agreeable replies and
+long replies higher. The finished model leans toward both
+(@Academy ai-capabilities-and-limitations).
 
 <Choice id="what-the-model-does" objective="concepts/explains-models/explains-generation"
   title="What did the model do?"
@@ -108,21 +108,23 @@ mysterious.
 
 - **Hallucination.** The most likely continuation of "The 2019 paper by
   Smith et al. showed" is a plausible citation, even if no such paper exists.
-  Confidence in the prose isn't confidence in the fact. Made-up detail
-  clusters in the specifics: names, dates, numbers, quotes, URLs and
-  citations. A common concept has been written about thousands of times and
-  the prediction is well constrained, but one exact figure has few or no
-  examples behind it, and the model fills the gap with something of the
-  right form. The more precise a claim, the more it needs a check
+  Confidence in the prose isn't confidence in the fact. Made-up details
+  concentrate in the specifics, such as a release date, a page number, or a
+  quoted line. A common concept has been written about thousands of times
+  and the prediction is well constrained, but one exact figure has few or
+  no examples behind it, and the model fills the gap with something of the
+  right form. A detail the model saw once comes out in the same confident
+  prose as a fact it saw ten thousand times
   (@Academy ai-capabilities-and-limitations).
 - **Sycophancy.** Agreeable replies were rated well in the second training
   stage, so agreeing is likely text. Push back and the model often folds,
-  even when you were right.
+  even when its first answer was right.
 - **Instruction dilution.** Everything in the context is just tokens.
   A rule you stated on page one competes with everything said since, and
-  long conversations drift. Attention across the context window is also
-  uneven: the model attends less to material in the middle of a long input
-  than to material at the start or the end.
+  long conversations drift. Position in the context window matters too. A
+  rule buried on page six of a twelve-page paste weighs less in the
+  prediction than the same rule at the top or at the bottom
+  (@Academy ai-capabilities-and-limitations).
 - **Cutoff and staleness.** Anything after training is invisible unless a
   tool puts it in the context.
 
@@ -149,7 +151,8 @@ in "strawberry" and to spell the word backwards. Then ask it for the
 opening sentence of a book you know well, and ask that last question a
 second time in a fresh chat. Note which answers are right and, for the
 wrong ones, which failure mode from this lesson explains it. If the two
-answers about the book differ, the difference is sampling at work.
+answers about the book differ, the difference comes from sampling, the
+pick from the distribution you saw in the widget.
 
 A good result names one failure mode per wrong answer and can say, in a
 sentence, why prediction rather than lookup produces it.
@@ -162,8 +165,10 @@ sentence, why prediction rather than lookup produces it.
 2. Output is one token at a time, sampled from a distribution the model
    scores. Temperature reshapes the distribution and doesn't add knowledge.
 3. The scores come from weights fitted to training text, so knowledge is
-   frequency-weighted and stops at the cutoff. A second, shorter training
-   stage on rated replies turns the text continuer into an assistant.
-4. Hallucination, sycophancy, dilution, and staleness all follow from that (@AEC-02).
+   frequency-weighted and stops at the cutoff.
+4. A second, shorter training stage on rated replies turns the text
+   continuer into an assistant, and the ratings have side effects.
+5. Hallucination, sycophancy, dilution, and staleness all follow from those
+   two stages (@AEC-02).
 
 </Recap>
