@@ -124,7 +124,7 @@ the table above as a list of tuples and counts them.
 
 <Predict id="predict-the-inventory" objective="customizing-agents/connects-tools-safely/weighs-tool-cost"
   title="Count the inventory" hint="Count the rows of the table by kind, and the items in the can't list: delete, change permissions, bulk edit, export, administer."
-  answer="8 read, 7 write, 5 cannot" run="customizing-agents/mcp/inventory.sh">
+  answer="8 read, 7 write, 5 cannot" run="customizing-agents/mcp/inventory.py">
 
 What does this print?
 
@@ -213,7 +213,7 @@ class WriteCap:
 ok
 ok
 refused: docs_update_page is write call 3 of 2 allowed this minute
-ok`} run="customizing-agents/mcp/write_cap.sh">
+ok`} run="customizing-agents/mcp/write_cap.py">
 
 The cap is set to two writes per minute. The model makes five calls as
 user `ada`: a search in minute 0, three page updates in minute 0, and one
