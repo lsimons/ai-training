@@ -204,15 +204,25 @@ run = "vale sync"
 # it, so the first pass shows every warning and the second decides the
 # outcome. Only errors (misspellings, unknown terms) block. Passive voice
 # and cliches are a judgement call for a reviewer, not a build failure.
+#
+# The YAML goes in a separate invocation with `--ext=.md`: Vale's
+# `TokenIgnores` (which hides the bibliography URLs from the term-casing
+# rule, see .vale.ini) only works for markup formats, and YAML is not one.
+# The `[*.{yaml,yml}]` section still selects the rules by file name.
 [tasks.prose]
 description = "Vale prose lint over Markdown, MDX and the site data YAML. Errors gate; warnings advise."
 run = """
 set -e
-files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
+files=$(git ls-files -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
+yaml=$(git ls-files -- 'site/src/data/**/*.yaml' 'site/src/data/*.yaml')
 # shellcheck disable=SC2086
 vale --no-exit $files
 # shellcheck disable=SC2086
+vale --no-exit --ext=.md $yaml
+# shellcheck disable=SC2086
 vale --minAlertLevel=error $files
+# shellcheck disable=SC2086
+vale --minAlertLevel=error --ext=.md $yaml
 """
 
 # Same files, the extended config (.vale-extended.ini) that also enables the
@@ -222,9 +232,12 @@ vale --minAlertLevel=error $files
 description = "Vale prose lint with the extended (passive-voice) rules; advisory only"
 run = """
 set -e
-files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
+files=$(git ls-files -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
+yaml=$(git ls-files -- 'site/src/data/**/*.yaml' 'site/src/data/*.yaml')
 # shellcheck disable=SC2086
 vale --no-exit --config .vale-extended.ini $files
+# shellcheck disable=SC2086
+vale --no-exit --config .vale-extended.ini --ext=.md $yaml
 """
 
 # Evaluate a Vale style package before deciding, rule by rule, where it
