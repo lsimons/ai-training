@@ -125,7 +125,7 @@ if (isLesson) {
 			const rec = progress.load();
 			const states = checkpoints.map((el) => rec.checkpoints[el.dataset.progressId!]);
 			const anyStuck = states.some((s) => s && s.state !== 'passed');
-			const allClean = states.length > 0 && states.every((s) => s && s.state === 'passed' && s.attempts === 1);
+			const allClean = states.length > 0 && states.every((s) => s?.state === 'passed' && s.attempts === 1);
 			if (behindCard) behindCard.hidden = !(anyStuck || rec.comfort === 'less');
 			if (aheadCard) aheadCard.hidden = !(allClean || rec.comfort === 'more');
 		}

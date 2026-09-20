@@ -126,4 +126,12 @@ describe('wrappers write through storage', () => {
 		expect(progress.importJson('{"version": 2}')).toMatchObject({ ok: false });
 		expect(stored().comfort).toBe('more');
 	});
+	it('import logs the fields normalize dropped, like load does', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		const result = progress.importJson(JSON.stringify({ version: 1, lessons: { 'a/x': { state: 'bogus' } } }));
+		expect(result).toEqual({ ok: true });
+		expect(stored().lessons).toEqual({});
+		expect(warn).toHaveBeenCalledTimes(1);
+		expect(warn.mock.calls[0]?.[0]).toContain('dropped 1 malformed "lessons" entry');
+	});
 });

@@ -357,9 +357,15 @@ export function exportJson(record: ProgressRecord): string {
 	return JSON.stringify(record, null, 2);
 }
 
-export type ImportResult = { ok: true; record: ProgressRecord } | { ok: false; message: string };
+export type ImportResult =
+	| { ok: true; record: ProgressRecord; warnings: NormalizeWarning[] }
+	| { ok: false; message: string };
 
-/** Parse an exported file: same version is accepted (malformed fields fall back to empty); another version is refused. */
+/**
+ * Parse an exported file: same version is accepted (malformed fields fall
+ * back to empty, and each drop is reported in `warnings` for the caller to
+ * log); another version is refused.
+ */
 export function parseImport(text: string): ImportResult {
 	let parsed: unknown;
 	try {
@@ -376,7 +382,8 @@ export function parseImport(text: string): ImportResult {
 			message: `That file is version ${parsed.version}; this site stores version ${VERSION} and has no migration for it.`,
 		};
 	}
-	const record = normalize(parsed);
+	const warnings: NormalizeWarning[] = [];
+	const record = normalize(parsed, warnings);
 	if (!record) return { ok: false, message: 'That file is not a progress record.' };
-	return { ok: true, record };
+	return { ok: true, record, warnings };
 }

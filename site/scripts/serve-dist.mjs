@@ -38,10 +38,21 @@ const TYPES = {
 	'.qmd': 'text/plain; charset=utf-8',
 };
 
+/** The percent-decoded path, or null when an escape is malformed (`%E0%A4%A`). */
+function decodePath(pathname) {
+	try {
+		return decodeURIComponent(pathname);
+	} catch {
+		return null;
+	}
+}
+
 /** The file under dist/ for a request path, or null when there is none. */
 function resolve(pathname) {
 	if (pathname !== BASE && !pathname.startsWith(`${BASE}/`)) return null;
-	const rel = normalize(decodeURIComponent(pathname.slice(BASE.length))).replace(/^(\.\.[/\\])+/, '');
+	const decoded = decodePath(pathname.slice(BASE.length));
+	if (decoded === null) return null;
+	const rel = normalize(decoded).replace(/^(\.\.[/\\])+/, '');
 	const candidates = rel.endsWith('/') || rel === '' ? [join(rel, 'index.html')] : [rel, join(rel, 'index.html')];
 	for (const c of candidates) {
 		const file = join(dist, c);
@@ -57,6 +68,11 @@ function send(res, status, file) {
 
 const server = createServer((req, res) => {
 	const url = new URL(req.url ?? '/', `http://localhost:${port}`);
+	// A malformed percent escape must not take the shared e2e server down with a URIError.
+	if (decodePath(url.pathname) === null) {
+		res.writeHead(400, { 'content-type': 'text/plain' });
+		return res.end('bad request: malformed percent-encoding');
+	}
 	const file = resolve(url.pathname);
 	if (file) return send(res, 200, file);
 	// A directory without a trailing slash: redirect like a static host would.

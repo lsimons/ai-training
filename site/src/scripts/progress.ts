@@ -171,6 +171,7 @@ export function setComfort(level: Comfort | undefined): void {
 export function importJson(text: string): { ok: true } | { ok: false; message: string } {
 	const result = model.parseImport(text);
 	if (!result.ok) return result;
+	for (const w of result.warnings) console.warn(model.describeWarning(w));
 	save(result.record);
 	return { ok: true };
 }
