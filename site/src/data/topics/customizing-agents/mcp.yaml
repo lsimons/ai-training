@@ -4,9 +4,10 @@ name: Connecting tools with MCP
 definition: >-
   The Model Context Protocol is a standard way to expose tools and data to
   an agent through a server the agent's client connects to. This topic covers
-  the server and client roles, the transports that connect them, when a plain
-  command-line tool is the better choice, what a tool costs in tokens, and
-  the security consequences of connecting one.
+  the server and client roles, the transports that connect them, the
+  primitives a server can offer beyond tools, when a plain command-line tool
+  is the better choice, what a tool costs in tokens, and the security
+  consequences of connecting one.
 concepts:
   - id: server
     name: Server
@@ -33,6 +34,16 @@ concepts:
       is reached over HTTP, often with streaming. The transport decides where
       the server's code runs and what credentials it holds, which makes it a
       security decision as much as a plumbing one.
+  - id: mcp-primitives
+    name: MCP primitives
+    definition: >-
+      The kinds of thing a server can offer besides tools. Resources are
+      data the client can read into context, such as files or records, with
+      a URI. Prompts are reusable templates the user picks by name. Sampling
+      lets a server ask the client's model to complete text, so the server
+      needs no model access of its own. Roots tell a server which
+      directories or locations it may work in. Most servers only use tools,
+      and the others matter when they show up in a client's menus.
   - id: mcp-vs-cli
     name: MCP vs CLI
     definition: >-
@@ -59,7 +70,10 @@ concepts:
       from untrusted sources, tool descriptions that carry injected
       instructions, tools that return attacker-controlled content, and tools
       that can send data outward. Vet the source, run with least privilege,
-      approve risky tools per call and review what leaves.
+      approve risky tools per call and review what leaves. A server acts
+      with the identity of the user who connected it, never with a shared
+      service account, so what it can do is bounded by what that user may
+      do and can be traced to them.
 links:
   prerequisites: [customizing-agents/instructions, concepts/what-is-an-agent]
   related: []

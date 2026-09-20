@@ -5,8 +5,9 @@ definition: >-
   Code you did not write needs a different kind of reading. This topic covers
   reviewing an agent's diff against the specification rather than for
   plausibility, observing the system as it runs, narrowing a fault
-  systematically, and turning checks into loops the agent can run itself
-  within limits you set.
+  systematically, turning checks into loops the agent can run itself within
+  limits you set, relying on deterministic gates over model opinions, and
+  attacking your own agent before someone else does.
 concepts:
   - id: reviewing-code-you-did-not-write
     name: Reviewing code you did not write
@@ -50,6 +51,24 @@ concepts:
       a limit on attempts and a rule for what it may change. The bound
       matters: an unbounded loop will eventually satisfy the check by
       weakening it. The human verifies the check is still honest at the end.
+  - id: deterministic-gates
+    name: Deterministic gates
+    definition: >-
+      Checks whose outcome does not depend on a model's judgment: tests, type
+      checks, linters, builds and schema validation. They give the same
+      answer every run, so they can block a merge. A review by another model
+      adds a second opinion and finds things a gate cannot, but it can be
+      wrong or be talked round in the same way as the first model, so it
+      never replaces the gate.
+  - id: red-teaming-your-own-agent
+    name: Red-teaming your own agent
+    definition: >-
+      Deliberately trying to make your own agent misbehave before relying on
+      it: feeding it a file with hidden instructions, asking for something
+      its permissions should stop, giving it an ambiguous brief and seeing
+      how far it runs. The aim is to learn what it does under pressure, in a
+      sandbox where the damage is nil. What you find becomes a permission
+      change, an instruction or a gate.
 links:
   prerequisites: [coding-with-agents/workflow, safety/verification]
   related: []
