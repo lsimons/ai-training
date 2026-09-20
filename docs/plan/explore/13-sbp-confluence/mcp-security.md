@@ -8,8 +8,8 @@ any remote MCP server. Feeds L5 in the [README](./README.md).
 
 Every tool call runs under the authenticated user's identity. The model has
 no service account of its own; it acts as a **delegate of the human**, bound
-by that human's existing permissions. If the user cannot edit a page in the
-browser, the agent cannot edit it through the MCP server either.
+by that human's existing permissions. If the user can't edit a page in the
+browser, the agent can't edit it through the MCP server either.
 
 Consequences worth teaching:
 
@@ -24,10 +24,10 @@ Consequences worth teaching:
 ## 2. Scope the capabilities
 
 Inventory what the server can do, split by **read** and **write**, and list
-explicitly what it **cannot** do. In the reviewed case: about a dozen read
+explicitly what it **can't** do. In the reviewed case: about a dozen read
 tools and a handful of write tools per system (create, update, comment,
 transition), and no delete, no permission changes, no bulk board or
-workflow operations, no exports. Knowing the "cannot" list is as valuable as
+workflow operations, no exports. Knowing the "can't" list is as valuable as
 the "can" list: it bounds the worst case.
 
 Application-side controls seen in the review: only administrators install
@@ -70,13 +70,13 @@ Rules for using write tools
 ```
 
 With the caveat the review itself made: prompt guardrails are defense in
-depth, not a guarantee. They stop accidents and naive attacks; they are not
+depth, not a guarantee. They stop accidents and naive attacks; they aren't
 the sole control.
 
 ## 5. Residual risks
 
-Five named classes, each with what, example and mitigation. Rate them for
-your own context; do not inherit anyone else's rating.
+Five named classes, each with what, example, and mitigation. Rate them for
+your own context; don't inherit anyone else's rating.
 
 | Risk                               | What                                                                                               | Mitigations                                                                                        |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
@@ -88,7 +88,7 @@ your own context; do not inherit anyone else's rating.
 
 ## 6. CLI or MCP?
 
-An opinionated position worth teaching: do not install a forge MCP server
+An opinionated position worth teaching: don't install a forge MCP server
 at all; let the agent use the forge's command-line client instead. The
 reasons:
 
@@ -108,7 +108,7 @@ things no CLI does (structured search, documentation lookup).
 
 - Install a local MCP server as a **version-controlled dev dependency**, not
   through `npx` at run time, and set a minimum release age on the package
-  manager so a freshly published compromised version cannot land.
+  manager so a freshly published compromised version can't land.
 - Run browser-driving servers in isolated mode, and list the allowed tools
   per server in the client configuration rather than allowing all.
 - Public, unauthenticated documentation servers still deserve a look at
@@ -132,5 +132,5 @@ things no CLI does (structured search, documentation lookup).
 - Exercise, more comfortable: write the five-rule block for a server of the
   learner's choice and test it with an injected instruction inside a
   retrieved document.
-- Do not reproduce any organization's own risk rating. The point is that
+- Don't reproduce any organization's own risk rating. The point is that
   the rating depends on who can write to the documents the agent reads.

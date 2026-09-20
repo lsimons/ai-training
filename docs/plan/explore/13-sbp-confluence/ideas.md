@@ -21,7 +21,7 @@ before adopting it; none is a decision.
 - **Most-likely, not correct** (1). Generative models produce the most
   probable continuation, not a verified answer, and not the same one twice.
 - **Vibe coding is off-limits where the result matters** (4). Letting a
-  model produce code unchecked, without review or accountability, is not an
+  model produce code unchecked, without review or accountability, isn't an
   engineering practice.
 - **Shadow AI** (2). When governed tools are absent or bad, people use
   ungoverned ones. Minimum viable governance beats no governance; the safe
@@ -50,9 +50,9 @@ before adopting it; none is a decision.
 - **Prefer the forge's CLI over an MCP server** for git hosting; see
   [`mcp-security.md`](./mcp-security.md) section 6.
 - **Open the agent in the service directory**, not the repository root.
-- **Agent definitions live in the repository**; do not hardcode tools,
+- **Agent definitions live in the repository**; don't hardcode tools,
   model or permission mode in them.
-- **Plans belong in git**, not in the issue tracker the agent cannot read.
+- **Plans belong in git**, not in the issue tracker the agent can't read.
 - **Keep plans abstract until implementation starts**; then write a
   detailed plan per task and assign focused agents.
 - **Coherence engineering** (4): the artifacts of a system (specification,
@@ -68,7 +68,7 @@ before adopting it; none is a decision.
 - **No change for the sake of change.** Every refactor addresses a concrete
   technical concern or a user need.
 - **A bad-smell list** for AI-heavy codebases: untestable code, code that
-  cannot be extended, inflexible implementations, deprecated or unused
+  can't be extended, inflexible implementations, deprecated, or unused
   code, design decisions made for a proof of concept and never revisited,
   flaky tests.
 - **Remove barriers to testing** by documenting the standard and providing
@@ -100,7 +100,7 @@ Principles:
 - **No default outcome.** The same principles govern "use the library" and
   "write it ourselves".
 - **Give back.** Report genuine findings upstream, for the parts you use.
-- **Share assessments** so the next team does not redo them.
+- **Share assessments** so the next team doesn't redo them.
 
 Six review dimensions, with which apply when:
 
@@ -119,7 +119,7 @@ Questions per dimension:
 - *Quality*: would we fork and maintain it if abandoned? Are there
   meaningful tests, passing in CI? Duplication and complexity as red flags.
 - *Governance and support*: multiple maintainers, known authors, many
-  reverse dependencies, recent activity, foundation backing or one vendor.
+  reverse dependencies, recent activity, foundation backing, or one vendor.
   Crisp definition: a project has open governance when it is clear how
   decisions are made; not when one company leads it or contributors sign
   their copyright away.
@@ -129,9 +129,9 @@ Questions per dimension:
   signed releases).
 - *Code*: find the risks (code needing specialist expertise such as
   concurrency, cryptography, network protocols, unsafe blocks; code on the
-  critical path; code that is too complicated) and **skip what is
+  critical path; code that's too complicated) and **skip what's
   irrelevant**: style, unchanged already-reviewed code, individual test
-  cases, platform-specific code for platforms you will never use,
+  cases, platform-specific code for platforms you never use,
   non-API documentation. The skip list is what makes the method affordable.
 - *License*: what does it require (attribution, notice reproduction, share
   alike) and does it fit the project's policy.
@@ -184,17 +184,17 @@ removed; the questions generalize.
 
 1. What data is shared with you when I use the AI features, and does the
    AI bypass any of my existing permissions?
-2. What is stored, for how long, and encrypted how?
+2. What's stored, for how long, and encrypted how?
 3. Who else receives it (subprocessors, model vendors), and can I turn them
    off?
-4. Is my data used to train models? Say where that is written.
+4. Is my data used to train models? Say where that's written.
 5. Which certifications cover the AI features specifically, and in which
    role do you act (processor or controller)?
-6. How is intellectual property protected: indemnity, citations, content
+6. How's intellectual property protected: indemnity, citations, content
    credentials on generated media?
 7. How do you reduce over-reliance on wrong answers (grounding in my own
    data, citations, confidence signals)?
-8. How do you detect and handle prompt injection, direct and indirect?
+8. How do you detect and handle direct and indirect prompt injection?
 
 Concepts the answers introduce, worth glossary entries (area 1): grounding,
 user versus cross-prompt injection, content credentials (C2PA).
@@ -206,21 +206,21 @@ What may I paste in? A four-tier model:
 | Tier                  | Meaning                                                                                                  | Typical AI-tool rule           |
 | --------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------ |
 | Public                | Anyone may see it                                                                                        | Fine                           |
-| Internal confidential | Ours; not for disclosure; we are the data controller                                                     | Approved tools only            |
+| Internal confidential | Ours; not for disclosure; we're the data controller                                                      | Approved tools only            |
 | Client-related        | Metadata we hold to serve a client; may include personal data of their people; joint controller at least | Approved tools, with care      |
-| Client data           | Part of the client's own product or service; we are a processor                                          | Only with the client's consent |
+| Client data           | Part of the client's own product or service; we're a processor                                           | Only with the client's consent |
 
 The controller/processor distinction is the part people miss; keep it.
 
 ### Small concepts (area 1, 2)
 
-- **Residency at rest is not processing location.** A vendor promising EU
+- **Residency at rest isn't processing location.** A vendor promising EU
   storage may still process elsewhere. Ask both questions.
 - **Web grounding sends a derived query, not the prompt.** Good explainer
   of what a search-enabled assistant does and why sensitive prompts still
   leak in part.
 - **"Agents" that are just prompts.** Some vendors' agents are saved
-  prompts with no tools; they cannot act outside the model.
+  prompts with no tools; they can't act outside the model.
 - **Your tool's cost display may be wrong.** Verify spend at the gateway or
   provider, not in the client's UI.
 - **Enterprise tiers sell governance.** Audit logs, single sign-on
@@ -244,8 +244,8 @@ The controller/processor distinction is the part people miss; keep it.
   engineer (a specialization), client-facing director, AI engineer,
   platform engineer, security engineer, innovation specialist; and
   explicitly who it is *not* for, including the attacker, with the honest
-  note that injection into knowledge bases was not yet guarded against.
-  Saying who a system is not for is a design skill.
+  note that injection into knowledge bases wasn't yet guarded against.
+  Saying who a system isn't for is a design skill.
 - **An adoption ladder** from experiment to service: discovery → try it →
   ask about policy → level 1 → level 2 with an operations team taking joint
   ownership → validation → handover → level 3. A readiness checklist in
@@ -255,7 +255,7 @@ The controller/processor distinction is the part people miss; keep it.
   support).
 - **Rollout lessons**: many channels create awareness fast; let a few teams
   see real benefit before scaling; plan the handover before the pilot
-  ends, because it will not plan itself.
+  ends, because it never plans itself.
 
 ## Concept syllabus check (area 1, 6)
 
@@ -265,6 +265,6 @@ multimodal, fine-tuning); evaluation-driven development and re-ranking;
 retrieval in depth (grounding; chunking by fixed size, overlap, recursion,
 document, semantics or agent; extraction; vector stores and semantic
 search; embedding models versus generative models; cosine, dot product and
-Euclidean distance; graph-shaped retrieval); problem framing (what is and
-is not an AI-shaped problem; human versus model performance). Use it as a
+Euclidean distance; graph-shaped retrieval); problem framing (what's and
+isn't an AI-shaped problem; human versus model performance). Use it as a
 checklist against the S02 concept lists.

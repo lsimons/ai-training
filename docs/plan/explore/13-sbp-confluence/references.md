@@ -3,7 +3,7 @@
 Everything here is public. Licenses were checked on 2026-09-20 where a
 repository was involved. Grouped by the lesson they serve.
 
-## Sandboxing and containment (L2, L3)
+## Sandboxing and containment
 
 | Reference                                                   | License     | Use                                                                                                                        |
 | ----------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -17,7 +17,7 @@ repository was involved. Grouped by the lesson they serve.
 | mitmproxy, Tetragon, Falco, Forgejo, Gitea, gitleaks        | OSS         | Public building blocks for the layered containment pattern                                                                 |
 | <https://pnpm.io/settings#minimumreleaseage>                | docs        | Minimum release age for dependencies                                                                                       |
 
-## Agent configuration and workflow (L2, folded items)
+## Agent configuration and workflow
 
 | Reference                                                  | Use                                                                                      |
 | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -31,7 +31,7 @@ repository was involved. Grouped by the lesson they serve.
 | <https://github.com/kasbuunk/coherence-engineering>        | The coherence idea for area 4                                                            |
 | <https://github.com/lsimons/caseum> (CC BY 4.0)            | The role-description format used for personas                                            |
 
-## MCP security (L5)
+## MCP security
 
 | Reference                                                                            | Use                                                       |
 | ------------------------------------------------------------------------------------ | --------------------------------------------------------- |
@@ -42,7 +42,7 @@ repository was involved. Grouped by the lesson they serve.
 | <https://github.com/microsoft/playwright-mcp>                                        | Browser driving via the accessibility tree; isolated mode |
 | OWASP Top 10 for LLM Applications                                                    | Cross-reference for scenarios and MCP risks               |
 
-## Regulation and governance (L4, L6)
+## Regulation and governance
 
 | Reference                                                                       | Use                                              |
 | ------------------------------------------------------------------------------- | ------------------------------------------------ |
@@ -54,7 +54,7 @@ repository was involved. Grouped by the lesson they serve.
 | Microsoft security blog on detecting prompt injection (user and cross-prompt)   | Definitions of the two injection kinds           |
 | ISO/IEC 42001, ISO 27001, SOC 2                                                 | Named standards in the charter and vendor checks |
 
-## Dependency review (L7)
+## Dependency review
 
 | Reference                                                      | Use                                                           |
 | -------------------------------------------------------------- | ------------------------------------------------------------- |
@@ -63,7 +63,7 @@ repository was involved. Grouped by the lesson they serve.
 | <https://doc.rust-lang.org/cargo/reference/build-scripts.html> | Example of build-time code execution as a review concern      |
 | ISO/IEC 25010                                                  | Quality model referenced in the incremental-improvement phase |
 
-## Concepts and onboarding (area 1, 3)
+## Concepts and onboarding
 
 | Reference                                                                                                                                                         | Use                                                  |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |

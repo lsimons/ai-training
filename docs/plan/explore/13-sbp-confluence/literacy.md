@@ -2,7 +2,7 @@
 
 Evidence and patterns from a year-long, organization-wide AI literacy
 programme that ran as a points leaderboard: a few hundred small tasks in ten
-subject categories, each claimed with a screenshot or a short text and
+subject categories. Each was claimed with a screenshot or a short text and
 reviewed by a small team.
 
 Three things carry forward: a way of typing exercises, a shape for writing
@@ -43,14 +43,14 @@ and it is worth adopting as the default for exercise prose:
 > one row per model", "a two-line comparison").
 >
 > **Why do this.** One sentence. What the learner can do afterwards that they
-> could not before, or what it protects them from.
+> couldn't before, or what it protects them from.
 
 Two further habits from the tasks that got engagement:
 
 - **End with a reflection prompt**, not just a deliverable: "what surprised
   you?", "how did this improve on the plain prompt, in two lines?", "what
   did you learn about prompt injection?". Every popular challenge had one.
-  For this site that is the self-grade step of an Exercise and the material
+  For this site that's the self-grade step of an Exercise and the material
   for its model answer.
 - **Make the proof the artifact.** A screenshot or a short text is the whole
   submission. Anything that asked for a matrix, a slide deck or a one-pager
@@ -82,16 +82,16 @@ What that says:
 - **Uptake lives in the lowest-effort, most concrete tasks.** A five-minute
   task with a screenshot got hundreds of completions; the same idea phrased
   as an analysis exercise got none. For a self-paced site: the first
-  exercise in every lesson must be tiny and produce something visible.
+  exercise in every lesson must be small and produce something visible.
 - **Prompting technique interest falls off a cliff after four techniques.**
   Zero-shot, role, few-shot and chain-of-thought carried real numbers.
   Generated knowledge, self-consistency, directional stimulus, tree of
-  thoughts, Reflexion, ReAct, prompt chaining and combinations each drew a
+  thoughts, Reflexion, ReAct, prompt chaining, and combinations each drew a
   handful. The Foundations prompting lesson should teach the four and
   point to the rest as a Short for the `more` comfort level. Technique
   names and definitions come from the papers, as already decided in
   [explore/12](../12-learn-prompting.md).
-- **Bulk-authored coverage does not get done.** About half the catalogue was
+- **Bulk-authored coverage doesn't get done.** About half the catalogue was
   written in one week, to one template, across every subject. Over the
   following six months those tasks drew a few dozen completions between
   them, and two thirds were never attempted. Breadth written without a
@@ -125,7 +125,7 @@ template in section 2 and is a "do" or a "judge" unless marked.
 - Send progressively longer inputs until a model hits its context limit;
   note exactly what happens at the boundary. *(do)*
 - Run three prompts (creative, analytical, factual) through three models;
-  compare style, accuracy and length in a small table. *(judge)*
+  compare style, accuracy, and length in a small table. *(judge)*
 - List five failure modes of language models with one real example each,
   drawn from your own use. *(judge)*
 - Run a small open model locally with Ollama and compare a response with a
@@ -140,10 +140,10 @@ template in section 2 and is a "do" or a "judge" unless marked.
 - Write three prompts that would expose personal data, bypass a rule or
   leak something; rewrite each so it is safe. *(judge)*
 - Red-team your own prompt: try to make it reveal its instructions or do
-  something it should not; describe what worked. *(do)*
+  something it shouldn't; describe what worked. *(do)*
 - Look up how one tool you use stores, processes and shares what you type;
   summarize it in five lines. *(judge)*
-- Write a checklist for when a human must review, approve or step in during
+- Write a checklist for when a human must review, approve, or step in during
   an automated task. *(judge)*
 - Put made-up sensitive data through a model in a scratch account; note
   what it does with it and what you would change. *(do)*

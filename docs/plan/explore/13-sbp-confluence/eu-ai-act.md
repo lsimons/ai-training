@@ -1,4 +1,4 @@
-# The EU AI Act in one lesson
+# One lesson on the EU AI act
 
 This file records what the lesson needs and how to source it. It contains
 no summary of Regulation (EU) 2024/1689 on purpose: earlier summaries seen
@@ -19,7 +19,7 @@ official material, with article references checked against the
 consolidated text, and dated.
 
 1. **Is it an AI system at all?** The definition, and why a rules engine or
-   a spreadsheet macro is not one.
+   a spreadsheet macro isn't one.
 2. **The risk tiers.** Prohibited practices; high-risk systems (the
    annexed use-case list and the product-safety route); systems with
    transparency obligations; everything else. A decision tree is the right
@@ -32,14 +32,14 @@ consolidated text, and dated.
    documentation, logging, human oversight, accuracy and robustness,
    conformity assessment, registration, post-market monitoring and incident
    reporting for providers; instructions-for-use compliance, oversight,
-   log retention, workforce information and impact assessment where
+   log retention, workforce information, and impact assessment where
    applicable for deployers. Link to the articles rather than paraphrasing
    them.
 5. **Transparency duties** that touch everyday work: telling people they
    are talking to a machine, labelling synthetic content. This connects to
    the disclosure line in [`guardrails.md`](./guardrails.md) and to content
    credentials.
-6. **The timeline** of application dates, taken from the Regulation and the
+6. **The timeline** of application dates taken from the Regulation and the
    Commission's implementation pages, with the current date in view.
 7. **Penalties**, as an order of magnitude and as a signal of what the
    legislator considers worst.

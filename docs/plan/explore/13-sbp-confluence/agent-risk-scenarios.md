@@ -26,13 +26,13 @@ the data if the vendor is acquired or fails.
 ## Fourteen scenarios
 
 Each scenario names a failure and typical countermeasures. Read them as the
-failure modes of a tool-using agent; most are not specific to any product.
+failure modes of a tool-using agent; most aren't specific to any product.
 
 ### Data leakage
 
-- **1. Data sent to an external model provider that should not have it.**
+- **1. Data sent to an external model provider that shouldn't have it.**
   The tool forwards company or client data to a model service that the
-  contracts do not cover. Countermeasures: limit who may add AI
+  contracts don't cover. Countermeasures: limit who may add AI
   integrations; keep an approved list of providers; require vetting before
   a new provider is enabled; in some contexts block external models
   entirely.
@@ -42,7 +42,7 @@ failure modes of a tool-using agent; most are not specific to any product.
   scrutiny for platforms that connect to many services.
 - **3. Files kept as input or memory.** Uploaded files and memory stores can
   leak outside the organization or between users of the same platform.
-  Countermeasures: teach what is safe to upload; understand the platform's
+  Countermeasures: teach what's safe to upload; understand the platform's
   isolation model; clean up old files.
 - **4. Third-party data pulled in through connectors.** Someone connects the
   tool to a wiki or document store that holds a client's data; the client
@@ -56,7 +56,7 @@ failure modes of a tool-using agent; most are not specific to any product.
 ### Integration security
 
 - **6. Excessive permissions.** The tool's integrations carry permissions
-  ordinary users do not have, and those can be abused by mistake, through
+  ordinary users don't have, and those can be abused by mistake, through
   prompt injection, or by a bug. Countermeasures: review every
   integration; avoid admin-level accounts; prefer delegated authentication
   so the user's own permissions apply; ship safe default configurations.
@@ -71,12 +71,12 @@ failure modes of a tool-using agent; most are not specific to any product.
 
 ### Access control
 
-- **09. Admin exposure.** Platform administrators, on your side and the
-  vendor's, can see everything every project processes. Countermeasures:
+- **09. Admin exposure.** Platform administrators on your side and the vendor's
+  can see everything every project processes. Countermeasures:
   train admins on their responsibilities; control and periodically review
   who is admin; approval flows for admin access; minimize permissions;
   accept the remaining risk explicitly.
-- **10. Excessive user permissions.** Ordinary users see data they should not.
+- **10. Excessive user permissions.** Ordinary users see data they shouldn't.
   Countermeasures: as above, plus proper role-based access control.
 - **11. Repudiation.** Someone acts through the tool and later denies it, and
   no log can settle it. Countermeasures: full audit logs of actions the
@@ -86,7 +86,7 @@ failure modes of a tool-using agent; most are not specific to any product.
 
 ### Platform trust
 
-- **12. Unsuitable platform.** The platform cannot meet the standards promised
+- **12. Unsuitable platform.** The platform can't meet the standards promised
   to clients for non-public information. Countermeasures: a vendor
   assessment before mission-critical use; check certifications and
   security documentation; document what the platform may and may not be
@@ -121,11 +121,11 @@ failure modes of a tool-using agent; most are not specific to any product.
 
 **Likelihood (1-5)**
 
-1. Rare: very unlikely.
+1. Rare: unlikely in practice.
 2. Unlikely: could happen, not expected.
 3. Possible: might happen occasionally.
-4. Likely: will probably happen at some point.
-5. Almost certain: will happen.
+4. Likely: probably happens at some point.
+5. Almost certain: happens.
 
 ## Assessment template
 
@@ -138,7 +138,7 @@ diagram. Then one row per applicable scenario:
 Then actions required before go-live (guidelines and training, allow lists
 for models and integrations, role-based access, logging and monitoring,
 sign-off on remaining risks), and a decision: approved, approved with
-conditions, or not approved, with conditions, approver and date.
+conditions, or not approved, with conditions, approver, and date.
 
 ## Notes for the lesson author
 
