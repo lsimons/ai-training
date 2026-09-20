@@ -1,0 +1,55 @@
+id: concepts/prompting
+area: concepts
+name: Prompting
+definition: >-
+  Prompting is the craft of writing the text a model responds to. Good prompts
+  state the instruction clearly, supply examples when the format matters, set a
+  role or system prompt that frames the whole conversation, ask for output in a
+  usable shape, and improve through deliberate iteration rather than repeated
+  retries.
+concepts:
+  - id: instruction
+    name: Instruction
+    definition: >-
+      The part of a prompt that says what to do. A clear instruction names the
+      task, the input it applies to, the constraints to respect and what a good
+      result looks like. Vague instructions are filled in by the model with
+      plausible defaults, so most prompt failures trace back to something the
+      instruction left unsaid rather than to the model misunderstanding.
+  - id: few-shot-example
+    name: Example (few-shot)
+    definition: >-
+      One or more worked input-output pairs placed in the prompt so the model
+      can copy the pattern. Few-shot examples are the most reliable way to fix
+      a format, tone or edge-case behaviour that is hard to describe in words.
+      Two or three well-chosen examples usually beat a long paragraph of rules,
+      and a bad example teaches the mistake just as well.
+  - id: role-and-system-prompt
+    name: Role and system prompt
+    definition: >-
+      Text set before the conversation starts that frames every later turn.
+      A system prompt typically assigns a role, sets tone, states standing
+      rules and lists what the model must never do. In chat products the
+      vendor writes one you cannot see; in agents and custom applications the
+      developer writes it, and it is where recurring behaviour is fixed.
+  - id: iteration
+    name: Iteration
+    definition: >-
+      Improving a result by changing the prompt after reading the output,
+      rather than resending the same prompt hoping for a better draw. Each
+      round adds a missing constraint, an example of the failure, or a
+      sharper definition of done. Iteration is the normal way to reach a
+      reliable prompt; a first attempt that works is the exception.
+  - id: structured-output
+    name: Structured output
+    definition: >-
+      Asking the model to answer in a fixed shape, such as a table, a numbered
+      list with named fields, or a machine-readable format like JSON, so the
+      next step can use the result without a human reformatting it. Naming
+      the fields and giving one example of the shape makes the output far
+      more consistent and makes missing information visible.
+links:
+  prerequisites: [concepts/how-models-work]
+  related: []
+  specializations: []
+sources: [DLAI-1, DLAI-3, Learn Prompting]

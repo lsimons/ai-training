@@ -1,0 +1,61 @@
+---
+/**
+ * Shared frame for every checkpoint kind (spec S03 "Checkpoints"): a section
+ * whose id is the checkpoint id, a heading, the stem, the interaction, and the
+ * Check / Hint / Skip controls. Review-only controls are rendered hidden and
+ * enabled by the review page.
+ */
+import { lessonIdOf } from '@lib/lesson-context';
+import { href } from '@lib/url';
+
+interface Props {
+	id: string;
+	objective: string;
+	title: string;
+	hint: string;
+	kind: 'choice' | 'scenario' | 'predict' | 'order' | 'sort' | 'repair';
+	/** Whether this checkpoint becomes a review item (spec S05 "What is reviewed"). */
+	reviewable?: boolean;
+	checkLabel?: string;
+}
+
+const { id, objective, title, hint, kind, reviewable = true, checkLabel = 'Check' } = Astro.props;
+const lessonId = lessonIdOf(Astro);
+const progressId = `${lessonId}#${id}`;
+---
+
+<section
+	class="checkpoint not-content"
+	id={id}
+	data-checkpoint
+	data-kind={kind}
+	data-progress-id={progressId}
+	data-objective={objective}
+	data-reviewable={String(reviewable)}
+	data-title={title}
+>
+	<header class="cp-head">
+		<span class="cp-kind">Checkpoint · {kind}</span>
+		<span class="cp-state" aria-live="polite"></span>
+	</header>
+	<h3 class="cp-title">{title}</h3>
+	<div class="cp-stem"><slot /></div>
+	<div class="cp-body"><slot name="body" /></div>
+	<div class="cp-controls">
+		<button type="button" class="cp-check">{checkLabel}</button>
+		<button type="button" class="cp-hint-btn" aria-expanded="false">Hint</button>
+		<button type="button" class="cp-skip">Skip</button>
+		<button type="button" class="cp-giveup" hidden>Give up</button>
+	</div>
+	<p class="cp-hint" hidden>{hint}</p>
+	<p class="cp-feedback" role="status" aria-live="polite"></p>
+	<div class="cp-after" hidden>
+		<a class="cp-lesson-link" href={href(`/${lessonId}/#${id}`)}>Open in the lesson</a>
+		<span class="cp-stage" hidden>
+			<span></span><span></span><span></span><span></span><span></span>
+			<em class="cp-stage-label"></em>
+		</span>
+		<button type="button" class="cp-sooner">See this sooner</button>
+		<button type="button" class="cp-later">See this less often</button>
+	</div>
+</section>

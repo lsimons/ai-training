@@ -1,0 +1,32 @@
+---
+/** Put steps in sequence (spec S01 `order`). `steps` is the correct order; the page shuffles. */
+import CheckpointShell from './CheckpointShell.astro';
+
+interface Props {
+	id: string;
+	objective: string;
+	title: string;
+	hint: string;
+	steps: string[];
+}
+const { id, objective, title, hint, steps } = Astro.props;
+---
+
+<CheckpointShell {id} {objective} {title} {hint} kind="order">
+	<slot />
+	<Fragment slot="body">
+		<ol class="cp-order" aria-label="Steps to order">
+			{
+				steps.map((s, i) => (
+					<li data-pos={i + 1}>
+						<span class="cp-step">{s}</span>
+						<span class="cp-move">
+							<button type="button" data-move="up" aria-label={`Move "${s}" up`}>↑</button>
+							<button type="button" data-move="down" aria-label={`Move "${s}" down`}>↓</button>
+						</span>
+					</li>
+				))
+			}
+		</ol>
+	</Fragment>
+</CheckpointShell>

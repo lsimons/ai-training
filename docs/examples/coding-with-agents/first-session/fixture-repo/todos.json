@@ -1,0 +1,14 @@
+[
+  {
+    "text": "Buy milk",
+    "done": false
+  },
+  {
+    "text": "Call the plumber",
+    "done": true
+  },
+  {
+    "text": "Water the plants",
+    "done": false
+  }
+]

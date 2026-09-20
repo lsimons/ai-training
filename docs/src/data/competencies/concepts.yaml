@@ -1,0 +1,71 @@
+area: concepts
+competencies:
+  - id: concepts/explains-models
+    statement: Explains how a language model produces text and where it fails
+    topics: [concepts/how-models-work, concepts/limits, concepts/grounding]
+    objectives:
+      - id: concepts/explains-models/explains-generation
+        statement: Explains tokens, context and sampling in plain words
+        level: base
+        behaviours:
+          - claim: A model produces text one token at a time, each chosen from a probability distribution over what could come next.
+            why: Once the learner sees output as a chain of likely next pieces, both fluent nonsense and surprising variation stop being mysterious.
+            example: Asked why the same question gave two different answers, the learner says the model picked a different likely token early on and the rest followed from it, rather than saying the model "changed its mind".
+          - claim: The context window is the whole of what the model can see for one response, and anything outside it does not exist for the model.
+            why: Most "it forgot" and "it ignored my file" complaints are context problems, and the fix is different from a prompting problem.
+            example: When a long chat starts contradicting itself, the learner suspects earlier messages fell out of the window and restates the key facts instead of scolding the model.
+          - claim: Temperature and sampling settings trade variety for predictability and do not change what the model knows.
+            why: Learners otherwise reach for temperature to fix accuracy, which it cannot do.
+            example: For a summary that must be the same on every run the learner asks for low temperature; for brainstorming names they raise it, and in neither case expect it to add facts.
+      - id: concepts/explains-models/names-failure-modes
+        statement: Names the common ways output goes wrong and why
+        level: base
+        behaviours:
+          - claim: A hallucination is a fluent, confident statement with nothing behind it, and fluency is no signal of truth.
+            why: Confident wording is exactly what the training rewards, so the learner must stop using tone as a check.
+            example: Given a citation with a real-looking journal name, author and year, the learner looks it up before trusting it and is not surprised when it does not exist.
+          - claim: The knowledge cutoff means the model's built-in facts stop at a date, and anything after that must be supplied or retrieved.
+            why: Questions about recent events or versions get plausible but stale answers unless the learner knows to bring the facts.
+            example: Asking for the current version of a library, the learner pastes the changelog or asks the tool to look it up rather than accepting the number the model recalls.
+          - claim: Sycophancy is the model agreeing with the person in front of it, so the learner's own framing shapes the answer.
+            why: A leading question produces a leading answer, which feels like confirmation and is not.
+            example: Instead of "this plan is solid, right?" the learner asks "what are the three strongest objections to this plan?" and compares the two responses.
+      - id: concepts/explains-models/explains-grounding
+        statement: Explains what grounding and retrieval add and what they do not fix
+        level: base
+        behaviours: []
+    alignment: []
+  - id: concepts/prompts-reliably
+    statement: Writes prompts that get reliable results
+    topics: [concepts/prompting, concepts/how-models-work]
+    objectives:
+      - id: concepts/prompts-reliably/structures-a-prompt
+        statement: Turns a vague request into instruction, context, example and format
+        level: base
+        behaviours: []
+      - id: concepts/prompts-reliably/iterates-on-output
+        statement: Improves a result by changing the prompt, not by retrying
+        level: base
+        behaviours: []
+      - id: concepts/prompts-reliably/asks-for-structure
+        statement: Asks for output in a shape the next step can use
+        level: base
+        behaviours: []
+    alignment: []
+  - id: concepts/recognises-agents
+    statement: Recognises an agent, its tools and its degree of autonomy
+    topics: [concepts/what-is-an-agent, concepts/limits]
+    objectives:
+      - id: concepts/recognises-agents/tells-agent-from-assistant
+        statement: Tells a chat assistant from an agent by what it can do unprompted
+        level: base
+        behaviours: []
+      - id: concepts/recognises-agents/places-on-autonomy-scale
+        statement: Places a product or workflow on the autonomy scale
+        level: base
+        behaviours: []
+      - id: concepts/recognises-agents/names-the-loop
+        statement: Describes the observe, think, act loop and the tools in it
+        level: base
+        behaviours: []
+    alignment: []

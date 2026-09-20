@@ -1,0 +1,13 @@
+---
+/** The lesson's one hands-on task, done outside the page, self-graded (spec S03 "Exercises"). */
+interface Props {
+	stretch?: string;
+}
+const { stretch } = Astro.props;
+---
+
+<section class="exercise" id="exercise">
+	<h2>Exercise</h2>
+	<slot />
+	{stretch && <p class="exercise-stretch"><strong>Stretch:</strong> {stretch}</p>}
+</section>

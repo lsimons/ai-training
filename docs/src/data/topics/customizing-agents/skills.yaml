@@ -1,0 +1,51 @@
+id: customizing-agents/skills
+area: customizing-agents
+name: Agent skills
+definition: >-
+  A skill packages a procedure so an agent can load and follow it on demand:
+  a description of when it applies, instructions to follow and any files it
+  needs. This topic distinguishes skills from tools and instructions,
+  introduces the skill specification, explains progressive disclosure and
+  covers what makes a skill worth reusing.
+concepts:
+  - id: skill-vs-tool-vs-instruction
+    name: Skill vs tool vs instruction
+    definition: >-
+      Three ways to change what an agent does. An instruction is standing
+      text loaded every session, for rules that always apply. A tool is a
+      function the agent can call, for capabilities it lacks. A skill is a
+      procedure loaded only when relevant, for repeatable multi-step work the
+      agent could do but does inconsistently. Pick by frequency, by whether
+      the need is knowledge or capability, and by context cost.
+  - id: skill-spec
+    name: Skill spec
+    definition: >-
+      The open format for an agent skill: a directory with a metadata file
+      that names the skill, describes when to use it and holds the
+      instructions, plus optional scripts and reference files alongside. The
+      description is what the agent reads to decide whether to load the
+      skill, so it carries the trigger; the body carries the procedure.
+      Because the format is shared, skills move between agents.
+  - id: progressive-disclosure
+    name: Progressive disclosure
+    definition: >-
+      Structuring a skill so the agent reads only what the current step
+      needs: a short description always visible, the main instructions loaded
+      when the skill is chosen, and detailed references or scripts opened
+      only when a step calls for them. It keeps the context window small
+      across many available skills and puts depth where it is used instead of
+      where it is loaded.
+  - id: writing-a-good-skill
+    name: Writing a good skill
+    definition: >-
+      A good skill has a description that fires on the right requests and no
+      others, steps that are concrete enough to follow without guessing, a
+      way for the agent to check its own result, and scripts for anything
+      deterministic. It is tested by watching an agent use it on a real task
+      and revising where it hesitated or went wrong, the same iteration
+      loop as prompting.
+links:
+  prerequisites: [customizing-agents/instructions]
+  related: []
+  specializations: []
+sources: [AEC-17, DLAI-10]

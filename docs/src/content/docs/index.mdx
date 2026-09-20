@@ -5,55 +5,43 @@ template: splash
 hero:
   tagline: Getting started with AI, for knowledge workers and software engineers. Open content, interactive lessons, progress kept in your browser.
   actions:
-    - text: Read the plan
+    - text: Start with Concepts
       # hero action links are used verbatim, so this one includes the deploy base
-      link: https://github.com/lsimons/ai-training/blob/main/docs/plan/README.md
+      link: /ai-training/concepts/
       icon: right-arrow
       variant: primary
+    - text: Topic map
+      link: /ai-training/map/
+      icon: puzzle
+      variant: secondary
     - text: View on GitHub
       link: https://github.com/lsimons/ai-training
       icon: external
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
 
 ## Six areas
 
 <CardGrid>
-	<Card title="AI concepts" icon="open-book">
-		What generative AI is and is not, how language models behave, and the
-		vocabulary you need to reason about them. For everyone.
-	</Card>
-	<Card title="AI safety" icon="warning">
-		Confidentiality, hallucination, prompt injection, over-reliance, and
-		the habits that keep AI use safe at work. For everyone.
-	</Card>
-	<Card title="Using AI agents" icon="rocket">
-		Working with agents day to day: delegation, description, discernment
-		and diligence. For everyone.
-	</Card>
-	<Card title="AI-assisted software engineering" icon="laptop">
-		Coding agents in a real engineering workflow: explore, plan, code,
-		review, ship. For engineers.
-	</Card>
-	<Card title="Customizing AI agents" icon="setting">
-		Instructions, skills, subagents, hooks and MCP servers: shaping an agent
-		to your codebase and team. For engineers.
-	</Card>
-	<Card title="Building AI agents" icon="puzzle">
-		The agent loop, tools, memory, evaluation and production concerns, with
-		the Claude API and Agent SDK. For engineers.
-	</Card>
+	<LinkCard title="Concepts" href="/ai-training/concepts/" description="What generative AI is and is not, how language models behave, and the vocabulary you need to reason about them. For everyone." />
+	<LinkCard title="Safety" href="/ai-training/safety/" description="Confidentiality, hallucination, prompt injection, over-reliance, and what changes once an agent can act. For everyone." />
+	<LinkCard title="Using agents" href="/ai-training/using-agents/" description="Working with agents day to day: the brief, the autonomy level, the review. For everyone." />
+	<LinkCard title="Coding with agents" href="/ai-training/coding-with-agents/" description="Coding agents in a real engineering workflow: explore, plan, code, review, ship. For engineers." />
+	<LinkCard title="Customizing agents" href="/ai-training/customizing-agents/" description="Instructions, skills, hooks and MCP servers: shaping an agent to your codebase and team. For engineers." />
+	<LinkCard title="Building agents" href="/ai-training/building-agents/" description="The agent loop, tools, memory, evaluation and production concerns. For engineers." />
 </CardGrid>
+
 
 ## Status
 
-This project was set up on 2026-09-19 and has no lesson content yet. The
-[rough plan](https://github.com/lsimons/ai-training/blob/main/docs/plan/README.md)
-describes what is coming: interactive lessons in the browser, a topic map, a
-project dictionary based on the CS50 approach to teaching, and a tutor mode
-that runs the site locally from a Claude Code session.
+Release 1: one lesson in each of the six areas, so the shape of the site is
+visible end to end. Each course page is a lesson graph, the
+[topic map](/map/) shows everything planned, and your progress, including a
+spaced-review schedule, stays in your browser (see [your progress](/progress/)).
+The [rough plan](https://github.com/lsimons/ai-training/blob/main/docs/plan/README.md)
+describes what comes next.
 
 ## Origins
 

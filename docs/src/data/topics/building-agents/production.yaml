@@ -1,0 +1,67 @@
+id: building-agents/production
+area: building-agents
+name: Guardrails and production
+definition: >-
+  Running an agent for real means surrounding it with controls and treating
+  its changes like any other risky deployment. This topic covers layered
+  defences, gating deploys on evaluation results, rolling changes out
+  gradually, managing cost, the security risks specific to agents, and the
+  protocols agents use to talk to tools and to each other.
+concepts:
+  - id: defence-layers
+    name: Defence layers
+    definition: >-
+      No single control stops every bad outcome, so production agents stack
+      several: policy in the system prompt, input and output filtering,
+      permission limits on tools, human approval at irreversible steps,
+      monitoring and alerting, and the ability to stop the agent. Each layer
+      catches what the previous ones miss, and the design assumes the model
+      itself will sometimes be fooled.
+  - id: eval-gated-deploys
+    name: Eval-gated deploys
+    definition: >-
+      Treating any change to prompt, tools, model or harness as a release
+      that must pass the evaluation suite before it reaches users, the same
+      way code must pass tests. The gate turns evaluation from an
+      occasional study into a continuous control and catches the regression
+      that a small wording change or a model update introduces.
+  - id: rollout-strategies
+    name: Rollout strategies
+    definition: >-
+      Releasing a change to a fraction of traffic first, comparing its
+      metrics with the current version, and widening or reverting based on
+      what is observed. Shadow runs, canaries and gradual percentages all
+      apply to agents. Because model behaviour is non-deterministic and
+      evaluation is imperfect, gradual rollout is the check that
+      evaluation cannot give.
+  - id: cost
+    name: Cost
+    definition: >-
+      What an agent spends per task in tokens, tool calls and time, and how
+      that scales with users. Agents multiply model cost by their number of
+      turns, and a runaway loop or verbose tool can multiply it again. Track
+      cost per run, set budgets that stop a run, cache what repeats, and
+      route simple steps to smaller models.
+  - id: agent-specific-security-risks
+    name: Agent-specific security risks
+    definition: >-
+      Risks that appear when a model can act: prompt injection through
+      content the agent reads, exfiltration through tools that send data
+      outward, over-permissioned tools that turn a wrong decision into real
+      damage, and confused-deputy situations where the agent uses the
+      user's authority on an attacker's behalf. They are mitigated by
+      limiting capability and reviewing actions, not by better prompts.
+  - id: protocols-mcp-a2a
+    name: Protocols (MCP, A2A)
+    definition: >-
+      Standards for how agents connect to things. The Model Context Protocol
+      standardises how an agent reaches tools and data through servers.
+      Agent-to-agent protocols standardise how one agent discovers, delegates
+      to and exchanges results with another across organisations. Shared
+      protocols reduce integration work and also widen the attack surface,
+      so each connection is a trust decision.
+links:
+  prerequisites: [building-agents/evaluation, safety/governance, customizing-agents/mcp]
+  related: []
+  specializations: []
+sources: [AEC-10, AEC-11, AEC-14, Brilliant SEC]

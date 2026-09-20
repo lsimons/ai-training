@@ -1,0 +1,48 @@
+id: safety/failure-modes
+area: safety
+name: Recognising failure
+definition: >-
+  Model failures rarely announce themselves; they arrive as fluent, confident
+  text. This topic shows what hallucination looks like in real documents and
+  code, how bias enters and repeats, and how people drift into overreliance
+  and automation complacency once a tool is usually right.
+concepts:
+  - id: hallucination-in-practice
+    name: Hallucination in practice
+    definition: >-
+      What invented output looks like in daily work: a statute with a real
+      number and wrong contents, a library method that almost exists, a quote
+      attributed to the right person from a speech never given, a summary that
+      adds a point the source did not make. The tell is specificity without a
+      checkable source. Treat precise details from a model as claims to
+      verify, not facts.
+  - id: bias
+    name: Bias
+    definition: >-
+      Systematic slant in a model's output inherited from its training data
+      and its tuning: which names it assumes are senior, which dialect it
+      calls professional, which candidates it ranks higher for the same
+      record. Bias is hard to see in a single answer and shows up in patterns
+      across many. Anything a model does that affects people should be
+      sampled and compared across groups.
+  - id: overreliance
+    name: Overreliance
+    definition: >-
+      Trusting a model's output beyond what you have checked or could check.
+      It starts with tasks you know well and then spreads to ones you do not,
+      where you can no longer tell a good answer from a plausible one. The
+      remedy is to keep verifying in proportion to stakes and to keep enough
+      of your own competence to recognise when the tool is wrong.
+  - id: automation-complacency
+    name: Automation complacency
+    definition: >-
+      The habit of waving through a tool's output because it has been right
+      many times before. Attention decays fastest when the tool is good, so
+      the rare failure passes unchecked. It is a known effect from aviation
+      and medicine, not a personal weakness, and is countered by process:
+      designed checks, sampling and rotating who reviews.
+links:
+  prerequisites: [concepts/limits]
+  related: []
+  specializations: []
+sources: []

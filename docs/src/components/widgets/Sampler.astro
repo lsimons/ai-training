@@ -1,0 +1,83 @@
+---
+/**
+ * Widget: next-token sampling with temperature over a tiny fixed distribution.
+ * Teaches, never grades (spec S03 "Widgets").
+ */
+---
+
+<div class="not-content sampler" data-sampler>
+	<p class="sampler-prefix">The cat sat on the …</p>
+	<label class="sampler-temp">
+		Temperature <input type="range" min="0.05" max="2" step="0.05" value="1" />
+		<output>1.00</output>
+	</label>
+	<div class="sampler-bars" aria-live="polite"></div>
+	<button type="button" class="sampler-go">Sample next token</button>
+	<p class="sampler-out" aria-live="polite"></p>
+</div>
+
+<style>
+	.sampler { border: 1px solid var(--sl-color-gray-5); border-radius: 6px; padding: 1rem 1.25rem; margin: 1.5rem 0; }
+	.sampler-prefix { font-weight: 700; margin: 0 0 0.5rem; }
+	.sampler-temp { display: flex; gap: 0.5rem; align-items: center; }
+	.sampler-temp input { flex: 1; max-width: 20rem; }
+	.sampler-bars { margin: 0.75rem 0; display: grid; gap: 0.25rem; }
+	.sampler-bars .bar { display: grid; grid-template-columns: 8rem 1fr 4rem; align-items: center; gap: 0.5rem; font-family: var(--sl-font-mono); font-size: 0.85rem; }
+	.sampler-bars .fill { height: 1rem; background: var(--sl-color-accent); border-radius: 2px; transition: width 0.2s; }
+	.sampler-go { padding: 0.35rem 0.85rem; border-radius: 4px; border: 1px solid var(--sl-color-gray-4); background: var(--sl-color-bg-nav); cursor: pointer; font: inherit; }
+	.sampler-out { margin: 0.75rem 0 0; font-size: 1.1rem; min-height: 1.5rem; }
+</style>
+
+<script>
+	const LOGITS: Record<string, number> = { ' mat': 2.0, ' sofa': 1.2, ' roof': 0.6, ' moon': -0.5, ' spreadsheet': -1.5 };
+
+	function probs(t: number): [string, number][] {
+		const temp = Math.max(t, 0.05);
+		const ex = Object.entries(LOGITS).map(([k, v]) => [k, Math.exp(v / temp)] as [string, number]);
+		const z = ex.reduce((a, [, v]) => a + v, 0);
+		return ex.map(([k, v]) => [k, v / z]);
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-sampler]').forEach((root) => {
+		const range = root.querySelector<HTMLInputElement>('input[type=range]');
+		const out = root.querySelector<HTMLOutputElement>('output');
+		const bars = root.querySelector<HTMLElement>('.sampler-bars');
+		const go = root.querySelector<HTMLButtonElement>('.sampler-go');
+		const gen = root.querySelector<HTMLElement>('.sampler-out');
+		if (!range || !out || !bars || !go || !gen) return;
+
+		const draw = () => {
+			const t = Number(range.value);
+			out.value = t.toFixed(2);
+			bars.replaceChildren(
+				...probs(t).map(([tok, p]) => {
+					const row = document.createElement('div');
+					row.className = 'bar';
+					const name = document.createElement('span');
+					name.textContent = tok;
+					const fill = document.createElement('span');
+					fill.className = 'fill';
+					fill.style.width = `${(p * 100).toFixed(1)}%`;
+					const pct = document.createElement('span');
+					pct.textContent = `${(p * 100).toFixed(1)}%`;
+					row.append(name, fill, pct);
+					return row;
+				})
+			);
+		};
+		go.addEventListener('click', () => {
+			let r = Math.random();
+			let pick = ' mat';
+			for (const [tok, p] of probs(Number(range.value))) {
+				r -= p;
+				if (r <= 0) {
+					pick = tok;
+					break;
+				}
+			}
+			gen.textContent = `The cat sat on the${pick}.`;
+		});
+		range.addEventListener('input', draw);
+		draw();
+	});
+</script>

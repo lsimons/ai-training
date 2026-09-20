@@ -1,0 +1,36 @@
+---
+/** A situation plus a decision as `choice`, with a consequence shown per option (spec S01 `scenario`). */
+import CheckpointShell from './CheckpointShell.astro';
+
+interface Option {
+	text: string;
+	correct?: boolean;
+	consequence: string;
+}
+interface Props {
+	id: string;
+	objective: string;
+	title: string;
+	hint: string;
+	options: Option[];
+}
+const { id, objective, title, hint, options } = Astro.props;
+const correct = options.filter((o) => o.correct).length;
+if (correct !== 1) throw new Error(`Scenario "${id}" needs exactly one correct option, has ${correct}`);
+---
+
+<CheckpointShell {id} {objective} {title} {hint} kind="scenario" checkLabel="Decide">
+	<slot />
+	<Fragment slot="body">
+		<div class="cp-options" role="radiogroup" aria-label={title}>
+			{
+				options.map((o) => (
+					<label data-correct={o.correct ? 'true' : undefined} data-consequence={o.consequence}>
+						<input type="radio" name={`${id}-choice`} />
+						<span>{o.text}</span>
+					</label>
+				))
+			}
+		</div>
+	</Fragment>
+</CheckpointShell>

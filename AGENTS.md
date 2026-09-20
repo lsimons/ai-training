@@ -20,8 +20,10 @@ and `mise install` once per clone.
 | `mise run docs-dev`            | Dev server at <http://localhost:4321/ai-training/>         |
 | `mise run docs-build`          | Build the static site into `docs/dist`                     |
 | `mise run docs-check`          | Astro type/content check                                   |
+| `mise run examples`            | Run lesson example fixtures, assert the shown output       |
+| `mise run docs-e2e`            | Build + headless-browser walkthrough of every mechanism    |
 | `mise run lint`                | prek hooks over every file + `actionlint`                  |
-| `mise run ci`                  | Full gate: install + lint + check + build                  |
+| `mise run ci`                  | Full gate: install + lint + examples + check + build       |
 | `mise run links`               | `lychee` broken-link check (network; not part of `ci`)     |
 | `mise run audit`               | `zizmor` audit of workflows + dependabot config            |
 | `mise run docs-audit`          | `bun audit` of the site dependency tree (network)          |
@@ -61,9 +63,28 @@ the config prepends the base at render time (for both `<a href>` and
 verbatim and must include the base path.
 
 - `docs/` - Astro Starlight site.
-  - `src/content/docs/` - the Markdown pages, plus the `index.mdx` splash
-    landing page. Each page needs a `title` in frontmatter.
-  - `src/styles/custom.css` - the LSD Warm theme and landing-page card styles.
+  - `src/content/docs/` - the pages. Lessons are `<area>/<lesson>.mdx`
+    with the frontmatter from spec S03; course pages are `<area>/index.mdx`.
+    `docs/agents/writing-a-lesson.md` is the authoring guide.
+  - `src/content.config.ts` - the `docs` schema (extended with lesson
+    fields) plus the `topics`, `competencies` and `bibliography` YAML
+    collections under `src/data/` (spec S02 "Storage").
+  - `src/components/lesson/` - the checkpoint and section components;
+    `components/widgets/` the widgets; `components/overrides/` the Starlight
+    `MarkdownContent` override that frames a lesson (routing cards, comfort
+    level, finish); `CourseGraph`, `TopicMap`, `Glossary`,
+    `ProgressOverview`.
+  - `src/scripts/progress.ts` - the local-storage progress record and review
+    schedule (specs S04, S05); `scripts/checkpoints.ts` binds interactions.
+  - `src/pages/` - generated pages: `topics/`, `competencies/`, and
+    `[area]/review`.
+  - `src/lib/` - build-time helpers: areas, lessons (checkpoint discovery,
+    graph levels), the base-path `href()` for component links.
+  - `src/styles/custom.css` - the LSD Warm theme; `lesson.css` - lesson,
+    course, map, progress and review styles (global on purpose: review
+    pages clone checkpoint markup out of lesson pages).
+  - `examples/` - the runnable fixtures behind `<Predict run=...>`;
+    `scripts/check-examples.mjs` runs them.
   - `public/` - static assets. `public/presentations/` holds Quarto decks and
     their committed HTML/PDF outputs.
   - `astro.config.mjs` - site/base, the sidebar, redirects, and the rehype
@@ -108,8 +129,12 @@ verbatim and must include the base path.
 - `mise run ci` must pass before you push. It is the same list the CI job
   runs, in the same order.
 - Code examples in lessons are real and their shown output is asserted in
-  CI (spec S03, Examples). Until the example-runner exists, an example that
-  cannot run must say so in the page.
+  CI (spec S03, Examples): `<Predict run="..." answer="...">` names a fixture
+  under `docs/examples/` and `mise run examples` fails on a mismatch. An
+  example that cannot run says so in the page (the component prints this
+  when `run` is absent).
+- Component-rendered links must use `href()` from `src/lib/url.ts`; the
+  rehype base plugin only sees Markdown.
 - Internal links are root-relative; the rehype plugin adds the base path.
   `starlight-links-validator` fails `mise run docs-build` on a dead one, so
   the build is the check. Do not disable it.
@@ -141,6 +166,10 @@ verbatim and must include the base path.
 ### Git remote
 
 Use GitHub with `gh`. The repo is `lsimons/ai-training` (private for now).
+
+### Tutor mode
+
+`.claude/skills/tutor/SKILL.md`. Run the site locally and invoke `/tutor`.
 
 ### Issue tracker
 

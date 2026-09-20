@@ -1,0 +1,49 @@
+id: customizing-agents/instructions
+area: customizing-agents
+name: Project instructions
+definition: >-
+  Project instructions are the standing brief an agent reads at the start of
+  every session in a repository. This topic covers the instruction file and
+  its conventions, which sections earn their place, how instructions layer in
+  a monorepo, and the point where a rule needs a hook or a tool instead of a
+  sentence.
+concepts:
+  - id: agents-md-claude-md
+    name: AGENTS.md / CLAUDE.md
+    definition: >-
+      The instruction file coding agents load automatically from a
+      repository root. Several tools read a shared name and others read
+      their own; a symlink lets one file serve both. It holds what the agent
+      must know every session: commands, conventions, boundaries. It is not
+      documentation for people and is read on every turn, so every line
+      costs context.
+  - id: sections
+    name: Sections
+    definition: >-
+      The recurring parts of a good instruction file: what the project is,
+      how to build, test and lint, the layout of the code, the conventions to
+      follow, the things never to do, and how to finish a piece of work. Each
+      section answers a question the agent would otherwise guess at. Remove
+      anything the agent can discover cheaply itself, and keep examples
+      concrete.
+  - id: monorepo-hierarchy
+    name: Monorepo hierarchy
+    definition: >-
+      In a repository with many packages, instruction files can sit at the
+      root and inside subdirectories; the agent reads the ones on the path to
+      the files it is working on. Root holds what is true everywhere,
+      subdirectory files hold what differs. The hierarchy keeps each file
+      short and lets teams own their own rules without conflicting.
+  - id: when-instructions-are-not-enough
+    name: When instructions are not enough
+    definition: >-
+      Instructions are requests; a model follows them most of the time and
+      forgets them as context fills. A rule that must hold every time, such as
+      never committing secrets or always running the formatter, belongs in a
+      hook or a permission setting that enforces it mechanically. A capability
+      the agent lacks belongs in a tool or a skill, not in a longer paragraph.
+links:
+  prerequisites: [coding-with-agents/context]
+  related: [coding-with-agents/context]
+  specializations: []
+sources: [AEC-15]

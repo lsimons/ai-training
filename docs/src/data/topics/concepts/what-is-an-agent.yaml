@@ -1,0 +1,55 @@
+id: concepts/what-is-an-agent
+area: concepts
+name: What an agent is
+definition: >-
+  An agent is a model placed in a loop with tools, so that instead of only
+  answering it can look things up, act, observe the result and decide what to
+  do next. This topic separates the model from the agent built around it,
+  explains tools and the loop, and introduces the scale from "suggests" to
+  "acts unattended".
+concepts:
+  - id: model-vs-agent
+    name: Model vs agent
+    definition: >-
+      A model takes text in and produces text out, once. An agent is software
+      that calls a model repeatedly, gives it tools, feeds the tool results
+      back and stops when a goal is met. The model supplies judgement; the
+      agent supplies hands, memory and a loop. Most of what makes an agent
+      useful or dangerous lives in the software around the model.
+  - id: tool
+    name: Tool
+    definition: >-
+      A function the agent can ask to run, described to the model by name,
+      purpose and parameters. Reading a file, searching the web, running a
+      command or calling an API are tools. The model does not execute
+      anything itself; it emits a request, the agent runs it and returns the
+      result. Tools are how an agent reaches beyond its context window.
+  - id: agent-loop
+    name: Agent loop
+    definition: >-
+      The cycle an agent runs: observe the current state, think about what to
+      do, act through a tool, observe the result, repeat. The loop ends when
+      the model says it is done, a step limit is hit or a human intervenes.
+      Everything an agent does, good or bad, is some number of turns of this
+      loop.
+  - id: degree-of-autonomy
+    name: Degree of autonomy
+    definition: >-
+      How much an agent may do before a human sees it. At one end it only
+      suggests; further along it acts but asks before anything irreversible;
+      at the far end it runs unattended. Autonomy is a setting chosen for a
+      task, not a property of the product, and the right level depends on
+      how costly a mistake is and how easily it can be undone.
+  - id: harness
+    name: Harness
+    definition: >-
+      The software around the model that makes it an agent: the loop, the tool
+      definitions, the permission checks, the system prompt, context
+      management and the stop rules. Two agents using the same model can
+      behave very differently because their harnesses differ. When an agent
+      misbehaves, the fix is usually in the harness, not the model.
+links:
+  prerequisites: [concepts/prompting, concepts/limits]
+  related: []
+  specializations: []
+sources: [AEC-01, DLAI-11]

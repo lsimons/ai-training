@@ -91,34 +91,45 @@ export default defineConfig({
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/lsimons/ai-training' },
 			],
 			editLink: { baseUrl: 'https://github.com/lsimons/ai-training/edit/main/docs/' },
-			customCss: ['./src/styles/custom.css'],
+			customCss: ['./src/styles/custom.css', './src/styles/lesson.css'],
 			sidebar: [
 				{
 					label: 'Foundations',
 					items: [
 						{ slug: 'concepts', label: 'Concepts' },
 						{ slug: 'concepts/how-models-work', label: 'How a language model works', attrs: { class: 'lesson-link' } },
+						{ slug: 'safety', label: 'Safety' },
+						{ slug: 'safety/agent-risk', label: 'Why agent safety is different', attrs: { class: 'lesson-link' } },
+						{ slug: 'using-agents', label: 'Using agents' },
+						{ slug: 'using-agents/delegating', label: 'Delegating a task to an agent', attrs: { class: 'lesson-link' } },
 					],
 				},
 				{
 					label: 'Engineering',
 					items: [
+						{ slug: 'coding-with-agents', label: 'Coding with agents' },
+						{ slug: 'coding-with-agents/first-session', label: 'Your first session with a coding agent', attrs: { class: 'lesson-link' } },
+						{ slug: 'customizing-agents', label: 'Customizing agents' },
+						{ slug: 'customizing-agents/instructions', label: 'Project instructions: AGENTS.md', attrs: { class: 'lesson-link' } },
 						{ slug: 'building-agents', label: 'Building agents' },
 						{ slug: 'building-agents/agent-loop', label: 'Building your first agent', attrs: { class: 'lesson-link' } },
-					],
-				},
-				{ slug: 'progress', label: 'Your progress' },
-				{
-					label: 'Authoring',
-					items: [
-						{ slug: 'guides/writing-pages', label: 'Writing pages' },
-						{ slug: 'guides/slides', label: 'Slide decks with Quarto' },
 					],
 				},
 				{
 					label: 'Reference',
 					items: [
+						{ slug: 'map', label: 'Topic map' },
+						{ slug: 'glossary', label: 'Glossary' },
+						{ slug: 'progress', label: 'Your progress' },
+					],
+				},
+				{
+					label: 'Contributing',
+					collapsed: true,
+					items: [
 						{ slug: 'contributing', label: 'Contributing' },
+						{ slug: 'guides/writing-pages', label: 'Writing pages' },
+						{ slug: 'guides/slides', label: 'Slide decks with Quarto' },
 						// Starlight prepends the deploy `base` to sidebar link values, so
 						// these are written without it (unlike head/content links).
 						{
@@ -136,6 +147,10 @@ export default defineConfig({
 					],
 				},
 			],
+			components: {
+				// Lesson frame: routing cards, comfort level, finish/skip, checkpoint script.
+				MarkdownContent: './src/components/overrides/MarkdownContent.astro',
+			},
 		}),
 	],
 });

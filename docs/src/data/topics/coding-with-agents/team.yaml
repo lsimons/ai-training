@@ -1,0 +1,68 @@
+id: coding-with-agents/team
+area: coding-with-agents
+name: Agents in a team
+definition: >-
+  Once several people and several agents work on one repository, individual
+  habits need to become team practice. This topic covers running parallel
+  agent sessions without collisions, using worktrees, wiring agents into CI,
+  enforcing rules with hooks, agreeing review norms, and attributing agent
+  work honestly.
+concepts:
+  - id: parallel-sessions
+    name: Parallel sessions
+    definition: >-
+      Running more than one agent session at once, on separate tasks, to
+      use waiting time. It multiplies output and also the chances of two
+      sessions editing the same files, losing track of which change belongs
+      where, or exhausting your own attention for review. Parallel work
+      needs isolation per session and a discipline of finishing and
+      reviewing one task before merging the next.
+  - id: worktrees
+    name: Worktrees
+    definition: >-
+      Separate checked-out copies of one repository, each on its own branch,
+      sharing one history. A worktree per agent session gives each its own
+      files and build state, so parallel sessions cannot overwrite each
+      other and a bad session can be discarded without touching the others.
+      They are the standard way to isolate concurrent agent work locally.
+  - id: ci-integration
+    name: CI integration
+    definition: >-
+      Making the continuous integration pipeline the shared gate for agent
+      changes: the same lint, test, build and security checks run on every
+      pull request regardless of who or what wrote it. CI turns individual
+      verification into a team guarantee and gives agents an objective
+      target. Agents can also be given CI results to fix, within the same
+      bounds as any self-checking loop.
+  - id: team-hooks
+    name: Hooks
+    definition: >-
+      Scripts that run automatically at fixed points, before a commit, after
+      an agent edits a file, before a command runs, to enforce a rule
+      mechanically: format the code, block a secret, refuse a forbidden path.
+      Hooks enforce what instructions can only request, and they apply to
+      every session and every team member the same way, which is what makes
+      them a team tool.
+  - id: review-norms
+    name: Review norms
+    definition: >-
+      The team's agreements on how agent-assisted changes are reviewed: the
+      author reads and understands every line before requesting review, the
+      PR says what the agent did and what was verified, reviewers read the
+      diff rather than the description, and size limits keep changes
+      reviewable. Norms keep the human accountability that agents can quietly
+      erode.
+  - id: attribution
+    name: Attribution
+    definition: >-
+      Recording that an agent contributed to a change, typically as a trailer
+      in the commit message and a note in the pull request, alongside the
+      human who directed and verified the work. Attribution lets reviewers
+      calibrate attention, keeps history honest, and separates what a person
+      certifies from what a tool produced. The human remains the author of
+      record.
+links:
+  prerequisites: [coding-with-agents/quality]
+  related: []
+  specializations: []
+sources: [DLAI-5]

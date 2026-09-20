@@ -1,0 +1,189 @@
+---
+/**
+ * The course page as a lesson graph (spec S02 "Course page as lesson graph"):
+ * lesson nodes in levels, dotted edges from `assumes`, a milestone bar, a
+ * completion ring, a review-due card and an about panel. Node state comes
+ * from the progress record on the client.
+ */
+import { getCollection } from 'astro:content';
+import { getLessons, checkpointsOf, levelsOf } from '@lib/lessons';
+import { areaOf } from '@lib/areas';
+import { href } from '@lib/url';
+
+interface Props {
+	area: string;
+}
+const { area } = Astro.props;
+const info = areaOf(area);
+const lessons = await getLessons(area);
+const levels = levelsOf(lessons);
+const maxLevel = Math.max(0, ...levels.values());
+const rows = Array.from({ length: maxLevel + 1 }, (_, i) => lessons.filter((l) => levels.get(l.id) === i));
+const nodes = lessons.map((l) => ({
+	id: l.id,
+	title: l.data.title,
+	mode: l.data.mode,
+	checkpoints: checkpointsOf(l).map((c) => c.id),
+	assumes: (l.data.assumes ?? []).filter((a) => a.lesson.startsWith(`${area}/`)).map((a) => a.lesson),
+}));
+const edges = nodes.flatMap((n) => n.assumes.map((from) => ({ from, to: n.id })));
+
+const competencies = (await getCollection('competencies')).find((c) => c.data.area === area)?.data.competencies ?? [];
+const topics = await getCollection('topics');
+const covered = new Set(lessons.flatMap((l) => l.data.covers ?? []));
+const prerequisites = [...new Set(topics.filter((t) => covered.has(t.data.id)).flatMap((t) => t.data.links.prerequisites))]
+	.filter((p) => !p.startsWith(`${area}/`))
+	.map((p) => topics.find((t) => t.data.id === p))
+	.filter((t): t is NonNullable<typeof t> => Boolean(t));
+const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
+---
+
+<div class="course not-content" data-course={area} data-nodes={JSON.stringify(nodes)}>
+	<aside class="course-review" data-review-card hidden>
+		<a href={href(`/${area}/review/`)}>Review due: <span data-review-count>0</span> items</a>
+	</aside>
+
+	<div class="course-top">
+		<div class="course-ring" data-ring style="--pct: 0" aria-label="Completion">
+			<span data-ring-label>0%</span>
+		</div>
+		<div class="course-milestone" aria-label="Milestones">
+			<div class="course-milestone-track"><div class="course-milestone-fill" data-milestone-fill></div></div>
+			<ol class="course-milestone-stops">
+				<li data-stop="0">getting started</li>
+				<li data-stop="50">halfway</li>
+				<li data-stop="80">almost there</li>
+				<li data-stop="100">complete</li>
+			</ol>
+		</div>
+	</div>
+
+	<div class="course-graph" data-graph>
+		<svg class="course-edges" aria-hidden="true"></svg>
+		{
+			rows.map((row) => (
+				<div class="course-level">
+					{row.map((l) => (
+						<a class="course-node" href={href(`/${l.id}/`)} data-node={l.id} data-state="untouched">
+							<span class="course-node-ring" data-node-ring style="--pct: 0"></span>
+							<span class="course-node-body">
+								<span class="course-node-mode">{l.data.mode}</span>
+								<span class="course-node-title">{l.data.title}</span>
+								<span class="course-node-count" data-node-count></span>
+							</span>
+						</a>
+					))}
+				</div>
+			))
+		}
+		<script is:inline type="application/json" data-edges set:html={JSON.stringify(edges)} />
+	</div>
+
+	<aside class="course-about">
+		<p class="course-about-title">About this course</p>
+		<dl>
+			<dt>Goals</dt>
+			<dd>
+				<ul>
+					{competencies.map((c) => <li><a href={href(`/competencies/${c.id}/`)}>{c.statement}</a></li>)}
+				</ul>
+			</dd>
+			<dt>Counts</dt>
+			<dd>
+				{lessons.length} lesson{lessons.length === 1 ? '' : 's'}, {totalCheckpoints} checkpoint{totalCheckpoints === 1 ? '' : 's'}
+			</dd>
+			<dt>Builds on</dt>
+			<dd>
+				{prerequisites.length ? (
+					<ul>
+						{prerequisites.map((t) => <li><a href={href(`/topics/${t.data.id}/`)}>{t.data.name}</a></li>)}
+					</ul>
+				) : (
+					<span>Nothing; start here.</span>
+				)}
+			</dd>
+		</dl>
+		<p class="course-about-note">{info.description} Progress is kept in this browser; see <a href={href('/progress/')}>your progress</a>.</p>
+	</aside>
+</div>
+
+<script>
+	import * as progress from '@scripts/progress';
+
+	interface Node {
+		id: string;
+		checkpoints: string[];
+	}
+
+	document.querySelectorAll<HTMLElement>('.course[data-course]').forEach((root) => {
+		const area = root.dataset.course!;
+		const nodes: Node[] = JSON.parse(root.dataset.nodes!);
+
+		function draw() {
+			const rec = progress.load();
+			let finishedLessons = 0;
+			let skippedLessons = 0;
+			let doneUnits = 0;
+			const totalUnits = nodes.length + nodes.reduce((n, l) => n + l.checkpoints.length, 0);
+			for (const n of nodes) {
+				const l = rec.lessons[n.id];
+				const passed = n.checkpoints.filter((c) => rec.checkpoints[`${n.id}#${c}`]?.state === 'passed').length;
+				const state = l?.state === 'finished' ? 'finished' : l?.state === 'skipped' ? 'skipped' : l?.state === 'read' ? 'in-progress' : 'untouched';
+				if (state === 'finished') finishedLessons++;
+				if (state === 'skipped') skippedLessons++;
+				doneUnits += passed + (state === 'finished' ? 1 : 0);
+				const el = root.querySelector<HTMLElement>(`[data-node="${n.id}"]`);
+				if (!el) continue;
+				el.dataset.state = state;
+				const ring = el.querySelector<HTMLElement>('[data-node-ring]');
+				if (ring) ring.style.setProperty('--pct', String(n.checkpoints.length ? Math.round((passed / n.checkpoints.length) * 100) : 0));
+				const count = el.querySelector<HTMLElement>('[data-node-count]');
+				if (count) count.textContent = n.checkpoints.length ? `${passed}/${n.checkpoints.length} checkpoints` : '';
+			}
+			// Milestone bar: percent of lessons finished; skipped count toward neither side.
+			const counted = nodes.length - skippedLessons;
+			const pctLessons = counted ? Math.round((finishedLessons / counted) * 100) : 0;
+			const fill = root.querySelector<HTMLElement>('[data-milestone-fill]');
+			if (fill) fill.style.width = `${pctLessons}%`;
+			root.querySelectorAll<HTMLElement>('[data-stop]').forEach((s) => (s.dataset.reached = String(pctLessons >= Number(s.dataset.stop) && (pctLessons > 0 || s.dataset.stop === '0'))));
+			// Completion ring: lessons and checkpoints done.
+			const pctUnits = totalUnits ? Math.round((doneUnits / totalUnits) * 100) : 0;
+			const ring = root.querySelector<HTMLElement>('[data-ring]');
+			if (ring) ring.style.setProperty('--pct', String(pctUnits));
+			const label = root.querySelector<HTMLElement>('[data-ring-label]');
+			if (label) label.textContent = `${pctUnits}%`;
+			// Review due card.
+			const due = progress.dueReviews(rec, `${area}/`);
+			const card = root.querySelector<HTMLElement>('[data-review-card]');
+			if (card) card.hidden = due.length === 0;
+			const cnt = root.querySelector<HTMLElement>('[data-review-count]');
+			if (cnt) cnt.textContent = String(due.length);
+		}
+
+		/** Dotted edges from the lesson that teaches an assumed objective to the lesson assuming it. */
+		function drawEdges() {
+			const svg = root.querySelector<SVGSVGElement>('.course-edges');
+			const graph = root.querySelector<HTMLElement>('[data-graph]');
+			const raw = root.querySelector('[data-edges]')?.textContent;
+			if (!svg || !graph || !raw) return;
+			const edges: { from: string; to: string }[] = JSON.parse(raw);
+			const box = graph.getBoundingClientRect();
+			svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+			svg.innerHTML = edges
+				.map((e) => {
+					const a = root.querySelector(`[data-node="${e.from}"]`)?.getBoundingClientRect();
+					const b = root.querySelector(`[data-node="${e.to}"]`)?.getBoundingClientRect();
+					if (!a || !b) return '';
+					const x1 = a.left + a.width / 2 - box.left, y1 = a.bottom - box.top;
+					const x2 = b.left + b.width / 2 - box.left, y2 = b.top - box.top;
+					return `<path d="M${x1},${y1} C${x1},${(y1 + y2) / 2} ${x2},${(y1 + y2) / 2} ${x2},${y2}" />`;
+				})
+				.join('');
+		}
+
+		draw();
+		drawEdges();
+		document.addEventListener(progress.EVENT, draw);
+		window.addEventListener('resize', drawEdges);
+	});
+</script>

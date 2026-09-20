@@ -1,0 +1,41 @@
+id: building-agents/orchestration
+area: building-agents
+name: Orchestration and multi-agent
+definition: >-
+  When one agent is not enough, something has to coordinate several. This
+  topic contrasts orchestration written as code with orchestration decided by
+  a model, surveys sequential, hierarchical and collaborative arrangements,
+  and names the coordination cost that every extra agent adds.
+concepts:
+  - id: code-vs-model-driven-orchestration
+    name: Code- vs model-driven orchestration
+    definition: >-
+      Two ways to coordinate agents. In code-driven orchestration a program
+      decides which agent runs when, passing outputs along fixed paths; it
+      is predictable, testable and cheap. In model-driven orchestration a
+      model decides, delegating to other agents as tools; it adapts to
+      unforeseen cases and is harder to bound. Use code for known
+      workflows and a model for the genuinely open parts.
+  - id: sequential-hierarchical-collaborative
+    name: Sequential / hierarchical / collaborative
+    definition: >-
+      Three arrangements. Sequential: agents form a pipeline, each
+      transforming the previous output. Hierarchical: a manager agent
+      delegates subtasks to workers and integrates their results.
+      Collaborative: peer agents share a workspace or conversation and
+      negotiate. Complexity and unpredictability rise in that order;
+      sequential is enough far more often than it seems.
+  - id: orchestration-tax
+    name: Orchestration tax
+    definition: >-
+      The cost every additional agent adds: more tokens for handoffs and
+      repeated context, latency from extra calls, information lost at each
+      boundary, new failure modes when agents disagree or wait on each
+      other, and harder debugging. A multi-agent design has to beat a
+      single well-equipped agent by more than this tax, and often it does
+      not.
+links:
+  prerequisites: [building-agents/patterns]
+  related: []
+  specializations: []
+sources: [AEC-07, AEC-18]

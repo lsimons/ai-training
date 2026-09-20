@@ -1,0 +1,58 @@
+id: building-agents/patterns
+area: building-agents
+name: Design patterns
+definition: >-
+  Recurring shapes for how an agent thinks and acts. This topic covers
+  reasoning interleaved with acting, reflection on one's own output, explicit
+  planning, the trade-off between planning everything up front and reacting
+  step by step, and breaking large goals into levels of plans.
+concepts:
+  - id: react
+    name: ReAct
+    definition: >-
+      A pattern where the model alternates a short written reasoning step
+      with an action, observes the result and reasons again. Making the
+      reasoning explicit before each tool call improves tool choice and
+      leaves a readable trace of why the agent did what it did. Most
+      tool-using agent loops are a form of this pattern, whether or not the
+      reasoning is shown to the user.
+  - id: reflection
+    name: Reflection
+    definition: >-
+      Having the model critique its own output, or a second model call
+      critique it, and then revise. Reflection catches errors a single pass
+      misses, especially in code, arguments and formats with checkable
+      rules. It costs extra calls and can loop on trivial edits, so bound
+      the rounds and give the critic concrete criteria rather than asking
+      whether the answer is good.
+  - id: planning
+    name: Planning
+    definition: >-
+      Having the agent write out the steps to a goal before taking them, as
+      a list it then works through and updates. A written plan improves
+      multi-step tasks, makes progress visible and gives a human a moment to
+      correct course cheaply. Plans go stale as steps reveal new facts, so
+      the pattern includes revisiting the plan, not only following it.
+  - id: plan-then-execute-vs-reactive
+    name: Plan-then-execute vs reactive
+    definition: >-
+      Two ends of a spectrum. Plan-then-execute decides the whole sequence
+      first and then runs it, which is predictable, cheap to review and
+      brittle when a step surprises. Reactive decides one step at a time
+      from the latest observation, which adapts well and is harder to
+      predict or bound. Most agents mix the two: plan coarsely, react within
+      a step.
+  - id: hierarchical-planning
+    name: Hierarchical planning
+    definition: >-
+      Breaking a large goal into subgoals, each with its own plan, often
+      handled by its own agent call or subagent with a fresh context. The
+      top level tracks subgoals and their status; lower levels handle
+      detail. It keeps any one context small and focused and maps well onto
+      decomposed specifications, at the cost of coordination and of
+      information lost between levels.
+links:
+  prerequisites: [building-agents/agent-loop]
+  related: []
+  specializations: []
+sources: [AEC-04, AEC-06, DLAI-11]
