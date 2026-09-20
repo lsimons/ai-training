@@ -4,14 +4,14 @@ description: Author slide decks in Quarto and render them to HTML and PDF.
 ---
 
 Slide decks are authored in [Quarto](https://quarto.org/) (`.qmd`) and rendered
-to two static outputs that live in `docs/public/presentations/`:
+to two static outputs that live in `site/public/presentations/`:
 
 - **HTML** - a self-contained [reveal.js](https://revealjs.com/) deck
   (`example.html`), themed to match the site.
 - **PDF** - a printable version (`example.pdf`) via Quarto's Beamer output.
 
 There is a worked example at
-[`docs/public/presentations/example.qmd`](/presentations/example.qmd). Open the
+[`site/public/presentations/example.qmd`](/presentations/example.qmd). Open the
 rendered [HTML slides](/presentations/example.html) or the
 [PDF](/presentations/example.pdf).
 
@@ -20,29 +20,29 @@ rendered [HTML slides](/presentations/example.html) or the
 Quarto is pinned in `.mise.toml`. Render the example (both formats) with:
 
 ```bash
-mise run docs-slides
+mise run site-slides
 ```
 
-That runs `quarto render docs/public/presentations/example.qmd`, which produces
+That runs `quarto render site/public/presentations/example.qmd`, which produces
 `example.html` and `example.pdf` beside the source. The PDF output uses LaTeX
 (Beamer); if it is missing, install it once with `quarto install tinytex`.
 
 The rendered outputs are committed to git, because decks change rarely and this
 keeps the deployed site a pure static build (CI does not run Quarto). Re-run
-`mise run docs-slides` and commit the results whenever you edit a deck.
+`mise run site-slides` and commit the results whenever you edit a deck.
 
 ## Theme
 
-The reveal.js theme lives in `docs/public/presentations/reveal.scss` and maps
+The reveal.js theme lives in `site/public/presentations/reveal.scss` and maps
 the deck's fonts and accent colour onto the site's LSD Warm palette. Adjust the
 SCSS variables there to restyle the HTML slides.
 
 ## Add a deck
 
-1. Copy `example.qmd` to a new name in `docs/public/presentations/`.
+1. Copy `example.qmd` to a new name in `site/public/presentations/`.
 2. Edit the frontmatter `title`/`author` and write your slides (`#` starts a
    section, `##` starts a slide).
-3. Render with `quarto render docs/public/presentations/your-deck.qmd`.
+3. Render with `quarto render site/public/presentations/your-deck.qmd`.
 4. Link it from the sidebar in `astro.config.mjs` (see the "Example slides"
    group), and add a redirect for the extensionless URL if you want a clean
    sidebar link.

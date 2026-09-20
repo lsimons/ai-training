@@ -20,19 +20,19 @@ This site is built with [Astro Starlight](https://starlight.astro.build/).
 
 Tools are pinned in `.mise.toml`; run `mise install` once. Then:
 
-- `mise run docs-install` - Install the site dependencies (bun). Updates
-  `docs/bun.lock` if `docs/package.json` changed; commit the result.
-  `mise run ci` and CI use `docs-install-frozen`, which fails instead of
+- `mise run site-install` - Install the site dependencies (bun). Updates
+  `site/bun.lock` if `site/package.json` changed; commit the result.
+  `mise run ci` and CI use `site-install-frozen`, which fails instead of
   resolving the difference.
-- `mise run docs-dev` - Start the live-reloading docs server.
-- `mise run docs-build` - Build the documentation site into `docs/dist`.
-- `mise run docs-check` - Run the Astro type/content check.
+- `mise run site-dev` - Start the live-reloading docs server.
+- `mise run site-build` - Build the documentation site into `site/dist`.
+- `mise run site-check` - Run the Astro type/content check.
 - `mise run lint` - Run the prek hooks over every file, plus `actionlint`.
 - `mise run ci` - The full gate: install, lint, check, build. Must pass
   before you push.
 - `mise run links` - `lychee` check of *external* URLs. Not part of `ci`,
   because it is a network check that flakes on rate limits. Internal links
-  are validated by `starlight-links-validator` during `mise run docs-build`.
+  are validated by `starlight-links-validator` during `mise run site-build`.
 
 Open a pull request against `main`. CI runs the same `mise run ci` gate plus a
 [zizmor](https://docs.zizmor.sh/) audit of the GitHub Actions workflows; both
@@ -40,9 +40,9 @@ must be green.
 
 ## Quarto slide decks
 
-The [example presentation](docs/public/presentations/example.qmd) is built with [Quarto](https://quarto.org/).
+The [example presentation](site/public/presentations/example.qmd) is built with [Quarto](https://quarto.org/).
 
-Render it to HTML and PDF with `mise run docs-slides` (or `quarto render docs/public/presentations/example.qmd`).
+Render it to HTML and PDF with `mise run site-slides` (or `quarto render site/public/presentations/example.qmd`).
 
 The presentations are modified so rarely that their rendered outputs are checked into git. Re-render and commit the outputs whenever you change a deck.
 
