@@ -22,7 +22,7 @@ site is static HTML with interactive lessons that keep your progress in your
 browser, and you can also run it locally from a Claude Code session with
 Claude acting as a tutor.
 
-**Status: release 1, one or two lessons per area, is live.** The
+**Status: release 1 is live, with one or two lessons per area and the first six Concepts lessons.** The
 design is in [`docs/spec/`](./docs/spec/) and the open work is in the
 [issue tracker](https://github.com/lsimons/ai-training/issues).
 
