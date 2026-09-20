@@ -41,6 +41,7 @@ lessons:
     serves:
       - coding-with-agents/ships-with-agent/runs-a-session
     status: planned
+    issue: 144
     minutes: 10
     after:
       - coding-with-agents/first-session
@@ -61,6 +62,7 @@ lessons:
       - coding-with-agents/specifies-work/judges-worth-building
       - coding-with-agents/specifies-work/defines-success
     status: planned
+    issue: 147
     minutes: 15
     after:
       - coding-with-agents/first-session
@@ -78,6 +80,7 @@ lessons:
       - coding-with-agents/specifies-work/decomposes-into-components
       - coding-with-agents/specifies-work/designs-the-check
     status: planned
+    issue: 150
     minutes: 15
     after:
       - coding-with-agents/deciding-what-to-build
@@ -93,6 +96,7 @@ lessons:
     serves:
       - coding-with-agents/ships-with-agent/runs-a-session
     status: planned
+    issue: 153
     minutes: 15
     after:
       - coding-with-agents/first-session
@@ -109,6 +113,7 @@ lessons:
     serves:
       - coding-with-agents/ships-with-agent/works-in-increments
     status: planned
+    issue: 155
     minutes: 15
     after:
       - coding-with-agents/plan-then-test
@@ -124,6 +129,7 @@ lessons:
     serves:
       - coding-with-agents/ships-with-agent/keeps-change-reversible
     status: planned
+    issue: 157
     minutes: 15
     after:
       - coding-with-agents/spec-driven-increments
@@ -139,6 +145,7 @@ lessons:
     serves:
       - coding-with-agents/ships-with-agent/gives-the-right-context
     status: planned
+    issue: 160
     minutes: 10
     after:
       - coding-with-agents/plan-then-test
@@ -155,6 +162,7 @@ lessons:
       - coding-with-agents/ships-with-agent/gives-the-right-context
       - coding-with-agents/ships-with-agent/keeps-understanding
     status: planned
+    issue: 163
     minutes: 15
     after:
       - coding-with-agents/scoping-and-referencing
@@ -173,6 +181,7 @@ lessons:
     serves:
       - coding-with-agents/ships-with-agent/keeps-understanding
     status: planned
+    issue: 166
     minutes: 10
     after:
       - coding-with-agents/project-instructions
@@ -191,6 +200,7 @@ lessons:
     serves:
       - coding-with-agents/verifies-agent-work/reviews-others-code
     status: planned
+    issue: 169
     minutes: 15
     after:
       - coding-with-agents/reversible-changes
@@ -207,6 +217,7 @@ lessons:
     serves:
       - coding-with-agents/verifies-agent-work/observes-and-debugs
     status: planned
+    issue: 172
     minutes: 15
     after:
       - coding-with-agents/reviewing-the-diff
@@ -222,6 +233,7 @@ lessons:
     serves:
       - coding-with-agents/verifies-agent-work/automates-the-check
     status: planned
+    issue: 174
     minutes: 15
     after:
       - coding-with-agents/observing-and-debugging
@@ -240,6 +252,7 @@ lessons:
       - coding-with-agents/verifies-agent-work/reviews-others-code
       - coding-with-agents/verifies-agent-work/automates-the-check
     status: planned
+    issue: 176
     minutes: 15
     after:
       - coding-with-agents/self-checking-loops
@@ -269,6 +282,7 @@ lessons:
     serves:
       - coding-with-agents/verifies-agent-work/screens-for-security
     status: planned
+    issue: 178
     minutes: 15
     after:
       - coding-with-agents/tests-and-docs-that-hold
@@ -303,6 +317,7 @@ lessons:
     serves:
       - coding-with-agents/verifies-agent-work/screens-for-security
     status: planned
+    issue: 180
     minutes: 15
     after:
       - coding-with-agents/sandboxing
@@ -323,6 +338,7 @@ lessons:
       - coding-with-agents/works-in-team/attributes-honestly
       - coding-with-agents/works-in-team/follows-team-norms
     status: planned
+    issue: 183
     minutes: 10
     after:
       - coding-with-agents/reversible-changes
@@ -342,6 +358,7 @@ lessons:
       - coding-with-agents/works-in-team/follows-team-norms
       - coding-with-agents/works-in-team/sets-team-practice
     status: planned
+    issue: 186
     minutes: 15
     after:
       - coding-with-agents/self-checking-loops
@@ -361,6 +378,7 @@ lessons:
     serves:
       - coding-with-agents/works-in-team/runs-parallel-work
     status: planned
+    issue: 190
     minutes: 15
     after:
       - coding-with-agents/ci-and-hooks
@@ -377,6 +395,7 @@ lessons:
     serves:
       - coding-with-agents/works-in-team/sets-team-practice
     status: planned
+    issue: 193
     minutes: 10
     after:
       - coding-with-agents/parallel-sessions
