@@ -6,6 +6,7 @@
  * bind to.
  */
 import CourseGraph from '@components/CourseGraph.astro';
+import CoursePlan from '@components/CoursePlan.astro';
 import LearnersReference from '@components/LearnersReference.astro';
 import OverallProgress from '@components/OverallProgress.astro';
 import Settings from '@components/Settings.astro';
@@ -153,5 +154,38 @@ describe('LearnersReference', () => {
 			title: 'How a language model works',
 			topics: [{ id: 'concepts/models', name: 'Models' }],
 		});
+	});
+});
+
+describe('CoursePlan', () => {
+	it('renders one row per plan entry in plan order, folded under a counted summary', async () => {
+		const html = await container.renderToString(CoursePlan, { props: { area: 'safety' } });
+		expect(html).toMatch(/<details class="course-plan not-content" data-course-plan="safety"/);
+		expect(html).toContain('<summary>Lesson plan (3 lessons, 2 live)</summary>');
+		const rows = [...html.matchAll(/data-plan-entry="([^"]+)"/g)].map((m) => m[1]);
+		expect(rows).toEqual(['safety/agent-risk', 'safety/deeper', 'safety/coming']);
+	});
+	it('links a live row to its page and leaves a planned row as text', async () => {
+		const html = await container.renderToString(CoursePlan, { props: { area: 'safety' } });
+		expect(html).toContain('<a href="/ai-training/safety/agent-risk/">Why agent safety is different</a>');
+		expect(html).toContain('<small class="course-plan-id">safety/agent-risk</small>');
+		expect(html).not.toContain('href="/ai-training/safety/coming/"');
+		expect(html).toMatch(/data-plan-entry="safety\/coming" data-status="planned"/);
+		expect(html).toContain('Coming soon');
+	});
+	it('links covers to the topic, serves to the competency anchor, and shows the issue and after titles', async () => {
+		const html = await container.renderToString(CoursePlan, { props: { area: 'safety' } });
+		expect(html).toContain('<a href="/ai-training/topics/safety/risk/" title="safety/risk">risk</a>');
+		expect(html).toContain(
+			'<a class="course-plan-objective" href="/ai-training/competencies/concepts/explains-models/#o1" title="o1">o1</a>',
+		);
+		expect(html).toContain('<a href="https://github.com/lsimons/ai-training/issues/42">#42</a>');
+		expect(html.match(/github\.com\/lsimons\/ai-training\/issues\//g)).toHaveLength(1);
+		expect(html).toContain('<td>Deeper</td>');
+	});
+	it('rejects an area without a plan file', async () => {
+		await expect(container.renderToString(CoursePlan, { props: { area: 'using-agents' } })).rejects.toThrow(
+			/No course plan/,
+		);
 	});
 });
