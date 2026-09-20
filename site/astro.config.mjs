@@ -187,6 +187,7 @@ export default defineConfig({
 					items: [
 						{ slug: 'concepts', label: 'Concepts' },
 						{ slug: 'concepts/how-models-work', label: 'How a language model works', attrs: { class: 'lesson-link' } },
+						{ slug: 'concepts/context-window', label: 'What the model can see', attrs: { class: 'lesson-link' } },
 						{
 							slug: 'concepts/prompt-anatomy',
 							label: 'Instruction, context and format',
