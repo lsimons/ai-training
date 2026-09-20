@@ -143,14 +143,22 @@ const opencodeAgent = {
       const all = await this.api('/session');
       this.coachSession = all.find((x) => x.title === NAME + ' (coach)') ||
         await this.api('/session', { method: 'POST', body: JSON.stringify({ title: NAME + ' (coach)' }) });
-      try { const cfg = await this.api('/config'); const m = (cfg.small_model || cfg.model || '').split('/'); if (m.length >= 2) this.coachModel = { providerID: m[0], modelID: m.slice(1).join('/') }; } catch {}
-      log('coach session', this.coachSession.id, 'model', this.coachModel ? `${this.coachModel.providerID}/${this.coachModel.modelID}` : '(default)');
     }
+    // Use the provider/model the learner's session last answered with: that is the
+    // one the learner actually logged in to (/connect), so the coach shares it.
+    // SPIKE_COACH_MODEL=provider/model overrides.
+    let model = null;
+    if (process.env.SPIKE_COACH_MODEL) { const m = process.env.SPIKE_COACH_MODEL.split('/'); model = { providerID: m[0], modelID: m.slice(1).join('/') }; }
+    else {
+      const last = (await this.api(`/session/${this.session.id}/message`)).filter((m) => m.info.role === 'assistant' && !m.info.error).at(-1);
+      if (last?.info.providerID && last?.info.modelID) model = { providerID: last.info.providerID, modelID: last.info.modelID };
+    }
+    log('coach session', this.coachSession.id, 'model', model ? `${model.providerID}/${model.modelID}` : '(server default)');
     const t0 = Date.now();
     const body = { system, tools: { '*': false }, parts: [{ type: 'text', text: user }] };
-    if (this.coachModel) body.model = this.coachModel;
+    if (model) body.model = model;
     const r = await this.api(`/session/${this.coachSession.id}/message`, { method: 'POST', body: JSON.stringify(body) });
-    if (r.info?.error) throw new Error(`${r.info.error.name}: ${r.info.error.data?.message ?? ''} (is the provider connected? try /connect in the terminal)`);
+    if (r.info?.error) throw new Error(`${r.info.error.name}: ${r.info.error.data?.message ?? ''} (the coach uses the same provider/model as your last reply; if you have not sent a prompt yet, send one first or set SPIKE_COACH_MODEL)`);
     return { text: r.parts.filter((p) => p.type === 'text').map((p) => p.text).join('\n'), cost: r.info.cost, ms: Date.now() - t0 };
   },
   shutdown() { if (this.server) { log('stopping opencode serve'); this.server.kill(); } },
