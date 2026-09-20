@@ -24,12 +24,11 @@ both, so the builder and the reviewer never talk to each other.
 
 ## The flow
 
-1. **Triage first.** Read every open issue and its comments. Label an issue
-   `ready-for-agent` only when the body holds every decision the work
-   needs, with a suggested default for each. Label it `ready-for-human`
-   when the actual work is a decision. Leave it `needs-triage` with a
-   comment naming the blocker when it depends on another issue, and flip
-   the label the day the blocker merges. The triage flow and labels are in
+1. **Triage first.** Read every open issue and its comments, and leave
+   each one `ready-for-agent` with its decisions written down, or
+   `ready-for-human` with the one action named, or closed. How to run that
+   pass with the maintainer, what a ready issue contains, and how to handle
+   issues that hold a list of entries, and blocked ones, is in `triage.md`. The labels are in
    `issue-tracker.md`.
 
 2. **Dispatch one builder per ready issue**, in a single batch, each in an

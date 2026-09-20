@@ -225,7 +225,8 @@ patterns below after the fact. Write so that it has nothing to say.
 ## Process
 
 - Git remote is GitHub, `lsimons/ai-training` (private for now). Use `gh`.
-- Issues and triage labels: `docs/agents/issue-tracker.md`.
+- Issues and triage labels: `docs/agents/issue-tracker.md`. Running a triage
+  pass with the maintainer: `docs/agents/triage.md`.
 - Running many builder and reviewer agents in parallel against the issues,
   from triage to merge queue: `docs/agents/orchestration.md`.
 - Tutor mode: `.claude/skills/tutor/SKILL.md`. Run the site locally and
