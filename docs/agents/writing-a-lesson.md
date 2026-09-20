@@ -98,8 +98,8 @@ Match each task to the smallest access that still gets it done.
 Each row is a statement with a `<select>` of the `options`. `option` is
 the index of the right one. After Check every row is marked right or wrong
 and a wrong row shows its `why`. `rationale` shows once every row is
-right. Options may be reused across rows, and an option no row uses is a wrong
-answer for every row.
+right. Options may be reused across rows, and an option that appears in no
+row's answer is wrong for every row.
 
 ````mdx
 <Predict id="predict-tool-call" objective="building-agents/builds-agent-loop/defines-a-tool"
