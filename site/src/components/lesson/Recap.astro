@@ -1,17 +1,13 @@
 ---
 /**
  * Closes a lesson (spec S03 "Recap"): the author's numbered takeaways, then
- * "You can now..." from the served objectives, where to go next, and the
- * finish button. "Next" is navigation: the next lesson of the course, or
- * the next course page after the course's last lesson, or the topic map
- * after the last course. `extends-to` only feeds the "You are ahead" card.
- * Sources live on the topic pages.
+ * "You can now..." from the served objectives, and the finish button. Where
+ * to go next is the page footer's previous/next, which follows the sidebar
+ * order (lesson, then the next course). `extends-to` only feeds the "You
+ * are ahead" card. Sources live on the topic pages.
  */
 import { getCollection } from 'astro:content';
-import { AREAS } from '@lib/areas';
-import { getLessons } from '@lib/lessons';
 import { lessonEntryOf } from '@lib/lesson-context';
-import { href } from '@lib/url';
 
 const entry = lessonEntryOf(Astro);
 const data = entry.data;
@@ -22,16 +18,6 @@ const served = (data.serves ?? []).map((id) => ({ id, statement: objectives.get(
 const missing = served.filter((s) => !s.statement).map((s) => s.id);
 if (missing.length) throw new Error(`${entry.id}: serves unknown objective(s): ${missing.join(', ')}`);
 
-const area = entry.id.split('/')[0];
-const courseLessons = await getLessons(area);
-const position = courseLessons.findIndex((l) => l.id === entry.id);
-const nextLesson = courseLessons[position + 1];
-const nextArea = AREAS[AREAS.findIndex((a) => a.slug === area) + 1];
-const next = nextLesson
-	? { label: nextLesson.data.title, href: href(`/${nextLesson.id}/`), kind: 'lesson' }
-	: nextArea
-		? { label: `${nextArea.name} course`, href: href(`/${nextArea.slug}/`), kind: 'course' }
-		: { label: 'Topic map', href: href('/map/'), kind: 'map' };
 ---
 
 <section class="recap" id="recap">
@@ -41,9 +27,6 @@ const next = nextLesson
 	<ul class="recap-objectives">
 		{served.map((s) => <li data-objective={s.id}>{s.statement}</li>)}
 	</ul>
-	<p class="recap-next not-content" data-next={next.kind}>
-		<strong>Next:</strong> <a href={next.href}>{next.label}</a>
-	</p>
 	<div class="not-content recap-actions">
 		<button type="button" class="recap-finish" data-finish>Mark lesson finished</button>
 		<button type="button" class="recap-skip" data-skip-lesson>I know this, skip it</button>
