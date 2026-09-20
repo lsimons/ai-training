@@ -187,6 +187,11 @@ export default defineConfig({
 					items: [
 						{ slug: 'concepts', label: 'Concepts' },
 						{ slug: 'concepts/how-models-work', label: 'How a language model works', attrs: { class: 'lesson-link' } },
+						{
+							slug: 'concepts/prompt-anatomy',
+							label: 'Instruction, context and format',
+							attrs: { class: 'lesson-link' },
+						},
 						{ slug: 'safety', label: 'Safety' },
 						{ slug: 'safety/responsible-use', label: 'What may go into an AI tool', attrs: { class: 'lesson-link' } },
 						{ slug: 'safety/agent-risk', label: 'Why agent safety is different', attrs: { class: 'lesson-link' } },
