@@ -1,0 +1,376 @@
+---
+title: The EU AI Act in one lesson
+description: What the European Union's AI Act asks of people who build and use AI at work. Whether a tool is an AI system, which risk tier a use falls in, whether you are provider or deployer, and which transparency duties touch everyday work.
+mode: explanation
+covers:
+  - safety/governance
+serves:
+  - safety/judges-agent-risk/sets-oversight
+  - safety/handles-data-safely/discloses-ai-use
+assumes:
+  - objective: safety/judges-agent-risk/chooses-human-in-loop
+    lesson: safety/agent-risk
+    section: human-in-the-loop
+extends-to:
+  - label: Governance and oversight
+    href: /topics/safety/governance/
+lastUpdated: 2026-09-20
+review-by: 2027-03-20
+---
+
+import { Choice, Match, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+
+The European Union (EU) has one law about artificial intelligence that
+applies to every member state at once: Regulation (EU) 2024/1689, called
+the AI Act. It has applied in steps since February 2025, and it is the main
+example of regulation for AI use at work. In this lesson we read the Act
+the way a knowledge worker needs to. We start from the tool on your desk
+and ask what the Act says about it: the definition of an AI system, the
+risk tiers, the provider and deployer roles, and the duties that reach your
+daily work. Where the Act sets a duty, the lesson links to the article, so
+that you can read the sentence that binds you instead of a paraphrase of
+it.
+
+This lesson is specific to the EU on a site that is otherwise global. If
+your organization is outside the EU, the Act can still apply, because it
+covers providers that sell into the EU and any provider or deployer whose
+system's output is used in the EU
+([Article 2(1)](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_2)).
+It does not apply to a person using AI for a purely personal, non-professional
+activity (Article 2(10)), so it is a law about work.
+
+The lesson is general information, and it is not legal advice. The Act was
+amended in July 2026, guidance from the Commission keeps coming, and a
+decision about your organization needs a lawyer who knows your member
+state. Every article number and date below comes from the consolidated text
+of the Regulation as of July 27, 2026 (@AI Act), and the page shows a
+review date for that reason.
+
+One duty explains why this page exists. Article 4 asks providers and
+deployers to "take measures to support the development of AI literacy" of
+their staff and of anyone operating AI systems for them, fitted to their
+role and to the context of use
+([Article 4](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_4)).
+The same article says the duty does not require any specific level of
+literacy from any individual. A course like this one is one way an
+organization meets it.
+
+## Is it an AI system at all?
+
+The Act only applies to an AI system, and it defines one in Article 3(1)
+as a machine-based system, designed to operate with some autonomy, that
+"infers, from the input it receives, how to generate outputs such as
+predictions, content, recommendations, or decisions" (@AI Act). The word
+that matters is *infers*. The system works out how to produce
+its output from the input, rather than following a fixed procedure a person
+wrote down.
+
+Recital 12 of the original text explains what that excludes: systems "based
+on the rules defined solely by natural persons to automatically execute
+operations" (@AI Act OJ). A spreadsheet macro that applies fixed rules is
+not an AI system. A rules engine with two hundred hand-written if-then
+rules is not one either. A model trained on past data that predicts,
+ranks or generates is one, and so is a chat assistant. The Commission has
+published guidelines on the definition with worked examples (@EC AI Act).
+
+<Choice id="is-it-an-ai-system" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['regulation']}
+  context="The EU AI Act defines an AI system in Article 3(1) as a machine-based system that infers from its input how to generate outputs such as predictions, content, recommendations or decisions."
+  title="Is this an AI system?" hint="Which of these works out how to produce its output from the input, rather than executing rules a person wrote?"
+  options={[
+    { text: 'A spreadsheet macro that applies fixed if-then rules a colleague wrote.', why: 'A person wrote the rules and the macro only executes them. Which word of the definition is missing here?' },
+    { text: 'A model trained on past support tickets that predicts which team should handle a new ticket.', correct: true },
+    { text: 'A database query that lists every invoice above 10,000 euros.', why: 'The query returns whatever matches a condition a person wrote. Does it infer anything from its input?' },
+  ]}>
+Your IT department asks which of these tools falls under the AI Act's definition of an AI system. Which one does?
+</Choice>
+
+## The risk tiers
+
+The Act regulates uses of AI rather than the technology, and it sorts
+those uses into tiers. To place a use, walk down this list, and stop at the
+first tier that fits.
+
+1. **Prohibited.** Article 5 lists practices no one may put on the market or
+   use. Among them: manipulation that causes serious harm, exploiting
+   the vulnerabilities of children or of people in a weak social or
+   economic position, social scoring, predicting a crime from a person's
+   profile alone, building face-recognition databases by scraping images
+   from the internet or closed-circuit television (CCTV), inferring emotions of people
+   at work or in education (except for medical or safety reasons), and
+   sorting people by biometric data into categories such as race, religion
+   or sexual orientation. The July 2026 amendment added two more, on sexual
+   deep fakes made without consent and on material showing sexual abuse of
+   children
+   ([Article 5](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_5)).
+2. **High-risk.**
+   [Article 6](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_6)
+   gives a product route and a use-case route.
+   The product route: the AI is a safety component of a product, or is
+   itself a product, that EU product law in Annex I already requires a
+   third party to certify. Toys, lifts, and medical devices are on that
+   list. The use-case route:
+   [Annex III](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#anx_III)
+   names areas where AI decisions touch people's lives. Its headings are
+   biometrics, critical infrastructure, education, employment and workers'
+   management, access to essential services such as credit and insurance,
+   law enforcement, migration and border control, and justice and
+   democratic processes. Ranking job applicants and scoring a consumer's
+   creditworthiness are both on the list. Article 6(3) lets a provider
+   argue that an Annex III system isn't high-risk when it only does a
+   narrow procedural task or prepares a human assessment, but a system that
+   profiles people is always high-risk.
+3. **Transparency duty.** Article 50 puts a duty to inform on systems that
+   talk to people, generate content, recognize emotions, or produce deep
+   fakes, whatever their tier. The section below on everyday work is about
+   this tier.
+4. **Everything else.** Most AI in use falls here, and the Act doesn't
+   set a specific duty for it. The Commission gives spam filters and AI in video
+   games as examples (@EC AI Act). The AI literacy duty of Article 4 still
+   applies to the organization, because it attaches to the provider and
+   the deployer rather than to the tier.
+
+A tier is a property of a use, so the same model can be in more than one
+tier at once. A general-purpose chat assistant is a transparency-tier system
+when it answers customers, a high-risk system when it ranks candidates, and
+an everything-else system when it drafts your meeting notes.
+
+<Sort id="sort-the-tiers" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['regulation', 'risk-assessment']}
+  context="The EU AI Act sorts AI uses into prohibited practices (Article 5), high-risk systems (Article 6 with Annex I and Annex III), systems with a transparency duty (Article 50), and everything else, for which the Act sets no specific duty."
+  title="Which tier?" hint="Walk the list from the top. Is the practice banned outright? Is the area in Annex III? Does the system talk to people or generate content? Otherwise it is in the last tier."
+  buckets={['Prohibited', 'High-risk', 'Transparency duty', 'No specific duty in the Act']}
+  items={[
+    { text: 'An office tool that reads employees\' faces on video calls to score how engaged they are', bucket: 0 },
+    { text: 'A service that builds a face-recognition database from photos collected across the internet', bucket: 0 },
+    { text: 'A recruiting tool that ranks the applications for an open position', bucket: 1 },
+    { text: 'A bank\'s model that scores whether a customer will repay a loan', bucket: 1 },
+    { text: 'A chatbot on a web shop that answers customer questions', bucket: 2 },
+    { text: 'The spam filter in your mailbox', bucket: 3 },
+  ]} />
+
+## Provider or deployer
+
+The Act puts duties on roles, and the two that matter for most
+organizations are defined in Article 3. A **provider** develops an AI
+system, or has one developed, and places it on the market or puts it into
+service "under its own name or trademark, whether for payment or free of
+charge" (Article 3(3)). A **deployer** uses an AI system "under its
+authority", outside a personal non-professional activity (Article 3(4))
+(@AI Act). Ask: did we build this, or sell it as ours? Then we're the
+provider. Do we use it in our work? Then we're the deployer. A vendor that sells a chatbot is its provider, and the hospital
+that books appointments with it is a deployer.
+
+One organization can hold both roles, and a deployer can turn into a
+provider without noticing.
+[Article 25(1)](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_25)
+names the moments. You put your own name or brand on a high-risk system
+someone else built. You make a substantial modification to a high-risk
+system. You change the intended purpose of a system so that it becomes
+high-risk. That last one is the everyday case. A team that buys a general-purpose
+chat tool for drafting and then wires it into hiring decisions has changed
+its purpose into an Annex III use, and the team's organization now owes
+the provider duties for it.
+
+<Pitfall title="Renaming a vendor's tool">
+A company licenses a document-classification service, gives it an internal
+product name, and offers it to customers as its own. When a customer
+asks who certified the system, the company points at the vendor. Under
+Article 25(1)(a), a party that puts its own name or trademark on a
+high-risk system already on the market is treated as its provider, and the
+original vendor stops being one for that system. Before you brand a tool
+as yours, check which role the branding gives you.
+</Pitfall>
+
+<Match id="provider-or-deployer" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['regulation', 'policy']}
+  context="Under the EU AI Act a provider develops an AI system or has it developed and puts it on the market under its own name, and a deployer uses an AI system under its authority. Article 25 treats a deployer as a provider when it changes the intended purpose of a system so that it becomes high-risk."
+  title="Which role?" hint="Who built the system or put their name on it, and who uses it? Did anyone change what the system is for?"
+  options={['Provider', 'Deployer', 'Both']}
+  rows={[
+    { statement: 'A software company builds a chatbot and sells it under its own brand', option: 0, why: 'Who developed the system and placed it on the market under their name?' },
+    { statement: 'A hospital buys that chatbot and uses it to book appointments', option: 1, why: 'Who uses the system under their own authority, without changing what it does?' },
+    { statement: 'A retailer takes a general-purpose chat tool it bought and turns it into a system that decides which customers get credit to pay in installments', option: 2, why: 'The retailer uses the system, and it also changed what the system is for. What does Article 25 say about a changed purpose that makes a system high-risk?' },
+  ]}
+  rationale="Roles follow what you do with the system, and one organization can hold both roles for the same tool.">
+Match each organization to its role under the Act.
+</Match>
+
+## What each role owes
+
+For a high-risk system the duties are substantial, and this lesson only
+gives their headings. Each one links to its article. Engineers who build
+such a system read the articles themselves.
+
+A **provider** of a high-risk system must run a risk management system
+([Article 9](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_9)),
+govern its training data
+([Article 10](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_10)),
+write technical documentation
+([Article 11](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_11)),
+make the system keep logs
+([Article 12](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_12)),
+give deployers instructions for use
+([Article 13](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_13)),
+design for human oversight
+([Article 14](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_14)),
+reach an appropriate level of accuracy, robustness, and cybersecurity
+([Article 15](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_15)),
+pass a conformity assessment
+([Article 43](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_43)),
+register the system in the EU database
+([Article 49](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_49)),
+monitor it after release
+([Article 72](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_72)),
+and report serious incidents to the authorities
+([Article 73](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_73)).
+[Article 16](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_16)
+collects the list.
+
+A **deployer** of a high-risk system has a shorter list, in
+[Article 26](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_26).
+Use the system as the instructions for use say. Assign human oversight to
+people who have "the necessary competence, training and authority". Keep
+the logs the system generates for at least six months. Monitor the system,
+suspend its use when it presents a risk, and tell the provider and the
+authority about serious incidents. Tell workers and their representatives
+before a high-risk system is used on them at work, and tell any person
+that a decision about them involved the system. A deployer that is a
+public body, or that provides a public service, or that scores credit or
+prices life and health insurance, also carries out a fundamental rights
+impact assessment before first use
+([Article 27](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_27)).
+
+Read that deployer list again with the earlier safety lessons in mind. Human
+oversight by competent people is the human in the loop from
+[Why agent safety is different](/safety/agent-risk/). Log retention is
+logging and audit. Suspending use and informing the provider is
+escalation. The Act turns the habits of this course into duties, for the
+high-risk tier, and a written policy is how an organization shows it
+meets them.
+
+## Transparency duties in everyday work
+
+Article 50 is the part of the Act that most people meet, because it
+applies whatever the tier and its duties are simple
+([Article 50](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_50)).
+
+- A provider of a system that interacts with people must design it so that
+  people know they are dealing with an AI system, unless that is obvious to
+  a reasonably observant person (Article 50(1)). A customer-service chatbot
+  says that it is one.
+- A provider of a system that generates text, images, audio, or video must
+  mark the output "in a machine-readable format and detectable as
+  artificially generated or manipulated" (Article 50(2)). Content
+  credentials are one technical answer to this duty.
+- A deployer of an emotion-recognition or biometric-categorization system
+  must tell the people exposed to it (Article 50(3)).
+- A deployer who publishes a deep fake, which Article 3(60) defines as
+  generated or manipulated content that resembles real people, places or
+  events and "would falsely appear to a person to be authentic", must
+  disclose that the content is generated or manipulated (Article 50(4)). For
+  a work that is clearly artistic or satirical, a disclosure that doesn't
+  spoil the work is enough.
+- A deployer who publishes AI-generated text "with the purpose of informing
+  the public on matters of public interest" must disclose that, unless a
+  person reviewed the text and holds editorial responsibility for it
+  (Article 50(4)).
+
+The information goes to the people concerned "in a clear and
+distinguishable manner at the latest at the time of the first interaction
+or exposure" (Article 50(5)) (@AI Act). Most everyday use at work falls
+under none of these. Drafting a memo with an assistant is neither a deep
+fake nor a publication on a matter of public interest, so the disclosure
+habit from [What may go into an AI tool](/safety/responsible-use/) stays a
+matter of what your audience expects rather than of law. The moment the
+output is a chatbot for the public, a realistic image of a real person, or
+a public article, Article 50 applies.
+
+<Match id="which-transparency-duty" objective="safety/handles-data-safely/discloses-ai-use"
+  concepts={['regulation']}
+  context="Article 50 of the EU AI Act puts transparency duties on systems that interact with people, on generated content, on deep fakes, and on AI-generated text published to inform the public, with an exception where a person holds editorial responsibility."
+  title="Which transparency duty applies?" hint="Who is talking to whom, and what is being published? Is anyone a real person shown doing something they did not do?"
+  options={[
+    'People must be told they are dealing with an AI system',
+    'The output must carry a machine-readable mark that it was generated',
+    'The content must be disclosed as a deep fake',
+    'The text must be disclosed as AI-generated',
+    'No Article 50 duty',
+  ]}
+  rows={[
+    { statement: 'Your company puts a chatbot on its public website to answer customer questions', option: 0, why: 'Who is the chatbot talking to, and do they know what it is?' },
+    { statement: 'A vendor sells an image generator to design agencies', option: 1, why: 'The vendor is the provider of a system that generates content. What must the provider do to the output?' },
+    { statement: 'Marketing publishes a realistic AI-made video of a real actor for an advertisement', option: 2, why: 'The video shows a real person. What does Article 3(60) call such content, and what does Article 50(4) ask of its deployer?' },
+    { statement: 'A news site publishes an AI-drafted article about a local election after an editor reviewed it and takes responsibility for it', option: 4, why: 'Article 50(4) names an exception for published text. What is it?' },
+    { statement: 'You use an AI assistant to draft a memo for your own team', option: 4, why: 'Is the memo a deep fake, or a publication to inform the public?' },
+  ]}
+  rationale="Article 50 reaches public-facing chat, generated media and public-interest text. It does not reach ordinary drafting, where disclosure is a matter of what your audience expects.">
+For each situation, pick the Article 50 duty that applies.
+</Match>
+
+## The timeline
+
+The Act applies in steps, set out in
+[Article 113](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_113)
+and changed by the July 2026 amendment, Regulation (EU) 2026/1744, which
+moved the high-risk dates back (@AI Act). Today is after the general
+application date, so most of the table is already in force.
+
+| From             | What applies                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| August 1, 2024   | The Act entered into force, twenty days after publication on July 12, 2024 (@EC AI Act)                                                                       |
+| February 2, 2025 | Definitions, the AI literacy duty, and the prohibited practices (Chapters I and II)                                                                           |
+| August 2, 2025   | Rules for general-purpose AI models, the governance bodies, and the chapter on penalties                                                                      |
+| August 2, 2026   | The Act as a whole, including the transparency duties of Article 50                                                                                           |
+| December 2, 2026 | The prohibitions added in 2026 on sexual deep fakes and child abuse material (Article 5(1)(ba) and (bb)). Generators already on the market before August 2, 2026 must meet Article 50(2) by this date too (Article 111(4)) |
+| December 2, 2027 | The high-risk duties for Annex III systems                                                                                                                    |
+| August 2, 2028   | The high-risk duties for AI in Annex I products                                                                                                               |
+
+Article 111 gives transition periods to systems that were already in use,
+and the Commission keeps a page with the current state of application (@EC AI Act).
+Dates have moved once already, which is why this page has a review date.
+
+## Penalties
+
+Article 99 sets the ceilings, and each member state writes the rules for
+applying them
+([Article 99](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_99)).
+A prohibited practice can cost up to 35 million euros or 7% of worldwide
+annual turnover, whichever is higher. Breaking the provider duties, the
+deployer duties of Article 26 or the transparency duties of Article 50 can
+cost up to 15 million euros or 3%. Giving authorities wrong or incomplete
+information can cost up to 7.5 million euros or 1%. For small and
+medium-sized enterprises the lower of the amount and the percentage
+applies (@AI Act). The order tells you what the legislator considers
+worst: the banned practices are at the top, and the everyday transparency
+duties are in the same band as the high-risk duties.
+
+## Who enforces it
+
+Each member state designates at least one notifying authority and at least
+one market surveillance authority for the Act
+([Article 70](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_70)).
+Those national authorities are who a deployer reports a serious incident
+to, and who can fine an organization in that state. At the EU level the
+Commission's AI Office builds expertise and enforces the rules for
+general-purpose AI models (Article 64), and the European Artificial
+Intelligence Board, with one representative per member state, coordinates
+the national authorities (Article 65) (@AI Act). The Commission describes
+the AI Office's powers over general-purpose models: requesting
+documentation, evaluating models, requiring corrective action and issuing
+fines (@EC AI Office). For your own country, look up which authority your
+member state designated. The Commission's AI Act pages point to them
+(@EC AI Act).
+
+<Exercise stretch="Check whether the tool's use appears in Annex III. If it does, write down which of the deployer duties of Article 26 your organization already meets and which it does not.">
+Pick one AI tool used at your work. In two lines, decide whether your organization is its provider or its deployer, and name the one Article 50 transparency duty that applies to your use of it, or write that none applies. Ten minutes at most. Those lines are the first entry of an inventory your organization needs for the AI literacy and deployer duties, and writing one shows you how quickly the roles become clear. A good result gives the reason with the role ("deployer: we bought the tool unchanged") and the paragraph with the duty ("Article 50(1): a chatbot for customers"). Which of the Act's duties touch your own daily work, and which only your organization's?
+</Exercise>
+
+<Recap>
+1. The Act applies to AI systems, which Article 3(1) defines by their ability to infer outputs from input. A tool that only executes rules a person wrote is outside it (@AI Act).
+2. Uses fall into tiers: prohibited practices (Article 5), high-risk systems (Article 6 with Annexes I and III), systems with a transparency duty (Article 50), and everything else, for which the Act doesn't set a specific duty (@AI Act).
+3. Providers build or brand a system and deployers use one. Changing a system's purpose into a high-risk use, or putting your name on it, makes you its provider (Article 25) (@AI Act).
+4. A deployer of a high-risk system follows the instructions for use and assigns competent human oversight. It also keeps the logs for at least six months and reports incidents, and it tells the people affected (Article 26) (@AI Act).
+5. Article 50 reaches everyday work through public-facing chatbots, generated media, deep fakes and public-interest text. Ordinary drafting has no Article 50 duty (@AI Act).
+6. The AI literacy duty of Article 4 has applied since February 2, 2025. High-risk duties start on December 2, 2027 and August 2, 2028, and dates have moved once, so check the review date on this page (@AI Act).
+</Recap>
