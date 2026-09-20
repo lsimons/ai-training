@@ -70,7 +70,7 @@ run = "bun run preview"
 [tasks.examples]
 description = "Run every lesson example fixture and assert the output the lesson shows"
 dir = "docs"
-run = "bun scripts/check-examples.mjs"
+run = "bun scripts/check-examples.mjs --self-test && bun scripts/check-examples.mjs"
 
 [tasks.docs-e2e]
 description = "Build, serve, and click through every lesson mechanism in a headless browser. Needs `mise run docs-browser` once."
@@ -78,7 +78,17 @@ dir = "docs"
 run = """
 bun run build
 bunx astro preview --port 4399 > /tmp/astro-e2e-preview.log 2>&1 &
-sleep 3
+# Wait for the preview server rather than sleeping a fixed time.
+for _ in $(seq 1 60); do
+  if curl -fsS -o /dev/null http://localhost:4399/ai-training/; then break; fi
+  sleep 0.5
+done
+if ! curl -fsS -o /dev/null http://localhost:4399/ai-training/; then
+  echo "preview server did not come up on :4399 within 30s" >&2
+  cat /tmp/astro-e2e-preview.log >&2
+  pkill -f 'astro preview --port 4399' || true
+  exit 1
+fi
 PORT=4399 bun scripts/e2e.mjs
 status=$?
 # `bunx` forks the real server; kill by command line, not by the bunx pid.
