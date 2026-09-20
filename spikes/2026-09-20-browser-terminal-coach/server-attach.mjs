@@ -160,7 +160,10 @@ Respond with JSON only: {"tip": "...", "suggestedPrompt": "..." | null}. suggest
   onMessage(raw) {
     const m = JSON.parse(raw);
     switch (m.type) {
-      case 'in': this.lastKey = Date.now(); this.cancelTyping(); this.pty.write(m.data); break;
+      case 'in':
+        // Terminal replies to queries (cursor position, DA, focus events) arrive here too and start with ESC; only real keys cancel.
+        if (!m.data.startsWith('\x1b')) { this.lastKey = Date.now(); this.cancelTyping(); }
+        this.pty.write(m.data); break;
       case 'resize': this.pty.resize(m.cols, m.rows); this.screen.resize(m.cols, m.rows); break;
       case 'type-for-me': this.lastKey = Date.now(); this.typeFor(m.text, m.submit !== false); break;
       case 'coach': this.coach('requested'); break;
