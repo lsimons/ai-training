@@ -88,7 +88,7 @@ Graded:
 
 01. **Single-select MCQ** (13 pkgs, 257 options). Data as
     `[{label, correct, rationale}]`, with a rationale per option.
-02. **Radio MCQ groups** (2 pkgs) for several questions on one screen.
+02. **Radio MCQ groups** (2 pkgs) for more than one question on one screen.
 03. **End-of-module quiz** (10 pkgs), all questions at once, pass = all correct.
 04. **Matching / row assignment** (7 pkgs, 62 rows): statement rows, shared
     option chips or selects, one per row, per-row scoring.

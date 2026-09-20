@@ -305,7 +305,7 @@ Learning objectives:
 | `verifies-agent-work` | `screens-for-security`       | base   | Screens agent output for security and supply-chain problems       |
 | `works-in-team`       | `attributes-honestly`        | base   | Attributes agent work as agent work in commits and reviews        |
 | `works-in-team`       | `follows-team-norms`         | base   | Follows the team's review and CI norms for agent changes          |
-| `works-in-team`       | `runs-parallel-work`         | expert | Runs several agent sessions without losing coherence              |
+| `works-in-team`       | `runs-parallel-work`         | expert | Runs parallel agent sessions without losing coherence             |
 | `works-in-team`       | `sets-team-practice`         | expert | Sets the team's practice for agent use                            |
 
 ### Customizing agents (`customizing-agents`)
@@ -499,7 +499,7 @@ Take the lesson *Your first session with a coding agent*:
 | `coding-with-agents/verification` -> `building-agents/evaluation`                           | prerequisite | You verify one piece of work before you measure a system                               |
 | `building-agents/evaluation` before `patterns` and `orchestration`                          | path order   | Ng's ordering puts evaluation and error analysis early; not a hard prerequisite        |
 
-Several competencies draw on topics from two areas. That's expected;
+Some competencies draw on topics from two areas. That's expected;
 competencies aren't confined to their area's topics.
 
 ## Paths
