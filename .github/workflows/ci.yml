@@ -59,11 +59,11 @@ jobs:
       - name: Lint
         run: mise run lint
 
-      - name: Check (Astro type/content check)
-        run: mise run docs-check
-
       - name: Examples
         run: mise run examples
+
+      - name: Check (Astro type/content check)
+        run: mise run docs-check
 
       - name: Build
         run: mise run docs-build
