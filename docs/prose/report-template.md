@@ -21,7 +21,7 @@ decides.
    `.vale/styles/write-good/<Rule>.yml`), its shipped level, and the size of
    its word list or pattern.
 2. **Stats.** Total hits. A table per area: hits, words, hits per thousand
-   words. A table of the top matched phrases (lowercased) with counts, up to
+   words. A table of the top matched phrases (in lowercase) with counts, up to
    fifteen rows, and the number of distinct phrases.
 3. **Examples.** Twelve to fifteen, each as a bullet with `file:line`, then
    the sentence quoted with one line before and after where the sentence is
