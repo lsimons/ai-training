@@ -86,3 +86,7 @@ mise.local.toml
 # Only per-user state and scratch worktrees are ignored.
 .claude/settings.local.json
 .claude/worktrees
+
+# Vale styles fetched by `mise run prose-sync` from the release URL pinned
+# in .vale.ini.
+.vale/styles/write-good/

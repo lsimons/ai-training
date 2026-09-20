@@ -81,7 +81,7 @@ Single file: `.claude/skills/teach/SKILL.md`. Invoked as
 - Boots the dev server if down, polls until 200, opens the lesson URL, leaves
   the server running.
 - One recall question from the review queue before each new lesson.
-- Reads the lesson markdown first; lessons over ~700 lines split at H2
+- Reads the lesson Markdown first; lessons over ~700 lines split at H2
   boundaries with a quiz per chunk. Widgets are part of the lesson: ask the
   learner what they observed.
 - Quiz: 3-5 questions, one at a time, each mapped to an objective; recall,
