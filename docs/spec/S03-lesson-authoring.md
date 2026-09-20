@@ -47,16 +47,17 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 
 ## Lesson anatomy
 
-| Part        | Rule                                                                                                                                                 |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Length      | 10 to 25 minutes.                                                                                                                                    |
-| Opener      | Where we're going, in the present tense: "In this lesson we build...". Never `you will learn`.                                                       |
-| Sections    | H2s, each with a section kind. Body sections alternate teaching with pitfalls and checkpoints.                                                       |
-| Pitfall     | At least one, placed right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule. Short in tutorial mode.   |
-| Checkpoints | At least one per served objective. A checkpoint's `objective` names the one objective it evidences, and its `concepts` the concept ids it exercises. |
-| Exercise    | Exactly one.                                                                                                                                         |
-| Recap       | Numbered takeaways and the served objectives as "You can now...". Where to go next is the page footer's previous/next.                               |
-| Habit       | Zero, one or two, after the recap. A small task in the learner's own work with a stable `id`. A later spec sets its schedule and storage.            |
+| Part              | Rule                                                                                                                                                                    |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Length            | 10 to 25 minutes.                                                                                                                                                       |
+| Opener            | Where we're going, in the present tense: "In this lesson we build...". Never `you will learn`.                                                                          |
+| Sections          | H2s, each with a section kind. Body sections alternate teaching with pitfalls and checkpoints.                                                                          |
+| Pitfall           | At least one, placed right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule. Short in tutorial mode.                      |
+| Checkpoints       | At least one per served objective. A checkpoint's `objective` names the one objective it evidences, and its `concepts` the concept ids it exercises.                    |
+| Exercise          | Exactly one.                                                                                                                                                            |
+| Recap             | Numbered takeaways and the served objectives as "You can now...". Where to go next is the page footer's previous/next.                                                  |
+| Habit             | Zero, one or two, after the recap. A small task in the learner's own work with a stable `id`. A later spec sets its schedule and storage.                               |
+| Canonical example | The one example the learner's reference shows for the lesson: the `Predict` or `Prompt` block with `canonical`, or the first of either in source order. See "Examples". |
 
 Objectives are frontmatter data that drive checkpoints, routing, and tutor
 mode. They're never printed as a `you will learn` list; the opener and the
@@ -131,6 +132,13 @@ pitfall and the exercise.
   the block as illustrative, and the page must say so in prose next to it
   ("the transcript is illustrative..."). A block that looks like a
   recording but isn't one is a defect.
+- **One example per lesson is canonical.** The learner's reference (S02
+  "Learner's reference") shows one example per finished lesson next to its
+  recap takeaways. By default that is the first `Predict` or `Prompt` block
+  in source order, whichever comes first, with the `Response` that follows a
+  `Prompt`. An author who wants another block sets `canonical` on it, and
+  at most one block per lesson carries it. The block is read from the
+  lesson source at build time, so it needs no extra markup in the page.
 - **Prompting walkthroughs follow one arc:** the naive attempt, the failure
   it produces, one change at a time (technique, order, wording), then
   compare.

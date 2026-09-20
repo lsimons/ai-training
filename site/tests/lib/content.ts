@@ -43,11 +43,26 @@ Stem.
 <Predict id="honor" objective="o1" title="Run it" hint="h" concepts={['token']}>
 </Predict>
 <Predict id="graded" objective="o1" title="Graded" hint="h" concepts={['token']} answer="1 > 0" run="x.sh" revision={2}>
+
+What does this print?
+
+\`\`\`python
+print(1 > 0)
+\`\`\`
+
 </Predict>
 <Repair id="fix" objective="o1" title="Fix" hint="h" concepts={['token']} broken="a" model="b">
 </Repair>
 <Order id="opt-out" objective="o1" title="Order" hint="h" concepts={['token']} review={false} steps={['b', 'a']}>
 </Order>
+
+<Recap>
+
+1. Tokens, **not** words (@AEC-02).
+2. One token at a time, from a *distribution* the
+   model scores. See \`temperature\`.
+
+</Recap>
 `,
 	},
 	{
@@ -56,8 +71,23 @@ Stem.
 			title: 'Why agent safety is different',
 			mode: 'tutorial',
 			assumes: [{ objective: 'o1', lesson: 'concepts/how-models-work', section: 's' }],
+			covers: ['safety/injection'],
 		},
-		body: '<Scenario id="s1" objective="o1" title="S" hint="h" concepts={[\'risk\']} options={[]}>\n</Scenario>',
+		body: `
+<Scenario id="s1" objective="o1" title="S" hint="h" concepts={['risk']} options={[]}>
+</Scenario>
+<Prompt model="illustrative" recorded="illustrative">
+Summarize the memo.
+
+- Keep every date.
+- Add nothing.
+</Prompt>
+<Response>
+**Title**
+
+Body of the response.
+</Response>
+`,
 	},
 	{
 		id: 'safety/deeper',
@@ -96,6 +126,11 @@ export const topics: TopicFixture[] = [
 			concepts: [{ id: 'risk', name: 'Risk', definition: 'What can go wrong.' }],
 			links: { prerequisites: ['concepts/models'] },
 		},
+	},
+	// Covered by safety/agent-risk (its Prompt block is the canonical example); no plan entry names it.
+	{
+		id: 'safety/injection',
+		data: { id: 'safety/injection', area: 'safety', name: 'Injection', concepts: [], links: { prerequisites: [] } },
 	},
 	// No lesson covers it and no plan entry names it: the topic map's gap state.
 	{

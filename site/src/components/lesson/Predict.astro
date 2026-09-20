@@ -20,6 +20,8 @@ interface Props {
 	run?: string;
 	review?: boolean;
 	revision?: number;
+	/** Marks this block as the lesson's canonical example (spec S03 "Examples"). Read from the MDX source by lib/reference.ts; not rendered. */
+	canonical?: boolean;
 }
 const { id, objective, title, hint, concepts, context, answer, run, review, revision } = Astro.props;
 const honor = answer === undefined;

@@ -1,0 +1,88 @@
+---
+/**
+ * The `/reference/` page body (spec S02 "Learner's reference"): the learner's
+ * finished lessons grouped by area, each linking to the topic page that holds
+ * its takeaways and example. The catalog is embedded at build; the script
+ * reads the progress record and draws the list, or the empty state.
+ */
+import { getCollection } from 'astro:content';
+import { AREAS } from '@lib/areas';
+import { getLessons } from '@lib/lessons';
+import { href } from '@lib/url';
+import type { ReferenceArea } from '@scripts/reference';
+
+const topics = (await getCollection('topics')).map((t) => t.data);
+const lessons = await getLessons();
+const catalog: ReferenceArea[] = AREAS.map((a) => ({
+	area: a.slug,
+	title: a.name,
+	lessons: lessons
+		.filter((l) => l.id.startsWith(`${a.slug}/`))
+		.map((l) => ({
+			id: l.id,
+			title: l.data.title,
+			topics: (l.data.covers ?? []).map((id) => ({ id, name: topics.find((t) => t.id === id)?.name ?? id })),
+		})),
+}));
+---
+
+<div class="not-content learners-reference" data-learners-reference data-catalog={JSON.stringify(catalog)} data-base={href('/')}>
+	<p class="reference-empty" data-reference-empty hidden>
+		Nothing here yet. Finish a lesson and its takeaways and example appear on the topic page it covers, and the lesson
+		is listed here. <a href={href('/progress/')}>Your progress</a> shows where you are.
+	</p>
+	<div data-reference-areas></div>
+</div>
+
+<script>
+	import * as progress from '@scripts/progress';
+	import { finishedByArea, type ReferenceArea } from '@scripts/reference';
+
+	const root = document.querySelector<HTMLElement>('[data-learners-reference]');
+	if (root) {
+		const catalog: ReferenceArea[] = JSON.parse(root.dataset.catalog!);
+		const base = root.dataset.base!.replace(/\/$/, '');
+		const empty = root.querySelector<HTMLElement>('[data-reference-empty]')!;
+		const areas = root.querySelector<HTMLElement>('[data-reference-areas]')!;
+
+		function link(path: string, text: string): HTMLAnchorElement {
+			const a = document.createElement('a');
+			a.href = `${base}${path}`;
+			a.textContent = text;
+			return a;
+		}
+
+		function draw() {
+			const finished = finishedByArea(catalog, progress.load());
+			empty.hidden = finished.length > 0;
+			areas.replaceChildren(
+				...finished.map((area) => {
+					const section = document.createElement('section');
+					section.className = 'reference-area';
+					section.dataset.referenceArea = area.area;
+					const h = document.createElement('h2');
+					h.textContent = area.title;
+					section.appendChild(h);
+					const ul = document.createElement('ul');
+					for (const lesson of area.lessons) {
+						const li = document.createElement('li');
+						li.dataset.referenceFinished = lesson.id;
+						li.appendChild(link(`/${lesson.id}/`, lesson.title));
+						if (lesson.topics.length) {
+							li.append(' · reference: ');
+							lesson.topics.forEach((t, i) => {
+								if (i > 0) li.append(', ');
+								li.appendChild(link(`/topics/${t.id}/#reference`, t.name));
+							});
+						}
+						ul.appendChild(li);
+					}
+					section.appendChild(ul);
+					return section;
+				}),
+			);
+		}
+		draw();
+		document.addEventListener(progress.EVENT, draw);
+	}
+</script>

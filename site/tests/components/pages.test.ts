@@ -6,9 +6,11 @@
  * bind to.
  */
 import CourseGraph from '@components/CourseGraph.astro';
+import LearnersReference from '@components/LearnersReference.astro';
 import OverallProgress from '@components/OverallProgress.astro';
 import Settings from '@components/Settings.astro';
 import TopicMap from '@components/TopicMap.astro';
+import TopicReference from '@components/TopicReference.astro';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
@@ -103,5 +105,53 @@ describe('OverallProgress', () => {
 		const html = await container.renderToString(OverallProgress, {});
 		expect(html).toContain('data-text');
 		expect(html).not.toContain('href="/ai-training/map/"');
+	});
+});
+
+describe('TopicReference', () => {
+	it('renders, hidden, the takeaways and the canonical example of every covering lesson', async () => {
+		const html = await container.renderToString(TopicReference, { props: { topicId: 'concepts/models' } });
+		expect(html).toContain('data-reference="concepts/models"');
+		expect(html).toMatch(
+			/<section class="reference-lesson" data-reference-lesson="concepts\/how-models-work" data-unlocked="false"/,
+		);
+		expect(html).toContain(
+			'Unlocks when you finish <a href="/ai-training/concepts/how-models-work/">How a language model works</a>.',
+		);
+		expect(html).toContain('<div class="reference-body" data-reference-body hidden>');
+		expect(html).toContain('<li>Tokens, <strong>not</strong> words.</li>');
+		// The first Predict (the honor one) is the canonical example: it has no body and no answer.
+		expect(html).toContain('href="/ai-training/concepts/how-models-work/#honor"');
+		expect(html).not.toContain('reference-answer');
+	});
+	it('renders a prompt and its response, and says when no lesson covers the topic', async () => {
+		const html = await container.renderToString(TopicReference, { props: { topicId: 'safety/injection' } });
+		expect(html).toContain('data-reference-lesson="safety/agent-risk"');
+		// The Prompt and Response components themselves, so the caption matches the lesson page.
+		expect(html).toContain('<figure class="prompt-block" data-illustrative="true">');
+		expect(html).toContain('Prompt (illustrative, not a recorded transcript)');
+		expect(html).toContain('<ul><li>Keep every date.</li><li>Add nothing.</li></ul>');
+		expect(html).toContain('<figure class="response-block"><figcaption>Response</figcaption>');
+		expect(html).toContain('This lesson has no recap takeaways yet.');
+		// safety/deeper covers nothing, and safety/risk has only a planned lesson.
+		expect(html).not.toContain('data-reference-lesson="safety/deeper"');
+		const none = await container.renderToString(TopicReference, { props: { topicId: 'safety/risk' } });
+		expect(none).toContain('No lesson covers this topic yet');
+	});
+});
+
+describe('LearnersReference', () => {
+	it("embeds the catalog with each lesson's topics and renders the empty state hidden", async () => {
+		const html = await container.renderToString(LearnersReference, {});
+		expect(html).toContain('class="not-content learners-reference"');
+		expect(html).toContain('data-reference-empty hidden');
+		expect(html).toContain('href="/ai-training/progress/"');
+		const catalog = JSON.parse(/data-catalog="([^"]*)"/.exec(html)?.[1]?.replace(/&quot;/g, '"') ?? '[]');
+		expect(catalog.map((c: { area: string }) => c.area)).toHaveLength(6);
+		expect(catalog[0].lessons[0]).toEqual({
+			id: 'concepts/how-models-work',
+			title: 'How a language model works',
+			topics: [{ id: 'concepts/models', name: 'Models' }],
+		});
 	});
 });

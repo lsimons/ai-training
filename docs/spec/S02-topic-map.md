@@ -7,8 +7,9 @@ differentiates between learners.
 
 **Status:** In progress - topic and competency YAML, the map page, topic and
 competency pages, the glossary, the course lesson graph with milestone bar,
-ring and review card, and the checkpoint fail and extension cards are
-implemented (2026-09-20). Every objective has behaviors and the YAML holds
+ring and review card, the checkpoint fail and extension cards, and the
+learner's reference on topic pages and at `/reference/` are implemented
+(2026-09-20). Every objective has behaviors and the YAML holds
 the alignment rows for Brilliant, Ng and AI Fluency 4D (2026-09-20).
 Claude Academy is a source, with one `Academy <slug>` key per cited course
 in the bibliography and the topic YAML (2026-09-20).
@@ -81,6 +82,7 @@ from these files.
 | Topic      | `/topics/<area>/<topic>/`            | The map opens it in a side drawer and updates the URL, so the view is shareable |
 | Competency | `/competencies/<area>/<competency>/` | Lists objectives, behaviors, alignment, and the lessons that serve it           |
 | Glossary   | `/glossary/#<concept>`               | Generated from every topic's concept definitions                                |
+| Reference  | `/reference/`                        | The learner's reference: finished lessons by area, linking to their topic pages |
 
 Tutor mode cites these URLs when it points a learner somewhere.
 
@@ -93,6 +95,34 @@ Tutor mode cites these URLs when it points a learner somewhere.
   objective slug.
 - The topic map colors each topic by the state of the lessons that cover
   it, using the same three states as the lesson graph below.
+
+## Learner's reference
+
+The learner's reference (S01 "Recap and the learner's reference") is a view
+over the topic pages. The topic pages hold the content, and the reference
+filters it by the learner's progress.
+
+- **Where it lives.** Each topic page has a "Your reference" section that
+  holds, per lesson covering the topic, the lesson's recap takeaways and its
+  canonical example. The page `/reference/` lists the learner's finished
+  lessons grouped by area, each linking to the topic page it covers, and
+  says what to do when nothing is finished yet. It sits in the sidebar next
+  to "Your progress".
+- **What is shown.** The takeaways are the numbered list inside the lesson's
+  `Recap`. The canonical example is one block per lesson, defined in S03
+  "Examples": the `Predict` or `Prompt` block marked `canonical`, or the
+  first of either in source order when none is marked. A lesson with
+  neither shows its takeaways and says it has no example.
+- **Rendering.** Both parts are read from the lesson source and rendered at
+  build time into the topic page, hidden. A client script reads the progress
+  record (S04) and reveals the parts for finished lessons. The rest keep a
+  note that names the lesson to finish. No fetch at view time and nothing
+  leaves the browser.
+- **Unlock rule.** A lesson's part appears when the record holds that lesson
+  as `finished`. A topic is in the reference when at least one lesson
+  covering it is finished. `read` and `skipped` do not unlock anything, so
+  a learner who marks "I know this" sees the unlock note until they finish
+  the lesson.
 
 ## Course page as lesson graph
 
