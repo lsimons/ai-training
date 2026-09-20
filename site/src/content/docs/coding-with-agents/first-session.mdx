@@ -55,6 +55,8 @@ developer tools for the terminal (the Xcode Command Line Tools). Accept it,
 wait for the install to finish, and run the command again.
 
 <Predict id="predict-list" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['codebase-understanding']}
+  context="The fixture is a small to-do list command in Python: todo.py is the program and todos.json holds its three committed items."
   title="Predict the list" hint="Three items are committed in todos.json. How does todo.py mark a finished one?"
   answer={`1. [ ] Buy milk
 2. [x] Call the plumber
@@ -104,6 +106,8 @@ Before you ask for a fix, see the failure with your own eyes. It takes ten
 seconds, and it gives you something exact to point at.
 
 <Predict id="predict-tests" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['codebase-understanding', 'first-change']}
+  context="The fixture repository has four unit tests in test_todo.py, and its README says one of them fails on purpose."
   title="Predict the verdict" hint="Four tests, and the README says one fails on purpose. What is the last line unittest prints in quiet mode?"
   answer="FAILED (failures=1)" run="coding-with-agents/first-session/tests.py">
 What's the last line of output?
@@ -119,6 +123,8 @@ something else. Prove it against the committed list, on a copy so the
 committed file doesn't change.
 
 <Predict id="predict-done-bug" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['first-change', 'codebase-understanding']}
+  context="In the fixture, todo.py done N should mark item N finished, and done() has an off-by-one bug that the failing test catches. The items are Buy milk, Call the plumber and Water the plants."
   title="Predict what done does" hint="The function uses the number as the index without subtracting one. Which item sits at index 1?"
   answer="done #1: Call the plumber" run="coding-with-agents/first-session/done_bug.py">
 What does this print?
@@ -142,6 +148,7 @@ commands, the limits are which files it may touch, and the done-criterion
 is usually a test.
 
 <Repair id="repair-the-brief" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['first-change', 'session-and-context']}
   title="Fix the brief" hint="If you handed this to a colleague who had never seen the repository, what would they have to go and find out first?"
   broken={`The done command is broken, please fix it.`}
   model={`Fix the off-by-one in the done() function in todo.py: "done 1" currently marks the second item. The failing test is test_done_marks_the_numbered_item in test_todo.py; make it pass without changing the test. Only edit todo.py. Do not touch todos.json. Done when python3 -m unittest -q reports OK.`}>

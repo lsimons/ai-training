@@ -78,6 +78,8 @@ only in your organization's private documents. Knowledge is
 frequency-weighted and frozen at the training cutoff.
 
 <Choice id="what-the-model-does" objective="concepts/explains-models/explains-generation"
+  concepts={['token', 'training-vs-inference']}
+  context="The lesson has a widget that shows a model scoring five candidate tokens, picking one, and repeating."
   title="What did the model do?"
   hint="Look back at the widget. What is the one operation it performs, over and over?"
   options={[
@@ -110,6 +112,7 @@ mysterious.
   tool puts it in the context.
 
 <Choice id="name-the-failure" objective="concepts/explains-models/names-failure-modes"
+  concepts={['knowledge-cutoff', 'hallucination']}
   title="Name the failure"
   hint="When did the model's training data end, and when did the event happen?"
   options={[
