@@ -1,0 +1,2 @@
+$ astro dev --port "4399"
+{"message":"Dev server running at http://localhost:4401 (pid 52210)\n  Stop:   astro dev stop\n  Status: astro dev status\n  Logs:   astro dev logs","label":"SKIP_FORMAT","level":"info"}

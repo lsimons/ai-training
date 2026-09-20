@@ -1,0 +1,15 @@
+{
+  "name": "spike-browser-terminal-coach",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node check.mjs"
+  },
+  "dependencies": {
+    "@xterm/addon-serialize": "^0.14.0",
+    "@xterm/headless": "^5.5.0",
+    "node-pty": "^1.1.0",
+    "ws": "^8.18.0"
+  }
+}

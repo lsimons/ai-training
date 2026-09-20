@@ -1,0 +1,7 @@
+04:11:01 helper listening on http://127.0.0.1:4400
+04:12:08 session open 52546
+04:12:46 coach: You're in Claude Code's security prompt—select 'Yes, I trust this folder' to continue. After that, Claude Code runs in conversation mode, not as shell commands, so you can ask questions directly.
+04:12:48 session close
+04:13:01 session open 52868
+04:13:48 coach: Claude can build and code, not just explain—try asking it to create files, write scripts, or set up a project structure. This turns the spike-learner directory into a real sandbox for exploration.
+04:13:50 session close

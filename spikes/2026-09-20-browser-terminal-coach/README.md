@@ -1,0 +1,144 @@
+# 2026-09-20 Spike: Browser terminal running Claude Code, with a coaching Claude
+
+A lesson page in the Starlight site embeds a real terminal that connects to the
+learner's local shell, runs `claude`, and a second Claude watches the screen and
+offers prompting tips as HTML overlays. It can also type on the learner's behalf.
+
+## Hypothesis
+
+A local helper process (Node + node-pty + WebSocket) plus xterm.js in the
+Starlight page is enough to (a) run interactive Claude Code inside a lesson
+page, (b) let the page read the terminal screen reliably enough that a second
+`claude -p` call can produce a useful coaching tip, and (c) let the page inject
+keystrokes so the lesson can "type" a prompt for the learner.
+
+## Problem statement
+
+Lessons about using Claude Code are much better if the learner practices in the
+real tool while the lesson watches, comments, and demonstrates. We want to know
+whether a browser-embedded terminal bridged to the local machine is feasible
+without building something heavy, and what the sharp edges are.
+
+## Validation plan
+
+1. `bun run start` in the spike dir starts the helper; `mise run docs-dev`
+   serves the site; open `/ai-training/spike/terminal/` and see a live zsh.
+2. Type `claude`, see the Claude Code TUI render correctly in xterm.js and
+   accept keyboard input.
+3. Press "Type for me" in the page; a prompt gets typed into Claude Code.
+4. Press "Ask the coach" (and/or wait for the idle trigger); a tip derived from
+   the actual screen content appears as an overlay.
+5. Automate 1-4 with Playwright (`bun run check`) and save a screenshot.
+
+## References
+
+- `docs/spec/S03-lesson-authoring.md` (widgets live in `not-content` containers)
+- `docs/astro.config.mjs` (base path `/ai-training`)
+- Sibling spike `spikes/2026-09-20-release-1-slice/` for the spike layout
+
+## Implementation
+
+Three pieces, all throwaway:
+
+- [`server.mjs`](./server.mjs): local helper on `127.0.0.1:4400`. Per WebSocket
+  connection it spawns the user's login shell in a PTY (`node-pty`), streams
+  bytes both ways, and feeds the same bytes into a **server-side headless
+  xterm** (`@xterm/headless`) so it always has a rendered screen to scrape.
+  Messages: `in` (keystrokes), `resize`, `type-for-me` (inject text + Enter),
+  `coach` (run the coach now), `screen` (return plain-text screen). The coach
+  is `claude -p --output-format json` (Haiku 4.5) with a system prompt that
+  asks for one tip and an optional verbatim `suggestedPrompt`. It also fires
+  automatically after 20s of no keystrokes if the screen changed.
+- [`../../docs/src/content/docs/spike/terminal.md`](../../docs/src/content/docs/spike/terminal.md):
+  a Starlight page at `/ai-training/spike/terminal/`. xterm.js + fit addon
+  from a CDN inside a `not-content` div, a toolbar (Type for me / Ask the coach
+  / Dump screen), a speech-bubble overlay for the tip with a "Use this prompt"
+  button that types the suggestion, and a bobbing 👉 pointer at the terminal
+  input line.
+- [`check.mjs`](./check.mjs): Playwright driver that opens the page, waits for
+  the shell, runs `claude` in `/tmp/spike-learner`, accepts the trust dialog,
+  clicks "Type for me", waits for the answer, clicks "Ask the coach", and
+  saves [`claude-running.png`](./claude-running.png) and
+  [`coach-tip.png`](./coach-tip.png).
+
+The helper strips every `CLAUDE*` env var from the PTY and coach environment
+so `claude` can be launched even when the helper itself was started from
+inside a Claude Code session.
+
+### How to run
+
+```sh
+cd spikes/2026-09-20-browser-terminal-coach
+bun install
+chmod +x node_modules/node-pty/prebuilds/darwin-arm64/spawn-helper  # bun drops the exec bit
+node server.mjs &                       # helper on :4400
+(cd ../../docs && bun run dev)          # Astro 7 dev server; note the port it prints (4401 here)
+open http://localhost:4401/ai-training/spike/terminal/
+SPIKE_URL=http://localhost:4401/ai-training/spike/terminal/ node check.mjs   # automated run
+```
+
+`claude` must be installed and logged in. Stop with `kill %1` and
+`bunx astro dev stop` in `docs/`.
+
+## Validation result
+
+All five steps passed in the automated run (`node check.mjs`):
+
+1. Live zsh appeared in the page within ~2s of load.
+2. `claude` started in `/tmp/spike-learner`; the TUI (banner, input box,
+   status bar, auto-mode line) rendered correctly in xterm.js and the
+   server-side headless xterm scrape matched what the browser showed.
+3. "Type for me" injected `Explain in two sentences what this directory is for...`; Claude Code listed the directory and answered in ~9s.
+4. "Ask the coach" returned in 4-13s at $0.02-0.04 per call. The tips were
+   grounded in the actual screen. First run (accidentally still on the trust
+   dialog): *"You're in Claude Code's security prompt, select 'Yes, I trust this
+   folder' to continue..."*. Second run (after an answer): *"Claude can build
+   and code, not just explain, try asking it to create files..."* with a
+   `suggestedPrompt` the learner could accept with one click.
+5. Screenshots saved. The tip bubble was below the fold in the first
+   `coach-tip.png`; `check.mjs` now takes a full-page screenshot.
+
+One bug found and fixed along the way: pressing Enter on the trust dialog
+selects the default "No, exit", so the injected prompt landed in zsh
+(`command not found: Explain`). The driver now presses ↓ first. The coach
+diagnosed this exact state correctly, which is a nice accidental demo.
+
+## Lessons learned
+
+**Hypothesis confirmed.** A ~150-line helper plus a CDN xterm.js is enough for
+a real, interactive Claude Code inside a lesson page, with screen scraping,
+prompt injection, and an LLM coach. Specific takeaways:
+
+- **Scrape on the server, not in the browser.** Feeding the PTY stream into
+  `@xterm/headless` gives a stable rendered screen for free; regex-stripping
+  raw ANSI would not survive Claude Code's constant redraws. The coach only
+  ever needs `translateToString()` of the visible buffer.
+- **A cheap model is a fine coach.** Haiku 4.5 via `claude -p` gave relevant,
+  state-aware tips from a screen dump alone. Cost is a few cents per tip, but
+  latency of 4-13s means the coach should be idle-triggered or on-demand, not
+  per keystroke. The idle trigger (20s, only if the screen changed) felt right.
+- **Prompt injection is trivial but needs pacing.** Writing text then `\r`
+  300ms later works; a single burst can be treated as a paste. Anything that
+  types for the learner must check the screen state first (see the trust
+  dialog bug), which argues for a small state classifier before injecting.
+- **Nested Claude Code is fine once `CLAUDE*` env vars are removed.** Both the
+  learner's `claude` in the PTY and the coach's `claude -p` ran from a helper
+  started inside a Claude Code session.
+- **Distribution is the real problem, not tech.** The page only works with a
+  helper on `127.0.0.1:4400`. For lsimons.github.io this means a `npx`/`bunx`
+  one-liner the learner runs first, an origin allowlist on the WebSocket
+  (currently none: any page on any origin can drive the learner's shell), and
+  a token in the URL. This must be hardened before anything beyond a spike.
+- **Astro 7 dev is a background daemon.** `bun run dev --port X` ignored the
+  port and reused the running daemon on 4401; use `bunx astro dev status`.
+- **bun install drops the exec bit on node-pty's `spawn-helper`**
+  (`posix_spawnp failed`). One `chmod +x` fixes it; a real setup needs a
+  postinstall or a different package manager.
+- **Overlays are easy, precise pointing is not.** xterm.js exposes the cursor
+  position (`term.buffer.active.cursorY`) so a pointer at the input line is
+  doable; pointing at arbitrary TUI elements would need pattern matching on
+  the scraped screen, which is the same information the coach already has.
+
+Not tested: multiple concurrent sessions, Windows, terminal resize under
+Claude Code, and whether the coach can *see* tool-call detail that is collapsed
+in the TUI (it cannot; `ctrl+o` expansion would need to be driven too).
