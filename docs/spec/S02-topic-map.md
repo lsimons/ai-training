@@ -437,8 +437,8 @@ use, and shaping the build (deciding what goes in the spec).
 **Anthropic's AI Fluency framework** names four competencies, the "4Ds":
 Delegation, Description, Discernment, and Diligence. This spec cites the
 four names as facts and paraphrases what each asks for in its own words.
-Its rows map to Foundations objectives, where Brilliant and Ng map to
-Engineering ones.
+Its rows map mostly to Foundations objectives, and the Brilliant and Ng
+rows mostly to Engineering ones.
 
 ### Rows
 
