@@ -80,6 +80,14 @@ description = "Run every lesson example fixture and assert the output the lesson
 dir = "site"
 run = "bun scripts/check-examples.mjs"
 
+# The plan files under site/src/data/courses must agree with the lesson
+# pages and the topic and competency YAML (spec S02 "Storage"). The check
+# lists what it rejects in its header comment.
+[tasks.courses]
+description = "Check the course plan files against the lesson pages, topics and competencies"
+dir = "site"
+run = "bun scripts/check-courses.mjs"
+
 [tasks.site-check]
 description = "Astro type/content check"
 dir = "site"
@@ -277,7 +285,7 @@ cspell --no-progress $files
 # `site-e2e` is last because it builds the site again and needs the browser
 # from `site-browser`; in the workflow it is its own job after the build.
 [tasks.ci]
-description = "Full CI gate: install + lint + Python lint/typecheck/test + prose + spell + examples + Astro check + Biome + unit tests + build + e2e"
+description = "Full CI gate: install + lint + Python lint/typecheck/test + prose + spell + examples + course plans + Astro check + Biome + unit tests + build + e2e"
 run = [
   "mise run site-install-frozen",
   "mise run py-install-frozen",
@@ -289,6 +297,7 @@ run = [
   "mise run prose",
   "mise run spell",
   "mise run examples",
+  "mise run courses",
   "mise run site-check",
   "mise run site-lint",
   "mise run site-test",

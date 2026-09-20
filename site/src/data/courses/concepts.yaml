@@ -1,0 +1,12 @@
+# Course plan for the Concepts area (docs/agents/writing-a-lesson.md, "Course plan").
+# One entry per lesson, in course order. Planned entries come from issue #30.
+area: concepts
+lessons:
+  - id: concepts/how-models-work
+    title: How a language model works
+    covers: concepts/how-models-work
+    serves:
+      - concepts/explains-models/explains-generation
+      - concepts/explains-models/names-failure-modes
+    status: live
+    minutes: 20

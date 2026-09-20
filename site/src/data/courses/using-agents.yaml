@@ -1,0 +1,13 @@
+# Course plan for the Using agents area (docs/agents/writing-a-lesson.md, "Course plan").
+# One entry per lesson, in course order. Planned entries come from issue #32.
+area: using-agents
+lessons:
+  - id: using-agents/delegating
+    title: Delegating a task to an agent
+    covers: using-agents/delegating
+    serves:
+      - using-agents/delegates-and-checks/writes-a-brief
+      - using-agents/delegates-and-checks/chooses-autonomy
+      - using-agents/delegates-and-checks/reviews-against-brief
+    status: live
+    minutes: 20

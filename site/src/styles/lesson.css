@@ -150,6 +150,10 @@
 .course-node[data-state='in-progress'] { border-color: var(--sl-color-accent); }
 .course-node[data-state='skipped'] { opacity: 0.6; border-style: dashed; }
 .course-node[data-state='skipped'] .course-node-title { text-decoration: line-through; }
+/* A planned or drafting lesson from the course plan: dimmed, dotted, and not a link. */
+.course-node[data-state='coming'] { opacity: 0.55; border-style: dotted; cursor: default; }
+.course-node[data-state='coming']:hover { border-color: var(--sl-color-gray-4); }
+.course-node[data-state='coming'] .course-node-ring { background: var(--sl-color-gray-6); }
 .course-node-body { display: grid; }
 .course-node-mode { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sl-color-gray-3); }
 .course-node-title { font-weight: 700; }
@@ -170,13 +174,17 @@
 .topic-col { display: grid; gap: 0.5rem; align-content: start; }
 .topic-col-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sl-color-gray-3); margin: 0; }
 .topic-node { display: block; position: relative; z-index: 1; padding: 0.45rem 0.6rem; border: 1.5px solid var(--sl-color-gray-4); border-radius: 6px; background: var(--sl-color-bg); text-decoration: none; color: inherit; font-size: 0.85rem; line-height: 1.25; }
-.topic-node[data-state='untouched'][data-has-lesson='false'] { opacity: 0.55; border-style: dashed; }
+/* No lesson and none planned: a gap in the plan. */
+.topic-node[data-state='untouched'][data-has-lesson='false'][data-planned='false'] { opacity: 0.55; border-style: dashed; }
+/* A lesson is planned or being written; the topic is covered on paper. */
+.topic-node[data-state='untouched'][data-has-lesson='false'][data-planned='true'] { opacity: 0.75; border-style: dotted; }
 .topic-node[data-state='in-progress'] { border-color: var(--sl-color-accent); }
 .topic-node[data-state='finished'] { border-color: var(--at-done); background: color-mix(in srgb, var(--at-done) 14%, var(--sl-color-bg)); }
 .topic-node:hover { border-color: var(--sl-color-accent); }
 .topic-legend { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: var(--sl-color-gray-3); }
 .topic-legend span[data-k]::before { content: ''; display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 3px; margin-right: 0.3rem; vertical-align: middle; border: 1.5px solid var(--sl-color-gray-4); }
 .topic-legend [data-k='none']::before { border-style: dashed; opacity: 0.6; }
+.topic-legend [data-k='planned']::before { border-style: dotted; opacity: 0.8; }
 .topic-legend [data-k='in-progress']::before { border-color: var(--sl-color-accent); }
 .topic-legend [data-k='finished']::before { border-color: var(--at-done); background: var(--at-done); }
 

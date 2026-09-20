@@ -1,0 +1,11 @@
+# Course plan for the Customizing agents area (docs/agents/writing-a-lesson.md, "Course plan").
+# One entry per lesson, in course order. Planned entries come from issue #34.
+area: customizing-agents
+lessons:
+  - id: customizing-agents/instructions
+    title: "Project instructions: AGENTS.md"
+    covers: customizing-agents/instructions
+    serves:
+      - customizing-agents/configures-agent/writes-project-instructions
+    status: live
+    minutes: 20

@@ -1,0 +1,12 @@
+# Course plan for the Building agents area (docs/agents/writing-a-lesson.md, "Course plan").
+# One entry per lesson, in course order. Planned entries come from issue #35.
+area: building-agents
+lessons:
+  - id: building-agents/agent-loop
+    title: Building your first agent
+    covers: building-agents/agent-loop
+    serves:
+      - building-agents/builds-agent-loop/defines-a-tool
+      - building-agents/builds-agent-loop/implements-the-loop
+    status: live
+    minutes: 25

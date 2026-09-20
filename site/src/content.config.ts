@@ -71,6 +71,35 @@ export const collections = {
 			),
 		}),
 	}),
+	/** site/src/data/courses/<area>.yaml: the ordered lesson plan per area, per spec S02 "Storage". */
+	courses: defineCollection({
+		loader: glob({ pattern: '*.yaml', base: './src/data/courses' }),
+		schema: z.object({
+			area: z.string(),
+			lessons: z.array(
+				z.object({
+					/** Equals the page route (`<area>/<lesson>`) once the lesson is live. */
+					id: z.string(),
+					title: z.string(),
+					/** One topic id: a lesson covers one topic. */
+					covers: z.string(),
+					/** Learning objective ids the lesson teaches toward. */
+					serves: z.array(z.string()).default([]),
+					status: z.enum(['planned', 'drafting', 'live']),
+					/** The lesson's GitHub issue number, until live. */
+					issue: z.number().int().positive().optional(),
+					/** Target length; keep lessons short. */
+					minutes: z.number().int().positive(),
+					/**
+					 * Lesson ids in the same plan that this lesson will assume, for its place
+					 * in the lesson graph before it is live. A live lesson takes its place
+					 * from the `assumes` in its page frontmatter instead.
+					 */
+					after: z.array(z.string()).default([]),
+				})
+			),
+		}),
+	}),
 	/** site/src/data/bibliography.yaml, keyed by citation key. */
 	bibliography: defineCollection({
 		loader: file('./src/data/bibliography.yaml'),
