@@ -109,7 +109,20 @@ class Session {
     for (let i = 0; i < b.length; i++) lines.push(b.getLine(i)?.translateToString(true) ?? '');
     return lines.join('\n').trim();
   }
-  typeFor(text, submit = true) { this.pty.write(text); if (submit) setTimeout(() => this.pty.write('\r'), 300); }
+  // Perceived-as-typing: one character at a time, ~30ms with jitter, a beat
+  // longer after spaces and punctuation. A real keystroke cancels it.
+  typeFor(text, submit = true) {
+    this.cancelTyping();
+    const chars = [...text]; let i = 0;
+    const step = () => {
+      if (i >= chars.length) { this.typing = null; if (submit) this.pty.write('\r'); return; }
+      const ch = chars[i++]; this.pty.write(ch);
+      const pause = 22 + Math.random() * 25 + (ch === ' ' ? 30 : /[.,;:!?]/.test(ch) ? 90 : 0);
+      this.typing = setTimeout(step, pause);
+    };
+    step();
+  }
+  cancelTyping() { if (this.typing) { clearTimeout(this.typing); this.typing = null; } }
   maybeIdleCoach() {
     if (Date.now() - this.lastKey < IDLE_MS) return;
     const conv = readConversation(this.bg);
@@ -147,7 +160,7 @@ Respond with JSON only: {"tip": "...", "suggestedPrompt": "..." | null}. suggest
   onMessage(raw) {
     const m = JSON.parse(raw);
     switch (m.type) {
-      case 'in': this.lastKey = Date.now(); this.pty.write(m.data); break;
+      case 'in': this.lastKey = Date.now(); this.cancelTyping(); this.pty.write(m.data); break;
       case 'resize': this.pty.resize(m.cols, m.rows); this.screen.resize(m.cols, m.rows); break;
       case 'type-for-me': this.lastKey = Date.now(); this.typeFor(m.text, m.submit !== false); break;
       case 'coach': this.coach('requested'); break;
@@ -155,7 +168,7 @@ Respond with JSON only: {"tip": "...", "suggestedPrompt": "..." | null}. suggest
       case 'conversation': this.send({ type: 'conversation', turns: readConversation(this.bg, 50) }); break;
     }
   }
-  close() { clearInterval(this.idleTimer); this.pty.kill(); this.screen.dispose(); }
+  close() { this.cancelTyping(); clearInterval(this.idleTimer); this.pty.kill(); this.screen.dispose(); }
 }
 
 const bg = ensureSession();
