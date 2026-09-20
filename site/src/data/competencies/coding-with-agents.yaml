@@ -14,8 +14,8 @@ competencies:
           - claim: The learner names at least one alternative to building, including doing nothing, and says why building wins.
             why: The comparison is what turns a wish into a decision.
             example: "\"We could add the feature, change the default, or document the workaround; the workaround costs each user five minutes a week, so we change the default.\""
-          - claim: The learner weighs the cost of owning the change against its value, not the cost of writing it.
-            why: The agent writes it in an hour; the team maintains it for years.
+          - claim: The learner weighs the cost of owning the change against its value, and the cost of writing it is the smaller part.
+            why: The agent writes it in an hour, and the team maintains it for years.
             example: A new dependency for one date format is rejected because it adds a package to keep patched, and a ten-line function is written instead.
       - id: coding-with-agents/specifies-work/defines-success
         statement: Defines what a successful outcome requires
@@ -24,9 +24,9 @@ competencies:
           - claim: Success is written as observable outcomes that a person other than the author could check.
             why: A criterion the author has to interpret is a criterion the agent and the reviewer interpret differently.
             example: "\"Search results return within 300 ms at the 95th percentile on the test data set\" instead of \"search is fast\"."
-          - claim: The criteria include what must keep working, not only what is new.
+          - claim: The criteria include what must keep working as well as what is new.
             why: An agent optimizing for the new criterion trades away anything that is not listed.
-            example: "\"All existing exports still open in Excel\" is added because the new CSV format could break them."
+            example: "\"All existing exports still open in the finance team's spreadsheet program\" is added because the new CSV format could break them."
           - claim: The learner writes down what is out of scope.
             why: The agent fills the gap between "done" and "everything it could improve" with its own choices.
             example: "\"Not in scope: mobile layout, translations\" stops the agent from restyling the whole page."
@@ -51,11 +51,11 @@ competencies:
             why: A check designed afterwards is designed around what was built, and passes by construction.
             example: For "no duplicate invoices", the check is a test that imports the same file twice and asserts one set of rows, written before the import code.
           - claim: The check is something the agent can run, so it can verify its own work before handing back.
-            why: A check only a person can run is run once at the end; a check the agent can run is run on every attempt.
+            why: A check only a person can run is run once at the end, and a check the agent can run is run on every attempt.
             example: The acceptance test goes into the test suite and the brief says "done when `mise run test` passes".
           - claim: The learner designs at least one check that would fail if the agent took a shortcut.
             why: Agents optimize for the check they see, and a check that passes on a stub passes on a stub.
-            example: The test for the email sender uses a fake mailbox and asserts the message arrived, not that the send function returned true.
+            example: The test for the email sender uses a fake mailbox and asserts the message arrived, where a check on the send function's return value would pass on a stub.
     alignment:
       - framework: Brilliant Coding with AI
         code: TAS-1..4
@@ -84,9 +84,9 @@ competencies:
           - claim: The learner has the agent describe the codebase and confirm the plan before it edits anything.
             why: A wrong model of the repository produces a confident change in the wrong place, and it is cheaper to correct a sentence than a diff.
             example: The learner asks "where is the config loaded and which tests cover it?" and checks the answer against the tree before saying "go ahead".
-          - claim: Every session ends with the learner reading the full diff, not the agent's summary of it.
-            why: The summary is the agent's account of what it meant to do; the diff is what it did.
-            example: The summary says "added validation"; the diff also shows a deleted test, which the learner catches and asks about.
+          - claim: Every session ends with the learner reading the full diff.
+            why: The summary is the agent's account of what it meant to do, and the diff is what it did.
+            example: The summary says "added validation", and the diff also shows a deleted test, which the learner catches and asks about.
           - claim: The learner keeps a session to one task and starts a new one when the task changes.
             why: A long session carries stale assumptions in context, and the agent keeps acting on the earlier task's constraints.
             example: After the bug fix is committed, the learner opens a fresh session for the refactor instead of typing "now also" into the same one.
@@ -98,8 +98,8 @@ competencies:
             why: A working state after every step means a mistake is found in a small diff and the last good state is one step back.
             example: The learner asks for "the endpoint returning a hard-coded response first, then the real query, then the caching", and runs the app after each.
           - claim: The learner sequences increments so the riskiest assumption is tested first.
-            why: Finding out on day one that the external API does not return what you expected is cheap; on day five it is not.
-            example: The integration with the payment provider is the first increment, not the last, because its behavior is the least known.
+            why: Finding out on day one that the external API does not return what you expected is cheap, and on day five it is not.
+            example: The integration with the payment provider is the first increment, because its behavior is the least known.
           - claim: An increment is committed when its check passes, before the next one starts.
             why: A commit per increment gives a point to return to and a diff a reviewer can read.
             example: Three small pull requests with green tests replace one large one at the end of the week.
@@ -111,8 +111,8 @@ competencies:
             why: Reverting is the cheapest fix there is, and only if the change is isolated.
             example: The learner has the agent commit after each passing increment instead of one commit at the end.
           - claim: Data and schema changes are designed with the way back written down before they run.
-            why: Code reverts in a second; a migrated table does not.
-            example: The migration adds the new column and backfills it; dropping the old column is a separate change a week later, after the code has run on the new one.
+            why: Code reverts in a second, and a migrated table does not.
+            example: The migration adds the new column and backfills it. Dropping the old column is a separate change a week later, after the code has run on the new one.
           - claim: The learner prefers a change that can be turned off to one that can only be undone.
             why: A feature flag or a configuration switch reverses in seconds and without a deploy.
             example: The new ranking algorithm ships behind a flag that is off by default, and is enabled for internal users first.
@@ -135,9 +135,9 @@ competencies:
         behaviors:
           - claim: The learner can explain, without looking, how the parts the agent wrote fit into the system and why they were built that way.
             why: An engineer who cannot explain the system cannot review changes to it, and the agent's next change goes unchecked.
-            example: Asked in a design review why the cache is keyed by user rather than by request, the learner answers from understanding, not from a transcript.
+            example: Asked in a design review why the cache is keyed by user rather than by request, the learner answers from their own understanding without opening a transcript.
           - claim: The learner reads agent-written code with the same attention as a colleague's, and asks the agent to explain anything they do not follow.
-            why: Understanding is built while reading; skipping the reading skips the understanding.
+            why: Understanding is built while reading, so skipping the reading skips the understanding.
             example: The learner stops at a regular expression they cannot parse and asks for a plain-language explanation and a test that documents it.
           - claim: The learner keeps the architecture decisions and the reasons for them in a place the agent also reads.
             why: A decision that is only in someone's head gets contradicted by the next session.
@@ -176,9 +176,9 @@ competencies:
             example: The learner reads the brief, then the tests, then the diff, and finds the agent implemented the filter as case-sensitive where the brief said otherwise.
           - claim: The learner reads every changed file and questions changes the brief did not ask for.
             why: An agent's diff often includes "improvements" that are the riskiest part of the change.
-            example: A "fix the retry" pull request also reformats two unrelated files and changes a timeout; the learner asks for those to be dropped or split.
-          - claim: The learner runs the code, not only reads it.
-            why: Reading catches design problems; running catches the behavior the tests missed.
+            example: A "fix the retry" pull request also reformats two unrelated files and changes a timeout, so the learner asks for those to be dropped or split.
+          - claim: The learner runs the code as well as reading it.
+            why: Reading catches design problems, and running catches the behavior the tests missed.
             example: The learner checks out the branch and tries the two edge cases the brief mentioned before approving.
       - id: coding-with-agents/verifies-agent-work/observes-and-debugs
         statement: Observes the running system and isolates a fault systematically
@@ -187,8 +187,8 @@ competencies:
           - claim: The learner reproduces the fault before changing anything, and writes down the steps.
             why: A fix for a fault you cannot reproduce cannot be verified, and the agent may fix something else.
             example: The learner turns a "sometimes fails" report into "fails when the file has a header row and no data" before briefing the agent.
-          - claim: The learner reads the logs and traces of the running system, not only the code.
-            why: The code says what should happen; the system says what did.
+          - claim: The learner reads the logs and traces of the running system as well as the code.
+            why: The code says what should happen, and the system says what did.
             example: The stack trace shows the request never reached the handler, so the learner looks at routing rather than at the handler the agent was about to rewrite.
           - claim: "The learner narrows the fault by halving: one change, one observation, and a note of what was ruled out."
             why: Changing several things at once and hoping is how a debugging session runs for hours.
@@ -198,7 +198,7 @@ competencies:
         level: base
         behaviors:
           - claim: The learner turns a manual check into a command the agent can run and read the result of.
-            why: A check the agent can run is run on every iteration; a check only the learner can run is run once.
+            why: A check the agent can run is run on every iteration, and a check only the learner can run is run once.
             example: "\"Open the page and see that the table has rows\" becomes a test that renders the page and asserts on the row count."
           - claim: "The loop has a bound: a number of attempts or a time limit, after which the agent stops and reports."
             why: An agent told "keep going until the tests pass" can run forever or delete the test.
@@ -211,14 +211,14 @@ competencies:
         level: base
         behaviors:
           - claim: "The learner checks every new dependency the agent added: does it exist, is it the intended package, is it maintained, and is it needed."
-            why: Agents suggest packages from memory, and a name that does not exist or exists as a typo-squat gets installed.
-            example: The diff adds a package with a slightly different name from the well-known one; the learner checks the registry and removes it.
+            why: Agents suggest packages from memory, and a name that does not exist, or a look-alike package published under a misspelled name, gets installed.
+            example: The diff adds a package with a slightly different name from the well-known one, so the learner checks the registry and removes it.
           - claim: The learner looks at how the change handles input, secrets and permissions, as a reviewer would for any code.
             why: Agent-written code has the same classes of vulnerability as human code, produced faster and with more confidence.
             example: The learner finds the generated query built with string formatting and asks for a parameterized one.
           - claim: The learner checks that no secret or credential ended up in the code, the tests or the transcript.
             why: An agent that read a `.env` file to solve a problem may paste its contents into a fixture.
-            example: The pull request's test fixtures contain a real-looking API key; the learner rotates it and adds the file to the secret scanner.
+            example: The pull request's test fixtures contain a real-looking API key, so the learner rotates it and adds the file to the secret scanner.
     alignment:
       - framework: Brilliant Coding with AI
         code: VER-2..6
@@ -244,8 +244,8 @@ competencies:
             why: Reviewers read agent-written and human-written changes differently, and they need to know which one they have.
             example: The commit trailer names the agent and model, per the repository's convention, on every agent-authored commit.
           - claim: The learner takes responsibility for the change as its author, and the attribution does not shift blame to the tool.
-            why: The tool is not accountable; the person who submitted the change is.
-            example: In the review the learner writes "I asked the agent for this and I checked it", and not "the agent did this".
+            why: The person who submitted the change is accountable, and the tool is not.
+            example: In the review the learner writes "I asked the agent for this and I checked it", instead of "the agent did this".
           - claim: The learner keeps the attribution form the project asks for, including what it forbids.
             why: Some projects need a certificate of origin only a person can sign, and an agent's sign-off is not valid.
             example: The learner adds the assisted-by trailer and leaves out `Signed-off-by` because the project says only humans certify.
@@ -270,7 +270,7 @@ competencies:
             why: Two agents editing the same files produce conflicts that cost more than the parallelism saved.
             example: The learner briefs one agent on the API change and another on the documentation, in two worktrees, and merges the API first.
           - claim: The learner keeps a written list of what each session is doing and what state it is in.
-            why: Attention does not parallelize, and a forgotten session is a session that finished the wrong way.
+            why: A person can follow only one session closely at a time, and a forgotten session is a session that finished the wrong way.
             example: "A short note per session: branch, task, next check-in, and whether it is waiting on the learner."
           - claim: The learner integrates often and in a fixed order, and rebases the rest.
             why: Parallel branches drift, and the longer they live the harder they merge.
@@ -289,7 +289,7 @@ competencies:
             why: A practice written from imagination guards against the wrong things.
             example: After two incidents of agents committing generated lockfiles, the team adds a hook and a line in the instructions, and removes a rule that never triggered.
           - claim: The learner makes the practice checkable by tooling where possible.
-            why: A rule enforced by a hook is followed; a rule in a document is followed by whoever read it.
+            why: A rule enforced by a hook is followed every time, and a rule in a document is followed by whoever read it.
             example: A lint hook checks the commit message format, and CI checks the attribution trailer.
     alignment:
       - framework: Brilliant Coding with AI

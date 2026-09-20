@@ -8,14 +8,14 @@ competencies:
         statement: Defines a tool with a schema the model uses correctly
         level: base
         behaviors:
-          - claim: The tool description says when to use the tool and when not to, not only what it does.
+          - claim: The tool description says when to use the tool and when not to, as well as what it does.
             why: The model chooses tools from their descriptions, and a description that only names the function leads to it being called for the wrong job.
             example: "\"Look up a customer by exact account id; do not use for name searches, use `search_customers` instead\" cuts wrong calls that \"Get customer\" invites."
           - claim: Every parameter has a type, a description and, where the set is small, an enum, so the model cannot invent a value.
             why: A free-text parameter where a fixed set was meant produces near-misses such as "EUR" against a code that expects "eur".
             example: "`currency` becomes an enum of the four supported codes and `amount` is documented as \"integer cents, not a decimal\"."
           - claim: The tool returns errors as structured results the model can read and act on, rather than raising through the loop.
-            why: An exception that escapes ends the run; an error message in the result lets the model retry, ask or give up on purpose.
+            why: An exception that escapes ends the run, but an error message in the result lets the model retry, ask or give up on purpose.
             example: "On a missing record the tool returns `{\"ok\": false, \"error\": \"no account 4711\"}` and the model tells the user instead of the process crashing."
       - id: building-agents/builds-agent-loop/implements-the-loop
         statement: Implements the loop with error handling and a stop condition
@@ -25,18 +25,18 @@ competencies:
             why: A model that keeps finding one more thing to do will run until the bill or the timeout stops it.
             example: "The loop stops after twelve turns or a set spend and returns \"stopped: budget reached\" together with what it has so far."
           - claim: The loop ends when the model replies without a tool call, and the learner can point to the line that checks this.
-            why: The natural stop condition of an agent loop is the model deciding it is done; if the code does not honor that, the loop never ends or ends by accident.
+            why: The natural stop condition of an agent loop is the model deciding it is done, and if the code does not honor that, the loop never ends or ends by accident.
             example: The learner shows the branch that returns the final text when the response has no tool calls, and the test that covers it.
-          - claim: A tool failure is fed back into the conversation as a result, and the loop continues or stops by policy, never by an unhandled exception.
+          - claim: A tool failure is fed back into the conversation as a result, and the loop continues or stops by policy rather than by an unhandled exception.
             why: Real tools time out, return garbage and hit rate limits, and the agent has to keep working through that.
-            example: A timed-out HTTP call becomes a tool result saying so; after two of them in a row the loop stops and reports, rather than retrying forever.
+            example: A timed-out HTTP call becomes a tool result saying so, and after two of them in a row the loop stops and reports instead of retrying forever.
       - id: building-agents/builds-agent-loop/adds-retrieval
         statement: Adds retrieval or memory and knows when basic RAG is enough
         level: base
         behaviors:
           - claim: The learner starts with basic retrieval (embed, search, put the top results in context) and adds an agentic loop only when the basic version measurably fails.
             why: A retrieve, evaluate, refine loop costs several model calls per question, and most questions do not need it.
-            example: On the evaluation set, basic RAG answers 85 percent; the learner adds a second retrieval step only for the questions where the first result set was empty or off topic.
+            example: On the evaluation set, basic RAG answers 85 percent, so the learner adds a second retrieval step only for the questions where the first result set was empty or off topic.
           - claim: "The learner picks the memory store by how the memory is used: a file for a handful of facts, a database for structured lookup, a vector index for similarity."
             why: Reaching for a vector database for twenty facts adds infrastructure and hides what the agent knows.
             example: The agent's "user preferences" memory is a JSON file per user, read at session start.
@@ -83,7 +83,7 @@ competencies:
             example: "\"Accuracy: 0 = contains a false statement, 1 = correct but incomplete, 2 = correct and complete\", with one example transcript for each."
           - claim: The learner checks the rubric by having a model grade with it and comparing the results with human grades on a sample.
             why: A rubric that a model applies differently from a person is not ready to run at scale.
-            example: The model judge agrees with the human on 26 of 30 samples; the learner rewrites the two criteria behind the four disagreements.
+            example: The model judge agrees with the human on 26 of 30 samples, so the learner rewrites the two criteria behind the four disagreements.
       - id: building-agents/evaluates-agents/builds-a-golden-set
         statement: Builds a representative input set with expected qualities
         level: base
@@ -91,12 +91,12 @@ competencies:
           - claim: The set covers the kinds of inputs that occur in use, in roughly their real proportion, plus the rare cases that matter most.
             why: An agent tuned on easy or typical inputs looks good and fails on the input that costs the most.
             example: The support agent set has 60 routine questions, 20 ambiguous ones, 10 in other languages and 10 that should be refused.
-          - claim: Each item records the expected qualities of a good answer, not one exact answer.
+          - claim: Each item records the expected qualities of a good answer instead of one exact answer.
             why: Agents produce many correct answers, and matching one string fails all the others.
             example: "\"Must mention the 30-day window, must not promise a refund, must offer the form link\" instead of a reference reply."
           - claim: The set grows from production failures and is versioned with the agent.
             why: Every failure that reached a user is a test case the set was missing.
-            example: A user got a wrong answer about a holiday closure; the question and the expected qualities go into the set with a link to the incident.
+            example: A user got a wrong answer about a holiday closure, so the question and the expected qualities go into the set with a link to the incident.
           - claim: The learner keeps a part of the set that is never used for tuning.
             why: A set the team iterates against becomes a set the agent has been fitted to.
             example: Twenty percent of the items are held back and scored only at release time.
@@ -106,7 +106,7 @@ competencies:
         behaviors:
           - claim: The learner scores the steps the agent took (which tools, in what order, with what arguments) as well as the final answer.
             why: A correct answer reached by luck or by a dangerous path is a failure the final-answer score cannot see.
-            example: The agent answered correctly after calling the payment API three times with the wrong account; the trajectory score fails it.
+            example: The agent answered correctly after calling the payment API three times with the wrong account, and the trajectory score fails it.
           - claim: "The learner writes down what a good path looks like for each task type: which tools it should use, which it should not, and roughly how many steps."
             why: Without an expected path there is nothing to grade the actual path against.
             example: "\"A lookup question should call search once and answer; more than three tool calls is a warning sign.\""
@@ -121,8 +121,8 @@ competencies:
             why: A metric that can be gamed will be, by the team or by the model, without anyone intending it.
             example: "\"Answers per hour\" is paired with \"answers accepted by the user\", because the first rises when the agent answers badly and fast."
           - claim: The learner checks metric changes against a held-out set and against human judgment on a sample.
-            why: A rise on the set the team tunes against may be the tuning, not the agent.
-            example: The rubric score rose five points; on the held-out set it rose one, so the learner reports one.
+            why: A rise on the set the team tunes against may come from the tuning rather than from the agent.
+            example: The rubric score rose five points, but on the held-out set it rose one, so the learner reports one.
           - claim: The learner prefers metrics tied to the user's outcome over metrics about the agent's output.
             why: Output metrics measure the agent's behavior, and the goal is the user's result.
             example: "\"Ticket resolved without reopening within seven days\" replaces \"response contains the policy link\"."
@@ -148,7 +148,7 @@ competencies:
             example: "\"The task has ten dependent steps and a wrong early step wastes the rest, so plan first, then execute the plan step by step.\""
           - claim: The learner starts with the simplest pattern that could work and adds structure when the evaluation shows a need.
             why: Each added pattern multiplies calls and cost, and the simple version is the baseline the complex one must beat.
-            example: A single tool-using loop handles 80 percent of the evaluation set; the learner adds reflection only after measuring where it fails.
+            example: A single tool-using loop handles 80 percent of the evaluation set, and the learner adds reflection only after measuring where it fails.
           - claim: The learner can say what each pattern costs in calls, latency and money for their task.
             why: Reflection doubles calls, planning adds a call per plan revision, and the budget decides whether that is affordable.
             example: "\"Reflection adds one call per step; at twelve steps that is twice the latency, which the user-facing flow cannot take.\""
@@ -164,14 +164,14 @@ competencies:
             example: A three-agent design spends 40 percent of its tokens on handoffs, and the learner shows this before deciding.
           - claim: The learner compares the multi-agent design against the single-agent baseline on the same evaluation set.
             why: A design that feels better must be shown to be better on the tasks that matter.
-            example: The orchestrated version scores three points higher at twice the cost; the learner keeps the single agent and notes where the three points came from.
+            example: The orchestrated version scores three points higher at twice the cost, so the learner keeps the single agent and notes where the three points came from.
       - id: building-agents/orchestrates-agents/composes-patterns
         statement: Composes patterns and names the failure modes of the composition
         level: expert
         behaviors:
           - claim: The learner draws the composition and names, at each junction, what passes across and what is lost.
             why: "Composition failures happen at the seams: a planner that does not see what the executor learned, a reflector without the original goal."
-            example: The plan-then-execute loop passes the plan to the executor but not the constraints, so the executor breaks a limit the planner knew about; the learner fixes the handoff.
+            example: The plan-then-execute loop passes the plan to the executor but not the constraints, so the executor breaks a limit the planner knew about, and the learner fixes the handoff.
           - claim: "The learner names the failure modes the composition adds: loops between components, disagreement without a tiebreaker, cost multiplying."
             why: Each pattern has known failures alone, and combining them adds new ones that are in neither.
             example: A reflector that keeps asking for revisions and an executor that keeps complying produce an unbounded loop, so the learner adds a revision cap.
@@ -198,10 +198,10 @@ competencies:
           - claim: A change to the prompt, model, tools or retrieval goes through the evaluation set before it reaches users, and the deploy is blocked below a threshold.
             why: Agent behavior changes in ways a code review cannot see, and the evaluation is the only test that sees them.
             example: The pipeline runs the golden set on every pull request and fails when the rubric score drops more than two points from main.
-          - claim: The threshold is set per metric and includes the safety metrics, not only quality.
+          - claim: The threshold is set per metric and includes the safety metrics as well as quality.
             why: A change that improves helpfulness and doubles the rate of unwanted refusals or of leaked data must not ship.
             example: "\"Refusal on the should-refuse set must stay at 100 percent\" is a hard gate; \"helpfulness\" is a soft one."
-          - claim: A failed gate is investigated by reading the failing transcripts, not by lowering the threshold.
+          - claim: A failed gate is investigated by reading the failing transcripts, and the threshold stays where it is.
             why: The gate is the only thing standing between the change and the users.
             example: The learner reads the six new failures and finds the new prompt dropped an instruction, then fixes the prompt.
       - id: building-agents/runs-in-production/layers-defenses
@@ -226,7 +226,7 @@ competencies:
             example: After the agent reads an email, any tool call that sends data outside the organization needs a human click.
           - claim: The agent's permissions are the minimum for its task, and the learner can list them.
             why: Over-permission is the risk that turns an injection into an incident.
-            example: The support agent can read tickets and draft replies; it cannot send, refund or read other customers' tickets.
+            example: The support agent can read tickets and draft replies, and it cannot send, refund or read other customers' tickets.
           - claim: Outbound channels are enumerated and restricted, and outbound content is checked for data that should not leave.
             why: Exfiltration needs a way out, and the ways out are countable.
             example: The agent's only outbound tool is "post reply to ticket", and the reply passes a filter for account numbers and internal URLs.
@@ -245,8 +245,8 @@ competencies:
             example: The new model goes to the team, then to 5 percent of traffic for a week, and the escalation rate is compared before going further.
           - claim: "Every rollout has a rollback that takes minutes: a flag, a pinned model version, a previous prompt."
             why: Agent failures are behavioral and may take hours to see, and by then the fix must be fast.
-            example: The prompt and the model version are configuration, not code, and the on-call can revert either without a deploy.
-          - claim: The learner pins the model version and treats a vendor upgrade as a change to roll out, not as maintenance.
+            example: The prompt and the model version are configuration rather than code, and the on-call can revert either without a deploy.
+          - claim: The learner pins the model version and treats a vendor upgrade as a change to roll out like any other.
             why: A new model version changes behavior, and an automatic upgrade is an untested change to production.
             example: The agent uses a dated model id, and the upgrade goes through the evaluation gate and the staged rollout.
     alignment:
