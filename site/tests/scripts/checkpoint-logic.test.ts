@@ -2,6 +2,8 @@ import {
 	answersMatch,
 	choiceFeedback,
 	isSequential,
+	matchVerdict,
+	multiChoiceVerdict,
 	normalizeAnswer,
 	orderFeedback,
 	predictFeedback,
@@ -80,5 +82,38 @@ describe('stageDisplay', () => {
 		expect(stageDisplay(3)).toEqual({ lit: 3, label: 'stage 3 of 5' });
 		expect(stageDisplay('done')).toEqual({ lit: 5, label: 'retired' });
 		expect(stageDisplay(undefined)).toEqual({ lit: 0, label: 'stage - of 5' });
+	});
+});
+
+describe('multiChoiceVerdict', () => {
+	it('asks for picks, names the first wrong why, counts what is still missing, then passes', () => {
+		expect(multiChoiceVerdict(3, 0, 0, undefined)).toEqual({
+			ok: null,
+			feedback: { kind: 'note', text: 'Pick 3 answers first.' },
+		});
+		expect(multiChoiceVerdict(3, 2, 1, 'Clear to whom?')).toEqual({
+			ok: false,
+			feedback: { kind: 'nope', text: 'Clear to whom?' },
+		});
+		expect(multiChoiceVerdict(3, 1, 1, undefined).feedback.text).toBe('One of your picks is not right.');
+		expect(multiChoiceVerdict(3, 1, 0, undefined)).toEqual({
+			ok: false,
+			feedback: { kind: 'nope', text: '1 of 3 so far, and nothing wrong. 2 more to find.' },
+		});
+		expect(multiChoiceVerdict(3, 3, 0, undefined)).toEqual({ ok: true, feedback: { kind: 'ok', text: 'Correct.' } });
+	});
+});
+
+describe('matchVerdict', () => {
+	it('blocks on empty rows, counts wrong rows, and shows the rationale on a full pass', () => {
+		expect(matchVerdict(1, 0, 'r')).toEqual({ ok: null, feedback: { kind: 'note', text: '1 row still to fill.' } });
+		expect(matchVerdict(3, 0, 'r').feedback.text).toBe('3 rows still to fill.');
+		expect(matchVerdict(0, 1, 'r')).toEqual({
+			ok: false,
+			feedback: { kind: 'nope', text: '1 row wrong. Each row says which.' },
+		});
+		expect(matchVerdict(0, 2, 'r').feedback.text).toBe('2 rows wrong. Each row says which.');
+		expect(matchVerdict(0, 0, 'Because.')).toEqual({ ok: true, feedback: { kind: 'ok', text: 'Correct. Because.' } });
+		expect(matchVerdict(0, 0, '').feedback.text).toBe('Correct.');
 	});
 });

@@ -121,3 +121,45 @@ test('the coding lesson marks which examples CI verifies', async ({ page }) => {
 	await expect(page.locator('[data-checkpoint]')).toHaveCount(4);
 	await expect(page.locator('.cp-verified')).toHaveCount(3);
 });
+
+test('multi-choice: exactly the correct boxes, a wrong pick shows its why', async ({ page }) => {
+	await page.goto('using-agents/delegating/');
+	const cp = page.locator('#which-criteria-tick');
+	await expect(cp).toHaveAttribute('data-reviewable', 'true');
+	await cp.locator('.cp-check').click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('Pick 3 answers first.');
+	await cp.locator('label[data-correct]').first().click();
+	await cp.locator('.cp-check').click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('1 of 3 so far, and nothing wrong. 2 more to find.');
+	await cp.locator('label:not([data-correct])').first().click();
+	await cp.locator('.cp-check').click();
+	await expect(cp.locator('.cp-feedback')).toHaveText(/^Clear to whom\?/);
+	await cp.locator('label:not([data-correct])').first().click();
+	for (const label of await cp.locator('label[data-correct]').all()) {
+		if (!(await label.locator('input').isChecked())) await label.click();
+	}
+	await cp.locator('.cp-check').click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('Correct.');
+	await expect(cp).toHaveAttribute('data-state', 'passed');
+});
+
+test('match: one select per row, per-row feedback, rationale on a full pass', async ({ page }) => {
+	await page.goto('safety/agent-risk/');
+	const cp = page.locator('#smallest-access');
+	await expect(cp).toHaveAttribute('data-reviewable', 'true');
+	await cp.locator('.cp-check').click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('3 rows still to fill.');
+	const rows = cp.locator('.cp-match-row');
+	for (const row of await rows.all()) await row.locator('select').selectOption('3');
+	await cp.locator('.cp-check').click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('3 rows wrong. Each row says which.');
+	await expect(rows.first()).toHaveAttribute('data-state', 'wrong');
+	await expect(rows.first().locator('.cp-row-feedback')).toHaveText(/^A reply that is not sent yet/);
+	for (const row of await rows.all()) {
+		const option = await row.getAttribute('data-option');
+		if (option) await row.locator('select').selectOption(option);
+	}
+	await cp.locator('.cp-check').click();
+	await expect(cp.locator('.cp-feedback')).toHaveText(/^Correct\. In each case the task is done just as well/);
+	await expect(cp).toHaveAttribute('data-state', 'passed');
+});

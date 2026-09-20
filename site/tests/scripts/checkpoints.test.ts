@@ -393,3 +393,97 @@ describe('review mode', () => {
 		expect(feedback()).toBe('Every item is now in its bucket.');
 	});
 });
+
+describe('multi-choice', () => {
+	const body = `
+		<fieldset class="cp-options cp-multi" data-count="2">
+			<label data-correct="true"><input type="checkbox" name="m-multi" /><span>a</span></label>
+			<label data-why="Clear to whom?"><input type="checkbox" name="m-multi" /><span>b</span></label>
+			<label data-correct="true"><input type="checkbox" name="m-multi" /><span>c</span></label>
+		</fieldset>`;
+	const box = (n: number) => q<HTMLInputElement>(`.cp-multi label:nth-of-type(${n}) input`);
+
+	it('needs picks, names a wrong pick, counts the missing ones, then passes', () => {
+		bindCheckpoint(shell('multi-choice', 'm', body));
+		click('.cp-check');
+		expect(feedback()).toBe('Pick 2 answers first.');
+		expect(state()).toBe('untouched');
+		box(1).checked = true;
+		click('.cp-check');
+		expect(feedback()).toBe('1 of 2 so far, and nothing wrong. 1 more to find.');
+		expect(state()).toBe('attempted');
+		box(2).checked = true;
+		click('.cp-check');
+		expect(feedback()).toBe('Clear to whom?');
+		box(2).checked = false;
+		box(3).checked = true;
+		click('.cp-check');
+		expect(feedback()).toBe('Correct.');
+		expect(state()).toBe('passed');
+	});
+	it('give up marks the correct items', () => {
+		progress.update((r) => {
+			r.reviews[`${LESSON}#m`] = { stage: 1, due: '2000-01-01', last: null, history: [], revision: 1 };
+		});
+		bindCheckpoint(shell('multi-choice', 'm', body), { review: true });
+		box(2).checked = true;
+		click('.cp-check');
+		click('.cp-giveup');
+		expect(document.querySelectorAll('label.cp-answer')).toHaveLength(2);
+		expect(feedback()).toBe('The correct items are marked.');
+	});
+});
+
+describe('match', () => {
+	const body = `
+		<div class="cp-match" data-rationale="Smaller is safer.">
+			<div class="cp-match-row" data-option="0" data-why="Keep the send step.">
+				<select><option value="">Choose…</option><option value="0">Drafts</option><option value="1">Copy</option></select>
+				<span class="cp-row-feedback"></span>
+			</div>
+			<div class="cp-match-row" data-option="1">
+				<select><option value="">Choose…</option><option value="0">Drafts</option><option value="1">Copy</option></select>
+				<span class="cp-row-feedback"></span>
+			</div>
+		</div>`;
+	const select = (n: number) => q<HTMLSelectElement>(`.cp-match-row:nth-child(${n}) select`);
+	const row = (n: number) => q(`.cp-match-row:nth-child(${n})`);
+
+	it('needs every row filled, marks each row, and shows the rationale on a full pass', () => {
+		bindCheckpoint(shell('match', 'x', body));
+		click('.cp-check');
+		expect(feedback()).toBe('2 rows still to fill.');
+		select(1).value = '1';
+		click('.cp-check');
+		expect(feedback()).toBe('1 row still to fill.');
+		expect(state()).toBe('untouched');
+		select(2).value = '0';
+		click('.cp-check');
+		expect(feedback()).toBe('2 rows wrong. Each row says which.');
+		expect(row(1).dataset.state).toBe('wrong');
+		expect(row(1).querySelector('.cp-row-feedback')?.textContent).toBe('Keep the send step.');
+		expect(row(2).querySelector('.cp-row-feedback')?.textContent).toBe('Not this one.');
+		select(1).value = '0';
+		select(2).value = '1';
+		click('.cp-check');
+		expect(feedback()).toBe('Correct. Smaller is safer.');
+		expect(row(1).dataset.state).toBe('right');
+		expect(row(1).querySelector('.cp-row-feedback')?.textContent).toBe('Right.');
+		expect(state()).toBe('passed');
+	});
+	it('give up fills every row neutrally and shows the rationale', () => {
+		progress.update((r) => {
+			r.reviews[`${LESSON}#x`] = { stage: 1, due: '2000-01-01', last: null, history: [], revision: 1 };
+		});
+		bindCheckpoint(shell('match', 'x', body), { review: true });
+		select(1).value = '1';
+		select(2).value = '0';
+		click('.cp-check');
+		click('.cp-giveup');
+		expect(select(1).value).toBe('0');
+		expect(select(2).value).toBe('1');
+		expect(row(1).dataset.state).toBe('revealed');
+		expect(row(1).querySelector('.cp-row-feedback')?.textContent).toBe('');
+		expect(feedback()).toBe('Each row now shows its answer. Smaller is safer.');
+	});
+});
