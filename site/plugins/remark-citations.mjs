@@ -4,13 +4,33 @@
  * resolves against site/src/data/bibliography.yaml and renders as a numbered
  * reference `[N]`, numbered by first appearance in the page. A page with at
  * least one citation gets a "References" section appended after its content,
- * one numbered entry per cited key. An unknown key fails the build.
+ * one numbered entry per cited key. An unknown key fails the build, and so
+ * does a citation inside a heading or a link, where the reference link could
+ * not render. Component children are scanned too, because recaps cite (S03),
+ * and the reference links are page-absolute (`/<page>/#ref-N`) so a cited
+ * checkpoint stem still resolves when a review page clones it. Only code is
+ * left alone.
  */
+import { walkText, CODE_ONLY } from './mdast-walk.mjs';
 
 const CITATION = /\(@([^()\n]+?)\)/g;
+const DOCS_DIR = /[\\/]src[\\/]content[\\/]docs[\\/]/;
 
-/** Parents whose text is never scanned for citations. */
-const SKIP = new Set(['code', 'inlineCode', 'link', 'linkReference', 'heading']);
+/**
+ * The root-relative URL of the page a file renders to, per Starlight's
+ * routing: `src/content/docs/a/b.mdx` is `/a/b/` and `a/index.mdx` is `/a/`.
+ * @param {string} path
+ */
+function pageUrl(path) {
+	const m = DOCS_DIR.exec(path);
+	if (!m) throw new Error(`${path}: a citation only works in a page under src/content/docs/`);
+	const rel = path
+		.slice(m.index + m[0].length)
+		.replace(/\\/g, '/')
+		.replace(/\.(mdx?|markdown)$/, '')
+		.replace(/(^|\/)index$/, '');
+	return rel ? `/${rel}/` : '/';
+}
 
 /**
  * @param {{ bibliography: Record<string, any> }} options
@@ -36,22 +56,20 @@ export function remarkCitations({ bibliography }) {
 			return n + 1;
 		};
 
-		const walk = (/** @type {any} */ node) => {
-			if (!Array.isArray(node.children)) return;
-			if (SKIP.has(node.type)) return;
-			/** @type {any[]} */
-			const out = [];
-			for (const child of node.children) {
-				if (child.type !== 'text') {
-					walk(child);
-					out.push(child);
-					continue;
+		const page = pageUrl(file.path);
+		walkText(tree, {
+			frozen: CODE_ONLY,
+			onText: (node) => splitText(node, numberOf, page),
+			onGuardedText: (node, parent) => {
+				const m = CITATION.exec(node.value);
+				CITATION.lastIndex = 0;
+				if (m) {
+					throw new Error(
+						`${file.path}: citation ${m[0]} inside a ${parent.type}. Cite in the paragraph text instead; a reference link cannot render there.`
+					);
 				}
-				out.push(...splitText(child, numberOf));
-			}
-			node.children = out;
-		};
-		walk(tree);
+			},
+		});
 
 		if (order.length === 0) return;
 		tree.children.push(
@@ -76,8 +94,9 @@ export function remarkCitations({ bibliography }) {
 /**
  * @param {{ type: 'text', value: string }} node
  * @param {(key: string) => number} numberOf
+ * @param {string} page root-relative URL of the page, so the link survives cloning
  */
-function splitText(node, numberOf) {
+function splitText(node, numberOf, page) {
 	/** @type {any[]} */
 	const out = [];
 	let last = 0;
@@ -88,7 +107,7 @@ function splitText(node, numberOf) {
 		const n = numberOf(key);
 		out.push({
 			type: 'link',
-			url: `#ref-${n}`,
+			url: `${page}#ref-${n}`,
 			title: key,
 			data: { hProperties: { className: ['citation'], 'data-key': key } },
 			children: [{ type: 'text', value: `[${n}]` }],

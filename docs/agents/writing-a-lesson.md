@@ -276,13 +276,17 @@ Neither needs an import in the page.
 `site/src/data/bibliography.yaml` (`AEC-02`, `DLAI-11`, `Brilliant VER`,
 `Learn Prompting`). It renders as a numbered reference, `[1]`, `[2]`, in
 order of first appearance, and the page gets a `## References` section
-appended after the recap with one entry per cited key. An unknown key
-fails the build with the file name and the key. Cite the way S03 asks:
-concept definitions, recaps, and behaviors cite papers and vendor
-documentation by key, never as a bare inline URL.
+appended after the page content with one entry per cited key. An unknown
+key fails the build with the file name and the key, and so does a citation
+inside a heading or a link. Citations work inside components too (a
+`Recap` takeaway, a checkpoint stem), and the reference link is
+page-absolute so it still resolves where a review page clones the
+checkpoint. Cite the way S03 asks: concept definitions, recaps, and
+behaviors cite papers and vendor documentation by key, never as a bare
+inline URL.
 
 ```mdx
-The model never runs anything; your loop does (@AEC-13).
+The model never runs anything. Your loop does (@AEC-13).
 ```
 
 A bibliography entry has `type` (`book`, `course`, `reference` or `video`,
@@ -291,16 +295,18 @@ public URL only where the licensing rules in `AGENTS.md` allow linking the
 source; otherwise `null`. Add a new entry to the YAML and to the source
 table in S02 together.
 
-**Terms.** There is no syntax. In a lesson, the first mention of a concept
+**Terms.** Terms have no syntax. In a lesson, the first mention of a concept
 from one of the topics in `covers` is marked automatically: it links to
-`/glossary/#<concept-id>` and carries the glossary definition as its hover
-text. Matching is on the concept `name` from the topic YAML, case-insensitive,
+`/glossary/#<concept-id>` with the glossary definition as its hover text.
+Matching is on the concept `name` from the topic YAML, case-insensitive,
 whole phrase, with an optional plural `s` or `es`, so `tokens` matches the
-concept `Token`. Headings, links and code spans are never marked, and later
-mentions stay plain text. If the first mention is in bold, it stays bold and
-becomes a term as well. To make a concept a term, use its exact name at
-its first mention. To keep a word plain, don't `cover` the topic it belongs
-to.
+concept `Token`. Headings, links, code spans, and the inside of components
+(checkpoint stems, `Prompt`, `Response`) are never marked, so a hover text
+can't give a checkpoint's answer away, and later mentions stay plain text.
+If the first mention is in bold, it stays bold and becomes a term as well.
+To make a concept a term, use its exact name at its first mention. To keep
+a word plain, don't `cover` the topic it belongs to. A hand-written link
+to `/glossary/#<id>` must name a real concept id, or the build fails.
 
 ## Rules that bite
 
