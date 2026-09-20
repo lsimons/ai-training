@@ -188,6 +188,8 @@ export default defineConfig({
 				MarkdownContent: './src/components/overrides/MarkdownContent.astro',
 				// The default footer plus the "Content co-authored by AI." notice.
 				Footer: './src/components/overrides/Footer.astro',
+				// No "On this page" when it would list only the title; the column stays.
+				TableOfContents: './src/components/overrides/TableOfContents.astro',
 			},
 		}),
 	],
