@@ -7,7 +7,7 @@
 import { getCollection } from 'astro:content';
 import { lessonEntryOf } from '@lib/lesson-context';
 import { href } from '@lib/url';
-import { getLessons } from '@lib/lessons';
+import { knownPagePaths } from '@lib/links';
 
 const entry = lessonEntryOf(Astro);
 const data = entry.data;
@@ -24,8 +24,8 @@ const sources = (data.sources ?? []).map((key) => {
 	if (!ref) throw new Error(`${entry.id}: unknown source key ${key}`);
 	return { key, ...ref.data };
 });
-const lessons = await getLessons();
-const next = (data['extends-to'] ?? []).map((n) => ({ ...n, exists: lessons.some((l) => `/${l.id}/` === n.href) }));
+const pages = await knownPagePaths();
+const next = (data['extends-to'] ?? []).map((n) => ({ ...n, exists: pages.has(n.href) }));
 ---
 
 <section class="recap" id="recap">
@@ -69,5 +69,6 @@ const next = (data['extends-to'] ?? []).map((n) => ({ ...n, exists: lessons.some
 	<div class="not-content recap-actions">
 		<button type="button" class="recap-finish" data-finish>Mark lesson finished</button>
 		<button type="button" class="recap-skip" data-skip-lesson>I know this, skip it</button>
+		<span class="recap-finish-note" data-finish-note></span>
 	</div>
 </section>

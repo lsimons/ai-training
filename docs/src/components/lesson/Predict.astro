@@ -14,12 +14,14 @@ interface Props {
 	hint: string;
 	answer?: string;
 	run?: string;
+	review?: boolean;
+	revision?: number;
 }
-const { id, objective, title, hint, answer, run } = Astro.props;
+const { id, objective, title, hint, answer, run, review, revision } = Astro.props;
 const honour = answer === undefined;
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} kind="predict" checkLabel={honour ? 'Record' : 'Check'}>
+<CheckpointShell {id} {objective} {title} {hint} {review} {revision} {honour} kind="predict" checkLabel={honour ? 'Record' : 'Check'}>
 	<slot />
 	<Fragment slot="body">
 		<div data-answer={answer} data-run={run} class="cp-predict">

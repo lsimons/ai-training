@@ -7,12 +7,14 @@ interface Props {
 	objective: string;
 	title: string;
 	hint: string;
+	review?: boolean;
+	revision?: number;
 	steps: string[];
 }
-const { id, objective, title, hint, steps } = Astro.props;
+const { id, objective, title, hint, review, revision, steps } = Astro.props;
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} kind="order">
+<CheckpointShell {id} {objective} {title} {hint} {review} {revision} kind="order">
 	<slot />
 	<Fragment slot="body">
 		<ol class="cp-order" aria-label="Steps to order">

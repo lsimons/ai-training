@@ -19,7 +19,9 @@ const catalog = lessons.map((l) => ({
 	id: l.id,
 	title: l.data.title,
 	href: href(`/${l.id}/`),
-	checkpoints: checkpointsOf(l).filter((c) => c.reviewable).map((c) => c.id),
+	checkpoints: checkpointsOf(l)
+		.filter((c) => c.reviewable)
+		.map((c) => ({ id: c.id, revision: c.revision })),
 }));
 const formats = [...new Set(lessons.flatMap((l) => checkpointsOf(l).filter((c) => c.reviewable).map((c) => c.kind)))];
 ---
@@ -48,7 +50,7 @@ const formats = [...new Set(lessons.flatMap((l) => checkpointsOf(l).filter((c) =
 		id: string;
 		title: string;
 		href: string;
-		checkpoints: string[];
+		checkpoints: { id: string; revision: number }[];
 	}
 
 	const root = document.querySelector<HTMLElement>('.review[data-review]');
@@ -59,14 +61,16 @@ const formats = [...new Set(lessons.flatMap((l) => checkpointsOf(l).filter((c) =
 		const status = root.querySelector<HTMLElement>('[data-status]')!;
 		const bar = root.querySelector<HTMLElement>('[data-bar]')!;
 
+		// Items whose answer changed since they were scheduled restart at stage 1 (spec S05 "Content changes").
+		progress.resetOutdatedReviews(catalog.flatMap((l) => l.checkpoints.map((c) => ({ id: `${l.id}#${c.id}`, revision: c.revision }))));
 		const due = progress.dueReviews(progress.load(), `${area}/`);
-		const totalDue = Object.entries(progress.load().reviews).filter(([id, it]) => id.startsWith(`${area}/`) && it.stage !== 'done' && it.due <= progress.today()).length;
+		const totalDue = progress.dueReviewIds(progress.load(), `${area}/`).length;
 		let answered = 0;
 
 		async function fetchSection(progressId: string): Promise<HTMLElement | null> {
 			const [lessonId, cpId] = progressId.split('#');
 			const lesson = catalog.find((l) => l.id === lessonId);
-			if (!lesson || !lesson.checkpoints.includes(cpId)) return null;
+			if (!lesson || !lesson.checkpoints.some((c) => c.id === cpId)) return null;
 			const html = await (await fetch(lesson.href)).text();
 			const doc = new DOMParser().parseFromString(html, 'text/html');
 			const section = doc.querySelector<HTMLElement>(`[data-checkpoint][data-progress-id="${progressId}"]`);
