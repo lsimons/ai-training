@@ -4,10 +4,13 @@
 what it contains and declares, how examples, citations, terms, and prompts are
 written, and how checkpoints, exercises, and widgets behave.
 
-**Status:** In progress - lesson anatomy, frontmatter, the checkpoint,
-pitfall, exercise, recap, prompt and response components, widgets, and the
-example runner in CI are implemented (2026-09-20). Deferred: the citation
-plugin (`(@key)`) and the term remark plugin. Changed after the release 1
+**Status:** Implemented - lesson anatomy, frontmatter, the checkpoint,
+pitfall, exercise, recap, prompt and response components, widgets, the
+example runner in CI, the citation plugin (`(@key)`, with a References
+section appended to the citing page) and the term remark plugin (first
+mention of a covered topic's concept) are in place (2026-09-20). The
+bibliography is YAML at `site/src/data/bibliography.yaml`, and each entry
+carries the S01 source type. Changed after the release 1
 review: checkpoints are "at least one per served objective" instead of
 exactly one, because tutorial mode also demands a `predict` for every
 example that runs; and prompt blocks may be marked `illustrative` in
@@ -132,7 +135,9 @@ pitfall and the exercise.
 
 - **Sources are cited by key.** `(@key)` in Markdown resolves against
   one bibliography file in the repo and renders as a numbered reference.
-  The sources list is on the topic page. Concept definitions, recaps, and
+  A page that cites gets a References section after its content, one entry
+  per cited key, and an unknown key fails the build. The full sources list
+  of a topic is on the topic page. Concept definitions, recaps, and
   behaviors cite papers and vendor documentation this way, never as bare
   inline URLs.
 - **The first mention of a concept is a term.** A remark plugin marks it in
@@ -194,5 +199,6 @@ pitfall and the exercise.
 1. Whether explanation-mode lessons may skip the exercise when the topic
    has nothing to do by hand. Leaning: no; a reflection-style exercise is
    still an exercise.
-2. Where the bibliography file is stored and in what format (BibTeX or YAML).
-   Decide when building the citation plugin.
+2. ~~Where the bibliography file is stored and in what format (BibTeX or
+   YAML).~~ Decided 2026-09-20: YAML at `site/src/data/bibliography.yaml`,
+   keyed as in S02 "Source material", validated as a content collection.
