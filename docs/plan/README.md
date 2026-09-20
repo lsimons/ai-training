@@ -37,16 +37,16 @@ BY-SA material be adapted freely. It replaces two earlier attempts:
 
 ## Sources and what may be done with each
 
-| Source                         | License                                         | Use here                                                                                                                                                                                                                                                                                                |
-| ------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agent-engineer-course` (fork) | Apache-2.0                                      | Integrate the best content, with attribution to Addy Osmani, Ivar Soares Urdalen and Leo Simons in `NOTICE.md`.                                                                                                                                                                                         |
-| `ai-cs50` (CS50 AI, workshops) | CC BY-NC-SA 4.0                                 | Ideas, structure, and vocabulary with citation. Text may not be adapted into this BY-SA work; a page may be included verbatim, marked with its own license. Workshop talk transcripts are YouTube captions and not licensed, so don't redistribute them.                                                |
-| Diátaxis                       | CC BY-SA 4.0                                    | Adopt the four kinds and the compass. Text may be adapted with attribution. See [explore/08](./explore/08-diataxis.md).                                                                                                                                                                                 |
-| `ai-anthropic-partners`        | Anthropic, proprietary                          | Reference and link only, preferring public `academy.claude.com` URLs.                                                                                                                                                                                                                                   |
-| `ai-deep-learning`             | DeepLearning.AI, paid                           | Inspiration for topic coverage and sequencing only. Don't embed any of it.                                                                                                                                                                                                                              |
-| Learn Prompting                | CC BY 4.0 (to 2023-02-15), then CC BY-NC-SA 4.0 | Vocabulary and authoring patterns only. Don't adapt text from either license period. Prompting concepts are written from the papers. See [explore/12](./explore/12-learn-prompting.md).                                                                                                                 |
-| `archive/career-model`         | Apache-2.0 (own)                                | Reuse the competency data model and the idea of a visual map.                                                                                                                                                                                                                                           |
-| Schuberg Philis AI wiki        | Company work product, no license                | Ideas only, rewritten: engineering guardrails, agent security scenarios, sandboxing and containment patterns, EU AI Act lesson brief, tool onboarding tiers, literacy programme evidence. Public Apache-2.0 repos it points at may be adapted. See [explore/13](./explore/13-sbp-confluence/README.md). |
+| Source                         | License                                         | Use here                                                                                                                                                                                                                                                                                              |
+| ------------------------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent-engineer-course` (fork) | Apache-2.0                                      | Integrate the best content, with attribution to Addy Osmani, Ivar Soares Urdalen and Leo Simons in `NOTICE.md`.                                                                                                                                                                                       |
+| `ai-cs50` (CS50 AI, workshops) | CC BY-NC-SA 4.0                                 | Ideas, structure, and vocabulary with citation. Text may not be adapted into this BY-SA work; a page may be included verbatim, marked with its own license. Workshop talk transcripts are YouTube captions and not licensed, so don't redistribute them.                                              |
+| Diátaxis                       | CC BY-SA 4.0                                    | Adopt the four kinds and the compass. Text may be adapted with attribution. See [explore/08](./explore/08-diataxis.md).                                                                                                                                                                               |
+| `ai-anthropic-partners`        | Anthropic, proprietary                          | Reference and link only, preferring public `academy.claude.com` URLs.                                                                                                                                                                                                                                 |
+| `ai-deep-learning`             | DeepLearning.AI, paid                           | Inspiration for topic coverage and sequencing only. Don't embed any of it.                                                                                                                                                                                                                            |
+| Learn Prompting                | CC BY 4.0 (to 2023-02-15), then CC BY-NC-SA 4.0 | Vocabulary and authoring patterns only. Don't adapt text from either license period. Prompting concepts are written from the papers. See [explore/12](./explore/12-learn-prompting.md).                                                                                                               |
+| `archive/career-model`         | Apache-2.0 (own)                                | Reuse the competency data model and the idea of a visual map.                                                                                                                                                                                                                                         |
+| Schuberg Philis AI wiki        | Company work product, no license                | Ideas only, rewritten: engineering guardrails, agent security scenarios, sandboxing and containment patterns, EU AI Act lesson brief, tool onboarding tiers, literacy program evidence. Public Apache-2.0 repos it points at may be adapted. See [explore/13](./explore/13-sbp-confluence/README.md). |
 
 See the `explore/` reports for detail on each.
 
@@ -116,10 +116,12 @@ See the `explore/` reports for detail on each.
    pages; declined: drawer-only content, typed link badges, lesson-anatomy
    checklist, project template). Added 2026-09-20:
    [explore/13](./explore/13-sbp-confluence/README.md) (a design brief drawn
-   from the Schuberg Philis AI wiki and literacy programme: guardrails, agent security scenarios,
+   from the Schuberg Philis AI wiki and literacy program: guardrails, agent security scenarios,
    sandboxing and containment, MCP security, EU AI Act, tool onboarding
-   tiers, literacy programme evidence; seven lesson briefs and three
-   authoring changes, none applied yet).
+   tiers, literacy program evidence; seven lesson briefs and three
+   authoring changes). Reviewed 2026-09-20 under issue #6: decisions are in
+   the brief's README, the map gaps are issue #13, and the knowledge-worker
+   data lesson is issue #10.
 4. ~~Write the dictionary / taxonomy spec.~~ Draft 2026-09-19 in
    [spec S01](../spec/S01-dictionary.md).
 5. ~~Design the interactive lesson component set and the local-storage progress
@@ -134,3 +136,8 @@ See the `explore/` reports for detail on each.
 7. Replace the template pages under `site/src/content/docs/` with real
    content, area by area. Release 1 (one lesson per area) landed
    2026-09-20, and the template authoring guides remain under "Contributing".
+8. Deepen after release 1, in this order: the knowledge-worker data lesson
+   (#10), then from [explore/13](./explore/13-sbp-confluence/README.md)
+   reviewing dependencies the agent pulled in (L7), connecting an agent to
+   your systems (L5), sandboxing a coding agent (L2), and the EU AI Act
+   (L4). The topic map gaps in #13 land before L2 and L4.
