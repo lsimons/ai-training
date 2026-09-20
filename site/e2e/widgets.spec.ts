@@ -5,6 +5,7 @@ test('the sampler redraws its bars when the temperature changes', async ({ page 
 	await page.goto('concepts/how-models-work/');
 	const sampler = page.locator('[data-sampler]');
 	await sampler.locator('input[type=range]').fill('0.1');
+	await expect(sampler.locator('.bar').first()).toHaveCSS('display', 'grid');
 	await expect(sampler.locator('.bar span:last-child').first()).not.toBeEmpty();
 });
 
