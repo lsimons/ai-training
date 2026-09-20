@@ -113,7 +113,7 @@ lesson table. Lesson types (`video`, `video_reading`, `video_notebook`,
 | 6   | Intro to Generative AI for Software Development | 6h26               | Intro; pair-coding; code analysis                                                                 | 1, 4    | Engineer  |
 | 7   | Team Software Engineering with AI               | 12h24              | Testing and debugging; documentation; dependency management                                       | 4       | Engineer  |
 | 8   | AI-Powered Software and System Design           | 12h41              | Config-driven development; databases; design patterns                                             | 4       | Engineer  |
-| 9   | MCP: Build Rich-Context AI Apps                 | intermediate, 2h   | Why MCP through remote deployment; very hands-on                                                  | 5, 6    | Engineer  |
+| 9   | MCP: Build Rich-Context AI Apps                 | intermediate, 2h   | Why MCP through remote deployment; hands-on throughout                                            | 5, 6    | Engineer  |
 | 10  | Agent Skills with Anthropic                     | beginner, 2h19     | Why skills, vs tools/MCP/subagents, creating, API / Code / SDK                                    | 5, 6    | Engineer  |
 | 11  | Agentic AI                                      | intermediate, 9h55 | Workflows and autonomy degrees; reflection; tool use; evals and error analysis; autonomous agents | 6, 3, 2 | Engineer  |
 

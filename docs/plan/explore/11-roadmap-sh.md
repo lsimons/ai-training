@@ -96,7 +96,7 @@ model-based, human; tools), AI-assisted coding tools (Claude Code, Codex,
 Cursor, Devin, Replit, Gemini).
 
 Overlap with our map ([spec S02](../../spec/S02-topic-map.md)): most of
-our `concepts` topics, all of `building-agents`, `customizing-agents/mcp`,
+our `concepts` topics, all `building-agents`, `customizing-agents/mcp`,
 and the security half of `safety`. Not present anywhere on roadmap.sh: our
 knowledge-worker material (responsible use, verifying output, delegating,
 choosing tools) and most of `coding-with-agents` except as a list of tool

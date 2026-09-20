@@ -506,7 +506,7 @@ competencies are not confined to their area's topics.
 
 | Path               | Audience                  | Lessons                                                                                             | Goal                                                 |
 | ------------------ | ------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `knowledge-worker` | Everyone                  | All of Foundations, in area order                                                                   | All Foundations competencies at `base`               |
+| `knowledge-worker` | Everyone                  | All Foundations, in area order                                                                      | All Foundations competencies at `base`               |
 | `engineer`         | Software engineers        | Foundations, then coding-with-agents, then customizing-agents                                       | `ships-with-agent` and `configures-agent` at `base`  |
 | `agent-builder`    | Engineers building agents | Foundations (agent and safety parts), building-agents/tool-use through evaluation, then customizing | `builds-agent-loop` and `evaluates-agents` at `base` |
 
