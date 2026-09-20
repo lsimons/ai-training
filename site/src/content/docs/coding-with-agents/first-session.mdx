@@ -166,12 +166,12 @@ task.
 <Sort id="what-goes-in-the-brief" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
   concepts={['first-change', 'task-brief']}
   context="A learner is about to brief a coding agent to fix an off-by-one bug in a small Python to-do program. A failing unit test already shows the bug, and the project has a short AGENTS.md file that the agent loads at start."
-  title="What goes in the brief?" hint="For each item, ask two things: does the agent need it to do this task, and can it get it faster than you can type it?"
+  title="What goes in the brief?" hint="Ask whether the agent needs it for this task, and whether it can get it faster than you can type it."
   buckets={['Goes in the brief', 'The agent finds this itself', 'Leave it out']}
   items={[
     { text: 'The name of the failing test', bucket: 0 },
     { text: 'Which file the agent may edit', bucket: 0 },
-    { text: 'Which file it must not touch', bucket: 0 },
+    { text: 'That the failing test must not change', bucket: 0 },
     { text: 'The command that shows the task is done', bucket: 0 },
     { text: 'The full text of todo.py', bucket: 1 },
     { text: 'The four lines of AGENTS.md', bucket: 1 },
@@ -224,8 +224,8 @@ and this lesson is about building the habit of reading.
   context="A learner briefed a coding agent to fix a bug in todo.py, a small Python to-do program. The brief and the project's AGENTS.md both say the agent must not touch todos.json, the data file. The agent stops at the permissions prompt before every edit."
   title="The agent asks for a different file" hint="Which document already answered this question before the agent asked it?"
   options={[
-    { text: 'Allow it. The agent has read more of the code than you have, and it probably knows what it is doing.', consequence: 'The agent edits the committed data file. The test still fails, because it uses a temporary file, and now there are two changes to undo instead of one.' },
-    { text: 'Deny the edit, and ask why it needs to change a file the brief said to leave alone.', correct: true, consequence: 'The agent re-reads the test, sees that it uses a temporary file, and comes back with the one-line change to done() in todo.py.' },
+    { text: 'Allow it. The agent has read more of the code than you have, and it probably knows what it is doing.', consequence: 'The agent edits the committed data file. The test still fails, because it builds its own list and never reads that file, and now there are two changes to undo instead of one.' },
+    { text: 'Deny the edit, and ask why it needs to change a file the brief said to leave alone.', correct: true, consequence: 'The agent re-reads the test, sees that it builds its own list and never reads todos.json, and comes back with the one-line change to done() in todo.py.' },
     { text: 'Stop the session, reset the fixture and start over with the same brief.', consequence: 'You lose only time, but you learn nothing about why the agent went there. The next session may make the same move, and you will face the same prompt.' },
     { text: 'Allow it, and revert the file with git afterwards.', consequence: 'The rest of the agent\'s work builds on the edited file. After the revert, its account of the fix no longer matches the code.' },
   ]}>
@@ -315,7 +315,7 @@ check that still has to run (@Academy claude-code-in-action).
     { text: 'Type the refactor request into the same session. The agent already knows the code.', why: 'It also still holds the bug-fix brief, with its limits and its done-criterion, and it keeps acting on them while it does the refactor.' },
     { text: 'End the session, and start a new one with a new brief for the refactor.', correct: true },
     { text: 'Ask the agent to summarize the session first, then continue in it with the refactor.', why: 'A summary makes the context shorter. The first task\'s constraints stay in it, and the session is still about two tasks.' },
-    { text: 'Keep the session open and start a second agent in the same directory for the refactor.', why: 'Two agents in one working tree edit each other\'s files. One task, one session, and one agent at a time in a directory.' },
+    { text: 'Keep the session open and start a second agent in the same directory for the refactor.', why: 'Two agents in one working tree edit each other\'s files.' },
   ]}>
 The fix is in, you have read the diff, and the tests pass. Now you want the
 agent to replace the done-mark strings in `todo.py` with a constant. Where

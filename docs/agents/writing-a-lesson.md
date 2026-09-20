@@ -195,7 +195,9 @@ that the learner checks it themselves.
 
 ````mdx
 <Predict id="run-list" title="Show the list"
-  answer="1. [ ] Buy milk" run="coding-with-agents/first-session/list.py">
+  answer={`1. [ ] Buy milk
+2. [x] Call the plumber
+3. [ ] Water the plants`} run="coding-with-agents/first-session/list.py">
 Run this, and compare what you see with the output below.
 
 ```sh

@@ -122,7 +122,8 @@ pitfall and the exercise.
   instead (a `scenario` on a permissions prompt, a `sort` on what goes in
   the brief). Before this date the rule read "prefer `predict` for any
   example that runs", which turned every shell command in a tutorial into
-  a graded code-reading question. Use `choice` only where nothing runs.
+  a graded code-reading question. Use `choice` when the answer is a judgment
+  or a decision.
 - **Fixtures are Python.** Every runnable example under `site/examples/` is
   a `.py` script run with `python3`, with no bash fixtures (decided
   2026-09-20). One language and one interpreter keep the runner simple and
