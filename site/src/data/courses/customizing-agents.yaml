@@ -9,3 +9,12 @@ lessons:
       - customizing-agents/configures-agent/writes-project-instructions
     status: live
     minutes: 20
+  - id: customizing-agents/mcp
+    title: Connecting an agent to your systems
+    covers: customizing-agents/mcp
+    serves:
+      - customizing-agents/connects-tools-safely/adds-a-tool
+      - customizing-agents/connects-tools-safely/weighs-tool-cost
+      - customizing-agents/connects-tools-safely/hardens-a-connection
+    status: live
+    minutes: 20

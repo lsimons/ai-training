@@ -2,6 +2,15 @@
 # One entry per lesson, in course order. Planned entries come from issue #31.
 area: safety
 lessons:
+  - id: safety/responsible-use
+    title: What may go into an AI tool
+    covers: safety/responsible-use
+    serves:
+      - safety/handles-data-safely/decides-what-to-share
+      - safety/handles-data-safely/discloses-ai-use
+      - safety/handles-data-safely/respects-licenses
+    status: live
+    minutes: 20
   - id: safety/agent-risk
     title: Why agent safety is different
     covers: safety/agent-risk
