@@ -215,7 +215,7 @@ routing default.
    with `building-agents/production` and `evaluation`.
 6. **Lesson length.** Their 5 to 10 minute unit with a skills check argues
    for splitting our lessons into sections that each end in a checkpoint,
-   which spec S01 already allows; keep an eye on total lesson length.
+   which spec S01 already allows; watch total lesson length.
 7. **Differentiation model.** Their "three learners in parallel in one
    graph" is the comfort-level idea done through the map rather than through
    alternate content: prerequisite review, current objective, extension.

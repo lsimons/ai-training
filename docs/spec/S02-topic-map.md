@@ -388,7 +388,7 @@ Learning objectives:
 
 ## Behaviours: worked example
 
-Behaviours are written for one objective so far; the rest are to write.
+Only one objective has behaviours so far; the rest are to write.
 Every objective's behaviours take this form: one-sentence claim, a why, one
 example; two to six per objective. For
 `using-agents/delegates-and-checks/writes-a-brief` (`base`):
@@ -396,20 +396,20 @@ example; two to six per objective. For
 | #   | Claim                                                                                   | Why                                                                                                                              | Example                                                                                                                                                             |
 | --- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | A brief states the goal, the context the work needs and the limits it must stay within. | An agent fills in whatever is left unsaid with plausible defaults, so what it must not touch matters as much as what it must do. | "Update the pricing table in `docs/pricing.md` from this spreadsheet; do not change any other file" stays on task, where "update the pricing" may rewrite the page. |
-| 2   | Done-criteria are written before the work starts.                                       | Without them the result is judged by feel, and a plausible result is accepted as a correct one.                                  | "Done when every row in the spreadsheet appears once in the table and the totals match" turns review into a check rather than a read.                               |
+| 2   | The brief states the done-criteria before the work starts.                              | Without them you judge the result by feel and accept a plausible result as a correct one.                                        | "Done when every row in the spreadsheet appears once in the table and the totals match" turns review into a check rather than a read.                               |
 | 3   | The brief names the information the agent should use and where it is.                   | An agent that has to guess sources will pick the most available one, not the right one.                                          | Pointing at the approved spreadsheet, not "the latest numbers", prevents the agent from pulling last quarter's figures from an old email.                           |
 
 ## Alignment
 
 An alignment row maps an external framework's item to the objectives here
-that address it. Rows are kept per competency in the YAML and summarised
-here for the two frameworks known so far.
+that address it. The YAML keeps the rows per competency; this section summarises
+them for the two frameworks known so far.
 
 ### Frameworks
 
 **Brilliant's *Coding with AI* skills map** organises AI-era programming
 skill into seven "big ideas", each with a three-letter code and numbered
-objectives underneath (`INC-2`, `VER-7`). Codes are cited here as facts;
+objectives underneath (`INC-2`, `VER-7`). This spec cites the codes as facts;
 the "asks" column paraphrases what each objective asks for.
 
 | Code | Big idea                               | In short                                                                  |

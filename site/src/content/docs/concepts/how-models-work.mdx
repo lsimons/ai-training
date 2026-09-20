@@ -41,8 +41,8 @@ around the text that appears most often in training data.
 
 Given the tokens so far, the model outputs a score for every token in its
 vocabulary: how likely is each one to come next? Those scores become a
-probability distribution. One token is picked from it, appended to the
-input, and the whole thing runs again. A hundred-word answer is a hundred
+probability distribution. The model picks one token from it, appends it to
+the input, and the whole thing runs again. A hundred-word answer is a hundred
 or so rounds of "what comes next?".
 
 Try it. The widget below is a toy with five candidate tokens and made-up
@@ -67,8 +67,8 @@ evidence.
 
 ## Where the scores come from
 
-The scores are produced by a neural network with billions of adjustable
-numbers, the **weights**. During training the network reads enormous
+A neural network with billions of adjustable numbers, the **weights**,
+produces the scores. During training the network reads enormous
 amounts of text and is nudged, each time, so that the token that really
 came next scores higher. Nothing is stored as facts or rules. What emerges
 is a compressed statistical model of the text it saw: grammar, style,
