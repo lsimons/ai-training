@@ -46,6 +46,7 @@ material be adapted freely. It replaces two earlier attempts:
 | `ai-deep-learning`             | DeepLearning.AI, paid                           | Inspiration for topic coverage and sequencing only. Embed nothing.                                                                                                                                                                               |
 | Learn Prompting                | CC BY 4.0 (to 2023-02-15), then CC BY-NC-SA 4.0 | Vocabulary and authoring patterns only; no text adapted from either license period. Prompting concepts are written from the papers. See [explore/12](./explore/12-learn-prompting.md).                                                           |
 | `archive/career-model`         | Apache-2.0 (own)                                | Reuse the competency data model and the idea of a visual map.                                                                                                                                                                                    |
+| Schuberg Philis AI wiki        | Company work product, no license                | Ideas only, rewritten: engineering guardrails, agent security scenarios, sandboxing and containment patterns, EU AI Act lesson brief, tool onboarding tiers, literacy programme evidence. Public Apache-2.0 repos it points at may be adapted. See [explore/13](./explore/13-sbp-confluence/README.md). |
 
 See the `explore/` reports for detail on each.
 
@@ -113,7 +114,12 @@ See the `explore/` reports for detail on each.
    quizzes, project specs; applied: node status and milestone bar,
    one-paragraph concept definitions, tutor verbs, deep-linkable topic
    pages; declined: drawer-only content, typed link badges, lesson-anatomy
-   checklist, project template).
+   checklist, project template). Added 2026-09-20:
+   [explore/13](./explore/13-sbp-confluence/README.md) (a design brief drawn
+   from the Schuberg Philis AI wiki and literacy programme: guardrails, agent security scenarios,
+   sandboxing and containment, MCP security, EU AI Act, tool onboarding
+   tiers, literacy programme evidence; seven lesson briefs and three
+   authoring changes, none applied yet).
 4. ~~Write the dictionary / taxonomy spec.~~ Draft 2026-09-19 in
    [spec S01](../spec/S01-dictionary.md).
 5. ~~Design the interactive lesson component set and the local-storage progress
