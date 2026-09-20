@@ -24,14 +24,14 @@ dev = [
 ]
 
 [tool.uv]
-# The repo is not installable; uv only manages the dev tools.
+# The repo is not installable, so uv only manages the dev tools.
 package = false
 exclude-newer = "1 week"
 
-# Two audiences, one config. This section is the strict set for scripts/ and
-# tests/ (ours, Python 3.14). site/examples/ruff.toml extends it and lowers
-# `target-version` to py39, so the UP (pyupgrade) rules never push syntax a
-# learner's older interpreter rejects. Do not add a third config.
+# One config serves two audiences. This section is the strict set for
+# scripts/ and tests/ (ours, Python 3.14). site/examples/ruff.toml extends it
+# and lowers `target-version` to py39, so the UP (pyupgrade) rules never push
+# syntax a learner's older interpreter rejects. Do not add a third config.
 [tool.ruff]
 line-length = 100
 target-version = "py314"
@@ -67,11 +67,11 @@ exclude = ["**/node_modules", "**/__pycache__", ".venv"]
 
 [tool.pytest.ini_options]
 # Only the repo's own tests. site/examples/**/test_*.py is lesson content
-# that the learner runs; `mise run examples` asserts its output.
+# that the learner runs, and `mise run examples` asserts its output.
 testpaths = ["tests"]
 pythonpath = ["scripts"]
 # --strict-markers/-config turn typos in markers and in this table into
-# errors; xfail_strict fails a test that was expected to fail but passed.
+# errors, and xfail_strict fails a test that was expected to fail but passed.
 # Coverage counts scripts/ only.
 addopts = "-v --strict-markers --strict-config --cov=scripts --cov-report=term-missing --cov-fail-under=80"
 xfail_strict = true
