@@ -45,7 +45,7 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 | Pitfall     | At least one, placed right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule. Short in tutorial mode. |
 | Checkpoints | At least one per served objective. A checkpoint's `objective` names the one objective it evidences.                                                |
 | Exercise    | Exactly one.                                                                                                                                       |
-| Recap       | Numbered takeaways, the served objectives as "You can now...", and what comes next.                                                                |
+| Recap       | Numbered takeaways, the served objectives as "You can now...", and "Next": the course's next lesson, else the next course.                         |
 
 Objectives are frontmatter data that drive checkpoints, routing, and tutor
 mode. They're never printed as a `you will learn` list; the opener and the
