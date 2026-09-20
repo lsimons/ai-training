@@ -68,12 +68,12 @@ Five stages, shown to the learner as five pills.
 
 ## Where reviews surface
 
-| Place                      | Surface                                                                                                                                                                                                                        |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Course page                | A "Review due: N items" card above the lesson graph when N > 0. The card links to the review page for that course. Also a small count in the sidebar group header.                                                             |
-| Landing page and path page | One line per course with due items                                                                                                                                                                                             |
-| Tutor mode                 | At session start, if items are due, the tutor asks one recall question before anything else. The tutor reads the exported progress file if the learner has exported it, otherwise it asks the learner to open the review page. |
-| Routing                    | Per the topic map: an item failed twice in a row marks its objective "behind" in the path lanes and offers the section that teaches it                                                                                         |
+| Place                      | Surface                                                                                                                                                                                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Course page                | A "Review due: N items" card above the lesson graph when N > 0. The card links to the review page for that course. Also a small count in the sidebar group header.                                                                                                              |
+| Landing page and path page | One line per course with due items                                                                                                                                                                                                                                              |
+| Tutor mode                 | At session start, if items are due, the tutor asks one recall question before anything else. The tutor can't read browser storage, so it reads the exported progress file if the learner pastes it into the session, and otherwise it asks the learner to open the review page. |
+| Routing                    | Per the topic map: an item failed twice in a row marks its objective "behind" in the path lanes and offers the section that teaches it                                                                                                                                          |
 
 ## The review page
 

@@ -213,15 +213,15 @@ Checkpoint kinds available to authors. Names are the component names.
 
 ## Learners and roles
 
-| Term            | Definition                                                                                                                                                                          | Don't use               |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| **Learner**     | The person using the site.                                                                                                                                                          | student, user, reader   |
-| **Author**      | Someone writing or editing lessons.                                                                                                                                                 | teacher, instructor     |
-| **Tutor**       | Claude acting in tutor mode inside Claude Code, with the site running locally. It gives hints and withholds answers. See "Tutor verbs".                                             | assistant, duck, bot    |
-| **Maintainer**  | Someone with commit rights on this repo.                                                                                                                                            | admin, owner            |
-| **Progress**    | The learner's local record of lessons, checkpoints, quizzes, review schedule, comfort level and goals, kept in the browser, and exportable as one file.                             | state, history, profile |
-| **Review**      | A short session of review items due today. Reached from the course page or tutor mode. Items are checkpoints from finished lessons, re-asked. Has **Give Up**, which lessons don't. | recap, test, drill      |
-| **Review item** | One checkpoint in the review schedule, with a stage on a fixed interval ladder and a learner-adjustable frequency.                                                                  | card, flashcard         |
+| Term            | Definition                                                                                                                                                                                 | Don't use               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| **Learner**     | The person using the site.                                                                                                                                                                 | student, user, reader   |
+| **Author**      | Someone writing or editing lessons.                                                                                                                                                        | teacher, instructor     |
+| **Tutor**       | Claude acting in tutor mode inside the learner's own agent (Claude Code or opencode), reading the lesson from the published site. It gives hints and withholds answers. See "Tutor verbs". | assistant, duck, bot    |
+| **Maintainer**  | Someone with commit rights on this repo.                                                                                                                                                   | admin, owner            |
+| **Progress**    | The learner's local record of lessons, checkpoints, quizzes, review schedule, comfort level and goals, kept in the browser, and exportable as one file.                                    | state, history, profile |
+| **Review**      | A short session of review items due today. Reached from the course page or tutor mode. Items are checkpoints from finished lessons, re-asked. Has **Give Up**, which lessons don't.        | recap, test, drill      |
+| **Review item** | One checkpoint in the review schedule, with a stage on a fixed interval ladder and a learner-adjustable frequency.                                                                         | card, flashcard         |
 
 ### Tutor verbs
 

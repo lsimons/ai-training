@@ -53,6 +53,7 @@ Dependabot
 Renovate
 pnpm
 microroute
+opencode
 
 # Course and certification codes
 CCAO
