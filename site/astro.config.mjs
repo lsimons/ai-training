@@ -192,6 +192,11 @@ export default defineConfig({
 							label: 'Instruction, context and format',
 							attrs: { class: 'lesson-link' },
 						},
+						{
+							slug: 'concepts/structured-output',
+							label: 'Output the next step can use',
+							attrs: { class: 'lesson-link' },
+						},
 						{ slug: 'safety', label: 'Safety' },
 						{ slug: 'safety/responsible-use', label: 'What may go into an AI tool', attrs: { class: 'lesson-link' } },
 						{ slug: 'safety/agent-risk', label: 'Why agent safety is different', attrs: { class: 'lesson-link' } },
