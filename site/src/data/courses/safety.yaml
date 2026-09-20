@@ -47,10 +47,10 @@ lessons:
     after:
       - safety/responsible-use
     # mode: tutorial
-    # exercise (do): Redact a real document from your own work down to what the task needs, and keep the redaction map outside the tool.
+    # exercise (do): Redact the lesson's fixture document (the full version of the one the Predict runs on) down to what the task needs, and keep the redaction map outside the tool. Stretch: do the same for one document of your own, on paper, without pasting it anywhere.
     # shorts: Controller and processor in one page; Anonymized data can be re-identified
     # assumes (other areas): none
-    # introduces: none (deepens data-privacy and confidentiality with a fixture that replaces names, contact details and account numbers with placeholders and shows the task still works on the result)
+    # introduces: none (deepens data-privacy and confidentiality with a fixture that replaces names and account numbers with placeholders and shows the task still works on the result)
   - id: safety/saying-ai-helped
     title: Saying that AI helped, and crediting what it copied
     covers: safety/responsible-use
@@ -74,10 +74,10 @@ lessons:
     status: planned
     minutes: 15
     # mode: tutorial
-    # exercise (do): Take one AI-written paragraph from your own work and mark every specific claim in it, then check the first three.
+    # exercise (judge): Read the lesson's second summary before running the check, predict from their specificity which of its claims are invented, then run the fixture and record where the prediction held and where it did not.
     # shorts: Why specificity is the tell
     # assumes (other areas): concepts/explains-models/names-failure-modes
-    # introduces: hallucination-in-practice (a fixture checks a summary's citations, numbers and quotes against a small offline source set and prints which ones have no source)
+    # introduces: hallucination-in-practice (a fixture checks a summary's citations and figures against a small offline source set and prints which ones have no source)
   - id: safety/bias-in-patterns
     title: Seeing bias across many answers
     covers: safety/failure-modes
@@ -88,7 +88,7 @@ lessons:
     after:
       - safety/spotting-hallucination
     # mode: tutorial
-    # exercise (judge): For one task at your work where a model's output affects people, write down which groups you would compare and how many samples you need before you would trust a pattern.
+    # exercise (judge): For one task at your work where a model's output affects people, write down which groups you would compare, how many samples you need before you would trust a pattern, and, given who the output affects, how much checking that task gets and by whom.
     # shorts: Bias from training data and bias from tuning
     # assumes (other areas): concepts/explains-models/names-failure-modes
     # introduces: bias (a fixture ranks the same set of records under two swapped name lists and tallies the difference, so the slant is visible only in the totals)
@@ -132,7 +132,7 @@ lessons:
     after:
       - safety/checking-habits
     # mode: tutorial
-    # exercise (do): Take three references from an AI-written text, open each, and record for each whether the source exists and says what the text claims.
+    # exercise (judge): The fixture's text cites a real report with an invented finding. Open the report (the lesson links it), write down in one sentence each what the report says and what the text says it says, and mark the gap.
     # shorts: Real title, invented finding
     # assumes (other areas): none
     # introduces: source-checking (a fixture resolves a list of citations against an offline bibliography and reports one that exists with a different finding and one that does not exist)
@@ -175,7 +175,7 @@ lessons:
     after:
       - safety/checking-habits
     # mode: tutorial
-    # exercise (do): For one agent task you have seen or read about, list the effects to inspect afterwards (files, messages, deletions) and the one step that needs a pause first.
+    # exercise (do): For one agent task you have seen or read about, list the effects to inspect afterwards (what changed and what was sent) and the one step that needs a pause first.
     # shorts: none
     # assumes (other areas): concepts/recognizes-agents/tells-agent-from-assistant
     # introduces: trust-but-verify-for-agents (a fixture replays a recorded agent session as file changes and prints the before and after, so the learner checks effects against the request without running an agent)
@@ -205,12 +205,12 @@ lessons:
       - safety/agent-risk
       - safety/checking-what-an-agent-changed
     # mode: tutorial
-    # exercise (do): Write the permission list for one agent task at your work as read, write and send rows, cross out what the task does not need, and mark the row where a person approves.
+    # exercise (do): Pick a task you would like an agent to do. Write its permission list as read, write and send rows, cross out what the task does not need, and mark the row where a person approves.
     # shorts: none
     # assumes (other areas): concepts/recognizes-agents/names-the-loop
     # introduces: none (deepens blast-radius, permissions-and-least-privilege and human-in-the-loop with a fixture that reads a permission list and prints what it reaches, who is affected and which actions cannot be undone)
   - id: safety/tracing-a-planted-instruction
-    title: Tracing a planted instruction to the way out
+    title: Tracing a planted instruction to the tool that leaks
     covers: safety/agent-risk
     serves:
       - safety/judges-agent-risk/recognizes-injection
@@ -219,7 +219,7 @@ lessons:
     after:
       - safety/agent-risk
     # mode: tutorial
-    # exercise (judge): For an assistant you use that reads mail, pages or files, name the outbound abilities it has and which one you would remove or gate for a summarizing task.
+    # exercise (judge): For an assistant you use that reads content you did not write, name the outbound abilities it has and which one you would remove or gate for a summarizing task.
     # shorts: Why a model cannot tell data from commands
     # assumes (other areas): none
     # introduces: none (deepens prompt-injection and exfiltration with a fixture that simulates an agent reading a page with a planted line under three permission sets and prints, for each, whether data leaves and by which tool)
@@ -278,11 +278,10 @@ lessons:
     issue: 19
     minutes: 15
     after:
-      - safety/writing-an-ai-policy
-      - safety/assessing-a-use-case
+      - safety/agent-risk
     # mode: explanation
-    # exercise (judge): Sort six scenarios into the Regulation's risk tiers and decide provider or deployer for three of them, then say which duties touch your own daily work.
+    # exercise (judge): For one AI tool used at your work, decide whether your organization is provider or deployer and name the one transparency duty that applies. Reflection: which of the Act's duties touch your own daily work?
     # shorts: Content credentials (C2PA); Where the AI literacy duty comes from
-    # assumes (other areas): none beyond the Concepts area, per the brief on issue #19
+    # assumes (other areas): none beyond the Concepts area, per the brief on issue #19. Inside this plan the lesson assumes only agent-risk, the governance topic's S02 prerequisite. It is last in the file because issue #19 puts it last in build order.
     # introduces: regulation
     # The AI literacy pointer that issue #10 asked for lands here, and the transparency duties connect back to disclosure in safety/responsible-use.
