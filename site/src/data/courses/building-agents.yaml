@@ -29,6 +29,7 @@ lessons:
     serves:
       - building-agents/builds-agent-loop/defines-a-tool
     status: planned
+    issue: 182
     minutes: 10
     # mode: explanation
     # exercise (judge): given the live lesson's fake model reply `{"tool": "get_weather", "args": {"city": "Lisbon"}}` and the tool's result, write the three real API messages they become (the tool request block with its id, the tool result message that quotes that id, and the final text reply), then mark which field plays the role of the fake model's `answer` key
@@ -63,6 +64,7 @@ lessons:
     serves:
       - building-agents/builds-agent-loop/defines-a-tool
     status: planned
+    issue: 185
     minutes: 15
     after:
       - building-agents/agent-loop
@@ -82,6 +84,7 @@ lessons:
       - building-agents/builds-agent-loop/defines-a-tool
       - building-agents/builds-agent-loop/implements-the-loop
     status: planned
+    issue: 188
     minutes: 15
     after:
       - building-agents/agent-loop
@@ -100,6 +103,7 @@ lessons:
     serves:
       - building-agents/builds-agent-loop/implements-the-loop
     status: planned
+    issue: 191
     minutes: 12
     after:
       - building-agents/tool-errors
@@ -118,6 +122,7 @@ lessons:
     serves:
       - building-agents/builds-agent-loop/implements-the-loop
     status: planned
+    issue: 194
     minutes: 15
     after:
       - building-agents/agent-loop
@@ -137,6 +142,7 @@ lessons:
     serves:
       - building-agents/builds-agent-loop/uses-an-sdk
     status: planned
+    issue: 196
     minutes: 15
     after:
       - building-agents/stopping-the-loop
@@ -159,6 +165,7 @@ lessons:
     serves:
       - building-agents/builds-agent-loop/adds-retrieval
     status: planned
+    issue: 198
     minutes: 15
     after:
       - building-agents/stopping-the-loop
@@ -178,6 +185,7 @@ lessons:
     serves:
       - building-agents/builds-agent-loop/adds-retrieval
     status: planned
+    issue: 199
     minutes: 12
     after:
       - building-agents/retrieval-as-a-tool
@@ -197,6 +205,7 @@ lessons:
     serves:
       - building-agents/evaluates-agents/writes-a-rubric
     status: planned
+    issue: 200
     minutes: 15
     after:
       - building-agents/retrieval-as-a-tool
@@ -215,6 +224,7 @@ lessons:
     serves:
       - building-agents/evaluates-agents/builds-a-golden-set
     status: planned
+    issue: 201
     minutes: 15
     after:
       - building-agents/rubrics
@@ -232,6 +242,7 @@ lessons:
     serves:
       - building-agents/evaluates-agents/grades-trajectories
     status: planned
+    issue: 202
     minutes: 15
     after:
       - building-agents/golden-sets
@@ -251,6 +262,7 @@ lessons:
       - building-agents/evaluates-agents/grades-trajectories
       - building-agents/evaluates-agents/builds-a-golden-set
     status: planned
+    issue: 203
     minutes: 12
     after:
       - building-agents/traces-and-trajectories
@@ -272,6 +284,7 @@ lessons:
       - building-agents/evaluates-agents/writes-a-rubric
       - building-agents/evaluates-agents/avoids-gamed-metrics
     status: planned
+    issue: 204
     minutes: 15
     after:
       - building-agents/rubrics
@@ -293,6 +306,7 @@ lessons:
     serves:
       - building-agents/orchestrates-agents/picks-a-pattern
     status: planned
+    issue: 205
     minutes: 12
     after:
       - building-agents/stopping-the-loop
@@ -311,6 +325,7 @@ lessons:
     serves:
       - building-agents/orchestrates-agents/picks-a-pattern
     status: planned
+    issue: 206
     minutes: 15
     after:
       - building-agents/react
@@ -329,6 +344,7 @@ lessons:
     serves:
       - building-agents/orchestrates-agents/picks-a-pattern
     status: planned
+    issue: 207
     minutes: 15
     after:
       - building-agents/react
@@ -346,6 +362,7 @@ lessons:
       - building-agents/orchestrates-agents/picks-a-pattern
       - building-agents/orchestrates-agents/composes-patterns
     status: planned
+    issue: 208
     minutes: 15
     after:
       - building-agents/planning
@@ -369,6 +386,7 @@ lessons:
       - building-agents/orchestrates-agents/justifies-orchestration-cost
       - building-agents/orchestrates-agents/composes-patterns
     status: planned
+    issue: 209
     minutes: 15
     after:
       - building-agents/plan-or-react
@@ -388,6 +406,7 @@ lessons:
     serves:
       - building-agents/orchestrates-agents/justifies-orchestration-cost
     status: planned
+    issue: 210
     minutes: 12
     after:
       - building-agents/orchestrating-agents
@@ -411,6 +430,7 @@ lessons:
     serves:
       - building-agents/runs-in-production/mitigates-agent-risks
     status: planned
+    issue: 211
     minutes: 12
     after:
       - building-agents/tool-errors
@@ -433,6 +453,7 @@ lessons:
       - building-agents/runs-in-production/layers-defenses
       - building-agents/runs-in-production/mitigates-agent-risks
     status: planned
+    issue: 212
     minutes: 15
     after:
       - building-agents/agent-attack-surface
@@ -455,6 +476,7 @@ lessons:
       - building-agents/runs-in-production/gates-on-evals
       - building-agents/runs-in-production/manages-cost-and-rollout
     status: planned
+    issue: 213
     minutes: 15
     after:
       - building-agents/golden-sets
@@ -475,6 +497,7 @@ lessons:
     serves:
       - building-agents/runs-in-production/manages-cost-and-rollout
     status: planned
+    issue: 214
     minutes: 12
     after:
       - building-agents/eval-gated-deploys
@@ -494,6 +517,7 @@ lessons:
     serves:
       - building-agents/runs-in-production/mitigates-agent-risks
     status: planned
+    issue: 215
     minutes: 12
     after:
       - building-agents/how-a-model-calls-a-tool
