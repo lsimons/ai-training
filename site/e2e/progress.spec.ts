@@ -1,7 +1,11 @@
 /** Finishing a lesson, and where that progress shows up and persists (spec S04). */
 import { answerChoice, expect, storedRecord, test } from './fixtures';
 
-const TODAY = new Date().toISOString().slice(0, 10);
+// The site compares due dates against the local calendar day (progress-model.ts `today()`), so the
+// seed is built the same way. `toISOString()` is UTC, which is already tomorrow in the evening west of UTC.
+const pad = (n: number) => String(n).padStart(2, '0');
+const now = new Date();
+const TODAY = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 const finished = {
 	lessons: { 'concepts/how-models-work': { state: 'finished' as const, at: TODAY } },
 	checkpoints: {

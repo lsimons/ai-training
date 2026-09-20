@@ -276,7 +276,18 @@ describe('export and import', () => {
 		const r = record({ comfort: 'more', lessons: { 'a/x': { state: 'finished', at: DAY } } });
 		const text = exportJson(r);
 		expect(text).toContain('\n  "version": 1');
-		expect(parseImport(text)).toEqual({ ok: true, record: r });
+		expect(parseImport(text)).toEqual({ ok: true, record: r, warnings: [] });
+	});
+	it('reports what normalize dropped instead of losing it silently', () => {
+		const text = JSON.stringify({ version: VERSION, lessons: { 'a/x': { state: 'bogus' } }, reviews: 'nope' });
+		const result = parseImport(text);
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		expect(result.record.lessons).toEqual({});
+		expect(result.warnings).toEqual([
+			{ field: 'lessons', kind: 'dropped', count: 1 },
+			{ field: 'reviews', kind: 'not-object', count: 1 },
+		]);
 	});
 	it('refuses bad input with a message', () => {
 		expect(parseImport('{')).toEqual({ ok: false, message: 'That file is not valid JSON.' });
