@@ -118,3 +118,6 @@ unvalidated
 upsell
 upvotes
 worktrees
+
+# Fictional names in lessons
+Northline

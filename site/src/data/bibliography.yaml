@@ -375,6 +375,13 @@ Brilliant ABS:
   author: Brilliant
   license: Proprietary
   url: null
+Brown 2020:
+  type: reference
+  title: Language Models are Few-Shot Learners
+  container: arXiv preprint 2005.14165
+  author: Tom B. Brown and others
+  license: arXiv non-exclusive license; cited, not copied
+  url: https://arxiv.org/abs/2005.14165
 Learn Prompting:
   type: reference
   title: The community prompt engineering guide
