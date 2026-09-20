@@ -54,7 +54,9 @@ const headings = [
 			<ul>
 				{topic.sources.map((key) => {
 					const ref = bibliography.find((b) => b.id === key);
-					return <li><code>{key}</code> {ref ? <>{ref.data.title}{ref.data.container && <>, <em>{ref.data.container}</em></>}</> : '(unknown key)'}</li>;
+					if (!ref) return <li><code>{key}</code> (unknown key)</li>;
+					const title = ref.data.url ? <a href={ref.data.url}>{ref.data.title}</a> : ref.data.title;
+					return <li><code>{key}</code> {title}{ref.data.container && <>, <em>{ref.data.container}</em></>} ({ref.data.type})</li>;
 				})}
 			</ul>
 		) : (
