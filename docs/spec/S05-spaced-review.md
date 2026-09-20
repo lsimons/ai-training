@@ -81,6 +81,10 @@ One page per course at `/<area>/<course>/review/`.
    - Hint is the checkpoint's diagnostic hint, never the answer.
    - Give Up is enabled after one attempt, shows the answer and rationale,
      and counts as a fail. Give Up exists only here, never in lessons.
+   - Each item records exactly one result per review session. A correct
+     Check records a pass. A wrong Check records nothing yet: the learner
+     may retry or Give Up, and Give Up records the single fail. Once a
+     result is recorded, Check and Give Up are both disabled.
 3. After each answer: the lesson link, the five-pill stage, and the frequency
    control.
 4. **Finish review** returns to the course page.
