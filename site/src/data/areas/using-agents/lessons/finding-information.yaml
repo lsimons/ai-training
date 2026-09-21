@@ -1,22 +1,32 @@
 id: using-agents/finding-information
 title: Finding information with an assistant
+description: >-
+  Ask an assistant what a newcomer must know from a text you supply, with a quote behind each claim,
+  and see why the same question from memory gives a confident wrong answer.
 mode: tutorial
 covers: using-agents/assistant-work
 serves: [using-agents/delegates-and-checks/writes-a-brief]
 introduces: [finding-information]
 assumes:
   - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: mark-the-boundary
   - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: Delegating a task to an agent
+    href: /using-agents/delegating/
 after: []
 shorts: [Asking for sources]
 exercise:
   kind: do
   brief: >-
-    Paste a supplied two-page text, ask for the three things a newcomer must know with a quote for
-    each, then check every quote against the text and note which one is not there.
-sources: []
-issue: 133
+    Paste the supplied guideline, ask for the three things a newcomer must know with a quote for each,
+    then check every quote against the text and note which one is not there word for word.
+sources: [Academy claude-101]
 minutes: 15
 notes: >-
   The plan named the topic concepts/prompting as assumed; taken as the objective
-  concepts/prompts-reliably/structures-a-prompt.
+  concepts/prompts-reliably/structures-a-prompt. The lesson has no fixture: the learner types the
+  prompts into a chat tool, and every transcript is marked illustrative.

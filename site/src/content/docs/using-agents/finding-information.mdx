@@ -1,0 +1,266 @@
+import { Choice, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we use a chat assistant to find our way around a text we
+have never read. We paste it and ask the question a newcomer would ask,
+first as a plain request and then as a brief that names the source and
+asks for a quote behind each claim. Then we ask the same question with no
+text at all and watch what comes back. By the end you have a rule for
+finding information with an assistant that you can apply to any document
+someone hands you.
+
+You need any chat assistant you already have access to. Every response
+shown here is illustrative. The author wrote it to show the pattern, and
+your model gives a different text.
+
+## The text
+
+Here is the material. It is a fictional guideline from a fictional company,
+about the length of a page and a half in the original. Read it once now, so
+that you can judge the answers later.
+
+> **Brindlewick Instruments: expenses and travel guideline**
+>
+> This guideline applies to everyone who spends their own money on behalf of
+> Brindlewick Instruments and claims it back. It replaces the 2024 version.
+>
+> **Claiming.** Submit a claim through the expense form on the intranet
+> within 14 days of the date on the receipt. Each claim needs a receipt for
+> every amount above 10 euros. For smaller amounts a one-line note of what
+> was bought and why is enough. Claims older than 90 days are not paid.
+> Approved claims are paid with the next salary run. A claim approved after
+> the 20th of the month is paid with the salary of the month after.
+>
+> **Company cards.** Team leads hold a company card for team costs. Everyone
+> else pays first and claims afterwards. Do not ask a team lead to put a
+> personal travel cost on their card.
+>
+> **Meals when traveling.** Brindlewick doesn't pay a daily allowance. Meals on
+> a business trip are reimbursed against receipts up to 35 euros per day.
+> Alcohol is not reimbursed. Meals with a client are booked as client
+> entertainment and need the client's company name on the claim.
+>
+> **Travel.** Take the train for any trip under four hours door to door.
+> Flights need written approval from your manager before booking, and only
+> economy fares are reimbursed. Book through the travel desk where you can,
+> so that the cost never touches your own account. Taxis are reimbursed
+> when there is no public transport option at that hour, and the claim
+> says so.
+>
+> **Own car.** Use your own car only when no train option exists for the
+> trip. Mileage is reimbursed at 23 cents per kilometer, plus parking
+> against receipts. Fines and damage are never reimbursed.
+>
+> **Home office.** In your first three months you may claim up to 250 euros
+> once for a desk or chair for working from home, with the receipt attached
+> to the claim. Monitors, keyboards and headsets come from the IT desk, so
+> do not buy your own.
+>
+> **Questions.** The finance team answers expense questions in their office
+> hours on Tuesday and Thursday mornings. For anything this guideline does
+> not cover, ask before you spend.
+
+The question we work with is the one a new hire asks in their first week:
+"What do I need to know about expenses before my first trip?" You don't
+know this text, so you can't judge an answer to it by feel. That is the
+normal situation when you ask an assistant to find information. The point
+of this lesson is to ask in a way that lets you check the answer anyway.
+
+## Ask for a summary
+
+Before you read on, predict what you get back when you paste the guideline
+and type one line above it. How long is the answer, and how do you tell
+whether it is right?
+
+<Prompt model="illustrative" recorded="illustrative">
+Summarize this.
+
+[the guideline, pasted in full]
+</Prompt>
+<Response>
+This guideline explains how employees of Brindlewick Instruments claim
+back expenses. Claims go through the intranet form within 14 days and need
+receipts, and claims older than 90 days are not paid. Payment comes with
+the next salary run. Only team leads have company cards. Meals on business
+trips are reimbursed against receipts up to a daily limit, and alcohol is
+excluded. Train is the default for shorter trips, flights require manager
+approval and must be economy, and taxis are only allowed when there is no
+public transport. Mileage in your own car is reimbursed at a fixed rate
+when no train is available. New hires can claim a one-off amount for a home
+office desk or chair within their first three months. Questions go to the
+finance team during their office hours on Tuesdays and Thursdays.
+</Response>
+
+You probably got something like this. It is a fair paragraph with two
+problems. "Need receipts" drops the 10-euro line. "A daily limit" and "a
+fixed rate" leave out the numbers, and the numbers are what a newcomer
+asks about next. The bigger problem is how you found that out. You had to read the whole
+guideline again and hold it against the paragraph. The summary saved you nothing.
+
+That result is the model's default when the prompt leaves everything unsaid,
+as you saw when you rebuilt a one-line request into a prompt. "Summarize
+this" doesn't say who is asking, what they need, or how you plan to check
+the answer. The model produces the average summary and leaves the
+checking to you.
+
+## Ask for the three things and where they come from
+
+Now write the same question as a brief. The goal is the newcomer's
+question. The context is the guideline, pasted below a marked boundary, and
+the brief says that the guideline is the only source. The format is three
+items, each with the sentence from the text it comes from, quoted word for
+word. The last line tells the model what to do when the text has no answer. A
+missing answer is the first place a guess appears when you leave that
+line out.
+
+<Prompt model="illustrative" recorded="illustrative">
+I am new at Brindlewick Instruments and about to make my first business
+trip. Using only the guideline below the line, give me the three things I
+must know about expenses before I travel. Below each one, put the
+sentence from the guideline it comes from, quoted word for word. Where the
+guideline does not answer something, tell me that instead of guessing.
+
+---
+
+[the guideline, pasted in full]
+</Prompt>
+<Response>
+1. **Pay first, claim within two weeks, with receipts.** "Submit a claim
+   through the expense form on the intranet within 14 days of the date on
+   the receipt."
+2. **Take the train unless the trip is long, and get flights approved
+   first.** "Flights need written approval from your manager before
+   booking, and only economy fares are reimbursed."
+3. **Meals are covered against receipts, up to a limit, and no alcohol.**
+   "Meals on a business trip are reimbursed against receipts up to 35 euros
+   per day, and alcohol is not reimbursed."
+</Response>
+
+Compare this with the paragraph. Each claim now comes with the place in the
+text it rests on, so checking it is a search for a sentence rather than a
+second reading. Try it on your own result: search the guideline for each
+quoted sentence.
+
+Do the same on the illustrative answer and the third quote fails. The
+guideline has "Meals on a business trip are reimbursed against receipts up
+to 35 euros per day" and then, as a separate sentence, "Alcohol is not
+reimbursed". The model joined two sentences into one and presented the
+result as a quote. The fact is right, and the quote is not one. Without the
+brief you would never have seen the join, and next time the join could be
+between a rule and something the model added. Asking for the source of each
+claim makes the answer checkable, and the check takes a minute.
+
+<Choice id="which-ask-is-checkable" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['finding-information']}
+  context="The lesson pastes a fictional company expense guideline into a chat assistant and asks what a new hire must know before a first business trip."
+  title="Which ask can you check?" hint="For each ask, how would you tell a right answer from a confident wrong one without reading the whole guideline again?"
+  options={[
+    { text: 'What do I need to know about expenses before my first trip?', why: 'Nothing here says where the answer should come from, so you cannot tell whether it came from the guideline or from the model\'s memory.' },
+    { text: 'Summarize the guideline below in three bullet points.', why: 'The format is fixed, but each bullet is still a claim with no place in the text you can look up.' },
+    { text: 'Using only the guideline below, list the three things a new hire must know before a first trip, and quote the sentence each one comes from.', correct: true },
+    { text: 'Read the guideline below carefully and make sure your answer is accurate.', why: 'Asking for accuracy changes nothing you can check. The model was already trying to be accurate.' },
+  ]}>
+You are about to paste the expense guideline into an assistant. Which ask
+gives you an answer you can check against the text in a minute?
+</Choice>
+
+<Repair id="fix-the-ask" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['finding-information', 'giving-context']}
+  title="Fix the ask" hint="Where should the answer come from, how does each claim show where it came from, and what should the model do when the text is silent?"
+  broken={`I attached our travel policy. What are the rules for booking flights?`}
+  model={`Using only the travel policy pasted below the line, list the rules for booking a flight. Quote the sentence from the policy that each rule comes from, word for word. If the policy does not say something, say that it does not, and do not fill it in from general knowledge.`}>
+A colleague sends this to their assistant, gets a confident list of six
+rules, and later finds that two of them are not in the policy. Rewrite the
+ask so that every rule in the answer can be checked against the policy.
+</Repair>
+
+## The same question from memory
+
+Now ask the newcomer's question without the guideline. Open a fresh chat
+and type only the question, with a specific in it that you already know
+the answer to.
+
+<Prompt model="illustrative" recorded="illustrative">
+I am starting a new job and about to make my first business trip. What is
+the deadline for submitting expense claims, and how much can I spend on
+meals per day?
+</Prompt>
+<Response>
+Policies vary between companies, but the common rules are these. Expense
+claims are usually due within 30 days of the expense, and many companies
+allow up to 60 days. For meals, most companies set a per diem of around 50
+to 75 euros per day for domestic travel, and you normally do not need to
+submit receipts for meals under the per diem. Check your employee handbook
+to confirm the exact figures.
+</Response>
+
+Read that answer as the newcomer would. It has a hedge at the start and a
+hedge at the end, and between them it gives four specific numbers and a
+rule about receipts. Every one of them is wrong for Brindlewick, where the
+deadline is 14 days, there is no per diem, the meal limit is 35 euros, and
+every meal needs a receipt. The prose is as confident as the answer that
+came with quotes. In the lesson on how models work you saw why. The
+specifics are where a model has the fewest examples behind its prediction,
+so it fills the gap with something of the right form. The model has never
+seen the guideline, and a general answer about companies is the most likely
+text for a question that names none.
+
+<Pitfall title="Repeating a specific the model remembered">
+A new hire asks an assistant, without the guideline, whether they can
+expense a taxi from the airport, and gets "yes, taxis to and from airports
+are normally reimbursed". They take the taxi and claim it. Finance rejects
+the claim, because the guideline pays for a taxi only when there was no
+public transport at that hour and the claim says so. The answer was general
+knowledge dressed as a specific. The rule: supply the material, ask for the
+source of each claim, and check anything you will repeat or act on.
+</Pitfall>
+
+<Choice id="colleague-from-memory" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['finding-information', 'hallucination']}
+  context="A colleague asked a chat assistant a factual question about the company's expense rules without giving it the company's guideline, and got a confident specific answer."
+  title="A confident answer with no source" hint="What did the assistant have in front of it when it answered, and what would change that?"
+  options={[
+    { text: 'Trust it. The answer was specific and did not hedge, so the model was sure.', why: 'Confidence in the prose is a property of the text, and it says nothing about whether the fact is right.' },
+    { text: 'Ask the assistant whether it is sure, and trust the answer if it says yes.', why: 'A model that agrees when pushed is showing sycophancy. Asking it to check itself adds no new information.' },
+    { text: 'Paste the guideline, ask the question again with "using only the text below", and ask for the sentence the answer comes from.', correct: true },
+    { text: 'Ask the same question in a second chat and trust the answer if both agree.', why: 'Two answers from memory can agree on the same general rule and both be wrong for this company.' },
+  ]}>
+A colleague asks an assistant "how many days do I have to submit an
+expense claim?" without pasting anything, and gets "30 days". What do you
+tell them to do before they rely on it?
+</Choice>
+
+## The rule
+
+Finding information with an assistant is fast when you give it the
+material and slow when you don't, because without the material the time
+moves to checking. The brief you wrote in this lesson names the source and
+says it is the only one, asks for the sentence behind each claim, and tells
+the model what to do when the text is silent. With the quotes in hand,
+checking what you will repeat is a search rather than a second reading
+(@Academy claude-101).
+
+The same brief works for a contract, a set of meeting notes, a long email
+thread or a product manual. When the assistant has a search tool and the
+source is the web, the quote becomes a link, and the check is opening it.
+Either way, an answer whose source you can't name is an answer you can't
+repeat.
+
+<Exercise stretch="Ask a fourth question that the guideline does not answer, such as whether a hotel breakfast counts as a meal, and see whether the assistant says so or fills it in.">
+Open a fresh chat and paste the Brindlewick guideline from this page. Send
+the brief from the second section, asking for the three things a newcomer
+must know with a quote for each. Then search the guideline for every quote
+and write down, for each of the three, whether it is there word for word,
+there in different words, or not there at all. This takes about five
+minutes and leaves you with a three-line table. Doing it once by hand is
+what makes the check a habit rather than an idea. A good result is a table
+where every row has a verdict you could show to someone else. What would
+you have done with the answer if you hadn't asked for the quotes?
+</Exercise>
+
+<Recap>
+1. An assistant is fast at orientation in a text you supply, and unreliable on specifics from memory alone.
+2. "Summarize this" gives you a paragraph you can only check by reading the source again.
+3. A brief for finding information names the source and says it is the only one, asks for the sentence behind each claim, and says what to do when the text is silent.
+4. Check the quotes. A quote that is not in the text, even when the fact is right, shows where the model joined or added something.
+5. A confident specific from memory is the most likely text, and it is never a looked-up fact. Check anything you will repeat or act on (@Academy claude-101).
+</Recap>
