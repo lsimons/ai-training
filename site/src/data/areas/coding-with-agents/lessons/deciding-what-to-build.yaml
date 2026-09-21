@@ -1,5 +1,9 @@
 id: coding-with-agents/deciding-what-to-build
 title: Deciding whether to build it at all
+description: >-
+  An agent makes building cheap, so the judgment moves before the code. Find the problem behind a
+  request, price the change by what the team owns afterwards, and write success criteria a stranger
+  could check.
 mode: explanation
 covers: coding-with-agents/specification
 serves:
@@ -8,6 +12,11 @@ serves:
 introduces: [what-is-worth-building, success-criteria]
 assumes:
   - objective: using-agents/delegates-and-checks/writes-a-brief
+    lesson: using-agents/delegating
+    section: writing-the-brief
+extends-to:
+  - label: Deciding and specifying
+    href: /topics/coding-with-agents/specification/
 after: [coding-with-agents/first-session]
 shorts: [the cost of owning a change]
 exercise:
@@ -16,8 +25,9 @@ exercise:
     Take three feature requests against the fixture and reject or shrink at least one. For the rest,
     write checkable success criteria with an out-of-scope line.
 sources: [Academy ai-fluency-for-builders, Brilliant TAS]
-issue: 147
 minutes: 15
 notes: >-
-  Explanation mode because nothing runs. Sources: Brilliant TAS, Academy ai-fluency-for-builders
-  (paraphrased ideas only).
+  Explanation mode because nothing runs. The feature requests are against the first-session to-do
+  fixture, and the undo scenario reuses its off-by-one bug in `done`. Sources: Brilliant TAS, Academy
+  ai-fluency-for-builders (paraphrased ideas only). The fictional package named in the pitfall is on neither
+  PyPI nor npm.
