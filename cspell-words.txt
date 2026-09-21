@@ -25,6 +25,9 @@ lsimons
 Schuberg
 Philis
 Varrowmere
+Okonkwo
+Varga
+Steinbrenner
 
 # Products, tools, projects
 Beamer
