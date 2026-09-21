@@ -396,6 +396,13 @@ Diátaxis:
   author: Daniele Procida
   license: CC BY-SA 4.0
   url: https://diataxis.fr/
+Anthropic tool use:
+  type: reference
+  title: "Tool use with Claude: overview, Define tools and Strict tool use"
+  container: Claude Developer Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview
 Fuchsia review:
   type: reference
   title: Review process for external Rust crates

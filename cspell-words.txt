@@ -86,6 +86,7 @@ ensembling
 evals
 exfiltration
 extensionless
+findall
 frontmatter
 gamified
 hackathon

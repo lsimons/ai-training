@@ -1,21 +1,31 @@
 id: building-agents/tool-schemas
 title: Writing a tool schema the model uses correctly
+description: >-
+  Give a fake model two overlapping tools, watch it pick the wrong one, and fix that with a
+  description that says when to use the tool and an enum the model cannot guess around.
 mode: tutorial
 covers: building-agents/tool-use
 serves: [building-agents/builds-agent-loop/defines-a-tool]
 introduces: [tool-schema-design]
-assumes: []
+assumes:
+  - objective: building-agents/builds-agent-loop/defines-a-tool
+    lesson: building-agents/agent-loop
+    section: a-tool-is-a-function-plus-a-description
+extends-to:
+  - label: Tool use
+    href: /building-agents/tool-use/
 after: [building-agents/agent-loop]
 shorts: [Tool descriptions are prompts]
 exercise:
   kind: do
   brief: >-
-    Rewrite the fixture's vague `get_customer` schema so the fake model, which picks tools by
-    matching request words against descriptions, calls the right one for all six fixture requests.
-    The output is the wrong-call count before and after.
-sources: [Academy building-with-the-claude-api]
-issue: 185
+    Rewrite the get_customer description in the fixture's CLEAR_TOOLS, leaving search_customers as
+    it is, until `python3 tools.py count` reports zero wrong calls after. The output is the
+    wrong-call count before and after.
+sources: [AEC-03, Academy building-with-the-claude-api, Anthropic tool use]
 minutes: 15
 notes: >-
-  Two tools with overlapping descriptions and a fake model that chooses by description. Predict
-  which tool it picks, then tighten the description and an enum parameter and predict again (Academy building-with-the-claude-api).
+  Two tools with overlapping descriptions and a fake model that chooses by counting shared words.
+  Predict which tool it picks, tighten the description, then turn a free-text currency parameter
+  into an enum and predict again. The page's own rewrite leaves one of six requests wrong on
+  purpose, so the exercise has work left (Academy building-with-the-claude-api).

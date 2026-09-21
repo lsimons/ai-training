@@ -1,0 +1,345 @@
+import { Predict, Repair, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In the first agent lesson the model had one tool, so its only choice was
+between calling it and answering. In this lesson the model gets two tools
+that overlap. We watch it call the wrong one and fix that without touching
+the functions. Everything we change is in the schema: the description the
+model reads and the parameters it fills in.
+
+Every example runs against a fixture: a fake model that behaves
+deterministically, so you can predict what happens and check yourself. The
+complete program is `site/examples/building-agents/tool-schemas/tools.py`
+in the repository, and each step below is `python3 tools.py <step>`.
+
+## What the model reads
+
+A tool definition sent to a model API has three fields: a `name`, a
+`description`, and an `input_schema`, which is a JSON Schema object that
+names each parameter and its type (@Anthropic tool use). The API turns
+those fields into text in the prompt. That text is all the model has when
+it decides which tool to call and what to put in the arguments. The
+function body never reaches it.
+
+A first draft of two customer tools often looks like this. The functions
+are stubs, because this lesson is about the text around them.
+
+```python
+VAGUE_TOOLS = [
+    {"name": "get_customer", "description": "Get customer.", "fn": get_customer},
+    {
+        "name": "search_customers",
+        "description": "Search customers. Matches name, email, city or account id.",
+        "fn": search_customers,
+    },
+]
+```
+
+The fixture's fake model chooses a tool the way a hurried reader would. It
+lowercases the request and each description, drops ten filler words such
+as `the` and `by`, strips a plural `s`, and counts the words a request
+shares with each description. The model picks the tool with the most
+shared words, and a tie goes to the first tool in the list. A tool name
+such as `search_customers` counts as one word.
+
+```python
+FILLER = {"a", "an", "the", "by", "for", "or", "and", "to", "of", "with"}
+
+
+def words(text):
+    return {w.rstrip("s") for w in re.findall(r"[a-z0-9_]+", text.lower())} - FILLER
+
+
+def choose_tool(request, tools):
+    scores = [(len(words(request) & words(tool["description"])), tool["name"]) for tool in tools]
+    best = max(score for score, _ in scores)
+    return next(name for score, name in scores if score == best)
+```
+
+A real model weighs meaning, and it reads a description the way it reads
+any other prompt. The counting model is a caricature, but it fails on the
+same descriptions a real model fails on, and you can work out its choice
+by hand.
+
+<Predict id="pick-vague" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool-schema-design', 'function-calling']}
+  context="In the lesson, VAGUE_TOOLS holds two tools. get_customer is described as 'Get customer.' and search_customers as 'Search customers. Matches name, email, city or account id.' The fake model choose_tool picks the tool whose description shares the most non-filler words with the request, and a tie goes to the first tool."
+  title="Which tool gets called?" hint="Count the words the request shares with each description, after dropping the filler words. Which description mentions the words the request is built from?"
+  answer="search_customers" run="building-agents/tool-schemas/pick_vague.py">
+
+Which tool name does this print?
+
+```python
+print(choose_tool("Look up the customer with account id 4711", VAGUE_TOOLS))
+```
+
+</Predict>
+
+The request is a lookup by account id, which is the one job `get_customer`
+exists for. Its description shares one word with the request. The other
+description happens to mention account ids, so it shares three, and the
+wrong tool runs a text search over a request that named an exact id. The
+function was never at fault. The model did what the text told it to.
+
+## Say when to use it, and when not to
+
+Rewrite the description of `get_customer`. Leave `search_customers` as it
+is for now, so you can see what one description does on its own.
+
+```python
+CLEAR_TOOLS = [
+    {
+        "name": "get_customer",
+        "description": (
+            "Look up one customer by exact account id, an integer such as 8842. "
+            "Returns the full record for that id. "
+            "Use search_customers instead when you do not have the account id."
+        ),
+        "fn": get_customer,
+    },
+    VAGUE_TOOLS[1],
+]
+```
+
+Each sentence gives the model something it needs. The first says what the
+tool does and what the argument looks like, with an example value. The
+second says what comes back. The third says when to use the other tool.
+Anthropic's guidance for real tool definitions asks for the same content
+in at least three or four sentences: what the tool does and when it should
+be used, what each parameter means, and any limits. The docs call the
+description "by far the most important factor in tool performance"
+(@Anthropic tool use).
+
+Look at how the third sentence is written. It names the other tool and the
+input you lack, and it doesn't repeat that tool's own trigger words. The
+fake model can't read the word `not`. Every word in a description pulls
+requests with that word toward the tool. A real model reads `not` most of
+the time, but a description that lists what the tool isn't for still adds
+those words to the text the model weighs.
+
+<Predict id="pick-clear" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool-schema-design']}
+  context="In the lesson, CLEAR_TOOLS is VAGUE_TOOLS with get_customer redescribed as: 'Look up one customer by exact account id, an integer such as 8842. Returns the full record for that id. Use search_customers instead when you do not have the account id.' search_customers keeps 'Search customers. Matches name, email, city or account id.' The fake model picks the tool whose description shares the most non-filler words with the request."
+  title="Predict again" hint="Same request, same counting rule. How many words does it share with the new description?"
+  answer="get_customer" run="building-agents/tool-schemas/pick_clear.py">
+
+The same request against the rewritten tools. Which tool name does this
+print?
+
+```python
+print(choose_tool("Look up the customer with account id 4711", CLEAR_TOOLS))
+```
+
+</Predict>
+
+## A parameter the model has to guess
+
+Tool choice is half of a call. The other half is the arguments, and the
+model gets those from the parameter schema. Here is a balance tool whose
+data is keyed by lowercase currency codes, with a schema that says only
+that `currency` is a string.
+
+```python
+BALANCES = {(4711, "eur"): "250.00", (4711, "usd"): "271.50", (4711, "gbp"): "214.20"}
+
+
+def get_balance(account_id, currency):
+    amount = BALANCES.get((account_id, currency))
+    if amount is None:
+        return f"unknown currency: {currency}"
+    return f"{account_id}: {amount} {currency}"
+
+
+FREE_TEXT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "account_id": {"type": "integer"},
+        "currency": {"type": "string"},
+    },
+    "required": ["account_id", "currency"],
+}
+```
+
+To fill `currency`, the fake model finds the currency word in the request
+and then looks at the schema. Without a list of allowed values it writes
+the first three letters as a code in capitals, because most text it has
+seen writes codes that way. A real model has the same habit, and a
+free-text parameter gives it no reason to write anything else.
+
+```python
+def fill_currency(request, schema):
+    mentioned = next(
+        w.rstrip(".?") for w in request.lower().split() if w.rstrip(".?") in CURRENCY_WORDS
+    )
+    if "enum" in schema:
+        return next(code for code in schema["enum"] if mentioned.startswith(code))
+    return mentioned[:3].upper()
+```
+
+<Predict id="balance-free" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool-schema-design']}
+  context="In the lesson, get_balance looks up (account_id, currency) in a dict keyed by lowercase codes such as 'eur' and returns 'unknown currency: X' on a miss. The fake model fills a free-text currency parameter by taking the first three letters of the currency word in the request and writing them in capitals."
+  title="Predict the currency" hint="What does the fake model write when the schema gives it no allowed values, and what does the dict expect?"
+  answer="unknown currency: EUR" run="building-agents/tool-schemas/balance_free.py">
+
+What does this print?
+
+```python
+print(call_balance("What is the balance of account 4711 in euros?", FREE_TEXT_SCHEMA))
+```
+
+</Predict>
+
+The fix is in the schema. JSON Schema has an `enum` keyword that restricts
+a value to a fixed list, and a `description` on each parameter tells the
+model what the value means. Anthropic's own example does this for a
+temperature unit, and with `strict: true` on the tool definition the API
+constrains the model's output so the arguments always match the schema.
+Without it the model can still return a type or a value the schema
+doesn't allow (@Anthropic tool use).
+
+```python
+ENUM_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "account_id": {
+            "type": "integer",
+            "description": "The customer's account id, such as 4711.",
+        },
+        "currency": {
+            "type": "string",
+            "enum": ["eur", "usd", "gbp"],
+            "description": "Lowercase currency code. The balance is converted into this currency.",
+        },
+    },
+    "required": ["account_id", "currency"],
+}
+```
+
+The fake model reads the enum and picks the allowed value the request
+mentions. `get_balance` is unchanged.
+
+<Predict id="balance-enum" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool-schema-design']}
+  context="In the lesson, ENUM_SCHEMA gives the currency parameter an enum of 'eur', 'usd' and 'gbp'. The fake model picks the enum value that the request's currency word starts with, and get_balance returns 'account_id: amount currency' for a known key. Account 4711 has 250.00 in eur."
+  title="Predict with the enum" hint="Which enum value does the word 'euros' start with, and how does get_balance format a hit?"
+  answer="4711: 250.00 eur" run="building-agents/tool-schemas/balance_enum.py">
+
+Same request, the enum schema. What does this print?
+
+```python
+print(call_balance("What is the balance of account 4711 in euros?", ENUM_SCHEMA))
+```
+
+</Predict>
+
+<Repair id="fix-currency-schema" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool-schema-design']}
+  title="Fix the schema" hint="Which parameter has a small fixed set of valid values, and how does the model learn what each parameter means?"
+  broken={`{
+  "type": "object",
+  "properties": {
+    "account_id": {"type": "string"},
+    "amount": {"type": "number"},
+    "currency": {"type": "string"}
+  },
+  "required": ["account_id", "amount", "currency"]
+}`}
+  model={`{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "integer",
+      "description": "The customer's account id, such as 4711."
+    },
+    "amount": {
+      "type": "integer",
+      "description": "The amount in whole cents, so 12.50 EUR is 1250. Never a decimal."
+    },
+    "currency": {
+      "type": "string",
+      "enum": ["eur", "usd", "gbp"],
+      "description": "Lowercase currency code of the amount."
+    }
+  },
+  "required": ["account_id", "amount", "currency"]
+}`}>
+
+This is the `input_schema` of a `charge_customer` tool. The tool stores
+amounts in whole cents and accepts the codes `eur`, `usd` and `gbp`, and
+account ids are integers. Rewrite the schema so the model can't invent a
+value for any of the three parameters.
+
+</Repair>
+
+## The description is a prompt
+
+The rule behind both fixes is the same. The schema is the only prompt the
+model gets about a tool, so tool schema design is prompt writing. The
+description says when to use the tool, when to use another one, and what
+comes back. Each parameter gets a type and a description, and an enum
+where the set is small. When a tool gets called for the wrong job or with
+a value it can't use, read the schema before you suspect the model
+(@AEC-03).
+
+The fixture keeps six requests and the tool each one should reach, and
+counts how many the fake model gets wrong under each set of descriptions.
+Run it.
+
+<Predict id="count-wrong-calls" title="Count the wrong calls"
+  answer={`wrong calls before: 3 of 6
+wrong calls after: 1 of 6
+still wrong: Show the email and current balance of account id 4711`} run="building-agents/tool-schemas/count.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 tools.py count
+```
+
+</Predict>
+
+The rewrite fixed the plain lookups and left one request wrong. That
+request asks for two fields of one customer's record by account id. The
+rewritten description says "the full record" and doesn't name a field, so
+the request still shares more words with the search tool. The count is the
+evidence you want when a description is under discussion. The model's
+choices are cheap to measure, and the fix is a sentence.
+
+<Pitfall title="Describing the implementation instead of the use">
+A first draft of a lookup tool often reads "Runs `SELECT * FROM customers
+WHERE id = ?` against the billing replica." Every word in it is true, and
+almost none of them appears in a request. Against the fixture's six
+requests it shares at most two words with any of them. All three lookups
+still go to the search tool, the same count that "Get customer." gets.
+Rule: write the description for the caller, from the request side. Say
+what to ask this tool for, in the words a request uses. Say what comes
+back.
+</Pitfall>
+
+<Exercise stretch="Send the same six requests through a real model API with the CLEAR_TOOLS descriptions as its tool definitions, and compare its wrong-call count with the fixture's.">
+
+Copy `tools.py` from the repository. Rewrite the `get_customer`
+description in `CLEAR_TOOLS`, and leave `search_customers` as it is, until
+`python3 tools.py count` reports `wrong calls after: 0 of 6`. Every change
+you make is a sentence, so keep the before and after descriptions to show
+what moved the count.
+
+A good result: a description that also says which fields the record
+contains, such as the customer's name, email address and current balance,
+so that a request for one of those fields by account id shares more words
+with the lookup tool than with the search tool. Which single word did the
+work, and would a real model have needed it?
+
+</Exercise>
+
+<Recap>
+
+1. The schema is the only prompt the model gets about a tool. A
+   description says what the tool does, when to use it, when to use
+   another tool, and what comes back (@Anthropic tool use).
+2. A parameter gets a type and a description, and an enum where the set
+   is small, so the model has nothing to guess.
+3. Count the wrong calls before and after a change. Most tool misuse is a
+   schema problem (@AEC-03).
+
+</Recap>
