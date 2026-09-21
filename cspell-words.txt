@@ -125,3 +125,11 @@ unvalidated
 upsell
 upvotes
 worktrees
+
+# Invented people and companies in lesson fixtures
+Renske
+Adelhof
+Tijmen
+Boskoorn
+Norrbeck
+Kastanjelaan
