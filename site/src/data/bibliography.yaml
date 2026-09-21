@@ -417,6 +417,20 @@ Claude docs handling-stop-reasons:
   author: Anthropic
   license: Proprietary
   url: https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons
+Claude docs define-tools:
+  type: reference
+  title: Define tools
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools
+Claude docs strict-tool-use:
+  type: reference
+  title: Strict tool use
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/strict-tool-use
 Fuchsia review:
   type: reference
   title: Review process for external Rust crates
