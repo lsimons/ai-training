@@ -1,0 +1,221 @@
+import { Choice, Predict, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we read a one-paragraph summary that a chat assistant wrote
+from a council report and decide which details in it we would check. A
+small checker then looks up every figure, quote and reference from the
+summary in the report and the meeting minutes. Some of the details have no
+source. By the end, the way a detail is written tells you that it is a
+claim to check before the summary leaves your desk.
+
+You need a terminal and `python3`. The report, the meeting minutes and the
+two summaries are fictional and were written for this lesson. The summaries
+read the way a model's summary reads, and the assistant's words are the
+author's.
+
+## A summary that reads well
+
+A colleague pastes a council report into a chat assistant and asks for a
+short summary to put in a briefing. This is the summary.
+
+> The council's 2025 review of cycle parking at the station finds it short
+> of racks. On a weekday morning in March the team counted 890 bicycles
+> against 640 racks. Article 7(3) of the Cycle Parking Ordinance requires
+> one rack per 50 passengers, so the station is below the legal minimum.
+> Locking the covered section at night cut theft by 38 percent between 2022
+> and 2024. The report recommends adding 300 racks, of which 120 covered,
+> and notes that the station handles about 9,000 passengers a day. Council
+> chair Rhea Dunmore told the meeting: "Racks before car parks, every time."
+
+The paragraph reads well, with the kind of detail a briefing wants: an
+article number, a percentage, a quote with a name on it. Before reading
+on, decide which of those details you would check against the report
+before you put the paragraph in a briefing, and write them down.
+
+## Run the check
+
+The checker is a short Python program in the course repository, under
+`site/examples/safety/spotting-hallucination/`. Copy that directory or
+work in a clone, and change into it. The `sources/` directory has the
+report and the minutes of the council meeting, one sentence per line.
+`check_claims.py` reads a summary, pulls out the specifics, and looks each
+one up in the sources. The specifics it knows are quoted passages, references
+written like `article 7(3)` or `section 12`, and figures, which it shows as
+the number with the word after it, as in `38 percent`. With `--missing` it
+prints only the claims it can't find, one per line, in the order they
+appear in the summary.
+
+<Predict id="predict-the-missing-claims" objective="safety/verifies-output/checks-claims"
+  concepts={['hallucination-in-practice']}
+  context="A checker reads a model's one-paragraph summary of a council report on cycle parking at a station, pulls out every quoted passage, article reference and figure, and looks each one up in the report and the meeting minutes. With --missing it prints only the claims it cannot find, as the number with the word after it (38 percent) or the quoted text with its quotes, one per line, in summary order. The summary claims a count of 890 bicycles against 640 racks, a legal minimum of one rack per 50 passengers under article 7(3), a 38 percent fall in theft between 2022 and 2024, a recommendation of 300 racks of which 120 covered, about 9,000 passengers a day, and a quote from the council chair."
+  title="Which claims have no source?"
+  hint="Which details are the most precise, and which of them could the model have produced from the form of a report alone?"
+  answer={`50 passengers
+38 percent
+9,000 passengers
+"Racks before car parks, every time."`}
+  run="safety/spotting-hallucination/missing_claims.py">
+Before you run it, predict what this prints. Write each claim the way the
+checker shows it, as the number and the word after it, or the quote with its
+quotes, one per line, in the order they appear in the summary.
+
+```sh
+python3 check_claims.py sample/summary_1.txt --missing
+```
+
+</Predict>
+
+Now run it without `--missing` to see every claim, including the ones it
+found. For a found claim the checker prints the source file, the line
+number and the sentence, so you can read what the source says next to what
+the summary says.
+
+<Predict id="every-claim" title="Every claim, with its source" canonical
+  answer={`found      2025 review
+           minutes.txt:1  Council meeting, 12 June 2025, item 4: station cycle parking.
+found      890 bicycles
+           report.txt:3  On a weekday morning in March the team counted 890 bicycles parked at the station against 640 racks.
+found      640 racks
+           report.txt:3  On a weekday morning in March the team counted 890 bicycles parked at the station against 640 racks.
+found      Article 7(3)
+           report.txt:5  Article 7(3) of the Cycle Parking Ordinance sets a minimum of one rack per 100 boarding passengers.
+NO SOURCE  50 passengers
+NO SOURCE  38 percent
+found      2022
+           report.txt:7  Reported bicycle theft at the station fell by roughly a third between 2022 and 2024, after the covered section was locked at night.
+found      2024
+           report.txt:7  Reported bicycle theft at the station fell by roughly a third between 2022 and 2024, after the covered section was locked at night.
+found      300 racks
+           report.txt:8  The team recommends adding 300 racks, of which 120 covered, on the eastern forecourt.
+found      120 covered
+           report.txt:8  The team recommends adding 300 racks, of which 120 covered, on the eastern forecourt.
+NO SOURCE  9,000 passengers
+NO SOURCE  "Racks before car parks, every time."
+4 of 12 claims have no source`}
+  run="safety/spotting-hallucination/all_claims.py">
+Run the checker on the same summary, and compare what you see with the
+output below.
+
+```sh
+python3 check_claims.py sample/summary_1.txt
+```
+
+</Predict>
+
+Read the entry for `Article 7(3)`. The checker found the article, and the
+sentence next to it says one rack per 100 boarding passengers. The summary
+says 50. The article number is real, in this fictional town, and the
+contents attached to it are wrong, which turns "the station meets the
+minimum" into "the station is below the legal minimum". `found` means the
+number or the reference appears in a source. Whether the source says what
+the summary says is still a person's reading, and the sentence is printed
+so that you can do it in one glance.
+
+Three of the four missing claims are the ones the opener asked about: the
+percentage, the quote and the ratio in the article. The report says
+"roughly a third", and the model wrote 38 percent. The minutes have the
+chair saying "We need racks before we need another car park". The line in
+the summary is shorter, she never said it, and it has her name on it. The
+fourth, 9,000 passengers a day, gets its own pitfall.
+
+<Pitfall title="It happens to be true">
+The learner sees `NO SOURCE 9,000 passengers`, looks at the rail
+operator's page, and finds that the station has about 9,000 passengers a
+day, boarding and alighting together. True, so they leave the sentence in.
+The sentence says that the report notes it, and the report says 7,200
+boarding passengers, the number the ordinance counts. The next reader cites
+the report for a figure it never gave. Rule: a claim that isn't in the
+source gets its own source named next to it, or comes out. The check is
+"does the source say this", and "is this true" is a different question
+with a different answer.
+</Pitfall>
+
+## Specificity is the tell
+
+Every claim that came back with no source is more precise than the report:
+an exact percentage where the report says roughly a third, a round ratio
+where the article says another, a quotable line where the minutes have a
+sentence. That is what **hallucination in practice** looks like. A model
+predicts the most likely continuation of the text so far, and the most
+likely continuation of "Article 7(3) of the Cycle Parking Ordinance
+requires" is a rule of the right form. A common idea has thousands of
+examples behind it and comes out well constrained. One exact figure has
+few or none, and the model fills the gap with something of the right form,
+in the same confident prose (@Academy ai-capabilities-and-limitations).
+The precision is a property of the text, and the text is fluent whether or
+not the detail has a source.
+
+In daily work the tell shows up in these forms.
+
+- **The reference with the wrong contents.** The article number exists, the
+  rule attached to it is different, and a reader who checks that the article
+  exists stops there.
+- **The function that almost exists.** A model asked for a spreadsheet
+  formula answers with `TEXTJOINIF`. `TEXTJOIN` and `SUMIF` are real, so
+  the name reads right, and the spreadsheet rejects it. The form was
+  predicted from two real forms.
+- **The quote from a speech never given.** The right person, the right
+  meeting, a line that sounds like her, shorter and sharper than anything
+  in the minutes.
+- **The summary that adds a point.** The second sample summary prices the
+  300 racks at 410,000, and the report says no cost estimate was made. The
+  checker catches this one because the added point contains a number. An
+  added point without a number is caught only by reading the source.
+
+The checker is a stand-in for a habit. Read a model's output with the
+specifics marked in your head, and for each one ask where it came from. A
+detail with a source you can open is a fact. A detail without one is a
+claim, however precise it reads, and the precision is the reason to check
+it first.
+
+<Choice id="which-claim-first" objective="safety/verifies-output/checks-claims"
+  concepts={['hallucination-in-practice']}
+  context="A colleague asked a chat assistant to summarize a review of a supplier contract, and the summary has four claims in it. The learner has time to check one claim against the contract before the summary goes into a meeting."
+  title="Which claim do you check first?"
+  hint="Which claim is precise enough to act on, and precise enough that the model could have produced its form without the contract?"
+  options={[
+    { text: 'The review recommends renewing the contract.', why: 'A general claim that the whole document either supports or does not. A skim of the conclusion settles it, and getting it wrong misleads less than a wrong clause.' },
+    { text: 'Clause 12.4 lets either side end the contract with 30 days notice.', correct: true },
+    { text: 'The supplier has been reliable over the contract period.', why: 'A judgment with no specific in it. It is worth confirming, but a model rarely invents a general impression, and a reader treats it as opinion.' },
+    { text: 'Prices went up in the last contract period.', why: 'A direction without a figure. It is easy to confirm from the price table, and there is no precise number here for a reader to act on.' },
+  ]}>
+
+A colleague's summary of a supplier contract review has these four claims.
+You have time to check one against the contract before the meeting. Which
+one first?
+
+</Choice>
+
+<Exercise stretch="Write a third summary of the report yourself, with one invented specific in it, and give it to a colleague with the checker. Did they pick the invented one before running it?">
+
+Open `sample/summary_2.txt` in the same directory and read it before you
+run anything. For each figure, quote and reference in it, write down
+whether you expect the checker to find it in the sources or to print
+`NO SOURCE`, and one word on why. Then run
+`python3 check_claims.py sample/summary_2.txt` and put the checker's
+answer next to yours. Ten minutes is enough. Doing the prediction first is
+what teaches your eye to stop at a specific before a checker does.
+
+A good result is a two-column list, your prediction and the checker's
+answer, with a note on every row where they differ. Which claim did you
+predict wrong, and was it precise, derived from other numbers, or true
+and still without a source?
+
+</Exercise>
+
+<Recap>
+
+1. A model's summary is fluent whether or not the source says what the
+   summary says. The precision of a detail is a property of the text, and
+   it says nothing about whether the detail has a source.
+2. Invented details concentrate in the specifics: an exact figure, a
+   reference, a quote, a name on a line. The tell is specificity without a
+   checkable source, and the more precise a detail is, the earlier it is
+   checked.
+3. Finding the reference or the number in the source is the start of the
+   check. Read the sentence around it and compare it with the summary,
+   because a real article number can come with a wrong rule.
+4. A claim that isn't in the source gets its own source named or comes
+   out, even when it happens to be true. The next reader will cite your
+   source for it.
+
+</Recap>

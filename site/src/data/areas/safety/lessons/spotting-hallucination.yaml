@@ -1,11 +1,19 @@
 id: safety/spotting-hallucination
 title: What an invented fact looks like
+description: >-
+  Read a model's fluent summary of a report, predict which of its figures, quotes and references have
+  no source, and run a checker that looks each one up in the report itself.
 mode: tutorial
 covers: safety/failure-modes
 serves: [safety/verifies-output/checks-claims]
 introduces: [hallucination-in-practice]
 assumes:
   - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: Verifying outputs
+    href: /safety/verification/
 after: []
 shorts: [Why specificity is the tell]
 exercise:
@@ -14,9 +22,9 @@ exercise:
     Read the lesson's second summary before running the check, predict from their specificity which
     of its claims are invented, then run the fixture and record where the prediction held and where
     it did not.
-sources: []
-issue: 115
+sources: [Academy ai-capabilities-and-limitations]
 minutes: 15
 notes: >-
   A fixture checks a summary's citations and figures against a small offline source set and prints
-  which ones have no source.
+  which ones have no source. The report, minutes, ordinance, council chair and quotes are fictional
+  and were searched for before publishing.
