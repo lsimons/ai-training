@@ -1,12 +1,24 @@
 id: concepts/same-prompt-twice
 title: Same prompt, different answer
+description: >-
+  Run a toy model ten times at two temperatures, count how often the answers agree, and see why one
+  good run proves nothing and what check a workflow built on a model needs.
 mode: tutorial
 covers: concepts/limits
 serves:
   - concepts/explains-models/explains-generation
   - concepts/explains-models/names-failure-modes
 introduces: [non-determinism]
-assumes: []
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: Output the next step can use
+    href: /concepts/structured-output/
 after: [concepts/how-models-work]
 shorts: []
 exercise:
@@ -14,10 +26,10 @@ exercise:
   brief: >-
     Run the sampling fixture ten times at two temperatures, tabulate how often the answers agree,
     and write the check a workflow would need to accept that variation.
-sources: []
-issue: 131
+sources: [Academy ai-capabilities-and-limitations, Academy building-with-the-claude-api]
 minutes: 12
 notes: >-
   The live lesson shows that two runs differ and why. This lesson adds the consequence for a
   process: one good run proves nothing about a prompt, variation remains at the lowest temperature,
-  and any workflow built on a model needs a check that tolerates it.
+  and any workflow built on a model needs a check that tolerates it. The fixture's --jitter flag
+  stands in for the rounding wobble of real serving, exaggerated so ten runs show it.
