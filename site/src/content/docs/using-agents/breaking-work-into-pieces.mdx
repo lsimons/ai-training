@@ -1,8 +1,8 @@
 import { MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
 
-In this lesson we hand an agent a task that's too big to check, watch
-what comes back, and then split the task into pieces that each have an
-input, an output, and a check. We write the brief for the first piece and
+In this lesson we hand an agent a task that's too big to check and read
+what comes back. Then we split the task into pieces, each with an input, an
+output, and a check. We write the brief for the first piece and
 run it, so that what we look at is one piece done and ticked off. The
 task is fictional and small enough to redo as often as you like.
 
@@ -87,7 +87,9 @@ and adding a second docking station near the east entrance.
 Read it against the sources. The 80% is 33 out of 41 replies. The
 report never says 41, and the manager reads it as 80% of 120
 participants. Week 5 and its offline days are gone. Option B, the maintenance quote,
-is gone too, and the contract now looks cheaper than it is. The docking
+is gone too, and the contract now looks cheaper than it is. "Around 190
+a week by the end" smooths weeks 6 to 8, which were 183, 190 and 176, into
+one rounded number. The docking
 station recommendation came from six free-text comments and is presented
 as a finding. And the survey has been folded into the usage paragraph, so
 there is no line you can point at and say "this one is wrong".
@@ -106,9 +108,9 @@ three columns.
 
 | Piece  | Input            | Output                                                                      | Check                                                                          |
 | ------ | ---------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Usage  | The usage export | A heading, one line per week, a total line, one line on week 5              | Eight weeks each appear once, the total equals the sum of the export, week 5 is marked incomplete, no other numbers |
+| Usage  | The usage export | A heading, one line per week, a total line, one line on week 5              | Eight weeks each appear once, the total equals the sum of the export, week 5 is marked incomplete, no count appears that isn't in the export |
 | Riders | The survey note  | A heading and four bullets, each written as "n of 41 replies"               | Every count is in the note, 41 is named as the base, no percentages            |
-| Cost   | The vendor email | A heading, both options with the monthly price and what it includes, the minimum term | Both prices appear once and match the email, the twelve-month term is stated |
+| Cost   | The vendor email | A heading, both options with the monthly price and what it includes, the twelve-month term | Both prices appear once and match the email, the twelve-month term is stated |
 
 Fill in the table and something else happens. Choices you never noticed
 in the one-line request become visible, and every one of them is yours.
@@ -133,10 +135,10 @@ in the briefs.
   items={[
     { text: 'The weekly usage export from the bike system', bucket: 0 },
     { text: 'A heading and four bullets, each written as "n of 41 replies"', bucket: 1 },
-    { text: 'The total line equals the sum of the export', bucket: 2 },
-    { text: 'The email from the bike vendor', bucket: 0 },
+    { text: 'A match between the total line and the sum of the export', bucket: 2 },
+    { text: 'The vendor emailed two options for continuing after the pilot', bucket: 0 },
     { text: 'Both prices appear once and match the email', bucket: 2 },
-    { text: 'One line per week and one total line under a heading', bucket: 1 },
+    { text: 'The agent writes one line per week and one total line under a heading', bucket: 1 },
     { text: 'No percentage appears in the riders section', bucket: 2 },
     { text: 'The note from the colleague who ran the survey', bucket: 0 },
   ]} />
@@ -157,8 +159,8 @@ in the export. What do you do?
 
 ## Briefing and running the first piece
 
-The usage piece is ready: its input is one source, its output is fixed,
-and its check is a list you can tick. Its brief is the four parts from the
+The usage piece is ready. Its input is one source and its output is
+fixed, and its check is a list you can tick. Its brief is the four parts from the
 previous lesson, with the check as the done-criteria. Send it now, with
 only the usage export pasted underneath. The other two sources stay out
 of this piece.
@@ -174,7 +176,7 @@ its count as given. Don't add commentary, trends, or recommendations.
 
 Done when: each of the eight weeks appears exactly once with the count
 from the export, the total equals the sum of the eight counts, the week 5
-note is present, and no other number appears.
+note is present, and no count appears that isn't in the export.
 
 [export follows]
 </Prompt>
@@ -198,14 +200,14 @@ two days that week.
 Now tick the check, line by line. Eight weeks, each once? Count them.
 Each count as in the export? Compare them. The total? Add the eight
 numbers yourself. The export gives 1,241, so a total of 1,241 passes and
-anything else fails. Week 5 note present? No other number? Your own result
+anything else fails. Week 5 note present? Any count that isn't in the export? Your own result
 differs in wording, and the check doesn't care about wording. It is a
 list of yes or no, and every item takes seconds.
 
 Compare this with the blended report. There you had one page and a
 feeling. Here you have one section and five ticks. A section that fails a tick
 goes back to the agent with the failing item, the way the previous lesson
-taught. Nothing in the other two pieces moves while you do that.
+taught. The riders and cost pieces are unchanged while you do that.
 
 <MultiChoice id="ready-to-brief" objective="using-agents/delegates-and-checks/writes-a-brief"
   concepts={['task-decomposition', 'task-brief']}
