@@ -25,6 +25,7 @@ lsimons
 Schuberg
 Philis
 Varrowmere
+Brindlewick
 
 # Products, tools, projects
 Beamer
