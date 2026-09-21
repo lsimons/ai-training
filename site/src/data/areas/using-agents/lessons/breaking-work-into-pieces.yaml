@@ -1,11 +1,17 @@
 id: using-agents/breaking-work-into-pieces
 title: Breaking a task into pieces an agent can finish
+description: >-
+  Hand a three-part report to an agent as one prompt and see it blend. Then split the task into
+  pieces that each have an input, an output and a check, and run the first one.
 mode: tutorial
 covers: using-agents/decomposition
 serves: [using-agents/delegates-and-checks/writes-a-brief]
 introduces: [task-decomposition]
-assumes: []
-after: [using-agents/delegating]
+assumes:
+  - objective: using-agents/delegates-and-checks/reviews-against-brief
+    lesson: using-agents/delegating
+    section: reviewing-against-the-brief
+after: []
 shorts: [The decisions that are yours to make first]
 exercise:
   kind: do
@@ -13,6 +19,10 @@ exercise:
     Take the supplied large task (a three-part report from three source files), split it into pieces
     that each have an input, an output and a check, write the brief for the first piece, and run
     that piece so the result is what you look at.
-sources: []
-issue: 151
+sources: [DLAI-11, Academy ai-fluency-framework-foundations]
 minutes: 15
+notes: >-
+  The issue listed no assumed objective. The page checks a piece against its own criterion, which the
+  live delegating lesson teaches, so it assumes reviews-against-brief from there. That also places the
+  lesson after delegating in the graph, where `after` had put it while it was planned. The sources
+  and people in the page have no names on purpose, so no fictional name can collide with a real one.
