@@ -4,17 +4,17 @@ A feature request arrives for the to-do program from the first lesson:
 "Add due dates. I want to type `todo add "Renew the domain" due friday`
 and see what is late." The agent could have it working in twenty minutes,
 tests included. In this lesson we decide whether it should. We ask who has
-the problem before we propose a change, we weigh what the change costs to
-keep against what it costs to write, and we turn the request that
-survives into criteria a stranger could check. Nothing runs here, and the
-to-do program is a fixture, so treat it as a small internal tool that a
-team of four uses every day.
+the problem before we propose a change, and we weigh what the change costs
+to keep against what it costs to write. The request that passes both
+questions gets criteria a stranger could check. The lesson has no code to
+run. The to-do program is a fixture, so treat it as a small internal tool
+that a team of four uses every day.
 
 Cheap implementation moves the engineer's work earlier. When writing the
 code took a week, a bad idea died of its own cost before it shipped. When
-the agent writes it in an hour, the idea ships, and the team finds out
-what it costs over the years it spends keeping it. Brilliant's skills map
-for coding with AI files this judgment under taste and treats it as a skill
+the agent writes it in an hour, the idea ships. The team then finds out
+what it costs over the years of keeping it. Brilliant's skills map for
+coding with AI files this judgment under taste and treats it as a skill
 of its own, separate from getting the agent to produce code (@Brilliant TAS).
 Claude Academy's fluency course for builders makes the same split between
 deciding what to hand over and judging what comes back
@@ -26,10 +26,11 @@ before the brief.
 A request names a solution. Your first job is to find the problem behind
 it and the person who has it. "Add due dates" came from one colleague.
 Ask what happened last week. The answer might be "I forgot to renew the
-domain and the site went down for an hour". That is a problem worth
-solving. It is also a problem that a calendar reminder, a line in the
-team's weekly checklist, or a note in the item text (`Renew the domain
-before Oct 1`) solves for that one colleague today.
+domain and the site went down for an hour". That problem costs the team
+an hour of downtime a year, so it deserves a fix. A calendar reminder
+solves it for that one colleague today. So does a line in the team's
+weekly checklist, or a note in the item text (`Renew the domain before
+Oct 1`).
 
 Write the alternatives down before you choose, and always include doing
 nothing. Doing nothing has a cost too, and naming it is what makes the
@@ -46,11 +47,11 @@ considered and why the team chose as it did. A second request is then
 evidence, and the decision is reopened on evidence instead of on
 enthusiasm.
 
-## The cost of owning the change
+## The cost of keeping the change
 
-The build cost is the part the agent removes. The cost that stays is
-ownership: every change you accept is code the team reads, tests, patches
-and explains for as long as the program exists. For due dates in the
+The build cost is the part the agent removes. The team still pays the
+cost of keeping the change: every change you accept is code the team reads,
+tests, patches and explains for as long as the program exists. For due dates in the
 to-do program that means a date format to document, a parser to keep
 working, a `list` output that got longer, a test file that grew, and a
 question every new user asks about what `friday` means on a Saturday.
@@ -92,22 +93,22 @@ keeps before you accept what the agent wrote.
   ]} />
 
 Building as asked is one outcome. The request can also be shrunk to the
-part that solves the stated problem, or answered without code, with a
-line in the README, a change to a default, or a pointer to a tool the
-team already has. Shrinking is the outcome that gets missed most. The colleague who asked for `due friday`
-and a late list may be served by a date that is stored and shown, with
-no parsing of weekday names and no notion of late. That version is a
-dozen lines, has one format, and can grow later if the second request
-ever comes.
+part that solves the stated problem. Or it can be answered without code,
+with a line in the README, a change to a default, or a pointer to a tool
+the team already has. Shrinking is the outcome that gets missed most. The
+colleague who asked for `due friday` and a late list may be served by a
+date that is stored and shown. That version doesn't parse weekday names
+and doesn't know what late means. It is a dozen lines with one format,
+and it can grow later if the second request ever comes.
 
 <Scenario id="undo-request" objective="coding-with-agents/specifies-work/judges-worth-building"
   concepts={['what-is-worth-building']}
   context="A team of four uses a small command-line to-do program with add, list and done commands, and one colleague sends a feature request for a new command."
-  title="The undo request" hint="What did the colleague do, and what did the program do, right before they wanted to undo?"
+  title="The undo request" hint="Which of the four options gives you a fact you do not have yet, and which ones spend the agent's hour on a guess?"
   options={[
     { text: 'Build it as asked: an `undo` command that reverses the last change, with a history file.', consequence: 'The agent adds a history file, a new command and eleven tests in an hour. The team now owns a history format, a second file next to the list, and a question about what undo does after two changes. The colleague keeps marking the wrong items done, and now undoes them.' },
-    { text: 'Shrink it: a `reopen` command that flips one item back to not done.', consequence: 'Twelve lines, one test, no history. The colleague has a way out of the mistake. Nobody has asked yet why the mistake happens twice a week.' },
-    { text: 'Ask which item they typed and which one got marked, before proposing anything.', correct: true, consequence: 'They typed `done 1` and item 2 was marked. That is the bug the first lesson found. Fixing it costs a one-character change and makes the request go away. The colleague did not need undo. They needed `done` to work.' },
+    { text: 'Shrink it: a `reopen` command that flips one item back to not done.', consequence: 'The agent writes twelve lines and one test, and there is no history file to keep. The colleague has a way out of the mistake. Nobody has asked yet why the mistake happens twice a week.' },
+    { text: 'Ask which item they typed and which one got marked, before proposing anything.', correct: true, consequence: 'They typed `done 1` and item 2 was marked. That is the bug the first lesson found. Fixing it costs a one-line change and makes the request go away. The colleague did not need undo. They needed `done` to work.' },
     { text: 'Decline: they can edit `todos.json` by hand, and the README says where it is.', consequence: 'True, and it leaves the colleague hand-editing a file twice a week without anyone asking why. The problem stays and the request comes back from the next person.' },
   ]}>
 A colleague who uses their own copy of the to-do program writes: "Please
@@ -117,7 +118,7 @@ do first?
 
 ## Writing down what success requires
 
-Suppose due dates survive the questions, in the shrunk form: a date is
+Suppose due dates pass both questions, in the shrunk form: a date is
 stored with an item and shown in the list. The next job is to write what
 a finished result must do, before the agent starts. These success
 criteria become the agent's target while it works and your checklist when
@@ -173,7 +174,7 @@ means?
     { text: '`python3 -m unittest -q` passes, and `todo list` prints an item without a due date exactly as it did before.', correct: true },
     { text: 'Not in scope: weekday names, relative dates, overdue marking, color.', correct: true },
     { text: 'The agent should make the date handling as flexible as it reasonably can.', why: 'Flexible is a direction, and reasonably is a judgment the agent makes alone. Where does it stop, and how would you know it stopped there?' },
-    { text: 'Parse the date with the `datetime` module.', why: 'That is an instruction about how to build it. It may belong in the brief as a limit, and a checker observes behavior without asking which module was used.' },
+    { text: 'Store the date as a Unix timestamp in `todos.json` and format it with `strftime` in `list`.', why: 'That describes how to build it. A checker who runs `todo list` sees the same output whichever way the date was stored, so this line is a design choice for the brief and cannot be ticked as a result.' },
   ]}>
 Which of these lines belong in the success criteria for the due-date
 change?
@@ -184,8 +185,8 @@ Three requests have come in for the to-do program from the first lesson.
 One asks for due dates with phrases like `next friday` and `in 3 days`.
 One asks for done items to be shown in green. One asks for the list to
 be shared between a laptop and a desktop. For each, write the problem
-behind it and who has it, name at least one alternative including doing
-nothing, and decide: build, shrink or answer without code. Reject or
+behind it and who has it. Name at least one alternative, including doing
+nothing, and then decide: build, shrink or answer without code. Reject or
 shrink at least one. For each request you keep, write the success
 criteria as a short list a stranger could check, including what must
 keep working and a final out-of-scope line. Ten to fifteen lines per
@@ -201,7 +202,7 @@ agent's diff?
 </Exercise>
 
 <Recap>
-1. A request names a solution. Find the problem behind it and the person who has it before you propose a change, and write the alternatives down, including doing nothing (@Brilliant TAS).
+1. A request names a solution. Find the problem behind it and the person who has it before you propose a change. Then write the alternatives down, including doing nothing (@Brilliant TAS).
 2. Price a change by what the team owns after it ships, and the hour the agent spends writing it is the smaller part. A dependency for one format is patched for years.
 3. Building as asked is one outcome. A request can also be shrunk to the part that solves the stated problem, or answered without code.
 4. Success criteria are observable outcomes a person other than the author could check, and they include what must keep working (@Academy ai-fluency-for-builders).

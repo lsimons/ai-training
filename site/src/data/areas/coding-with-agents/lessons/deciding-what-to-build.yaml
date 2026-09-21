@@ -18,7 +18,7 @@ extends-to:
   - label: Deciding and specifying
     href: /topics/coding-with-agents/specification/
 after: [coding-with-agents/first-session]
-shorts: [the cost of owning a change]
+shorts: [the cost of keeping a change]
 exercise:
   kind: judge
   brief: >-
