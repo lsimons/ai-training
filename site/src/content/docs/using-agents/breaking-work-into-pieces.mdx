@@ -1,0 +1,270 @@
+import { MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we hand an agent a task that's too big to check, watch
+what comes back, and then split the task into pieces that each have an
+input, an output, and a check. We write the brief for the first piece and
+run it, so that what we look at is one piece done and ticked off. The
+task is fictional and small enough to redo as often as you like.
+
+You need any chat-capable agent you already have access to. Keep the
+brief from the previous lesson in mind: goal, context, limits and
+done-criteria. The pieces we make here are what those briefs get written
+for.
+
+## The task
+
+You coordinate a shared-bike pilot at a company campus. The pilot ran for
+eight weeks and the facilities manager wants a one-page report with three
+parts: how much the bikes were used, what the riders said, and what it
+costs to continue. You have one source per part. Read them once now, so
+that you can judge the agent's work later.
+
+The first source is the weekly usage export from the bike system.
+
+> **Rides per week, pilot weeks 1 to 8**
+>
+> - Week 1: 112
+> - Week 2: 148
+> - Week 3: 171
+> - Week 4: 165
+> - Week 5: 96 (docking station offline Wednesday and Thursday, count incomplete)
+> - Week 6: 183
+> - Week 7: 190
+> - Week 8: 176
+
+The second source is a note from the colleague who ran the rider survey.
+
+> **Survey note**
+>
+> All 120 pilot participants got the survey and 41 replied. 33 said they
+> would keep using the bikes if the scheme continues. 29 named "no bike
+> available in the morning" as the biggest problem. 12 asked for helmets
+> at the docking station. 6 wrote in the free-text box that the docking
+> station is too far from the east entrance. I haven't turned any of this
+> into percentages.
+
+The third source is the email from the bike vendor.
+
+> **Email: continuing after the pilot**
+>
+> Thank you for running the pilot with us. The pilot period was free of
+> charge. To continue we offer two options, both with a minimum term of
+> twelve months. Option A is 1,800 per month for the bikes and the docking
+> station, with your facilities team doing the maintenance. Option B is
+> 2,400 per month and includes maintenance and replacement of damaged
+> bikes. Both prices exclude tax.
+
+Before you send anything, predict: if you paste all three sources under
+"write the one-page report for the facilities manager", what comes back?
+Something well written, probably. Now ask a harder question. Which line
+of it could you check, and against what?
+
+## The blended result
+
+Try it. Paste the three sources into your agent with that one-line
+request, then read the result with the sources next to it. Here is the
+kind of thing that comes back. The transcript is illustrative, written to
+show the pattern rather than recorded from one model.
+
+<Prompt model="illustrative" recorded="illustrative">
+Write the one-page report on the bike pilot for the facilities manager.
+
+[the three sources follow]
+</Prompt>
+<Response>
+**Shared-bike pilot: report**
+
+The pilot was a clear success. Usage grew steadily over the eight weeks,
+from 112 rides in the first week to around 190 a week by the end, and 80%
+of riders want to keep the scheme. The main complaint was that bikes were
+sometimes unavailable in the morning, which suggests adding capacity.
+
+The price to continue is 1,800 per month on a twelve-month contract.
+Given the strong uptake and positive feedback, we recommend continuing
+and adding a second docking station near the east entrance.
+</Response>
+
+Read it against the sources. The 80% is 33 out of 41 replies. The
+report never says 41, and the manager reads it as 80% of 120
+participants. Week 5 and its offline days are gone. Option B, the maintenance quote,
+is gone too, and the contract now looks cheaper than it is. The docking
+station recommendation came from six free-text comments and is presented
+as a finding. And the survey has been folded into the usage paragraph, so
+there is no line you can point at and say "this one is wrong".
+
+None of this is the agent being careless. You gave it one task with three
+sources and no way to be right or wrong, and it filled every gap with a
+plausible choice. The report reads well, and reading well is the only
+thing you can check.
+
+## Splitting the task
+
+Task decomposition is splitting a large task into pieces small enough
+that each has a clear input, a clear output, and a way to check it. The
+report has a natural split, one piece per part, and each piece gets the
+three columns.
+
+| Piece  | Input            | Output                                                                      | Check                                                                          |
+| ------ | ---------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Usage  | The usage export | A heading, one line per week, a total line, one line on week 5              | Eight weeks each appear once, the total equals the sum of the export, week 5 is marked incomplete, no other numbers |
+| Riders | The survey note  | A heading and four bullets, each written as "n of 41 replies"               | Every count is in the note, 41 is named as the base, no percentages            |
+| Cost   | The vendor email | A heading, both options with the monthly price and what it includes, the minimum term | Both prices appear once and match the email, the twelve-month term is stated |
+
+Fill in the table and something else happens. Choices you never noticed
+in the one-line request become visible, and every one of them is yours.
+Does week 5 go in the report as it is, with a note, or get left out? Are
+survey numbers reported per reply or per participant? Does the report
+show one price or both? In the blended result the agent made each of them
+for you, silently, and the report looked finished. In the split they show
+up as blanks in the Output and Check columns, before any brief is
+written (@Academy ai-fluency-framework-foundations).
+
+Make them now, in a line each. Week 5 goes in, marked incomplete, because
+leaving it out would hide the outage. Survey numbers are "n of 41
+replies", because the note counts replies and never participants.
+Both prices go in, because the manager is choosing between them. Those lines become limits
+in the briefs.
+
+<Sort id="input-output-check" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['task-decomposition']}
+  context="The lesson splits a three-part report on a shared-bike pilot into pieces. Each piece has an input (a source), an output (what the agent produces) and a check (what you tick afterwards)."
+  title="Input, output or check?" hint="Is this something you hand over, something that comes back, or something you tick after it comes back?"
+  buckets={['Input', 'Output', 'Check']}
+  items={[
+    { text: 'The weekly usage export from the bike system', bucket: 0 },
+    { text: 'A heading and four bullets, each written as "n of 41 replies"', bucket: 1 },
+    { text: 'The total line equals the sum of the export', bucket: 2 },
+    { text: 'The email from the bike vendor', bucket: 0 },
+    { text: 'Both prices appear once and match the email', bucket: 2 },
+    { text: 'One line per week and one total line under a heading', bucket: 1 },
+    { text: 'No percentage appears in the riders section', bucket: 2 },
+    { text: 'The note from the colleague who ran the survey', bucket: 0 },
+  ]} />
+
+<Scenario id="week-five" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['task-decomposition', 'task-brief']}
+  context="A weekly usage export for an eight-week bike pilot has one week flagged as an incomplete count because the docking station was offline for two days. You are about to write the brief for the piece that turns the export into the usage section of a report."
+  title="The week that is flagged" hint="Who ends up making this decision if you do not, and will you be able to tell?"
+  options={[
+    { text: 'Write the brief without mentioning week 5 and see what the agent does with it.', consequence: 'The agent picks one reading, drops the week or reports 96 as a normal count, and the section reads fine either way. You find out only if you compare it with the export line by line.' },
+    { text: 'Decide now that week 5 goes in with a note that the count is incomplete, and put that in the brief and in the check.', correct: true, consequence: 'The decision is made once, in writing. The agent has no gap to fill, and the check tells you whether it did what you decided.' },
+    { text: 'Leave week 5 out of the source you paste, so the agent never sees the problem.', consequence: 'The section shows seven weeks and a total that does not match the export. The outage is hidden from the manager, and the check "eight weeks each appear once" fails.' },
+    { text: 'Tell the agent to handle week 5 in whatever way it thinks is best.', consequence: 'You have delegated the decision and kept the accountability. The agent chooses, and the choice is not written anywhere you can review.' },
+  ]}>
+You are about to brief the usage piece and you notice the flag on week 5
+in the export. What do you do?
+</Scenario>
+
+## Briefing and running the first piece
+
+The usage piece is ready: its input is one source, its output is fixed,
+and its check is a list you can tick. Its brief is the four parts from the
+previous lesson, with the check as the done-criteria. Send it now, with
+only the usage export pasted underneath. The other two sources stay out
+of this piece.
+
+<Prompt model="illustrative" recorded="illustrative">
+Write the "Usage" section of a report from the export below. Format: the
+heading "Usage", then one line per week in the form "Week N: R rides",
+then one line "Total: T rides", then one line saying that the week 5 count
+is incomplete because the docking station was offline for two days.
+
+Use only the export as your source. Include all eight weeks, week 5 with
+its count as given. Don't add commentary, trends, or recommendations.
+
+Done when: each of the eight weeks appears exactly once with the count
+from the export, the total equals the sum of the eight counts, the week 5
+note is present, and no other number appears.
+
+[export follows]
+</Prompt>
+<Response>
+**Usage**
+
+- Week 1: 112 rides
+- Week 2: 148 rides
+- Week 3: 171 rides
+- Week 4: 165 rides
+- Week 5: 96 rides
+- Week 6: 183 rides
+- Week 7: 190 rides
+- Week 8: 176 rides
+- Total: 1,241 rides
+
+The week 5 count is incomplete because the docking station was offline on
+two days that week.
+</Response>
+
+Now tick the check, line by line. Eight weeks, each once? Count them.
+Each count as in the export? Compare them. The total? Add the eight
+numbers yourself. The export gives 1,241, so a total of 1,241 passes and
+anything else fails. Week 5 note present? No other number? Your own result
+differs in wording, and the check doesn't care about wording. It is a
+list of yes or no, and every item takes seconds.
+
+Compare this with the blended report. There you had one page and a
+feeling. Here you have one section and five ticks. A section that fails a tick
+goes back to the agent with the failing item, the way the previous lesson
+taught. Nothing in the other two pieces moves while you do that.
+
+<MultiChoice id="ready-to-brief" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['task-decomposition', 'task-brief']}
+  context="A report is being split into pieces. A piece is ready to brief when it names its input, its output and a check you can tick. The pieces below come from a report on a shared-bike pilot with three sources: a usage export, a survey note and a vendor email."
+  title="Which pieces are ready to brief?" hint="For each piece, find its input, its output and its check. Is one of the three missing, or written as a feeling?"
+  options={[
+    { text: 'Input: the survey note. Output: four bullets, each as "n of 41 replies". Check: every count is in the note and no percentage appears.', correct: true },
+    { text: 'Input: the survey note. Output: a short section on what riders think.', why: 'There is an output but no check. What would you tick when it comes back?' },
+    { text: 'Output: a cost paragraph. Check: the amounts match the quote.', why: 'Which source? Without an input the agent picks its own, and "the quote" could be either of the two options in the email.' },
+    { text: 'Input: the vendor email. Output: both options with price and what each includes, plus the minimum term. Check: both prices appear once and match the email, and the twelve-month term is stated.', correct: true },
+    { text: 'Input: the usage export. Output: the usage section. Check: it reads well and looks complete.', why: 'The check is a feeling. Two readers can disagree about "reads well", so nothing here can be ticked.' },
+  ]}>
+Which of these pieces are ready to have a brief written for them?
+</MultiChoice>
+
+<Pitfall title="A piece with an output but no check">
+A learner splits the report, writes "Riders: from the survey note, a short
+section on satisfaction" as the second piece, and briefs it. The agent
+returns "80% of riders are satisfied and want the scheme to continue".
+The line is true of the 41 replies and reads as true of all 120
+participants, and there is nothing in the piece that would have caught
+it, because the piece said what to produce and never said what to check.
+The rule: a piece isn't ready to brief until its check is written, and a
+check is something you can tick.
+</Pitfall>
+
+## What a good piece looks like
+
+Look at the usage piece once more. You could hand it over on its own
+with one source and no other context. You could check it on its own, with a
+list that took under a minute. If the total had been wrong, you would have
+redone that one piece and the riders and cost sections would have stayed
+untouched. Those are the marks of a good piece, and a piece missing one
+of them is a sign the split isn't finished.
+
+Splitting also moved the decisions to the right moment. In the one-prompt
+version you discovered the week 5 and percentage choices, if at all, by
+reading a finished report. In the split version they appeared as blanks
+in a table before anything ran, and you filled them in as limits in the
+brief. An agent that works through a task in steps is only as good as
+the check at the end of each step (@DLAI-11). The steps and the checks
+are the part you supply.
+
+<Exercise stretch="Ask the agent to assemble your three checked sections into the one-page report, with one check: no number changed. Then compare the result with the blended report from the start of the lesson.">
+Write the briefs for the riders piece and the cost piece from the table,
+using the decisions you made about the survey base and the two prices as
+limits. Run the riders piece with only the survey note pasted underneath,
+then tick its check item by item. Keep it to the four bullets the table
+asks for. A good result is one where every count in the bullets is a
+number from the note, 41 is named as the base, and no percentage appears,
+so that a reader can't mistake 33 replies for 80% of the campus. Which of
+the decisions in your brief would the agent have made for you, and could
+you have told?
+</Exercise>
+
+<Recap>
+1. A task given as one prompt comes back blended, with the gaps filled by the agent's own choices, and reading well is the only thing you can check.
+2. Split a large task into pieces that each have an input, an output, and a check. One source per piece, a fixed output, and a check you can tick.
+3. The split shows the decisions that are yours: which data goes in, what base a number uses, which of two options to show. Make them before the first brief, and write them into it as limits.
+4. A piece with an output but no check isn't ready to brief. Write the check first, and use it as the done-criteria.
+5. A good piece can be handed over on its own and checked on its own. When it fails, you redo that piece and the other two are unchanged.
+</Recap>
