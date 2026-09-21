@@ -24,7 +24,12 @@ exercise:
     Copy agent.py, make slow_service time out on the first call only and answer on the second, run
     the rate question under max_errors=2 and again under max_errors=1, and compare the message lists
     and stop reasons.
-sources: [AEC-03, AEC-13, Academy building-with-the-claude-api, Claude docs handle-tool-calls]
+sources:
+  - AEC-03
+  - AEC-13
+  - Academy building-with-the-claude-api
+  - Claude docs handle-tool-calls
+  - Claude docs handling-stop-reasons
 minutes: 15
 notes: >-
   The tool side of what #91 does in the loop: a structured `ok: false` result the model can read, a

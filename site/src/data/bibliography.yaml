@@ -403,6 +403,13 @@ Claude docs handle-tool-calls:
   author: Anthropic
   license: Proprietary
   url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/handle-tool-calls
+Claude docs handling-stop-reasons:
+  type: reference
+  title: Stop reasons and fallback
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons
 Fuchsia review:
   type: reference
   title: Review process for external Rust crates
