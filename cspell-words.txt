@@ -27,7 +27,7 @@ Philis
 Varrowmere
 Okonkwo
 Varga
-Steinbrenner
+Tervonen
 
 # Products, tools, projects
 Beamer
