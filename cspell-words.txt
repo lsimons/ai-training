@@ -122,6 +122,7 @@ unvalidated
 upsell
 upvotes
 worktrees
+pseudonymized
 
 # Invented people and companies in lesson fixtures
 Renske
