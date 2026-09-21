@@ -5,7 +5,8 @@ time it asks before every edit and every command. The second time it edits
 without asking and only stops for commands. We count the prompts in each
 run and read what they were for. Then we decide which mode the task
 deserved. The setting is the to-do fixture from *Your first session with a
-coding agent*, where a wrong edit costs one `git checkout`.
+coding agent*, committed to a throwaway git repository, where a wrong edit
+costs one `git checkout`.
 
 The mode names and flags here are Claude Code's, checked against the
 vendor's documentation on the date shown above the lesson
@@ -20,36 +21,45 @@ approved one line at a time. That behavior is a setting. **Permission
 modes** are preset levels of how much the agent may do without asking,
 from approving every action to running unattended. The mode sets the
 baseline for the session, and the allowlists you write in the next lesson
-widen or narrow it per command.
+widen or narrow it per command. Which mode a fresh session starts in
+depends on your plan and your settings. On some plans the built-in
+starting mode is `auto`, so check the status bar before you assume the
+agent asks (@Claude Code permission modes).
 
-Claude Code's modes, with what runs without a prompt in each
-(@Claude Code permission modes):
+Claude Code's modes, with what runs without a prompt in each. The last
+column is our paraphrase of the vendor's advice on when to use it
+(@Claude Code permission modes).
 
-| Mode (config value) | Runs without asking                                                                          | Vendor's "best for"                     |
-| ------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `default` (Manual)  | Reads                                                                                        | Reviewing every action, sensitive work  |
-| `acceptEdits`       | Reads, file edits in the working directory, and file commands such as `mkdir`, `mv` and `cp` | Iterating on code you review afterwards |
-| `plan`              | Reads. Edits are blocked until you approve a plan                                            | Exploring a codebase before changing it |
-| `auto`              | Everything a second model, the classifier, approves                                          | Long tasks, fewer prompts               |
-| `dontAsk`           | Reads and pre-approved tools. Anything that would prompt is denied instead                   | Locked-down CI and scripts              |
-| `bypassPermissions` | Everything                                                                                   | Isolated containers and VMs only        |
+| Mode (config value) | Runs without asking                                                                          | When the vendor suggests it                      |
+| ------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `default` (Manual)  | Reads                                                                                        | You want to see each action, or the work is sensitive |
+| `acceptEdits`       | Reads, file edits in the working directory, and file commands such as `mkdir`, `mv` and `cp` | Code you read back afterwards                    |
+| `plan`              | Reads and exploratory shell commands. Edits are blocked until you approve a plan             | Understanding a codebase before you change it    |
+| `auto`              | Everything a second model, the classifier, approves                                          | Long tasks where the prompts wear you down       |
+| `dontAsk`           | Reads and pre-approved tools. Anything that would prompt is denied instead                   | CI and scripts with an exact allowlist           |
+| `bypassPermissions` | Everything, apart from the few actions listed below                                          | Only inside a container or virtual machine that isolates it |
 
 The `acceptEdits` and `bypassPermissions` rows have fine print that
 matters for this lesson. `acceptEdits` approves an edit only when
 the path is inside the working directory, and any shell command outside
 the built-in read-only set still prompts, so the test run in our task
-stops for you in that mode too. `bypassPermissions` skips every check,
-including the protected paths such as `.git` that no other mode
-auto-approves, and the vendor's own page limits it to isolated containers
-and virtual machines. It also refuses to start as root, because root with
-no prompts can change any file on the machine
+stops for you in that mode too. `bypassPermissions` skips the permission
+prompts, including for writes to protected paths such as `.git` that the
+other modes guard. A few actions still prompt in it: a tool matched by an
+`ask` rule you wrote, and a tool that needs your answer to work. The
+vendor's own page limits the mode to isolated containers and virtual
+machines, and the tool refuses to start in it as root or under `sudo`,
+"for security reasons", as the vendor puts it
 (@Claude Code permission modes).
 
 You pick the mode for one session with a flag, `claude --permission-mode
 acceptEdits`, or cycle through the modes in a running session with
 `Shift+Tab`. A `defaultMode` entry in a settings file sets where every
-session starts (@Claude Code permission modes). This lesson uses the
-flag. Each run then states its mode in the command that started it.
+session starts, with one exception: `auto` and `bypassPermissions` in a
+project's settings files don't take effect, so a repository can't check in
+a setting that starts every clone in a hands-off mode
+(@Claude Code permission modes). This lesson uses the flag. Each run then
+states its mode in the command that started it.
 
 Here is the decision as a small program. `NO_PROMPT` holds the table above
 for the three kinds of action our task uses, and `TASK` is the task as
@@ -96,19 +106,29 @@ for mode in ("default", "acceptEdits", "bypassPermissions"):
 
 </Predict>
 
-The program is a model, and the real agent may read more files or run an
-extra command. Your counts in the two runs below can differ from it by
-one or two. The comparison stays the same: every edit and every command
-prompts in Manual mode, only the commands prompt in `acceptEdits`, and
-nothing prompts in `bypassPermissions`.
+The program is a model. The real agent may edit a file twice or run an
+extra command, and each of those adds a prompt in the modes that ask for
+it. Reads don't change the tally, because no mode prompts for a read
+inside the working directory. Your counts in the two runs below can differ from the
+model by one or two. The comparison stays the same: every edit and every
+command prompts in Manual mode, only the commands prompt in `acceptEdits`,
+and nothing prompts in `bypassPermissions`.
 
 ## Run one: ask before everything
 
 Make a fresh copy of the fixture directory,
-`site/examples/coding-with-agents/first-session/fixture-repo/`, and change
-into it. Run the tests first. One of them fails on purpose, because that
-bug is the first-session lesson's task, and you want to know that before
-the agent tells you.
+`site/examples/coding-with-agents/first-session/fixture-repo/`, outside the
+course repository, and change into it. The copy has no git history of its
+own, so give it one before the agent touches anything. This commit is the
+point you reset to between the runs.
+
+```sh
+git init -q && git add -A && git commit -q -m "fixture"
+```
+
+Run the tests next. One of them fails on purpose, because that bug is the
+first-session lesson's task, and you want to know that before the agent
+tells you.
 
 <Predict id="run-tests-before" title="The suite before the agent starts"
   answer="FAILED (failures=1)" run="coding-with-agents/first-session/tests.py">
@@ -133,13 +153,13 @@ already fails and is not your task. Leave it. Do not edit todos.json.
 Now count. Keep a tally of every prompt, and for each one write down what
 it asked to do: which file, or which command. Approve each one after you
 have read it. Expect an edit to `todo.py`, an edit to `test_todo.py` and
-one command, and don't be surprised by an extra read or a second edit to
-the same file.
+one command, and don't be surprised by a second edit to the same file.
+The agent also reads both files first, and those reads never prompt.
 
 When the agent reports done, read the diff with `git diff` and check the
 tally against it. Every changed file should have a prompt in your list.
-Then reset the fixture with `git checkout -- .` so the second run starts
-from the same place.
+Then reset the fixture to the commit you made with `git checkout -- .` so
+the second run starts from the same place.
 
 ## Run two: accept the edits
 
@@ -147,31 +167,31 @@ Start the agent again, this time with `claude --permission-mode
 acceptEdits`, and send the same brief. The status bar reads
 `accept edits on`. Tally again.
 
-This time the two edits land without a prompt, and the session stops once,
-at the test command. The vendor's guidance for this mode is to review the
-changes afterwards in your editor or with `git diff`, rather than approving
-each edit inline (@Claude Code permission modes). Do that now. Read the
-diff as carefully as you read the prompts in run one, because this is the
-first time you see what changed.
+This time the two edits are written without a prompt, and the session
+stops once, at the test command. The vendor's guidance for this mode is
+to review the changes afterwards in your editor or with `git diff`, rather
+than approving each edit inline (@Claude Code permission modes). Do that
+now. Read the diff as carefully as you read the prompts in run one,
+because this is the first time you see what changed.
 
 Now compare the two runs on one question: what would a mistake have cost?
 In run one, a wrong edit shows up in a prompt before it is written, and
 you decline it. In run two, the same wrong edit is written, and you find it
-in the diff. The fixture is a copy you reset with one command, so in both runs the
-repair costs the same `git checkout`. The mode changed when you saw the
-edit, and the setting decided how much a late look could cost. That's the
-whole judgment. Choose the mode by what a mistake costs in the place the
-agent works, and remember the *blast radius* habit from the safety course:
-say out loud what the agent can reach before you press enter.
+in the diff. The fixture is a committed copy you reset with one command,
+so in both runs the repair costs the same `git checkout`. The mode changed
+when you saw the edit, and the place decided how much a late look could
+cost. Choose the mode by what a mistake costs in the place the agent
+works, and remember the *blast radius* habit from the safety course: say
+out loud what the agent can reach before you press enter.
 
 <Scenario id="same-task-real-repo" objective="customizing-agents/configures-agent/sets-permissions"
   concepts={['permission-modes', 'blast-radius']}
-  context="A developer has just run a small task in a fixture repository in the accept-edits permission mode of a coding agent, where edits and file commands land without a prompt. They now want the same task done in their team's real repository."
+  context="A developer has just run a small task in a committed fixture repository in the accept-edits permission mode of a coding agent, where edits and file commands are written without a prompt. They now want the same task done in their team's real repository."
   title="The same task in your own repository" hint="What is in the working tree that a mode with no edit prompts could touch, and is there a cheaper way to protect it than a prompt on every edit?"
   options={[
     { text: 'Start in acceptEdits, as in run two. The task is the same size and it went fine.', consequence: 'The mode also approves mv, cp and rm inside the working directory without asking. The agent tidies a file you had not committed, and there is no copy to restore it from.' },
-    { text: 'Commit or stash your own changes first, then start in acceptEdits and read the diff afterwards.', correct: true, consequence: 'Every file in the tree is now one git command from restored. The two edits land without prompts, the test command stops for you, and the diff is the review.' },
-    { text: 'Start with --dangerously-skip-permissions. You are on a feature branch, so main is safe.', consequence: 'The branch protects main from a bad commit and protects nothing on your machine. The mode skips every prompt, including the ones for the test command and for protected paths, and the vendor limits it to isolated containers.' },
+    { text: 'Commit or stash your own changes first, then start in acceptEdits and read the diff afterwards.', correct: true, consequence: 'Every file in the tree is now one git command from restored, as the fixture was. The two edits are written without prompts, the test command stops for you, and the diff is the review.' },
+    { text: 'Start with --dangerously-skip-permissions. You are on a feature branch, so main is safe.', consequence: 'The branch protects main from a bad commit and protects nothing on your machine. The mode skips the prompts for the test command and for protected paths alike, and the vendor limits it to isolated containers and virtual machines.' },
     { text: 'Start in `dontAsk` so the agent cannot do anything you have not allowed.', consequence: 'Nothing has been allowed yet, so every edit and the test command are denied and the task never starts.' },
   ]}>
 The `undo` task went well in the fixture. You want the same change in your
@@ -186,43 +206,45 @@ checkout on their laptop, with their credentials in the environment and
 uncommitted work in the tree. Two hours later the agent runs a cleanup
 command to "remove build artifacts" and the pattern matches a directory of
 notes that was never committed. The rule: step a mode up only inside a
-sandbox, a container, or a disposable worktree, where the worst command
-costs a copy, and never further than the task in front of you needs.
+sandbox or a container, where the worst command costs a copy, and never
+further than the task in front of you needs. A git worktree or a branch
+shares the machine and its credentials with everything else on it, so it
+isn't isolation.
 </Pitfall>
 
 ## Which mode for which task
 
 The vendor's course on running the tool unattended makes the same point
 from the other side: hands-off runs belong in an environment built to be
-thrown away, such as a container or a fresh git worktree, and the check
-afterwards is the review of what it produced (@Academy claude-code-in-action).
-The mode is the last thing you choose, after you know where the agent
-works and what a wrong action there would cost.
+thrown away, such as a container, and the check afterwards is the review
+of what it produced (@Academy claude-code-in-action). The mode is the last
+thing you choose, after you know where the agent works and what a wrong
+action there would cost.
 
 <Sort id="mode-per-task" objective="customizing-agents/configures-agent/sets-permissions"
   concepts={['permission-modes', 'permissions']}
-  context="Claude Code's permission modes: default (Manual) prompts before every edit and command, acceptEdits approves edits inside the working directory but prompts for other commands, plan reads and blocks edits until a plan is approved, and bypassPermissions skips every prompt and is meant for isolated containers and virtual machines."
+  context="Claude Code's permission modes: default (Manual) prompts before every edit and command, acceptEdits approves edits inside the working directory but prompts for other commands, plan reads and blocks edits until a plan is approved, and bypassPermissions skips the permission prompts and is meant for isolated containers and virtual machines."
   title="Which mode for which task?" hint="For each task, what does the agent need to do without stopping, and what would a wrong action cost in that place?"
   buckets={['default (Manual)', 'acceptEdits', 'plan', 'bypassPermissions']}
   items={[
     { text: 'Work out how an unfamiliar service handles retries and write up the findings, changing nothing', bucket: 2 },
-    { text: 'Add a command and its test in a fixture you reset with one git command, reviewing the diff afterwards', bucket: 1 },
+    { text: 'Add a command and its test in a fixture copy you committed, so one git command resets it, reviewing the diff afterwards', bucket: 1 },
     { text: 'Change the deploy script on a machine that holds the production credentials', bucket: 0 },
     { text: 'Run an overnight batch of dependency upgrades inside a throwaway container with no credentials', bucket: 3 },
-    { text: 'Fix a typo in a README in the checkout where you have uncommitted work', bucket: 0 },
-    { text: 'Rename a function across a small project in a fresh worktree, then read the diff', bucket: 1 },
+    { text: 'Fix a typo in a README in a checkout with half-finished work you are not ready to commit or stash', bucket: 0 },
+    { text: 'Rename a function across a small project in a clean checkout with everything committed, then read the diff', bucket: 1 },
   ]}>
 Place each task in the mode you would start it in.
 </Sort>
 
 <Exercise stretch="Run the task a third time in plan mode and note where the agent stops: it reads and proposes, and the edits wait until you approve the plan.">
 Do the two runs from this lesson, if you haven't already, in a fresh
-copy of the fixture: once in Manual mode and once in `acceptEdits`, with
-the same brief. For each run write down the number of prompts and what
-each one asked for. Then write one line that names the mode you would use
-for this task in this place, and why. The point is to practice choosing a
-mode from what a mistake costs, before you do it in a repository that
-matters.
+copy of the fixture with its own first commit: once in Manual mode and
+once in `acceptEdits`, with the same brief. For each run write down the
+number of prompts and what each one asked for. Then write one line that
+names the mode you would use for this task in this place, and why. The
+point is to practice choosing a mode from what a mistake costs, before you
+do it in a repository that matters.
 
 A good result: the Manual tally has one entry per edit and per command,
 the `acceptEdits` tally has only the command, both diffs contain the same
@@ -236,14 +258,16 @@ would the answer be different, and what's in them that makes it so?
    In Claude Code, `default` prompts for every edit and command,
    `acceptEdits` approves edits inside the working directory and still
    prompts for other commands, `plan` blocks edits, and
-   `bypassPermissions` skips every prompt (@Claude Code permission modes).
+   `bypassPermissions` skips the permission prompts apart from your own
+   `ask` rules and the tools that need your answer
+   (@Claude Code permission modes).
 2. The mode sets the baseline, and allowlists refine it per command. Deny
    rules hold in every mode, and allow rules do nothing in
    `bypassPermissions`.
 3. Choose the mode by what a mistake would cost in the place the agent
    works, and say the blast radius out loud first.
-4. Step a mode up only inside a sandbox, a container, or a disposable
-   worktree, and only as far as the task in front of you needs.
+4. Step a mode up only inside a sandbox or a container, and only as far as
+   the task in front of you needs. A worktree or a branch isn't isolation.
 5. In a mode that skips prompts, the diff is your review. Read it as
    carefully as you would have read the prompts.
 </Recap>

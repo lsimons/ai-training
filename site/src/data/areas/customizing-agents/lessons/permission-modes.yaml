@@ -18,7 +18,7 @@ sources-checked: 2026-09-21
 review-by: 2027-03-21
 after: [customizing-agents/instructions]
 shorts:
-  - Running unattended inside a sandbox or a disposable worktree (Academy claude-code-in-action)
+  - Running unattended inside a sandbox or a container (Academy claude-code-in-action)
 exercise:
   kind: do
   brief: >-
@@ -27,7 +27,7 @@ exercise:
 sources: [Claude Code permission modes]
 minutes: 15
 notes: >-
-  The fixture task reuses the first-session to-do repository, with the brief telling the agent to
-  leave the known failing test alone. The modes.py fixture is a three-mode model of the vendor's
+  The fixture task reuses the first-session to-do directory, copied and given its own first commit
+  so git checkout resets it, with the brief telling the agent to leave the known failing test alone. The modes.py fixture is a three-mode model of the vendor's
   table; the page says the real counts may differ by one or two. Mode names, flags and behavior
   come from code.claude.com/docs/en/permission-modes and must be re-checked by review-by.
