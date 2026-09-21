@@ -1,0 +1,209 @@
+import { Choice, MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+
+A feature request arrives for the to-do program from the first lesson:
+"Add due dates. I want to type `todo add "Renew the domain" due friday`
+and see what is late." The agent could have it working in twenty minutes,
+tests included. In this lesson we decide whether it should. We ask who has
+the problem before we propose a change, we weigh what the change costs to
+keep against what it costs to write, and we turn the request that
+survives into criteria a stranger could check. Nothing runs here, and the
+to-do program is a fixture, so treat it as a small internal tool that a
+team of four uses every day.
+
+Cheap implementation moves the engineer's work earlier. When writing the
+code took a week, a bad idea died of its own cost before it shipped. When
+the agent writes it in an hour, the idea ships, and the team finds out
+what it costs over the years it spends keeping it. Brilliant's skills map
+for coding with AI files this judgment under taste and treats it as a skill
+of its own, separate from getting the agent to produce code (@Brilliant TAS).
+Claude Academy's fluency course for builders makes the same split between
+deciding what to hand over and judging what comes back
+(@Academy ai-fluency-for-builders). The decision is yours, and it comes
+before the brief.
+
+## Who has the problem
+
+A request names a solution. Your first job is to find the problem behind
+it and the person who has it. "Add due dates" came from one colleague.
+Ask what happened last week. The answer might be "I forgot to renew the
+domain and the site went down for an hour". That is a problem worth
+solving. It is also a problem that a calendar reminder, a line in the
+team's weekly checklist, or a note in the item text (`Renew the domain
+before Oct 1`) solves for that one colleague today.
+
+Write the alternatives down before you choose, and always include doing
+nothing. Doing nothing has a cost too, and naming it is what makes the
+comparison fair. If the domain lapses once a year and takes an hour to fix,
+the cost of not building is an hour a year and some embarrassment. If four
+people each miss a deadline a week, it is a different decision.
+
+The comparison turns a wish into a decision. "We could add due dates,
+put the date in the item text, or use the shared calendar. The calendar
+already sends reminders, and the item text works with no change to the
+program, so we start with the item text and revisit when a second person
+asks." Anyone reading that sentence in six months knows what was
+considered and why the team chose as it did. A second request is then
+evidence, and the decision is reopened on evidence instead of on
+enthusiasm.
+
+## The cost of owning the change
+
+The build cost is the part the agent removes. The cost that stays is
+ownership: every change you accept is code the team reads, tests, patches
+and explains for as long as the program exists. For due dates in the
+to-do program that means a date format to document, a parser to keep
+working, a `list` output that got longer, a test file that grew, and a
+question every new user asks about what `friday` means on a Saturday.
+None of that shows up in the diff the agent hands you. All of it shows
+up in the next year.
+
+Two more questions belong in the same weighing. What does the change
+displace? A program with `add`, `list` and `done` fits in one screen, and
+its README fits in ten lines. Each feature makes the next one a little
+harder to add and the whole a little harder to hand to a new colleague.
+And what happens if it is never built? Say it out loud. Often the honest
+answer is "nothing much", and that answer ends the discussion.
+
+<Pitfall title="A package for one date format">
+An agent was asked for due dates and added `dueparse`, a small package
+that turns phrases like `friday` and `in 3 days` into dates. It worked on
+the first try, and the request was closed the same afternoon. The
+package pulled in two others. The next year, one of them changed its
+license, and the year after that a security advisory named the parser,
+and its single maintainer had stopped answering. The team patched around
+it four times and finally replaced it with a twelve-line function that
+accepts one format, `YYYY-MM-DD`. The rule: a change that takes an hour
+to write and years to own is priced by the years. Ask what the team
+keeps before you accept what the agent wrote.
+</Pitfall>
+
+<Sort id="once-or-forever" objective="coding-with-agents/specifies-work/judges-worth-building"
+  concepts={['what-is-worth-building']}
+  context="A team of four uses a small command-line to-do program, and a coding agent has been asked to add due dates to it, including a package that parses phrases like friday into dates."
+  title="Which costs stay?" hint="For each cost, ask whether it is paid once or paid again in every month the feature exists."
+  buckets={['Paid once, while building', 'Paid for as long as the feature exists']}
+  items={[
+    { text: 'The hour the agent spends writing the date parser and its tests', bucket: 0 },
+    { text: 'Reading the diff before merging it', bucket: 0 },
+    { text: 'Patching the date package when a security advisory names it', bucket: 1 },
+    { text: 'Explaining to each new colleague what "due friday" means on a Saturday', bucket: 1 },
+    { text: 'Writing the first version of the README section on due dates', bucket: 0 },
+    { text: 'Keeping the date tests passing when the operating system updates its time zone data', bucket: 1 },
+  ]} />
+
+Building as asked is one outcome. The request can also be shrunk to the
+part that solves the stated problem, or answered without code, with a
+line in the README, a change to a default, or a pointer to a tool the
+team already has. Shrinking is the outcome that gets missed most. The colleague who asked for `due friday`
+and a late list may be served by a date that is stored and shown, with
+no parsing of weekday names and no notion of late. That version is a
+dozen lines, has one format, and can grow later if the second request
+ever comes.
+
+<Scenario id="undo-request" objective="coding-with-agents/specifies-work/judges-worth-building"
+  concepts={['what-is-worth-building']}
+  context="A team of four uses a small command-line to-do program with add, list and done commands, and one colleague sends a feature request for a new command."
+  title="The undo request" hint="What did the colleague do, and what did the program do, right before they wanted to undo?"
+  options={[
+    { text: 'Build it as asked: an `undo` command that reverses the last change, with a history file.', consequence: 'The agent adds a history file, a new command and eleven tests in an hour. The team now owns a history format, a second file next to the list, and a question about what undo does after two changes. The colleague keeps marking the wrong items done, and now undoes them.' },
+    { text: 'Shrink it: a `reopen` command that flips one item back to not done.', consequence: 'Twelve lines, one test, no history. The colleague has a way out of the mistake. Nobody has asked yet why the mistake happens twice a week.' },
+    { text: 'Ask which item they typed and which one got marked, before proposing anything.', correct: true, consequence: 'They typed `done 1` and item 2 was marked. That is the bug the first lesson found. Fixing it costs a one-character change and makes the request go away. The colleague did not need undo. They needed `done` to work.' },
+    { text: 'Decline: they can edit `todos.json` by hand, and the README says where it is.', consequence: 'True, and it leaves the colleague hand-editing a file twice a week without anyone asking why. The problem stays and the request comes back from the next person.' },
+  ]}>
+A colleague who uses their own copy of the to-do program writes: "Please
+add an `undo` command. I keep marking the wrong item done." What do you
+do first?
+</Scenario>
+
+## Writing down what success requires
+
+Suppose due dates survive the questions, in the shrunk form: a date is
+stored with an item and shown in the list. The next job is to write what
+a finished result must do, before the agent starts. These success
+criteria become the agent's target while it works and your checklist when
+it hands back, and they are what stops a plausible result from being
+accepted as a correct one. The brief you learned to write in the
+delegating lesson had done-criteria you could tick. The same rule
+applies here, and code makes it easier to follow, because behavior can be
+observed and stated.
+
+A criterion is observable when a person who was not in the conversation
+could check it and get the same yes or no as you. "Due dates work" fails
+that test. `todo add "Pay rent" due 2026-10-01` stores the date, and
+`todo list` shows the item as `1. [ ] Pay rent (due 2026-10-01)` passes
+it. Add the edge cases that matter here: an item added without a date
+shows exactly as before, and `due tomorrow` is rejected with a message
+that names the one accepted format.
+
+The criteria also say what must keep working. An agent that optimizes
+for the new behavior trades away anything you did not list. For the
+to-do program that means the existing tests still pass, the `add`,
+`list` and `done` commands still take the same arguments, and a
+`todos.json` written by the old version still loads. The `AGENTS.md`
+in the fixture already fixes some of these, and repeating the ones that
+matter for this change costs one line each.
+
+Last, write the out-of-scope line. The gap between "done" and
+"everything the program could do better" is where the agent makes its
+own choices, and one line closes it. "Not in scope: weekday names,
+relative dates, any notion of overdue, color in the output." The agent
+that would have added `dueparse` reads that line and doesn't.
+
+<Choice id="checkable-criterion" objective="coding-with-agents/specifies-work/defines-success"
+  concepts={['success-criteria']}
+  context="A coding agent is about to add a stored due date to a small command-line to-do program, and the author is writing the success criteria before the work starts."
+  title="Which criterion can a reviewer check alone?" hint="Could two reviewers who never spoke to the author check this line and reach the same yes or no?"
+  options={[
+    { text: 'Due dates work well for the team.', why: 'Which team member checks what, and how would two of them agree?' },
+    { text: 'Bad dates are handled gracefully.', why: 'Handled how? One reviewer expects an error message and another expects the date to be ignored, and both call their reading graceful.' },
+    { text: 'After `todo add "Pay rent" due 2026-10-01`, `todo list` prints `1. [ ] Pay rent (due 2026-10-01)`.', correct: true },
+    { text: 'The date handling code is clean and easy to extend.', why: 'Clean is a taste, and easy to extend is a prediction. A reviewer can hold an opinion on either and cannot tick it.' },
+  ]}>
+Four lines were proposed as success criteria for the due-date change.
+Which one could a reviewer check without asking the author what it
+means?
+</Choice>
+
+<MultiChoice id="which-lines-belong" objective="coding-with-agents/specifies-work/defines-success"
+  concepts={['success-criteria']}
+  context="A coding agent is about to add a stored due date to a small command-line to-do program that has add, list and done commands and a small unittest suite. The author is writing the success criteria."
+  title="Which lines belong in the criteria?" hint="A criterion states what a checker observes when the work is done. Does the line say what to observe, or how to build it, or how to feel about it?"
+  options={[
+    { text: '`todo add "Pay rent" due 2026-10-01` stores the date, and `todo list` shows it after the item text.', correct: true },
+    { text: '`python3 -m unittest -q` passes, and `todo list` prints an item without a due date exactly as it did before.', correct: true },
+    { text: 'Not in scope: weekday names, relative dates, overdue marking, color.', correct: true },
+    { text: 'The agent should make the date handling as flexible as it reasonably can.', why: 'Flexible is a direction, and reasonably is a judgment the agent makes alone. Where does it stop, and how would you know it stopped there?' },
+    { text: 'Parse the date with the `datetime` module.', why: 'That is an instruction about how to build it. It may belong in the brief as a limit, and a checker observes behavior without asking which module was used.' },
+  ]}>
+Which of these lines belong in the success criteria for the due-date
+change?
+</MultiChoice>
+
+<Exercise stretch="For the request you shrank, write the one-paragraph note to the person who asked, saying what you are building instead and why.">
+Three requests have come in for the to-do program from the first lesson.
+One asks for due dates with phrases like `next friday` and `in 3 days`.
+One asks for done items to be shown in green. One asks for the list to
+be shared between a laptop and a desktop. For each, write the problem
+behind it and who has it, name at least one alternative including doing
+nothing, and decide: build, shrink or answer without code. Reject or
+shrink at least one. For each request you keep, write the success
+criteria as a short list a stranger could check, including what must
+keep working and a final out-of-scope line. Ten to fifteen lines per
+request is enough. You do this so that the agent's speed never decides
+what your team owns.
+
+A good result names a concrete problem for each request or says that
+none was found, has a decision with a reason that a colleague could
+disagree with on the facts, and has criteria where every line is a yes
+or no that does not need you in the room. Reflect: for the request that
+cost the most to own, how much of that cost would have shown in the
+agent's diff?
+</Exercise>
+
+<Recap>
+1. A request names a solution. Find the problem behind it and the person who has it before you propose a change, and write the alternatives down, including doing nothing (@Brilliant TAS).
+2. Price a change by what the team owns after it ships, and the hour the agent spends writing it is the smaller part. A dependency for one format is patched for years.
+3. Building as asked is one outcome. A request can also be shrunk to the part that solves the stated problem, or answered without code.
+4. Success criteria are observable outcomes a person other than the author could check, and they include what must keep working (@Academy ai-fluency-for-builders).
+5. End the criteria with an out-of-scope line, because the agent fills the gap between done and everything it could improve with its own choices.
+</Recap>
