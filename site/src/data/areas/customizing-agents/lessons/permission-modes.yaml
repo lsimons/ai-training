@@ -1,12 +1,21 @@
 id: customizing-agents/permission-modes
 title: Choosing a permission mode per task
+description: >-
+  Run one small task with a coding agent in a mode that asks before everything and in one that
+  accepts edits, count the prompts, and choose the mode by what a mistake would cost.
 mode: tutorial
 covers: customizing-agents/hooks-permissions
 serves: [customizing-agents/configures-agent/sets-permissions]
 introduces: [permission-modes]
 assumes:
   - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
   - objective: coding-with-agents/ships-with-agent/runs-a-session
+    lesson: coding-with-agents/first-session
+    section: the-first-change-and-the-permissions-prompt
+sources-checked: 2026-09-21
+review-by: 2027-03-21
 after: [customizing-agents/instructions]
 shorts:
   - Running unattended inside a sandbox or a disposable worktree (Academy claude-code-in-action)
@@ -15,6 +24,10 @@ exercise:
   brief: >-
     Run the same small fixture task in an ask-everything mode and in an accept-edits mode, count the
     prompts, and write one line on which mode fits the task and why.
-sources: []
-issue: 177
+sources: [Claude Code permission modes]
 minutes: 15
+notes: >-
+  The fixture task reuses the first-session to-do repository, with the brief telling the agent to
+  leave the known failing test alone. The modes.py fixture is a three-mode model of the vendor's
+  table; the page says the real counts may differ by one or two. Mode names, flags and behavior
+  come from code.claude.com/docs/en/permission-modes and must be re-checked by review-by.
