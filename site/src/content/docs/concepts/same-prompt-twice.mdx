@@ -130,10 +130,9 @@ One run in ten differs from the rest, at the lowest temperature there is. In
 the toy the difference is a full stop. In a real model the swapped token
 is somewhere in the middle of a long answer, and every token after it is predicted
 from a slightly different prefix, so two temperature-0 answers can share
-their first sentence and part ways after it. The public course on the
-Claude API describes temperature as a setting that makes output more or
-less consistent, and more consistent is as far as the promise goes
-(@Academy building-with-the-claude-api).
+their first sentence and part ways after it. The Messages API reference
+says the same about the real thing: even at a temperature of 0 the results
+aren't fully deterministic (@Claude docs messages).
 
 Put the two results together. At temperature 1 a run can pick a wrong
 answer that has a few percent of the probability. At temperature 0 a run
@@ -182,8 +181,12 @@ needs a check that accepts the variation that doesn't matter and rejects
 the variation that does.
 
 For this question the check is short: does the answer name Canberra? Any
-wording that names it passes, and the Sydney answer fails. `--check` applies it to every run and
-adds a second summary line.
+wording that names it passes, and the Sydney answer fails. A check this
+loose is fine here because a person reads the answer, and a person reads
+"It's Canberra." and "Canberra" as the same fact. When a program reads the
+answer, as in the ticket system of the pitfall, the wording is part of
+what the check has to pin down. `--check` applies the check to every run
+and adds a second summary line.
 
 <Predict id="run-checked" title="Ten runs with the check applied"
   answer={`What is the capital of Australia? (temperature 1.0, 10 runs)
@@ -241,10 +244,11 @@ job?
 
 <Exercise stretch="Change the check in sample.py so that only the bare word Canberra passes, run the ten temperature-1 runs again, and decide whether the stricter check helped the workflow or hurt it.">
 
-Run `sample.py` ten times at temperature 0.3 and ten times at temperature
-1.5, each with three different seeds, and note the two summary counts
-each time: how many runs agree with run 1, and with `--check`, how many
-pass. Put the twelve numbers in a small table. Then write the check a
+Run `sample.py --runs 10 --check` six times: at temperature 0.3 and at
+temperature 1.5, each with three different seeds. The temperature scale is
+the toy's own, and a real model's scale differs. Each run prints both
+counts, how many runs agree with run 1 and how many pass the check, so
+note both. Put the twelve numbers in a small table. Then write the check a
 workflow that used this model would need, in one or two sentences, and
 say which wording differences it accepts and which answers it rejects. Ten
 minutes is enough. Doing this once with numbers in front of you is what
@@ -267,8 +271,9 @@ told you?
    better prompt narrows the variation and doesn't end it.
 2. Temperature 0 puts the probability on the top candidate and removes
    most of the variation. It doesn't remove it all, because a real model
-   computes its scores on hardware whose rounding depends on what else is
-   being served, and a near tie can swap.
+   computes its scores in batches with other requests, the rounding
+   follows the order of the arithmetic in the batch, and a near tie can
+   swap.
 3. One good run is a sample of size one. It shows that an answer can
    come up, and says nothing about how often it does or what a bad run
    looks like.

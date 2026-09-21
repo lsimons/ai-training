@@ -26,8 +26,8 @@ exercise:
   brief: >-
     Run the sampling fixture ten times at two temperatures, tabulate how often the answers agree,
     and write the check a workflow would need to accept that variation.
-sources: [Academy ai-capabilities-and-limitations, Academy building-with-the-claude-api]
-minutes: 12
+sources: [Academy ai-capabilities-and-limitations, Claude docs messages]
+minutes: 15
 notes: >-
   The live lesson shows that two runs differ and why. This lesson adds the consequence for a
   process: one good run proves nothing about a prompt, variation remains at the lowest temperature,
