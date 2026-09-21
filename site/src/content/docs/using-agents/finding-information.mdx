@@ -15,8 +15,8 @@ your model gives a different text.
 ## The text
 
 Here is the material. It is a fictional guideline from a fictional company,
-about the length of a page and a half in the original. Read it once now, so
-that you can judge the answers later.
+kept short on purpose so that you can check every answer against it. Read
+it once now, so that you can judge the answers later.
 
 > **Brindlewick Instruments: expenses and travel guideline**
 >
@@ -61,7 +61,7 @@ that you can judge the answers later.
 
 The question we work with is the one a new hire asks in their first week:
 "What do I need to know about expenses before my first trip?" You don't
-know this text, so you can't judge an answer to it by feel. That is the
+know this text, so you can't judge an answer to it by feel. That's the
 normal situation when you ask an assistant to find information. The point
 of this lesson is to ask in a way that lets you check the answer anyway.
 
@@ -90,11 +90,12 @@ office desk or chair within their first three months. Questions go to the
 finance team during their office hours on Tuesdays and Thursdays.
 </Response>
 
-You probably got something like this. It is a fair paragraph with two
-problems. "Need receipts" drops the 10-euro line. "A daily limit" and "a
-fixed rate" leave out the numbers, and the numbers are what a newcomer
-asks about next. The bigger problem is how you found that out. You had to read the whole
-guideline again and hold it against the paragraph. The summary saved you nothing.
+You probably got something like this. It is a fair paragraph. "Need
+receipts" drops the 10-euro line, and "a daily limit" and "a fixed rate"
+leave out the numbers, which are what a newcomer asks about next. The
+bigger problem is how you found that out. You had to read the whole
+guideline again and hold it against the paragraph. The summary saved you
+nothing.
 
 That result is the model's default when the prompt leaves everything unsaid,
 as you saw when you rebuilt a one-line request into a prompt. "Summarize
@@ -136,18 +137,18 @@ guideline does not answer something, tell me that instead of guessing.
 </Response>
 
 Compare this with the paragraph. Each claim now comes with the place in the
-text it rests on, so checking it is a search for a sentence rather than a
-second reading. Try it on your own result: search the guideline for each
-quoted sentence.
+text it rests on, and checking it is a search for one sentence. Try it on
+your own result: search the guideline for each quoted sentence.
 
 Do the same on the illustrative answer and the third quote fails. The
 guideline has "Meals on a business trip are reimbursed against receipts up
-to 35 euros per day" and then, as a separate sentence, "Alcohol is not
+to 35 euros per day" and then, as a separate sentence, "Alcohol isn't
 reimbursed". The model joined two sentences into one and presented the
-result as a quote. The fact is right, and the quote is not one. Without the
-brief you would never have seen the join, and next time the join could be
-between a rule and something the model added. Asking for the source of each
-claim makes the answer checkable, and the check takes a minute.
+result as a quote. The fact is right, and the quote isn't in the text.
+Without the brief you would never have seen the join, and next time the
+join could be between a rule and something the model added. Asking for the
+source of each claim makes the answer checkable, and the check takes a
+minute.
 
 <Choice id="which-ask-is-checkable" objective="using-agents/delegates-and-checks/writes-a-brief"
   concepts={['finding-information']}
@@ -165,9 +166,9 @@ gives you an answer you can check against the text in a minute?
 
 <Repair id="fix-the-ask" objective="using-agents/delegates-and-checks/writes-a-brief"
   concepts={['finding-information', 'giving-context']}
-  title="Fix the ask" hint="Where should the answer come from, how does each claim show where it came from, and what should the model do when the text is silent?"
+  title="Fix the ask" hint="How would the colleague have caught the two invented rules before relying on them?"
   broken={`I attached our travel policy. What are the rules for booking flights?`}
-  model={`Using only the travel policy pasted below the line, list the rules for booking a flight. Quote the sentence from the policy that each rule comes from, word for word. If the policy does not say something, say that it does not, and do not fill it in from general knowledge.`}>
+  model={`Using only the attached travel policy, list the rules for booking a flight. Quote the sentence from the policy that each rule comes from, word for word. If the policy does not say something, say that it does not, and do not fill it in from general knowledge.`}>
 A colleague sends this to their assistant, gets a confident list of six
 rules, and later finds that two of them are not in the policy. Rewrite the
 ask so that every rule in the answer can be checked against the policy.
@@ -176,8 +177,8 @@ ask so that every rule in the answer can be checked against the policy.
 ## The same question from memory
 
 Now ask the newcomer's question without the guideline. Open a fresh chat
-and type only the question, with a specific in it that you already know
-the answer to.
+and type only the question, with a specific detail in it that you already
+know the answer to.
 
 <Prompt model="illustrative" recorded="illustrative">
 I am starting a new job and about to make my first business trip. What is
@@ -197,20 +198,20 @@ Read that answer as the newcomer would. It has a hedge at the start and a
 hedge at the end, and between them it gives four specific numbers and a
 rule about receipts. Every one of them is wrong for Brindlewick, where the
 deadline is 14 days, there is no per diem, the meal limit is 35 euros, and
-every meal needs a receipt. The prose is as confident as the answer that
-came with quotes. In the lesson on how models work you saw why. The
+a meal above 10 euros needs a receipt. The prose is as confident as the
+answer that came with quotes. In the lesson on how models work you saw why. The
 specifics are where a model has the fewest examples behind its prediction,
 so it fills the gap with something of the right form. The model has never
 seen the guideline, and a general answer about companies is the most likely
 text for a question that names none.
 
-<Pitfall title="Repeating a specific the model remembered">
+<Pitfall title="Repeating a detail the model remembered">
 A new hire asks an assistant, without the guideline, whether they can
 expense a taxi from the airport, and gets "yes, taxis to and from airports
 are normally reimbursed". They take the taxi and claim it. Finance rejects
 the claim, because the guideline pays for a taxi only when there was no
 public transport at that hour and the claim says so. The answer was general
-knowledge dressed as a specific. The rule: supply the material, ask for the
+knowledge dressed as a company rule. Supply the material and ask for the
 source of each claim, and check anything you will repeat or act on.
 </Pitfall>
 
@@ -233,17 +234,16 @@ tell them to do before they rely on it?
 
 Finding information with an assistant is fast when you give it the
 material and slow when you don't, because without the material the time
-moves to checking. The brief you wrote in this lesson names the source and
-says it is the only one, asks for the sentence behind each claim, and tells
-the model what to do when the text is silent. With the quotes in hand,
-checking what you will repeat is a search rather than a second reading
-(@Academy claude-101).
+moves to checking. The brief you wrote in this lesson has one line for
+each part of that: the source and that it is the only one, the sentence
+behind each claim, and what to do when the text is silent. With the quotes
+in hand, checking what you will repeat takes a minute.
 
 The same brief works for a contract, a set of meeting notes, a long email
 thread or a product manual. When the assistant has a search tool and the
 source is the web, the quote becomes a link, and the check is opening it.
-Either way, an answer whose source you can't name is an answer you can't
-repeat.
+Either way, before you repeat an answer you should be able to name where
+it came from.
 
 <Exercise stretch="Ask a fourth question that the guideline does not answer, such as whether a hotel breakfast counts as a meal, and see whether the assistant says so or fills it in.">
 Open a fresh chat and paste the Brindlewick guideline from this page. Send
@@ -252,7 +252,7 @@ must know with a quote for each. Then search the guideline for every quote
 and write down, for each of the three, whether it is there word for word,
 there in different words, or not there at all. This takes about five
 minutes and leaves you with a three-line table. Doing it once by hand is
-what makes the check a habit rather than an idea. A good result is a table
+what turns the check into a habit. A good result is a table
 where every row has a verdict you could show to someone else. What would
 you have done with the answer if you hadn't asked for the quotes?
 </Exercise>
@@ -260,7 +260,7 @@ you have done with the answer if you hadn't asked for the quotes?
 <Recap>
 1. An assistant is fast at orientation in a text you supply, and unreliable on specifics from memory alone.
 2. "Summarize this" gives you a paragraph you can only check by reading the source again.
-3. A brief for finding information names the source and says it is the only one, asks for the sentence behind each claim, and says what to do when the text is silent.
+3. A brief for finding information gives the assistant the material, marks it as the only source, and asks for the sentence behind each claim and for a plain "the text doesn't say" where there is none.
 4. Check the quotes. A quote that is not in the text, even when the fact is right, shows where the model joined or added something.
-5. A confident specific from memory is the most likely text, and it is never a looked-up fact. Check anything you will repeat or act on (@Academy claude-101).
+5. A confident detail from memory is the most likely text for the question, and the model didn't look it up. Confidence in the prose says nothing about the fact (@Academy ai-capabilities-and-limitations).
 </Recap>
