@@ -323,3 +323,28 @@ Concepts had one live lesson. Every branch added its sidebar line at the
 same spot, and the coordinator resolved those add/add conflicts on the wave
 branch by keeping every line in course order, since no builder's work was
 at stake.
+
+## Session record, 2026-09-21, wave 5
+
+Ten lesson issues, the first unwritten lesson or two of each of the six
+courses (#113, #115, #129, #131, #133, #147, #151, #177, #185, #188), became
+ten branches and one wave pull request, #229, merged about ninety minutes
+after the first builder started. Three earlier-in-course candidates were
+skipped because their `assumes` named a planned lesson, which `mise run data`
+rejects. Twenty review passes: every first review said needs changes, every
+re-check approved, zero merged with an open finding. Review caught an
+overstated claim that an abstain instruction changes nothing, a hedge about
+temperature 0 attributed to an Academy page that says the opposite, a
+done-criterion the lesson's own model answer failed, a page that promised no
+pasting and then asked for it, a git worktree presented as isolation for
+bypass mode against the vendor docs, a graded prediction whose answer
+depended on code the page never showed, and four sort items with two
+defensible buckets. Two things for the builder prompt: `mise run prose` and
+`mise run spell` read `git ls-files`, so a builder must stage the new page
+before trusting either (one branch shipped twelve Vale errors that way), and
+two builders adding a bibliography key both reflowed the S02 source table,
+so name the key pattern (`Claude docs <slug>`) and say not to add a table
+row. The coordinator resolved the add/add conflicts in the word list, the
+source table and the bibliography by keeping every line, squashed one branch
+whose second commit reverted part of its first, and delegated the e2e fix
+for two specs that assumed Concepts had six live lessons.
