@@ -2,13 +2,16 @@ import { buildCatalog, orderByPlan } from '@lib/catalog';
 import type { Lesson } from '@lib/lessons';
 import { describe, expect, it, vi } from 'vitest';
 
-// The safety plan lists `deeper` before `agent-risk`, the reverse of id order, and
-// `concepts` has no plan file at all.
+// The safety course lists `deeper` before `agent-risk`, the reverse of id order, and
+// `concepts` has no course file at all.
 vi.mock('astro:content', async () => {
 	const { courses, mockContent } = await import('./content');
-	const safety = courses.find((c) => c.id === 'safety');
+	const safety = courses.find((c) => c.data.id === 'safety');
 	if (!safety) throw new Error('no safety fixture');
-	const reversed = { ...safety, data: { ...safety.data, lessons: [...safety.data.lessons].reverse() } };
+	const reversed = {
+		...safety,
+		data: { id: 'safety', area: 'safety', lessons: ['safety/deeper', 'safety/agent-risk', 'safety/coming'] },
+	};
 	return mockContent({ courses: [reversed] });
 });
 
@@ -28,7 +31,7 @@ describe('buildCatalog', () => {
 			'safety/deeper',
 			'safety/agent-risk',
 		]);
-		// No plan file: id order.
+		// No course file: id order.
 		expect(catalog.find((c) => c.area === 'concepts')?.lessons.map((l) => l.id)).toEqual(['concepts/how-models-work']);
 	});
 });

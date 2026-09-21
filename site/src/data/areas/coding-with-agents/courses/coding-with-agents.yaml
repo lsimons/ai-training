@@ -1,0 +1,47 @@
+id: coding-with-agents
+area: coding-with-agents
+plan-issue: 33
+notes: >-
+  Order follows the prerequisite edges in spec S02: first-session, then specification, then
+  workflow, then context, then verification, quality and team, with sandboxing and red-teaming as a
+  late part of their own.
+parts:
+  - title: Running a coding agent
+    lessons: [coding-with-agents/first-session, coding-with-agents/keys-and-secrets]
+  - title: Deciding and specifying
+    lessons: [coding-with-agents/deciding-what-to-build, coding-with-agents/decomposing-the-work]
+  - title: Plan, implement, verify
+    lessons:
+      - coding-with-agents/plan-then-test
+      - coding-with-agents/spec-driven-increments
+      - coding-with-agents/reversible-changes
+  - title: Context engineering for code
+    notes: >-
+      Staying the engineer who understands the system covers the workflow topic and closes this part,
+      because it looks back over the plan, implement, verify and context lessons at the expert level.
+    lessons:
+      - coding-with-agents/scoping-and-referencing
+      - coding-with-agents/project-instructions
+      - coding-with-agents/keeping-understanding
+  - title: Verifying agent work
+    lessons:
+      - coding-with-agents/reviewing-the-diff
+      - coding-with-agents/observing-and-debugging
+      - coding-with-agents/self-checking-loops
+  - title: Quality with agents
+    lessons:
+      - coding-with-agents/tests-and-docs-that-hold
+      - coding-with-agents/dependency-review
+      - coding-with-agents/security-review
+  - title: Sandboxing and red-teaming
+    notes: >-
+      Two lessons that sit late on purpose. Sandboxing covers the first-session topic (issue #18, low
+      priority), and red-teaming your own agent covers verification and needs a sandbox where nothing
+      real can be damaged.
+    lessons: [coding-with-agents/sandboxing, coding-with-agents/red-teaming-your-agent]
+  - title: Agents in a team
+    lessons:
+      - coding-with-agents/attribution-and-review-norms
+      - coding-with-agents/ci-and-hooks
+      - coding-with-agents/parallel-sessions
+      - coding-with-agents/team-practice

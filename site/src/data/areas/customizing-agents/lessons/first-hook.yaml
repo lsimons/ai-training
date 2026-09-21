@@ -1,0 +1,22 @@
+id: customizing-agents/first-hook
+title: Writing a hook that blocks a mistake
+mode: tutorial
+covers: customizing-agents/hooks-permissions
+serves: [customizing-agents/configures-agent/adds-a-hook]
+introduces: [hooks]
+assumes:
+  - objective: coding-with-agents/verifies-agent-work/automates-the-check
+after: [customizing-agents/allowlists]
+shorts:
+  - The hook exit-code contract, and what the agent sees when a hook blocks (Academy claude-code-101)
+exercise:
+  kind: do
+  brief: >-
+    Write a pre-tool hook that rejects a commit when the lockfile changed and the manifest did not,
+    with the message that says what to do, then make the mistake on purpose and watch it fire.
+sources: []
+issue: 184
+minutes: 15
+notes: >-
+  The pitfall carries the rule from when-instructions-are-not-enough: a rule that must hold every
+  time is a hook, and guidance stays an instruction.

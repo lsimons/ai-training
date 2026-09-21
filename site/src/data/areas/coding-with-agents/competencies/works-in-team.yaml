@@ -1,0 +1,84 @@
+id: coding-with-agents/works-in-team
+area: coding-with-agents
+statement: Works with agents alongside a team
+topics: [coding-with-agents/team, coding-with-agents/workflow]
+objectives:
+  - id: coding-with-agents/works-in-team/attributes-honestly
+    statement: Attributes agent work honestly in commits and reviews
+    level: base
+    behaviors:
+      - claim: Commits and pull requests say that an agent wrote the change, in the form the team agreed on.
+        why: Reviewers read agent-written and human-written changes differently, and they need to know which
+          one they have.
+        example: The commit trailer names the agent and model, per the repository's convention, on every
+          agent-authored commit.
+      - claim: The learner takes responsibility for the change as its author, and the attribution does not
+          shift blame to the tool.
+        why: The person who submitted the change is accountable, and the tool is not.
+        example: In the review the learner writes "I asked the agent for this and I checked it", instead of
+          "the agent did this".
+      - claim: The learner keeps the attribution form the project asks for, including what it forbids.
+        why: Some projects need a certificate of origin only a person can sign, and an agent's sign-off is
+          not valid.
+        example: The learner adds the assisted-by trailer and leaves out `Signed-off-by` because the project
+          says only humans certify.
+  - id: coding-with-agents/works-in-team/follows-team-norms
+    statement: Follows the team's review and CI norms for agent changes
+    level: base
+    behaviors:
+      - claim: Agent-written changes go through the same review and CI gates as any other change, and the
+          learner does not bypass them because "the agent tested it".
+        why: The gates exist for changes from anyone, and an agent's tests are part of the change under
+          review.
+        example: The learner waits for CI and a reviewer's approval on the agent's pull request instead of
+          merging it themselves.
+      - claim: The learner sizes and labels agent changes so reviewers can read them.
+        why: A reviewer who receives a 3000-line agent diff either skips it or blocks it.
+        example: The learner splits the generated change into three pull requests and marks them as
+          agent-assisted in the title, as the team asked.
+      - claim: The learner reads and follows the team's agent instructions file before starting, and
+          proposes changes to it instead of working around it.
+        why: The file is the team's shared agreement, and a session that ignores it makes changes the team
+          rejects.
+        example: The instructions say "no new dependencies without an issue", so the learner opens the issue
+          first.
+  - id: coding-with-agents/works-in-team/runs-parallel-work
+    statement: Runs several agent sessions without losing coherence
+    level: expert
+    behaviors:
+      - claim: Each parallel session works in its own checkout or worktree on its own branch, with a task
+          that does not overlap the others.
+        why: Two agents editing the same files produce conflicts that cost more than the parallelism saved.
+        example: The learner briefs one agent on the API change and another on the documentation, in two
+          worktrees, and merges the API first.
+      - claim: The learner keeps a written list of what each session is doing and what state it is in.
+        why: A person can follow only one session closely at a time, and a forgotten session is a session
+          that finished the wrong way.
+        example: "A short note per session: branch, task, next check-in, and whether it is waiting on the
+          learner."
+      - claim: The learner integrates often and in a fixed order, and rebases the rest.
+        why: Parallel branches drift, and the longer they live the harder they merge.
+        example: Every afternoon the learner merges the finished branches into main and has the remaining
+          sessions rebase before they continue.
+      - claim: Shared resources (ports, databases, the stash, credentials) are either per session or left
+          alone.
+        why: Sessions that share a port or a stash interfere with each other without any visible conflict.
+        example: The learner tells each agent not to start the dev server, because the port is shared, and
+          to run the build instead.
+  - id: coding-with-agents/works-in-team/sets-team-practice
+    statement: Sets the team's practice for agent use
+    level: expert
+    behaviors:
+      - claim: "The learner writes the team's agent practice down where the team and the agents read it:
+          what agents may do, how work is attributed, how it is reviewed."
+        why: Unwritten practice is a different practice per person, and the agents follow none of them.
+        example: The repository's `AGENTS.md` says what the CI gate is, what a commit trailer looks like,
+          and which directories agents may not touch.
+      - claim: The practice starts from the mistakes the team has seen and changes when the mistakes change.
+        why: A practice written from imagination guards against the wrong things.
+        example: After two incidents of agents committing generated lockfiles, the team adds a hook and a
+          line in the instructions, and removes a rule that never triggered.
+      - claim: The learner makes the practice checkable by tooling where possible.
+        why: A rule enforced by a hook is followed every time, and a rule in a document is followed by
+          whoever read it.
+        example: A lint hook checks the commit message format, and CI checks the attribution trailer.

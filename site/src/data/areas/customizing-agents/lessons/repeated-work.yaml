@@ -1,0 +1,26 @@
+id: customizing-agents/repeated-work
+title: Turning repeated work into something the agent keeps
+mode: explanation
+covers: customizing-agents/memory
+serves:
+  - customizing-agents/configures-agent/manages-memory
+  - customizing-agents/configures-agent/adds-a-hook
+introduces: [turning-repeated-work-into-reusable-knowledge]
+assumes:
+  - objective: safety/judges-agent-risk/chooses-human-in-loop
+after: [customizing-agents/session-handoff, customizing-agents/first-hook]
+shorts:
+  - Hooks as approval gates in a team's delivery pipeline (Academy ai-native-sdlc-playbook)
+exercise:
+  kind: judge
+  brief: >-
+    Read three session transcripts that each work out how to regenerate the API client and repeat
+    two corrections, decide for each repeated step whether it becomes an instruction, a skill, a
+    hook or a context file entry, and delete the instruction lines a hook now enforces.
+sources: []
+issue: 197
+minutes: 15
+notes: >-
+  This is the one lesson where the learner makes the full instruction, skill, hook or context file
+  decision; it serves adds-a-hook through its first behavior, a hook for a rule that must hold every
+  time.

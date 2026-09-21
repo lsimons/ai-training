@@ -1,0 +1,31 @@
+id: building-agents/how-a-model-calls-a-tool
+title: What a tool call looks like on the wire
+mode: explanation
+covers: building-agents/tool-use
+serves: [building-agents/builds-agent-loop/defines-a-tool]
+introduces: [function-calling, n-x-m-integration-problem]
+assumes:
+  - objective: concepts/recognizes-agents/names-the-loop
+after: []
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    Given the live lesson's fake model reply `{"tool": "get_weather", "args": {"city": "Lisbon"}}`
+    and the tool's result, write the three real API messages they become (the tool request block
+    with its id, the tool result message that quotes that id, and the final text reply), then mark
+    which field plays the role of the fake model's `answer` key.
+sources:
+  - Academy building-with-the-claude-api
+  - Academy claude-platform-101
+  - Academy introduction-to-model-context-protocol
+issue: 182
+minutes: 10
+notes: >-
+  The content the live lesson leaves out on purpose: one full request (system prompt, tool
+  definitions with a JSON schema, message list) and one full response, then the tool result message
+  and the second request that carries the whole history again. Shows how the fake model's `tool` and
+  `answer` keys map onto the request block, its id and the stop reason (Academy building-with-the-claude-api, Academy claude-platform-101). The N x M problem closes the lesson
+  and sets up agent-protocols (Academy introduction-to-model-context-protocol). Until the live
+  lesson page gains an `assumes` that points here, both lessons render at the top row, because a
+  live entry takes its place from its page. The live lesson's follow-up issue should add it.

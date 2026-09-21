@@ -1,0 +1,23 @@
+id: building-agents/orchestration-tax
+title: What every extra agent costs
+mode: explanation
+covers: building-agents/orchestration
+serves: [building-agents/orchestrates-agents/justifies-orchestration-cost]
+introduces: [orchestration-tax]
+assumes: []
+after: [building-agents/orchestrating-agents, building-agents/golden-sets]
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    Given the fixture's scores and token counts for a three-agent design and a single agent on the
+    same golden set, decide which to keep and write where the score difference came from.
+sources: [Academy claude-platform-101]
+issue: 210
+minutes: 12
+notes: >-
+  Handoff tokens, latency, information lost at each boundary and new failure modes, with the token
+  count of each arrangement from the previous lesson's fixture as the worked example. Before a
+  second agent, name what the single agent cannot do, and check whether compaction or just-in-time
+  loading fixes it inside one context first (Academy claude-platform-101). Checkpoints are scenario
+  and choice.

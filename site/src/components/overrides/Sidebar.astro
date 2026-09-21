@@ -8,17 +8,23 @@
  * `styles/custom.css` with the other sidebar rules.
  */
 import Default from '@astrojs/starlight/components/Sidebar.astro';
+import { getAreas } from '@lib/areas';
+
+// The course list comes from the data tree on the server; the client script reads it from the attribute.
+const courses = (await getAreas()).map((a) => ({ area: a.slug, title: a.name }));
 ---
 
 <Default {...Astro.props}><slot /></Default>
+<script is:inline type="application/json" data-sidebar-courses set:html={JSON.stringify(courses)} />
 
 <script>
-	import { AREAS } from '@lib/areas';
 	import { dueByCourse, dueCountLabel } from '@scripts/due-counts';
 	import * as progress from '@scripts/progress';
 
 	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-	const courses = AREAS.map((a) => ({ area: a.slug, title: a.name }));
+	const courses: { area: string; title: string }[] = JSON.parse(
+		document.querySelector('[data-sidebar-courses]')?.textContent ?? '[]'
+	);
 
 	/** The course links in the sidebar. The count element exists only while something is due. */
 	const links = new Map<string, HTMLAnchorElement>();

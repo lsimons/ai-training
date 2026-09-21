@@ -1,0 +1,23 @@
+id: using-agents/thought-partner
+title: Thinking a problem through with an assistant
+mode: tutorial
+covers: using-agents/assistant-work
+serves: [using-agents/delegates-and-checks/writes-a-brief]
+introduces: [thought-partner]
+assumes:
+  - objective: concepts/prompts-reliably/structures-a-prompt
+  - objective: safety/verifies-output/spots-sycophancy
+after: []
+shorts: [Why a model agrees with your framing]
+exercise:
+  kind: do
+  brief: >-
+    Describe a decision you face in five lines, ask the assistant to argue against your preferred
+    option and to list what you have not mentioned, then write down the one point that changed your
+    view.
+sources: []
+issue: 139
+minutes: 10
+notes: >-
+  The plan named the topic concepts/prompting as assumed; taken as the objective
+  concepts/prompts-reliably/structures-a-prompt.

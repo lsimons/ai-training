@@ -1,0 +1,21 @@
+id: safety/checking-what-an-agent-changed
+title: Checking what an agent changed
+mode: tutorial
+covers: safety/verification
+serves: [safety/verifies-output/calibrates-trust]
+introduces: [trust-but-verify-for-agents]
+assumes:
+  - objective: concepts/recognizes-agents/tells-agent-from-assistant
+after: [safety/checking-habits]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    For one agent task you have seen or read about, list the effects to inspect afterwards (what
+    changed and what was sent) and the one step that needs a pause first.
+sources: []
+issue: 128
+minutes: 15
+notes: >-
+  A fixture replays a recorded agent session as file changes and prints the before and after, so the
+  learner checks effects against the request without running an agent.

@@ -1,0 +1,21 @@
+id: safety/tracing-a-planted-instruction
+title: Tracing a planted instruction to the tool that leaks
+mode: tutorial
+covers: safety/agent-risk
+serves: [safety/judges-agent-risk/recognizes-injection]
+introduces: []
+assumes: []
+after: [safety/agent-risk]
+shorts: [Why a model cannot tell data from commands]
+exercise:
+  kind: judge
+  brief: >-
+    For an assistant you use that reads content you did not write, name the outbound abilities it
+    has and which one you would remove or gate for a summarizing task.
+sources: []
+issue: 132
+minutes: 15
+notes: >-
+  Introduces no concept: deepens prompt-injection and exfiltration with a fixture that simulates an
+  agent reading a page with a planted line under three permission sets and prints, for each, whether
+  data leaves and by which tool.

@@ -1,0 +1,19 @@
+id: coding-with-agents/observing-and-debugging
+title: Reproducing a fault before the agent fixes it
+mode: tutorial
+covers: coding-with-agents/verification
+serves: [coding-with-agents/verifies-agent-work/observes-and-debugs]
+introduces: [observing-a-running-system, isolating-a-fault]
+assumes: []
+after: [coding-with-agents/reviewing-the-diff]
+shorts: [bisecting a change with the agent as a pair]
+exercise:
+  kind: do
+  brief: >-
+    Turn a "sometimes fails" report against the fixture into reproduction steps, read the log to
+    rule out one cause, halve the remaining ones, and only then brief the agent with the confirmed
+    cause.
+sources: [Brilliant VER]
+issue: 172
+minutes: 15
+notes: "Sources: Brilliant VER-4, VER-5."

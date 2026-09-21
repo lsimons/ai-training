@@ -15,8 +15,7 @@ const entry = lessonEntryOf(Astro);
 const data = entry.data;
 const competencies = await getCollection('competencies');
 const objectives = new Map<string, string>();
-for (const area of competencies)
-	for (const c of area.data.competencies) for (const o of c.objectives) objectives.set(o.id, o.statement);
+for (const c of competencies) for (const o of c.data.objectives) objectives.set(o.id, o.statement);
 const served = (data.serves ?? []).map((id) => ({ id, statement: objectives.get(id) }));
 const missing = served.filter((s) => !s.statement).map((s) => s.id);
 if (missing.length) throw new Error(`${entry.id}: serves unknown objective(s): ${missing.join(', ')}`);

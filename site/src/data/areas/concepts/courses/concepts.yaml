@@ -1,0 +1,32 @@
+id: concepts
+area: concepts
+plan-issue: 30
+notes: >-
+  Order follows the prerequisite edges in spec S02: how-models-work, then prompting and limits, then
+  what-is-an-agent, then grounding.
+parts:
+  - title: How language models work
+    notes: >-
+      Five concepts: two lessons here, model-family-and-size in concepts/what-tokens-cost.
+    lessons: [concepts/how-models-work, concepts/context-window]
+  - title: Prompting
+    notes: "Five concepts, tutorial side: five lessons."
+    lessons:
+      - concepts/prompt-anatomy
+      - concepts/one-example
+      - concepts/structured-output
+      - concepts/system-prompt
+      - concepts/iterating-on-a-prompt
+  - title: Capabilities and limits
+    notes: "Six concepts: four lessons."
+    lessons:
+      - concepts/thin-path
+      - concepts/same-prompt-twice
+      - concepts/straight-answer
+      - concepts/what-tokens-cost
+  - title: What an agent is
+    notes: "Five concepts: three lessons; hub for five topics in other areas."
+    lessons: [concepts/agent-loop, concepts/assistant-or-agent, concepts/autonomy-scale]
+  - title: Grounding and memory
+    notes: "Four concepts: two lessons."
+    lessons: [concepts/retrieval, concepts/memory]

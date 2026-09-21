@@ -1,5 +1,5 @@
-import { getCollection } from 'astro:content';
-import { AREAS } from './areas';
+import { getAreas } from './areas';
+import { getAllCoursePlans } from './courses';
 import { checkpointsOf, getLessons, type Lesson } from './lessons';
 
 /** The site's courses and lessons in path order, serializable for client scripts. */
@@ -21,9 +21,10 @@ export interface CatalogCourse {
 }
 
 /**
- * Path order (spec S04 "Progress display"): the order of the course plan file
- * (site/src/data/courses/<area>.yaml). A lesson page the plan doesn't name goes
- * after the planned ones, in id order, so it is never lost from the catalog.
+ * Path order (spec S04 "Progress display"): the order of the course plan
+ * (site/src/data/areas/<area>/courses/<area>.yaml). A lesson page the plan
+ * doesn't name goes after the planned ones, in id order, so it is never lost
+ * from the catalog.
  */
 export function orderByPlan(lessons: Lesson[], planIds: string[]): Lesson[] {
 	const rank = new Map(planIds.map((id, i) => [id, i]));
@@ -33,9 +34,9 @@ export function orderByPlan(lessons: Lesson[], planIds: string[]): Lesson[] {
 
 export async function buildCatalog(): Promise<CatalogCourse[]> {
 	const lessons = await getLessons();
-	const plans = await getCollection('courses');
-	return AREAS.map((a) => {
-		const planIds = plans.find((p) => p.data.area === a.slug)?.data.lessons.map((e) => e.id) ?? [];
+	const plans = await getAllCoursePlans();
+	return (await getAreas()).map((a) => {
+		const planIds = plans.filter((e) => e.id.startsWith(`${a.slug}/`)).map((e) => e.id);
 		return {
 			area: a.slug,
 			title: a.name,

@@ -1,0 +1,22 @@
+id: using-agents/drafting-and-critique
+title: Drafting a text and asking for critique
+mode: tutorial
+covers: using-agents/assistant-work
+serves:
+  - using-agents/delegates-and-checks/writes-a-brief
+  - using-agents/delegates-and-checks/reviews-against-brief
+introduces: [drafting, critique]
+assumes:
+  - objective: concepts/prompts-reliably/structures-a-prompt
+  - objective: safety/verifies-output/spots-sycophancy
+after: [using-agents/thought-partner]
+shorts: [Grading against stated criteria]
+exercise:
+  kind: do
+  brief: >-
+    Brief the assistant for a short email (audience, purpose, two points that must appear, tone),
+    then hand the draft back as "a colleague's text" with three stated criteria and ask for problems
+    only. Compare the two answers.
+sources: []
+issue: 142
+minutes: 15

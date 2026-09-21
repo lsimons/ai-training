@@ -1,0 +1,26 @@
+id: coding-with-agents/red-teaming-your-agent
+title: Attacking your own agent before someone else does
+mode: tutorial
+covers: coding-with-agents/verification
+serves: [coding-with-agents/verifies-agent-work/screens-for-security]
+introduces: [red-teaming-your-own-agent]
+assumes:
+  - objective: safety/judges-agent-risk/recognizes-injection
+  - objective: safety/judges-agent-risk/names-blast-radius
+after: [coding-with-agents/sandboxing, coding-with-agents/self-checking-loops]
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    In the sandboxed fixture, plant a file with hidden instructions and ask for an action the
+    permissions should stop, record what the agent did, and turn each finding into a permission
+    change, an instruction or a gate.
+sources: []
+issue: 180
+minutes: 15
+notes: >-
+  The plan named the topic safety/agent-risk as assumed; taken as the objective
+  safety/judges-agent-risk/names-blast-radius. Closes the "adversarial prompting of one's own agent"
+  gap from issue #13. Placed after sandboxing because the topic YAML says to do this where nothing
+  real can be damaged. It assumes recognizing injection from safety/agent-risk and tests the
+  learner's own agent, which is the security screen.

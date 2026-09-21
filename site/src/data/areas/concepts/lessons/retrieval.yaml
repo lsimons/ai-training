@@ -1,0 +1,17 @@
+id: concepts/retrieval
+title: Answers from documents the model never saw
+mode: tutorial
+covers: concepts/grounding
+serves: [concepts/explains-models/explains-grounding]
+introduces: [retrieval-rag, grounding]
+assumes: []
+after: [concepts/agent-loop]
+shorts: [keyword search versus similarity search]
+exercise:
+  kind: do
+  brief: >-
+    Search a small folder of policy texts with the retrieval fixture, ask a question in other words
+    than the document uses, and record what the search missed.
+sources: []
+issue: 149
+minutes: 15

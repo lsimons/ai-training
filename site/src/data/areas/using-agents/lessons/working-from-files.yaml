@@ -1,0 +1,18 @@
+id: using-agents/working-from-files
+title: Working from your own files and images
+mode: tutorial
+covers: using-agents/assistant-work
+serves: [using-agents/delegates-and-checks/writes-a-brief]
+introduces: [working-with-files-and-images]
+assumes:
+  - objective: safety/handles-data-safely/decides-what-to-share
+after: [using-agents/finding-information]
+shorts: [What an upload discloses]
+exercise:
+  kind: do
+  brief: >-
+    Upload a supplied screenshot of a table, ask for it as rows you can paste into a spreadsheet,
+    and count the cells that came back wrong.
+sources: []
+issue: 136
+minutes: 10

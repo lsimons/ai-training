@@ -1,0 +1,30 @@
+id: coding-with-agents/project-instructions
+title: Writing project instructions the agent reads every session
+mode: tutorial
+covers: coding-with-agents/context
+serves:
+  - coding-with-agents/ships-with-agent/gives-the-right-context
+  - coding-with-agents/ships-with-agent/keeps-understanding
+introduces: [project-instructions, avoiding-context-rot]
+assumes:
+  - objective: concepts/explains-models/explains-grounding
+  - objective: customizing-agents/configures-agent/writes-project-instructions
+after: [coding-with-agents/scoping-and-referencing]
+shorts:
+  - long instruction files are followed less reliably than short ones. When the agent drifts,
+    compact or restart.
+exercise:
+  kind: do
+  brief: >-
+    Find the mistake the agent repeats across two fixture sessions, put the one-line fix in the
+    fixture's existing instructions file, and confirm a fresh session follows it without being told.
+sources: [AEC-15, Academy claude-code-in-action]
+issue: 163
+minutes: 15
+notes: >-
+  The plan named the topic concepts/grounding as assumed; taken as the objective
+  concepts/explains-models/explains-grounding. The user side of the subject that
+  customizing-agents/instructions teaches from the author side (S02 cross-area edge, related): the
+  file exists already, and this lesson is about what the agent does with it and where a recurring
+  mistake gets fixed once. Sources: AEC-15, Academy claude-code-in-action (steering long sessions,
+  paraphrased).

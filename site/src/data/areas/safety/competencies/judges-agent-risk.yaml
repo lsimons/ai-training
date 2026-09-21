@@ -1,0 +1,92 @@
+id: safety/judges-agent-risk
+area: safety
+statement: Judges the risk of letting an agent act
+topics: [safety/agent-risk, safety/governance]
+objectives:
+  - id: safety/judges-agent-risk/names-blast-radius
+    statement: Names what an agent action can reach and break
+    level: base
+    behaviors:
+      - claim: Before letting an agent act, the learner lists everything the agent's tools and credentials
+          can reach, beyond what the task needs.
+        why: An agent acts with everything it has been given, and a wrong step lands wherever that access
+          extends.
+        example: Asked to let an agent tidy one folder, the learner notices it has been given write access
+          to the whole shared drive and narrows that first.
+      - claim: The learner separates actions that can be undone from actions that cannot.
+        why: A reversible mistake costs a retry. An irreversible one costs whatever was sent, deleted or
+          paid.
+        example: Drafting an email is reversible, sending it is not, so the learner lets the agent draft and
+          keeps sending for themselves.
+      - claim: The learner names who else is affected when the agent gets it wrong.
+        why: Blast radius is measured in people and systems, and the size of the task says nothing about it.
+        example: A script that renames files in a personal folder affects one person. The same script on a
+          shared calendar affects everyone invited, and the learner treats them differently.
+  - id: safety/judges-agent-risk/chooses-human-in-loop
+    statement: Chooses where a human must approve
+    level: base
+    behaviors:
+      - claim: Approval is placed right before the irreversible or externally visible step, and a plan
+          approval at the start does not replace it.
+        why: Approving the plan up front does not catch the mistake the agent makes halfway through.
+        example: The agent may read the ticket, draft the reply and propose a label, but a person clicks
+          send and closes the ticket.
+      - claim: A step that is approved without being read is not a control, so the learner keeps the number
+          of approvals small enough to read.
+        why: Twenty prompts a minute trains a person to click yes, which is the same as no approval with
+          extra cost.
+        example: Rather than approving every file edit, the learner approves once at the diff, where all
+          edits can be read together.
+      - claim: The learner can say what evidence an approver needs at each check-in point.
+        why: An approver without the right information in front of them is guessing.
+        example: At the "send invoices" step the approver sees the count, the total and three sample rows
+          instead of a bare "proceed?" prompt.
+  - id: safety/judges-agent-risk/recognizes-injection
+    statement: Recognizes prompt injection and data exfiltration paths
+    level: base
+    behaviors:
+      - claim: The learner treats everything an agent reads (web pages, emails, files, calendar entries) as
+          text the model may follow as an instruction.
+        why: A model has one stream of text and no separate channel for "orders from my user", so a planted
+          sentence looks like any other instruction.
+        example: Before pointing an agent at a bookmarked page, the learner asks what the page could tell
+          the agent to do with the access it has.
+      - claim: Given an agent's permissions, the learner can name the path a planted instruction would use
+          to get data out.
+        why: Exfiltration needs only two ordinary abilities, read and send, and the attack is the
+          combination of the two.
+        example: An agent that can read mail and fetch URLs can be told to put a password into a URL, and
+          the learner spots that the fetch is the way out.
+      - claim: The learner shrinks or gates the outbound ability rather than trying to filter what the agent
+          reads.
+        why: You cannot vet every input, but an agent that cannot send, or must ask before sending, cannot
+          carry data out unnoticed.
+        example: For a summarizing task the learner removes the agent's mail and network-post tools, leaving
+          read-only access.
+  - id: safety/judges-agent-risk/sets-oversight
+    statement: Sets policy, logging and escalation for agents in an organization
+    level: expert
+    behaviors:
+      - claim: The learner writes a policy that says which tasks an agent may do, with what data and which
+          approvals, in terms a team can apply.
+        why: A policy that says "use AI responsibly" decides nothing, and every team then decides for
+          itself.
+        example: '"Agents may open pull requests in any repository; merging requires a human review;
+          production credentials are never given to an agent."'
+      - claim: Agent actions are logged where a person can read them later, and someone is named to read
+          them.
+        why: Without a log there is no way to learn what happened after a problem, and a log nobody reads
+          catches nothing.
+        example: Every agent-sent message carries a tag, the tagged messages go to an audit channel, and the
+          team lead reviews a sample weekly.
+      - claim: "The policy names the escalation path: what stops the agent, who is told, and who decides
+          whether it restarts."
+        why: The first incident is the wrong time to find out who can revoke the agent's access.
+        example: '"Any agent action on customer data outside office hours pages the on-call, who can revoke
+          the token."'
+      - claim: The learner treats a model or tool update as a change that needs a re-check of the agent's
+          behavior.
+        why: The same prompt on a new model version can act differently, and a policy that assumed the old
+          behavior no longer holds.
+        example: After the vendor's model upgrade, the learner reruns the agent on last month's tasks before
+          letting it back on live work.

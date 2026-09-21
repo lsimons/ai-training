@@ -1,0 +1,20 @@
+id: coding-with-agents/security-review
+title: Reading agent code as if the input were hostile
+mode: tutorial
+covers: coding-with-agents/quality
+serves: [coding-with-agents/verifies-agent-work/screens-for-security]
+introduces: [security-review-of-agent-output]
+assumes:
+  - objective: safety/judges-agent-risk/names-blast-radius
+  - objective: safety/judges-agent-risk/recognizes-injection
+after: [coding-with-agents/tests-and-docs-that-hold]
+shorts: [the classic mistakes agents copy from their training data]
+exercise:
+  kind: do
+  brief: >-
+    Run a static analyzer over an agent-written fixture change, find the string-built query and the
+    swallowed error it misses, and brief the agent for the parameterized version with a test.
+sources: [Academy claude-code-in-action, Brilliant SEC]
+issue: 178
+minutes: 15
+notes: "Sources: Brilliant SEC-3, Academy claude-code-in-action (paraphrased)."

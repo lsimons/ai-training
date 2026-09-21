@@ -1,0 +1,30 @@
+id: concepts/how-models-work
+title: How a language model works
+description: >-
+  What a language model actually does when it answers, why that explains its strengths, and why it
+  explains its failures too.
+mode: explanation
+covers: concepts/how-models-work
+serves:
+  - concepts/explains-models/explains-generation
+  - concepts/explains-models/names-failure-modes
+introduces:
+  - token
+  - training-vs-inference
+  - sampling-and-temperature
+  - hallucination
+  - knowledge-cutoff
+assumes: []
+extends-to:
+  - label: Why agent safety is different
+    href: /safety/agent-risk/
+after: []
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    Ask the same question twice, read both answers, and explain the difference in terms of sampling.
+sources: []
+minutes: 20
+notes: >-
+  Names context-window, non-determinism and sycophancy in passing; the lessons below teach them.

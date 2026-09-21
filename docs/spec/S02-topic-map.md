@@ -41,6 +41,10 @@ and point into the map. **Lessons** cover topics and serve objectives.
 | Engineering | Customizing agents | `customizing-agents` | Software engineers |
 | Engineering | Building agents    | `building-agents`    | Software engineers |
 
+The groups, their audience and the area order are data in
+`site/src/data/groups.yaml`, and each area's name and description are in
+`site/src/data/areas/<area>/area.yaml` (S09). This table is the summary.
+
 An area has three to seven topics and two to four competencies. A lesson
 covers one topic and teaches one to five of its concepts.
 
@@ -56,24 +60,29 @@ covers one topic and teaches one to five of its concepts.
 
 ### Lesson frontmatter
 
-A lesson names, by id, the topics it **covers**, the objectives it
+A lesson names, by id, the topic it **covers**, the objectives it
 **serves**, the objectives it **assumes** (each pointing at the lesson
 section that teaches it) and the lessons, topics, or shorts it **extends
-to**. Paths are lists of lesson ids, and goals are competency levels. Lesson
+to**. These are written in the lesson's data file and copied onto the page
+at build (S11). Paths are lists of lesson ids, and goals are competency levels. Lesson
 lists per topic and per objective are derived from frontmatter at build
 time, never stored twice.
 
 ### Storage
 
-One YAML file per topic and one per area's competencies. The map page, one
+One YAML file per topic, per competency, per course and per lesson, all
+under the area's directory (S09 "The data tree"). The map page, one
 reference page per topic, one per competency, and the glossary all render
-from these files.
+from these files, and `mise run data` checks them against each other and
+the lesson pages.
 
-| File                                       | Contents                                                                                                                                                                                                                                                                                                            |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `site/src/data/topics/<area>/<topic>.yaml` | `name`, `definition`, `concepts[] {id, name, definition}`, `links {prerequisites[], related[], specializations[]}`, `sources[]`                                                                                                                                                                                     |
-| `site/src/data/competencies/<area>.yaml`   | `competencies[] {id, statement, topics[], objectives[] {id, statement, level, behaviors[] {claim, why, example}}, alignment[] {framework, code, asks, objectives[]}}`                                                                                                                                               |
-| `site/src/data/courses/<area>.yaml`        | The area's ordered lesson plan: `lessons[] {id, title, covers, serves[], status (planned, drafting, live), issue, minutes, after[]}`. The course page renders every entry, live or coming, and `mise run courses` checks the file against the pages and the YAML above. Format in `docs/agents/writing-a-lesson.md` |
+| File                                                        | Contents                                                                                                                                                                  |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site/src/data/areas/<area>/topics/<topic>.yaml`            | `id`, `area`, `name`, `definition`, `concepts[] {id, name, definition}`, `links {prerequisites[], related[], specializations[]}`, `sources[]`                             |
+| `site/src/data/areas/<area>/competencies/<competency>.yaml` | `id`, `area`, `statement`, `topics[]`, `objectives[] {id, statement, level, behaviors[] {claim, why, example}}`. Format in S10                                            |
+| `site/src/data/alignment/<framework>.yaml`                  | `framework`, `rows[] {code, asks, objectives[]}`, each row written once. Format in S10                                                                                    |
+| `site/src/data/areas/<area>/courses/<course>.yaml`          | The course's lesson order, flat or in parts. Format in S11                                                                                                                |
+| `site/src/data/areas/<area>/lessons/<lesson>.yaml`          | Everything the plan says about one lesson, written or not, and the frontmatter of its page once live. The course page renders every lesson, live or coming. Format in S11 |
 
 ### Stable URLs
 
@@ -475,9 +484,11 @@ For `using-agents/delegates-and-checks/writes-a-brief` (`base`):
 ## Alignment
 
 An alignment row maps an external framework's item to the objectives here
-that address it. The YAML keeps the rows per competency, and a row that
-names objectives from more than one competency is stored under each of them.
-This section summarizes the rows for the three frameworks known so far.
+that address it. The YAML keeps the rows per framework, each row written
+once (S10 "Alignment"), and a competency page shows the rows that name one
+of its objectives. This section summarizes the rows for the three
+frameworks known so far, abbreviating a whole competency as `*`; the YAML
+lists every objective in full.
 
 ### Frameworks
 

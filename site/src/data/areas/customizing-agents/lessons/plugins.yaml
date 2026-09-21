@@ -1,0 +1,19 @@
+id: customizing-agents/plugins
+title: Reading a plugin before you install it
+mode: explanation
+covers: customizing-agents/skills
+serves: [customizing-agents/writes-skill/chooses-skill-over-tool]
+introduces: [plugins]
+assumes:
+  - objective: coding-with-agents/verifies-agent-work/screens-for-security
+after: [customizing-agents/first-skill]
+shorts: [Marketplaces and version pins for plugins (Academy claude-code-in-action)]
+exercise:
+  kind: judge
+  brief: >-
+    Read the contents of one public plugin and list what it adds to the session: skills, hooks that
+    will run, subagents, and servers with the access they ask for, then say whether to install it or
+    copy one skill out of it.
+sources: []
+issue: 170
+minutes: 10

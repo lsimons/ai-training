@@ -17,7 +17,7 @@ describe('knownConceptIds and assertKnownConcepts', () => {
 		const known = new Set(['token']);
 		expect(() => assertKnownConcepts('x#a', ['token'], known)).not.toThrow();
 		expect(() => assertKnownConcepts('x#a', ['token', 'nope', 'zip'], known)).toThrow(
-			'x#a: unknown concept ids "nope", "zip" (see site/src/data/topics/)',
+			'x#a: unknown concept ids "nope", "zip" (see site/src/data/areas/<area>/topics/)',
 		);
 		expect(() => assertKnownConcepts('x#a', ['nope'], known)).toThrow(/unknown concept id "nope"/);
 		expect(() => assertKnownConcepts('x#a', [], known)).toThrow(/at least one concept id/);

@@ -1,0 +1,65 @@
+id: using-agents/chooses-tool-and-autonomy
+area: using-agents
+statement: Chooses the right tool and autonomy level for a job
+topics: [using-agents/choosing-tools, using-agents/delegating]
+objectives:
+  - id: using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation
+    statement: Picks chat, agent or automation for a task and says why
+    level: base
+    behaviors:
+      - claim: The learner picks chat when the task needs judgment at every step, an agent when the steps
+          are known but the path varies, and automation when the steps and path are fixed.
+        why: Each level trades control for effort, and the wrong pick either wastes attention or removes it
+          where it was needed.
+        example: Drafting a difficult email is chat. Cleaning up a folder of misnamed files is an agent.
+          Renaming every new invoice on arrival is automation.
+      - claim: The learner says what would make them move a task to the next level, and what would move it
+          back.
+        why: Tasks change, and a rule for moving makes the choice reviewable.
+        example: '"Once the agent has filed ten reports without a correction, schedule it; if it needs a
+          correction twice in a month, go back to reviewing each."'
+      - claim: The learner picks the level for the task's worst case.
+        why: A task that is routine nine times and consequential the tenth needs the level that handles the
+          tenth.
+        example: Replying to support tickets stays at agent-with-approval because one in fifty tickets is a
+          legal complaint.
+  - id: using-agents/chooses-tool-and-autonomy/keeps-the-human-steps
+    statement: Names the steps that stay human and why
+    level: base
+    behaviors:
+      - claim: The learner names the steps that stay with a person because someone has to answer for them,
+          even when the agent could do them.
+        why: Some steps are kept because a person has to be accountable for them, and that reason should be
+          said out loud.
+        example: The agent can draft the performance review, but the manager writes the rating, because the
+          manager is the one who has to defend it.
+      - claim: The learner keeps the step where the information is not in any system the agent can reach.
+        why: An agent works from what it can read, and much of what matters in a decision is in
+          conversations and context it never saw.
+        example: The agent proposes the meeting time from calendars, and the person keeps the choice because
+          they know a colleague is having a hard week.
+      - claim: The learner keeps the steps that teach them what they need to keep judging the agent's work.
+        why: If every step is handed over, the person loses the knowledge that lets them check the result.
+        example: The engineer keeps reading the tests the agent writes, even though the agent could review
+          them, so that they still know the system.
+  - id: using-agents/chooses-tool-and-autonomy/reasons-across-levels
+    statement: Re-applies judgment when the tool level rises
+    level: expert
+    behaviors:
+      - claim: When a tool takes over a level of work, the learner moves their attention to the level above
+          it and asks the same questions there.
+        why: The questions about correctness, cost and risk do not go away. They move to the specification
+          and the review.
+        example: When the agent writes the code, the learner stops reviewing syntax and starts reviewing
+          whether the acceptance test proves the requirement.
+      - claim: The learner can still go down to the lower level when the higher-level signal does not add
+          up.
+        why: Higher-level signals depend on the lower level being sound, and the ability to check it is what
+          makes the trust deserved.
+        example: The dashboard says the migration succeeded, and the learner still opens the database to
+          count rows when the number looks round.
+      - claim: The learner notices when a tool's rise changes what counts as a mistake, and changes the
+          checks to match.
+        why: The old checks catch the old mistakes, and a more capable tool makes different ones.
+        example: With an agent that writes tests too, "are there tests?" stops working as a check and "do
+          the tests fail when the feature is broken?" replaces it.

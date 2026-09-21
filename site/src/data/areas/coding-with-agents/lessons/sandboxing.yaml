@@ -1,0 +1,26 @@
+id: coding-with-agents/sandboxing
+title: Sandboxing a coding agent
+mode: tutorial
+covers: coding-with-agents/first-session
+serves: [coding-with-agents/ships-with-agent/runs-a-session]
+introduces: [sandbox, trust-boundary]
+assumes:
+  - objective: safety/judges-agent-risk/names-blast-radius
+  - objective: safety/judges-agent-risk/sets-oversight
+after: [coding-with-agents/keys-and-secrets]
+shorts:
+  - what your agent sends home (the trace, for everyone), permission modes
+exercise:
+  kind: do
+  brief: >-
+    Enable the agent's built-in sandbox in the fixture and block one network destination, then
+    predict and confirm which hosts the agent still reaches. Stretch goal: run the hardened
+    container and add a proxy allowlist.
+sources: [Academy claude-code-in-action]
+issue: 18
+minutes: 15
+notes: >-
+  Issue #18, low priority, so it sits late in the course. It covers first-session because that topic
+  owns `sandbox` and `trust boundary` (issue #13; the area is at its seven-topic cap). The network
+  allowlist that the #65 Academy pass names is taught here, cited as Academy claude-code-in-action
+  (trusting unsupervised runs, paraphrased).

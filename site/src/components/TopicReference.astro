@@ -17,7 +17,7 @@ interface Props {
 	topicId: string;
 }
 const { topicId } = Astro.props;
-const lessons = (await getLessons()).filter((l) => (l.data.covers ?? []).includes(topicId));
+const lessons = (await getLessons()).filter((l) => l.data.covers === topicId);
 const entries = lessons.map((l) => ({ lesson: l, ...referenceOf(l) }));
 
 /** Expressive Code wants a language it knows; plain text otherwise. */

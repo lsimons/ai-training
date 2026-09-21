@@ -1,0 +1,21 @@
+id: using-agents/choosing-autonomy
+title: How much the agent may do before it asks
+mode: explanation
+covers: using-agents/delegating
+serves: [using-agents/delegates-and-checks/chooses-autonomy]
+introduces: []
+assumes:
+  - objective: concepts/recognizes-agents/places-on-autonomy-scale
+  - objective: safety/judges-agent-risk/names-blast-radius
+after: [using-agents/delegating]
+shorts: [Widening autonomy as results pass]
+exercise:
+  kind: judge
+  brief: >-
+    Sort six supplied tasks into draft only, ask before anything irreversible, or run to completion,
+    and write the one-sentence boundary for two of them.
+sources: []
+issue: 145
+minutes: 10
+notes: >-
+  Introduces no concept: deepens choosing-a-degree-of-autonomy from the live lesson.

@@ -1,0 +1,69 @@
+id: brilliant-coding-with-ai
+framework: Brilliant Coding with AI
+rows:
+  - code: SPC-5, BLD-1
+    asks: Manage constraints; direct an agent to a specification
+    objectives:
+      - using-agents/delegates-and-checks/writes-a-brief
+      - coding-with-agents/ships-with-agent/gives-the-right-context
+  - code: BLD-2, BLD-3
+    asks: Adjust on new information; divide and delegate
+    objectives:
+      - using-agents/delegates-and-checks/adjusts-mid-task
+      - using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation
+  - code: ABS-1..3
+    asks: Reason across levels of abstraction and tooling
+    objectives:
+      - using-agents/chooses-tool-and-autonomy/reasons-across-levels
+  - code: TAS-1..4
+    asks: Judge what should be built and define success, weighing value against cost
+    objectives:
+      - coding-with-agents/specifies-work/judges-worth-building
+      - coding-with-agents/specifies-work/defines-success
+  - code: SPC-3, SPC-4, SPC-6
+    asks: Decompose, analyze dependencies, design verification
+    objectives:
+      - coding-with-agents/specifies-work/decomposes-into-components
+      - coding-with-agents/specifies-work/designs-the-check
+  - code: INC-1, INC-2, INC-5
+    asks: Working increments, early feedback, reversibility
+    objectives:
+      - coding-with-agents/ships-with-agent/works-in-increments
+      - coding-with-agents/ships-with-agent/keeps-change-reversible
+  - code: INC-3, INC-4
+    asks: Maintain understanding and coherence
+    objectives:
+      - coding-with-agents/ships-with-agent/keeps-understanding
+  - code: VER-2..6
+    asks: Verify against spec, review, observe, debug, automate
+    objectives:
+      - coding-with-agents/verifies-agent-work/reviews-others-code
+      - coding-with-agents/verifies-agent-work/observes-and-debugs
+      - coding-with-agents/verifies-agent-work/automates-the-check
+      - coding-with-agents/verifies-agent-work/screens-for-security
+  - code: SEC-3, SEC-5
+    asks: Evaluate AI code for vulnerabilities; supply-chain risk
+    objectives:
+      - coding-with-agents/verifies-agent-work/screens-for-security
+  - code: BLD-4, BLD-5
+    asks: Organize and oversee a workflow
+    objectives:
+      - coding-with-agents/works-in-team/runs-parallel-work
+      - building-agents/orchestrates-agents/picks-a-pattern
+  - code: MEM-1, MEM-2
+    asks: Manage memory; turn repeated work into reusable knowledge
+    objectives:
+      - customizing-agents/configures-agent/manages-memory
+      - customizing-agents/writes-skill/packages-a-procedure
+  - code: SEC-4
+    asks: Mitigate AI- and agent-specific risks
+    objectives:
+      - building-agents/runs-in-production/mitigates-agent-risks
+      - customizing-agents/connects-tools-safely/hardens-a-connection
+  - code: VER-7
+    asks: Measure quality and evaluate AI systems
+    objectives:
+      - building-agents/evaluates-agents/writes-a-rubric
+      - building-agents/evaluates-agents/builds-a-golden-set
+      - building-agents/evaluates-agents/grades-trajectories
+      - building-agents/evaluates-agents/avoids-gamed-metrics

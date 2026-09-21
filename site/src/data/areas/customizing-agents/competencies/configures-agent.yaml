@@ -1,0 +1,84 @@
+id: customizing-agents/configures-agent
+area: customizing-agents
+statement: Configures an agent for a project
+topics:
+  - customizing-agents/instructions
+  - customizing-agents/hooks-permissions
+  - customizing-agents/memory
+objectives:
+  - id: customizing-agents/configures-agent/writes-project-instructions
+    statement: Writes instructions that remove a recurring agent mistake
+    level: base
+    behaviors:
+      - claim: Each instruction is traceable to a mistake the agent made in a real session.
+        why: Instructions written from imagination pad the file, dilute the ones that matter and are never
+          tested.
+        example: After the agent ran `npm install` twice against a pinned lockfile, the learner adds
+          "install with `npm ci`, never `npm install`" and nothing else that day.
+      - claim: An instruction says what to do and how the agent can tell it did it, in one or two lines.
+        why: Vague guidance such as "write clean code" gives the agent nothing to check itself against.
+        example: '"Run `mise run ci` before reporting done; it must exit 0" replaces "make sure everything
+          works".'
+      - claim: The learner removes an instruction when the mistake stops recurring or when a hook or a check
+          now enforces it.
+        why: A project file that only grows gets skimmed, and the rules that still matter get lost in it
+          (@Academy claude-code-in-action).
+        example: Once a pre-commit hook rejects unformatted files, the learner deletes the "always run the
+          formatter" line from the instructions.
+  - id: customizing-agents/configures-agent/sets-permissions
+    statement: Sets permissions to the least the work needs
+    level: base
+    behaviors:
+      - claim: The learner starts from deny by default and allows the specific commands and paths the task
+          needs.
+        why: A broad allowlist granted for convenience is the blast radius of every later mistake.
+        example: The settings allow `npm test` and `git diff` without asking, and everything else prompts.
+      - claim: The learner separates what the agent may read from what it may write and run.
+        why: Reading is nearly always safe, and writing and running are where damage happens.
+        example: The agent may read the whole repository but may write only under `src/` and `tests/`.
+      - claim: The learner reviews the permission set after a task and removes what was not used.
+        why: Permissions accumulate and are never removed on their own.
+        example: After the migration is done, the learner removes the database CLI from the allowlist.
+  - id: customizing-agents/configures-agent/adds-a-hook
+    statement: Adds a hook that enforces a rule the instructions cannot
+    level: base
+    behaviors:
+      - claim: The learner reaches for a hook when a rule must hold every time, and for an instruction when
+          it is guidance.
+        why: An instruction is read and sometimes ignored, but a hook runs whether or not the model
+          remembered (@Academy claude-code-in-action).
+        example: '"Run the formatter before committing" becomes a pre-commit hook after the third
+          unformatted commit.'
+      - claim: A hook fails loudly and says what to do, and it runs fast enough that nobody disables it.
+        why: A silent hook is a mystery to the agent and a slow hook is a hook someone turns off.
+        example: The hook prints "lockfile changed but the manifest did not; run `bun install` or revert"
+          and exits non-zero in under a second.
+      - claim: The learner tests the hook by making the mistake it is meant to catch.
+        why: A hook that has never fired may not work, and the first real mistake is a bad time to find out.
+        example: The learner writes a commit with the forbidden pattern and checks that the hook rejects it,
+          before relying on it.
+  - id: customizing-agents/configures-agent/manages-memory
+    statement: Manages what the agent carries between sessions
+    level: expert
+    behaviors:
+      - claim: The learner decides what the agent should carry between sessions and puts it in a file the
+          agent reads, rather than relying on automatic memory.
+        why: Automatic memory keeps what the tool thought was important, and a file keeps what the team
+          decided was.
+        example: The project's context file records "the staging database is read-only for agents" so no
+          session has to relearn it.
+      - claim: The learner reviews what the agent has remembered and deletes what is stale or wrong.
+        why: A wrong remembered fact is applied to every future session with full confidence.
+        example: The memory file still says the tests take ten minutes. After the test speed-up, the learner
+          removes the line so the agent stops skipping them.
+      - claim: "When a session's work continues later, the learner has the agent write a handoff: state,
+          decisions, what is left."
+        why: Context does not survive the session, and the next session otherwise reconstructs it from the
+          diff, badly.
+        example: The session ends with a `HANDOFF.md` that names the failing test and the two approaches
+          already ruled out.
+      - claim: The learner turns a fix that sessions had to make more than once into a skill or an
+          instruction.
+        why: Repeated work in memory is a symptom, and the cure is a reusable procedure.
+        example: After three sessions each worked out how to regenerate the API client, the steps become a
+          skill.

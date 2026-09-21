@@ -1,0 +1,22 @@
+id: safety/bias-in-patterns
+title: Seeing bias across many answers
+mode: tutorial
+covers: safety/failure-modes
+serves: [safety/verifies-output/calibrates-trust]
+introduces: [bias]
+assumes:
+  - objective: concepts/explains-models/names-failure-modes
+after: [safety/spotting-hallucination]
+shorts: [Bias from training data and bias from tuning]
+exercise:
+  kind: judge
+  brief: >-
+    For one task at your work where a model's output affects people, write down which groups you
+    would compare, how many samples you need before you would trust a pattern, and, given who the
+    output affects, how much checking that task gets and by whom.
+sources: []
+issue: 116
+minutes: 15
+notes: >-
+  A fixture ranks the same set of records under two swapped name lists and tallies the difference,
+  so the slant is visible only in the totals.

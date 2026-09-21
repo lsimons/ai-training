@@ -1,0 +1,22 @@
+id: using-agents/finding-information
+title: Finding information with an assistant
+mode: tutorial
+covers: using-agents/assistant-work
+serves: [using-agents/delegates-and-checks/writes-a-brief]
+introduces: [finding-information]
+assumes:
+  - objective: concepts/prompts-reliably/structures-a-prompt
+  - objective: concepts/explains-models/names-failure-modes
+after: []
+shorts: [Asking for sources]
+exercise:
+  kind: do
+  brief: >-
+    Paste a supplied two-page text, ask for the three things a newcomer must know with a quote for
+    each, then check every quote against the text and note which one is not there.
+sources: []
+issue: 133
+minutes: 15
+notes: >-
+  The plan named the topic concepts/prompting as assumed; taken as the objective
+  concepts/prompts-reliably/structures-a-prompt.

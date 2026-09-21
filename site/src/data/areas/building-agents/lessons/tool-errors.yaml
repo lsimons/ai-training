@@ -1,0 +1,24 @@
+id: building-agents/tool-errors
+title: When a tool fails
+mode: tutorial
+covers: building-agents/tool-use
+serves:
+  - building-agents/builds-agent-loop/defines-a-tool
+  - building-agents/builds-agent-loop/implements-the-loop
+introduces: [error-handling]
+assumes: []
+after: [building-agents/agent-loop]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Give the fixture's HTTP tool a timeout that fires on the second call, return it as a structured
+    error result, and set the harness policy to stop after two errors in a row. The output is the
+    run's message list and the stop reason.
+sources: []
+issue: 188
+minutes: 15
+notes: >-
+  The tool side of what #91 does in the loop: a structured `ok: false` result the model can read, a
+  retry count decided in the harness, and the fake model answering from the error text. Predict the
+  message list after a missing record and after a timeout.

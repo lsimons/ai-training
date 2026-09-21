@@ -1,0 +1,23 @@
+id: coding-with-agents/tests-and-docs-that-hold
+title: Tests that prove behavior and docs that stay current
+mode: tutorial
+covers: coding-with-agents/quality
+serves:
+  - coding-with-agents/verifies-agent-work/reviews-others-code
+  - coding-with-agents/verifies-agent-work/automates-the-check
+introduces: [testing, documentation]
+assumes:
+  - objective: safety/judges-agent-risk/names-blast-radius
+after: [coding-with-agents/self-checking-loops]
+shorts: [a test that mirrors the implementation]
+exercise:
+  kind: judge
+  brief: >-
+    Break the fixture on purpose and run its agent-written tests, keep the ones that fail, rewrite
+    one that passed, and check which documentation the change left stale.
+sources: [Academy ai-native-sdlc-playbook, DLAI-7]
+issue: 176
+minutes: 15
+notes: >-
+  The plan named the topic safety/agent-risk as assumed; taken as the objective
+  safety/judges-agent-risk/names-blast-radius. Sources: DLAI-7 as inspiration, Academy ai-native-sdlc-playbook.

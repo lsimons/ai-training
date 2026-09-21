@@ -1,0 +1,22 @@
+id: building-agents/cost-and-provider-operations
+title: Cost, caching and pinning the model
+mode: tutorial
+covers: building-agents/production
+serves: [building-agents/runs-in-production/manages-cost-and-rollout]
+introduces: [cost, provider-operations]
+assumes: []
+after: [building-agents/eval-gated-deploys]
+shorts: [Retries and backoff]
+exercise:
+  kind: do
+  brief: >-
+    Add per-run cost accounting and a token budget to the fixture loop, run the fixture's five
+    tasks, and find the one tool whose verbose output triples the average. The output is the cost
+    table.
+sources: [Academy claude-platform-101]
+issue: 214
+minutes: 12
+notes: >-
+  The fake provider charges per token and returns a rate-limit error on the third call. Predict the
+  cost per run, what the budget stop returns, and how a cached stable prefix changes the bill.
+  Pinned model ids, retries with backoff, timeouts (Academy claude-platform-101).

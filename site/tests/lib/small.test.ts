@@ -1,26 +1,7 @@
-import { AREAS, areaOf, ENGINEERING_AREAS } from '@lib/areas';
 import { DEFAULT_REVISION, isReviewable, KIND_OF_TAG } from '@lib/checkpoint-rules';
 import { jsonForScript } from '@lib/json';
 import { href } from '@lib/url';
 import { describe, expect, it } from 'vitest';
-
-describe('areas', () => {
-	it('lists six areas in path order, three of them engineering', () => {
-		expect(AREAS.map((a) => a.slug)).toEqual([
-			'concepts',
-			'safety',
-			'using-agents',
-			'coding-with-agents',
-			'customizing-agents',
-			'building-agents',
-		]);
-		expect(ENGINEERING_AREAS).toEqual(['coding-with-agents', 'customizing-agents', 'building-agents']);
-	});
-	it('areaOf finds an area or throws', () => {
-		expect(areaOf('safety').name).toBe('Safety');
-		expect(() => areaOf('nope')).toThrow('Unknown area: nope');
-	});
-});
 
 describe('checkpoint rules', () => {
 	it('maps every component tag to its kind and knows the default revision', () => {

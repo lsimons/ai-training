@@ -1,0 +1,31 @@
+id: building-agents/guardrails-in-layers
+title: Guardrails in layers
+mode: tutorial
+covers: building-agents/production
+serves:
+  - building-agents/runs-in-production/layers-defenses
+  - building-agents/runs-in-production/mitigates-agent-risks
+introduces: [defense-layers]
+assumes:
+  - objective: safety/judges-agent-risk/recognizes-injection
+  - objective: safety/judges-agent-risk/chooses-human-in-loop
+  - objective: safety/judges-agent-risk/sets-oversight
+after:
+  - building-agents/agent-attack-surface
+  - building-agents/stopping-the-loop
+  - building-agents/traces-and-trajectories
+shorts: [Human approval at irreversible steps]
+exercise:
+  kind: do
+  brief: >-
+    Set up a restricted agent with exactly two permissions (fetch a page, write a file), plant an
+    instruction in a page it will read, predict what it does, run it, and compare. Stretch: add a
+    third permission that sends, rerun, and write down what changed.
+sources: [AEC-10]
+issue: 212
+minutes: 15
+notes: >-
+  AEC-10 lesson. The exercise is the sandbox exercise moved out of safety/agent-risk by issue #60.
+  The fixture loop gains a permission check, an output filter and an approval gate, one Predict
+  each, and the trace from traces-and-trajectories shows which layer fired. Predict which layer
+  stops the planted line.

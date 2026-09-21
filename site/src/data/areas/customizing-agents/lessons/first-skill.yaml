@@ -1,0 +1,19 @@
+id: customizing-agents/first-skill
+title: Writing your first skill
+mode: tutorial
+covers: customizing-agents/skills
+serves: [customizing-agents/writes-skill/packages-a-procedure]
+introduces: [skill-spec, writing-a-good-skill]
+assumes:
+  - objective: coding-with-agents/ships-with-agent/runs-a-session
+after: [customizing-agents/skill-or-tool-or-instruction]
+shorts:
+  - The skill specification, field by field (Academy introduction-to-agent-skills)
+exercise:
+  kind: do
+  brief: >-
+    Write a skill that cuts a release of the fixture package, with the trigger in the description,
+    the commands in order and the check that says the result is right.
+sources: []
+issue: 162
+minutes: 15

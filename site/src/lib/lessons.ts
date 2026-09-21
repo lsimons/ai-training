@@ -2,7 +2,18 @@ import { type CollectionEntry, getCollection } from 'astro:content';
 import { type CheckpointKind, DEFAULT_REVISION, isReviewable } from './checkpoint-rules';
 import { type CheckpointTagInfo, CONCEPTS_FORM, propValue, scanCheckpointTags, stringProp } from './checkpoint-source';
 
-export type Lesson = CollectionEntry<'docs'>;
+/**
+ * A lesson page: a docs entry whose data the lesson docs loader filled from
+ * its lesson YAML (spec S11 "Lesson page"), so `title`, `mode`, `covers` and
+ * `serves` are always present.
+ */
+export type LessonData = CollectionEntry<'docs'>['data'] & {
+	title: string;
+	mode: 'tutorial' | 'explanation';
+	covers: string;
+	serves: string[];
+};
+export type Lesson = Omit<CollectionEntry<'docs'>, 'data'> & { data: LessonData };
 
 export type { CheckpointAttr, CheckpointTagInfo } from './checkpoint-source';
 export { CONCEPTS_FORM, parseAttrs } from './checkpoint-source';
@@ -25,11 +36,11 @@ export interface CheckpointInfo {
 	stem: string;
 }
 
-/** Every lesson: a docs entry with `mode` in its frontmatter. */
+/** Every lesson: a docs entry with `mode`, which only the lesson YAML sets. */
 export async function getLessons(area?: string): Promise<Lesson[]> {
 	const docs = await getCollection('docs');
 	return docs
-		.filter((d) => Boolean(d.data.mode))
+		.filter((d): d is Lesson => Boolean(d.data.mode))
 		.filter((d) => !area || d.id.startsWith(`${area}/`))
 		.sort((a, b) => a.id.localeCompare(b.id));
 }

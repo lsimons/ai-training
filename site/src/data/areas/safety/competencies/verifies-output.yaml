@@ -1,0 +1,76 @@
+id: safety/verifies-output
+area: safety
+statement: Verifies AI output before relying on it
+topics: [safety/failure-modes, safety/verification]
+objectives:
+  - id: safety/verifies-output/checks-claims
+    statement: Checks claims and sources on anything that leaves their desk
+    level: base
+    behaviors:
+      - claim: Every specific claim in AI output that leaves the learner's desk (a number, a date, a name, a
+          quote, a citation) is checked against a source.
+        why: Specifics are what the model invents most convincingly and what the reader acts on.
+        example: Before sending a briefing the learner opens each of the three cited reports and finds one
+          does not say what the summary claims.
+      - claim: The learner reads the source itself and compares it with the model's description of it.
+        why: A model can produce a real title with an invented finding attached to it.
+        example: The paper exists, but the learner reads its abstract and sees it studied a different
+          population than the summary says.
+      - claim: When a claim cannot be checked, the learner marks it as unverified or removes it.
+        why: An unverified claim that stays in looks like a verified one to the next reader.
+        example: The report keeps the market size figure but adds "(unverified, from the assistant)" until
+          the analyst confirms it.
+  - id: safety/verifies-output/spots-sycophancy
+    statement: Spots agreement that is not evidence
+    level: base
+    behaviors:
+      - claim: The learner recognizes that a model agreeing with them is not evidence, because agreement is
+          what it tends to produce.
+        why: The model's confirmation feels like a second opinion but comes from the framing the learner
+          gave it.
+        example: After "my analysis shows we should cancel the project, right?" gets a yes, the learner asks
+          the opposite and gets a yes too.
+      - claim: The learner asks for the strongest counter-argument before asking for confirmation.
+        why: A model asked to disagree does disagree, and the answer shows what the confirmation left out.
+        example: '"Give me the three best reasons this plan fails" comes before "is this plan good?".'
+      - claim: The learner strips their own opinion out of the question when they want an assessment.
+        why: A leading question produces a leading answer, and the fix is in the question.
+        example: '"Here are two options, compare them on cost and risk" instead of "option A is better,
+          agree?".'
+  - id: safety/verifies-output/calibrates-trust
+    statement: Matches the depth of checking to the cost of being wrong
+    level: base
+    behaviors:
+      - claim: The learner sets the depth of checking from what happens if the output is wrong.
+        why: Fluency is constant and consequences are not, so the cost of a mistake is the only thing that
+          should change the effort.
+        example: A brainstorm list gets no checking. A dosage table in a patient leaflet gets every value
+          checked by a second person.
+      - claim: The learner checks harder when the output cannot be undone or goes to people who will not
+          check it themselves.
+        why: An internal draft has readers who catch mistakes, and a published page or a sent email does
+          not.
+        example: An internal summary is skimmed, and the same summary going to a customer is read line by
+          line.
+      - claim: The learner treats a domain they cannot judge as high risk regardless of the task's size.
+        why: In an unfamiliar domain the learner cannot see the mistakes, so the checking has to come from a
+          source or a person who can.
+        example: A one-paragraph legal clause goes to the legal team, even though it is short and reads
+          well.
+  - id: safety/verifies-output/keeps-a-check-habit
+    statement: Builds verification into a team's routine rather than their own
+    level: expert
+    behaviors:
+      - claim: The learner puts the check in the process (a template field, a review step, a checklist item)
+          so it happens whether or not anyone remembers.
+        why: A habit held by one person leaves with that person and fails on a busy day.
+        example: The team's report template gets a "sources checked by" line that the reviewer fills in.
+      - claim: The check is light enough that the team does it, and the learner measures whether it is done.
+        why: A heavy check gets skipped, and a skipped check is worse than a light one because everyone
+          assumes it happened.
+        example: The learner samples three AI-assisted documents a month and looks for the checkbox filled
+          in and a source named.
+      - claim: The learner makes it normal to report an AI mistake that was caught.
+        why: A team that hides caught mistakes learns nothing, and one that shares them refines its checks.
+        example: 'A weekly note lists "caught this week: an invented statute number, a wrong currency
+          conversion" without naming who let it through.'

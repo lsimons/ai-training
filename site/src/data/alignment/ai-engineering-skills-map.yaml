@@ -1,0 +1,40 @@
+id: ai-engineering-skills-map
+framework: Ng, AI engineering skills map
+rows:
+  - code: Using coding agents
+    asks: Plan, execute, verify, monitor at calibrated autonomy
+    objectives:
+      - using-agents/delegates-and-checks/writes-a-brief
+      - using-agents/delegates-and-checks/chooses-autonomy
+      - using-agents/delegates-and-checks/reviews-against-brief
+      - using-agents/delegates-and-checks/adjusts-mid-task
+      - coding-with-agents/ships-with-agent/runs-a-session
+      - coding-with-agents/ships-with-agent/works-in-increments
+      - coding-with-agents/ships-with-agent/keeps-change-reversible
+      - coding-with-agents/ships-with-agent/gives-the-right-context
+      - coding-with-agents/ships-with-agent/keeps-understanding
+  - code: Shaping the build
+    asks: Deciding what goes in the spec
+    objectives:
+      - coding-with-agents/specifies-work/judges-worth-building
+      - coding-with-agents/specifies-work/defines-success
+      - coding-with-agents/specifies-work/decomposes-into-components
+      - coding-with-agents/specifies-work/designs-the-check
+  - code: Building and deploying AI applications
+    asks: Build, evaluate, ship
+    objectives:
+      - building-agents/builds-agent-loop/defines-a-tool
+      - building-agents/builds-agent-loop/implements-the-loop
+      - building-agents/builds-agent-loop/adds-retrieval
+      - building-agents/builds-agent-loop/uses-an-sdk
+      - building-agents/evaluates-agents/writes-a-rubric
+      - building-agents/evaluates-agents/builds-a-golden-set
+      - building-agents/evaluates-agents/grades-trajectories
+      - building-agents/evaluates-agents/avoids-gamed-metrics
+      - building-agents/orchestrates-agents/picks-a-pattern
+      - building-agents/orchestrates-agents/justifies-orchestration-cost
+      - building-agents/orchestrates-agents/composes-patterns
+      - building-agents/runs-in-production/gates-on-evals
+      - building-agents/runs-in-production/layers-defenses
+      - building-agents/runs-in-production/mitigates-agent-risks
+      - building-agents/runs-in-production/manages-cost-and-rollout

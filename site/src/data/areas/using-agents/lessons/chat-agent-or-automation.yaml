@@ -1,0 +1,19 @@
+id: using-agents/chat-agent-or-automation
+title: Chat, agent or automation
+mode: explanation
+covers: using-agents/choosing-tools
+serves: [using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation]
+introduces: [chat-vs-agent-vs-automation]
+assumes:
+  - objective: concepts/recognizes-agents/tells-agent-from-assistant
+  - objective: safety/judges-agent-risk/chooses-human-in-loop
+after: [using-agents/choosing-autonomy]
+shorts: [Picking for the tenth time]
+exercise:
+  kind: judge
+  brief: >-
+    For five supplied tasks, pick chat, agent or automation for the task's worst case, and write
+    what would move each one level up and what would move it back.
+sources: []
+issue: 158
+minutes: 15

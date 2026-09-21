@@ -1,0 +1,41 @@
+id: building-agents
+area: building-agents
+plan-issue: 35
+notes: |-
+  Topic order: tool-use, agent-loop, retrieval-memory, evaluation, patterns, orchestration, production. S02 "Cross-area edges" puts evaluation before patterns and orchestration as a path order. Retrieval comes before evaluation because it completes the builds-agent-loop competency and gives the evaluation lessons a retrieval agent to grade.
+
+  Every code example runs against a fake model with a fixture under site/examples/building-agents/, the way the live agent-loop lesson does.
+parts:
+  - title: Tool use
+    lessons:
+      - building-agents/how-a-model-calls-a-tool
+      - building-agents/agent-loop
+      - building-agents/tool-schemas
+      - building-agents/tool-errors
+      - building-agents/parallel-tool-calls
+  - title: The agent loop and harness
+    lessons: [building-agents/stopping-the-loop, building-agents/loop-on-an-sdk]
+  - title: Agentic retrieval and memory
+    lessons: [building-agents/retrieval-as-a-tool, building-agents/agent-memory]
+  - title: Evaluation and testing
+    lessons:
+      - building-agents/rubrics
+      - building-agents/golden-sets
+      - building-agents/traces-and-trajectories
+      - building-agents/error-analysis
+      - building-agents/llm-as-judge
+  - title: Design patterns
+    lessons:
+      - building-agents/react
+      - building-agents/reflection
+      - building-agents/planning
+      - building-agents/plan-or-react
+  - title: Orchestration and multi-agent
+    lessons: [building-agents/orchestrating-agents, building-agents/orchestration-tax]
+  - title: Guardrails and production
+    lessons:
+      - building-agents/agent-attack-surface
+      - building-agents/guardrails-in-layers
+      - building-agents/eval-gated-deploys
+      - building-agents/cost-and-provider-operations
+      - building-agents/agent-protocols

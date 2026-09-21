@@ -1,0 +1,18 @@
+id: customizing-agents/session-handoff
+title: Handing work to the next session
+mode: tutorial
+covers: customizing-agents/memory
+serves: [customizing-agents/configures-agent/manages-memory]
+introduces: [session-handoff]
+assumes:
+  - objective: coding-with-agents/ships-with-agent/keeps-understanding
+after: [customizing-agents/compaction]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    End a session with a handoff file naming state, decisions, the failing test and what was ruled
+    out, then start a fresh session from it and count the turns until useful work resumes.
+sources: []
+issue: 195
+minutes: 15

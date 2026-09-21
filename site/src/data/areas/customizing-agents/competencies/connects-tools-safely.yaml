@@ -1,0 +1,66 @@
+id: customizing-agents/connects-tools-safely
+area: customizing-agents
+statement: Connects an agent to tools and data safely
+topics: [customizing-agents/mcp, customizing-agents/hooks-permissions, safety/agent-risk]
+objectives:
+  - id: customizing-agents/connects-tools-safely/adds-a-tool
+    statement: Adds a tool via MCP or CLI with least privilege
+    level: base
+    behaviors:
+      - claim: The learner adds the smallest tool that does the job, with read-only access where the task is
+          read-only.
+        why: A tool's permissions are what the agent, or an injected instruction, can do with it.
+        example: The issue tracker is connected with a token that can read and comment and cannot close or
+          delete.
+      - claim: The learner picks between an MCP server and a CLI by what the agent needs and what each
+          costs.
+        why: An MCP server's tool list is in context on every turn, and a CLI is called only when used and
+          needs a shell.
+        example: For two occasional queries the learner uses the CLI. For a tool the agent calls constantly
+          with structured input, they use an MCP server.
+      - claim: The tool is added with a test task and the transcript is read before it is used on real work.
+        why: The first use shows what the agent thinks the tool does, which may differ from what it does.
+        example: The learner asks the agent to "list open issues" and sees it call the tool with the wrong
+          filter, then fixes the description.
+  - id: customizing-agents/connects-tools-safely/weighs-tool-cost
+    statement: Explains the token and risk cost of a tool before adding it
+    level: base
+    behaviors:
+      - claim: Before adding a tool, the learner can say how many tokens its definitions take and on how
+          many turns they are paid.
+        why: Tool definitions travel with every request, and a tool used once costs on every turn it is
+          present.
+        example: The learner measures that a server's forty tool schemas add several thousand tokens per
+          turn and keeps only the three tools the task uses.
+      - claim: The learner names what the tool lets the agent do that it could not before, and what an
+          injected instruction could do with it.
+        why: A tool's risk is its abilities in the wrong hands, and any web page the agent reads can hold an
+          injected instruction.
+        example: A tool that posts to chat is what turns a read-only summarizer into an exfiltration path,
+          so it is added only where posting is the task.
+      - claim: The learner compares the tool against the alternative of no tool.
+        why: Many tools wrap something the agent could read from a file or a command.
+        example: Instead of a documentation MCP server, the docs are checked into the repository and the
+          agent reads them.
+  - id: customizing-agents/connects-tools-safely/hardens-a-connection
+    statement: Hardens a tool connection against injection and exfiltration
+    level: expert
+    behaviors:
+      - claim: The learner treats every tool result as untrusted input to the model, and designs the
+          connection assuming a result will one day contain instructions.
+        why: Anything the tool reads from the world can carry an injected instruction, and the model cannot
+          tell.
+        example: The web-fetch tool strips scripts and marks its output as "content from the page", and the
+          agent's sensitive tools require approval when a fetch happened in the same turn.
+      - claim: Outbound abilities are gated or removed on any agent that reads untrusted content.
+        why: Exfiltration is read plus send, and the send is the part you can control.
+        example: The research agent has fetch and file-write, and no email or chat tool, and file-write is
+          confined to one directory.
+      - claim: Credentials given to a tool are scoped, short-lived and separate from the person's own.
+        why: A leaked agent token should cost one revocation and nothing more.
+        example: The MCP server runs with a service account that can read one project's issues, and the
+          token expires daily.
+      - claim: The learner logs tool calls and their arguments and reviews them for the tool's first weeks.
+        why: Injection shows up as a call that made no sense for the task, and only a log shows it.
+        example: The log shows the agent tried to fetch a URL containing a file's contents, and the learner
+          traces it to a planted comment in a README.

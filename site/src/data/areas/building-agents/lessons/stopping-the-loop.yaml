@@ -1,0 +1,22 @@
+id: building-agents/stopping-the-loop
+title: Stopping the loop on purpose
+mode: tutorial
+covers: building-agents/agent-loop
+serves: [building-agents/builds-agent-loop/implements-the-loop]
+introduces: [stop-conditions, unbounded-loop-pitfalls]
+assumes: []
+after: [building-agents/agent-loop, building-agents/tool-errors]
+shorts: [Ways a loop runs away]
+exercise:
+  kind: do
+  brief: >-
+    Add repeated-state detection to the fixture loop so a fake model that alternates between two
+    fixes stops with `stopped: repeated state` instead of hitting the step limit. The output is the
+    shorter trace.
+sources: []
+issue: 194
+minutes: 15
+notes: >-
+  The live lesson has one step limit. This lesson gives the full set of stop rules and a fake model
+  that never answers, retries a failing tool forever, and alternates two fixes. Predict which rule
+  fires and what the run returns.

@@ -1,0 +1,30 @@
+id: coding-with-agents/dependency-review
+title: Reviewing what the agent pulled in
+description: >-
+  A coding agent adds packages fast and with confidence. Review each one in proportion to its risk,
+  with the OpenSSF Scorecard checks as the security step and a written skip list.
+mode: explanation
+covers: coding-with-agents/quality
+serves: [coding-with-agents/verifies-agent-work/screens-for-security]
+introduces: [dependency-hygiene, supply-chain-risk]
+assumes:
+  - objective: coding-with-agents/ships-with-agent/runs-a-session
+    lesson: coding-with-agents/first-session
+    section: review-the-diff
+  - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
+extends-to:
+  - label: Verifying agent work
+    href: /coding-with-agents/verification/
+after: []
+shorts:
+  - reading a lockfile diff, a release age floor
+exercise:
+  kind: judge
+  brief: Classify a lockfile diff and write the verdict per dependency.
+sources: []
+minutes: 20
+notes: >-
+  From issue #16 (closed). Sits after tests-and-docs because the topic's prerequisites are
+  verification and safety/agent-risk. Its `assumes` place it in the graph.

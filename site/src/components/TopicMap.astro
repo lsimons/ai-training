@@ -5,7 +5,7 @@
  * Prerequisite edges are drawn client-side from the box positions.
  */
 import { getCollection } from 'astro:content';
-import { AREAS } from '@lib/areas';
+import { getAreas } from '@lib/areas';
 import { getAllCoursePlans } from '@lib/courses';
 import { jsonForScript } from '@lib/json';
 import { getLessons } from '@lib/lessons';
@@ -15,7 +15,7 @@ const topics = (await getCollection('topics')).map((t) => t.data);
 const lessons = await getLessons();
 // Topics a course plan covers with a lesson that isn't live yet (spec S02 "Storage").
 const planned = new Set((await getAllCoursePlans()).filter((e) => e.status !== 'live').map((e) => e.covers));
-const byArea = AREAS.map((a) => {
+const byArea = (await getAreas()).map((a) => {
 	const list = topics.filter((t) => t.area === a.slug);
 	// Order by prerequisite depth within the area, then by name.
 	const depth = new Map<string, number>();
@@ -35,7 +35,7 @@ const byArea = AREAS.map((a) => {
 });
 const coverage = topics.map((t) => ({
 	id: t.id,
-	lessons: lessons.filter((l) => (l.data.covers ?? []).includes(t.id)).map((l) => l.id),
+	lessons: lessons.filter((l) => l.data.covers === t.id).map((l) => l.id),
 }));
 const edges = topics.flatMap((t) =>
 	t.links.prerequisites.map((from) => ({ from, to: t.id, cross: from.split('/')[0] !== t.area })),

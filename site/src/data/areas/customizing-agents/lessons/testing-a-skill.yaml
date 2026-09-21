@@ -1,0 +1,21 @@
+id: customizing-agents/testing-a-skill
+title: Testing a skill from a fresh session
+mode: tutorial
+covers: customizing-agents/skills
+serves: [customizing-agents/writes-skill/packages-a-procedure]
+introduces: []
+assumes:
+  - objective: coding-with-agents/ships-with-agent/runs-a-session
+after: [customizing-agents/first-skill]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Run the release skill from a fresh session in a clean clone, note where the agent hesitated or
+    asked, and add the missing check or failure step.
+sources: []
+issue: 165
+minutes: 10
+notes: >-
+  Introduces no concept: deepens writing-a-good-skill: watch an agent use the skill on a real task
+  and revise where it went wrong.

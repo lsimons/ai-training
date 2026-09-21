@@ -1,0 +1,70 @@
+id: concepts/explains-models
+area: concepts
+statement: Explains how a language model produces text and where it fails
+topics: [concepts/how-models-work, concepts/limits, concepts/grounding]
+objectives:
+  - id: concepts/explains-models/explains-generation
+    statement: Explains tokens, context and sampling in plain words
+    level: base
+    behaviors:
+      - claim: A model produces text one token at a time, each chosen from a probability distribution over
+          what could come next.
+        why: Once the learner sees output as a chain of likely next pieces, both fluent nonsense and
+          surprising variation stop being mysterious.
+        example: Asked why the same question gave two different answers, the learner says the model picked a
+          different likely token early on and the rest followed from it, rather than saying the
+          model "changed its mind".
+      - claim: The context window is the whole of what the model can see for one response, and anything
+          outside it does not exist for the model.
+        why: Most "it forgot" and "it ignored my file" complaints are context problems, and the fix is
+          different from a prompting problem.
+        example: When a long chat starts contradicting itself, the learner suspects earlier messages fell
+          out of the window and restates the key facts instead of scolding the model.
+      - claim: Temperature and sampling settings trade variety for predictability and do not change what the
+          model knows.
+        why: Learners otherwise reach for temperature to fix accuracy, which it cannot do.
+        example: For a summary that must be the same on every run the learner asks for low temperature. For
+          brainstorming names they raise it, and in neither case expect it to add facts.
+  - id: concepts/explains-models/names-failure-modes
+    statement: Names the common ways output goes wrong and why
+    level: base
+    behaviors:
+      - claim: A hallucination is a fluent, confident statement with nothing behind it, and fluency is no
+          signal of truth.
+        why: Confident wording is exactly what the training rewards, so the learner must stop using tone as
+          a check.
+        example: Given a citation with a real-looking journal name, author and year, the learner looks it up
+          before trusting it and is not surprised when it does not exist.
+      - claim: The knowledge cutoff means the model's built-in facts stop at a date, and anything after that
+          must be supplied or retrieved.
+        why: Questions about recent events or versions get plausible but stale answers unless the learner
+          knows to bring the facts.
+        example: Asking for the current version of a library, the learner pastes the changelog or asks the
+          tool to look it up rather than accepting the number the model recalls.
+      - claim: Sycophancy is the model agreeing with the person in front of it, so the learner's own framing
+          shapes the answer.
+        why: A leading question produces a leading answer, which feels like confirmation and is not.
+        example: Instead of "this plan is solid, right?" the learner asks "what are the three strongest
+          objections to this plan?" and compares the two responses.
+  - id: concepts/explains-models/explains-grounding
+    statement: Explains what grounding and retrieval add and what they do not fix
+    level: base
+    behaviors:
+      - claim: Retrieval puts relevant documents into the context window at question time, so the model
+          answers from text it can see rather than from what it memorized.
+        why: Learners otherwise expect a model "trained on our documents", and the difference decides what a
+          stale or missing document does to the answer.
+        example: When a product assistant gives an outdated price, the learner asks which document it
+          retrieved rather than asking for the model to be retrained.
+      - claim: Grounding reduces invented facts about the retrieved material but does not stop the model
+          from misreading it or filling gaps outside it.
+        why: A grounded system still produces fluent text, and a wrong summary of a real document looks the
+          same as a right one.
+        example: The learner checks the cited passage against the answer and finds the model combined two
+          clauses from different contracts into one.
+      - claim: Retrieval finds text that looks similar to the question, so a question that uses other words
+          than the document may miss it, and keyword search misses it most often.
+        why: Knowing this turns "the assistant does not know our policy" into "rephrase or fix the index",
+          which is a fixable problem.
+        example: The assistant says it has no travel policy, so the learner asks about "expense rules for
+          trips", gets the document, and reports the naming gap.

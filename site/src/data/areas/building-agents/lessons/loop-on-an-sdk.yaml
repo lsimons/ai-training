@@ -1,0 +1,24 @@
+id: building-agents/loop-on-an-sdk
+title: Rebuilding the loop on an agent SDK
+mode: explanation
+covers: building-agents/agent-loop
+serves: [building-agents/builds-agent-loop/uses-an-sdk]
+introduces: [agent-sdk]
+assumes: []
+after: [building-agents/stopping-the-loop, building-agents/parallel-tool-calls]
+shorts: [When to drop to the raw API]
+exercise:
+  kind: judge
+  brief: >-
+    From the lesson's SDK code blocks, write a five-row table of what the SDK took over (messages,
+    dispatch, retries, stopping, streaming) and the line in the live lesson's loop where each one
+    lived. Stretch: rebuild the weather agent on an agent SDK with the maximum turns and a cost cap
+    set explicitly, and test that both stop it.
+sources: [Academy building-with-the-claude-api, Academy claude-platform-101]
+issue: 196
+minutes: 15
+notes: >-
+  Explanation mode because SDK code needs a real model and cannot run against the fixture in CI. The
+  SDK code blocks are shown as non-runnable and a match checkpoint pairs hand-loop parts with SDK
+  features. Expert-level objective. The Academy's loop against the real API is the reference
+  (Academy claude-platform-101, Academy building-with-the-claude-api).

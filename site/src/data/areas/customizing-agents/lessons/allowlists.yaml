@@ -1,0 +1,18 @@
+id: customizing-agents/allowlists
+title: Allowing the commands the task needs
+mode: tutorial
+covers: customizing-agents/hooks-permissions
+serves: [customizing-agents/configures-agent/sets-permissions]
+introduces: [allowlists]
+assumes:
+  - objective: safety/judges-agent-risk/names-blast-radius
+after: [customizing-agents/permission-modes]
+shorts: [How a wildcard pattern widens an allowlist beyond the command that prompted it]
+exercise:
+  kind: do
+  brief: >-
+    Start from deny by default, allow the test command and the read-only version-control commands,
+    finish the fixture task, then remove every entry the transcript shows was not used.
+sources: []
+issue: 179
+minutes: 15

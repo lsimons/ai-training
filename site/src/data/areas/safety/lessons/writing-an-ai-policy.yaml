@@ -1,0 +1,22 @@
+id: safety/writing-an-ai-policy
+title: Writing an AI policy a team can apply
+mode: tutorial
+covers: safety/governance
+serves: [safety/judges-agent-risk/sets-oversight]
+introduces: [policy, escalation]
+assumes: []
+after: [safety/agent-risk]
+shorts: [Enterprise tiers sell governance, The eight questions for a vendor]
+exercise:
+  kind: do
+  brief: >-
+    Fill in the one-page policy template for your own team: allowed tasks, data, approvals, and the
+    escalation route with names.
+sources: [Academy deploying-claude-enterprise-with-confidence]
+issue: 135
+minutes: 15
+notes: >-
+  Paraphrase, in our own words, the framing from Academy deploying-claude-enterprise-with-confidence
+  noted on issue #31: read access and write access as two levels of sign-off (start read-only, grant
+  write per workflow with the risk owner's approval), and an agent inheriting the user's own
+  permissions through a connector.

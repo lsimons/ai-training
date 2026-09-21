@@ -1,0 +1,22 @@
+id: concepts/thin-path
+title: Where a model makes things up
+mode: explanation
+covers: concepts/limits
+serves: [concepts/explains-models/names-failure-modes]
+introduces: []
+assumes: []
+after: [concepts/how-models-work]
+shorts: [checking a citation]
+exercise:
+  kind: judge
+  brief: >-
+    For five tasks, decide whether to spot-check or to verify every specific, and for one wrong
+    answer name the two properties that met to produce it.
+sources: []
+issue: 129
+minutes: 15
+notes: >-
+  Introduces no concept: Deepens hallucination and knowledge-cutoff, which the live lesson
+  introduces and grades. This lesson adds where fabrication concentrates (specifics, rare topics,
+  recent events) and how much checking a task calls for. Issue #86 decides whether the task-placing
+  checkpoint goes in the live lesson or here; this entry stands either way.

@@ -1,0 +1,96 @@
+id: building-agents/builds-agent-loop
+area: building-agents
+statement: Builds a tool-using agent loop
+topics:
+  - building-agents/tool-use
+  - building-agents/agent-loop
+  - building-agents/retrieval-memory
+objectives:
+  - id: building-agents/builds-agent-loop/defines-a-tool
+    statement: Defines a tool with a schema the model uses correctly
+    level: base
+    behaviors:
+      - claim: The tool description says when to use the tool and when not to, as well as what it does.
+        why: The model chooses tools from their descriptions, and a description that only names the function
+          leads to it being called for the wrong job.
+        example: '"Look up a customer by exact account id; do not use for name searches, use
+          `search_customers` instead" cuts wrong calls that "Get customer" invites.'
+      - claim: Every parameter has a type, a description and, where the set is small, an enum, so the model
+          cannot invent a value.
+        why: A free-text parameter where a fixed set was meant produces near-misses such as "EUR" against a
+          code that expects "eur".
+        example: '`currency` becomes an enum of the four supported codes and `amount` is documented as
+          "integer cents, not a decimal".'
+      - claim: The tool returns errors as structured results the model can read and act on, rather than
+          raising through the loop.
+        why: An exception that escapes ends the run, but an error message in the result lets the model
+          retry, ask or give up on purpose.
+        example: 'On a missing record the tool returns `{"ok": false, "error": "no account 4711"}` and the
+          model tells the user instead of the process crashing.'
+  - id: building-agents/builds-agent-loop/implements-the-loop
+    statement: Implements the loop with error handling and a stop condition
+    level: base
+    behaviors:
+      - claim: The loop has an explicit iteration limit and a token or cost budget, and stops cleanly when
+          either is hit.
+        why: A model that keeps finding one more thing to do will run until the bill or the timeout stops
+          it.
+        example: 'The loop stops after twelve turns or a set spend and returns "stopped: budget reached"
+          together with what it has so far.'
+      - claim: The loop ends when the model replies without a tool call, and the learner can point to the
+          line that checks this.
+        why: The natural stop condition of an agent loop is the model deciding it is done, and if the code
+          does not honor that, the loop never ends or ends by accident.
+        example: The learner shows the branch that returns the final text when the response has no tool
+          calls, and the test that covers it.
+      - claim: A tool failure is fed back into the conversation as a result, and the loop continues or stops
+          by policy rather than by an unhandled exception.
+        why: Real tools time out, return garbage and hit rate limits, and the agent has to keep working
+          through that.
+        example: A timed-out HTTP call becomes a tool result saying so, and after two of them in a row the
+          loop stops and reports instead of retrying forever.
+  - id: building-agents/builds-agent-loop/adds-retrieval
+    statement: Adds retrieval or memory and knows when basic RAG is enough
+    level: base
+    behaviors:
+      - claim: The learner starts with basic retrieval (embed, search, put the top results in context) and
+          adds an agentic loop only when the basic version measurably fails.
+        why: A retrieve, evaluate, refine loop costs several model calls per question, and most questions do
+          not need it.
+        example: On the evaluation set, basic RAG answers 85 percent, so the learner adds a second retrieval
+          step only for the questions where the first result set was empty or off topic.
+      - claim: "The learner picks the memory store by how the memory is used: a file for a handful of facts,
+          a database for structured lookup, a vector index for similarity."
+        why: Reaching for a vector database for twenty facts adds infrastructure and hides what the agent
+          knows.
+        example: The agent's "user preferences" memory is a JSON file per user, read at session start.
+      - claim: The learner tests retrieval with questions whose answer is in the documents and questions
+          whose answer is not, and checks the agent says so in the second case.
+        why: A retrieval system that answers everything is one that invents answers when the documents have
+          none.
+        example: The evaluation set includes "what is the refund policy for gift cards" where no such policy
+          exists, and the expected answer is "not found".
+      - claim: The learner tells the model what came from retrieval and what to do when it does not answer
+          the question.
+        why: Retrieved text without a frame is treated as instructions or as the model's own knowledge.
+        example: The prompt says "The passages below were retrieved for this question. Answer only from
+          them, and say if they do not cover it."
+  - id: building-agents/builds-agent-loop/uses-an-sdk
+    statement: Rebuilds the loop on an agent SDK and explains what the SDK took over
+    level: expert
+    behaviors:
+      - claim: "The learner can name what the SDK does that their hand-written loop did: message handling,
+          tool dispatch, retries, stop conditions, streaming."
+        why: Knowing what was taken over is what lets the learner debug the SDK's version when it behaves
+          differently (@Academy claude-platform-101).
+        example: The learner points at the SDK's tool dispatch and explains where their own version's error
+          handling went.
+      - claim: The learner keeps the stop conditions and budgets explicit in SDK code, rather than trusting
+          defaults.
+        why: SDK defaults are chosen for demos, and a production agent needs its own limits.
+        example: The learner sets the maximum turns and a cost cap in the SDK configuration and tests that
+          both stop the agent.
+      - claim: The learner can say what the SDK makes harder and where they would drop to the raw API.
+        why: An SDK is a set of choices, and knowing which ones do not fit is part of using it.
+        example: The SDK's context management compacts history in a way that drops the tool results the
+          learner's evaluation needs, so the learner turns it off for the evaluation run.

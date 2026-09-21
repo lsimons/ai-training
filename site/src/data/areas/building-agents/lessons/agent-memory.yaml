@@ -1,0 +1,23 @@
+id: building-agents/agent-memory
+title: Where an agent's memory lives
+mode: explanation
+covers: building-agents/retrieval-memory
+serves: [building-agents/builds-agent-loop/adds-retrieval]
+introduces: [memory-storage-choices]
+assumes:
+  - objective: concepts/explains-models/explains-grounding
+after: [building-agents/retrieval-as-a-tool]
+shorts: [Compaction and context rot]
+exercise:
+  kind: judge
+  brief: >-
+    For four memory uses (twenty user preferences, ten thousand support tickets, a running task
+    list, facts learned this session) pick a store from the lesson's table and write one line on why
+    the others cost more than they give.
+sources: [Academy claude-platform-101]
+issue: 199
+minutes: 12
+notes: >-
+  Files, key-value notes, an index, a database behind a tool, a summary in the system prompt. Start
+  with a file the human can read. Covers the Academy's memory and compaction patterns as ways to
+  keep the context small (Academy claude-platform-101).

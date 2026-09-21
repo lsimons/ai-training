@@ -1,0 +1,24 @@
+id: customizing-agents/mcp-hardening
+title: Hardening a tool connection
+mode: tutorial
+covers: customizing-agents/mcp
+serves: [customizing-agents/connects-tools-safely/hardens-a-connection]
+introduces: []
+assumes:
+  - objective: safety/judges-agent-risk/recognizes-injection
+  - objective: safety/judges-agent-risk/names-blast-radius
+after: [customizing-agents/mcp-first-server]
+shorts:
+  - Tool poisoning across servers, one worked example
+exercise:
+  kind: do
+  brief: >-
+    Give the fixture server a read-only, short-lived token, turn on tool-call logging, plant an
+    instruction in one file that asks the agent to write elsewhere, and show in the log that the
+    write was refused or asked about.
+sources: []
+issue: 175
+minutes: 15
+notes: >-
+  Introduces no concept: hands-on for mcp-security: scoped credentials, gated outbound abilities and
+  a reviewed log.

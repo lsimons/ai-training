@@ -1,0 +1,27 @@
+id: coding-with-agents/ci-and-hooks
+title: Enforcing the team's rules with hooks and CI
+mode: tutorial
+covers: coding-with-agents/team
+serves:
+  - coding-with-agents/works-in-team/follows-team-norms
+  - coding-with-agents/works-in-team/sets-team-practice
+introduces: [ci-integration, team-hooks]
+assumes:
+  - objective: safety/judges-agent-risk/chooses-human-in-loop
+after: [coding-with-agents/self-checking-loops]
+shorts:
+  - an agent review pass in CI with a security lane, evals in CI (a pointer to
+    building-agents/evaluation)
+exercise:
+  kind: do
+  brief: >-
+    Add a hook to the fixture that blocks an edit to a protected path and a CI job that runs the
+    deterministic gates, then have the agent hit both and fix the CI failure within a bound.
+sources: [Academy ai-native-sdlc-playbook]
+issue: 186
+minutes: 15
+notes: >-
+  Takes the material the #65 Academy pass left for this topic: hooks as approval gates, a CI review
+  pass with ranked findings, review findings fed back into the project instructions on the second
+  occurrence, and a cold second opinion from a fresh session, all cited as Academy ai-native-sdlc-playbook and paraphrased. Evals in CI are named and pointed at
+  building-agents/evaluation instead of taught here.

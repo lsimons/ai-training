@@ -94,8 +94,8 @@ jobs:
       - name: Examples
         run: mise run examples
 
-      - name: Course plans
-        run: mise run courses
+      - name: Data tree
+        run: mise run data
 
       - name: Check (Astro type/content check)
         run: mise run site-check

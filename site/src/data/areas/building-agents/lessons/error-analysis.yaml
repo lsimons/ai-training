@@ -1,0 +1,24 @@
+id: building-agents/error-analysis
+title: Reading failures one by one
+mode: explanation
+covers: building-agents/evaluation
+serves:
+  - building-agents/evaluates-agents/grades-trajectories
+  - building-agents/evaluates-agents/builds-a-golden-set
+introduces: [error-analysis]
+assumes: []
+after: [building-agents/traces-and-trajectories]
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    Classify the fixture's ten failed traces into categories you name, count them, and say which
+    single fix moves the score most. Then name the one item each failure adds to the golden set.
+sources: []
+issue: 203
+minutes: 12
+notes: >-
+  Explanation mode on purpose. The categories are the learner's own judgment, and a script that
+  tallies given labels would only test arithmetic. Counting the categories replaces guessing about
+  what to fix, because the most common failure is usually one thing, and every failure that reached
+  a user is a golden-set item. Checkpoints are match and scenario.

@@ -1,0 +1,20 @@
+id: concepts/what-tokens-cost
+title: What every token costs
+mode: tutorial
+covers: concepts/limits
+serves: [concepts/explains-models/explains-generation]
+introduces: [model-family-and-size, cost-and-latency, instruction-dilution]
+assumes: []
+after: [concepts/context-window]
+shorts: [why long instruction files fail]
+exercise:
+  kind: do
+  brief: >-
+    Price a long prompt and a short one with the token counter and a price table for a small and a
+    large model, then find the rule that a long instruction file buried.
+sources: []
+issue: 137
+minutes: 15
+notes: >-
+  Dilution here is about one instruction competing with the text after it, in one prompt or file.
+  Context rot (concepts/memory) is the session-level effect of a filling window.

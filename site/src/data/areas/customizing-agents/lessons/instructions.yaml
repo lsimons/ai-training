@@ -1,0 +1,25 @@
+id: customizing-agents/instructions
+title: "Project instructions: AGENTS.md"
+description: >-
+  Write the one file a coding agent reads before it touches your project, and keep it short enough
+  that it keeps working.
+mode: tutorial
+covers: customizing-agents/instructions
+serves: [customizing-agents/configures-agent/writes-project-instructions]
+introduces: [agents-md-claude-md, sections, monorepo-hierarchy, when-instructions-are-not-enough]
+assumes:
+  - objective: coding-with-agents/ships-with-agent/gives-the-right-context
+    lesson: coding-with-agents/first-session
+    section: give-the-right-context
+extends-to:
+  - label: Agent skills
+    href: /customizing-agents/skills/
+after: []
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    In a throwaway project, run three tasks without an instruction file, note the wrong guesses, and
+    write an AGENTS.md of at most fifteen lines from them.
+sources: []
+minutes: 20

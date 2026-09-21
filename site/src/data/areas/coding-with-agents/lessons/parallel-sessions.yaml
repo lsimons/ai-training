@@ -1,0 +1,22 @@
+id: coding-with-agents/parallel-sessions
+title: Running several agent sessions in worktrees
+mode: tutorial
+covers: coding-with-agents/team
+serves: [coding-with-agents/works-in-team/runs-parallel-work]
+introduces: [parallel-sessions, worktrees]
+assumes: []
+after: [coding-with-agents/ci-and-hooks]
+shorts:
+  - git worktree in five commands, shared ports and the shared stash
+exercise:
+  kind: do
+  brief: >-
+    Open two worktrees of the fixture and brief one agent on the API change and one on the docs,
+    with no shared files. Keep a one-line note per session, merge the API branch first and have the
+    other session rebase.
+sources: [Academy claude-code-in-action, Brilliant BLD]
+issue: 190
+minutes: 15
+notes: >-
+  Expert level. This repository's orchestration practice (docs/agents/orchestration.md) is the
+  worked example. Sources: Academy claude-code-in-action (paraphrased), Brilliant BLD-4, BLD-5.

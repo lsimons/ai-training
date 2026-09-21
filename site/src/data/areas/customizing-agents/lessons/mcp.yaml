@@ -1,0 +1,31 @@
+id: customizing-agents/mcp
+title: Connecting an agent to your systems
+description: >-
+  The operator's view of a remote tool server, from the identity the agent acts under to the point
+  where a CLI is the better connection.
+mode: explanation
+covers: customizing-agents/mcp
+serves:
+  - customizing-agents/connects-tools-safely/adds-a-tool
+  - customizing-agents/connects-tools-safely/weighs-tool-cost
+  - customizing-agents/connects-tools-safely/hardens-a-connection
+introduces: [server, client, transport, mcp-primitives, mcp-vs-cli, tool-cost, mcp-security]
+assumes:
+  - objective: customizing-agents/configures-agent/writes-project-instructions
+    lesson: customizing-agents/instructions
+    section: when-instructions-arent-enough
+extends-to:
+  - label: Hooks and permissions
+    href: /customizing-agents/hooks-permissions/
+after: []
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Put a five-rule guardrail block in an agent's system prompt and test it against an injected
+    instruction in a sandbox page.
+sources: []
+minutes: 20
+notes: >-
+  Delegated identity is the section "Whose identity does the agent act under?", which #17 asked for.
+  It assumes nothing beyond the in-area instructions lesson.

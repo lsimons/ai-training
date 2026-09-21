@@ -1,0 +1,20 @@
+id: safety/checking-habits
+title: Checking habits that run when you are in a hurry
+mode: tutorial
+covers: safety/verification
+serves: [safety/verifies-output/checks-claims, safety/verifies-output/calibrates-trust]
+introduces: [checking-habits]
+assumes: []
+after: [safety/spotting-hallucination, safety/when-the-tool-is-usually-right]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Apply the four checks to one AI-written document from your week: read it against the request,
+    find the claims you did not supply, open one link, redo one calculation.
+sources: []
+issue: 120
+minutes: 15
+notes: >-
+  A fixture recomputes the totals in a model-written summary table and flags the row that does not
+  add up.

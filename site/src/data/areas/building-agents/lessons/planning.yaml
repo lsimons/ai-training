@@ -1,0 +1,20 @@
+id: building-agents/planning
+title: Writing the plan before taking the steps
+mode: tutorial
+covers: building-agents/patterns
+serves: [building-agents/orchestrates-agents/picks-a-pattern]
+introduces: [planning]
+assumes: []
+after: [building-agents/react]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Make the fixture planner revise its list when step three returns a surprise, instead of running
+    the stale step four. The output is the plan before and after the revision.
+sources: []
+issue: 207
+minutes: 15
+notes: >-
+  The fake model writes a step list, works through it and updates it. Predict the plan after a step
+  reveals a new fact.

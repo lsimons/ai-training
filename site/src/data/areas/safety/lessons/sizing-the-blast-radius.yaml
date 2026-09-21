@@ -1,0 +1,24 @@
+id: safety/sizing-the-blast-radius
+title: Sizing an agent's blast radius
+mode: tutorial
+covers: safety/agent-risk
+serves:
+  - safety/judges-agent-risk/names-blast-radius
+  - safety/judges-agent-risk/chooses-human-in-loop
+introduces: []
+assumes:
+  - objective: concepts/recognizes-agents/names-the-loop
+after: [safety/agent-risk, safety/checking-what-an-agent-changed]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Pick a task you would like an agent to do. Write its permission list as read, write and send
+    rows, cross out what the task does not need, and mark the row where a person approves.
+sources: []
+issue: 130
+minutes: 15
+notes: >-
+  Introduces no concept: deepens blast-radius, permissions-and-least-privilege and human-in-the-loop
+  with a fixture that reads a permission list and prints what it reaches, who is affected and which
+  actions cannot be undone.

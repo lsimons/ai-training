@@ -48,7 +48,7 @@ describe('CourseGraph', () => {
 		const nodes = JSON.parse(/data-nodes="([^"]*)"/.exec(html)?.[1]?.replace(/&quot;/g, '"') ?? '[]');
 		expect(nodes.map((n: { id: string }) => n.id)).toEqual(['safety/agent-risk', 'safety/deeper']);
 	});
-	it('rejects an area without a plan file', async () => {
+	it('rejects an area without a course file', async () => {
 		await expect(container.renderToString(CourseGraph, { props: { area: 'using-agents' } })).rejects.toThrow(
 			/No course plan/,
 		);
@@ -158,12 +158,19 @@ describe('LearnersReference', () => {
 });
 
 describe('CoursePlan', () => {
-	it('renders one row per plan entry in plan order, folded under a counted summary', async () => {
+	it('renders one row per lesson in course order, a heading row per part, folded under a counted summary', async () => {
 		const html = await container.renderToString(CoursePlan, { props: { area: 'safety' } });
 		expect(html).toMatch(/<details class="course-plan not-content" data-course-plan="safety"/);
 		expect(html).toContain('<summary>Lesson plan (3 lessons, 2 live)</summary>');
 		const rows = [...html.matchAll(/data-plan-entry="([^"]+)"/g)].map((m) => m[1]);
 		expect(rows).toEqual(['safety/agent-risk', 'safety/deeper', 'safety/coming']);
+		const parts = [...html.matchAll(/data-plan-part="([^"]+)"/g)].map((m) => m[1]);
+		expect(parts).toEqual(['Risk', 'Later']);
+		expect(html).toContain('<td>tutorial</td>');
+		expect(html).toContain('<td>do, judge</td>');
+		// A flat course has no part rows.
+		const flat = await container.renderToString(CoursePlan, { props: { area: 'concepts' } });
+		expect(flat).not.toContain('data-plan-part');
 	});
 	it('links a live row to its page and leaves a planned row as text', async () => {
 		const html = await container.renderToString(CoursePlan, { props: { area: 'safety' } });
@@ -183,7 +190,7 @@ describe('CoursePlan', () => {
 		expect(html.match(/github\.com\/lsimons\/ai-training\/issues\//g)).toHaveLength(1);
 		expect(html).toContain('<td>Deeper</td>');
 	});
-	it('rejects an area without a plan file', async () => {
+	it('rejects an area without a course file', async () => {
 		await expect(container.renderToString(CoursePlan, { props: { area: 'using-agents' } })).rejects.toThrow(
 			/No course plan/,
 		);

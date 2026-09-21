@@ -1,0 +1,22 @@
+id: safety/following-the-source
+title: Following a claim back to its source
+mode: tutorial
+covers: safety/verification
+serves: [safety/verifies-output/checks-claims]
+introduces: [source-checking]
+assumes: []
+after: [safety/checking-habits]
+shorts:
+  - Real title, invented finding
+exercise:
+  kind: judge
+  brief: >-
+    The fixture's text cites a real report with an invented finding. Open the report (the lesson
+    links it), write down in one sentence each what the report says and what the text says it says,
+    and mark the gap.
+sources: []
+issue: 122
+minutes: 15
+notes: >-
+  A fixture resolves a list of citations against an offline bibliography and reports one that exists
+  with a different finding and one that does not exist.

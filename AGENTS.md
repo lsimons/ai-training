@@ -21,15 +21,16 @@ them now and then.
 
 The site's own checks, in the order `ci` runs them after the prose tasks:
 
-| Task                   | What it does                                                       |
-| ---------------------- | ------------------------------------------------------------------ |
-| `mise run examples`    | Run every `<Predict run=...>` fixture and compare with the lesson  |
-| `mise run site-check`  | `astro check`: types, templates, content schemas                   |
-| `mise run site-lint`   | Biome lint and format check (`mise run site-format` rewrites)      |
-| `mise run site-test`   | Vitest unit and component tests, 80% coverage floor                |
-| `mise run site-build`  | Build `site/dist`, with the internal link check                    |
-| `mise run checkpoints` | Check the built `checkpoints.json` export against the lesson pages |
-| `mise run site-e2e`    | Build, then the Playwright walkthrough in `site/e2e/`              |
+| Task                   | What it does                                                                  |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| `mise run examples`    | Run every `<Predict run=...>` fixture and compare with the lesson             |
+| `mise run data`        | Check the data tree under `site/src/data` against itself and the lesson pages |
+| `mise run site-check`  | `astro check`: types, templates, content schemas                              |
+| `mise run site-lint`   | Biome lint and format check (`mise run site-format` rewrites)                 |
+| `mise run site-test`   | Vitest unit and component tests, 80% coverage floor                           |
+| `mise run site-build`  | Build `site/dist`, with the internal link check                               |
+| `mise run checkpoints` | Check the built `checkpoints.json` export against the lesson pages            |
+| `mise run site-e2e`    | Build, then the Playwright walkthrough in `site/e2e/`                         |
 
 `site-e2e` and `site-screenshot` need `mise run site-browser` once per
 machine. `docs/agents/testing.md` says which layer a new assertion belongs
@@ -71,12 +72,14 @@ The layout is what the tree shows. The parts that aren't obvious from it:
   used verbatim and must include the base path. Component-rendered links
   must use `href()` from `site/src/lib/url.ts`, because the rehype plugin
   only sees Markdown.
-- Lessons are `site/src/content/docs/<area>/<lesson>.mdx` with the
-  frontmatter from spec S03; course pages are `<area>/index.mdx`. The
-  ordered lesson plan per area, written or not, is
-  `site/src/data/courses/<area>.yaml`, and `mise run courses` checks it
-  against the pages. `docs/agents/writing-a-lesson.md` is the authoring
-  guide.
+- Lessons are `site/src/content/docs/<area>/<lesson>.mdx` and course pages
+  are `<area>/index.mdx`. Neither has frontmatter: everything the site
+  knows about an area, a topic, a competency, a course or a lesson is YAML
+  under `site/src/data/areas/<area>/` (specs S09 to S11), and the build
+  copies a lesson's title, mode and the rest onto its page. Every lesson,
+  written or not, has a file under `lessons/`, and the course file orders
+  them, flat or in parts. `mise run data` checks the tree against itself
+  and the pages. `docs/agents/writing-a-lesson.md` is the authoring guide.
 - `site/src/styles/lesson.css` is global on purpose: review pages clone
   checkpoint markup out of lesson pages.
 - `site/examples/` holds the runnable fixtures behind `<Predict run=...>`.

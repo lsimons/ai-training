@@ -1,0 +1,29 @@
+id: building-agents/eval-gated-deploys
+title: Gating a deploy on the evaluation
+mode: tutorial
+covers: building-agents/production
+serves:
+  - building-agents/runs-in-production/gates-on-evals
+  - building-agents/runs-in-production/manages-cost-and-rollout
+introduces: [eval-gated-deploys, rollout-strategies]
+assumes:
+  - objective: coding-with-agents/verifies-agent-work/automates-the-check
+  - objective: safety/judges-agent-risk/sets-oversight
+after:
+  - building-agents/golden-sets
+  - building-agents/llm-as-judge
+  - building-agents/guardrails-in-layers
+shorts: [Shadow runs and canaries]
+exercise:
+  kind: do
+  brief: >-
+    Add a hard gate for the should-refuse group and a soft gate for helpfulness to the fixture gate
+    script, run it against the two candidate prompts, and read the failing transcripts of the one it
+    blocks. The output is the gate report.
+sources: []
+issue: 213
+minutes: 15
+notes: >-
+  The golden-set script becomes a gate with a threshold per metric, then a staged rollout table
+  (team, five percent, everyone) with a rollback that is a configuration change. Predict the gate
+  result for a prompt change that drops one instruction.

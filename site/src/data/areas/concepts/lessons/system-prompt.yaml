@@ -1,0 +1,35 @@
+id: concepts/system-prompt
+title: The prompt before the conversation
+description: >-
+  The system prompt sets the role, the tone and the standing rules before the first message, and it
+  is where behavior that should hold every time gets fixed.
+mode: explanation
+covers: concepts/prompting
+serves: [concepts/prompts-reliably/structures-a-prompt]
+introduces: [role-and-system-prompt]
+assumes:
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: the-instruction
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: audience-and-purpose
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: format-and-length
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: "Project instructions: AGENTS.md"
+    href: /customizing-agents/instructions/
+  - label: Change the prompt before you retry
+    href: /concepts/iterating-on-a-prompt/
+after: [concepts/prompt-anatomy]
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    Read two short system prompts and predict, for three user messages, how the answers differ.
+sources: []
+minutes: 10

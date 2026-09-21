@@ -1,9 +1,8 @@
 import type { PlanEntry } from './courses';
 
 /**
- * The pure half of `components/CoursePlan.astro`: the course plan
- * (site/src/data/courses/<area>.yaml) as table cells. No DOM, no collections,
- * so Vitest covers it directly.
+ * The pure half of `components/CoursePlan.astro`: the course plan (spec S11)
+ * as table cells. No DOM, no collections, so Vitest covers it directly.
  */
 
 /** A competency as the `competencies` collection holds it, reduced to what the table needs. */
@@ -46,6 +45,11 @@ export function afterTitles(after: string[], plan: PlanEntry[]): string[] {
 export function planSummary(plan: PlanEntry[]): string {
 	const live = plan.filter((e) => e.status === 'live').length;
 	return `Lesson plan (${plan.length} lesson${plan.length === 1 ? '' : 's'}, ${live} live)`;
+}
+
+/** The exercise cell: each exercise's kind, so a course's mix of do and judge is visible at a glance. */
+export function exerciseKinds(entry: Pick<PlanEntry, 'exercises'>): string {
+	return entry.exercises.map((x) => x.kind).join(', ');
 }
 
 /** The GitHub issue URL of an entry, or undefined when it has none. */

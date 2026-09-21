@@ -1,0 +1,36 @@
+id: concepts/context-window
+title: What the model can see
+description: >-
+  Measure a page of text in tokens and work out how many pages a context window holds, so a long
+  chat that contradicts itself has an explanation.
+mode: tutorial
+covers: concepts/how-models-work
+serves: [concepts/explains-models/explains-generation]
+introduces: [context-window]
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: text-becomes-tokens
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: where-the-scores-come-from
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: What every token costs
+    href: /concepts/what-tokens-cost/
+  - label: Where memory comes from
+    href: /concepts/memory/
+after: [concepts/how-models-work]
+shorts: [how a tokenizer splits text (why letter counting fails)]
+exercise:
+  kind: do
+  brief: >-
+    Count the tokens of a page of your own text with the fixture, then work out how many such pages
+    fill a window of a given size.
+sources: []
+minutes: 12

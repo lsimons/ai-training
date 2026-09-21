@@ -1,0 +1,26 @@
+id: coding-with-agents/attribution-and-review-norms
+title: Saying what the agent did, in the commit and the review
+mode: explanation
+covers: coding-with-agents/team
+serves:
+  - coding-with-agents/works-in-team/attributes-honestly
+  - coding-with-agents/works-in-team/follows-team-norms
+introduces: [review-norms, attribution]
+assumes:
+  - objective: safety/handles-data-safely/discloses-ai-use
+after:
+  - coding-with-agents/reversible-changes
+  - coding-with-agents/reviewing-the-diff
+  - coding-with-agents/security-review
+shorts: [commit trailers and the certificate of origin]
+exercise:
+  kind: judge
+  brief: >-
+    Rewrite a commit message and a PR description from the fixture so they carry the agent trailer
+    and say what was verified, with no sign-off, because only a person may give one.
+sources: [DLAI-5]
+issue: 183
+minutes: 10
+notes: >-
+  Explanation mode because the material is agreements, and the judge exercise keeps it concrete.
+  This repository's own practice is the worked example. Sources: DLAI-5 as inspiration.

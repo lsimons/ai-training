@@ -1,0 +1,17 @@
+id: using-agents/when-to-stop
+title: When to stop delegating and do it yourself
+mode: explanation
+covers: using-agents/decomposition
+serves: [using-agents/delegates-and-checks/adjusts-mid-task]
+introduces: [when-to-stop-and-do-it-yourself]
+assumes: []
+after: [using-agents/delegating-in-rounds]
+shorts: [The third round on one piece is the signal]
+exercise:
+  kind: judge
+  brief: >-
+    Read three supplied round logs and mark, for each, the round where taking the step back would
+    have been cheaper, with the sign that shows it.
+sources: []
+issue: 156
+minutes: 10
