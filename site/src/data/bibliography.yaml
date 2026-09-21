@@ -403,6 +403,13 @@ Diátaxis:
   author: Daniele Procida
   license: CC BY-SA 4.0
   url: https://diataxis.fr/
+Claude docs handle-tool-calls:
+  type: reference
+  title: Handle tool calls
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/handle-tool-calls
 Fuchsia review:
   type: reference
   title: Review process for external Rust crates

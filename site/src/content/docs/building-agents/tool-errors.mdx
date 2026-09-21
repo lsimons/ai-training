@@ -1,0 +1,292 @@
+import { Predict, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we break a tool on purpose and watch what the loop from
+[Building your first agent](/building-agents/agent-loop/) does with it. A
+tool that fails is the normal case in production: records go missing,
+services time out, rate limits fire. The tool gets a way to report the
+failure, and the loop gets a policy for how many tries a step gets. The
+model then says what went wrong.
+
+Every example runs against a fixture with a fake model, so you can predict
+the output and check yourself. The complete program is
+`site/examples/building-agents/tool-errors/agent.py` in the repository. Its
+`run` function is the loop from the previous lesson with two additions,
+which this lesson adds one at a time.
+
+## Two ways a tool fails badly
+
+The tool is a lookup in a dict of accounts, and the only account is `1001`.
+The first version raises when the id is unknown, the way most library code
+does.
+
+```python
+ACCOUNTS = {"1001": {"plan": "basic", "balance": "12.50 EUR"}}
+
+def lookup_account_raises(account_id: str) -> dict:
+    return ACCOUNTS[account_id]
+```
+
+The loop calls `tool["fn"](**reply["args"])` with no `try` around it, so
+the `KeyError` passes through `run` and ends the program. The fixture step
+catches it one level up so it can print one line. Run it and compare.
+
+<Predict id="run-raises" title="A tool that raises"
+  answer="KeyError: '4711'" run="building-agents/tool-errors/raises.py">
+
+Ask for an account that doesn't exist.
+
+```python
+run("What is the balance of account 4711?", tools=with_tool(lookup_account_raises))
+```
+
+</Predict>
+
+The user gets a stack trace and the model never hears about the failure.
+The second version is the first fix most developers try: return an empty
+string on a miss, so nothing raises.
+
+```python
+def lookup_account_empty(account_id: str) -> str:
+    account = ACCOUNTS.get(account_id)
+    if account is None:
+        return ""
+    return str(account)
+```
+
+The fake model answers from whatever is in the tool result. Here is its
+branch for a result that isn't an error:
+
+```python
+return {"answer": f"Here is what I found: {result}."}
+```
+
+The fixture prints the message list, one line per message, then the stop
+reason and the answer. The tool line shows the result with `repr`, so an
+empty string prints as `''`.
+
+<Predict id="predict-empty" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['error-handling', 'tool']}
+  context="In the lesson, a fake model answers from the tool result. The lookup tool returns an empty string when the account id is unknown, and the loop prints every message in the list, then the stop reason and the answer."
+  title="Predict the empty result" hint="What does the model see in the tool message, and does anything in it say that something went wrong?"
+  answer={`user: 'What is the balance of account 4711?'
+assistant: {'tool': 'lookup_account', 'args': {'account_id': '4711'}}
+tool: ''
+stop: end_turn
+answer: Here is what I found: .`} run="building-agents/tool-errors/empty.py">
+
+What does this print?
+
+```python
+show(run("What is the balance of account 4711?", tools=with_tool(lookup_account_empty)))
+```
+
+</Predict>
+
+The run finished with `end_turn`, and the answer is nonsense. An empty
+result looks like success to the model, so it reports success. Nothing
+crashed and nothing is right.
+
+## Say what went wrong, as data
+
+Error handling starts in the tool. The tool knows why it failed, so it
+puts that reason in the result as data the model can read (@AEC-03). The
+third version returns a dict with an `ok` flag either way.
+
+```python
+def lookup_account(account_id: str) -> dict:
+    account = ACCOUNTS.get(account_id)
+    if account is None:
+        return {"ok": False, "error": f"no account {account_id}"}
+    return {"ok": True, "plan": account["plan"], "balance": account["balance"]}
+```
+
+The fake model gets a branch for that flag. A real model does the same
+reading on its own, which is why the error text is written for the model
+and names what's missing.
+
+```python
+result = last["content"]
+if isinstance(result, dict) and not result.get("ok", False):
+    return {"answer": f"Sorry, that failed: {result['error']}."}
+```
+
+The loop marks the message too. It appends the tool result with an
+`is_error` flag next to the content, so the harness can count errors
+without reading the content itself.
+
+```python
+def is_error(result) -> bool:
+    return isinstance(result, dict) and result.get("ok") is False
+
+messages.append({"role": "tool", "content": result, "is_error": is_error(result)})
+```
+
+<Predict id="predict-structured" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['error-handling', 'tool']}
+  context="In the lesson, the lookup tool returns a dict with ok False and an error string when the account id is unknown, and the fake model answers with 'Sorry, that failed:' followed by that error string. The loop prints every message, then the stop reason and the answer."
+  title="Predict the message list" hint="Trace two rounds. What is in the tool message now, and which branch of the fake model reads it?"
+  answer={`user: 'What is the balance of account 4711?'
+assistant: {'tool': 'lookup_account', 'args': {'account_id': '4711'}}
+tool: {'ok': False, 'error': 'no account 4711'}
+stop: end_turn
+answer: Sorry, that failed: no account 4711.`} run="building-agents/tool-errors/structured.py">
+
+What does this print?
+
+```python
+show(run("What is the balance of account 4711?"))
+```
+
+</Predict>
+
+Same question, same missing account, and this time the user learns which
+account was missing. The stop reason is still `end_turn`, because the
+model chose to answer. The failure was handled, and the run ended the
+normal way.
+
+The Claude API works like this on the wire. A tool result goes back in a
+`user` message as a `tool_result` block that names the `tool_use_id` it
+answers, with the result as its `content`. When the tool failed, the
+`content` holds the error text and the block sets `is_error` to `true`,
+and the model then works the error into its reply (@Claude docs handle-tool-calls).
+The `content` field is optional, and a block without it is the API's form
+of the empty string above. The docs ask for error text that says what went
+wrong and what to try next, for the same reason `no account 4711` beats
+`failed`.
+
+## The harness decides how many tries
+
+Some failures go away on a second try, because a timeout says nothing
+about the request, only about the moment. The second tool simulates an HTTP call to
+a rate service. In the fixture the service always times out, and the tool
+turns the exception into the same kind of result.
+
+```python
+def slow_service(currency: str) -> str:
+    raise TimeoutError(f"rate service for {currency} timed out after 2 seconds")
+
+def fetch_rate(currency: str) -> dict:
+    try:
+        return {"ok": True, "rate": slow_service(currency)}
+    except TimeoutError as exc:
+        return {"ok": False, "error": str(exc)}
+```
+
+The fake model, on a result whose error says `timed out`, asks for the same
+call again. It copies its own previous request from the message list:
+
+```python
+if "timed out" in result["error"]:
+    return messages[-2]["content"]
+```
+
+Left alone, that pair would go on until `max_steps`. The loop gets a
+second budget, `max_errors=2`. It counts errors in a row and resets the
+count on a good result. When the count reaches the limit, it stops with its
+own named reason.
+
+```python
+errors_in_a_row = errors_in_a_row + 1 if is_error(result) else 0
+if errors_in_a_row >= max_errors:
+    return {"stop": "too_many_errors", "answer": None, "messages": messages}
+```
+
+A stop reason is a name the caller can branch on. `end_turn` means the
+model answered, `max_steps` means the step budget ran out, and
+`too_many_errors` means the error policy stopped the run. The Claude API reports its
+side the same way: a response with `stop_reason` `tool_use` wants a tool
+run, and `end_turn` means the model is done (@Claude docs handle-tool-calls).
+Your loop adds the reasons the API can't know about, because only the loop
+knows its budgets.
+
+<Predict id="predict-timeout" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['error-handling', 'stop-conditions']}
+  context="In the lesson, a rate tool always returns an error result saying the service timed out, the fake model retries the same call when it sees 'timed out', and the loop stops with the reason too_many_errors after two error results in a row. The loop prints every message, then the stop reason, and an answer line only when there is an answer."
+  title="Predict the stop reason" hint="How many tool rounds happen before the count reaches two, and does the model get a turn after the second one?"
+  answer={`user: 'What is the rate for EUR?'
+assistant: {'tool': 'fetch_rate', 'args': {'currency': 'EUR'}}
+tool: {'ok': False, 'error': 'rate service for EUR timed out after 2 seconds'}
+assistant: {'tool': 'fetch_rate', 'args': {'currency': 'EUR'}}
+tool: {'ok': False, 'error': 'rate service for EUR timed out after 2 seconds'}
+stop: too_many_errors`} run="building-agents/tool-errors/timeout.py">
+
+What does this print?
+
+```python
+show(run("What is the rate for EUR?"))
+```
+
+</Predict>
+
+The loop returned after the second error result, before the model got a
+third turn. No answer line prints, because the harness stopped the run, and
+the caller now knows why. It can show the message list to the user or
+retry the whole run later.
+
+<Pitfall title="Retrying inside the tool">
+A tempting change is to make `fetch_rate` loop three times over
+`slow_service` before it gives up. Now a run with three slow calls takes
+three times as long and neither the harness nor the model sees an error
+until the end. The retry count is a policy of the run, and the loop is
+where it can be read, changed, and tested. Rule: the tool reports one
+attempt, and the harness decides how many attempts a step gets.
+</Pitfall>
+
+## Who decides what
+
+Each part of the program makes one kind of decision, and the design stays
+clear as long as none of them takes over another's job (@AEC-13).
+
+- The **tool** says what went wrong. It catches what it can explain and
+  returns the explanation as data, and it never retries on its own.
+- The **harness** decides how many tries a step gets and when a run stops.
+  It reads the `is_error` flag, keeps the count, and names the reason it
+  stopped.
+- The **model** decides what to tell the user, or whether to try a
+  different call. It reads the error text, which is why that text is
+  written for a reader and names the missing thing.
+
+<Sort id="sort-the-decision" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['error-handling', 'harness']}
+  context="The lesson's program has three parts: a tool that runs one attempt and returns a structured result, a harness loop that appends results and counts errors, and a model that reads results and either calls a tool or answers."
+  title="Who decides?" hint="Which part can see the information the decision needs, and nothing more?"
+  buckets={['The tool', 'The harness', 'The model']}
+  items={[
+    { text: 'The error text says which account id was not found', bucket: 0 },
+    { text: 'A second timeout in a row ends the run', bucket: 1 },
+    { text: 'Ask the user to check the account number', bucket: 2 },
+    { text: 'The exception from the service call becomes an error result', bucket: 0 },
+    { text: 'A good result resets the error count', bucket: 1 },
+    { text: 'Call the rate tool again after a timeout', bucket: 2 },
+  ]} />
+
+<Exercise stretch="Add a third stop reason: a budget of tool calls that counts every call, error or not, and fires before max_steps. Make one run end with it and check that the loop reports the limit it reached first.">
+
+Copy `agent.py` from the repository. Change `slow_service` so only the
+first call times out and the second returns `"1.08 USD"`. Leave the
+`max_errors=2` policy as it is. Run `show(run("What is the rate for EUR?"))`
+and keep the output. Then set `max_errors=1` and run it again.
+
+A good result: the first run shows one error result, then a good one,
+and ends with `end_turn` and an answer that holds the rate. The second
+run stops with `too_many_errors` after the first timeout, before the
+retry that would have worked. Which policy would you ship for a tool
+whose service times out about one call in ten, and what would change
+your answer?
+
+</Exercise>
+
+<Recap>
+
+1. A tool failure is a result, as data the model can read. An exception
+   that escapes ends the run, and an empty result reads as success
+   (@AEC-03).
+2. In the Claude API the same thing is a `tool_result` block with
+   `is_error` set to `true` and the error text as its content
+   (@Claude docs handle-tool-calls).
+3. The harness defines the retry policy and the stop reasons. It counts
+   errors in a row and names the limit it reached.
+4. The tool says what went wrong, the harness decides how many tries a
+   step gets, and the model decides what to tell the user.
+
+</Recap>

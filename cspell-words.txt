@@ -96,6 +96,7 @@ gamified
 hackathon
 Hotspot
 hrefs
+isinstance
 jailbreaking
 lockfiles
 lede
