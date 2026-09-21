@@ -200,6 +200,13 @@ Academy ai-capabilities-and-limitations:
   author: Anthropic
   license: Proprietary
   url: https://academy.claude.com/courses/ai-capabilities-and-limitations
+Claude docs messages:
+  type: reference
+  title: Messages
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/api/messages
 Academy ai-fluency-framework-foundations:
   type: course
   title: "AI Fluency: Framework and foundations"
