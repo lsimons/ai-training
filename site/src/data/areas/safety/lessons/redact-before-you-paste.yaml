@@ -1,10 +1,17 @@
 id: safety/redact-before-you-paste
 title: Redacting a document before you paste it
+description: >-
+  Take the names, numbers and addresses a task does not need out of a document before it goes into
+  an AI tool, check that the task still works on what is left, and put the values back with a map
+  that never left your computer.
 mode: tutorial
 covers: safety/responsible-use
 serves: [safety/handles-data-safely/decides-what-to-share]
 introduces: []
-assumes: []
+assumes:
+  - objective: safety/handles-data-safely/decides-what-to-share
+    lesson: safety/responsible-use
+    section: what-may-go-in-four-tiers
 after: [safety/responsible-use]
 shorts: [Controller and processor in one page, Anonymized data can be re-identified]
 exercise:
@@ -13,9 +20,9 @@ exercise:
     Redact the lesson's fixture document (the full version of the one the Predict runs on) down to
     what the task needs, and keep the redaction map outside the tool. Stretch: do the same for one
     document of your own, on paper, without pasting it anywhere.
-sources: []
-issue: 113
+sources: [Academy ai-fluency-framework-foundations]
 minutes: 15
 notes: >-
   Introduces no concept: deepens data-privacy and confidentiality with a fixture that replaces names
-  and account numbers with placeholders and shows the task still works on the result.
+  and account numbers with placeholders and shows the task still works on the result. DLAI-2 was
+  inspiration only and is not cited on the page.
