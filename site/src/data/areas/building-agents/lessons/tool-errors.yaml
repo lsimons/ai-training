@@ -1,24 +1,32 @@
 id: building-agents/tool-errors
 title: When a tool fails
+description: >-
+  Break a tool on purpose, return the failure as data the model can read, and give the loop a retry
+  policy with a named stop reason.
 mode: tutorial
 covers: building-agents/tool-use
 serves:
   - building-agents/builds-agent-loop/defines-a-tool
   - building-agents/builds-agent-loop/implements-the-loop
 introduces: [error-handling]
-assumes: []
+assumes:
+  - objective: building-agents/builds-agent-loop/defines-a-tool
+    lesson: building-agents/agent-loop
+    section: a-tool-is-a-function-plus-a-description
+  - objective: building-agents/builds-agent-loop/implements-the-loop
+    lesson: building-agents/agent-loop
+    section: the-loop
 after: [building-agents/agent-loop]
 shorts: []
 exercise:
   kind: do
   brief: >-
-    Give the fixture's HTTP tool a timeout that fires on the second call, return it as a structured
-    error result, and set the harness policy to stop after two errors in a row. The output is the
-    run's message list and the stop reason.
-sources: []
-issue: 188
+    Copy agent.py, make slow_service time out on the first call only and answer on the second, run
+    the rate question under max_errors=2 and again under max_errors=1, and compare the message lists
+    and stop reasons.
+sources: [AEC-03, AEC-13, Academy building-with-the-claude-api, Claude docs handle-tool-calls]
 minutes: 15
 notes: >-
   The tool side of what #91 does in the loop: a structured `ok: false` result the model can read, a
-  retry count decided in the harness, and the fake model answering from the error text. Predict the
-  message list after a missing record and after a timeout.
+  retry count decided in the harness, and the fake model answering from the error text. The fixture
+  is its own copy of the agent-loop program, so #91 can change agent-loop without touching it.
