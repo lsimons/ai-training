@@ -2,16 +2,21 @@ import { Predict, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
 
 In this lesson we break a tool on purpose and watch what the loop from
 [Building your first agent](/building-agents/agent-loop/) does with it. A
-tool that fails is the normal case in production: records go missing,
-services time out, rate limits fire. The tool gets a way to report the
+tool that fails is the normal case in production: records go missing and
+services time out. The tool gets a way to report the
 failure, and the loop gets a policy for how many tries a step gets. The
 model then says what went wrong.
 
 Every example runs against a fixture with a fake model, so you can predict
 the output and check yourself. The complete program is
 `site/examples/building-agents/tool-errors/agent.py` in the repository. Its
-`run` function is the loop from the previous lesson with two additions,
-which this lesson adds one at a time.
+`run` function is the loop from the previous lesson with a few changes.
+The tool table is a parameter, and the return value is a dict with the
+stop reason, the answer and the message list instead of a bare string.
+The assistant message stores the model's request as the dict itself
+rather than as text, because the fake model reads it back when it retries.
+The error flag on tool messages and the `max_errors` policy are the two
+changes this lesson adds one at a time.
 
 ## Two ways a tool fails badly
 
@@ -101,8 +106,8 @@ def lookup_account(account_id: str) -> dict:
 ```
 
 The fake model gets a branch for that flag. A real model does the same
-reading on its own, which is why the error text is written for the model
-and names what's missing.
+reading on its own, so the error text is written for the model and names
+what's missing.
 
 ```python
 result = last["content"]
@@ -195,7 +200,8 @@ A stop reason is a name the caller can branch on. `end_turn` means the
 model answered, `max_steps` means the step budget ran out, and
 `too_many_errors` means the error policy stopped the run. The Claude API reports its
 side the same way: a response with `stop_reason` `tool_use` wants a tool
-run, and `end_turn` means the model is done (@Claude docs handle-tool-calls).
+run (@Claude docs handle-tool-calls), and `end_turn` means the model
+finished its reply on its own (@Claude docs handling-stop-reasons).
 Your loop adds the reasons the API can't know about, because only the loop
 knows its budgets.
 
@@ -228,7 +234,7 @@ A tempting change is to make `fetch_rate` loop three times over
 `slow_service` before it gives up. Now a run with three slow calls takes
 three times as long and neither the harness nor the model sees an error
 until the end. The retry count is a policy of the run, and the loop is
-where it can be read, changed, and tested. Rule: the tool reports one
+where it can be read and tested. Rule: the tool reports one
 attempt, and the harness decides how many attempts a step gets.
 </Pitfall>
 
@@ -241,10 +247,14 @@ clear as long as none of them takes over another's job (@AEC-13).
   returns the explanation as data, and it never retries on its own.
 - The **harness** decides how many tries a step gets and when a run stops.
   It reads the `is_error` flag, keeps the count, and names the reason it
-  stopped.
+  stopped. A production loop also wraps the tool call in its own
+  `try`, so an exception the tool didn't explain, like the `KeyError` in
+  section one, still becomes an error result instead of a crash. This
+  lesson's loop leaves that out so the tool's part of the job stays
+  visible.
 - The **model** decides what to tell the user, or whether to try a
-  different call. It reads the error text, which is why that text is
-  written for a reader and names the missing thing.
+  different call. It reads the error text and acts on what that text
+  names.
 
 <Sort id="sort-the-decision" objective="building-agents/builds-agent-loop/implements-the-loop"
   concepts={['error-handling', 'harness']}
@@ -255,9 +265,9 @@ clear as long as none of them takes over another's job (@AEC-13).
     { text: 'The error text says which account id was not found', bucket: 0 },
     { text: 'A second timeout in a row ends the run', bucket: 1 },
     { text: 'Ask the user to check the account number', bucket: 2 },
-    { text: 'The exception from the service call becomes an error result', bucket: 0 },
+    { text: 'Turn a TimeoutError into an ok False result that names the currency', bucket: 0 },
     { text: 'A good result resets the error count', bucket: 1 },
-    { text: 'Call the rate tool again after a timeout', bucket: 2 },
+    { text: 'Read the timeout text and ask for the same rate call again', bucket: 2 },
   ]} />
 
 <Exercise stretch="Add a third stop reason: a budget of tool calls that counts every call, error or not, and fires before max_steps. Make one run end with it and check that the loop reports the limit it reached first.">
@@ -265,7 +275,9 @@ clear as long as none of them takes over another's job (@AEC-13).
 Copy `agent.py` from the repository. Change `slow_service` so only the
 first call times out and the second returns `"1.08 USD"`. Leave the
 `max_errors=2` policy as it is. Run `show(run("What is the rate for EUR?"))`
-and keep the output. Then set `max_errors=1` and run it again.
+and keep the output. Then set `max_errors=1` and run it again. Doing this
+once shows you the same policy being right and wrong for the same tool,
+which is the judgment you make for every tool you ship.
 
 A good result: the first run shows one error result, then a good one,
 and ends with `end_turn` and an answer that holds the rate. The second
