@@ -73,14 +73,14 @@ adding one is adding one file.
   areas: [coding-with-agents, customizing-agents, building-agents]
 ```
 
-| Field         | Holds                                                                                              |
-| ------------- | -------------------------------------------------------------------------------------------------- |
-| `id`          | `foundations` or `engineering`. The comfort levels of S01 apply to the `engineering` group only.  |
+| Field         | Holds                                                                                               |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `id`          | `foundations` or `engineering`. The comfort levels of S01 apply to the `engineering` group only.    |
 | `order`       | Display order, unique per group. A collection comes back in no fixed order, and the file states it. |
-| `name`        | The sidebar label.                                                                                 |
-| `audience`    | Who the group is written for, as the S02 area table states it.                                    |
-| `description` | One or two sentences on the group's level and what it assumes.                                    |
-| `areas`       | The group's area slugs in display order. The order of areas is written here and nowhere else.      |
+| `name`        | The sidebar label.                                                                                  |
+| `audience`    | Who the group is written for, as the S02 area table states it.                                      |
+| `description` | One or two sentences on the group's level and what it assumes.                                      |
+| `areas`       | The group's area slugs in display order. The order of areas is written here and nowhere else.       |
 
 ## Area file
 
@@ -96,25 +96,25 @@ notes: >-
   area is new material.
 ```
 
-| Field         | Required | Holds                                                                                                     |
-| ------------- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `id`          | yes      | The area slug, equal to the directory name.                                                               |
-| `name`        | yes      | The display name: the sidebar entry, the course page title, the column head on the topic map.            |
-| `group`       | yes      | The group id. Must match the group whose `areas` list names this area.                                    |
+| Field         | Required | Holds                                                                                                      |
+| ------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `id`          | yes      | The area slug, equal to the directory name.                                                                |
+| `name`        | yes      | The display name: the sidebar entry, the course page title, the column head on the topic map.              |
+| `group`       | yes      | The group id. Must match the group whose `areas` list names this area.                                     |
 | `description` | yes      | One sentence. The course page's description, the front page card, and the about panel on the lesson graph. |
-| `notes`       | no       | Free prose for authors: why the area is shaped as it is. Never rendered.                                  |
+| `notes`       | no       | Free prose for authors: why the area is shaped as it is. Never rendered.                                   |
 
 The schema is strict, and a key not in this table fails the build. A fact
 that has no field gets a field, never a comment.
 
 ## What reads the tree
 
-| Reader                             | Uses                                                                                                                            |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| The `groups` and `areas` collections | Check the two files at build. `site/src/lib/areas.ts` joins them into the area list in group order and rejects a mismatch.    |
-| The sidebar (`site/astro.config.mjs`) | One sidebar group per S01 group, each area's course page, then its live lessons per S11 "Sidebar". The topic group per area. |
-| The course page (`<area>/index.mdx`) | Gets `title` and `description` from `area.yaml` through the docs loader. The MDX has no frontmatter of its own.                |
-| The topic map, the reference, the review pages, the progress catalog | Iterate the areas in group order.                                                                            |
+| Reader                                                               | Uses                                                                                                                         |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| The `groups` and `areas` collections                                 | Check the two files at build. `site/src/lib/areas.ts` joins them into the area list in group order and rejects a mismatch.   |
+| The sidebar (`site/astro.config.mjs`)                                | One sidebar group per S01 group, each area's course page, then its live lessons per S11 "Sidebar". The topic group per area. |
+| The course page (`<area>/index.mdx`)                                 | Gets `title` and `description` from `area.yaml` through the docs loader. The MDX has no frontmatter of its own.              |
+| The topic map, the reference, the review pages, the progress catalog | Iterate the areas in group order.                                                                                            |
 
 ## Check
 

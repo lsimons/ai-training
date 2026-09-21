@@ -58,14 +58,14 @@ area: safety
 lessons: [safety/responsible-use, safety/agent-risk]
 ```
 
-| Field             | Required | Holds                                                                                                      |
-| ----------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `id`              | yes      | The course id, equal to the file stem and, today, to the area id.                                          |
-| `area`            | yes      | The area slug, equal to the directory.                                                                     |
-| `plan-issue`      | no       | The GitHub issue the plan was written in. Provenance.                                                      |
-| `notes`           | no       | Free prose for authors: the ordering rationale, constraints the whole course keeps. Never rendered.        |
-| `lessons`         | one of   | The flat form: lesson ids in course order.                                                                 |
-| `parts`           | one of   | The parted form: a list of `{title, notes?, lessons}`, each `lessons` a list of ids in course order.       |
+| Field        | Required | Holds                                                                                                |
+| ------------ | -------- | ---------------------------------------------------------------------------------------------------- |
+| `id`         | yes      | The course id, equal to the file stem and, today, to the area id.                                    |
+| `area`       | yes      | The area slug, equal to the directory.                                                               |
+| `plan-issue` | no       | The GitHub issue the plan was written in. Provenance.                                                |
+| `notes`      | no       | Free prose for authors: the ordering rationale, constraints the whole course keeps. Never rendered.  |
+| `lessons`    | one of   | The flat form: lesson ids in course order.                                                           |
+| `parts`      | one of   | The parted form: a list of `{title, notes?, lessons}`, each `lessons` a list of ids in course order. |
 
 A **part** is a titled slice of the course. In most parts every lesson
 covers the same topic and the title is the topic name. A part may also hold
@@ -114,27 +114,27 @@ notes: >-
   The AI literacy pointer that issue #10 asked for lands here.
 ```
 
-| Field             | Required   | Holds                                                                                                                                                       |
-| ----------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`              | yes        | `<area>/<lesson>`, equal to the directory and file stem, and to the page route.                                                                             |
-| `title`           | yes        | The page title, the sidebar label, the node label on the lesson graph.                                                                                      |
-| `description`     | when live  | One sentence for search and social cards. The page's `description`.                                                                                        |
-| `mode`            | yes        | `tutorial` or `explanation` (S03 "Choosing the page kind").                                                                                                |
-| `covers`          | yes        | The one topic id the lesson covers, from this area. The term plugin marks first mentions of its concepts (S03 "Citations and terms").                       |
-| `serves`          | yes        | The objective ids the lesson teaches toward. Each gets at least one checkpoint (S03). May be empty while planning.                                          |
-| `introduces`      | yes        | The concept ids first taught in this lesson. Every concept of the area's topics is introduced by exactly one lesson, or the check warns. May be empty.       |
-| `assumes`         | yes        | The objectives the lesson relies on, from any area, as `{objective, lesson?, section?}`. Once live, each names the lesson and `## ` section that teach it. |
-| `extends-to`      | yes        | Where a confident learner goes next: `{label, href}` pairs (S03 "Frontmatter"). May be empty.                                                               |
-| `after`           | yes        | Lesson ids of this area the lesson comes after, for its place in the lesson graph while it is coming. A live lesson takes its place from `assumes`.         |
-| `shorts`          | yes        | Titles of the shorts the lesson would link to for depth (S01 "Short"), or an empty list. The short pages are still to be written.                              |
-| `exercise`        | one of     | The lesson's hands-on task: `{kind, brief}` with `kind` `do` or `judge` (S03 "Exercises") and a one-sentence brief.                                        |
-| `exercises`       | one of     | Two or more exercises, for a longer lesson. A lesson has `exercise` or `exercises`, never both.                                                              |
-| `sources`         | yes        | Bibliography keys the lesson draws on. Each must exist. May be empty.                                                                                       |
-| `issue`           | no         | The lesson's GitHub issue number.                                                                                                                           |
-| `minutes`         | yes        | Target length. Keep lessons short.                                                                                                                          |
-| `sources-checked` | no         | The day the sources were last checked. Becomes Starlight's `lastUpdated` on the page. Set with `review-by`.                                                 |
-| `review-by`       | no         | The date by which the sources must be checked again, for a lesson whose facts move (S03 "Frontmatter").                                                     |
-| `notes`           | no         | Free prose for authors: rationale, a content sketch, pointers to issues, what the plan named that the page later changed. Never rendered.                    |
+| Field             | Required  | Holds                                                                                                                                                         |
+| ----------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`              | yes       | `<area>/<lesson>`, equal to the directory and file stem, and to the page route.                                                                               |
+| `title`           | yes       | The page title, the sidebar label, the node label on the lesson graph.                                                                                        |
+| `description`     | when live | One sentence for search and social cards. The page's `description`.                                                                                           |
+| `mode`            | yes       | `tutorial` or `explanation` (S03 "Choosing the page kind").                                                                                                   |
+| `covers`          | yes       | The one topic id the lesson covers, from this area. The term plugin marks first mentions of its concepts (S03 "Citations and terms").                         |
+| `serves`          | yes       | The objective ids the lesson teaches toward. Each gets at least one checkpoint (S03). May be empty while planning.                                            |
+| `introduces`      | yes       | The concept ids first taught in this lesson. Every concept of the area's topics is introduced by exactly one lesson, or the check warns. May be empty.        |
+| `assumes`         | yes       | The objectives the lesson relies on, from any area, as `{objective, lesson?, section?}`. Once live, each names the lesson and the `##` section that teach it. |
+| `extends-to`      | yes       | Where a confident learner goes next: `{label, href}` pairs (S03 "Frontmatter"). May be empty.                                                                 |
+| `after`           | yes       | Lesson ids of this area the lesson comes after, for its place in the lesson graph while it is coming. A live lesson takes its place from `assumes`.           |
+| `shorts`          | yes       | Titles of the shorts the lesson would link to for depth (S01 "Short"), or an empty list. The short pages are still to be written.                             |
+| `exercise`        | one of    | The lesson's hands-on task: `{kind, brief}` with `kind` `do` or `judge` (S03 "Exercises") and a one-sentence brief.                                           |
+| `exercises`       | one of    | Two or more exercises, for a longer lesson. A lesson has `exercise` or `exercises`, never both.                                                               |
+| `sources`         | yes       | Bibliography keys the lesson draws on. Each must exist. May be empty.                                                                                         |
+| `issue`           | no        | The lesson's GitHub issue number.                                                                                                                             |
+| `minutes`         | yes       | Target length. Keep lessons short.                                                                                                                            |
+| `sources-checked` | no        | The day the sources were last checked. Becomes Starlight's `lastUpdated` on the page. Set with `review-by`.                                                   |
+| `review-by`       | no        | The date by which the sources must be checked again, for a lesson whose facts move (S03 "Frontmatter").                                                       |
+| `notes`           | no        | Free prose for authors: rationale, a content sketch, pointers to issues, what the plan named that the page later changed. Never rendered.                     |
 
 The schema is strict. A fact with no field gets a field, and a comment in
 a lesson file is a defect to fix by adding the fact to `notes` or to the
