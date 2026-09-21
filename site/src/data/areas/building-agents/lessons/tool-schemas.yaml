@@ -22,7 +22,11 @@ exercise:
     Rewrite the get_customer description in the fixture's CLEAR_TOOLS, leaving search_customers as
     it is, until `python3 tools.py count` reports zero wrong calls after. The output is the
     wrong-call count before and after.
-sources: [AEC-03, Academy building-with-the-claude-api, Anthropic tool use]
+sources:
+  - AEC-03
+  - Academy building-with-the-claude-api
+  - Claude docs define-tools
+  - Claude docs strict-tool-use
 minutes: 15
 notes: >-
   Two tools with overlapping descriptions and a fake model that chooses by counting shared words.

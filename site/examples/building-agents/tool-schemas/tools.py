@@ -52,8 +52,8 @@ def fill_currency(request, schema):
     return mentioned[:3].upper()
 
 
-# The customer tools. The functions are stubs; the lesson is about the
-# descriptions the model reads, not about the lookup.
+# The customer tools. The functions are stubs. The lesson is about the
+# descriptions the model reads.
 CUSTOMERS = {4711: "Vos", 3120: "Okafor", 9001: "Lindqvist"}
 
 

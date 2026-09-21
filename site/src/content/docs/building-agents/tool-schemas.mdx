@@ -13,11 +13,13 @@ in the repository, and each step below is `python3 tools.py <step>`.
 
 ## What the model reads
 
-A tool definition sent to a model API has three fields: a `name`, a
-`description`, and an `input_schema`, which is a JSON Schema object that
-names each parameter and its type (@Anthropic tool use). The API turns
-those fields into text in the prompt. That text is all the model has when
-it decides which tool to call and what to put in the arguments. The
+A tool definition sent to a model API has three required fields: a
+`name`, a `description`, and an `input_schema`, which is a JSON Schema
+object that names each parameter and its type (@Claude docs define-tools).
+The API turns those fields into text in the prompt, and sends them again
+with every request, because the model doesn't keep state between calls
+(@Academy building-with-the-claude-api). That text is all the model has
+when it decides which tool to call and what to put in the arguments. The
 function body never reaches it.
 
 A first draft of two customer tools often looks like this. The functions
@@ -63,7 +65,7 @@ by hand.
 <Predict id="pick-vague" objective="building-agents/builds-agent-loop/defines-a-tool"
   concepts={['tool-schema-design', 'function-calling']}
   context="In the lesson, VAGUE_TOOLS holds two tools. get_customer is described as 'Get customer.' and search_customers as 'Search customers. Matches name, email, city or account id.' The fake model choose_tool picks the tool whose description shares the most non-filler words with the request, and a tie goes to the first tool."
-  title="Which tool gets called?" hint="Count the words the request shares with each description, after dropping the filler words. Which description mentions the words the request is built from?"
+  title="Which tool gets called?" hint="Count the words the request shares with each description, after dropping the filler words."
   answer="search_customers" run="building-agents/tool-schemas/pick_vague.py">
 
 Which tool name does this print?
@@ -103,16 +105,22 @@ CLEAR_TOOLS = [
 Each sentence gives the model something it needs. The first says what the
 tool does and what the argument looks like, with an example value. The
 second says what comes back. The third says when to use the other tool.
-Anthropic's guidance for real tool definitions asks for the same content
-in at least three or four sentences: what the tool does and when it should
-be used, what each parameter means, and any limits. The docs call the
-description "by far the most important factor in tool performance"
-(@Anthropic tool use).
+Anthropic's guidance for real tool definitions asks the description to
+cover the following, in at least three or four sentences
+(@Claude docs define-tools):
+
+- what the tool does
+- when it should be used, and when it shouldn't
+- what each parameter means and how it changes the result
+- any caveats or limits
+
+The docs call the description "by far the most important factor in tool
+performance" (@Claude docs define-tools).
 
 Look at how the third sentence is written. It names the other tool and the
 input you lack, and it doesn't repeat that tool's own trigger words. The
-fake model can't read the word `not`. Every word in a description pulls
-requests with that word toward the tool. A real model reads `not` most of
+fake model can't read the word `not`. Every word in a description makes
+the tool a closer match for requests that contain that word. A real model reads `not` most of
 the time, but a description that lists what the tool isn't for still adds
 those words to the text the model weighs.
 
@@ -160,12 +168,17 @@ FREE_TEXT_SCHEMA = {
 ```
 
 To fill `currency`, the fake model finds the currency word in the request
-and then looks at the schema. Without a list of allowed values it writes
-the first three letters as a code in capitals, because most text it has
-seen writes codes that way. A real model has the same habit, and a
-free-text parameter gives it no reason to write anything else.
+and then looks at that parameter's schema. Without a list of allowed
+values it writes the first three letters as a code in capitals, because
+most text it has seen writes codes that way. A real model has the same
+habit, and a free-text parameter gives it no reason to write anything
+else. `call_balance` plays the loop's part: it fills both arguments from
+the request and runs the tool.
 
 ```python
+CURRENCY_WORDS = {"euros", "euro", "dollars", "dollar", "pounds", "pound"}
+
+
 def fill_currency(request, schema):
     mentioned = next(
         w.rstrip(".?") for w in request.lower().split() if w.rstrip(".?") in CURRENCY_WORDS
@@ -173,6 +186,15 @@ def fill_currency(request, schema):
     if "enum" in schema:
         return next(code for code in schema["enum"] if mentioned.startswith(code))
     return mentioned[:3].upper()
+
+
+def call_balance(request, schema):
+    digits = re.search(r"\d+", request)
+    if digits is None:
+        return "no account id in the request"
+    account_id = int(digits.group())
+    currency = fill_currency(request, schema["properties"]["currency"])
+    return get_balance(account_id, currency)
 ```
 
 <Predict id="balance-free" objective="building-agents/builds-agent-loop/defines-a-tool"
@@ -195,7 +217,7 @@ model what the value means. Anthropic's own example does this for a
 temperature unit, and with `strict: true` on the tool definition the API
 constrains the model's output so the arguments always match the schema.
 Without it the model can still return a type or a value the schema
-doesn't allow (@Anthropic tool use).
+doesn't allow (@Claude docs define-tools) (@Claude docs strict-tool-use).
 
 ```python
 ENUM_SCHEMA = {
@@ -275,9 +297,9 @@ value for any of the three parameters.
 
 The rule behind both fixes is the same. The schema is the only prompt the
 model gets about a tool, so tool schema design is prompt writing. The
-description says when to use the tool, when to use another one, and what
-comes back. Each parameter gets a type and a description, and an enum
-where the set is small. When a tool gets called for the wrong job or with
+description says what the tool does and what comes back, and it says when
+to use this tool and when to use another one. Each parameter gets a type
+and a description, and an enum where the set is small. When a tool gets called for the wrong job or with
 a value it can't use, read the schema before you suspect the model
 (@AEC-03).
 
@@ -336,7 +358,7 @@ work, and would a real model have needed it?
 
 1. The schema is the only prompt the model gets about a tool. A
    description says what the tool does, when to use it, when to use
-   another tool, and what comes back (@Anthropic tool use).
+   another tool, and what comes back (@Claude docs define-tools).
 2. A parameter gets a type and a description, and an enum where the set
    is small, so the model has nothing to guess.
 3. Count the wrong calls before and after a change. Most tool misuse is a
