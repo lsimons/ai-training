@@ -43,23 +43,23 @@ objectives:
         example: Before forwarding a summary, the learner opens the two figures it quotes and finds one is from last year.
 ```
 
-| Field          | Required | Holds                                                                                             |
-| -------------- | -------- | ------------------------------------------------------------------------------------------------- |
-| `id`           | yes      | `<area>/<competency>`: the directory name, then the file stem. Verb-led (S01 "Identifiers").     |
-| `area`         | yes      | The area slug, equal to the directory.                                                            |
-| `statement`    | yes      | The verb phrase. The competency page title and the "Goals" entry on the lesson graph.             |
-| `topics`       | yes      | The topic ids it draws on, from any area. Each must exist.                                        |
-| `objectives`   | yes      | One or more, in the order the page lists them. See below.                                         |
-| `notes`        | no       | Free prose for authors. Never rendered.                                                           |
+| Field        | Required | Holds                                                                                        |
+| ------------ | -------- | -------------------------------------------------------------------------------------------- |
+| `id`         | yes      | `<area>/<competency>`: the directory name, then the file stem. Verb-led (S01 "Identifiers"). |
+| `area`       | yes      | The area slug, equal to the directory.                                                       |
+| `statement`  | yes      | The verb phrase. The competency page title and the "Goals" entry on the lesson graph.        |
+| `topics`     | yes      | The topic ids it draws on, from any area. Each must exist.                                   |
+| `objectives` | yes      | One or more, in the order the page lists them. See below.                                    |
+| `notes`      | no       | Free prose for authors. Never rendered.                                                      |
 
 Each objective:
 
-| Field       | Required | Holds                                                                                          |
-| ----------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `id`        | yes      | `<competency id>/<objective>`, verb-led. The tail after the last slash is the page anchor.     |
-| `statement` | yes      | The verb phrase, shown as "You can now..." in the recap of a lesson that serves it.            |
-| `level`     | yes      | `base` or `expert` (S01 "Levels").                                                             |
-| `behaviors` | no       | The claim, why, example triples (S01 "Behavior triple"). Empty means "not written yet".        |
+| Field       | Required | Holds                                                                                      |
+| ----------- | -------- | ------------------------------------------------------------------------------------------ |
+| `id`        | yes      | `<competency id>/<objective>`, verb-led. The tail after the last slash is the page anchor. |
+| `statement` | yes      | The verb phrase, shown as "You can now..." in the recap of a lesson that serves it.        |
+| `level`     | yes      | `base` or `expert` (S01 "Levels").                                                         |
+| `behaviors` | no       | The claim, why, example triples (S01 "Behavior triple"). Empty means "not written yet".    |
 
 The schema is strict at every level. A misspelled key fails the build.
 
@@ -78,13 +78,13 @@ rows:
       - safety/verifies-output/checks-claims
 ```
 
-| Field               | Holds                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| `id`                | The file stem, kebab-case.                                                                 |
-| `framework`         | The framework's name as the S02 "Alignment" section cites it.                              |
-| `rows[].code`       | The framework's own item code or name (`INC-2`, `Discernment`).                            |
-| `rows[].asks`       | What the item asks for, paraphrased in our words (S02 "Frameworks").                        |
-| `rows[].objectives` | The objective ids here that address it, each written out in full as an objective id.         |
+| Field               | Holds                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| `id`                | The file stem, kebab-case.                                                           |
+| `framework`         | The framework's name as the S02 "Alignment" section cites it.                        |
+| `rows[].code`       | The framework's own item code or name (`INC-2`, `Discernment`).                      |
+| `rows[].asks`       | What the item asks for, paraphrased in our words (S02 "Frameworks").                 |
+| `rows[].objectives` | The objective ids here that address it, each written out in full as an objective id. |
 
 A row is written once. The competency page shows the rows that name one of
 its objectives, with the column "Objectives here" reduced to that
