@@ -2,7 +2,7 @@
 import { expect, test } from './fixtures';
 
 test('the last lesson of a course links to the next course, and the footer carries the AI notice', async ({ page }) => {
-	await page.goto('concepts/system-prompt/');
+	await page.goto('concepts/same-prompt-twice/');
 	await expect(page.locator('.site-footer a[rel=next]')).toHaveAttribute('href', '/ai-training/safety/');
 	await expect(page.locator('.ai-notice')).toHaveText('Content co-authored by AI.');
 });
