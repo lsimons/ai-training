@@ -1,0 +1,22 @@
+id: coding-with-agents/reviewing-the-diff
+title: Reviewing a diff you did not write, against the spec
+mode: tutorial
+covers: coding-with-agents/verification
+serves: [coding-with-agents/verifies-agent-work/reviews-others-code]
+introduces: [reviewing-code-you-did-not-write, verifying-against-the-specification]
+assumes:
+  - objective: safety/verifies-output/checks-claims
+  - objective: using-agents/delegates-and-checks/reviews-against-brief
+after: [coding-with-agents/reversible-changes]
+shorts: [why the diff is read before the agent's summary]
+exercise:
+  kind: judge
+  brief: >-
+    Review a prepared agent branch in the fixture against its spec, item by item. It hides a dropped
+    criterion, a deleted test, a changed timeout and a reformatted file the brief never mentioned.
+sources: [Academy ai-fluency-for-builders, Brilliant VER]
+issue: 169
+minutes: 15
+notes: >-
+  Tutorial because the branch is real and the learner runs its tests. Sources: Brilliant VER-2,
+  VER-3, Academy ai-fluency-for-builders (discernment for code, paraphrased).

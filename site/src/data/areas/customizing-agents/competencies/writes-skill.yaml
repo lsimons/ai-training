@@ -1,0 +1,59 @@
+id: customizing-agents/writes-skill
+area: customizing-agents
+statement: Writes a reusable agent skill
+topics: [customizing-agents/skills, customizing-agents/instructions]
+objectives:
+  - id: customizing-agents/writes-skill/chooses-skill-over-tool
+    statement: Chooses between a skill, a tool and an instruction for a need
+    level: base
+    behaviors:
+      - claim: The learner picks an instruction for a rule, a skill for a procedure, and a tool for an
+          ability the agent does not have.
+        why: Each does one thing, and a rule written as a skill or a procedure written as an instruction
+          fails in a predictable way.
+        example: '"Always use `bun`, never `npm`" is an instruction. "How to cut a release" is a skill, and
+          "query the issue tracker" is a tool.'
+      - claim: The learner asks whether the agent can already do the task with what it has before adding
+          anything.
+        why: A skill that wraps a command the agent already knows adds context and no ability.
+        example: The agent can run `gh pr create` unaided, so the skill only records the team's PR template
+          and review steps.
+      - claim: The learner weighs what each option costs the context window and the permission set.
+        why: Every tool and every loaded skill takes tokens on every turn, and a tool adds to what the agent
+          can do wrong.
+        example: A read-only MCP server with forty tools is replaced by a CLI the agent calls when needed.
+  - id: customizing-agents/writes-skill/packages-a-procedure
+    statement: Packages a repeatable procedure as a skill another person's agent can use
+    level: base
+    behaviors:
+      - claim: The skill states when to use it, the steps, and how to tell the result is right.
+        why: Another person's agent has none of the author's context and needs all three to run the
+          procedure without asking.
+        example: A release skill says "use when asked to cut a release", lists the six commands in order,
+          and ends with "the tag exists and CI on the tag is green".
+      - claim: The skill is tested by running it from a fresh session on someone else's machine.
+        why: A procedure that only works with the author's setup is not reusable.
+        example: A colleague's agent runs the skill and stops at a missing environment variable, so the
+          skill gains a check for it.
+      - claim: The skill names the commands and files exactly, and says what to do when a step fails.
+        why: A procedure that assumes success stops at the first surprise.
+        example: '"If `mise run ci` fails, fix the reported task and rerun; do not skip the task" is part of
+          the skill.'
+  - id: customizing-agents/writes-skill/discloses-progressively
+    statement: Structures a skill so the agent loads only what it needs
+    level: base
+    behaviors:
+      - claim: The skill's front matter says in one or two lines what it is for, so the agent can decide
+          whether to load it without reading it.
+        why: Every skill's description is in context on every turn, and a long one is paid for on every turn
+          (@Academy introduction-to-agent-skills).
+        example: The description is "Cut and publish a release of this package" and nothing more.
+      - claim: The main skill file holds the common path, and rare cases, long references and templates go
+          into files the skill points to.
+        why: A skill that loads everything up front costs the context of the rare case on every run.
+        example: The release skill's body is forty lines, and the rollback procedure is in `rollback.md`,
+          loaded only when needed.
+      - claim: The learner measures what the skill costs when loaded and trims it when it grows.
+        why: Skills grow by accretion, and no single addition looks expensive.
+        example: The learner counts the tokens of the skill directory after each change and moves a bloated
+          table into a script.

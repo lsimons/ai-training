@@ -1,0 +1,19 @@
+id: customizing-agents/progressive-disclosure
+title: Loading only what the skill needs
+mode: tutorial
+covers: customizing-agents/skills
+serves: [customizing-agents/writes-skill/discloses-progressively]
+introduces: [progressive-disclosure]
+assumes:
+  - objective: concepts/explains-models/explains-generation
+after: [customizing-agents/first-skill]
+shorts:
+  - Counting the tokens a skill costs on every turn (Academy introduction-to-agent-skills)
+exercise:
+  kind: do
+  brief: >-
+    Measure the release skill's token count, move the rollback procedure into a reference file the
+    skill points to, and measure again.
+sources: []
+issue: 167
+minutes: 15

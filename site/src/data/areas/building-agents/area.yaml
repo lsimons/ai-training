@@ -1,0 +1,4 @@
+id: building-agents
+name: Building agents
+group: engineering
+description: Build an agent from a model, a loop and tools.

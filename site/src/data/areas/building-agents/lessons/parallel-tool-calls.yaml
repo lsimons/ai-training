@@ -1,0 +1,21 @@
+id: building-agents/parallel-tool-calls
+title: Several tool calls in one turn
+mode: tutorial
+covers: building-agents/tool-use
+serves: [building-agents/builds-agent-loop/implements-the-loop]
+introduces: [parallel-calls]
+assumes: []
+after: [building-agents/tool-errors]
+shorts: [Side effects under concurrency]
+exercise:
+  kind: do
+  brief: >-
+    Change the fixture loop to run the fake model's three independent weather calls together and
+    return the results in one turn, then add a fourth call that depends on the first and show why it
+    stays sequential.
+sources: []
+issue: 191
+minutes: 12
+notes: >-
+  The fake model requests three lookups in one reply. Predict the round count with sequential and
+  with concurrent execution, and the order of the results.

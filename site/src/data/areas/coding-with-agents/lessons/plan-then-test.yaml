@@ -1,0 +1,20 @@
+id: coding-with-agents/plan-then-test
+title: Plan first, then drive the change from a failing test
+mode: tutorial
+covers: coding-with-agents/workflow
+serves: [coding-with-agents/ships-with-agent/runs-a-session]
+introduces: [plan-mode, test-driven-change]
+assumes: []
+after: [coding-with-agents/first-session, coding-with-agents/decomposing-the-work]
+shorts: [when a test beats a spec and when a spec beats a test]
+exercise:
+  kind: do
+  brief: >-
+    In plan mode, have the agent propose steps for a bug fix in the fixture, correct one step, then
+    let it write the failing test and implement until it passes.
+sources: [Academy claude-code-101, DLAI-6]
+issue: 153
+minutes: 15
+notes: >-
+  Sources: Academy claude-code-101 for the explore, plan, code rhythm (paraphrased), DLAI-6 as
+  inspiration.

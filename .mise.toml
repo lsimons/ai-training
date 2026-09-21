@@ -88,13 +88,14 @@ description = "Run every lesson example fixture on the current Python and the 3.
 dir = "site"
 run = "bun scripts/check-examples.mjs"
 
-# The plan files under site/src/data/courses must agree with the lesson
-# pages and the topic and competency YAML (spec S02 "Storage").
-# site/scripts/lib/courses.mjs lists what it rejects in its header comment.
-[tasks.courses]
-description = "Check the course plan files against the lesson pages, topics and competencies"
+# The data tree under site/src/data (groups, areas, topics, competencies,
+# alignment, courses, lessons; specs S09 to S11) must agree with itself and
+# with the lesson pages. site/scripts/lib/data.mjs lists what it rejects in
+# its header comment.
+[tasks.data]
+description = "Check the data tree (areas, topics, competencies, courses, lessons) against itself and the lesson pages"
 dir = "site"
-run = "bun scripts/check-courses.mjs"
+run = "bun scripts/check-data.mjs"
 
 # The build writes the checkpoint export (spec S03 "Checkpoint export") to
 # site/dist/data/checkpoints.json from src/pages/data/checkpoints.json.ts.
@@ -328,7 +329,7 @@ run = [
   "mise run prose",
   "mise run spell",
   "mise run examples",
-  "mise run courses",
+  "mise run data",
   "mise run site-check",
   "mise run site-lint",
   "mise run site-test",

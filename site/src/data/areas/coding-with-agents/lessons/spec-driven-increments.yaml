@@ -1,0 +1,19 @@
+id: coding-with-agents/spec-driven-increments
+title: Working from a spec in small increments
+mode: tutorial
+covers: coding-with-agents/workflow
+serves: [coding-with-agents/ships-with-agent/works-in-increments]
+introduces: [spec-driven-change, working-increments, sequencing-for-early-feedback]
+assumes: []
+after: [coding-with-agents/plan-then-test]
+shorts: [the thin end-to-end path]
+exercise:
+  kind: do
+  brief: >-
+    Write a one-page spec for a fixture feature and order its increments with the least certain one
+    first. Land the first increment with the agent.
+sources: [Academy ai-native-sdlc-playbook, Brilliant INC]
+issue: 155
+minutes: 15
+notes: >-
+  Sources: Brilliant INC, Academy ai-native-sdlc-playbook (spec as the source of truth, paraphrased).

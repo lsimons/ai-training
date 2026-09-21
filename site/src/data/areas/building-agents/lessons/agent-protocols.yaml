@@ -1,0 +1,27 @@
+id: building-agents/agent-protocols
+title: Protocols for tools and for other agents
+mode: explanation
+covers: building-agents/production
+serves: [building-agents/runs-in-production/mitigates-agent-risks]
+introduces: [protocols-mcp-a2a]
+assumes:
+  - objective: customizing-agents/connects-tools-safely/adds-a-tool
+  - objective: customizing-agents/connects-tools-safely/hardens-a-connection
+after:
+  - building-agents/how-a-model-calls-a-tool
+  - building-agents/guardrails-in-layers
+  - building-agents/orchestration-tax
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    For a proposed connection to an external agent over an agent-to-agent protocol, list what it can
+    read and send, decide which of the fixture's defense layers apply to it, and write the one trust
+    decision you would make before enabling it.
+sources: [Academy model-context-protocol-advanced-topics]
+issue: 215
+minutes: 12
+notes: >-
+  Closes the N x M thread from the first lesson. The Model Context Protocol for tools and data,
+  agent-to-agent protocols for delegation across organizations, and each connection as a trust
+  decision (Academy model-context-protocol-advanced-topics). Checkpoints are choice and scenario.

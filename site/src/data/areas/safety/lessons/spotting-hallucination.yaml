@@ -1,0 +1,22 @@
+id: safety/spotting-hallucination
+title: What an invented fact looks like
+mode: tutorial
+covers: safety/failure-modes
+serves: [safety/verifies-output/checks-claims]
+introduces: [hallucination-in-practice]
+assumes:
+  - objective: concepts/explains-models/names-failure-modes
+after: []
+shorts: [Why specificity is the tell]
+exercise:
+  kind: judge
+  brief: >-
+    Read the lesson's second summary before running the check, predict from their specificity which
+    of its claims are invented, then run the fixture and record where the prediction held and where
+    it did not.
+sources: []
+issue: 115
+minutes: 15
+notes: >-
+  A fixture checks a summary's citations and figures against a small offline source set and prints
+  which ones have no source.

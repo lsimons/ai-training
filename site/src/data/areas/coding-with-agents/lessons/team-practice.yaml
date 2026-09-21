@@ -1,0 +1,21 @@
+id: coding-with-agents/team-practice
+title: Writing down how the team uses agents
+mode: explanation
+covers: coding-with-agents/team
+serves: [coding-with-agents/works-in-team/sets-team-practice]
+introduces: []
+assumes: []
+after: [coding-with-agents/parallel-sessions, coding-with-agents/attribution-and-review-norms]
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    From three incidents in the fixture's history, write the practice section of an agent
+    instructions file and drop the rule no incident supports.
+sources: []
+issue: 193
+minutes: 10
+notes: >-
+  Introduces no concept: draws the six team concepts together for the expert objective. Expert level
+  and the last lesson in the course. Explanation mode because the deliverable is a document, and the
+  judge exercise keeps it concrete.

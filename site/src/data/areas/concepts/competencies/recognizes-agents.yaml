@@ -1,0 +1,66 @@
+id: concepts/recognizes-agents
+area: concepts
+statement: Recognizes an agent, its tools and its degree of autonomy
+topics: [concepts/what-is-an-agent, concepts/limits]
+objectives:
+  - id: concepts/recognizes-agents/tells-agent-from-assistant
+    statement: Tells a chat assistant from an agent by what it can do unprompted
+    level: base
+    behaviors:
+      - claim: An assistant produces text for a person to act on, and an agent takes actions through tools
+          and decides what to do next on its own.
+        why: The two need different handling, and treating an agent as a chat box means not noticing what it
+          did.
+        example: A chatbot that drafts an email is an assistant. A tool that reads the inbox, drafts replies
+          and sends them without another prompt is an agent.
+      - claim: The learner tells the difference by asking what the system can do without another prompt,
+          whatever its interface looks like.
+        why: A chat window can front an agent, and a button can trigger a plain model call, so the interface
+          says nothing.
+        example: Two products both show a chat box, and the learner asks "does it run the query itself or
+          give me the query?" and classifies them differently.
+      - claim: The learner names the tools an agent has before judging what it can do.
+        why: An agent's reach is its tool list, and a research agent with a browser tool is a different risk
+          from one with a browser and an email tool.
+        example: Reading the product page, the learner lists "web search, file read, calendar write" and
+          notes that calendar write is the one that acts on others.
+  - id: concepts/recognizes-agents/places-on-autonomy-scale
+    statement: Places a product or workflow on the autonomy scale
+    level: base
+    behaviors:
+      - claim: "The learner places a workflow by who decides the next step: a person at every step, the
+          system with approval at some steps, or the system alone."
+        why: Autonomy is about who makes the decisions, and the amount of text the model produces says
+          nothing about it.
+        example: Autocomplete in an editor is low autonomy even when it writes a whole function, because the
+          person accepts each suggestion.
+      - claim: The learner can say what would move a workflow one step up or down the scale.
+        why: Autonomy is a design choice, and seeing the dial makes the choice visible rather than accepting
+          the product's default.
+        example: '"If the agent also merged the pull request instead of opening it, it would move from
+          supervised to autonomous."'
+      - claim: The learner places the same product differently depending on how it is configured.
+        why: Most agent products have permission settings, and the setting decides the autonomy.
+        example: A coding agent in "ask before each edit" mode and the same agent in "auto-accept" mode go
+          on different points of the scale.
+  - id: concepts/recognizes-agents/names-the-loop
+    statement: Describes the observe, think, act loop and the tools in it
+    level: base
+    behaviors:
+      - claim: "The learner describes the loop as: the agent observes (reads a result), thinks (decides the
+          next step), acts (calls a tool), and repeats until it decides it is done."
+        why: Naming the loop makes the agent's behavior predictable and points at where a step can go wrong
+          (@Academy claude-platform-101).
+        example: Watching a coding agent, the learner narrates "it ran the tests, read the failure, and now
+          it is editing the file".
+      - claim: The learner can name which tools were used in a given run and what each observation was.
+        why: A tool call is where the agent touches the world, so the tool list is the list of things that
+          can have side effects.
+        example: From a transcript the learner lists "searched the web twice, read one file, wrote one file"
+          and notes the write is the step to check.
+      - claim: The learner knows the loop ends either because the agent decides it is done or because a
+          limit stops it, and can tell which happened.
+        why: '"Stopped because the budget ran out" and "stopped because it is finished" need different
+          follow-up.'
+        example: An agent that ends with a half-written file and no summary hit a limit, so the learner
+          checks the log rather than trusting the output.

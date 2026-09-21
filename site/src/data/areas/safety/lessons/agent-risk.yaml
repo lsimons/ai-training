@@ -1,0 +1,37 @@
+id: safety/agent-risk
+title: Why agent safety is different
+description: >-
+  What changes once an AI can act instead of only answer. How to decide what it may reach and do on
+  its own, and where a person must approve first.
+mode: explanation
+covers: safety/agent-risk
+serves:
+  - safety/judges-agent-risk/names-blast-radius
+  - safety/judges-agent-risk/chooses-human-in-loop
+  - safety/judges-agent-risk/recognizes-injection
+introduces:
+  - blast-radius
+  - permissions-and-least-privilege
+  - human-in-the-loop
+  - prompt-injection
+  - exfiltration
+assumes:
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: Verifying outputs
+    href: /safety/verification/
+after: []
+shorts:
+  - Agents that are only saved prompts
+  - Permission modes (spec S02, extends-to)
+exercise:
+  kind: do
+  brief: >-
+    Describe one agent task, list its reach, and place the approval before the irreversible step.
+sources: []
+minutes: 20
+notes: >-
+  The plan also assumed concepts/recognizes-agents/tells-agent-from-assistant, which the page does
+  not name.

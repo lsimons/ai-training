@@ -1,0 +1,17 @@
+id: customizing-agents/settings-layering
+title: Where a setting comes from
+mode: explanation
+covers: customizing-agents/hooks-permissions
+serves: [customizing-agents/configures-agent/sets-permissions]
+introduces: [settings-layering]
+assumes: []
+after: [customizing-agents/allowlists]
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    Given a user file, a committed project file, a local override and a session flag that disagree,
+    write down the effective permission set and which layer decided each entry.
+sources: []
+issue: 181
+minutes: 10

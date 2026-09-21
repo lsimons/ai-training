@@ -1,0 +1,77 @@
+id: coding-with-agents/specifies-work
+area: coding-with-agents
+statement: Specifies work well enough for an agent to implement and for anyone to verify
+topics: [coding-with-agents/specification, using-agents/decomposition]
+objectives:
+  - id: coding-with-agents/specifies-work/judges-worth-building
+    statement: Judges whether something should be built before building it
+    level: base
+    behaviors:
+      - claim: The learner states the problem and who has it before proposing a change.
+        why: An agent makes building cheap, which makes building the wrong thing cheap too.
+        example: '"Support answers the same question ten times a week" comes before "build a settings page",
+          and the answer may be a documentation fix.'
+      - claim: The learner names at least one alternative to building, including doing nothing, and says why
+          building wins.
+        why: The comparison is what turns a wish into a decision.
+        example: '"We could add the feature, change the default, or document the workaround; the workaround
+          costs each user five minutes a week, so we change the default."'
+      - claim: The learner weighs the cost of owning the change against its value, and the cost of writing
+          it is the smaller part.
+        why: The agent writes it in an hour, and the team maintains it for years.
+        example: A new dependency for one date format is rejected because it adds a package to keep patched,
+          and a ten-line function is written instead.
+  - id: coding-with-agents/specifies-work/defines-success
+    statement: Defines what a successful outcome requires
+    level: base
+    behaviors:
+      - claim: Success is written as observable outcomes that a person other than the author could check.
+        why: A criterion the author has to interpret is a criterion the agent and the reviewer interpret
+          differently.
+        example: '"Search results return within 300 ms at the 95th percentile on the test data set" instead
+          of "search is fast".'
+      - claim: The criteria include what must keep working as well as what is new.
+        why: An agent optimizing for the new criterion trades away anything that is not listed.
+        example: "\"All existing exports still open in the finance team's spreadsheet program\" is added
+          because the new CSV format could break them."
+      - claim: The learner writes down what is out of scope.
+        why: The agent fills the gap between "done" and "everything it could improve" with its own choices.
+        example: '"Not in scope: mobile layout, translations" stops the agent from restyling the whole
+          page.'
+  - id: coding-with-agents/specifies-work/decomposes-into-components
+    statement: Decomposes a problem into components with clear dependencies
+    level: base
+    behaviors:
+      - claim: Each component has one clear responsibility and an interface that fits in a sentence.
+        why: Components a person can describe are components an agent can implement in isolation and a
+          reviewer can check in isolation.
+        example: '"A parser that turns the file into records; a validator that flags bad records; a writer
+          that saves the good ones" rather than one "import" task.'
+      - claim: The learner draws the dependencies and orders the work so each step can be checked before the
+          next starts.
+        why: A component built on an unverified one inherits its mistakes and hides them.
+        example: The parser is built and tested on real files before the validator, because the validator's
+          tests need real parsed records.
+      - claim: Each component is small enough to be one agent session and one reviewable change.
+        why: A task that is too large for a session loses context halfway through, and its diff is too large
+          to read.
+        example: The learner splits "add authentication" into token issuing, token checking and the login
+          page, and briefs each separately.
+  - id: coding-with-agents/specifies-work/designs-the-check
+    statement: Designs how the work will be verified before it is built
+    level: base
+    behaviors:
+      - claim: "Before building, the learner writes down how each success criterion will be verified: which
+          test, which measurement, which manual step."
+        why: A check designed afterwards is designed around what was built, and passes by construction.
+        example: For "no duplicate invoices", the check is a test that imports the same file twice and
+          asserts one set of rows, written before the import code.
+      - claim: The check is something the agent can run, so it can verify its own work before handing back.
+        why: A check only a person can run is run once at the end, and a check the agent can run is run on
+          every attempt.
+        example: The acceptance test goes into the test suite and the brief says "done when `mise run test`
+          passes".
+      - claim: The learner designs at least one check that would fail if the agent took a shortcut.
+        why: Agents optimize for the check they see, and a check that passes on a stub passes on a stub.
+        example: The test for the email sender uses a fake mailbox and asserts the message arrived, where a
+          check on the send function's return value would pass on a stub.

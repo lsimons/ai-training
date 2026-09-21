@@ -1,0 +1,23 @@
+id: coding-with-agents/self-checking-loops
+title: Giving the agent a check it can run, with a limit
+mode: tutorial
+covers: coding-with-agents/verification
+serves: [coding-with-agents/verifies-agent-work/automates-the-check]
+introduces: [bounded-self-checking-loops, deterministic-gates]
+assumes:
+  - objective: safety/verifies-output/checks-claims
+after: [coding-with-agents/observing-and-debugging]
+shorts: [why a second model's review never replaces a test]
+exercise:
+  kind: do
+  brief: >-
+    Turn a manual check on the fixture into a test. Brief the agent to fix and rerun at most five
+    times with the test file read-only, and confirm afterwards that the assertions did not change.
+sources: [Academy ai-native-sdlc-playbook, Academy claude-code-in-action, Brilliant VER]
+issue: 174
+minutes: 15
+notes: >-
+  The plan named the topic safety/verification as assumed; taken as the objective
+  safety/verifies-output/checks-claims. Closes the "deterministic gates" gap from issue #13.
+  Sources: Brilliant VER-6, Academy claude-code-in-action (verification skills, paraphrased),
+  Academy ai-native-sdlc-playbook (a check the agent can run is run every iteration, paraphrased).

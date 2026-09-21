@@ -1,0 +1,22 @@
+id: building-agents/rubrics
+title: Turning good into a rubric
+mode: explanation
+covers: building-agents/evaluation
+serves: [building-agents/evaluates-agents/writes-a-rubric]
+introduces: [quality-pillars, rubrics]
+assumes:
+  - objective: coding-with-agents/verifies-agent-work/reviews-others-code
+after: [building-agents/retrieval-as-a-tool]
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    Read the fixture's twelve retrieval-agent transcripts, write three criteria with anchored 0-1-2
+    scales, and score two transcripts with them. Compare your scores with the model answer's.
+sources: []
+issue: 200
+minutes: 15
+notes: >-
+  Correctness, faithfulness, safety, efficiency and adherence as separate scores, because one number
+  hides the trade. A rubric written from real outputs. Checkpoints are choice and repair on weak
+  criteria.

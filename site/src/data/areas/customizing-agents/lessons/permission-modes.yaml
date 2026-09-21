@@ -1,0 +1,20 @@
+id: customizing-agents/permission-modes
+title: Choosing a permission mode per task
+mode: tutorial
+covers: customizing-agents/hooks-permissions
+serves: [customizing-agents/configures-agent/sets-permissions]
+introduces: [permission-modes]
+assumes:
+  - objective: safety/judges-agent-risk/names-blast-radius
+  - objective: coding-with-agents/ships-with-agent/runs-a-session
+after: [customizing-agents/instructions]
+shorts:
+  - Running unattended inside a sandbox or a disposable worktree (Academy claude-code-in-action)
+exercise:
+  kind: do
+  brief: >-
+    Run the same small fixture task in an ask-everything mode and in an accept-edits mode, count the
+    prompts, and write one line on which mode fits the task and why.
+sources: []
+issue: 177
+minutes: 15

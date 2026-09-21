@@ -12,7 +12,7 @@ afterAll(() => {
 const TOPIC =
 	'id: a/t\narea: a\nname: T\ndefinition: d\nconcepts:\n  - id: c1\n    name: C\n    definition: d\nlinks: {prerequisites: [], related: [], specializations: []}\n';
 const PAGE =
-	'---\ntitle: X\nmode: tutorial\n---\n\n<Choice id="one" objective="o" title="T" hint="h" concepts={[\'c1\']}\n  options={[{ text: \'a\', correct: true }]}>\nStem.\n</Choice>\n\n<Sort id="two" objective="o" title="T" hint="h" concepts={[\'c1\']} buckets={[]} items={[]} />\n\n<Predict id="shown" title="Shown" answer="1" run="x.py">\nRun this.\n</Predict>\n';
+	'<Choice id="one" objective="o" title="T" hint="h" concepts={[\'c1\']}\n  options={[{ text: \'a\', correct: true }]}>\nStem.\n</Choice>\n\n<Sort id="two" objective="o" title="T" hint="h" concepts={[\'c1\']} buckets={[]} items={[]} />\n\n<Predict id="shown" title="Shown" answer="1" run="x.py">\nRun this.\n</Predict>\n';
 const item = (id: string, over: Record<string, unknown> = {}) => ({
 	id,
 	lesson: 'a/x',
@@ -35,9 +35,9 @@ function tree(data: unknown, files: Record<string, string | null> = {}) {
 	const root = mkdtempSync(join(tmpdir(), 'checkpoints-'));
 	roots.push(root);
 	const all: Record<string, string | null> = {
-		'data/topics/a/t.yaml': TOPIC,
+		'data/areas/a/topics/t.yaml': TOPIC,
 		'content/a/x.mdx': PAGE,
-		'content/a/index.mdx': '---\ntitle: Course\n---\n\n<Choice id="not-a-lesson">\n',
+		'content/a/index.mdx': '<Choice id="not-a-lesson">\n',
 		'dist/data/checkpoints.json': data === null ? null : typeof data === 'string' ? data : JSON.stringify(data),
 		...files,
 	};
@@ -49,7 +49,7 @@ function tree(data: unknown, files: Record<string, string | null> = {}) {
 	return root;
 }
 const check = (root: string) =>
-	checkCheckpoints(join(root, 'dist/data/checkpoints.json'), join(root, 'content'), join(root, 'data/topics'));
+	checkCheckpoints(join(root, 'dist/data/checkpoints.json'), join(root, 'content'), join(root, 'data'));
 
 describe('checkCheckpoints', () => {
 	it('passes a consistent export and counts the items', () => {
@@ -89,23 +89,26 @@ describe('checkCheckpoints', () => {
 });
 
 describe('helpers', () => {
-	it('conceptIds collects every concept id under the topics directory', () => {
-		expect([...conceptIds(join(tree(GOOD), 'data/topics'))]).toEqual(['c1']);
+	it('conceptIds collects every concept id in the data tree', () => {
+		expect([...conceptIds(join(tree(GOOD), 'data'))]).toEqual(['c1']);
 	});
 	it('pageCheckpointIds skips an ungraded example (a Predict without an objective), so the export need not list it', () => {
-		const { ids } = pageCheckpointIds(join(tree(GOOD), 'content'));
+		const root = tree(GOOD);
+		const { ids } = pageCheckpointIds(join(root, 'content'), join(root, 'data'));
 		expect([...ids]).not.toContain('a/x#shown');
 		expect(check(tree(GOOD)).errors).toEqual([]);
 	});
 	it('pageCheckpointIds reads lesson pages only, not the course page, with the same scanner as the build', () => {
 		const spaced = PAGE.replace('<Choice id="one"', '<Choice id = "one"');
-		const { ids, errors } = pageCheckpointIds(join(tree(GOOD, { 'content/a/x.mdx': spaced }), 'content'));
+		const root = tree(GOOD, { 'content/a/x.mdx': spaced });
+		const { ids, errors } = pageCheckpointIds(join(root, 'content'), join(root, 'data'));
 		expect([...ids].sort()).toEqual(['a/x#one', 'a/x#two']);
 		expect(errors).toEqual([]);
 	});
 	it('pageCheckpointIds reports a tag without a string id and a tag the scanner rejects', () => {
 		const noId = PAGE.replace('<Choice id="one"', '<Choice id={x}');
-		expect(pageCheckpointIds(join(tree(GOOD, { 'content/a/x.mdx': noId }), 'content')).errors).toEqual([
+		const root = tree(GOOD, { 'content/a/x.mdx': noId });
+		expect(pageCheckpointIds(join(root, 'content'), join(root, 'data')).errors).toEqual([
 			'a/x: <Choice> without an id="..."',
 		]);
 		const broken = PAGE.replace('<Choice id="one"', '<Choice id="one" {...rest}');

@@ -1,0 +1,22 @@
+id: concepts/memory
+title: Where memory comes from
+mode: explanation
+covers: concepts/grounding
+serves:
+  - concepts/explains-models/explains-grounding
+  - concepts/explains-models/explains-generation
+introduces: [short-and-long-term-memory, context-rot]
+assumes: []
+after: [concepts/retrieval, concepts/what-tokens-cost]
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    Read a long transcript, mark where the answers start to drift, and say which of summarize, start
+    fresh or retrieve would have helped.
+sources: []
+issue: 152
+minutes: 12
+notes: >-
+  Context rot is the session-level decline as the window fills with old turns and tool output;
+  concepts/what-tokens-cost covers instruction dilution inside one prompt or file.

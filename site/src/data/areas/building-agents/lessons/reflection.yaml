@@ -1,0 +1,21 @@
+id: building-agents/reflection
+title: A second pass that critiques the first
+mode: tutorial
+covers: building-agents/patterns
+serves: [building-agents/orchestrates-agents/picks-a-pattern]
+introduces: [reflection]
+assumes: []
+after: [building-agents/react, building-agents/rubrics]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Give the fixture critic the three criteria from the rubrics lesson instead of "is this good",
+    cap the rounds at two, and run it on the fixture's four drafts. The output is the round count
+    and final draft per input.
+sources: []
+issue: 206
+minutes: 15
+notes: >-
+  A fake critic call revises a draft with checkable rules. Predict the number of rounds with and
+  without a cap, and what a critic without concrete criteria does to a trivial edit.

@@ -1,0 +1,17 @@
+id: safety/marking-what-a-person-checked
+title: Marking what a person has checked
+mode: explanation
+covers: safety/verification
+serves: [safety/verifies-output/checks-claims, safety/verifies-output/keeps-a-check-habit]
+introduces: [endorsed-answers]
+assumes: []
+after: [safety/following-the-source]
+shorts: [Endorsed answers in the CS50 tutor]
+exercise:
+  kind: judge
+  brief: >-
+    Take a template your team uses for AI-assisted work and decide where a "checked by" field goes,
+    how light it must be to get filled in, and how you would sample whether it is.
+sources: []
+issue: 126
+minutes: 15

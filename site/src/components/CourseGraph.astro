@@ -6,7 +6,7 @@
  * from the progress record on the client.
  */
 import { getCollection } from 'astro:content';
-import { areaOf } from '@lib/areas';
+import { areaOf, getAreas } from '@lib/areas';
 import { dependenciesOf, getCoursePlan, isLive, planLevels } from '@lib/courses';
 import { jsonForScript } from '@lib/json';
 import { checkpointsOf } from '@lib/lessons';
@@ -16,9 +16,9 @@ interface Props {
 	area: string;
 }
 const { area } = Astro.props;
-const info = areaOf(area);
-// The plan (site/src/data/courses/<area>.yaml) decides which lessons the graph shows
-// and where. Planned and drafting entries render as "coming" nodes without a link.
+const info = areaOf(await getAreas(), area);
+// The course plan (spec S11) decides which lessons the graph shows and where.
+// Planned entries render as "coming" nodes without a link.
 const plan = await getCoursePlan(area);
 const lessons = plan.filter(isLive).map((e) => e.lesson);
 const levels = planLevels(plan, area);
@@ -34,9 +34,9 @@ const nodes = lessons.map((l) => ({
 const edges = plan.flatMap((e) => dependenciesOf(e, area).map((from) => ({ from, to: e.id })));
 const coming = plan.length - lessons.length;
 
-const competencies = (await getCollection('competencies')).find((c) => c.data.area === area)?.data.competencies ?? [];
+const competencies = (await getCollection('competencies')).filter((c) => c.data.area === area).map((c) => c.data);
 const topics = await getCollection('topics');
-const covered = new Set(lessons.flatMap((l) => l.data.covers ?? []));
+const covered = new Set(lessons.map((l) => l.data.covers));
 const prerequisites = [
 	...new Set(topics.filter((t) => covered.has(t.data.id)).flatMap((t) => t.data.links.prerequisites)),
 ]
@@ -84,7 +84,7 @@ const totalCheckpoints = nodes.reduce((n, l) => n + l.checkpoints.length, 0);
 								<span class="course-node-body">
 									<span class="course-node-mode">coming</span>
 									<span class="course-node-title">{e.title}</span>
-									<span class="course-node-count">{e.status === 'drafting' ? 'being written' : 'planned'}</span>
+									<span class="course-node-count">planned</span>
 								</span>
 							</span>
 						)

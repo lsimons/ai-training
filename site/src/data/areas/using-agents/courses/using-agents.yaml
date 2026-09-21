@@ -1,0 +1,39 @@
+id: using-agents
+area: using-agents
+plan-issue: 32
+parts:
+  - title: Working with an assistant
+    notes: >-
+      Five concepts, four lessons. Each lesson is one everyday use with its own run, so each stays a
+      short tutorial.
+    lessons:
+      - using-agents/finding-information
+      - using-agents/working-from-files
+      - using-agents/thought-partner
+      - using-agents/drafting-and-critique
+  - title: Delegating to an agent
+    notes: >-
+      Four concepts, three lessons. The live tutorial teaches all four concepts. The two planned
+      lessons add the explanation side of autonomy and the one objective the live lesson does not
+      serve, adjusts-mid-task.
+    lessons:
+      - using-agents/delegating
+      - using-agents/choosing-autonomy
+      - using-agents/adjusting-the-brief
+  - title: Decomposing work
+    notes: >-
+      Three concepts, three lessons. Two tutorials that run, one explanation that judges.
+    lessons:
+      - using-agents/breaking-work-into-pieces
+      - using-agents/delegating-in-rounds
+      - using-agents/when-to-stop
+  - title: Choosing models and tools
+    notes: >-
+      Five concepts, four lessons. One tutorial that runs a comparison, three explanations that
+      judge. The last lesson serves the area's one expert objective and stays separate for that
+      reason.
+    lessons:
+      - using-agents/chat-agent-or-automation
+      - using-agents/trying-two-models
+      - using-agents/steps-that-stay-human
+      - using-agents/reasoning-across-tool-levels

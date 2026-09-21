@@ -17,7 +17,7 @@ export function assertKnownConcepts(where: string, concepts: readonly string[], 
 	const unknown = concepts.filter((c) => !known.has(c));
 	if (unknown.length) {
 		throw new Error(
-			`${where}: unknown concept id${unknown.length === 1 ? '' : 's'} ${unknown.map((c) => JSON.stringify(c)).join(', ')} (see site/src/data/topics/)`,
+			`${where}: unknown concept id${unknown.length === 1 ? '' : 's'} ${unknown.map((c) => JSON.stringify(c)).join(', ')} (see site/src/data/areas/<area>/topics/)`,
 		);
 	}
 }

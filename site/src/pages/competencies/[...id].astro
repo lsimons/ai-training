@@ -2,29 +2,33 @@
 import { getCollection } from 'astro:content';
 /** One page per competency (spec S02 "Stable URLs"): objectives, behaviors, alignment, lessons serving it. */
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import { areaOf } from '@lib/areas';
+import { areaOf, getAreas } from '@lib/areas';
 import { getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
 
 export async function getStaticPaths() {
-	const areas = await getCollection('competencies');
-	return areas.flatMap((a) =>
-		a.data.competencies.map((c) => ({ params: { id: c.id }, props: { competency: c, area: a.data.area } })),
-	);
+	const competencies = await getCollection('competencies');
+	return competencies.map((c) => ({ params: { id: c.data.id }, props: { competency: c.data } }));
 }
 
-const { competency, area } = Astro.props;
+const { competency } = Astro.props;
+const area = areaOf(await getAreas(), competency.area);
 const topics = (await getCollection('topics')).map((t) => t.data);
 const lessons = await getLessons();
-const serving = (objectiveId: string) => lessons.filter((l) => (l.data.serves ?? []).includes(objectiveId));
+const serving = (objectiveId: string) => lessons.filter((l) => l.data.serves.includes(objectiveId));
+// Alignment rows (spec S10 "Alignment") are kept per framework; a competency's rows are the ones naming one of its objectives.
+const own = new Set(competency.objectives.map((o) => o.id));
+const alignment = (await getCollection('alignment')).flatMap((f) =>
+	f.data.rows.filter((r) => r.objectives.some((o) => own.has(o))).map((r) => ({ framework: f.data.framework, ...r })),
+);
 const headings = [
 	{ depth: 2, slug: 'objectives', text: 'Learning objectives' },
-	...(competency.alignment.length ? [{ depth: 2, slug: 'alignment', text: 'Alignment' }] : []),
+	...(alignment.length ? [{ depth: 2, slug: 'alignment', text: 'Alignment' }] : []),
 ];
 ---
 
 <StarlightPage frontmatter={{ title: competency.statement, description: `Competency ${competency.id}` }} headings={headings}>
-	<p><em>{areaOf(area).name}</em> · competency <code>{competency.id}</code></p>
+	<p><em>{area.name}</em> · competency <code>{competency.id}</code></p>
 	<p>
 		<strong>Draws on:</strong>{' '}
 		{competency.topics.map((t, i) => (<>{i > 0 && ', '}<a href={href(`/topics/${t}/`)}>{topics.find((x) => x.id === t)?.name ?? t}</a></>))}
@@ -53,12 +57,21 @@ const headings = [
 	}
 
 	{
-		competency.alignment.length > 0 && (
+		alignment.length > 0 && (
 			<>
 				<h2 id="alignment">Alignment</h2>
 				<table>
-					<thead><tr><th>Framework</th><th>Code</th><th>Asks</th></tr></thead>
-					<tbody>{competency.alignment.map((a) => <tr><td>{a.framework}</td><td>{a.code}</td><td>{a.asks}</td></tr>)}</tbody>
+					<thead><tr><th>Framework</th><th>Code</th><th>Asks</th><th>Objectives here</th></tr></thead>
+					<tbody>
+						{alignment.map((a) => (
+							<tr>
+								<td>{a.framework}</td>
+								<td>{a.code}</td>
+								<td>{a.asks}</td>
+								<td>{a.objectives.filter((o) => own.has(o)).map((o) => o.split('/').pop()).join(', ')}</td>
+							</tr>
+						))}
+					</tbody>
 				</table>
 			</>
 		)

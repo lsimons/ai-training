@@ -1,0 +1,24 @@
+id: building-agents/agent-attack-surface
+title: How a running agent gets attacked
+mode: explanation
+covers: building-agents/production
+serves: [building-agents/runs-in-production/mitigates-agent-risks]
+introduces: [agent-specific-security-risks]
+assumes:
+  - objective: safety/judges-agent-risk/recognizes-injection
+  - objective: safety/judges-agent-risk/sets-oversight
+after: [building-agents/tool-errors, building-agents/traces-and-trajectories]
+shorts: [Confused deputy]
+exercise:
+  kind: judge
+  brief: >-
+    For the fixture support agent's permission list, name every outbound channel, write the injected
+    line that would use each one, and cross out the permissions that are not needed for the task.
+sources: []
+issue: 211
+minutes: 12
+notes: >-
+  Injection through what the agent reads, exfiltration through what it can send, over-permission,
+  confused deputy. Engineering-level follow-on to the Foundations agent-risk lesson, with the same
+  planted-instruction example. A scenario asks what happens when the system prompt is the only
+  layer, which sets up the next lesson. Checkpoints are scenario and match.

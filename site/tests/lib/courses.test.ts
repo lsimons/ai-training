@@ -1,4 +1,12 @@
-import { dependenciesOf, getAllCoursePlans, getCoursePlan, isLive, type PlanEntry, planLevels } from '@lib/courses';
+import {
+	dependenciesOf,
+	getAllCoursePlans,
+	getCourse,
+	getCoursePlan,
+	isLive,
+	type PlanEntry,
+	planLevels,
+} from '@lib/courses';
 import type { Lesson } from '@lib/lessons';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -6,29 +14,70 @@ vi.mock('astro:content', async () => (await import('./content')).mockContent());
 
 const entry = (over: Partial<PlanEntry> & { id: string }): PlanEntry => ({
 	title: over.id,
+	mode: 'tutorial',
 	covers: 'x/t',
 	serves: [],
+	introduces: [],
+	assumes: [],
+	after: [],
+	shorts: [],
+	exercises: [],
+	sources: [],
 	status: 'planned',
 	minutes: 10,
-	after: [],
 	...over,
 });
 
-describe('getCoursePlan', () => {
-	it('returns the plan entries in file order, joined with the lesson page when one exists', async () => {
-		const plan = await getCoursePlan('safety');
-		expect(plan.map((e) => e.id)).toEqual(['safety/agent-risk', 'safety/deeper', 'safety/coming']);
-		expect(plan[0]?.lesson?.data.title).toBe('Why agent safety is different');
-		expect(plan[2]?.lesson).toBeUndefined();
-		expect(plan[2]?.issue).toBe(42);
+describe('getCourse', () => {
+	it('resolves the parts and the lesson files, in course order, with the page when one exists', async () => {
+		const course = await getCourse('safety');
+		expect(course.planIssue).toBe(31);
+		expect(course.parts?.map((p) => [p.title, p.lessons.map((l) => l.id)])).toEqual([
+			['Risk', ['safety/agent-risk', 'safety/deeper']],
+			['Later', ['safety/coming']],
+		]);
+		expect(course.entries.map((e) => [e.id, e.part, e.status])).toEqual([
+			['safety/agent-risk', 'Risk', 'live'],
+			['safety/deeper', 'Risk', 'live'],
+			['safety/coming', 'Later', 'planned'],
+		]);
+		expect(course.entries[0]?.lesson?.data.title).toBe('Why agent safety is different');
+		expect(course.entries[2]?.lesson).toBeUndefined();
+		expect(course.entries[2]?.issue).toBe(42);
 	});
-	it('throws for an area without a plan file', async () => {
-		await expect(getCoursePlan('using-agents')).rejects.toThrow(/No course plan for area using-agents/);
+	it('reads a flat course without parts, and folds the one exercise or the exercises list into a list', async () => {
+		const course = await getCourse('concepts');
+		expect(course.parts).toBeUndefined();
+		expect(course.entries.map((e) => e.id)).toEqual(['concepts/how-models-work']);
+		expect(course.entries[0]?.exercises).toEqual([{ kind: 'do', brief: 'Do it.' }]);
+		const safety = await getCourse('safety');
+		expect(safety.entries[1]?.exercises.map((x) => x.kind)).toEqual(['do', 'judge']);
+	});
+	it('throws for an area without a course file, and for a listed lesson without a file', async () => {
+		await expect(getCourse('using-agents')).rejects.toThrow(/No course plan for area using-agents/);
+		const { mockContent, courses } = await import('./content');
+		const broken = mockContent({
+			courses: [
+				{ id: 'concepts/courses/concepts', data: { id: 'concepts', area: 'concepts', lessons: ['concepts/nope'] } },
+				...courses.slice(1),
+			],
+		});
+		vi.doMock('astro:content', () => broken);
+		vi.resetModules();
+		const fresh = await import('@lib/courses');
+		await expect(fresh.getCourse('concepts')).rejects.toThrow(/lists concepts\/nope, but .* has no file/);
+		vi.doUnmock('astro:content');
+		vi.resetModules();
 	});
 });
 
-describe('getAllCoursePlans', () => {
-	it('flattens every plan', async () => {
+describe('getCoursePlan and getAllCoursePlans', () => {
+	it('returns the entries of one course, or of every course', async () => {
+		expect((await getCoursePlan('safety')).map((e) => e.id)).toEqual([
+			'safety/agent-risk',
+			'safety/deeper',
+			'safety/coming',
+		]);
 		const all = await getAllCoursePlans();
 		expect(all.map((e) => e.id)).toEqual([
 			'concepts/how-models-work',
@@ -45,7 +94,7 @@ describe('isLive', () => {
 		const plan = await getCoursePlan('safety');
 		expect(plan.map(isLive)).toEqual([true, true, false]);
 		expect(isLive(entry({ id: 'x/a', status: 'live' }))).toBe(false);
-		expect(isLive(entry({ id: 'x/a', status: 'drafting', lesson: {} as Lesson }))).toBe(false);
+		expect(isLive(entry({ id: 'x/a', status: 'planned', lesson: {} as Lesson }))).toBe(false);
 	});
 });
 

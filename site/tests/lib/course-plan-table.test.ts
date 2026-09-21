@@ -1,14 +1,20 @@
-import { afterTitles, idTail, issueUrl, objectiveCells, planSummary } from '@lib/course-plan-table';
+import { afterTitles, exerciseKinds, idTail, issueUrl, objectiveCells, planSummary } from '@lib/course-plan-table';
 import type { PlanEntry } from '@lib/courses';
 import { describe, expect, it } from 'vitest';
 
 const entry = (over: Partial<PlanEntry> & { id: string }): PlanEntry => ({
 	title: over.id,
+	mode: 'tutorial',
 	covers: 'x/t',
 	serves: [],
+	introduces: [],
+	assumes: [],
+	after: [],
+	shorts: [],
+	exercises: [],
+	sources: [],
 	status: 'planned',
 	minutes: 10,
-	after: [],
 	...over,
 });
 
@@ -56,6 +62,20 @@ describe('planSummary', () => {
 			'Lesson plan (2 lessons, 1 live)',
 		);
 		expect(planSummary([entry({ id: 'a/one' })])).toBe('Lesson plan (1 lesson, 0 live)');
+	});
+});
+
+describe('exerciseKinds', () => {
+	it('lists the kind of each exercise', () => {
+		expect(
+			exerciseKinds({
+				exercises: [
+					{ kind: 'do', brief: 'a' },
+					{ kind: 'judge', brief: 'b' },
+				],
+			}),
+		).toBe('do, judge');
+		expect(exerciseKinds({ exercises: [] })).toBe('');
 	});
 });
 

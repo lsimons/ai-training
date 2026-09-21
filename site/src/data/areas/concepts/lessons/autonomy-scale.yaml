@@ -1,0 +1,17 @@
+id: concepts/autonomy-scale
+title: Who decides the next step
+mode: explanation
+covers: concepts/what-is-an-agent
+serves: [concepts/recognizes-agents/places-on-autonomy-scale]
+introduces: [degree-of-autonomy]
+assumes: []
+after: [concepts/assistant-or-agent]
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    Place one coding agent in three permission settings on the scale and say what moves each one
+    step up or down.
+sources: []
+issue: 146
+minutes: 12

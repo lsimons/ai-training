@@ -5,96 +5,115 @@ must follow are in `docs/spec/S03-lesson-authoring.md`; the ids it declares
 come from `docs/spec/S02-topic-map.md` and the YAML under `site/src/data/`.
 This file is the mechanics.
 
-## File and frontmatter
+## Files
 
-A lesson is an MDX file at `site/src/content/docs/<area>/<lesson>.mdx`. Its
-lesson id is `<area>/<lesson>`. The course page for the area is
-`site/src/content/docs/<area>/index.mdx`.
+A lesson is two files. Its **plan** is
+`site/src/data/areas/<area>/lessons/<lesson>.yaml`, which exists before the
+lesson is written and holds everything the site knows about it. Its **page**
+is `site/src/content/docs/<area>/<lesson>.mdx`, which has no frontmatter:
+the build copies `title`, `description`, `mode`, `covers`, `serves`,
+`assumes`, `extends-to`, `sources-checked` (as Starlight's `lastUpdated`)
+and `review-by` from the plan onto the page. The lesson id is
+`<area>/<lesson>`, the same as the page route and the plan's `id`. Spec S11
+is the rule, and this section is the mechanics.
 
-```mdx
----
+```yaml
+id: using-agents/delegating
 title: Delegating a task to an agent
-description: One sentence for search and social cards.
+description: One sentence for search and social cards.   # required once the page exists
 mode: tutorial            # or explanation
-covers:
-  - using-agents/delegating
+covers: using-agents/delegating                            # one topic id, from this area
 serves:                   # objective ids: <area>/<competency>/<objective>
   - using-agents/delegates-and-checks/writes-a-brief
   - using-agents/delegates-and-checks/chooses-autonomy
-assumes:                  # each points at the lesson section that teaches it
+introduces: [task-brief, giving-context]                  # concept ids first taught here
+assumes:                  # once live, each names the lesson section that teaches it
   - objective: concepts/explains-models/explains-generation
     lesson: concepts/how-models-work
     section: one-token-at-a-time   # slug of a real `## ` heading in that lesson
 extends-to:
   - label: Decomposing work
     href: /using-agents/decomposition/
----
-
-import { Choice, MultiChoice, Match, Predict, Order, Sort, Scenario, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+after: []                 # lesson ids of this area, for the graph while the lesson is coming
+shorts: [Asking for sources]                               # titles of shorts to write, or []
+exercise:                 # or `exercises:` with a list, for a longer lesson
+  kind: do                # do | judge
+  brief: Brief the agent for a short email, then review the draft against the brief.
+sources: [Academy introduction-to-claude-cowork]           # bibliography keys
+issue: 42                 # the lesson's GitHub issue
+minutes: 15
+notes: >-
+  Free prose for authors: rationale, a content sketch, issue pointers. Never rendered.
 ```
 
-`assumes` may be empty for a first lesson. `extends-to` hrefs may point at
-pages that don't exist yet, and they render as plain text until they do.
+The page opens with the imports and the first paragraph:
+
+```mdx
+import { Choice, MultiChoice, Match, Predict, Order, Sort, Scenario, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we brief an agent and check what comes back.
+```
+
+A page that sets `title`, `mode` or another plan field in its own
+frontmatter fails `mise run data`. A comment in the plan file is a defect:
+put the fact in the field it belongs in, or in `notes`.
 
 A lesson whose facts move (a law, a product) sets `review-by: 2027-03-20`,
-the date by which its sources must be checked again, and Starlight's
-`lastUpdated: 2026-09-20` for the day they were last checked. The page then
-shows "Sources checked on September 20, 2026. Review due by March 20, 2027."
-above the lesson body. Move both dates when you re-check the sources.
+the date by which its sources must be checked again, and
+`sources-checked: 2026-09-20` for the day they were last checked. The page
+then shows "Sources checked on September 20, 2026. Review due by March 20,
+2027." above the lesson body. Move both dates when you re-check the sources.
 
 ## Course plan
 
-Every lesson, written or not, has an entry in its area's plan file,
-`site/src/data/courses/<area>.yaml`. The course page renders the plan as the
-lesson graph: live entries are the lesson nodes, and planned or drafting
-entries are dimmed "coming" nodes in their planned position. Progress never
-counts a coming lesson. The topic map uses the plan too. A topic with no entry
-at all is a gap, and a topic with a planned entry shows as "lesson coming".
+The course file `site/src/data/areas/<area>/courses/<area>.yaml` orders the
+area's lessons, either as a flat `lessons` list of ids or as `parts`, each
+with a `title`, optional `notes` and its `lessons`. A lesson is **live** when
+its page exists and **planned** otherwise, and the page's existence is the
+whole record. The course
+page renders the plan as the lesson graph: live lessons are the nodes, and
+planned ones are dimmed "coming" nodes in their planned position. Progress
+never counts a coming lesson. The topic map uses the plan too: a topic with
+no lesson at all is a gap, and a topic with a planned lesson shows as
+"lesson coming".
 
 ```yaml
+id: safety
 area: safety
-lessons:
-  - id: safety/agent-risk        # equals the page route once live
-    title: Why agent safety is different
-    covers: safety/agent-risk    # one topic id; a lesson covers one topic
-    serves:                      # objective ids, same as the page frontmatter
-      - safety/judges-agent-risk/names-blast-radius
-    status: live                 # planned | drafting | live
-    minutes: 20                  # target length; keep lessons short
-  - id: safety/verification
-    title: Verifying what an agent tells you
-    covers: safety/verification
-    serves:
-      - safety/verifies-output/checks-claims
-    status: planned
-    issue: 42                    # the lesson's GitHub issue, until live
-    minutes: 15
-    after:                       # lesson ids in this plan it will assume
-      - safety/agent-risk        # (places the node; a live page uses `assumes`)
+plan-issue: 31
+parts:
+  - title: Responsible use
+    lessons: [safety/responsible-use, safety/redact-before-you-paste]
+  - title: Agent risk
+    notes: The live tutorial teaches all five concepts; the two planned lessons deepen two of them.
+    lessons: [safety/agent-risk, safety/sizing-the-blast-radius]
 ```
 
-Entries are in course order. When a lesson goes live, set `status: live`,
-drop `issue`, and make sure `title`, `covers` and `serves` match the page
-frontmatter.
-`after` is only read for a coming lesson. A live lesson takes its place in
-the graph from the `assumes` in its page.
+`after` in a lesson file places a coming lesson in the graph. A live lesson
+takes its place from the `assumes` in its plan. When a lesson goes live,
+add `description`, give every `assumes` entry its `lesson` and `section`,
+and bring `serves`, `introduces`, `extends-to` and `sources` in line with
+what the page does.
 
 The course page also renders the plan as a table under the graph
 (`site/src/components/CoursePlan.astro`), folded into a "Lesson plan"
-`<details>` element. The reader sees the graph before the table. Each
-entry is one row, in plan order, and each field is a column. The title
-becomes a link once the lesson is live, `covers` links to the topic page,
-each `serves` id links to its heading on the competency page, `after` shows
-the titles of those entries and `issue` links to GitHub. The YAML comments
-never reach the collection, so they don't render. Read the plan file for
-those.
+`<details>` element, with a heading row per part. The title becomes a link
+once the lesson is live, `covers` links to the topic page, each `serves` id
+links to its heading on the competency page, `after` shows the titles of
+those lessons and `issue` links to GitHub. `notes` never renders.
 
-`mise run courses` (part of `mise run ci`) fails when a lesson page is missing
-from its plan or listed with a status other than `live`, when a `live` entry
-has no page or its `title`, `covers` or `serves` differ from the page, when a
-`covers`, `serves` or `after` id is unknown, or when two entries share an id.
-The collection schema rejects an unknown key, so a misspelled field fails
-`mise run site-check`.
+The sidebar lists each course's live lessons under its course page, nested
+per part, from the same files (`site/astro.config.mjs`). A merged lesson
+page appears there with no edit to the config.
+
+`mise run data` (part of `mise run ci`) fails when a lesson page has no plan
+file or sets a field that belongs in the plan, when a plan's `covers`, `serves`,
+`assumes`, `after`, `introduces` or `sources` id is unknown, when two
+lessons introduce the same concept, when a course lists a lesson twice or
+not at all, or when a live lesson lacks a `description` or an `assumes`
+entry lacks its `lesson` and `section`. It warns when a concept of the
+area's topics is introduced by no lesson. The collection schema rejects an
+unknown key, and a misspelled field fails `mise run site-check`.
 
 ## Anatomy
 
@@ -118,7 +137,7 @@ ids the checkpoint exercises, at least one, as an array). Children are the
 stem, as Markdown.
 
 A concept id is the `id` of a `concepts` entry in a topic YAML under
-`site/src/data/topics/`, the same id the glossary anchors use (`token`,
+`site/src/data/areas/<area>/topics/`, the same id the glossary anchors use (`token`,
 `blast-radius`), and it may come from any topic, not only the one the
 lesson covers. The build fails on an unknown id.
 

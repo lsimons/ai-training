@@ -1,0 +1,100 @@
+id: coding-with-agents/ships-with-agent
+area: coding-with-agents
+statement: Ships a change with a coding agent through plan, implement and verify
+topics:
+  - coding-with-agents/first-session
+  - coding-with-agents/workflow
+  - coding-with-agents/context
+objectives:
+  - id: coding-with-agents/ships-with-agent/runs-a-session
+    statement: Runs a session from setup to a reviewed diff
+    level: base
+    behaviors:
+      - claim: The learner has the agent describe the codebase and confirm the plan before it edits
+          anything.
+        why: A wrong model of the repository produces a confident change in the wrong place, and it is
+          cheaper to correct a sentence than a diff (@Academy claude-code-101).
+        example: The learner asks "where is the config loaded and which tests cover it?" and checks the
+          answer against the tree before saying "go ahead".
+      - claim: Every session ends with the learner reading the full diff.
+        why: The summary is the agent's account of what it meant to do, and the diff is what it did.
+        example: The summary says "added validation", and the diff also shows a deleted test, which the
+          learner catches and asks about.
+      - claim: The learner keeps a session to one task and starts a new one when the task changes.
+        why: A long session carries stale assumptions in context, and the agent keeps acting on the earlier
+          task's constraints.
+        example: After the bug fix is committed, the learner opens a fresh session for the refactor instead
+          of typing "now also" into the same one.
+  - id: coding-with-agents/ships-with-agent/works-in-increments
+    statement: Works in small increments, sequenced for early feedback
+    level: base
+    behaviors:
+      - claim: Each increment leaves the system working and adds one thing that can be shown.
+        why: A working state after every step means a mistake is found in a small diff and the last good
+          state is one step back.
+        example: The learner asks for "the endpoint returning a hard-coded response first, then the real
+          query, then the caching", and runs the app after each.
+      - claim: The learner sequences increments so the riskiest assumption is tested first.
+        why: Finding out on day one that the external API does not return what you expected is cheap, and on
+          day five it is not.
+        example: The integration with the payment provider is the first increment, because its behavior is
+          the least known.
+      - claim: An increment is committed when its check passes, before the next one starts.
+        why: A commit per increment gives a point to return to and a diff a reviewer can read.
+        example: Three small pull requests with green tests replace one large one at the end of the week.
+  - id: coding-with-agents/ships-with-agent/keeps-change-reversible
+    statement: Keeps every change reversible
+    level: base
+    behaviors:
+      - claim: Every change is on a branch and in commits small enough to revert one at a time.
+        why: Reverting is the cheapest fix there is, and only if the change is isolated.
+        example: The learner has the agent commit after each passing increment instead of one commit at the
+          end.
+      - claim: Data and schema changes are designed with the way back written down before they run.
+        why: Code reverts in a second, and a migrated table does not.
+        example: The migration adds the new column and backfills it. Dropping the old column is a separate
+          change a week later, after the code has run on the new one.
+      - claim: The learner prefers a change that can be turned off to one that can only be undone.
+        why: A feature flag or a configuration switch reverses in seconds and without a deploy.
+        example: The new ranking algorithm ships behind a flag that is off by default, and is enabled for
+          internal users first.
+  - id: coding-with-agents/ships-with-agent/gives-the-right-context
+    statement: Gives the agent the files, constraints and limits the task needs
+    level: base
+    behaviors:
+      - claim: The learner names the files the task touches and the files it must not touch.
+        why: Left to search, an agent finds the nearest plausible file, and the nearest one is often the
+          wrong one.
+        example: '"Change the retry logic in `src/http/client.ts`; the tests are in `tests/http/`; leave
+          `src/http/legacy/` alone" instead of "fix the retries".'
+      - claim: "Constraints that are not in the code are stated in the brief: style, compatibility, what
+          must keep working."
+        why: The agent cannot infer a rule it cannot see, and a project convention lives in people's heads
+          until it is written down.
+        example: The learner adds "this must stay compatible with Node 20 and must not add a dependency"
+          because neither fact is visible in the file being edited.
+      - claim: The learner gives the verification command along with the task.
+        why: An agent that knows how the work will be checked runs the check itself and reports honestly
+          against it.
+        example: '"Done when `npm test -- http` passes and the lint task is clean" lets the agent close its
+          own loop before handing back.'
+  - id: coding-with-agents/ships-with-agent/keeps-understanding
+    statement: Keeps their own understanding of the code as the agent produces more of it
+    level: expert
+    behaviors:
+      - claim: The learner can explain, without looking, how the parts the agent wrote fit into the system
+          and why they were built that way.
+        why: An engineer who cannot explain the system cannot review changes to it, and the agent's next
+          change goes unchecked.
+        example: Asked in a design review why the cache is keyed by user rather than by request, the learner
+          answers from their own understanding without opening a transcript.
+      - claim: The learner reads agent-written code with the same attention as a colleague's, and asks the
+          agent to explain anything they do not follow.
+        why: Understanding is built while reading, so skipping the reading skips the understanding.
+        example: The learner stops at a regular expression they cannot parse and asks for a plain-language
+          explanation and a test that documents it.
+      - claim: The learner keeps the architecture decisions and the reasons for them in a place the agent
+          also reads.
+        why: A decision that is only in someone's head gets contradicted by the next session.
+        example: The project's `docs/decisions/` folder records why the queue is in-process, and the project
+          instructions point the agent at it.

@@ -1,0 +1,17 @@
+id: concepts/agent-loop
+title: Run a tiny agent
+mode: tutorial
+covers: concepts/what-is-an-agent
+serves: [concepts/recognizes-agents/names-the-loop]
+introduces: [tool, agent-loop]
+assumes: []
+after: [concepts/iterating-on-a-prompt, concepts/thin-path]
+shorts: [how a tool is described to the model]
+exercise:
+  kind: do
+  brief: >-
+    Run the toy loop fixture (a scripted model with two tools), and list each turn as observe, think
+    or act with the tool it used.
+sources: []
+issue: 140
+minutes: 15

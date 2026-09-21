@@ -1,0 +1,26 @@
+id: using-agents/trying-two-models
+title: Trying two models on the same task
+mode: tutorial
+covers: using-agents/choosing-tools
+serves: [using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation]
+introduces: [model-fit, cost-and-speed]
+assumes:
+  - objective: concepts/explains-models/names-failure-modes
+  - objective: concepts/explains-models/explains-generation
+after: [using-agents/chat-agent-or-automation]
+shorts: [When a small model is the right one]
+exercise:
+  kind: do
+  brief: >-
+    Run the same three supplied inputs (one reformatting, one classification, one ambiguous request)
+    on a small and a large model from the picker in your chat tool, time each answer, and fill a
+    six-cell table with good enough or not.
+sources: []
+issue: 161
+minutes: 15
+notes: >-
+  The plan named the topic concepts/limits as assumed; taken as the objective
+  concepts/explains-models/names-failure-modes. The plan named the topic concepts/how-models-work as
+  assumed; taken as the objective concepts/explains-models/explains-generation. note: no objective
+  in S02 covers model fit yet. Issue #106 proposes a base objective under chooses-tool-and-autonomy;
+  `serves` to be updated when #106 lands.

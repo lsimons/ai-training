@@ -1,0 +1,4 @@
+id: safety
+name: Safety
+group: foundations
+description: Using AI safely, and judging the risk of letting an agent act.

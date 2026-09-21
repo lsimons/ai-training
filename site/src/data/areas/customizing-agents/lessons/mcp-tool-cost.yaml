@@ -1,0 +1,21 @@
+id: customizing-agents/mcp-tool-cost
+title: Measuring what a tool server costs
+mode: tutorial
+covers: customizing-agents/mcp
+serves: [customizing-agents/connects-tools-safely/weighs-tool-cost]
+introduces: []
+assumes:
+  - objective: concepts/explains-models/explains-generation
+after: [customizing-agents/mcp-first-server]
+shorts:
+  - On-demand tool loading and why disabling unused servers is still the control (Academy claude-code-101)
+exercise:
+  kind: judge
+  brief: >-
+    Connect a server with many tools, read the token count of its definitions from the client, then
+    compare one query through the server with the same query through the CLI, and record both costs
+    in a short table.
+sources: []
+issue: 173
+minutes: 15
+notes: "Introduces no concept: hands-on for tool-cost and mcp-vs-cli."

@@ -73,8 +73,8 @@ milestone bar always show the same number for the same record.
   that lesson's checkpoints. That is detail within one lesson and isn't a
   progress unit.
 - **Continue button**: it links to the first lesson in path order that is
-  neither finished nor skipped. Path order is the order of the course plan
-  file (`site/src/data/courses/<area>.yaml`), courses in site order. When no
+  neither finished nor skipped. Path order is the order of the course file
+  (`site/src/data/areas/<area>/courses/<area>.yaml`), courses in site order. When no
   such lesson is left and at least one is finished and one is skipped, it says
   "All lessons finished, N skipped" and links to the first skipped lesson. When
   every lesson is skipped and none finished, it offers the first skipped lesson

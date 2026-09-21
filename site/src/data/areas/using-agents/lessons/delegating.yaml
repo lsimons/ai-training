@@ -1,0 +1,30 @@
+id: using-agents/delegating
+title: Delegating a task to an agent
+description: >-
+  Write a brief, choose how much the agent may do on its own, and review the result against what you
+  asked for.
+mode: tutorial
+covers: using-agents/delegating
+serves:
+  - using-agents/delegates-and-checks/writes-a-brief
+  - using-agents/delegates-and-checks/chooses-autonomy
+  - using-agents/delegates-and-checks/reviews-against-brief
+introduces: [task-brief, giving-context, choosing-a-degree-of-autonomy, checking-results]
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+extends-to:
+  - label: Decomposing work
+    href: /using-agents/decomposition/
+after: []
+shorts: [Done-criteria before the work]
+exercise:
+  kind: do
+  brief: >-
+    Delegate the memo summary from the lesson with a brief, then walk the done-criteria one by one.
+sources: []
+minutes: 20
+notes: >-
+  The plan assumed the topics concepts/what-is-an-agent and safety/verification, which the page does
+  not name as objectives.

@@ -1,0 +1,14 @@
+- id: foundations
+  order: 1
+  name: Foundations
+  audience: Everyone
+  description: >-
+    Written at one level for every knowledge worker. No lesson needs programming or agent
+    configuration.
+  areas: [concepts, safety, using-agents]
+- id: engineering
+  order: 2
+  name: Engineering
+  audience: Software engineers
+  description: For software engineers who have finished Foundations, at two comfort levels.
+  areas: [coding-with-agents, customizing-agents, building-agents]

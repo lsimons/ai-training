@@ -1,0 +1,30 @@
+id: building-agents/agent-loop
+title: Building your first agent
+description: >-
+  Define one tool, run the loop that lets a model call it, and see why the loop is the whole
+  architecture.
+mode: tutorial
+covers: building-agents/agent-loop
+serves:
+  - building-agents/builds-agent-loop/defines-a-tool
+  - building-agents/builds-agent-loop/implements-the-loop
+introduces: [loop-from-scratch]
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+extends-to:
+  - label: Design patterns
+    href: /building-agents/patterns/
+after: []
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Add a second tool, get_time(city), to agent.py, extend the fake model so a question containing
+    "time" asks for it, run the loop on "What is the time in Lisbon?" and check the answer.
+sources: []
+minutes: 25
+notes: >-
+  Live. Issue #91 adds the error path and a named stop reason to this lesson's code and is a section
+  here, so it has no entry of its own.

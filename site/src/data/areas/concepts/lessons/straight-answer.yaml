@@ -1,0 +1,17 @@
+id: concepts/straight-answer
+title: Getting a straight answer
+mode: tutorial
+covers: concepts/limits
+serves: [concepts/explains-models/names-failure-modes]
+introduces: [sycophancy]
+assumes: []
+after: [concepts/thin-path]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Ask a leading and a neutral question about the same plan, then ask for the strongest objections,
+    and compare the three answers.
+sources: []
+issue: 134
+minutes: 12

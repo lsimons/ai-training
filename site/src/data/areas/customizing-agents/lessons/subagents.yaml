@@ -1,0 +1,19 @@
+id: customizing-agents/subagents
+title: Delegating to a subagent with narrower permissions
+mode: tutorial
+covers: customizing-agents/hooks-permissions
+serves: [customizing-agents/configures-agent/sets-permissions]
+introduces: [subagents]
+assumes:
+  - objective: safety/judges-agent-risk/names-blast-radius
+after: [customizing-agents/allowlists]
+shorts:
+  - Parallel subagents and what the parent sees of their work (Academy introduction-to-subagents)
+exercise:
+  kind: do
+  brief: >-
+    Define a read-only reviewer subagent with its own instructions and tool set, have the main agent
+    delegate a review of the fixture diff to it, and compare the main context before and after.
+sources: []
+issue: 187
+minutes: 15

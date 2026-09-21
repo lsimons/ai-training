@@ -1,0 +1,21 @@
+id: building-agents/tool-schemas
+title: Writing a tool schema the model uses correctly
+mode: tutorial
+covers: building-agents/tool-use
+serves: [building-agents/builds-agent-loop/defines-a-tool]
+introduces: [tool-schema-design]
+assumes: []
+after: [building-agents/agent-loop]
+shorts: [Tool descriptions are prompts]
+exercise:
+  kind: do
+  brief: >-
+    Rewrite the fixture's vague `get_customer` schema so the fake model, which picks tools by
+    matching request words against descriptions, calls the right one for all six fixture requests.
+    The output is the wrong-call count before and after.
+sources: [Academy building-with-the-claude-api]
+issue: 185
+minutes: 15
+notes: >-
+  Two tools with overlapping descriptions and a fake model that chooses by description. Predict
+  which tool it picks, then tighten the description and an enum parameter and predict again (Academy building-with-the-claude-api).

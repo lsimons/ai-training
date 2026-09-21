@@ -1,0 +1,31 @@
+id: concepts/structured-output
+title: Output the next step can use
+description: >-
+  Ask a chat assistant for action items as named fields with allowed values, check the result with
+  the program that has to read it, and fix the prompt until it passes.
+mode: tutorial
+covers: concepts/prompting
+serves: [concepts/prompts-reliably/asks-for-structure]
+introduces: [structured-output]
+assumes:
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: the-instruction
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: mark-the-boundary
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: format-and-length
+extends-to:
+  - label: Change the prompt before you retry
+    href: /concepts/iterating-on-a-prompt/
+after: [concepts/prompt-anatomy]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Ask for named fields with allowed values, paste the result into the fixture that checks it, and
+    fix the prompt until it passes.
+sources: []
+minutes: 12

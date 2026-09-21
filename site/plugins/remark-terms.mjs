@@ -1,8 +1,9 @@
 // @ts-check
 /**
- * Terms per spec S03 "Citations and terms": in a lesson (a page with `mode`
- * in its frontmatter), the first mention of a concept from one of the topics
- * the lesson `covers` is a term. It renders as a link to the concept's
+ * Terms per spec S03 "Citations and terms": in a lesson, the first mention
+ * of a concept from the topic the lesson `covers` is a term. The lesson is
+ * found by path: `<docsDir>/<area>/<lesson>.mdx` is the lesson `<area>/<lesson>`
+ * in the `lessons` list (the lesson YAML, spec S11), which names the topic. It renders as a link to the concept's
  * glossary anchor (`/glossary/#<concept>`, root-relative; the rehype base
  * plugin in astro.config.mjs adds the deploy base) with the glossary
  * definition in its `title`, so it shows on hover. Later mentions stay plain
@@ -26,16 +27,27 @@ import { walkText } from './mdast-walk.mjs';
 const GLOSSARY_LINK = /^\/glossary\/#(.+)$/;
 
 /**
- * @param {{ topics: Array<{ id: string, concepts: Array<{ id: string, name: string, definition: string }> }> }} options
+ * @param {{
+ *   topics: Array<{ id: string, concepts: Array<{ id: string, name: string, definition: string }> }>,
+ *   lessons: Array<{ id: string, covers: string }>,
+ *   docsDir: string,
+ * }} options
  */
-export function remarkTerms({ topics }) {
+export function remarkTerms({ topics, lessons, docsDir }) {
 	if (!Array.isArray(topics)) throw new Error('remarkTerms needs the parsed topic list');
+	if (!Array.isArray(lessons) || typeof docsDir !== 'string') {
+		throw new Error('remarkTerms needs the lesson list and the docs directory');
+	}
 	const conceptIds = new Set(topics.flatMap((t) => t.concepts.map((c) => c.id)));
+	const coversOf = new Map(lessons.map((l) => [l.id, l.covers]));
+	const root = docsDir.endsWith('/') ? docsDir : `${docsDir}/`;
 
 	return (/** @type {any} */ tree, /** @type {any} */ file) => {
-		const frontmatter = file.data?.astro?.frontmatter;
+		const path = typeof file.path === 'string' ? file.path : '';
+		const lessonId = path.startsWith(root) ? path.slice(root.length).replace(/\.mdx?$/, '') : null;
+		const topicId = lessonId ? coversOf.get(lessonId) : undefined;
 		/** @type {string[]} */
-		const covers = frontmatter?.mode && Array.isArray(frontmatter.covers) ? frontmatter.covers : [];
+		const covers = topicId ? [topicId] : [];
 
 		/** @type {Map<string, any>} */
 		const byName = new Map();

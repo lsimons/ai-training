@@ -214,7 +214,7 @@ The cases that come up:
   e2e gates forces every later pull request to bring its code under them.
   Tell those builders exactly what the gates are and where the docs are
   (`testing.md`), and expect them to split logic out of scripts into
-  tested modules, the way `check-examples.mjs` and `check-courses.mjs` were
+  tested modules, the way `check-examples.mjs` and `check-data.mjs` were
   split.
 - **Rules that change mid-flight.** When one branch removes bash fixtures,
   a lesson builder that started earlier still adds a `.sh` file. Say the

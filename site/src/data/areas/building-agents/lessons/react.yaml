@@ -1,0 +1,21 @@
+id: building-agents/react
+title: Reasoning before each action
+mode: tutorial
+covers: building-agents/patterns
+serves: [building-agents/orchestrates-agents/picks-a-pattern]
+introduces: [react]
+assumes: []
+after: [building-agents/stopping-the-loop, building-agents/rubrics]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Add a `thought` field to the fixture model's replies and print it before each tool call, then
+    run the same three tasks and compare the trace with the one from the live lesson's loop. The
+    output is the two traces side by side.
+sources: []
+issue: 205
+minutes: 12
+notes: >-
+  The fake model writes one line of reasoning before each tool request. Predict the trace. Most
+  tool-using loops are this pattern whether or not the reasoning is shown.

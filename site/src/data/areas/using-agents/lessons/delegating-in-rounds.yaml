@@ -1,0 +1,21 @@
+id: using-agents/delegating-in-rounds
+title: Delegating in rounds
+mode: tutorial
+covers: using-agents/decomposition
+serves:
+  - using-agents/delegates-and-checks/adjusts-mid-task
+  - using-agents/delegates-and-checks/reviews-against-brief
+introduces: [task-iteration]
+assumes:
+  - objective: safety/verifies-output/keeps-a-check-habit
+after: [using-agents/breaking-work-into-pieces, using-agents/adjusting-the-brief]
+shorts: [Keeping rounds short]
+exercise:
+  kind: do
+  brief: >-
+    Delegate the supplied first piece and its criteria (a model answer to the previous exercise;
+    your own split works too), check the result against the criteria, change the brief with what the
+    result showed, and delegate the second piece. Keep a two-line log per round.
+sources: []
+issue: 154
+minutes: 15

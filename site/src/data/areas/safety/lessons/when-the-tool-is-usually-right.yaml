@@ -1,0 +1,18 @@
+id: safety/when-the-tool-is-usually-right
+title: When the tool is usually right
+mode: explanation
+covers: safety/failure-modes
+serves: [safety/verifies-output/calibrates-trust]
+introduces: [overreliance, automation-complacency]
+assumes:
+  - objective: concepts/explains-models/names-failure-modes
+after: [safety/spotting-hallucination]
+shorts: [Automation complacency in aviation and medicine]
+exercise:
+  kind: judge
+  brief: >-
+    Pick one task you have stopped checking, and write down what the last unchecked mistake would
+    have cost and who would have found it.
+sources: []
+issue: 118
+minutes: 10

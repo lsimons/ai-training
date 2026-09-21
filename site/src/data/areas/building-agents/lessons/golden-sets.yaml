@@ -1,0 +1,21 @@
+id: building-agents/golden-sets
+title: A golden set is the agent's regression suite
+mode: tutorial
+covers: building-agents/evaluation
+serves: [building-agents/evaluates-agents/builds-a-golden-set]
+introduces: [golden-sets]
+assumes:
+  - objective: coding-with-agents/verifies-agent-work/automates-the-check
+after: [building-agents/rubrics]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Add two items to the fixture golden set, one from a past failure and one that should be refused,
+    mark twenty percent of the set as held out, and run it. The output is the pass count per group.
+sources: []
+issue: 201
+minutes: 15
+notes: >-
+  A golden set of inputs with expected qualities, run against the fake retrieval agent by a small
+  script. Predict which items fail after a prompt change.

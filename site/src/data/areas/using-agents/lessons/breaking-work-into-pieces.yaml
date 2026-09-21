@@ -1,0 +1,18 @@
+id: using-agents/breaking-work-into-pieces
+title: Breaking a task into pieces an agent can finish
+mode: tutorial
+covers: using-agents/decomposition
+serves: [using-agents/delegates-and-checks/writes-a-brief]
+introduces: [task-decomposition]
+assumes: []
+after: [using-agents/delegating]
+shorts: [The decisions that are yours to make first]
+exercise:
+  kind: do
+  brief: >-
+    Take the supplied large task (a three-part report from three source files), split it into pieces
+    that each have an input, an output and a check, write the brief for the first piece, and run
+    that piece so the result is what you look at.
+sources: []
+issue: 151
+minutes: 15

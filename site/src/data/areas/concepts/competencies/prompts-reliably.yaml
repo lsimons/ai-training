@@ -1,0 +1,68 @@
+id: concepts/prompts-reliably
+area: concepts
+statement: Writes prompts that get reliable results
+topics: [concepts/prompting, concepts/how-models-work]
+objectives:
+  - id: concepts/prompts-reliably/structures-a-prompt
+    statement: Turns a vague request into instruction, context, example and format
+    level: base
+    behaviors:
+      - claim: A prompt separates the instruction (what to do) from the context (what to work on) and marks
+          the boundary between them.
+        why: When instruction and material run together, the model treats parts of the material as orders or
+          parts of the order as material.
+        example: '"Summarize the text between the triple quotes for a sales manager" with the pasted email
+          inside the quotes, rather than the email followed by "summarize".'
+      - claim: The prompt names the audience and the purpose of the output.
+        why: The same content for a customer and for a colleague differs in length, tone and what may be
+          left out, and the model cannot guess which.
+        example: '"Write the release note for end users who do not read code; skip internal ticket numbers"
+          replaces "write a release note".'
+      - claim: When the wanted output is hard to describe, the prompt shows one example of it.
+        why: One good example fixes format, length and tone at once, where a paragraph of rules leaves room
+          for interpretation.
+        example: The learner pastes one past meeting summary in the house format and writes "produce the
+          same for these notes".
+      - claim: The prompt states the output format, including length.
+        why: Left to its default, the model picks a length and format for a general reader, which is rarely
+          what the next step needs.
+        example: '"Five bullets, each under 15 words, no introduction" instead of "keep it short".'
+  - id: concepts/prompts-reliably/iterates-on-output
+    statement: Improves a result by changing the prompt, not by retrying
+    level: base
+    behaviors:
+      - claim: When the output is wrong, the learner names what is wrong with it and changes the prompt to
+          address that, instead of rerunning the same prompt.
+        why: Rerunning draws another sample from the same distribution, and the same gap in the instructions
+          produces the same class of mistake.
+        example: The summary skipped the decisions made, so the learner adds "list every decision as its own
+          line" instead of pressing regenerate.
+      - claim: The learner changes one thing at a time and compares the result with the previous one.
+        why: Changing five things at once shows whether the total worked and hides which change did it, so
+          the next prompt cannot build on it.
+        example: The learner first adds the audience, sees the tone fix, and only then works on the length.
+      - claim: A correction the learner had to make twice moves into the prompt or into a saved template.
+        why: A fix typed in the chat is gone with the session, but a fix in the prompt is there for every
+          run.
+        example: After twice asking for "dates in ISO format", the learner adds the line to the prompt they
+          keep for the weekly report.
+  - id: concepts/prompts-reliably/asks-for-structure
+    statement: Asks for output in a shape the next step can use
+    level: base
+    behaviors:
+      - claim: "The learner asks for output in the format the next step consumes: a table, a list of named
+          fields, JSON, or a file in a known layout."
+        why: Prose has to be reformatted by hand or by another prompt, and each reformatting is another
+          place for mistakes.
+        example: 'For action items that go into a tracker, the learner asks for "one line per item: owner,
+          task, due date, separated by tabs".'
+      - claim: The requested format names its fields and the allowed values as well as its type.
+        why: '"Return JSON" gives a different set of keys every run, and naming the keys makes runs
+          comparable and parseable.'
+        example: '"Return a JSON object with keys `sentiment` (one of positive, neutral, negative) and
+          `reason` (one sentence)".'
+      - claim: The learner checks the first structured result against its consumer before scaling up.
+        why: A format that looks right can still fail on the detail the consumer cares about, such as a date
+          format or an empty field.
+        example: The learner pastes the first generated CSV into the spreadsheet import and fixes the column
+          order in the prompt before running the other 200 rows.

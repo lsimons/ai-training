@@ -1,0 +1,23 @@
+id: building-agents/traces-and-trajectories
+title: Recording and grading the path the agent took
+mode: tutorial
+covers: building-agents/evaluation
+serves: [building-agents/evaluates-agents/grades-trajectories]
+introduces: [observability, trajectory-evaluation]
+assumes:
+  - objective: coding-with-agents/verifies-agent-work/observes-and-debugs
+after: [building-agents/golden-sets]
+shorts: [Trace formats and tracing tools]
+exercise:
+  kind: do
+  brief: >-
+    Write an expected-path rule for the fixture's lookup task (search once, then answer, at most
+    three tool calls) as a function over the trace, run it over the fixture's eight runs and list
+    which fail and why.
+sources: []
+issue: 202
+minutes: 15
+notes: >-
+  The fixture loop gains a trace: one record per model call and tool call with latency and cost. Two
+  runs reach the same answer and one called the payment tool three times with the wrong account.
+  Predict the trace and which run the trajectory grader fails.

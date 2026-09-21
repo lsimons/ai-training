@@ -57,7 +57,7 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 | Sections          | H2s, each with a section kind. Body sections alternate teaching with pitfalls and checkpoints.                                                                          |
 | Pitfall           | At least one, placed right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule. Short in tutorial mode.                      |
 | Checkpoints       | At least one per served objective. A checkpoint's `objective` names the one objective it evidences, and its `concepts` the concept ids it exercises.                    |
-| Exercise          | Exactly one.                                                                                                                                                            |
+| Exercise          | One by default. A longer lesson may have more; the lesson file (S11) lists them.                                                                                        |
 | Recap             | Numbered takeaways and the served objectives as "You can now...". Where to go next is the page footer's previous/next.                                                  |
 | Habit             | Zero, one or two, after the recap. A small task in the learner's own work with a stable `id`. A later spec sets its schedule and storage.                               |
 | Canonical example | The one example the learner's reference shows for the lesson: the `Predict` or `Prompt` block with `canonical`, or the first of either in source order. See "Examples". |
@@ -68,15 +68,20 @@ recap carry that role.
 
 ### Frontmatter
 
-| Field        | Holds                                                                                                                                                                                                                             |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `title`      | The display title                                                                                                                                                                                                                 |
-| `mode`       | `tutorial` or `explanation`                                                                                                                                                                                                       |
-| `covers`     | The topic ids the lesson teaches                                                                                                                                                                                                  |
-| `serves`     | The learning objective ids the lesson teaches toward; each gets at least one checkpoint                                                                                                                                           |
-| `assumes`    | The learning objective ids the lesson relies on, each pointing at the lesson section that teaches it                                                                                                                              |
-| `extends-to` | Where a confident learner goes next: the next lesson, a specialization topic, or a short                                                                                                                                          |
-| `review-by`  | Optional. The date by which the sources must be checked again, for a lesson whose facts move (a law, a product). The page shows it as a review line, with Starlight's `lastUpdated` date as the day the sources were last checked |
+Since 2026-09-21 these fields are written in the lesson's data file,
+`site/src/data/areas/<area>/lessons/<lesson>.yaml`, and the build copies
+them onto the page (S11 "Lesson page"). The MDX file carries no frontmatter
+of its own. The table describes the fields as the components see them.
+
+| Field        | Holds                                                                                                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `title`      | The display title                                                                                                                                                                                                                                                        |
+| `mode`       | `tutorial` or `explanation`                                                                                                                                                                                                                                              |
+| `covers`     | The topic ids the lesson teaches                                                                                                                                                                                                                                         |
+| `serves`     | The learning objective ids the lesson teaches toward; each gets at least one checkpoint                                                                                                                                                                                  |
+| `assumes`    | The learning objective ids the lesson relies on, each pointing at the lesson section that teaches it                                                                                                                                                                     |
+| `extends-to` | Where a confident learner goes next: the next lesson, a specialization topic, or a short                                                                                                                                                                                 |
+| `review-by`  | Optional. The date by which the sources must be checked again, for a lesson whose facts move (a law, a product). The page shows it as a review line, with Starlight's `lastUpdated` date (`sources-checked` in the lesson file) as the day the sources were last checked |
 
 ## Tutorial mode
 
@@ -245,8 +250,9 @@ reads it to ask a checkpoint as a standalone item.
 - Runs in a contrived, resettable setting (a fixture repository, a
   sandbox), never in the learner's own project.
 - The learner self-grades against a model answer. Honor system.
-- One per lesson, written once, optionally ending with a one-line stretch
-  goal. No variants per comfort level.
+- One per lesson by default, and a longer lesson may have more. Each is
+  written once, optionally ending with a one-line stretch goal. No variants
+  per comfort level.
 - Small, and it produces something the learner can look at: a screenshot,
   a diff, a short table, a few lines of text. Uptake of optional exercises
   drops sharply with size, so an exercise that asks for a matrix or a

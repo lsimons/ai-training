@@ -1,0 +1,23 @@
+id: using-agents/reasoning-across-tool-levels
+title: Reasoning across tool levels
+mode: explanation
+covers: using-agents/choosing-tools
+serves: [using-agents/chooses-tool-and-autonomy/reasons-across-levels]
+introduces: [reasoning-across-tool-levels]
+assumes:
+  - objective: concepts/explains-models/names-failure-modes
+  - objective: safety/verifies-output/calibrates-trust
+after: [using-agents/steps-that-stay-human, using-agents/trying-two-models]
+shorts: [Going down a level when the number looks round]
+exercise:
+  kind: judge
+  brief: >-
+    For two supplied before-and-after pairs (a summary you wrote versus one an agent wrote, a folder
+    you filed versus one an automation filed), name the check that stopped working and the check
+    that replaces it.
+sources: []
+issue: 168
+minutes: 15
+notes: >-
+  The plan named the topic concepts/limits as assumed; taken as the objective
+  concepts/explains-models/names-failure-modes.

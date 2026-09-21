@@ -5,12 +5,12 @@
  * pages at runtime and bound in review mode (Give Up, stage pills, frequency).
  */
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import { AREAS } from '@lib/areas';
+import { getAreas } from '@lib/areas';
 import { checkpointsOf, getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
 
 export async function getStaticPaths() {
-	return AREAS.map((a) => ({ params: { area: a.slug }, props: { area: a } }));
+	return (await getAreas()).map((a) => ({ params: { area: a.slug }, props: { area: a } }));
 }
 
 const { area } = Astro.props;

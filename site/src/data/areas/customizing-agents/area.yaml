@@ -1,0 +1,5 @@
+id: customizing-agents
+name: Customizing agents
+group: engineering
+description: >-
+  Configuring an agent for a project with instructions, skills, tools and permissions.

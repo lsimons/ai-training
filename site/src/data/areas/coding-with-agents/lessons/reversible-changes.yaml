@@ -1,0 +1,19 @@
+id: coding-with-agents/reversible-changes
+title: Keeping every agent change easy to undo
+mode: tutorial
+covers: coding-with-agents/workflow
+serves: [coding-with-agents/ships-with-agent/keeps-change-reversible]
+introduces: [reversibility, commits-and-prs]
+assumes: []
+after: [coding-with-agents/spec-driven-increments]
+shorts:
+  - migrations with the way back written down, feature flags as the cheaper revert
+exercise:
+  kind: do
+  brief: >-
+    Have the agent land the fixture increments as one commit each on a branch, revert the middle
+    one, and write the PR description that names the spec and what was verified.
+sources: [Brilliant INC, DLAI-5]
+issue: 157
+minutes: 15
+notes: "Sources: Brilliant INC-5, DLAI-5 as inspiration."

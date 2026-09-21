@@ -1,0 +1,23 @@
+id: safety/reading-agent-logs
+title: Reading agent logs and rerunning after a model change
+mode: tutorial
+covers: safety/governance
+serves: [safety/judges-agent-risk/sets-oversight]
+introduces: [logging-and-audit, model-change-risk]
+assumes: []
+after: [safety/writing-an-ai-policy]
+shorts: [A model update as a dependency upgrade]
+exercise:
+  kind: do
+  brief: >-
+    Take one agent or assistant your team uses and write down what it logs, where, who reads a
+    sample, and what you would rerun after the vendor's next model update.
+sources: [Academy deploying-claude-enterprise-with-confidence]
+issue: 138
+minutes: 15
+notes: >-
+  A fixture reads a recorded agent log and reconstructs what was asked, called and changed, then
+  compares the same task set run under two model versions and prints the rows that differ.
+  Paraphrase, in our own words, the framing from Academy deploying-claude-enterprise-with-confidence
+  noted on issue #31: an agent that leaves no audit trail is the wrong tool for a regulated
+  workflow.

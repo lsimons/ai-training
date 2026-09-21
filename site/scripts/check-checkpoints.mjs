@@ -13,7 +13,7 @@ const root = new URL('..', import.meta.url).pathname;
 const { errors, items } = checkCheckpoints(
 	join(root, 'dist/data/checkpoints.json'),
 	join(root, 'src/content/docs'),
-	join(root, 'src/data/topics'),
+	join(root, 'src/data'),
 );
 
 if (errors.length) {

@@ -1,0 +1,21 @@
+id: safety/asking-a-model-to-disagree
+title: Asking a model to disagree
+mode: tutorial
+covers: safety/verification
+serves: [safety/verifies-output/spots-sycophancy]
+introduces: []
+assumes:
+  - objective: concepts/explains-models/names-failure-modes
+after: [safety/checking-habits]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Ask a model whether a plan of yours is good in three ways: leading, neutral, and asking for the
+    strongest counter-argument first. Compare the three answers.
+sources: []
+issue: 124
+minutes: 15
+notes: >-
+  Sycophancy, as a limit of the model. Introduces no concept: deepens checking-habits with prompts
+  the learner types into their own chat tool, and recorded responses marked illustrative.

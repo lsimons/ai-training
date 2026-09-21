@@ -1,0 +1,37 @@
+id: coding-with-agents/first-session
+title: Your first session with a coding agent
+description: >-
+  Start a coding agent in a small repository and give it the context it needs. Then make one change
+  behind a permissions prompt and review the diff before you trust it.
+mode: tutorial
+covers: coding-with-agents/first-session
+serves:
+  - coding-with-agents/ships-with-agent/runs-a-session
+  - coding-with-agents/ships-with-agent/gives-the-right-context
+introduces:
+  - install-and-setup
+  - codebase-understanding
+  - first-change
+  - permissions
+  - session-and-context
+assumes:
+  - objective: using-agents/delegates-and-checks/writes-a-brief
+    lesson: using-agents/delegating
+    section: writing-the-brief
+  - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
+extends-to:
+  - label: Plan, implement, verify
+    href: /coding-with-agents/workflow/
+after: []
+shorts:
+  - permission modes (S02 worked example), directed compaction and rewind
+exercise:
+  kind: do
+  brief: A scripted change in the fixture repository, reviewed the same way.
+sources: []
+minutes: 25
+notes: >-
+  Issue #94 adds a permission modes section and checkpoint to this page. It is a section of this
+  live lesson, so it gets no entry of its own.

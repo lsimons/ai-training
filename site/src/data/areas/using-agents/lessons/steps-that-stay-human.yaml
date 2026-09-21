@@ -1,0 +1,23 @@
+id: using-agents/steps-that-stay-human
+title: The steps that stay human
+mode: explanation
+covers: using-agents/choosing-tools
+serves: [using-agents/chooses-tool-and-autonomy/keeps-the-human-steps]
+introduces: [what-to-keep-human]
+assumes:
+  - objective: safety/judges-agent-risk/chooses-human-in-loop
+  - objective: safety/judges-agent-risk/sets-oversight
+after: [using-agents/chat-agent-or-automation]
+shorts: [A human path when the tool is down]
+exercise:
+  kind: judge
+  brief: >-
+    In a supplied eight-step process (hiring a contractor), mark the steps that stay with a person
+    and give the reason per step, accountability, knowledge the agent cannot reach, or keeping your
+    own judgment sharp.
+sources: []
+issue: 164
+minutes: 10
+notes: >-
+  The plan named the topic safety/governance as assumed; taken as the objective
+  safety/judges-agent-risk/sets-oversight.

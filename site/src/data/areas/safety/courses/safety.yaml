@@ -1,0 +1,36 @@
+id: safety
+area: safety
+plan-issue: 31
+notes: |-
+  Order follows the prerequisite edges in spec S02: responsible-use and failure-modes need only concepts/limits, verification needs failure-modes, agent-risk needs verification and concepts/what-is-an-agent, and governance needs agent-risk. The EU AI Act lesson is last, per issue #19.
+
+  Safety is a Foundations course for every knowledge worker. No lesson here requires running or configuring an agent. Tutorial-mode lessons run Python fixtures under site/examples/ through <Predict run=...>, or have the learner type prompts into a chat tool they already use.
+parts:
+  - title: Responsible use
+    lessons:
+      - safety/responsible-use
+      - safety/redact-before-you-paste
+      - safety/saying-ai-helped
+  - title: Recognizing failure
+    lessons:
+      - safety/spotting-hallucination
+      - safety/bias-in-patterns
+      - safety/when-the-tool-is-usually-right
+  - title: Verifying outputs
+    lessons:
+      - safety/checking-habits
+      - safety/following-the-source
+      - safety/asking-a-model-to-disagree
+      - safety/marking-what-a-person-checked
+      - safety/checking-what-an-agent-changed
+  - title: Agent risk
+    lessons:
+      - safety/agent-risk
+      - safety/sizing-the-blast-radius
+      - safety/tracing-a-planted-instruction
+  - title: Governance and oversight
+    lessons:
+      - safety/writing-an-ai-policy
+      - safety/reading-agent-logs
+      - safety/assessing-a-use-case
+      - safety/eu-ai-act

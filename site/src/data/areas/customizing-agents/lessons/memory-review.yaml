@@ -1,0 +1,19 @@
+id: customizing-agents/memory-review
+title: Reading what the agent remembers
+mode: tutorial
+covers: customizing-agents/memory
+serves: [customizing-agents/configures-agent/manages-memory]
+introduces: [auto-memory, context-files]
+assumes:
+  - objective: concepts/explains-models/explains-grounding
+after: [customizing-agents/first-skill]
+shorts:
+  - The instruction file's import syntax for pulling context files in (Academy claude-code-101)
+exercise:
+  kind: do
+  brief: >-
+    Open the agent's memory notes for the fixture project, delete the two planted stale facts, and
+    move the one fact the team should share into a context file the agent reads.
+sources: []
+issue: 189
+minutes: 15

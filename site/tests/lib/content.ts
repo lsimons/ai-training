@@ -13,7 +13,8 @@ export interface DocFixture {
 		title: string;
 		mode?: 'tutorial' | 'explanation';
 		assumes?: { objective: string; lesson: string; section: string }[];
-		covers?: string[];
+		covers?: string;
+		serves?: string[];
 	};
 }
 
@@ -33,7 +34,7 @@ export const docs: DocFixture[] = [
 	{ id: 'concepts/index', data: { title: 'Concepts' } },
 	{
 		id: 'concepts/how-models-work',
-		data: { title: 'How a language model works', mode: 'explanation', covers: ['concepts/models'] },
+		data: { title: 'How a language model works', mode: 'explanation', covers: 'concepts/models', serves: ['o1'] },
 		body: `
 <Choice id="what-the-model-does" objective="o1" title="What the model does" hint="h"
   concepts={['token', 'context-window']} context="The lesson shows a widget."
@@ -80,7 +81,7 @@ print(2)
 			title: 'Why agent safety is different',
 			mode: 'tutorial',
 			assumes: [{ objective: 'o1', lesson: 'concepts/how-models-work', section: 's' }],
-			covers: ['safety/injection'],
+			covers: 'safety/injection',
 		},
 		body: `
 <Scenario id="s1" objective="o1" title="S" hint="h" concepts={['risk']} options={[]}>
@@ -148,106 +149,180 @@ export const topics: TopicFixture[] = [
 	},
 ];
 
-export interface CourseFixture {
-	id: string;
-	data: {
-		area: string;
-		lessons: {
-			id: string;
-			title: string;
-			covers: string;
-			serves: string[];
-			status: 'planned' | 'drafting' | 'live';
-			issue?: number;
-			minutes: number;
-			after: string[];
-		}[];
-	};
-}
-
-/** Course plans matching `docs`, plus one planned lesson in safety. */
-export const courses: CourseFixture[] = [
+/** The groups and areas (spec S09): the six real areas, so area-order assertions hold. */
+export const groups = [
 	{
-		id: 'concepts',
+		id: 'foundations',
 		data: {
-			area: 'concepts',
-			lessons: [
-				{
-					id: 'concepts/how-models-work',
-					title: 'How a language model works',
-					covers: 'concepts/models',
-					serves: ['o1'],
-					status: 'live',
-					minutes: 20,
-					after: [],
-				},
-			],
+			id: 'foundations',
+			order: 1,
+			name: 'Foundations',
+			audience: 'Everyone',
+			description: 'For everyone.',
+			areas: ['concepts', 'safety', 'using-agents'],
 		},
 	},
 	{
-		id: 'safety',
+		id: 'engineering',
 		data: {
+			id: 'engineering',
+			order: 2,
+			name: 'Engineering',
+			audience: 'Software engineers',
+			description: 'For engineers.',
+			areas: ['coding-with-agents', 'customizing-agents', 'building-agents'],
+		},
+	},
+];
+const area = (id: string, name: string, group: string) => ({
+	id: `${id}/area`,
+	data: { id, name, group, description: `${name}.` },
+});
+export const areas = [
+	area('concepts', 'Concepts', 'foundations'),
+	area('safety', 'Safety', 'foundations'),
+	area('using-agents', 'Using agents', 'foundations'),
+	area('coding-with-agents', 'Coding with agents', 'engineering'),
+	area('customizing-agents', 'Customizing agents', 'engineering'),
+	area('building-agents', 'Building agents', 'engineering'),
+];
+
+export interface CourseFixture {
+	id: string;
+	data: {
+		id: string;
+		area: string;
+		'plan-issue'?: number;
+		notes?: string;
+		lessons?: string[];
+		parts?: { title: string; notes?: string; lessons: string[] }[];
+	};
+}
+
+export interface LessonPlanFixture {
+	id: string;
+	data: {
+		id: string;
+		title: string;
+		description?: string;
+		mode: 'tutorial' | 'explanation';
+		covers: string;
+		serves: string[];
+		introduces: string[];
+		assumes: { objective: string; lesson?: string; section?: string }[];
+		'extends-to': { label: string; href: string }[];
+		after: string[];
+		shorts: string[];
+		exercise?: { kind: 'do' | 'judge'; brief: string };
+		exercises?: { kind: 'do' | 'judge'; brief: string }[];
+		sources: string[];
+		issue?: number;
+		minutes: number;
+		notes?: string;
+	};
+}
+
+const plan = (over: Partial<LessonPlanFixture['data']> & { id: string; title: string }): LessonPlanFixture => ({
+	id: over.id.replace('/', '/lessons/'),
+	data: {
+		mode: 'tutorial',
+		covers: 'safety/risk',
+		serves: [],
+		introduces: [],
+		assumes: [],
+		'extends-to': [],
+		after: [],
+		shorts: [],
+		exercise: { kind: 'do', brief: 'Do it.' },
+		sources: [],
+		minutes: 15,
+		...over,
+	},
+});
+
+/** Course plans matching `docs`, plus one planned lesson in safety. The safety course has parts. */
+export const courses: CourseFixture[] = [
+	{
+		id: 'concepts/courses/concepts',
+		data: { id: 'concepts', area: 'concepts', lessons: ['concepts/how-models-work'] },
+	},
+	{
+		id: 'safety/courses/safety',
+		data: {
+			id: 'safety',
 			area: 'safety',
-			lessons: [
-				{
-					id: 'safety/agent-risk',
-					title: 'Why agent safety is different',
-					covers: 'safety/risk',
-					serves: ['o1'],
-					status: 'live',
-					minutes: 20,
-					after: [],
-				},
-				{
-					id: 'safety/deeper',
-					title: 'Deeper',
-					covers: 'safety/risk',
-					serves: [],
-					status: 'live',
-					minutes: 15,
-					after: [],
-				},
-				{
-					id: 'safety/coming',
-					title: 'Coming soon',
-					covers: 'safety/risk',
-					serves: [],
-					status: 'planned',
-					issue: 42,
-					minutes: 15,
-					after: ['safety/deeper'],
-				},
+			'plan-issue': 31,
+			parts: [
+				{ title: 'Risk', lessons: ['safety/agent-risk', 'safety/deeper'] },
+				{ title: 'Later', notes: 'One planned lesson.', lessons: ['safety/coming'] },
 			],
 		},
 	},
 ];
 
+export const lessonPlans: LessonPlanFixture[] = [
+	plan({
+		id: 'concepts/how-models-work',
+		title: 'How a language model works',
+		mode: 'explanation',
+		covers: 'concepts/models',
+		serves: ['o1'],
+		minutes: 20,
+	}),
+	plan({ id: 'safety/agent-risk', title: 'Why agent safety is different', serves: ['o1'], minutes: 20 }),
+	plan({
+		id: 'safety/deeper',
+		title: 'Deeper',
+		exercises: [
+			{ kind: 'do', brief: 'A.' },
+			{ kind: 'judge', brief: 'B.' },
+		],
+		exercise: undefined,
+	}),
+	plan({ id: 'safety/coming', title: 'Coming soon', issue: 42, after: ['safety/deeper'] }),
+];
+
 export const competencies = [
 	{
-		id: 'concepts',
+		id: 'concepts/competencies/explains-models',
 		data: {
+			id: 'concepts/explains-models',
 			area: 'concepts',
-			competencies: [
-				{
-					id: 'concepts/explains-models',
-					statement: 'Explains what a model does',
-					topics: ['concepts/models'],
-					objectives: [{ id: 'o1', statement: 'Explains generation', level: 'base', behaviors: [] }],
-					alignment: [],
-				},
-			],
+			statement: 'Explains what a model does',
+			topics: ['concepts/models'],
+			objectives: [{ id: 'o1', statement: 'Explains generation', level: 'base', behaviors: [] }],
+		},
+	},
+];
+
+export const alignment = [
+	{
+		id: 'ai-fluency-4d',
+		data: {
+			id: 'ai-fluency-4d',
+			framework: 'AI Fluency 4D',
+			rows: [{ code: 'Discernment', asks: 'Judge the output', objectives: ['o1', 'other/x/y'] }],
 		},
 	},
 ];
 
 export function mockContent(
-	overrides: { docs?: DocFixture[]; topics?: TopicFixture[]; courses?: CourseFixture[] } = {},
+	overrides: {
+		docs?: DocFixture[];
+		topics?: TopicFixture[];
+		courses?: CourseFixture[];
+		lessonPlans?: LessonPlanFixture[];
+	} = {},
 ) {
 	const collections: Record<string, unknown[]> = {
 		docs: overrides.docs ?? docs,
 		topics: overrides.topics ?? topics,
 		courses: overrides.courses ?? courses,
+		lessonPlans: overrides.lessonPlans ?? lessonPlans,
+		groups,
+		areas,
 		competencies,
+		alignment,
 	};
 	return {
 		getCollection: vi.fn(async (name: string) => collections[name] ?? []),

@@ -1,0 +1,24 @@
+id: building-agents/llm-as-judge
+title: A model as the grader
+mode: tutorial
+covers: building-agents/evaluation
+serves:
+  - building-agents/evaluates-agents/writes-a-rubric
+  - building-agents/evaluates-agents/avoids-gamed-metrics
+introduces: [llm-as-judge, metrics-that-cannot-be-gamed]
+assumes: []
+after: [building-agents/rubrics, building-agents/golden-sets]
+shorts: [Judge biases and calibration]
+exercise:
+  kind: judge
+  brief: >-
+    For three metrics on the fixture (answer length, keyword presence, judge score) describe one way
+    each could rise with the agent unchanged, then pair each with a metric that would catch it.
+sources: []
+issue: 204
+minutes: 15
+notes: >-
+  A fake judge with a built-in length bias grades the fixture transcripts against the rubric.
+  Predict which of two answers it prefers, then compare its grades with the human grades in the
+  fixture and see where they disagree. Expert-level objective on gamed metrics served here and in
+  the deploy gate lesson.

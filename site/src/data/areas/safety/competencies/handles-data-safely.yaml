@@ -1,0 +1,65 @@
+id: safety/handles-data-safely
+area: safety
+statement: Uses AI safely with confidential and personal data
+topics: [safety/responsible-use]
+objectives:
+  - id: safety/handles-data-safely/decides-what-to-share
+    statement: Decides what may go into a prompt and what may not
+    level: base
+    behaviors:
+      - claim: Before pasting, the learner asks who can see the prompt, how long it is kept, and whether it
+          may train a model.
+        why: The answers differ between a consumer chat product, an enterprise plan and a local model, and
+          the same paste is fine in one and a breach in another.
+        example: The learner checks that the company's approved tool has "no training on inputs" in its
+          terms before pasting a customer list, and uses that tool instead of a personal account.
+      - claim: The learner removes or replaces personal data and secrets the task does not need before
+          sharing the rest.
+        why: Most tasks work as well on redacted data, and what is not sent cannot leak.
+        example: To ask for help with a spreadsheet formula, the learner replaces the names column with
+          "Person 1, Person 2" and keeps the numbers.
+      - claim: When in doubt, the learner treats the prompt like an email to an outside company.
+        why: The rule is easy to apply and matches how most organizations classify data.
+        example: The learner would not email the unreleased quarterly numbers to a vendor, so they do not
+          paste them either, and ask the data owner instead.
+  - id: safety/handles-data-safely/discloses-ai-use
+    statement: Discloses AI use where the audience expects it
+    level: base
+    behaviors:
+      - claim: The learner says that AI helped when the audience would judge the work differently knowing
+          it.
+        why: Disclosure is about not misleading, and the test is what the reader would want to know.
+        example: A translated contract carries "machine-translated, reviewed by X", and a spell-checked
+          email does not.
+      - claim: The learner follows the disclosure rule of the place the work goes to, and asks when there is
+          none.
+        why: Journals, employers, schools and open-source projects have different rules, and breaking one
+          costs more than the disclosure.
+        example: Before submitting to a conference, the learner reads the AI policy and adds the required
+          statement.
+      - claim: Disclosure names what the AI did and what the person checked.
+        why: '"Written with AI" tells the reader nothing about what to trust, while "drafted by AI, facts
+          checked by me" does.'
+        example: A commit message says which agent wrote the code and that the author ran and read the
+          tests.
+  - id: safety/handles-data-safely/respects-licenses
+    statement: Respects licenses and attribution in AI-assisted output
+    level: base
+    behaviors:
+      - claim: The learner treats AI output that reproduces a recognizable source the same as copying that
+          source.
+        why: A model can repeat text or code it saw in training, and the license of the original still
+          applies to the copy.
+        example: A generated function that matches a well-known library almost word for word gets the
+          library's attribution, or gets rewritten.
+      - claim: When adapting licensed material with AI help, the learner keeps the original's license terms
+          and attribution.
+        why: The transformation does not remove the obligation, and the derived work carries it.
+        example: Rewriting a CC BY-SA tutorial with an assistant, the learner keeps the attribution and
+          releases the result under the same license.
+      - claim: The learner knows the terms of the tool they use for who owns the output and what the tool
+          may do with the input.
+        why: The terms differ between tools and plans, and the answer decides whether the output may go into
+          a product.
+        example: Before shipping generated images in a brochure, the learner checks the image tool's
+          commercial-use terms.

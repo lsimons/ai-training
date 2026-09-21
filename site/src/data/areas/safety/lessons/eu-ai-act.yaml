@@ -1,0 +1,34 @@
+id: safety/eu-ai-act
+title: The EU AI Act in one lesson
+description: >-
+  What the European Union's AI Act asks of people who build and use AI at work. Whether a tool is an
+  AI system, which risk tier a use falls in, whether you are provider or deployer, and which
+  transparency duties touch everyday work.
+mode: explanation
+covers: safety/governance
+serves: [safety/judges-agent-risk/sets-oversight, safety/handles-data-safely/discloses-ai-use]
+introduces: [regulation]
+assumes:
+  - objective: safety/judges-agent-risk/chooses-human-in-loop
+    lesson: safety/agent-risk
+    section: human-in-the-loop
+extends-to:
+  - label: Governance and oversight
+    href: /topics/safety/governance/
+sources-checked: 2026-09-20
+review-by: 2027-03-20
+after: [safety/agent-risk]
+shorts: [Content credentials (C2PA), Where the AI literacy duty comes from]
+exercise:
+  kind: judge
+  brief: >-
+    For one AI tool used at your work, decide whether your organization is provider or deployer and
+    name the one transparency duty that applies. Reflection: which of the Act's duties touch your
+    own daily work?
+sources: []
+minutes: 15
+notes: >-
+  The AI literacy pointer that issue #10 asked for lands here, and the transparency duties connect
+  back to disclosure in safety/responsible-use. It assumes nothing beyond the Concepts area, per the
+  brief on issue #19, and inside this course only agent-risk, the governance topic's S02
+  prerequisite. It is last in the course because issue #19 puts it last in build order.

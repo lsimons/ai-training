@@ -1,0 +1,20 @@
+id: safety/assessing-a-use-case
+title: Assessing the risk of a use case before it starts
+mode: tutorial
+covers: safety/governance
+serves: [safety/judges-agent-risk/sets-oversight, safety/judges-agent-risk/names-blast-radius]
+introduces: [risk-assessment]
+assumes: []
+after: [safety/writing-an-ai-policy]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Assess one AI use case from your own work with the method: domains touched, impact and
+    likelihood on the scales, the level, and who would have to accept it in writing.
+sources: []
+issue: 141
+minutes: 15
+notes: >-
+  A fixture scores three use cases from their impact and likelihood ratings into a level and prints
+  which ones cross the threshold.

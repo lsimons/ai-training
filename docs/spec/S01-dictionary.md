@@ -54,12 +54,13 @@ course > lesson > section.
 | **Site**          | The whole thing: *AI Training*.                                                                                                                                                                                                                                                            | portal, academy, suite                 |
 | **Group**         | One of two top-level sidebar groups: **Foundations**, written at one level for everyone, and **Engineering**, written for software engineers at two comfort levels.                                                                                                                        | part, half, tier                       |
 | **Area**          | One of six subjects. Owns competencies in the topic map and one course today, with room for more later (see "Identifiers").                                                                                                                                                                | topic, module, track, domain           |
-| **Course**        | An ordered sequence of lessons inside one area, with stated goals, an end quiz, and optionally a project. Its page is the **lesson graph**.                                                                                                                                                | module, training, class                |
+| **Course**        | An ordered sequence of lessons inside one area, with stated goals, an end quiz, and optionally a project. Its page is the **lesson graph**. The lessons may be grouped in parts.                                                                                                           | module, training, class                |
+| **Part**          | A titled slice of a course: an ordered run of its lessons, usually the lessons covering one topic. A course is either flat or divided into parts.                                                                                                                                          | unit, module, chapter, section         |
 | **Lesson**        | One page, 10 to 25 minutes, of kind `tutorial` or `explanation`. The unit of progress and of tutor mode. See "Lesson".                                                                                                                                                                     | chapter, unit, page, module            |
 | **Section**       | An H2 of a lesson. A section has a kind. See "Section kinds".                                                                                                                                                                                                                              | screen, step, slide                    |
 | **Pitfall**       | A section showing a realistic failure mode right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule.                                                                                                                                           | watch-out, warning, gotcha, caution    |
 | **Checkpoint**    | A graded interaction inside a lesson, mapped to one learning objective. See "Checkpoint".                                                                                                                                                                                                  | question, quiz, test, assessment       |
-| **Exercise**      | A hands-on task the learner does outside the page, then self-grades against a model answer. See "Exercise".                                                                                                                                                                                | assignment, homework, task, variant    |
+| **Exercise**      | A hands-on task the learner does outside the page, then self-grades against a model answer. One per lesson by default, more in a longer lesson. See "Exercise".                                                                                                                            | assignment, homework, task, variant    |
 | **Habit**         | A small task the learner does in their own work, outside the site, and marks done or skipped. Offered after a lesson is finished and brought back on a short fixed schedule. Distinct from an exercise, which is done in the lesson. See "Habit".                                          | micro-habit, nudge, challenge          |
 | **Project**       | A larger exercise closing a course, which comes with a specification and a walkthrough.                                                                                                                                                                                                    | capstone, assignment                   |
 | **Quiz**          | The end-of-course set of checkpoint questions. Pass means all objectives touched with at most one miss.                                                                                                                                                                                    | exam, test                             |
@@ -102,8 +103,9 @@ course > lesson > section.
 
 - Done outside the page: in a terminal, an editor, or a chat. The learner
   self-grades against a model answer. Honor system.
-- One per lesson, written once. May end with a one-line **stretch goal** for
-  confident learners. The exercise has no variants.
+- One per lesson by default, and a longer lesson may have more (decided
+  2026-09-21). Each is written once and may end with a one-line **stretch
+  goal** for confident learners. An exercise has no variants.
 
 ### Habit
 
@@ -258,7 +260,9 @@ change once published, but display names may. The project doesn't use short code
 Each area has one course, so a course id is its area id and a lesson id has
 two segments (decided 2026-09-20, issue #24). The day an area needs a second
 course, the id scheme gains a `<course>` segment and progress records are
-migrated with a record version bump per S04.
+migrated with a record version bump per S04. The data files follow the ids:
+an area's topics, competencies, courses and lessons are files under
+`site/src/data/areas/<area>/`, named by the last segment of their id.
 
 ## Open questions
 

@@ -1,0 +1,22 @@
+id: safety/saying-ai-helped
+title: Saying that AI helped, and crediting what it copied
+mode: tutorial
+covers: safety/responsible-use
+serves:
+  - safety/handles-data-safely/discloses-ai-use
+  - safety/handles-data-safely/respects-licenses
+introduces: []
+assumes: []
+after: [safety/responsible-use]
+shorts: [Content credentials (C2PA), The license filter question for generated code]
+exercise:
+  kind: do
+  brief: >-
+    Write the disclosure line for three artifacts you produced this month, and for one of them find
+    the rule of the place it went to.
+sources: []
+issue: 114
+minutes: 15
+notes: >-
+  Introduces no concept: deepens disclosure and licensing-and-attribution with a fixture that
+  compares a generated function with a known library source and reports the near-verbatim match.

@@ -9,7 +9,7 @@ import { getCollection, render } from 'astro:content';
  */
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
 import ReviewLine from '@components/lesson/ReviewLine.astro';
-import { ENGINEERING_AREAS } from '@lib/areas';
+import { getAreas, isEngineering } from '@lib/areas';
 import { checkpointsOf, type Lesson } from '@lib/lessons';
 import { knownPagePaths } from '@lib/links';
 import { chooseSkillsCheck } from '@lib/skills-check';
@@ -27,7 +27,7 @@ const data = entry.data as typeof entry.data & {
 const isLesson = Boolean(data.mode);
 const lessonId = entry.id;
 const area = lessonId.split('/')[0] ?? '';
-const engineering = ENGINEERING_AREAS.includes(area);
+const engineering = isLesson && isEngineering(await getAreas(), area);
 
 let behind: { objective: string; statement: string; href: string; lessonTitle: string }[] = [];
 let ahead: { label: string; href: string; exists: boolean }[] = [];
@@ -40,12 +40,18 @@ if (isLesson) {
 	const docs = await getCollection('docs');
 	const competencies = await getCollection('competencies');
 	const statements = new Map<string, string>();
-	for (const a of competencies)
-		for (const c of a.data.competencies) for (const o of c.objectives) statements.set(o.id, o.statement);
+	for (const c of competencies) for (const o of c.data.objectives) statements.set(o.id, o.statement);
 	// `assumes[].section` must be a `## ` heading of the target lesson. The slugs
 	// come from Starlight's own rendering, so they match the anchors it emits.
 	const sectionSlugs = new Map<string, string[]>();
-	for (const a of data.assumes ?? []) {
+	// A live lesson's `assumes` entries name the lesson and section that teach the objective (spec S11).
+	const assumed = (data.assumes ?? []).map((a) => {
+		if (!a.lesson || !a.section) {
+			throw new Error(`${lessonId}: assumes ${a.objective} without the lesson and section that teach it`);
+		}
+		return { objective: a.objective, lesson: a.lesson, section: a.section };
+	});
+	for (const a of assumed) {
 		if (sectionSlugs.has(a.lesson)) continue;
 		const lesson = docs.find((d) => d.id === a.lesson);
 		if (!lesson) throw new Error(`${lessonId}: assumes unknown lesson ${a.lesson}`);
@@ -55,7 +61,7 @@ if (isLesson) {
 			headings.filter((h) => h.depth === 2).map((h) => h.slug),
 		);
 	}
-	behind = (data.assumes ?? []).map((a) => {
+	behind = assumed.map((a) => {
 		const lesson = docs.find((d) => d.id === a.lesson)!;
 		if (!statements.has(a.objective)) throw new Error(`${lessonId}: assumes unknown objective ${a.objective}`);
 		const slugs = sectionSlugs.get(a.lesson)!;
@@ -68,7 +74,7 @@ if (isLesson) {
 			objective: a.objective,
 			statement: statements.get(a.objective)!,
 			href: href(`/${a.lesson}/#${a.section}`),
-			lessonTitle: lesson.data.title,
+			lessonTitle: lesson.data.title ?? a.lesson,
 		};
 	});
 	const pages = await knownPagePaths();

@@ -1,0 +1,23 @@
+id: coding-with-agents/keeping-understanding
+title: Staying the engineer who understands the system
+mode: explanation
+covers: coding-with-agents/workflow
+serves: [coding-with-agents/ships-with-agent/keeps-understanding]
+introduces: []
+assumes: []
+after: [coding-with-agents/project-instructions, coding-with-agents/reversible-changes]
+shorts: []
+exercise:
+  kind: judge
+  brief: >-
+    After the fixture increments, explain from memory how the parts fit and why, then check the
+    explanation against the code and record one decision in a decisions folder the instructions
+    point at.
+sources: [Brilliant INC]
+issue: 166
+minutes: 10
+notes: >-
+  Introduces no concept: revisits plan-mode, commits-and-prs and project-instructions for the expert
+  objective. Expert level. Kept as its own short explanation lesson because the objective has three
+  behaviors of its own (Brilliant INC-3, INC-4) and none of the tutorial lessons above has room for
+  them without going past fifteen minutes.

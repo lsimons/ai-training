@@ -1,0 +1,19 @@
+id: customizing-agents/compaction
+title: Directing the summary before compaction
+mode: tutorial
+covers: customizing-agents/memory
+serves: [customizing-agents/configures-agent/manages-memory]
+introduces: [compaction]
+assumes:
+  - objective: concepts/explains-models/explains-grounding
+after: [customizing-agents/memory-review]
+shorts:
+  - Context rot in a long session, and what a compaction summary drops (Academy claude-code-101)
+exercise:
+  kind: do
+  brief: >-
+    Load the fixture transcript that holds three planted facts, ask for a summary that names open
+    items and decisions, compact on command, and check which of the three facts survived.
+sources: []
+issue: 192
+minutes: 10

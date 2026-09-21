@@ -1,0 +1,23 @@
+id: concepts/same-prompt-twice
+title: Same prompt, different answer
+mode: tutorial
+covers: concepts/limits
+serves:
+  - concepts/explains-models/explains-generation
+  - concepts/explains-models/names-failure-modes
+introduces: [non-determinism]
+assumes: []
+after: [concepts/how-models-work]
+shorts: []
+exercise:
+  kind: do
+  brief: >-
+    Run the sampling fixture ten times at two temperatures, tabulate how often the answers agree,
+    and write the check a workflow would need to accept that variation.
+sources: []
+issue: 131
+minutes: 12
+notes: >-
+  The live lesson shows that two runs differ and why. This lesson adds the consequence for a
+  process: one good run proves nothing about a prompt, variation remains at the lowest temperature,
+  and any workflow built on a model needs a check that tolerates it.

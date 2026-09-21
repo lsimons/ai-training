@@ -1,0 +1,80 @@
+id: coding-with-agents/verifies-agent-work
+area: coding-with-agents
+statement: Verifies agent-written code before trusting it
+topics: [coding-with-agents/verification, coding-with-agents/quality, safety/agent-risk]
+objectives:
+  - id: coding-with-agents/verifies-agent-work/reviews-others-code
+    statement: Reviews code they did not write, against the specification
+    level: base
+    behaviors:
+      - claim: The review starts from the specification and asks whether the change does what was asked,
+          before looking at how it does it.
+        why: Well-written code that solves the wrong problem is the most common agent failure and the
+          hardest to see line by line.
+        example: The learner reads the brief, then the tests, then the diff, and finds the agent implemented
+          the filter as case-sensitive where the brief said otherwise.
+      - claim: The learner reads every changed file and questions changes the brief did not ask for.
+        why: An agent's diff often includes "improvements" that are the riskiest part of the change.
+        example: A "fix the retry" pull request also reformats two unrelated files and changes a timeout, so
+          the learner asks for those to be dropped or split.
+      - claim: The learner runs the code as well as reading it.
+        why: Reading catches design problems, and running catches the behavior the tests missed.
+        example: The learner checks out the branch and tries the two edge cases the brief mentioned before
+          approving.
+  - id: coding-with-agents/verifies-agent-work/observes-and-debugs
+    statement: Observes the running system and isolates a fault systematically
+    level: base
+    behaviors:
+      - claim: The learner reproduces the fault before changing anything, and writes down the steps.
+        why: A fix for a fault you cannot reproduce cannot be verified, and the agent may fix something
+          else.
+        example: The learner turns a "sometimes fails" report into "fails when the file has a header row and
+          no data" before briefing the agent.
+      - claim: The learner reads the logs and traces of the running system as well as the code.
+        why: The code says what should happen, and the system says what did.
+        example: The stack trace shows the request never reached the handler, so the learner looks at
+          routing rather than at the handler the agent was about to rewrite.
+      - claim: "The learner narrows the fault by halving: one change, one observation, and a note of what
+          was ruled out."
+        why: Changing several things at once and hoping is how a debugging session runs for hours.
+        example: The learner disables the cache, sees the bug persist, and rules out caching before letting
+          the agent touch anything.
+  - id: coding-with-agents/verifies-agent-work/automates-the-check
+    statement: Turns a check into a bounded, self-checking loop
+    level: base
+    behaviors:
+      - claim: The learner turns a manual check into a command the agent can run and read the result of.
+        why: A check the agent can run is run on every iteration, and a check only the learner can run is
+          run once (@Academy ai-native-sdlc-playbook).
+        example: '"Open the page and see that the table has rows" becomes a test that renders the page and
+          asserts on the row count.'
+      - claim: "The loop has a bound: a number of attempts or a time limit, after which the agent stops and
+          reports."
+        why: An agent told "keep going until the tests pass" can run forever or delete the test.
+        example: The brief says "run the tests; if they fail, fix and rerun, at most five times, then stop
+          and show me what you found".
+      - claim: The learner protects the check from the agent that runs against it.
+        why: The shortest path to a green check is often to change the check.
+        example: The brief says the test file is read-only, and the review confirms the assertions did not
+          change.
+  - id: coding-with-agents/verifies-agent-work/screens-for-security
+    statement: Screens agent output for security and supply-chain problems
+    level: base
+    behaviors:
+      - claim: "The learner checks every new dependency the agent added: does it exist, is it the intended
+          package, is it maintained, and is it needed."
+        why: Agents suggest packages from memory, and a name that does not exist, or a look-alike package
+          published under a misspelled name, gets installed.
+        example: The diff adds a package with a slightly different name from the well-known one, so the
+          learner checks the registry and removes it.
+      - claim: The learner looks at how the change handles input, secrets and permissions, as a reviewer
+          would for any code.
+        why: Agent-written code has the same classes of vulnerability as human code, produced faster and
+          with more confidence.
+        example: The learner finds the generated query built with string formatting and asks for a
+          parameterized one.
+      - claim: The learner checks that no secret or credential ended up in the code, the tests or the
+          transcript.
+        why: An agent that read a `.env` file to solve a problem may paste its contents into a fixture.
+        example: The pull request's test fixtures contain a real-looking API key, so the learner rotates it
+          and adds the file to the secret scanner.

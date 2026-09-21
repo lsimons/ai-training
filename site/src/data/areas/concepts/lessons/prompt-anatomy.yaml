@@ -1,0 +1,36 @@
+id: concepts/prompt-anatomy
+title: Instruction, context and format
+description: >-
+  Turn a one-line request into a prompt with a clear instruction, marked context, a named audience
+  and a stated output format, and see what each part changes.
+mode: tutorial
+covers: concepts/prompting
+serves: [concepts/prompts-reliably/structures-a-prompt]
+introduces: [instruction]
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: text-becomes-tokens
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: where-the-scores-come-from
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: Show one example
+    href: /concepts/one-example/
+  - label: Output the next step can use
+    href: /concepts/structured-output/
+after: [concepts/how-models-work]
+shorts: [delimiters and why they matter]
+exercise:
+  kind: do
+  brief: >-
+    Rewrite a one-line request into instruction, marked context, audience and format, and run both
+    versions in a chat.
+sources: []
+minutes: 15

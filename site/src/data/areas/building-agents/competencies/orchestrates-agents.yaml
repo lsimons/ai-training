@@ -1,0 +1,65 @@
+id: building-agents/orchestrates-agents
+area: building-agents
+statement: Designs and orchestrates multi-agent systems
+topics: [building-agents/patterns, building-agents/orchestration]
+objectives:
+  - id: building-agents/orchestrates-agents/picks-a-pattern
+    statement: Picks a design pattern for a task and says why
+    level: base
+    behaviors:
+      - claim: The learner names the pattern (single loop, reflection, plan-then-execute, and so on) and the
+          property of the task that calls for it.
+        why: A pattern picked because it is interesting adds calls and failure modes without a reason to
+          point to.
+        example: '"The task has ten dependent steps and a wrong early step wastes the rest, so plan first,
+          then execute the plan step by step."'
+      - claim: The learner starts with the simplest pattern that could work and adds structure when the
+          evaluation shows a need.
+        why: Each added pattern multiplies calls and cost, and the simple version is the baseline the
+          complex one must beat.
+        example: A single tool-using loop handles 80 percent of the evaluation set, and the learner adds
+          reflection only after measuring where it fails.
+      - claim: The learner can say what each pattern costs in calls, latency and money for their task.
+        why: Reflection doubles calls, planning adds a call per plan revision, and the budget decides
+          whether that is affordable.
+        example: '"Reflection adds one call per step; at twelve steps that is twice the latency, which the
+          user-facing flow cannot take."'
+  - id: building-agents/orchestrates-agents/justifies-orchestration-cost
+    statement: Justifies the coordination cost of more than one agent
+    level: base
+    behaviors:
+      - claim: "Before adding a second agent, the learner names what the single agent cannot do: a context
+          that does not fit, a tool set too large, a skill that needs a different prompt."
+        why: Most multi-agent designs are a single agent with more coordination cost and no new ability.
+        example: "\"One agent's context fills with the codebase before it reaches the task, so a scout agent
+          summarizes the relevant files first.\""
+      - claim: "The learner counts the coordination cost: extra calls, handoff messages, lost context at
+          each boundary, and the failure modes of agents disagreeing."
+        why: Every boundary between agents is a place where information is dropped and a decision is made
+          twice.
+        example: A three-agent design spends 40 percent of its tokens on handoffs, and the learner shows
+          this before deciding.
+      - claim: The learner compares the multi-agent design against the single-agent baseline on the same
+          evaluation set.
+        why: A design that feels better must be shown to be better on the tasks that matter.
+        example: The orchestrated version scores three points higher at twice the cost, so the learner keeps
+          the single agent and notes where the three points came from.
+  - id: building-agents/orchestrates-agents/composes-patterns
+    statement: Composes patterns and names the failure modes of the composition
+    level: expert
+    behaviors:
+      - claim: The learner draws the composition and names, at each junction, what passes across and what is
+          lost.
+        why: "Composition failures happen at the seams: a planner that does not see what the executor
+          learned, a reflector without the original goal."
+        example: The plan-then-execute loop passes the plan to the executor but not the constraints, so the
+          executor breaks a limit the planner knew about, and the learner fixes the handoff.
+      - claim: "The learner names the failure modes the composition adds: loops between components,
+          disagreement without a tiebreaker, cost multiplying."
+        why: Each pattern has known failures alone, and combining them adds new ones that are in neither.
+        example: A reflector that keeps asking for revisions and an executor that keeps complying produce an
+          unbounded loop, so the learner adds a revision cap.
+      - claim: The learner tests the composition with faults injected at each boundary.
+        why: A composed system that has only seen happy paths has untested error handling at every seam.
+        example: The test returns an empty plan from the planner and a tool error from the executor and
+          checks that the orchestrator stops and reports.

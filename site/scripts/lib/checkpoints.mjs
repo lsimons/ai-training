@@ -16,10 +16,10 @@
  * `scripts/check-checkpoints.mjs` is the command-line entry; tests import this.
  */
 import { existsSync, readFileSync } from 'node:fs';
-import { parse } from 'yaml';
 import { KIND_OF_TAG } from '../../src/lib/checkpoint-rules.ts';
 import { scanCheckpointTags } from '../../src/lib/checkpoint-source.ts';
-import { lessonPages, yamlFiles } from './courses.mjs';
+import { allTopics, readAreaTree } from './area-tree.mjs';
+import { lessonPages } from './data.mjs';
 import { walkMdx } from './examples.mjs';
 
 /** Field name to the `typeof` it must have. `context`, `options` and `answer` may be null and are not listed. */
@@ -34,9 +34,9 @@ export const REQUIRED = {
 	revision: 'number',
 };
 
-/** Every concept id under `topicsDir` (site/src/data/topics). */
-export function conceptIds(topicsDir) {
-	return new Set(yamlFiles(topicsDir).flatMap((p) => (parse(readFileSync(p, 'utf8')).concepts ?? []).map((c) => c.id)));
+/** Every concept id in the topic YAML under `dataDir` (site/src/data). */
+export function conceptIds(dataDir) {
+	return new Set(allTopics(readAreaTree(dataDir)).flatMap((t) => (t.concepts ?? []).map((c) => c.id)));
 }
 
 /**
@@ -45,8 +45,9 @@ export function conceptIds(topicsDir) {
  * rejects fails the build first, so it is reported here as an error rather
  * than thrown.
  */
-export function pageCheckpointIds(contentDir) {
-	const lessons = lessonPages(contentDir);
+export function pageCheckpointIds(contentDir, dataDir) {
+	const areaIds = new Set(readAreaTree(dataDir).areas.map((a) => a.dir));
+	const lessons = lessonPages(contentDir, areaIds);
 	const out = new Set();
 	const errors = [];
 	for (const p of walkMdx(contentDir)) {
@@ -67,9 +68,9 @@ export function pageCheckpointIds(contentDir) {
 
 /**
  * Check the export at `file` against the pages under `contentDir` and the
- * topics under `topicsDir`. Returns `{ errors: string[], items: number }`.
+ * data tree under `dataDir`. Returns `{ errors: string[], items: number }`.
  */
-export function checkCheckpoints(file, contentDir, topicsDir) {
+export function checkCheckpoints(file, contentDir, dataDir) {
 	const errors = [];
 	const fail = (msg) => errors.push(msg);
 	if (!existsSync(file)) return { errors: [`${file} does not exist; run site-build first`], items: 0 };
@@ -82,9 +83,9 @@ export function checkCheckpoints(file, contentDir, topicsDir) {
 	if (data?.version !== 1) fail(`version is ${JSON.stringify(data?.version)}, expected 1`);
 	if (!Array.isArray(data?.items)) return { errors: [...errors, 'no items list'], items: 0 };
 
-	const known = conceptIds(topicsDir);
+	const known = conceptIds(dataDir);
 	const kinds = new Set(Object.values(KIND_OF_TAG));
-	const { ids: expected, errors: pageErrors } = pageCheckpointIds(contentDir);
+	const { ids: expected, errors: pageErrors } = pageCheckpointIds(contentDir, dataDir);
 	errors.push(...pageErrors);
 	const seen = new Set();
 	for (const [i, item] of data.items.entries()) {

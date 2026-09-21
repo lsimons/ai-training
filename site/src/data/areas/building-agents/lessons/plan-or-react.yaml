@@ -1,0 +1,24 @@
+id: building-agents/plan-or-react
+title: Plan everything first or react step by step
+mode: explanation
+covers: building-agents/patterns
+serves:
+  - building-agents/orchestrates-agents/picks-a-pattern
+  - building-agents/orchestrates-agents/composes-patterns
+introduces: [plan-then-execute-vs-reactive, hierarchical-planning]
+assumes: []
+after: [building-agents/planning, building-agents/reflection]
+shorts: [Hierarchical planning with subagents]
+exercise:
+  kind: judge
+  brief: >-
+    For four task descriptions place each on the plan-then-execute to reactive spectrum, name the
+    pattern you would start with, and write what it costs in calls and latency at twelve steps.
+sources: [Academy building-with-the-claude-api]
+issue: 208
+minutes: 15
+notes: >-
+  The Academy's workflows-versus-agents recommendation is the spine: a fixed workflow when the steps
+  are known, an agent when they are not, and most systems plan coarsely and react within a step
+  (Academy building-with-the-claude-api). Hierarchical planning as subgoals with fresh contexts, and
+  what is lost between levels. Checkpoints are scenario and match.

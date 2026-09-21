@@ -1,0 +1,25 @@
+id: using-agents/adjusting-the-brief
+title: Changing the brief while the agent works
+mode: tutorial
+covers: using-agents/delegating
+serves: [using-agents/delegates-and-checks/adjusts-mid-task]
+introduces: []
+assumes:
+  - objective: concepts/prompts-reliably/iterates-on-output
+  - objective: concepts/explains-models/explains-generation
+after: [using-agents/delegating]
+shorts: [Why an answer in the chat is lost]
+exercise:
+  kind: do
+  brief: >-
+    Run the lesson's brief, which is written so the agent must ask a question, answer it by editing
+    the brief instead of the chat, restart from the edited brief, and compare the two results. If
+    the agent guesses instead of asking, its pick between the two named templates is the question to
+    answer.
+sources: []
+issue: 148
+minutes: 15
+notes: >-
+  The plan named the topic concepts/how-models-work as assumed; taken as the objective
+  concepts/explains-models/explains-generation. Introduces no concept: deepens task-brief and
+  checking-results from the live lesson.

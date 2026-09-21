@@ -70,6 +70,9 @@ Precalculus
 pset
 psets
 
+# Section slugs named in lesson data (`assumes[].section`)
+arent
+
 # Jargon
 anonymization
 automator

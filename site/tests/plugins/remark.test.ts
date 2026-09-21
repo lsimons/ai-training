@@ -48,18 +48,24 @@ type Node = {
 	data?: { hProperties?: Record<string, unknown> };
 };
 
-/** Run both plugins over MDX source the way astro.config.mjs wires them. */
+const docsDir = '/repo/site/src/content/docs/';
+
+/**
+ * Run both plugins over MDX source the way astro.config.mjs wires them. `lessons`
+ * is the lesson list the terms plugin reads (spec S11): by default the page at
+ * `path` is a lesson covering `concepts/how-models-work`.
+ */
 async function run(
 	source: string,
-	frontmatter: Record<string, unknown> = { mode: 'explanation', covers: ['concepts/how-models-work'] },
-	path = '/repo/site/src/content/docs/concepts/how-models-work.mdx',
+	lessons: { id: string; covers: string }[] = [{ id: 'concepts/how-models-work', covers: 'concepts/how-models-work' }],
+	path = `${docsDir}concepts/how-models-work.mdx`,
 ): Promise<Node> {
 	const processor = unified()
 		.use(remarkParse)
 		.use(remarkMdx)
-		.use(remarkTerms, { topics })
+		.use(remarkTerms, { topics, lessons, docsDir })
 		.use(remarkCitations, { bibliography });
-	const file = { path, value: source, data: { astro: { frontmatter } } };
+	const file = { path, value: source, data: {} };
 	const tree = processor.parse(file);
 	return (await processor.run(tree, file)) as Node;
 }
@@ -102,18 +108,16 @@ describe('remarkTerms', () => {
 	});
 
 	it('matches curly quotes where the concept name has straight quotes', async () => {
-		const tree = await run('Apply “Trust but verify” for agents here.\n', {
-			mode: 'tutorial',
-			covers: ['safety/verification'],
-		});
+		const tree = await run('Apply “Trust but verify” for agents here.\n', [
+			{ id: 'concepts/how-models-work', covers: 'safety/verification' },
+		]);
 		expect(links(tree, 'term').map((t) => t.url)).toEqual(['/glossary/#trust-but-verify-for-agents']);
 	});
 
-	it('dedupes concept names across covered topics, first covered topic winning', async () => {
-		const tree = await run('A token and a token.\n', {
-			mode: 'tutorial',
-			covers: ['safety/verification', 'concepts/how-models-work'],
-		});
+	it("marks the covered topic's concept when another topic shares the name", async () => {
+		const tree = await run('A token and a token.\n', [
+			{ id: 'concepts/how-models-work', covers: 'safety/verification' },
+		]);
 		expect(links(tree, 'term').map((t) => t.url)).toEqual(['/glossary/#token-again']);
 	});
 
@@ -139,17 +143,20 @@ describe('remarkTerms', () => {
 		expect(last && links(last, 'term')).toHaveLength(1);
 	});
 
-	it('does nothing on a page without mode or covers', async () => {
-		const tree = await run('A token.\n', {});
-		expect(links(tree, 'term')).toHaveLength(0);
+	it('does nothing on a page that is not a lesson', async () => {
+		expect(links(await run('A token.\n', []), 'term')).toHaveLength(0);
+		expect(links(await run('A token.\n', undefined, `${docsDir}guides/how-models-work.mdx`), 'term')).toHaveLength(0);
+	});
+	it('refuses to run without the lesson list and docs directory', () => {
+		expect(() => remarkTerms({ topics } as never)).toThrow(/lesson list/);
 	});
 
 	it('fails the build on a hand-written link to an unknown glossary anchor, also inside a component', async () => {
 		await expect(run('See [this](/glossary/#no-such-concept).\n')).rejects.toThrow(
 			'link to unknown glossary anchor "/glossary/#no-such-concept". No concept has the id "no-such-concept"',
 		);
-		await expect(run('<Recap>\n\nSee [this](/glossary/#nope).\n\n</Recap>\n', {})).rejects.toThrow('"/glossary/#nope"');
-		await expect(run('See [this](/glossary/#token).\n', {})).resolves.toBeTruthy();
+		await expect(run('<Recap>\n\nSee [this](/glossary/#nope).\n\n</Recap>\n', [])).rejects.toThrow('"/glossary/#nope"');
+		await expect(run('See [this](/glossary/#token).\n', [])).resolves.toBeTruthy();
 	});
 });
 
@@ -181,16 +188,14 @@ describe('remarkCitations', () => {
 	});
 
 	it('never marks a term inside the appended References list', async () => {
-		const tree = await run('Cite (@Brilliant TAS).\n', { mode: 'tutorial', covers: ['safety/verification'] });
+		const tree = await run('Cite (@Brilliant TAS).\n', [
+			{ id: 'concepts/how-models-work', covers: 'safety/verification' },
+		]);
 		expect(links(tree, 'term')).toHaveLength(0);
 	});
 
 	it('cites inside a component such as a Recap and maps index pages to their directory URL', async () => {
-		const tree = await run(
-			'<Recap>\n\n1. A point (@AEC-02).\n\n</Recap>\n',
-			{},
-			'/repo/site/src/content/docs/concepts/index.mdx',
-		);
+		const tree = await run('<Recap>\n\n1. A point (@AEC-02).\n\n</Recap>\n', [], `${docsDir}concepts/index.mdx`);
 		expect(links(tree, 'citation').map((c) => c.url)).toEqual(['/concepts/#ref-1']);
 	});
 
@@ -211,13 +216,15 @@ describe('remarkCitations', () => {
 	});
 
 	it('refuses a page outside src/content/docs and a missing bibliography', async () => {
-		await expect(run('Body (@AEC-02).\n', {}, '/repo/site/README.md')).rejects.toThrow(
+		await expect(run('Body (@AEC-02).\n', [], '/repo/site/README.md')).rejects.toThrow(
 			'only works in a page under src/content/docs/',
 		);
 		expect(() => remarkCitations({ bibliography: undefined as unknown as Record<string, unknown> })).toThrow(
 			'needs the parsed bibliography',
 		);
-		expect(() => remarkTerms({ topics: undefined as unknown as [] })).toThrow('needs the parsed topic list');
+		expect(() => remarkTerms({ topics: undefined as unknown as [], lessons: [], docsDir })).toThrow(
+			'needs the parsed topic list',
+		);
 	});
 });
 

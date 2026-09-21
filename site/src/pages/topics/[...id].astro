@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 /** One reference page per topic (spec S02 "Stable URLs"), rendered from the YAML. */
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import TopicReference from '@components/TopicReference.astro';
-import { areaOf } from '@lib/areas';
+import { areaOf, getAreas } from '@lib/areas';
 import { getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
 
@@ -15,9 +15,9 @@ export async function getStaticPaths() {
 const { topic } = Astro.props;
 const topics = (await getCollection('topics')).map((t) => t.data);
 const bibliography = await getCollection('bibliography');
-const lessons = (await getLessons()).filter((l) => (l.data.covers ?? []).includes(topic.id));
+const lessons = (await getLessons()).filter((l) => l.data.covers === topic.id);
 const competencies = (await getCollection('competencies'))
-	.flatMap((c) => c.data.competencies)
+	.map((c) => c.data)
 	.filter((c) => c.topics.includes(topic.id));
 const name = (id: string) => topics.find((t) => t.id === id)?.name ?? id;
 const dependants = topics.filter((t) => t.links.prerequisites.includes(topic.id));
@@ -31,7 +31,7 @@ const headings = [
 ---
 
 <StarlightPage frontmatter={{ title: topic.name, description: topic.definition }} headings={headings}>
-	<p><em>{areaOf(topic.area).name}</em> · topic <code>{topic.id}</code></p>
+	<p><em>{areaOf(await getAreas(), topic.area).name}</em> · topic <code>{topic.id}</code></p>
 	<p>{topic.definition}</p>
 
 	<h2 id="concepts">Concepts</h2>

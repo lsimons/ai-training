@@ -1,0 +1,22 @@
+id: customizing-agents/mcp-first-server
+title: Connecting your first tool server
+mode: tutorial
+covers: customizing-agents/mcp
+serves: [customizing-agents/connects-tools-safely/adds-a-tool]
+introduces: []
+assumes:
+  - objective: concepts/recognizes-agents/names-the-loop
+  - objective: coding-with-agents/ships-with-agent/runs-a-session
+after: [customizing-agents/mcp]
+shorts:
+  - Local and remote transports and what each one means for credentials (Academy model-context-protocol-advanced-topics)
+exercise:
+  kind: do
+  brief: >-
+    Connect a local file-system server scoped to one fixture directory, ask the agent to list and
+    summarize its files, and read the transcript for what it called and with which arguments.
+sources: []
+issue: 171
+minutes: 15
+notes: >-
+  Introduces no concept: hands-on for server, client and transport, which the live lesson introduces.
