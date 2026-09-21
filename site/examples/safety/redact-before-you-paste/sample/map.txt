@@ -1,0 +1,13 @@
+Renske Adelhof => Person 1
+renske.adelhof@example.net => [email 1]
+Tijmen Boskoorn => Person 2
+Sander Adelhof => Person 3
+Marit Zandvliet-Oosterhuis => Person 4
++31 6 5555 0142 => [phone 1]
++31 6 5555 0377 => [phone 2]
+NB-4471-0928 => [account number]
+NB-2026-08814 => [ticket number]
+55-31972 => [order number]
+Kastanjelaan 12, Zwolle => [address]
+Kastanjelaan 12 => [address]
+Zwolle => [city]
