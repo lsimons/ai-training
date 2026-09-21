@@ -7,8 +7,12 @@ summary in the report and the meeting minutes. Some of the details have no
 source. By the end, the way a detail is written tells you that it is a
 claim to check before the summary leaves your desk.
 
-You need a terminal and `python3`. The report, the meeting minutes and the
-two summaries are fictional and were written for this lesson. The summaries
+You need a terminal and `python3`. On a fresh Mac the first `python3`
+command may open a dialog from Apple offering to install its developer
+tools for the terminal (the Xcode Command Line Tools). Accept it, wait for
+the install to finish, and run the command again. The report, the meeting
+minutes and the two summaries are fictional and were written for this
+lesson. The summaries
 read the way a model's summary reads, and the assistant's words are the
 author's.
 
@@ -26,9 +30,8 @@ short summary to put in a briefing. This is the summary.
 > and notes that the station handles about 9,000 passengers a day. Council
 > chair Rhea Dunmore told the meeting: "Racks before car parks, every time."
 
-The paragraph reads well, with the kind of detail a briefing wants: an
-article number, a percentage, a quote with a name on it. Before reading
-on, decide which of those details you would check against the report
+The paragraph reads well, and it has the kind of detail a briefing wants,
+from an article number to a quote with a name on it. Before reading on, decide which of those details you would check against the report
 before you put the paragraph in a briefing, and write them down.
 
 ## Run the check
@@ -40,13 +43,13 @@ report and the minutes of the council meeting, one sentence per line.
 `check_claims.py` reads a summary, pulls out the specifics, and looks each
 one up in the sources. The specifics it knows are quoted passages, references
 written like `article 7(3)` or `section 12`, and figures, which it shows as
-the number with the word after it, as in `38 percent`. With `--missing` it
+the number with the word after it, as in `890 bicycles`. With `--missing` it
 prints only the claims it can't find, one per line, in the order they
 appear in the summary.
 
 <Predict id="predict-the-missing-claims" objective="safety/verifies-output/checks-claims"
   concepts={['hallucination-in-practice']}
-  context="A checker reads a model's one-paragraph summary of a council report on cycle parking at a station, pulls out every quoted passage, article reference and figure, and looks each one up in the report and the meeting minutes. With --missing it prints only the claims it cannot find, as the number with the word after it (38 percent) or the quoted text with its quotes, one per line, in summary order. The summary claims a count of 890 bicycles against 640 racks, a legal minimum of one rack per 50 passengers under article 7(3), a 38 percent fall in theft between 2022 and 2024, a recommendation of 300 racks of which 120 covered, about 9,000 passengers a day, and a quote from the council chair."
+  context="A checker reads a model's one-paragraph summary of a council report on cycle parking at a station, pulls out every quoted passage, article reference and figure, and looks each one up in the report and the meeting minutes. With --missing it prints only the claims it cannot find, as the number with the word after it (890 bicycles) or the quoted text with its quotes, one per line, in summary order. The summary claims a count of 890 bicycles against 640 racks, a legal minimum of one rack per 50 passengers under article 7(3), a 38 percent fall in theft between 2022 and 2024, a recommendation of 300 racks of which 120 covered, about 9,000 passengers a day, and a quote from the council chair."
   title="Which claims have no source?"
   hint="Which details are the most precise, and which of them could the model have produced from the form of a report alone?"
   answer={`50 passengers
@@ -110,8 +113,9 @@ number or the reference appears in a source. Whether the source says what
 the summary says is still a person's reading, and the sentence is printed
 so that you can do it in one glance.
 
-Three of the four missing claims are the ones the opener asked about: the
-percentage, the quote and the ratio in the article. The report says
+Two of the four missing claims are details the opener asked about, the
+percentage and the quote, and a third is the rule attached to the article
+number the opener also asked about. The report says
 "roughly a third", and the model wrote 38 percent. The minutes have the
 chair saying "We need racks before we need another car park". The line in
 the summary is shorter, she never said it, and it has her name on it. The
@@ -131,18 +135,19 @@ with a different answer.
 
 ## Specificity is the tell
 
-Every claim that came back with no source is more precise than the report:
-an exact percentage where the report says roughly a third, a round ratio
-where the article says another, a quotable line where the minutes have a
-sentence. That is what **hallucination in practice** looks like. A model
-predicts the most likely continuation of the text so far, and the most
-likely continuation of "Article 7(3) of the Cycle Parking Ordinance
-requires" is a rule of the right form. A common idea has thousands of
-examples behind it and comes out well constrained. One exact figure has
-few or none, and the model fills the gap with something of the right form,
-in the same confident prose (@Academy ai-capabilities-and-limitations).
-The precision is a property of the text, and the text is fluent whether or
-not the detail has a source.
+Every claim that came back with no source is a specific the source
+doesn't give: an exact percentage where the report says roughly a third,
+and a quotable line where the minutes have a longer sentence. That is what
+**hallucination in practice** looks like. The model predicts the most
+likely continuation, so a gap in what it knows is filled with something of
+the right form, in the same confident prose as the rest
+(@Academy ai-capabilities-and-limitations). The lesson
+[How a language model works](/concepts/how-models-work/#failure-modes-named) names
+that failure. This lesson is about recognizing it, and the summary of a
+pasted document is where you meet it most: the model has the source in
+front of it and still drifts in the specifics, because the specifics are
+where the prediction is least constrained. The precision is a property of
+the text, and the text is fluent whether or not the detail has a source.
 
 In daily work the tell shows up in these forms.
 
