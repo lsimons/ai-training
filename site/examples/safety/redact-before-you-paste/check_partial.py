@@ -30,7 +30,7 @@ Zwolle
 IDENTIFYING = [
     ("name", "Renske Adelhof"),
     ("initials", "R. A."),
-    ("phone", "+31 6 5555 0142"),
+    ("phone", "+31 6 1234 5678"),
     ("email", "renske.adelhof@example.net"),
     ("account number", "NB-4471-0928"),
     ("street", "Kastanjelaan 12"),

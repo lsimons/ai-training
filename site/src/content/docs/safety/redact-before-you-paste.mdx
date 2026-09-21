@@ -10,8 +10,9 @@ the values back into the reply.
 
 You need a terminal and `python3`. The scripts are in the course
 repository under `site/examples/safety/redact-before-you-paste/`. Copy that
-directory and change into it. You don't paste anything into an AI tool
-in this lesson, and every person and company in the email is invented.
+directory and change into it. Every person and company in the email is
+invented, and the one step that puts text into an AI tool is optional and
+uses the redacted version only.
 
 Here is the email, as the fixture holds it.
 
@@ -25,7 +26,7 @@ Hello,
 Your technician Tijmen Boskoorn came by on Tuesday to fix the leak in our
 dishwasher, a Norrbeck D410. It worked for two days and now the water is
 back under the sink. I leave for work at 7:30, so please call me on
-+31 6 5555 0142 before that, or write back. My account number is
++31 6 1234 5678 before that, or write back. My account number is
 NB-4471-0928.
 
 Kind regards,
@@ -37,8 +38,8 @@ Kastanjelaan 12, Zwolle
 
 The task is "draft a reply that apologizes, offers a free second visit,
 and asks for a time window". Read the email once with that task in mind
-and mark what the reply depends on: the leak came back, the first repair
-was on Tuesday, the customer leaves early in the morning. Now mark what it
+and mark what the reply depends on: the leak came back after a repair on
+Tuesday, and the customer leaves early in the morning. Now mark what it
 doesn't depend on: who the customer is, how to reach them, where they
 live, which account they have. Support sends the reply from the ticket,
 and the ticket system already has those details.
@@ -56,7 +57,8 @@ what you hand over and for what happens with it
 Deleting a name leaves a sentence with a hole in it, and a model drafting
 a reply from "Your technician came by" can no longer tell that two people
 are in the story. A placeholder keeps the role: `Person 1` for the
-customer, `Person 2` for the technician, `[phone]` for the number. The
+customer and `Person 2` for the technician, `[phone]` and `[address]` for
+the contact details. The
 same placeholder goes everywhere the value appears. Both mentions of the
 account number become `[account number]`, and the reader still knows
 they're one thing.
@@ -66,7 +68,7 @@ and its placeholder. `redact.py` replaces every value with its placeholder,
 longest value first, so a full name is replaced before a shorter value it
 contains.
 
-<Predict id="redact-the-email" title="Redact the email" canonical
+<Predict id="redact-the-email" title="Redact the email"
   answer={`From: Person 1 <[email]>
 To: support@norrbeck-appliances.example
 Subject: Dishwasher still leaking after repair (account [account number])
@@ -98,9 +100,11 @@ in it, because they belong to the company and the task may need them.
 
 ## The task works as well on the redacted text
 
-Paste the redacted email into the chat tool you use at work, with the task
-above it. The exchange below is illustrative: the author wrote it to show
-the pattern, and yours reads a little differently.
+To see this for yourself, put the task and the redacted email into the
+chat tool you use at work. That paste is safe
+because the people are invented and their details are already replaced.
+You can also skip it. The exchange below is illustrative: the author wrote
+it to show the pattern, and yours reads a little differently.
 
 <Prompt model="illustrative" recorded="illustrative">
 Draft a short reply to the customer email between the triple quotes. Apologize,
@@ -125,20 +129,21 @@ Norrbeck Appliances customer support
 </Response>
 
 The reply is as good as one drafted on the original. The model used the
-early departure, the Tuesday visit and the returning leak, and it needed
-nothing that was taken out. That's the usual case. Most tasks read the
+early departure and the visit that didn't hold, and it needed nothing that
+was taken out. That's the usual case. Most tasks read the
 facts of a document, and the identifiers in it are there for the humans
 who file and answer it.
 
 <Pitfall title="Leaving an initial and a city">
 A colleague redacts the same email by hand. They shorten the name to
-"R. A.", remove the phone number and the email address, and leave the rest.
-The result names a technician, a dishwasher model, an account number in
-the subject line and a city. Anyone with access to the company's ticket
-system, and anyone who knows the technician's round, can find the customer
-from that in a minute. A redaction that leaves one detail per person is a
-redaction of nothing. Take out every detail that points at the person, and
-check the subject line and the signature, where the values hide.
+"R. A." in both places, remove the phone number and the email address, and
+cut the street from the signature but keep the city. The subject line
+stays as it was, with the account number in it, and so does the
+technician's name. Anyone with access to the company's ticket system, and
+anyone who knows the technician's round, can find the customer from that
+in a minute. A redaction that leaves one detail per person is a redaction
+of nothing. Take out every detail that points at the person, and read the
+subject line and the signature as carefully as the body.
 </Pitfall>
 
 The fixture has the colleague's version in `check_partial.py`. The script
@@ -149,7 +154,7 @@ a comma and a space.
 
 <Predict id="what-the-partial-redaction-leaves" objective="safety/handles-data-safely/decides-what-to-share"
   concepts={['data-privacy']}
-  context="A colleague redacted a customer's support email by hand: the name became the initials R. A., the phone number and the email address were removed, and the account number in the subject line, the city under the signature and the technician's name stayed. The checker looks for eight details from the original in this order: name, initials, phone, email, account number, street, city, technician, and prints the labels of the ones still present after the words still identifying: separated by a comma and a space."
+  context="A colleague redacted a customer's support email by hand: the name became the initials R. A., the phone number, the email address and the street were removed, and the account number in the subject line, the city under the signature and the technician's name stayed. The checker looks for eight details from the original in this order: name, initials, phone, email, account number, street, city, technician, and prints the labels of the ones still present after the words still identifying: separated by a comma and a space."
   title="What does the checker print?" hint="Read the colleague's version line by line, including the subject and the signature. Which of the eight details are still there, and in which order does the checker list them?"
   answer="still identifying: initials, account number, city, technician" run="safety/redact-before-you-paste/check_partial.py">
 Open `check_partial.py` and read the `PARTIAL` text at the top. Before you
@@ -191,8 +196,11 @@ The map is the one file in this lesson that holds every identifier in
 one place, so it is the one file that never goes into the tool. Keep it
 where the original document is kept, in the ticket system or in a folder
 your organization already protects, and delete it when the reply has
-gone out. Without the map the redacted text is safe to keep in a chat
-history, and with it the reply is still addressed to a person. For a
+gone out. Without the map the redacted text is pseudonymized: the people
+have placeholders instead of names. It isn't anonymous, because the
+dishwasher model, the Tuesday visit and the company address are still in
+it, and someone with the ticket system could match them. With the map the
+reply is still addressed to a person. For a
 document you redact by hand, the map is a two-column table in a text file.
 `redact.py` reads one `value => placeholder` per line, the form the
 exercise below uses.
@@ -214,8 +222,7 @@ address. What do you tell them?
 
 ## Send what the task needs
 
-The rule this lesson trains has one sentence: send what the task needs
-and no more. Before a document goes into a tool, read it with the task in
+Send what the task needs and no more. Before a document goes into a tool, read it with the task in
 mind and split it in two: the facts the task uses, and the details that
 say who is involved. Replace every detail in the second group with a
 placeholder that keeps its role, check the subject line and the
@@ -225,15 +232,16 @@ back, the map puts the people back in.
 <Exercise stretch="Take one document from your own work and do the same on paper: list the values you would replace and their placeholders, without pasting the document anywhere.">
 The fixture directory has the full ticket the email came from, in
 `sample/ticket.txt`: the customer's email, an internal note from the
-technician, and a message from the planner, about forty lines in all. Write a map for it in a new file `map.txt`, one
-`value => placeholder` per line, and run
-`python3 redact.py sample/ticket.txt map.txt`. Read the output line by line
-and add a row for every detail that still points at a person, then run it
-again. Ten minutes. This is the whole procedure, and once it fits in your
-hands you apply it to the next document without thinking about it.
+technician, and a message from the planner, about forty lines in all.
+Write a map for it in a new file `my-map.txt`, one `value => placeholder`
+per line, and run `python3 redact.py sample/ticket.txt my-map.txt`. Read
+the output line by line and add a row for every detail that still points
+at a person, then run it again. Plan on ten minutes. This is the whole
+procedure, and after one full pass you can apply it to the next document
+without looking anything up.
 
 A good result doesn't name a person or hold a phone number, email address,
-account number, order number, or street. A reader can still tell that a
+account number, ticket number, order number, or street. A reader can still tell that a
 door seal was replaced and that the inlet hose is the next suspect, and
 that Thursday afternoon is on offer. `sample/map.txt` is one map that gets
 there. Compare yours with it, and then answer one question: which detail

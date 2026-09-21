@@ -22,7 +22,7 @@ Hello,
 Your technician Tijmen Boskoorn came by on Tuesday to fix the leak in our
 dishwasher, a Norrbeck D410. It worked for two days and now the water is
 back under the sink. I leave for work at 7:30, so please call me on
-+31 6 5555 0142 before that, or write back. My account number is
++31 6 1234 5678 before that, or write back. My account number is
 NB-4471-0928.
 
 Kind regards,
@@ -38,7 +38,7 @@ MAP = [
     ("Renske Adelhof", "Person 1"),
     ("renske.adelhof@example.net", "[email]"),
     ("Tijmen Boskoorn", "Person 2"),
-    ("+31 6 5555 0142", "[phone]"),
+    ("+31 6 1234 5678", "[phone]"),
     ("NB-4471-0928", "[account number]"),
     ("Kastanjelaan 12, Zwolle", "[address]"),
 ]
@@ -56,8 +56,12 @@ def redact(text: str, replacements: "list[tuple[str, str]]") -> str:
 
 
 def restore(text: str, replacements: "list[tuple[str, str]]") -> str:
-    """Put the real values back for every placeholder that appears in `text`."""
-    for value, placeholder in replacements:
+    """Put the real values back for every placeholder that appears in `text`.
+
+    Longer placeholders go first, so `Person 10` is restored whole and not
+    as `Person 1` followed by a `0`.
+    """
+    for value, placeholder in sorted(replacements, key=lambda row: -len(row[1])):
         text = text.replace(placeholder, value)
     return text
 
