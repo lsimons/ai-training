@@ -1,10 +1,23 @@
 id: concepts/thin-path
 title: Where a model makes things up
+description: >-
+  Why one model gives a reliable summary and an invented citation in the same afternoon, which
+  tasks earn a spot-check and which earn a check of every specific, and how naming the two
+  properties behind a wrong answer picks the fix.
 mode: explanation
 covers: concepts/limits
 serves: [concepts/explains-models/names-failure-modes]
 introduces: []
-assumes: []
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: where-the-scores-come-from
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
 after: [concepts/how-models-work]
 shorts: [checking a citation]
 exercise:
@@ -12,11 +25,11 @@ exercise:
   brief: >-
     For five tasks, decide whether to spot-check or to verify every specific, and for one wrong
     answer name the two properties that met to produce it.
-sources: []
-issue: 129
+sources: [Academy ai-capabilities-and-limitations, Academy ai-fluency-framework-foundations]
 minutes: 15
 notes: >-
-  Introduces no concept: Deepens hallucination and knowledge-cutoff, which the live lesson
-  introduces and grades. This lesson adds where fabrication concentrates (specifics, rare topics,
-  recent events) and how much checking a task calls for. Issue #86 decides whether the task-placing
-  checkpoint goes in the live lesson or here; this entry stands either way.
+  Introduces no concept: deepens hallucination and knowledge-cutoff, which how-models-work
+  introduces and grades. Adds where fabrication concentrates (specifics, rare topics, recent
+  events), the task-placing Sort decided in the triage of #86, and the two-properties Scenario.
+  The citation in the second illustrative answer and in the pitfall is invented and was checked
+  against the web on 2026-09-21: no such authors, title or workshop exists.

@@ -1,0 +1,207 @@
+import { Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+The same model, in the same afternoon, gives you one answer you can use as
+it is and one that is wrong in a way you only find out about a week later.
+In the lesson on how models work you saw that both come from the same
+mechanism, next-token prediction, and you learned the names hallucination
+and knowledge cutoff for two of the failures. In this lesson we look at
+*where* the invention happens. The question that predicts it is about the
+task, and once you can ask that question you know how much checking each
+answer needs before you rely on it.
+
+Both exchanges below are illustrative: the author wrote them to show the
+pattern, and your model gives different text.
+
+## One model, a reliable answer and an invented one
+
+First, a task you have probably given a model many times.
+
+<Prompt model="illustrative" recorded="illustrative">
+Summarize this in two sentences for someone who missed the meeting.
+
+[a page of meeting notes, pasted in full]
+</Prompt>
+<Response>
+The team agreed to move the release from Friday to the following Tuesday
+so the payment fix can be tested on staging first. Sam writes the test
+plan, and Tom tells the two customers who asked about the date.
+</Response>
+
+Read the notes and the summary side by side and the summary holds up. It
+leaves things out, as a summary should, and what it keeps is in the notes.
+
+Now a different kind of task.
+
+<Prompt model="illustrative" recorded="illustrative">
+Which paper first proposed attention gating for summarizing long documents?
+Give the authors, the year, and the venue.
+</Prompt>
+<Response>
+The approach was introduced by Okonkwo-Varga and Steinbrenner (2017) in
+"Attention gating for long-document summarization", presented at the Nordic
+Workshop on Applied Language Modeling, pages 44 to 58. It was extended the
+following year to multi-document settings.
+</Response>
+
+Every part of this answer is in the right form. The names sound like names,
+the year is plausible, the venue is the kind of venue that exists, and the
+page range is exact. None of it is real. The paper, the authors, and the
+workshop are all invented, and you find that out the moment you search for
+any of them.
+
+Nothing about the model changed between the two prompts. The same weights
+produced both answers with the same confidence. The task changed.
+
+## How well-trodden is the path
+
+A model is a compressed record of the text it was trained on, and its
+prediction for the next token is well constrained where the training text
+has many examples of the pattern and poorly constrained where it has few
+(@Academy ai-capabilities-and-limitations). Picture the training data as a
+field crossed by paths. A task that people have written about millions of
+times is a wide path: summarizing, reformatting, translating, explaining a
+concept that appears in every textbook. The model has seen so many good
+completions that its prediction has little room to go wrong. A rare topic,
+an exact figure, a niche paper or an event after the cutoff is a thin path,
+worn by a few examples or by none. The prediction still runs, because
+prediction always runs, but it is filling a gap with something of the right
+form.
+
+That is why invention concentrates on specifics. "Summarize these notes" is
+a wide path even when the notes are about something obscure, because the
+material is in the prompt and the *task* is common. "Give me the authors,
+year and page range" hinges on exact tokens that were either in the training
+text or were not, and when they were not, the model produces tokens that
+look like them. The summary can be loosely right. A citation, a version
+number, a date or a quoted line is either exactly right or wrong.
+
+So the question to ask before you read an answer is about the task rather
+than about the model. How common is this task, and how much of the answer
+hinges on exact specifics? A common task whose answer you can check against
+material you gave it needs a spot-check: you read it once and look at the
+two or three places where it could have drifted. A rare task, or one whose
+value is in its specifics, needs a check of every specific in it before you
+pass it on.
+
+<Sort id="spot-check-or-verify" objective="concepts/explains-models/names-failure-modes"
+  concepts={['hallucination', 'knowledge-cutoff']}
+  context="The lesson distinguishes tasks the model has seen millions of examples of, such as summarizing text that is in the prompt, from tasks that hinge on exact specifics the model may never have seen, such as a citation or a recent release date."
+  title="How much checking does each task need?"
+  hint="For each task, ask how common the task is in written text, and whether the answer stands or falls on exact specifics the model would have had to see."
+  buckets={['Trust and spot-check', 'Verify every specific']}
+  items={[
+    { text: 'Summarize the customer complaint you pasted in, in three sentences', bucket: 0 },
+    { text: 'Rewrite your draft email in a friendlier tone', bucket: 0 },
+    { text: 'Give the version number and release date of a library update from last month', bucket: 1 },
+    { text: 'List three published studies, with authors and years, on a narrow topic in your field', bucket: 1 },
+    { text: 'Explain in plain words what a database index does', bucket: 0 },
+    { text: 'Quote the exact clause of a contract you have not pasted in', bucket: 1 },
+  ]}>
+
+Place each task by how much checking its answer needs before you rely on
+it.
+
+</Sort>
+
+## The pair behind a failure
+
+When you look closely at a wrong answer, it is rarely one failure on its
+own. It is two properties of the model meeting on one task. The invented
+citation above is prediction (the model always produces the likely next
+token) meeting a knowledge gap (the training text has no such paper, or only
+a fragment). Prediction on its own gives you a fine summary. A knowledge gap
+on its own would be harmless if the model could say "I have nothing on
+that". Put together, they produce a confident citation with nothing behind
+it.
+
+The same move explains the other common failures. A confident wrong release
+date is prediction meeting the knowledge cutoff: the update happened after
+the training data ends, and the model completes the sentence from older
+release patterns. A model that folds when you push back on a right answer
+is prediction meeting the second training stage that rewarded agreeable
+replies, which the earlier lesson named sycophancy. A rule from the start
+of a long chat that quietly stops being followed is prediction meeting a
+context full of newer tokens, which that lesson named instruction dilution.
+
+Naming the pair is useful because each pair has a different fix, and the
+fix follows from the name. A knowledge gap closes when you put the
+material in the prompt or give the model a tool that looks it up. The
+cutoff closes the same way, with the recent document or a search result
+pasted in. Neither closes by asking the model to try harder or by telling
+it to be accurate. Prediction is the part you cannot switch off. The fix
+is always on the other side of the pair. Either you supply what is missing,
+or you verify what came out.
+
+<Scenario id="name-the-pair" objective="concepts/explains-models/names-failure-modes"
+  concepts={['hallucination', 'knowledge-cutoff']}
+  context="A colleague asked a chat assistant for the standard reference on a narrow technical topic and received a citation with authors, a year and a journal name. The colleague searched for it and nothing with that title or those authors exists."
+  title="Which two properties met?"
+  hint="One property is always there. Which second property turned it into an invented reference, and what does that tell you to do?"
+  options={[
+    { text: 'The model lied to cover a gap, so I ask it to be honest and try again.', consequence: 'You get a second citation, in the same confident form. There is no honesty switch to flip: the model produced the likely next tokens both times, and asking for honesty does not add a paper to its training data.' },
+    { text: 'Next-token prediction met a knowledge gap on a rare topic, so I paste in the papers I already have and ask it to work from those.', correct: true, consequence: 'The model summarizes and compares the papers you gave it, and every citation in the answer is one you can see in the prompt. The gap is closed by supplying the material rather than by asking for more effort.' },
+    { text: 'Non-determinism produced a bad sample, so I ask the same question a few more times and keep the answer that repeats.', consequence: 'An invented citation on a thin path can repeat across runs, because the same weights are filling the same gap. Agreement between samples tells you the gap is stable, and nothing about whether the paper exists.' },
+    { text: 'Instruction dilution let an earlier rule about citing sources fade, so I restate the rule.', consequence: 'The question was one message long, so nothing diluted. The restated rule produces the same citation with a sentence about how important sources are.' },
+  ]}>
+
+A colleague asks a chat assistant for "the standard reference on" a narrow
+topic in your field and gets a citation with two authors, a year and a
+journal. They search for it and find nothing. They ask you what went wrong
+and what to do instead. Which answer do you give?
+
+</Scenario>
+
+<Pitfall title="The citation that looked fine">
+A colleague puts a report together and asks a model for a source for one
+claim. It returns a reference with a plausible venue, a page range and a
+year. It passes review because it looks like every other reference in the
+report, and it comes out as invented only when a reader tries to find it.
+Look up the citation from the second answer above yourself, by searching
+for the title in quotes and then for the author names. Rule: a citation, a
+figure or a quoted line that the model produced from its own knowledge has
+not been checked until you have found it somewhere other than the model's
+answer.
+</Pitfall>
+
+<Exercise stretch="Take one of the answers you marked wrong, close the gap the way the pair suggests (paste in the source, or give the recent document), and ask again. Note whether the specifics now match what you gave it.">
+
+Open any chat assistant you have access to. Write down five tasks you
+could give it this week, then place each one as "trust and spot-check" or
+"verify every specific" before you run it. Run at least the two you placed
+under "verify every specific" and check each specific in the answer against
+a source that is not the model. For one specific that turns out wrong,
+write one sentence naming the two properties that met to produce it.
+
+The result is a table with five rows and a sentence, and it is small
+enough to do in ten minutes. It protects you from the answer that passes
+review because it looks like every other answer.
+
+A good result places the tasks by how common the task is and how much the
+answer hinges on specifics, finds at least one wrong specific, and names
+the pair behind it in terms from this lesson rather than as "the model made
+a mistake". Reflection: which of your five tasks would have been safe to
+pass on without checking, and what made it safe?
+
+</Exercise>
+
+<Recap>
+
+1. One mechanism produces both the answer you can use and the invented
+   one. The task differs, so ask about the task rather than the
+   model (@Academy ai-capabilities-and-limitations).
+2. The first question is how common the task is in written text. A summary,
+   a reformat or a textbook concept is a wide path. A niche topic, an exact
+   figure or an event after the cutoff is a thin one.
+3. The second question is how much of the answer hinges on exact specifics.
+   Invention concentrates in names, numbers, dates, quotes and citations,
+   because each is exactly right or wrong.
+4. A wide-path task needs a spot-check against the material you gave it. A
+   thin-path task needs a check of every specific before you pass it on, in
+   proportion to what a wrong specific would cost
+   (@Academy ai-fluency-framework-foundations).
+5. A real failure is two properties meeting, such as prediction plus a
+   knowledge gap or prediction plus the cutoff. Prediction cannot be
+   switched off, so the fix is on the other side of the pair: supply what
+   is missing, or verify what came out.
+
+</Recap>
