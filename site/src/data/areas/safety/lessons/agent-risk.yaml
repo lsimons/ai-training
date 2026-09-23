@@ -19,9 +19,12 @@ assumes:
   - objective: concepts/explains-models/names-failure-modes
     lesson: concepts/how-models-work
     section: failure-modes-named
+  - objective: safety/verifies-output/calibrates-trust
+    lesson: safety/bias-in-patterns
+    section: how-much-checking-a-screening-task-gets
 extends-to:
-  - label: Verifying outputs
-    href: /safety/verification/
+  - label: Introduction to the EU AI Act
+    href: /safety/eu-ai-act/
 after: []
 shorts:
   - Agents that are only saved prompts
