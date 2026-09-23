@@ -33,7 +33,8 @@ Make a fresh copy of the fixture directory,
 course repository, change into it, and give it a first commit, as you did
 in the last lesson. If you still have that copy, reset it with
 `git checkout -- .` and use it. Either way the copy is its own git
-repository, so no rule you saved in any other project applies here.
+repository, so no rule saved in another project's settings file applies
+here.
 
 ```sh
 git init -q && git add -A && git commit -q -m "fixture"
@@ -42,7 +43,11 @@ git init -q && git add -A && git commit -q -m "fixture"
 Start the agent with `claude --permission-mode default`, type
 `/permissions`, and look at the dialog. It lists every permission rule in
 force and the settings file each one came from (@Claude Code permissions).
-In a fresh copy the list is empty. Close it and send this brief.
+In a fresh copy the only rules listed, if any, come from your user
+settings file, `~/.claude/settings.json`, which applies in every project.
+Note any rule there for `python3` or `Edit`: it removes a prompt from run
+one, and the tally has to account for it. The rest of this lesson assumes
+there is none. Close the dialog and send this brief.
 
 ```text
 Add a `clear` command to todo.py that removes every item marked done and
@@ -53,9 +58,10 @@ already fails and is not your task. Leave it. Do not edit todos.json.
 
 Keep a tally with one line per prompt: the file it asked to edit, or the
 exact command it asked to run. Approve each one after you have read it,
-and choose the plain "Yes" each time. The other option, "Yes, and don't
-ask again", writes a rule for you, and this lesson writes the rules by
-hand first so you can see what one looks like. Expect an edit to
+and choose the plain "Yes" each time. On a command prompt the other
+option, "Yes, and don't ask again", writes a rule for you. On an edit
+prompt it only lasts until the session ends. This lesson writes the rules
+by hand first so you can see what one looks like. Expect an edit to
 `todo.py`, an edit to `test_todo.py` and the test command, and don't be
 surprised by a second edit to a file or a second test run. The reads
 before the edits never prompt, because reading a file inside the working
@@ -106,7 +112,7 @@ here because the plan for the run said "allow the read-only
 version-control commands". Whether they're needed is the question of the
 next section.
 
-The `deny` entry does a job the brief only asked for. "Do not edit
+The `deny` entry enforces what the brief could only ask for. "Do not edit
 `todos.json`" in a prompt is an instruction, and the agent decides whether
 to follow it. The deny rule is enforced by Claude Code, on its own file
 tools and on the file commands it recognizes in a shell command, such as
@@ -157,9 +163,11 @@ for command in COMMANDS:
 </Predict>
 
 The last line is the one to remember. The rule `Bash(git *)` was never
-written with a push in mind, and it approves one anyway. Claude Code
-matches everything before the first `*` as written. The words before it
-are the whole limit of the rule (@Claude Code permissions).
+written with a push in mind, and it approves one anyway. Everything in
+front of the `*` has to appear in the command exactly as you typed it,
+and here that is one word, `git`. Text after a `*` still has to
+appear too, as `git log * main` in the vendor's own table shows, but this
+rule has none (@Claude Code permissions).
 
 Now start the agent again in the same mode, `claude --permission-mode
 default`, and check `/permissions`. Every rule from the file is listed,
@@ -181,10 +189,10 @@ is either for a command the agent never ran, or for a command that never
 prompted in the first place.
 
 The `git status` and `git diff` entries fail that test for the second
-reason. Claude Code
-recognizes a built-in set of read-only commands, among them `ls`, `cat`,
-`grep` and the read-only forms of `git`, and runs them without a prompt
-in every mode (@Claude Code permissions). `git status` was never in the
+reason. Claude Code never prompts for a fixed set of commands it treats as
+read-only: `ls`, `cat`, `grep`, `git status`, `git diff`, `git log` and
+their kin. The set is the same in every mode, and you can't add to it
+(@Claude Code permissions). `git status` was never in the
 tally because it never stopped for you, and a rule for it changes
 nothing. Here is the prune as a program, with `TALLY` as the commands of
 a typical run one. The complete file is
@@ -257,11 +265,11 @@ A developer is prompted for `git commit -m "add clear"` and, wanting no
 more git prompts, saves the rule `Bash(git *)`. It does what they wanted
 for commits. A week later, in a session they are half watching, the agent
 asks for nothing before `git push --force origin main`. The same rule
-approved it, because everything after `git` is the wildcard. The rule:
-put the `*` after the subcommand, as in `Bash(git commit *)`, and write
-one rule per subcommand the task needs. Claude Code matches the text
-before the first `*` exactly, and nothing after it limits the rule
-(@Claude Code permissions).
+approved it. Everything the developer typed before the `*` was one
+word, `git`, so every git subcommand matched
+(@Claude Code permissions). The rule: put the `*` after the subcommand,
+as in `Bash(git commit *)`, and write one rule per subcommand the task
+needs.
 </Pitfall>
 
 <Exercise stretch="Approve one prompt in run two with the don't-ask-again option instead of the plain yes, then open the settings file and compare the rule Claude Code wrote with the one you would have written.">
@@ -297,7 +305,7 @@ work in every day. Which rule in it can you no longer say the prompt for?
    thought of (@Claude Code permissions).
 4. Write the rule from the tally: sort the prompts into reads, writes and
    runs, and give the writes and runs one line each. A read inside the
-   working directory doesn't prompt and doesn't need one.
+   working directory never prompts, so it doesn't need a rule.
 5. After the run, delete every rule that answered no prompt. A rule for a
    command on the built-in read-only list does nothing, and the
    don't-ask-again option adds rules to the same file, so prune it after
