@@ -11,10 +11,10 @@ that runs wave after wave.
 The coordinator of `orchestration.md` spends about 20k tokens of its own
 context per issue. The session of 2026-09-20 (waves 2 and 3, about twenty
 issues) peaked at 456k tokens and was compacted once. Wave 5 (ten issues)
-reached 220k. What fills it is relayed detail: the final reports of builders
-and reviewers, 3k to 9k characters each, and the output of `gh pr list` and
-CI polling. The coordinator's own decisions are a few hundred words per
-issue.
+reached 220k. What fills it is relayed detail. The final reports of builders
+and reviewers are 3k to 9k characters each, and the output of `gh pr list`
+and CI polling adds to that. The coordinator's own decisions are a few
+hundred words per issue.
 
 With 113 issues ready on 2026-09-23, one coordinator context can't hold the
 run. So the coordinator role moves down one level, into a disposable *wave
@@ -26,7 +26,7 @@ that only ever holds one short report per wave.
 | Role       | How many       | Lives in                                | Context per wave               |
 | ---------- | -------------- | --------------------------------------- | ------------------------------ |
 | Dispatcher | one            | the main checkout, on `main`, in a loop | one report, under 200 words    |
-| Wave lead  | one per wave   | its own context; spawns the others      | the whole wave, then discarded |
+| Wave lead  | one per wave   | its own context, spawning the others    | the whole wave, then discarded |
 | Builder    | one per issue  | its own worktree and branch             | as in `orchestration.md`       |
 | Reviewer   | one per branch | its own worktree                        | as in `orchestration.md`       |
 
@@ -37,8 +37,8 @@ lead that ran two sub-agents and a follow-up message: three results, no
 duplicate or missing notifications.)
 
 The concurrent-agent cap (20 on this platform) is shared by every level, so
-the dispatcher runs one wave at a time. A wave of six issues is six builders
-plus up to six reviewers plus the lead, under the cap with room for the
+the dispatcher runs one wave at a time. With six issues in a wave, the lead
+runs six builders plus up to six reviewers, under the cap with room for the
 `code-review` skill's own sub-agents.
 
 ## The loop
@@ -46,25 +46,31 @@ plus up to six reviewers plus the lead, under the cap with room for the
 The dispatcher runs as a self-paced `/loop`. One tick:
 
 1. **Pick the wave.** Run `mise run next-wave -- --size 6`. It lists the
-   planned lessons whose issue is `ready-for-agent` and unassigned, drops the
-   ones whose `assumes` name a lesson that has no page on `main` (a live
-   lesson can't assume a planned one; `mise run data` rejects it), orders
-   the rest earliest-in-course first, takes them round-robin across the
-   areas, and prints the wave as a table plus `--json` for the prompt. It
-   also lists what it blocked and skipped and why, and which candidates
-   wait for a later wave, so nothing drops silently. It reads the tree of
-   the checkout it runs in, so pull `main` first.
-2. **Spawn the wave lead** with the prompt below. Nothing else happens in the
-   dispatcher until the lead's notification arrives. Schedule a long
-   fallback wake-up (30 minutes) in case it never does.
+   planned lessons whose issue is `ready-for-agent` and unassigned, and
+   drops the ones that assume an objective no live lesson on `main` serves.
+   A plan file's `assumes` entries name only the objective, the builder
+   adds the `lesson` and `section` that teach it when the page goes live,
+   and the build (`mise run site-build`, through `MarkdownContent.astro`)
+   rejects a page that names a lesson without a page, so such a lesson
+   can't be merged in this wave. Within an area it orders the rest with no
+   planned `after` first, then earliest-in-course, takes them round-robin
+   across the areas, and prints the wave as a table plus `--json` for the
+   prompt. It also lists what it blocked and skipped and why, and which
+   candidates wait for a later wave, so nothing drops silently. It reads
+   the tree of the checkout it runs in, so pull `main` first.
+2. **Spawn the wave lead** with the prompt below. The dispatcher then
+   waits for the lead's notification. Schedule a long fallback wake-up (30
+   minutes) in case it never arrives.
 3. **Read the report.** On `merged`, play the chime and go to step 1. On
-   `open`, the lead has hit the standing-approval exception (below); report
+   `open`, the lead has hit the standing-approval exception (below). Report
    it to the maintainer and stop the loop. On `failed`, read the session
    record the lead wrote, decide whether the failure is the wave's or the
    loop's, and either spawn a new lead for the same wave or stop.
 4. **Keep the record.** Append the report to the session record file for
    the day, `docs/agents/sessions/<date>-meta.md`, so the history is a file
-   and never the dispatcher's context.
+   and never the dispatcher's context. The `docs/agents/sessions/`
+   directory is new and the first wave lead creates it, while
+   `orchestration.md` keeps its earlier records inline.
 
 The dispatcher edits no code and runs no check of its own. When the picker
 returns an empty wave, or only blocked lessons, the loop ends and the
@@ -77,18 +83,23 @@ request: `mise run ci` green on the wave branch, GitHub CI green, every
 branch in it approved on its re-check, and no open finding. The wave lead
 merges such a pull request itself with `gh pr merge --rebase`, without a
 round trip. A wave that doesn't meet every condition stays open, and the
-lead returns `open` with the reason. Two things always go to the maintainer
-instead of being merged: a review finding that needs their decision (strike
-a spec feature, choose between two designs), and any change to a spec,
-a gate, or shared tooling that a lesson branch drags along.
+lead returns `open` with the reason. A review finding that needs the
+maintainer's decision (strike a spec feature, choose between two designs)
+always goes to them instead of being merged, and so does any change to a
+spec, a gate, or shared tooling that a lesson branch drags along.
 
 ## The wave lead prompt
 
 The lead starts with no context. Its prompt holds everything below. Keep it
-as a file and paste it; don't retype it per wave.
+as a file and paste it, rather than retyping it per wave.
 
-- The wave as `next-wave` printed it: issue numbers, lesson ids, courses,
-  and for each lesson the `after` entries that are still planned.
+- The wave as `next-wave` printed it: issue numbers, lesson ids, course
+  positions, and for each lesson the `after` entries that are still
+  planned. A planned `after` is ordering advice for the lead (spec S11:
+  `after` is only read while a lesson is coming, and neither the data check
+  nor the build needs its target live). It never requires stacking one
+  branch on another. The picker blocks the `assumes` dependencies that
+  would.
 
 - The instruction to follow `docs/agents/orchestration.md` end to end, in
   integration mode: one builder per issue, one reviewer per pushed branch,

@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { AreaTree } from '../../scripts/lib/area-tree.mjs';
-import { pickWave } from '../../scripts/lib/next-wave.mjs';
+import { formatWave, pickWave } from '../../scripts/lib/next-wave.mjs';
 
 type Lesson = {
 	id: string;
 	title?: string;
 	issue?: number;
-	assumes?: { objective: string; lesson?: string }[];
+	serves?: string[];
+	assumes?: { objective: string; lesson?: string; section?: string }[];
 	after?: string[];
 };
 /** `course` is the flat lesson list of the area's one course. `courses` replaces the course files when set. */
@@ -47,37 +48,39 @@ describe('pickWave', () => {
 			},
 		]);
 		const r = pickWave({ tree: t, livePageIds: ['a/one'], readyIssues: [issue(2), issue(3)], size: 6 });
-		expect(r.wave).toEqual([
-			{ issue: 2, id: 'a/two', title: 'Two', area: 'a', course: 'a', position: 2, afterPlanned: [] },
-			{ issue: 3, id: 'a/three', title: 'Three', area: 'a', course: 'a', position: 3, afterPlanned: [] },
-		]);
-		expect(r.blocked).toEqual([]);
-		expect(r.skipped).toEqual([]);
-		expect(r.waiting).toEqual([]);
+		expect(r).toEqual({
+			size: 6,
+			wave: [
+				{ issue: 2, id: 'a/two', title: 'Two', area: 'a', position: 2, afterPlanned: [] },
+				{ issue: 3, id: 'a/three', title: 'Three', area: 'a', position: 3, afterPlanned: [] },
+			],
+			blocked: [],
+			skipped: [],
+			waiting: [],
+		});
 	});
 
 	it('leaves out a lesson that already has a page, even when its issue is ready', () => {
 		const t = tree([{ dir: 'a', course: ['a/one'], lessons: [{ id: 'a/one', issue: 1 }] }]);
 		const r = pickWave({ tree: t, livePageIds: ['a/one'], readyIssues: [issue(1)], size: 6 });
-		expect(r).toEqual({ wave: [], blocked: [], skipped: [], waiting: [] });
+		expect(r).toEqual({ size: 6, wave: [], blocked: [], skipped: [], waiting: [] });
 	});
 
-	it('blocks a lesson whose assumes name a planned lesson, and says which', () => {
+	it('blocks a lesson that assumes an objective only a planned lesson serves, and names that lesson', () => {
 		const t = tree([
 			{
 				dir: 'a',
 				course: ['a/one', 'a/two', 'a/three'],
 				lessons: [
-					{ id: 'a/one' },
-					{ id: 'a/two', issue: 2 },
+					{ id: 'a/one', serves: ['a/c/o1'] },
+					{ id: 'a/two', issue: 2, serves: ['a/c/o2'] },
 					{
 						id: 'a/three',
 						issue: 3,
 						assumes: [
-							{ objective: 'o1', lesson: 'a/one' },
-							{ objective: 'o2', lesson: 'a/two' },
-							{ objective: 'o3', lesson: 'a/two' },
-							{ objective: 'o4' },
+							{ objective: 'a/c/o1', lesson: 'a/one', section: 's' },
+							{ objective: 'a/c/o2' },
+							{ objective: 'a/c/o2' },
 						],
 					},
 				],
@@ -85,7 +88,26 @@ describe('pickWave', () => {
 		]);
 		const r = pickWave({ tree: t, livePageIds: ['a/one'], readyIssues: [issue(2), issue(3)], size: 6 });
 		expect(ids(r.wave)).toEqual(['a/two']);
-		expect(r.blocked).toEqual([{ issue: 3, id: 'a/three', blockedBy: ['a/two'] }]);
+		expect(r.blocked).toEqual([{ issue: 3, id: 'a/three', blockedBy: [{ objective: 'a/c/o2', servedBy: ['a/two'] }] }]);
+	});
+
+	it('does not block a lesson whose assumed objective a live lesson serves, even from another area', () => {
+		const t = tree([
+			{ dir: 'a', course: ['a/one'], lessons: [{ id: 'a/one', serves: ['a/c/o1'] }] },
+			{ dir: 'b', course: ['b/one'], lessons: [{ id: 'b/one', issue: 1, assumes: [{ objective: 'a/c/o1' }] }] },
+		]);
+		const r = pickWave({ tree: t, livePageIds: ['a/one'], readyIssues: [issue(1)], size: 6 });
+		expect(ids(r.wave)).toEqual(['b/one']);
+		expect(r.blocked).toEqual([]);
+	});
+
+	it('blocks a lesson whose assumed objective no lesson serves, and says so', () => {
+		const t = tree([
+			{ dir: 'a', course: ['a/one'], lessons: [{ id: 'a/one', issue: 1, assumes: [{ objective: 'x/y/z' }] }] },
+		]);
+		const r = pickWave({ tree: t, livePageIds: [], readyIssues: [issue(1)], size: 6 });
+		expect(r.wave).toEqual([]);
+		expect(r.blocked).toEqual([{ issue: 1, id: 'a/one', blockedBy: [{ objective: 'x/y/z', servedBy: [] }] }]);
 	});
 
 	it('takes lessons round-robin across areas, in area order', () => {
@@ -115,14 +137,15 @@ describe('pickWave', () => {
 		expect(r.waiting).toEqual([]);
 	});
 
-	it('caps the wave at size and reports the rest as waiting', () => {
+	it('caps the wave at size and reports the rest as waiting, grouped by area', () => {
 		const t = tree([
 			{
 				dir: 'a',
-				course: ['a/1', 'a/2'],
+				course: ['a/1', 'a/2', 'a/3'],
 				lessons: [
 					{ id: 'a/1', issue: 11 },
 					{ id: 'a/2', issue: 12 },
+					{ id: 'a/3', issue: 13 },
 				],
 			},
 			{
@@ -134,19 +157,23 @@ describe('pickWave', () => {
 				],
 			},
 		]);
-		const ready = [11, 12, 21, 22].map((n) => issue(n));
+		const ready = [11, 12, 13, 21, 22].map((n) => issue(n));
 		const r = pickWave({ tree: t, livePageIds: [], readyIssues: ready, size: 3 });
 		expect(ids(r.wave)).toEqual(['a/1', 'b/1', 'a/2']);
 		expect(r.skipped).toEqual([]);
-		expect(ids(r.waiting)).toEqual(['b/2']);
+		expect(r.waiting.map((w) => [w.area, ids(w.lessons)])).toEqual([
+			['a', ['a/3']],
+			['b', ['b/2']],
+		]);
 	});
 
 	it('defaults the size to six', () => {
 		const lessons = Array.from({ length: 8 }, (_, i) => ({ id: `a/${i}`, issue: i + 1 }));
 		const t = tree([{ dir: 'a', course: lessons.map((l) => l.id), lessons }]);
 		const r = pickWave({ tree: t, livePageIds: [], readyIssues: lessons.map((l) => issue(l.issue)) });
+		expect(r.size).toBe(6);
 		expect(r.wave).toHaveLength(6);
-		expect(ids(r.waiting)).toEqual(['a/6', 'a/7']);
+		expect(r.waiting.map((w) => ids(w.lessons))).toEqual([['a/6', 'a/7']]);
 	});
 
 	it('skips an assigned issue and an issue that is not ready, and says why', () => {
@@ -187,7 +214,7 @@ describe('pickWave', () => {
 		expect(r.wave.map((w) => w.afterPlanned)).toEqual([[], [], ['a/3']]);
 	});
 
-	it('falls back to the issue title and sorts a lesson no course lists last', () => {
+	it('falls back to the issue title and sorts a lesson no course lists last, with a null position', () => {
 		const t = tree([
 			{
 				dir: 'a',
@@ -215,12 +242,71 @@ describe('pickWave', () => {
 			},
 		]);
 		const r = pickWave({ tree: t, livePageIds: [], readyIssues: [issue(1)] });
-		expect(r.wave.map((w) => [w.course, w.position])).toEqual([['a', 1]]);
+		expect(r.wave.map((w) => w.position)).toEqual([1]);
+	});
+});
+
+describe('formatWave', () => {
+	it('renders the wave table and the three lists as markdown', () => {
+		const out = formatWave({
+			size: 6,
+			wave: [
+				{ issue: 1, id: 'a/1', title: 'One', area: 'a', position: 1, afterPlanned: [] },
+				{ issue: 2, id: 'a/2', title: 'Two', area: 'a', position: null, afterPlanned: ['a/3', 'a/4'] },
+			],
+			blocked: [
+				{
+					issue: 3,
+					id: 'b/3',
+					blockedBy: [
+						{ objective: 'a/c/o1', servedBy: ['a/5', 'a/6'] },
+						{ objective: 'a/c/o2', servedBy: [] },
+					],
+				},
+			],
+			skipped: [{ issue: 4, id: 'b/4', reason: 'issue is assigned to someone' }],
+			waiting: [
+				{ area: 'a', lessons: [{ issue: 5, id: 'a/5', title: 'Five', area: 'a', position: 5, afterPlanned: [] }] },
+				{
+					area: 'b',
+					lessons: [
+						{ issue: 6, id: 'b/6', title: 'Six', area: 'b', position: 1, afterPlanned: [] },
+						{ issue: 7, id: 'b/7', title: 'Seven', area: 'b', position: 2, afterPlanned: [] },
+					],
+				},
+			],
+		});
+		expect(out).toBe(
+			[
+				'## Wave (2 of 6)',
+				'',
+				'| Issue | Lesson | Course position | Planned `after` |',
+				'| ----- | ------ | --------------- | --------------- |',
+				'| #1 | `a/1` | a 1 | - |',
+				'| #2 | `a/2` | a (unlisted) | `a/3`, `a/4` |',
+				'',
+				'## Blocked (1)',
+				'',
+				'- #3 `b/3`: assumes `a/c/o1` (served by `a/5`, `a/6`); `a/c/o2` (no lesson serves it)',
+				'',
+				'## Skipped (1)',
+				'',
+				'- #4 `b/4`: issue is assigned to someone',
+				'',
+				'## Waiting for a later wave (3)',
+				'',
+				'- a: #5',
+				'- b: #6 #7',
+				'',
+			].join('\n'),
+		);
 	});
 
-	it('names the area as the course and a null position when the area has no course file', () => {
-		const t = tree([{ dir: 'a', course: [], courses: [], lessons: [{ id: 'a/1', issue: 1 }] }]);
-		const r = pickWave({ tree: t, livePageIds: [], readyIssues: [issue(1)] });
-		expect(r.wave.map((w) => [w.course, w.position])).toEqual([['a', null]]);
+	it('renders an empty result with the headings and counts only', () => {
+		const out = formatWave({ size: 2, wave: [], blocked: [], skipped: [], waiting: [] });
+		expect(out).toContain('## Wave (0 of 2)');
+		expect(out).toContain('## Blocked (0)');
+		expect(out).toContain('## Skipped (0)');
+		expect(out).toContain('## Waiting for a later wave (0)');
 	});
 });
