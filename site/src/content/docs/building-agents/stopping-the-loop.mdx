@@ -83,7 +83,7 @@ def run(question, model, tools=TOOLS, max_steps=4, max_errors=2, budget=5000, pr
 then, `repeated` returns `False` for every run on this page except the one
 that is built to trigger it. The character budget never ends a run on this
 page either: four rounds of the first fixture put `spent` at 2062, well
-under 5000, and the other runs are shorter.
+under 5000, and the other runs stay under it too.
 
 ## A model that never answers
 
