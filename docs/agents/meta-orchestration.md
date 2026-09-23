@@ -45,62 +45,93 @@ runs six builders plus up to six reviewers, under the cap with room for the
 
 `/wave` (`.claude/skills/wave/SKILL.md`) is the dispatcher. On a fresh
 session in this repo it pulls `main`, runs the picker, fills the wave lead
-template at `.claude/skills/wave/wave-lead-prompt.md`, spawns the lead, and
-loops on the report, with no further instruction from the maintainer. Its
-arguments: `/wave [size]`, default 6, then any of `--kind lessons|content`
-(what the picker selects, planned lessons by default), `--only N,N,...` (an
-issue whitelist, and the picker skips everything else) and `--no-filing`.
-The skill runs one tick and waits for the lead in the foreground, so a
-maintainer who wants self-pacing types `/loop /wave 6`.
+template at `.claude/skills/wave/wave-lead-prompt.md`, spawns the lead,
+reads the report, commits the record, and repeats until a stop condition,
+with no further instruction from the maintainer. Its arguments:
+`/wave [size]`, default 6, then any of `--kind lessons|content` (what the
+picker selects, planned lessons by default), `--only N,N,...` (an issue
+whitelist for the run, and the picker skips everything else) and
+`--no-filing`. The skill loops on its own and waits for each lead in the
+foreground. An optional watchdog is the maintainer's choice, and a second
+`/wave` on a session with a lead running would spawn a second dispatcher,
+so don't run one.
 
 `--no-filing` is the bounded-run mode for an unattended session. In the
 default mode every wave files follow-up issues, and some of those are
 `ready-for-agent` content issues, so a content run can feed its own queue
-and never reach the empty wave that ends the loop. With `--no-filing` the
-lead files nothing and lists every nit and follow-up under a `Follow-ups:`
-line in its report and in the session record. The queue only shrinks, the
-loop ends, and the maintainer files the follow-ups from the record the next
+and never reach the empty wave that ends the loop. With `--no-filing`
+nobody in the wave files an issue. The lead passes that rule to every
+builder and reviewer, builders hand their follow-ups to the lead instead of
+filing them, and the lead lists everything under a `Follow-ups:` line in
+its report and in the session record. The queue only shrinks, the loop
+ends, and the maintainer files the follow-ups from the record the next
 day. The `AGENTS.md` rule that work never waits in a session record has
 this one exception, and the record names the run as unattended so the
 follow-ups are found.
 
 ## The loop
 
-The dispatcher runs as a self-paced `/loop`. One tick:
+The dispatcher keeps a meta record, `docs/agents/sessions/<date>-meta.md`,
+with the run's remaining whitelist, the parked issues and one report per
+wave, so the history is a file and never the dispatcher's context. One
+tick:
 
-1. **Pick the wave.** Run `mise run next-wave -- --size 6`, with `--kind`
-   and `--only` as given. For a lessons wave it lists the
-   planned lessons whose issue is `ready-for-agent` and unassigned, and
-   drops the ones that assume an objective no live lesson on `main` serves.
-   A plan file's `assumes` entries name only the objective, the builder
-   adds the `lesson` and `section` that teach it when the page goes live,
-   and the build (`mise run site-build`, through `MarkdownContent.astro`)
-   rejects a page that names a lesson without a page, so such a lesson
-   can't be merged in this wave. Within an area it orders the rest with no
-   planned `after` first, then earliest-in-course, takes them round-robin
-   across the areas, and prints the wave as a table plus `--json` for the
-   prompt. It also lists what it blocked and skipped and why, and which
-   candidates wait for a later wave, so nothing drops silently. A content
-   wave (`--kind content`) is the ready, unassigned `content` issues that no
-   plan file claims, by ascending number, with no dependency logic, and an
-   issue that has the `code` label too is marked so the lead adds a code
-   review.
-   The picker reads the tree of the checkout it runs in, so pull `main`
-   first. The dispatcher then adds the nits row (below) when there is one.
-2. **Spawn the wave lead** with the prompt below. The dispatcher then
-   waits for the lead's notification. Schedule a long fallback wake-up (30
-   minutes) in case it never arrives.
-3. **Read the report.** On `merged`, play the chime and go to step 1. On
-   `open`, the lead has hit the standing-approval exception (below). Report
-   it to the maintainer and stop the loop. On `failed`, report to the
-   maintainer and stop. A failed wave whose builders pushed branches is
-   resumed rather than restarted: the next `/wave` keeps the wave number
-   and spawns a fresh lead with the resuming line, and the lead follows
-   "Resuming a half-done wave" in the template. It fetches, reads each
-   issue's last review verdict, reuses the worktrees that exist, spawns
-   only what is missing, and never redoes a branch with an approve
-   verdict.
-4. **File the follow-ups.** Every item on the report's maintainer line,
+1. **Pull.** `git pull --rebase` on `main`. The dispatcher commits its
+   record after every wave, so the tree is clean here.
+2. **Wave number.** One more than the highest `wave-<n>` in
+   `docs/agents/sessions/` or in `origin/wave/<n>-*`, whichever is higher,
+   or 6 when there is none. `orchestration.md` keeps the records of waves 1
+   to 5 inline.
+3. **Resume check.** A wave failed when its lead never reported `merged`.
+   An `origin/wave/<n>-*` branch with the computed number, or a
+   `origin/feat/<issue>-*` branch for a whitelisted issue with no merged
+   pull request, is such a wave. The dispatcher then spawns a lead for that
+   wave number and branch with the resuming line filled in, and the lead
+   follows "Resuming a half-done wave" in the template: fetch, read each
+   issue's last review verdict, reuse the worktrees that exist, spawn only
+   what is missing, and never redo a branch with an approve verdict. The
+   wave branch is `wave/<n>-<kind>`, without a date, so a next-day resume
+   finds it.
+4. **Pick.** Run `mise run next-wave -- --size 6`, with `--kind` and the
+   remaining whitelist as `--only`. For a lessons wave it lists the planned
+   lessons whose issue is `ready-for-agent` and unassigned, and drops the
+   ones that assume an objective no live lesson on `main` serves. A plan
+   file's `assumes` entries name only the objective, the builder adds the
+   `lesson` and `section` that teach it when the page goes live, and the
+   build (`mise run site-build`, through `MarkdownContent.astro`) rejects a
+   page that names a lesson without a page, so such a lesson can't be
+   merged in this wave. Within an area it orders the rest with no planned
+   `after` first, then earliest-in-course, takes them round-robin across
+   the areas, and prints the wave as a table plus `--json` for the prompt.
+   It also lists what it blocked and skipped and why, which candidates wait
+   for a later wave, and, under `--only`, every listed number it didn't
+   pick with the reason, so nothing drops silently. A content wave
+   (`--kind content`) is the ready, unassigned `content` issues that no plan
+   file claims, by ascending number, with no dependency logic. An issue
+   that has the `code` label too is marked so the lead adds a code review,
+   and a nits issue is left out because it arrives as the nits row. The
+   picker reads the tree of the checkout it runs in, which is why the
+   pull comes first. The dispatcher then appends the nits row: every open
+   `ready-for-agent` issue whose title starts with `Nits` or
+   `Cosmetic nits`, as one row for one nits builder in one worktree and
+   branch, reviewed with a diff read plus the fast checks and no content
+   review. A wave that is only the nits row proceeds. An empty table ends
+   the loop.
+5. **Spawn the wave lead** with the filled template. The dispatcher then
+   waits for the lead's notification and does nothing else.
+6. **Read the report and commit the record.** Append the report to the
+   meta record, apply its `Add to collision notes` lines to the template,
+   and under `--only` remove the merged and the left-out issues from the
+   remaining whitelist, parking the left-out ones so the run never picks
+   them again. Run `mise run spell` and `mise run prose` on the two files,
+   commit them on `main` as `docs(agents): meta record wave <n>`, and push.
+   Nothing of the dispatcher's stays uncommitted between ticks, and the
+   wave lead never edits either file. Then, on `merged`, play the chime
+   and go to step 1. On `open`, the lead has hit the standing-approval
+   exception (below). Report it to the maintainer and stop. On `failed`,
+   report to the maintainer and stop. The next `/wave` finds the wave in
+   step 3 and resumes it.
+7. **File the follow-ups.** Every item on the report's maintainer line,
    every nit the lead left open on a merged branch, and every improvement
    deferred during the session becomes a GitHub issue before the next wave
    starts, filed and triaged as `triage.md` describes and linked from the
@@ -108,23 +139,12 @@ The dispatcher runs as a self-paced `/loop`. One tick:
    lists their numbers on the report's `Filed` line. The dispatcher files
    the rest. Nits are batched: the lead files one nits issue per wave
    (`Cosmetic nits left open on wave <n> branches`, one line per nit) and
-   never one per lesson. The dispatcher puts every open nits issue into the
-   next wave as one extra row, the nits row, which one nits builder takes
-   in one worktree and branch, reviewed with a diff read plus the fast
-   checks and no content review. With `--no-filing` the lead files nothing
-   and the report's `Follow-ups:` lines hold the list instead.
-5. **Keep the record.** Append the report to the session record file for
-   the day, `docs/agents/sessions/<date>-meta.md`, so the history is a file
-   and never the dispatcher's context, and apply the report's
-   `Add to collision notes` lines to the template. Both stay uncommitted in
-   the main checkout while the loop runs and go to `main` in one
-   `docs(agents): meta record <date>` commit at the end of the run. The
-   wave lead never edits either file. `orchestration.md` keeps the records
-   of waves 1 to 5 inline, and `docs/agents/sessions/` holds the rest.
+   never one per lesson. With `--no-filing` nothing is filed and the
+   report's `Follow-ups:` lines hold the list instead.
 
-The dispatcher edits no code and runs no check of its own. When the picker
-returns an empty wave, or only blocked lessons, the loop ends and the
-dispatcher reports which lessons were blocked and by what.
+The dispatcher edits no code and runs no check of the site. The loop ends
+on an empty wave, an exhausted whitelist, an `open` or `failed` report, or
+the maintainer saying stop, and the dispatcher reports which.
 
 ## Standing approval
 
@@ -142,8 +162,9 @@ spec, a gate, or shared tooling that a lesson branch drags along.
 
 The lead starts with no context. Its prompt is the template at
 `.claude/skills/wave/wave-lead-prompt.md`, which `/wave` fills with the
-wave number, the branch, the date, the picker's table and the filing
-paragraph. The template holds everything below.
+wave number, the branch, the date, the picker's table, the filing
+paragraph and the fresh-or-resuming line. The template holds everything
+below.
 
 - The wave as `next-wave` printed it: issue numbers, lesson ids, course
   positions, and for each lesson the `after` entries that are still

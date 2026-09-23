@@ -56,13 +56,17 @@ function parseArgs(argv) {
 	return { size, kind, only, json };
 }
 
-/** The open `ready-for-agent` issues, with assignees as login names and labels as names. */
-function readyIssues() {
+/**
+ * Every open issue, with assignees as login names and labels as names. The
+ * lib takes the `ready-for-agent` ones as candidates and the full number
+ * set to tell a closed or unknown `--only` number from a not-ready one.
+ */
+function openIssues() {
 	let out;
 	try {
 		out = execFileSync(
 			'gh',
-			['issue', 'list', '-R', REPO, '-l', 'ready-for-agent', '-L', '500', '--json', 'number,title,assignees,labels'],
+			['issue', 'list', '-R', REPO, '-s', 'open', '-L', '1000', '--json', 'number,title,assignees,labels'],
 			{ encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] },
 		);
 	} catch (e) {
@@ -81,5 +85,8 @@ const { size, kind, only, json } = parseArgs(process.argv.slice(2));
 const root = new URL('..', import.meta.url).pathname;
 const tree = readAreaTree(join(root, 'src/data'));
 const livePageIds = lessonPages(join(root, 'src/content/docs'), new Set(tree.areas.map((a) => a.dir))).keys();
-const result = pickWave({ tree, livePageIds, readyIssues: readyIssues(), size, kind, only });
+const issues = openIssues();
+const readyIssues = issues.filter((i) => i.labels.includes('ready-for-agent'));
+const openNumbers = issues.map((i) => i.number);
+const result = pickWave({ tree, livePageIds, readyIssues, openIssues: openNumbers, size, kind, only });
 process.stdout.write(json ? `${JSON.stringify(result, null, 2)}\n` : formatWave(result));
