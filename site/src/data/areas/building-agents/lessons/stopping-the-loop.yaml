@@ -1,5 +1,8 @@
 id: building-agents/stopping-the-loop
 title: Stopping the loop on purpose
+description: >-
+  Give the agent loop every reason it needs to stop, run three fake models that never answer, and
+  name the rule that ended each run.
 mode: tutorial
 covers: building-agents/agent-loop
 serves: [building-agents/builds-agent-loop/implements-the-loop]
@@ -10,11 +13,14 @@ shorts: [Ways a loop runs away]
 exercise:
   kind: do
   brief: >-
-    Add repeated-state detection to the fixture loop so a fake model that alternates between two
-    fixes stops with `stopped: repeated state` instead of hitting the step limit. The output is the
-    shorter trace.
-sources: []
-issue: 194
+    Change the repeated-round check in the fixture loop to compare with every earlier round, so a
+    fake model that alternates between two fixes stops with `repeated_state` instead of hitting the
+    step limit. The output is the shorter trace.
+sources:
+  - AEC-06
+  - AEC-13
+  - Claude docs handling-stop-reasons
+sources-checked: 2026-09-23
 minutes: 15
 notes: >-
   The live lesson has one step limit. This lesson gives the full set of stop rules and a fake model

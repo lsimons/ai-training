@@ -1,0 +1,300 @@
+import { Predict, Order, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we take the loop from [When a tool fails](/building-agents/tool-errors/)
+and give it every reason it needs to stop. The loop so far ends when the
+model answers, when the step budget runs out, or after two tool errors in
+a row. Then we swap in three fake models that never answer and watch which
+rule ends each run. The last one is caught by nothing in the loop, and we
+add the check that catches it.
+
+Every example runs against a fixture with a fake model, so you can predict
+the output and check yourself. The complete program is
+`site/examples/building-agents/stopping-the-loop/agent.py` in the
+repository. Its `run` function is the loop from the previous lesson with
+the harness checks gathered in one function, `check`, that returns the
+name of the rule that ended the run. The fixture prints one line per tool round,
+`round 1: read_file(path='notes/1.md') -> {...}`, with the tool result in
+`repr`, then the stop reason, and an answer line only when there is one.
+
+## The rules that end a run
+
+A harness combines stop conditions, and each one exists because the
+others can miss. The model answering without a tool request is the
+natural end, and the Claude API reports it as the stop reason `end_turn`,
+against `tool_use` for a reply that wants a tool run
+(@Claude docs handling-stop-reasons). A turn limit catches a model that
+keeps finding one more thing to do (@AEC-13). A token or cost budget
+catches a run whose turns are few but large. A passing check ends a run
+whose goal the harness can test itself, such as the tests going green,
+whatever the model thinks. A human watching the run stops it when they
+see it going wrong. The API has its own limits on its side: `max_tokens`
+caps one reply, and `pause_turn` says that a server-side tool loop reached
+its iteration limit and the client may send the reply back to continue
+(@Claude docs handling-stop-reasons). Your loop knows about its own
+budgets, so it adds the rest.
+
+This lesson's harness has the model's answer, the step limit `max_steps`,
+the error budget `max_errors` from the previous lesson, a character budget
+in place of a token budget because the fake model has no tokens, and the
+`KeyboardInterrupt` a person sends with Ctrl-C. After each round, `check`
+reads the message list and names the first rule that matches.
+
+```python
+def check(messages, spent: int, max_errors: int, budget: int) -> Optional[str]:
+    if errors_in_a_row(messages) >= max_errors:
+        return "too_many_errors"
+    if repeated(messages):
+        return "repeated_state"
+    if spent > budget:
+        return "budget_spent"
+    return None
+```
+
+The loop calls it after it has appended the round, and it wraps the whole
+run in a `try` so that Ctrl-C becomes a stop reason too.
+
+```python
+def run(question, model, tools=TOOLS, max_steps=4, max_errors=2, budget=5000, progress=None):
+    messages = [{"role": "user", "content": question}]
+    spent = 0
+    try:
+        for step in range(1, max_steps + 1):
+            reply = model(messages)
+            if "answer" in reply:
+                return outcome("end_turn", reply["answer"], messages)
+            tool = tools[reply["tool"]]
+            result = tool["fn"](**reply["args"])
+            messages.append({"role": "assistant", "content": reply})
+            messages.append({"role": "tool", "content": result, "is_error": is_error(result)})
+            if progress is not None:
+                progress(step, reply, result)
+            spent += len(str(messages))
+            reason = check(messages, spent, max_errors, budget)
+            if reason is not None:
+                return outcome(reason, None, messages)
+    except KeyboardInterrupt:
+        return outcome("interrupted", None, messages)
+    return outcome("max_steps", None, messages)
+```
+
+`repeated` and `progress` are explained where the lesson adds them. Until
+then, `repeated` returns `False` for every run on this page except the one
+that is built to trigger it.
+
+## A model that never answers
+
+The first fake model always finds one more file to read. It counts the
+tool rounds in the message list and asks for the next note.
+
+```python
+def read_file(path: str) -> dict:
+    return {"ok": True, "text": f"contents of {path}"}
+
+def model_never_answers(messages):
+    n = len(rounds(messages)) + 1
+    return {"tool": "read_file", "args": {"path": f"notes/{n}.md"}}
+```
+
+Every call succeeds, so the error count never moves, and every request
+names a new path. `max_steps` is 4 in this fixture.
+
+<Predict id="predict-never-answers" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['stop-conditions']}
+  context="In the lesson, a hand-written agent loop has a step limit of four, an error budget of two errors in a row, a repeated-round check and a character budget. A fake model asks to read notes/1.md, notes/2.md and so on, one new file per round, and never answers. Every read succeeds. The fixture prints the question, one line per round with the tool call and its result, then the stop reason."
+  title="Predict which rule fires" hint="Which of the checks can see a difference between this round and the last one, and which counter is the only one that moves?"
+  answer={`user: 'Summarize the notes.'
+round 1: read_file(path='notes/1.md') -> {'ok': True, 'text': 'contents of notes/1.md'}
+round 2: read_file(path='notes/2.md') -> {'ok': True, 'text': 'contents of notes/2.md'}
+round 3: read_file(path='notes/3.md') -> {'ok': True, 'text': 'contents of notes/3.md'}
+round 4: read_file(path='notes/4.md') -> {'ok': True, 'text': 'contents of notes/4.md'}
+stop: max_steps`} run="building-agents/stopping-the-loop/never_answers.py">
+
+What does this print?
+
+```python
+show(run("Summarize the notes.", model=model_never_answers))
+```
+
+</Predict>
+
+Four rounds, then `max_steps`. Each round on its own looks like normal
+work, and a model that reads one file too many looks the same as one that
+is nearly done. The step limit ends the run without needing to understand
+it, and that is what makes it the rule every loop has.
+
+<Pitfall title="The model is the only judge of done">
+The first version of most loops is `while True` with a `break` when the
+reply has no tool request (@AEC-13). That loop has one stop rule, and the
+model owns it. With the model above, `show` never prints, because `run`
+never returns, and the terminal is empty while the bill grows. Rule:
+every loop has at least one stop rule that the model cannot influence,
+and the harness reports which rule ended the run.
+</Pitfall>
+
+## Two ways a loop runs in circles
+
+The second and third models work on a failing test. The tool applies a
+change and runs the tests, and in this fixture the test never passes. The
+tool itself succeeds every time, so the error budget from the previous
+lesson sees nothing, because a test failure is a result, and a tool error
+is a tool that could not do its job.
+
+```python
+def apply_fix(change: str) -> dict:
+    return {"ok": True, "tests": "1 failed: test_total"}
+
+def model_retries_forever(messages):
+    return {"tool": "apply_fix", "args": {"change": "round the total"}}
+```
+
+Repeating the same action after the same result is the loop failure
+mode that shows up first in planning agents (@AEC-06), and the defense is
+to remember what was tried. `rounds` gives the request and result of every
+tool round, and `repeated` compares the last round with the one before it.
+
+```python
+def rounds(messages) -> list:
+    return [
+        (messages[i]["content"], messages[i + 1]["content"]) for i in range(1, len(messages) - 1, 2)
+    ]
+
+def repeated(messages) -> bool:
+    done = rounds(messages)
+    return len(done) >= 2 and done[-1] == done[-2]
+```
+
+<Predict id="run-retries" title="The same fix twice"
+  answer={`user: 'Make the failing test pass.'
+round 1: apply_fix(change='round the total') -> {'ok': True, 'tests': '1 failed: test_total'}
+round 2: apply_fix(change='round the total') -> {'ok': True, 'tests': '1 failed: test_total'}
+stop: repeated_state`} run="building-agents/stopping-the-loop/retries.py">
+
+Run this, and compare what you see with the output below.
+
+```python
+show(run("Make the failing test pass.", model=model_retries_forever))
+```
+
+</Predict>
+
+The run ends after round 2, and the stop reason says why. The third model
+is smarter by one step. It reads its own last request and tries the other
+fix, so no two rounds in a row are the same.
+
+```python
+def model_alternates(messages):
+    done = rounds(messages)
+    if done and done[-1][0]["args"]["change"] == "round the total":
+        return {"tool": "apply_fix", "args": {"change": "truncate the total"}}
+    return {"tool": "apply_fix", "args": {"change": "round the total"}}
+```
+
+<Predict id="run-alternates" title="Two fixes, in turn"
+  answer={`user: 'Make the failing test pass.'
+round 1: apply_fix(change='round the total') -> {'ok': True, 'tests': '1 failed: test_total'}
+round 2: apply_fix(change='truncate the total') -> {'ok': True, 'tests': '1 failed: test_total'}
+round 3: apply_fix(change='round the total') -> {'ok': True, 'tests': '1 failed: test_total'}
+round 4: apply_fix(change='truncate the total') -> {'ok': True, 'tests': '1 failed: test_total'}
+stop: max_steps`} run="building-agents/stopping-the-loop/alternates.py">
+
+Run this, and compare what you see with the output below.
+
+```python
+show(run("Make the failing test pass.", model=model_alternates))
+```
+
+</Predict>
+
+Round 3 is round 1 again, and `repeated` misses it because it only looks
+one round back. The step limit catches this run, at the price of two
+wasted rounds, and with `max_steps` at forty the price is thirty-eight.
+The exercise at the end of the lesson adds the check that catches it.
+
+## Progress a person can see
+
+`show` prints the trace after `run` returns. A run that has no working
+stop rule never returns, so the person at the terminal sees nothing until
+they lose patience. The `progress` parameter of `run` is called after every
+round with the step number, the request and the result, and the fixture's
+`print_round` writes the same line `show` would, while the loop is running.
+
+```python
+def print_round(step: int, request: dict, result: dict) -> None:
+    print(line(step, request, result), flush=True)
+```
+
+A person who reads those lines can press Ctrl-C. The `try` in `run`
+turns the key press into the stop reason `interrupted`, and the caller
+still gets the message list. In the fixture, `watch_and_stop` does what
+you would do at the terminal: it prints the line and raises
+`KeyboardInterrupt` after round 2.
+
+<Predict id="run-interrupted" title="A person stops the run"
+  answer={`round 1: read_file(path='notes/1.md') -> {'ok': True, 'text': 'contents of notes/1.md'}
+round 2: read_file(path='notes/2.md') -> {'ok': True, 'text': 'contents of notes/2.md'}
+stop: interrupted`} run="building-agents/stopping-the-loop/interrupted.py">
+
+Run this, and compare what you see with the output below.
+
+```python
+result = run("Summarize the notes.", model=model_never_answers, progress=watch_and_stop)
+print(f"stop: {result['stop']}")
+```
+
+</Predict>
+
+The lines appeared one at a time, and the run ended two rounds before the
+step limit, because someone could see it going in circles. Every stop
+reason on this page is a name the caller can branch on, and `interrupted`
+is the one that says a person made the call.
+
+<Order id="order-the-checks" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['unbounded-loop-pitfalls']}
+  context="The lesson's agent loop calls a model, runs the tool it asks for, appends the request and the result to the message list, and then runs harness checks that read that list: errors in a row, a repeated round, and a character budget. Each stop rule returns a named stop reason."
+  title="Order one iteration" hint="What does each step read that the step before it produced?"
+  steps={[
+    'Send the message list to the model',
+    'Return end_turn with the answer when the reply holds no tool request',
+    'Run the requested tool with the arguments from the reply',
+    'Append the request and the result to the message list',
+    'Run the harness checks over the new message list: errors in a row, a repeated round, the budget',
+    'Return the stop reason the checks named, or start the next step if the step limit allows',
+  ]}>
+
+Put the steps of one iteration of the loop in order, from the model call
+to the decision to go round again.
+
+</Order>
+
+<Exercise stretch="Add a passing check as a stop rule: give run a done parameter, a function of the message list, and stop with the reason done when it returns True. Make a fake model whose second fix makes the tests pass, and check that the run ends with done before the model gets to say so.">
+
+Copy `agent.py` from the repository. Change `repeated` so it compares the
+last round with every earlier round, and run
+`show(run("Make the failing test pass.", model=model_alternates))` again.
+Then run the `retries` and `never_answers` steps and check that their
+output is the same as before. Doing this once shows you how small the difference
+is between a check that catches one runaway form and one that catches two,
+and how easy it is to test.
+
+A good result: the alternating model stops after round 3 with
+`repeated_state`, one round earlier than before, and the other two runs
+print what they printed in the lesson. What would a model have to do to
+get past this version of the check, and which rule on this page would
+catch it then?
+
+</Exercise>
+
+<Recap>
+
+1. A harness combines stop rules because each one misses something: the
+   model's answer, a step limit, a token or cost budget, a passing check
+   and a person's Ctrl-C (@AEC-13).
+2. The API names its own stop reasons, `end_turn`, `tool_use`,
+   `max_tokens` and `pause_turn`, and your loop adds the ones only it can
+   know (@Claude docs handling-stop-reasons).
+3. A loop runs in circles by repeating a round or by alternating between
+   two, and a check that remembers earlier rounds ends both (@AEC-06).
+4. Progress a person can see while the loop runs is a stop rule too, and
+   the harness reports which rule ended every run.
+
+</Recap>
