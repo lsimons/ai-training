@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 /**
- * Wave picker (`mise run next-wave -- --size 6 [--json]`): the planned lessons
- * the next wave of builders should take on, from the data tree of this
- * checkout and the `ready-for-agent` issues on GitHub (`gh issue list`). The
- * rules and the markdown output are in scripts/lib/next-wave.mjs, which
- * tests/scripts/next-wave.test.ts covers. This file fetches the issues,
- * calls the lib, and prints.
+ * Wave picker (`mise run next-wave -- --size 6 [--kind lessons|content]
+ * [--only N,N,...] [--json]`): the issues the next wave of builders should
+ * take on, from the data tree of this checkout and the `ready-for-agent`
+ * issues on GitHub (`gh issue list`). The rules and the markdown output are
+ * in scripts/lib/next-wave.mjs, which tests/scripts/next-wave.test.ts
+ * covers. This file fetches the issues, calls the lib, and prints.
  */
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
@@ -15,9 +15,15 @@ import { formatWave, pickWave } from './lib/next-wave.mjs';
 
 const REPO = 'lsimons/ai-training';
 
-/** `--size N` (default 6, a positive integer in plain digits) and `--json` from the command line. */
+/**
+ * `--size N` (default 6, a positive integer in plain digits), `--kind`
+ * (`lessons`, the default, or `content`), `--only N,N,...` (issue numbers,
+ * the whitelist) and `--json` from the command line.
+ */
 function parseArgs(argv) {
 	let size = 6;
+	let kind = 'lessons';
+	let only = null;
 	let json = false;
 	for (let i = 0; i < argv.length; i++) {
 		if (argv[i] === '--json') json = true;
@@ -28,21 +34,35 @@ function parseArgs(argv) {
 				process.exit(2);
 			}
 			size = Number(raw);
+		} else if (argv[i] === '--kind') {
+			const raw = argv[++i] ?? '';
+			if (raw !== 'lessons' && raw !== 'content') {
+				console.error(`next-wave: --kind is lessons or content, got ${JSON.stringify(raw)}`);
+				process.exit(2);
+			}
+			kind = raw;
+		} else if (argv[i] === '--only') {
+			const raw = argv[++i] ?? '';
+			if (!/^[1-9][0-9]*(,[1-9][0-9]*)*$/.test(raw)) {
+				console.error(`next-wave: --only needs issue numbers separated by commas, got ${JSON.stringify(raw)}`);
+				process.exit(2);
+			}
+			only = raw.split(',').map(Number);
 		} else {
 			console.error(`next-wave: unknown argument ${argv[i]}`);
 			process.exit(2);
 		}
 	}
-	return { size, json };
+	return { size, kind, only, json };
 }
 
-/** The open `ready-for-agent` issues, with assignees as login names. */
+/** The open `ready-for-agent` issues, with assignees as login names and labels as names. */
 function readyIssues() {
 	let out;
 	try {
 		out = execFileSync(
 			'gh',
-			['issue', 'list', '-R', REPO, '-l', 'ready-for-agent', '-L', '500', '--json', 'number,title,assignees'],
+			['issue', 'list', '-R', REPO, '-l', 'ready-for-agent', '-L', '500', '--json', 'number,title,assignees,labels'],
 			{ encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] },
 		);
 	} catch (e) {
@@ -53,12 +73,13 @@ function readyIssues() {
 		number: i.number,
 		title: i.title,
 		assignees: (i.assignees ?? []).map((a) => a.login),
+		labels: (i.labels ?? []).map((l) => l.name),
 	}));
 }
 
-const { size, json } = parseArgs(process.argv.slice(2));
+const { size, kind, only, json } = parseArgs(process.argv.slice(2));
 const root = new URL('..', import.meta.url).pathname;
 const tree = readAreaTree(join(root, 'src/data'));
 const livePageIds = lessonPages(join(root, 'src/content/docs'), new Set(tree.areas.map((a) => a.dir))).keys();
-const result = pickWave({ tree, livePageIds, readyIssues: readyIssues(), size });
+const result = pickWave({ tree, livePageIds, readyIssues: readyIssues(), size, kind, only });
 process.stdout.write(json ? `${JSON.stringify(result, null, 2)}\n` : formatWave(result));

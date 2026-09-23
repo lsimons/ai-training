@@ -236,14 +236,17 @@ patterns below after the fact. Write so that it has nothing to say.
 - Running many builder and reviewer agents in parallel against the issues,
   from triage to merge queue: `docs/agents/orchestration.md`.
 - Running wave after wave from one long session, with a dispatcher that
-  spawns a wave lead per wave: `docs/agents/meta-orchestration.md`.
+  spawns a wave lead per wave: `docs/agents/meta-orchestration.md`. The
+  `/wave` skill (`.claude/skills/wave/SKILL.md`) is that dispatcher.
 - Tutor mode: `.claude/skills/tutor/SKILL.md`. Run the site locally and
   invoke `/tutor`.
 - A nit left open on a merged pull request, a follow-up a review or a
   wave report names, and an improvement the maintainer defers all become
   GitHub issues before the session ends, filed and triaged as
-  `docs/agents/triage.md` describes. Session records and transcripts are
-  not a place work waits.
+  `docs/agents/triage.md` describes, or, in a bounded unattended run
+  (`/wave --no-filing`), are listed in the session record for the
+  maintainer to file. Session records and transcripts are otherwise not a
+  place work waits.
 - Commits follow [Conventional Commits](https://conventionalcommits.org/)
   (`type(scope): description`), and commitlint enforces it.
 - A push to `main` deploys to GitHub Pages (`.github/workflows/deploy.yml`).
