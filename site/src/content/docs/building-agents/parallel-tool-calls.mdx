@@ -157,7 +157,7 @@ each with its own `id`. Your loop answers with one `user` message that
 holds one `tool_result` block per `tool_use` block, each naming its
 `tool_use_id`, and any text in that message comes after the results
 (@Claude docs handle-tool-calls). Whether those calls ran one after
-another or at the same time is invisible in that message, so `in_order`
+another or in a thread pool is invisible in that message, so `in_order`
 and `together` both produce a valid reply. The docs name
 one result per `user` message as the most common formatting mistake: the
 API accepts it, and a history with that pattern teaches the model to stop
