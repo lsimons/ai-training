@@ -1,10 +1,25 @@
 id: concepts/iterating-on-a-prompt
 title: Change the prompt before you retry
+description: >-
+  A summary skips the decisions of a meeting. Name the gap, change one line of the prompt, compare
+  with the last round, and move the fix you made twice into a saved template.
 mode: tutorial
 covers: concepts/prompting
 serves: [concepts/prompts-reliably/iterates-on-output]
 introduces: [iteration]
-assumes: []
+assumes:
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: the-instruction
+  - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: format-and-length
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+extends-to:
+  - label: Where a model makes things up
+    href: /concepts/thin-path/
 after: [concepts/structured-output]
 shorts: [keeping a prompt template]
 exercise:
@@ -12,6 +27,5 @@ exercise:
   brief: >-
     Take a summary prompt through three rounds, changing one thing per round, and keep a three-line
     log of what each change fixed.
-sources: []
-issue: 127
+sources: [DLAI-1, DLAI-3, Academy ai-fluency-framework-foundations]
 minutes: 15
