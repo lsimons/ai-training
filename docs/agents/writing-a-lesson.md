@@ -93,7 +93,8 @@ parts:
 takes its place from the `assumes` in its plan. When a lesson goes live,
 add `description`, give every `assumes` entry its `lesson` and `section`,
 and bring `serves`, `introduces`, `extends-to` and `sources` in line with
-what the page does.
+what the page does. Keep `after` as the plan had it (spec S11 step 3), so
+the coming lesson keeps its place in the graph until it goes live.
 
 The course page also renders the plan as a table under the graph
 (`site/src/components/CoursePlan.astro`), folded into a "Lesson plan"
