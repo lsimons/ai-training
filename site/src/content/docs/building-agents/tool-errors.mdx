@@ -15,6 +15,8 @@ The tool table is a parameter, and the return value is a dict with the
 stop reason, the answer and the message list instead of a bare string.
 The assistant message stores the model's request as the dict itself
 rather than as text, because the fake model reads it back when it retries.
+The `TOOLS.get` and the `try` around the tool call from the last lesson
+are gone on purpose. You need to see the raw failure first.
 The error flag on tool messages and the `max_errors` policy are the two
 changes this lesson adds one at a time.
 
@@ -249,9 +251,10 @@ clear as long as none of them takes over another's job (@AEC-13).
   It reads the `is_error` flag, keeps the count, and names the reason it
   stopped. A production loop also wraps the tool call in its own
   `try`, so an exception the tool didn't explain, like the `KeyError` in
-  section one, still becomes an error result instead of a crash. This
-  lesson's loop leaves that out so the tool's part of the job stays
-  visible.
+  section one, still becomes an error result instead of a crash. The loop
+  in [Building your first agent](/building-agents/agent-loop/#the-loop)
+  does that. This lesson's loop leaves it out to keep the tool's part of
+  the job separate from the harness's.
 - The **model** decides what to tell the user, or whether to try a
   different call. It reads the error text and acts on what that text
   names.
