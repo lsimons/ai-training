@@ -152,16 +152,16 @@ weights.
 ## Where the slant comes from
 
 **Bias** in a model is a systematic slant in its output that it inherited
-from its training data and its tuning. The model learned which words
-follow which from a large body of text, and it predicts the most likely
+from its training data and its tuning. The model learned which words follow
+which from a large body of text, and it predicts the most likely
 continuation of whatever it is given
 (@Academy ai-capabilities-and-limitations). In that text some names appear
 more often next to some jobs, and a name that appears often in the text at
-all reads differently from one that appears rarely, so the same record
-reads as a slightly better fit under one name than under another
-(@Wilson 2024). Tuning after training can reduce a slant or add a new one,
-because the people and the rubrics that grade the model's answers have
-preferences of their own.
+all reads differently from one that appears rarely. The same record reads as
+a slightly better fit under one name than under another (@Wilson 2024).
+Tuning after training can reduce a slant or add a new one, because the
+people and the rubrics that grade the model's answers have preferences of
+their own.
 
 This is measured, and the measurement uses the same swap as the fixture.
 Bertrand and Mullainathan sent nearly five thousand fictitious resumes to
@@ -172,9 +172,9 @@ Wilson and Caliskan ran the method against text-embedding models set up to
 retrieve resumes for a job description, with over five hundred resumes and
 job descriptions across nine occupations, and found that the models favored
 white-associated names in 85.1 percent of the tests, favored
-female-associated names in 11.1 percent, and in some settings put Black
-male names at a disadvantage in every test (@Wilson 2024). The models were
-not told anyone's race or gender. The name was enough, as it was for the
+female-associated names in 11.1 percent, and in some settings put Black male
+names at a disadvantage in every test (@Wilson 2024). The models were not
+told anyone's race or gender. The name was enough, as it was for the
 employers in 2004.
 
 Both studies needed thousands of comparisons to find this. One output of
@@ -207,14 +207,14 @@ correct it. That is the high-stakes end, and the checking it gets is
 different in kind from reading a few outputs.
 
 The check that fits is the one the fixture did. Name the groups the task
-could treat differently. Take a sample of records that is large enough for
-a pattern to show, and the fixture shows that a dozen is barely enough for
-a slant of two points. Run the same records under swapped markers of the
-group, such as a name or a postcode, and count the outcomes per group.
-Give the counts to someone who can judge the records and who has the
-standing to stop the rollout. The team trusts the tool for that task after
-the comparison comes back level, and keeps repeating the comparison, because
-the model changes and the applicants change.
+could treat differently. Take a sample of records that is large enough for a
+pattern to show, and the fixture shows that a dozen is barely enough for a
+slant of two points. Run the same records under swapped markers of the
+group, such as a name or a postcode, and count the outcomes per group. Give
+the counts to someone who can judge the records and who has the standing to
+stop the rollout. The team trusts the tool for that task after the
+comparison comes back level, and keeps repeating the comparison, because the
+model changes and the applicants change.
 
 <Scenario id="screening-three-hundred" objective="safety/verifies-output/calibrates-trust"
   concepts={['bias']}
@@ -234,7 +234,7 @@ checking does the task get before the team trusts the tool for it?
 
 </Scenario>
 
-<Exercise stretch="Change LIST_A_BONUS in rank.py to 0 and run it again. Then set it back to 2 and change one record so the totals come out equal anyway. What does that tell you about how many records a check needs?">
+<Exercise stretch="Change the bonus constant in rank.py to 0 and run it again. Then set it back to 2 and change one record so the totals come out equal anyway. What does that tell you about how many records a check needs?">
 
 Pick one task at your work where a model's output affects people who don't
 see it: a shortlist, a triage queue, a scoring, a decision about who gets
