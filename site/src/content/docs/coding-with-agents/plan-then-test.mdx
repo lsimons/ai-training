@@ -24,8 +24,12 @@ done items, and it has been split into three modules: `todo.py` holds the
 commands, `store.py` reads, writes and prunes the list, and `render.py`
 formats it. It is in the course repository under
 `site/examples/coding-with-agents/plan-then-test/fixture-repo/`. Copy that
-directory somewhere, or work in a clone of the course repository, and
-change into it. `git checkout -- .` puts every file back.
+directory to a place of its own and change into it. A copy has no git
+history, so the reset is to delete the copy and copy again, and the files
+the session adds go with it. Working inside a clone of the course
+repository also works, and there `git checkout -- .` is the reset, but the
+agent then reads the course's own instruction files from the directories
+above the fixture. The copy is the better default.
 
 The committed list has four items, two of them done. Run the program
 before you run the agent, so you know what the list looks like now.
@@ -105,7 +109,7 @@ before it names the fix.
 `clear` leaves a done item behind. With the committed `todos.json` copied to
 `/tmp/todos.json`, `TODO_FILE=/tmp/todos.json python3 todo.py clear` prints
 "removed 1 done item" and the list still shows "Renew the passport" as done.
-Two items were done. Read the three modules and the tests, then give me a
+Both done items should have gone. Read the three modules and the tests, then give me a
 plan: where the cause is, which test you would write first, and which files
 you would change. Don't change anything yet. `todos.json` stays as it is.
 </Prompt>
@@ -149,12 +153,12 @@ every user who has a done item they haven't cleared yet.
   context="Plan mode puts a coding agent in a read-only mode: it reads and explores and proposes steps, and it edits nothing until the plan is approved. A plan costs a few minutes at the start of a task."
   title="Which task gets a plan?" hint="For which task could you not write the diff yourself in one sentence?"
   options={[
-    { text: 'Fix a typo in the README.', why: 'You could write this diff in one sentence. A plan costs more than the change.' },
-    { text: 'Rename one variable in one function.', why: 'The change is bounded to a place you can already point at. Let the agent do it and read the diff.' },
+    { text: 'Bump the version string in one file for a release.', why: 'You could write this diff in one sentence. A plan costs more than the change.' },
     { text: 'A command gives the wrong result and the code that could cause it is spread over three modules.', correct: true },
     { text: 'Add one log line where an exception is caught.', why: 'The scope is clear and the fix is small. Plan mode adds a round trip and finds nothing you did not know.' },
+    { text: 'Rename one variable in one function.', why: 'The change is bounded to a place you can already point at. Let the agent do it and read the diff.' },
   ]}>
-Four tasks are waiting for the agent. Which one do you start in plan mode?
+Which of these do you start in plan mode?
 </Choice>
 
 ## Correct the plan while it is cheap
@@ -195,8 +199,9 @@ An engineer skips the plan and briefs the agent to "make `clear` remove all
 the done items". The agent reads `render.py` first, because that is where
 the output comes from, and changes `list_items` to leave done items out.
 The symptom is gone, and `list` after `clear` doesn't show a done item. The bug is
-still in `store.py`, the file still holds the item, and `done 3` now marks
-an item the user can't see. The rule: for a change you can't place in one
+still in `store.py`, the file still holds the item, and the numbers `list`
+shows no longer match the positions in the file, so `done 3` marks whatever
+is third in the file. The rule: for a change you can't place in one
 file, ask for the cause and the steps first, and read the steps against
 the cause before any of them runs.
 </Pitfall>
@@ -221,9 +226,9 @@ The first step of the approved plan is a test, and the agent writes it
 before it touches `store.py`, because a test written after the fix asserts
 whatever the fixed code does. A test written
 before it has to describe the behavior you want, and it has to fail, which
-proves it is looking at the bug at all. The vendor's own advice for a bug
-report is the same: have the agent write a failing test that reproduces
-the issue, then fix it (@Claude Code best practices).
+proves it is looking at the bug at all. The vendor's own guidance for a
+bug brief takes the same order: ask for a test that fails on the bug before
+any fix, and only then for the fix (@Claude Code best practices).
 
 The agent creates `test_clear.py` and asks permission for the new file.
 Read it before you approve.
@@ -281,7 +286,7 @@ file has changed. What do you do?
 
 The agent moves to step 2, asks permission to edit `store.py`, and you
 approve the one edit the plan named. Then it runs the suite, reads the
-verdict, and reports. Don't take the report. Run the check yourself.
+verdict, and reports. The report is a claim, so run the check yourself.
 
 <Predict id="run-tests-after-fix" title="Run the suite after the fix"
   answer="OK" run="coding-with-agents/plan-then-test/tests_after_fix.py">
@@ -375,10 +380,10 @@ sentence that says what "fixed" means.
   buckets={['Start from a failing test', 'Start from a spec']}
   items={[
     { text: 'The clear command leaves a done item behind', bucket: 0 },
-    { text: 'The list command should show the count of open items at the bottom', bucket: 0 },
+    { text: 'The add command should refuse an empty text instead of adding a blank item', bucket: 0 },
     { text: 'Dates on items, with a due command that lists what is overdue', bucket: 1 },
     { text: 'Split the program into a package with one module per command and a shared store', bucket: 1 },
-    { text: 'The done command should reject a number that is out of range with a message instead of a crash', bucket: 0 },
+    { text: 'The clear command should print the text of each item it removed', bucket: 0 },
     { text: 'Sync the list with a calendar service', bucket: 1 },
   ]} />
 
@@ -393,9 +398,8 @@ rhythm you use on any change too big to describe in one sentence.
 
 A good result: the plan named `store.remove_done` as the cause, the test
 failed before the fix and passed after it, and the diff touches
-`store.py` and one new test file and nothing else. Finish by running
-`git checkout -- . && git clean -f test_clear.py` so the fixture is ready
-for next time. Then answer one question: which step of the plan would you
+`store.py` and one new test file and nothing else. Finish by deleting your
+copy and copying the fixture again, so it is ready for next time. Then answer one question: which step of the plan would you
 have missed if the agent had gone straight to the diff?
 </Exercise>
 

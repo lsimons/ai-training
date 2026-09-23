@@ -16,5 +16,6 @@ python3 -m unittest -q
 `render.py` formats it. Items live in `todos.json` next to the scripts. Set
 `TODO_FILE` to use a different file.
 
-The tests pass, and `clear` has a bug they don't cover. Reset the repository
-at any time with `git checkout -- .`.
+The tests pass, and `clear` has a bug they don't cover. Work in a copy of
+this directory, and reset it by deleting the copy and copying again. In a
+clone of the course repository, `git checkout -- .` does the same.
