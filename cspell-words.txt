@@ -155,3 +155,35 @@ Korbak
 
 # Plain words cspell lacks
 pushback
+
+# Invented people in the bias-in-patterns fixture
+Arvel
+Adair
+Pell
+Dunmoor
+Brisa
+Tallent
+Corin
+Halvane
+Dessa
+Elior
+Fenwick
+Marisel
+Okonde
+Kesrou
+Oriel
+Sabani
+Varnava
+Quilla
+Tesfay
+Rashon
+Belka
+
+# Authors and names in cited papers
+Caliskan
+Kyra
+Aylin
+Mullainathan
+Sendhil
+Lakisha
+AIES

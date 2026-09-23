@@ -1,12 +1,20 @@
 id: safety/bias-in-patterns
 title: Seeing bias across many answers
+description: >-
+  Read two shortlists from a simulated ranker that each look fair on their own, count who made the
+  cut when the names are swapped, and decide how much checking a task that affects people gets.
 mode: tutorial
 covers: safety/failure-modes
 serves: [safety/verifies-output/calibrates-trust]
 introduces: [bias]
 assumes:
   - objective: concepts/explains-models/names-failure-modes
-after: [safety/spotting-hallucination]
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: Verifying outputs
+    href: /safety/verification/
+after: []
 shorts: [Bias from training data and bias from tuning]
 exercise:
   kind: judge
@@ -14,9 +22,14 @@ exercise:
     For one task at your work where a model's output affects people, write down which groups you
     would compare, how many samples you need before you would trust a pattern, and, given who the
     output affects, how much checking that task gets and by whom.
-sources: []
-issue: 116
+sources: [Wilson 2024, Bertrand 2004, Academy ai-capabilities-and-limitations]
+sources-checked: 2026-09-23
 minutes: 15
 notes: >-
-  A fixture ranks the same set of records under two swapped name lists and tallies the difference,
-  so the slant is visible only in the totals.
+  The fixture is a constructed simulation of a slanted ranker, and the page says so twice: it ranks
+  twelve made-up records under two invented name lists, swaps the lists, and tallies the shortlist
+  per list over both runs. Under a fair ranker the totals are equal by construction, so any
+  difference is the slant. The names are invented and carry no real-world group. The claim that real
+  models slant by name rests on Wilson and Caliskan 2024 (resume retrieval, checked 2026-09-23) and
+  the swapped-name method on Bertrand and Mullainathan 2004. Bloomberg's 2024 GPT ranking analysis
+  was not cited because its page is behind a paywall and could not be checked.
