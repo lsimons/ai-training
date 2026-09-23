@@ -26,9 +26,13 @@ def load_settings(path: str) -> dict[str, Any]:
         return json.load(f)
 
 
-def run_helper(command: str) -> str:
-    result = subprocess.run(shlex.split(command), capture_output=True, text=True, check=True)
-    return result.stdout.strip()
+def run_helper(command: str) -> Optional[str]:
+    """Return the helper's output, or None when the command fails or prints nothing."""
+    try:
+        result = subprocess.run(shlex.split(command), capture_output=True, text=True, check=True)
+    except (subprocess.CalledProcessError, OSError):
+        return None
+    return result.stdout.strip() or None
 
 
 def find_key(settings: dict[str, Any], environ: dict[str, str]) -> tuple[Optional[str], str]:
@@ -37,7 +41,10 @@ def find_key(settings: dict[str, Any], environ: dict[str, str]) -> tuple[Optiona
         return environ[ENV_VAR], "environment variable " + ENV_VAR
     helper = settings.get("keyHelper")
     if helper:
-        return run_helper(helper), "keyHelper command: " + helper
+        key = run_helper(helper)
+        if key is None:
+            return None, "keyHelper command failed: " + helper
+        return key, "keyHelper command: " + helper
     stored = settings.get("env", {}).get(ENV_VAR)
     if stored:
         return stored, SETTINGS + " (env." + ENV_VAR + ")"
@@ -45,6 +52,8 @@ def find_key(settings: dict[str, Any], environ: dict[str, str]) -> tuple[Optiona
 
 
 def mask(key: str) -> str:
+    if len(key) < 13:
+        return "***"
     return key[:8] + "..." + key[-4:]
 
 
@@ -52,7 +61,10 @@ def main() -> int:
     settings = load_settings(SETTINGS)
     key, source = find_key(settings, dict(os.environ))
     if key is None:
-        print("no key found: set " + ENV_VAR + " or a keyHelper in " + SETTINGS)
+        if source.startswith("keyHelper command failed"):
+            print("no key: " + source)
+        else:
+            print("no key found: set " + ENV_VAR + " or a keyHelper in " + SETTINGS)
         return 1
     print("key " + mask(key) + " from " + source)
     denied = settings.get("permissions", {}).get("deny", [])

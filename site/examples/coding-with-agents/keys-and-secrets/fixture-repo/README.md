@@ -6,5 +6,8 @@ reach*. `agent.py` finds a key at start and says where it came from,
 `scan.py` is a small secret scanner. Nothing here calls a model, and every
 key in this directory is fake.
 
-Run `python3 agent.py` and `python3 scan.py` before you change anything.
-`git checkout -- .` puts every file back.
+The application's `.env` is committed as `env.sample`, because the course
+repository ignores every `.env`. Copy it once before you start:
+`cp env.sample .env`. Then run `python3 agent.py` and `python3 scan.py`
+before you change anything. `git checkout -- .` puts every tracked file
+back, and `.env` stays as you left it.
