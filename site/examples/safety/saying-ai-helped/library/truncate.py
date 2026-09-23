@@ -1,6 +1,6 @@
 # truncate.py, from the Hazeldine text helpers
 # Copyright (c) 2021 M. Hazeldine
-# MIT License: keep this notice in every copy.
+# MIT License. This line stands in for the full permission notice in LICENSE.
 
 
 def truncate_words(text, limit, marker="..."):
