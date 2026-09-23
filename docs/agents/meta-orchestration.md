@@ -66,7 +66,14 @@ The dispatcher runs as a self-paced `/loop`. One tick:
    it to the maintainer and stop the loop. On `failed`, read the session
    record the lead wrote, decide whether the failure is the wave's or the
    loop's, and either spawn a new lead for the same wave or stop.
-4. **Keep the record.** Append the report to the session record file for
+4. **File the follow-ups.** Every item on the report's maintainer line,
+   every nit the lead left open on a merged branch, and every improvement
+   deferred during the session becomes a GitHub issue before the next wave
+   starts, filed and triaged as `triage.md` describes and linked from the
+   session record. The wave lead files the ones it has the context for and
+   lists their numbers on the report's `Filed` line. The dispatcher files
+   the rest.
+5. **Keep the record.** Append the report to the session record file for
    the day, `docs/agents/sessions/<date>-meta.md`, so the history is a file
    and never the dispatcher's context. The `docs/agents/sessions/`
    directory is new and the first wave lead creates it, while
@@ -133,6 +140,7 @@ as a file and paste it, rather than retyping it per wave.
   Merged issues: #a #b ...
   Left out: #c (<reason>) ...
   For the maintainer: <decisions needed, or none>
+  Filed: #<issue> <title> ... (or none)
   Add to collision notes: <one line each, or none>
   ```
 

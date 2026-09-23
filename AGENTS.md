@@ -239,6 +239,11 @@ patterns below after the fact. Write so that it has nothing to say.
   spawns a wave lead per wave: `docs/agents/meta-orchestration.md`.
 - Tutor mode: `.claude/skills/tutor/SKILL.md`. Run the site locally and
   invoke `/tutor`.
+- A nit left open on a merged pull request, a follow-up a review or a
+  wave report names, and an improvement the maintainer defers all become
+  GitHub issues before the session ends, filed and triaged as
+  `docs/agents/triage.md` describes. Session records and transcripts are
+  not a place work waits.
 - Commits follow [Conventional Commits](https://conventionalcommits.org/)
   (`type(scope): description`), and commitlint enforces it.
 - A push to `main` deploys to GitHub Pages (`.github/workflows/deploy.yml`).
