@@ -1,0 +1,298 @@
+import { Predict, Choice, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson the model asks for three things at once. The question
+"Compare the weather in Amsterdam, Lisbon and Oslo" needs three lookups
+that have nothing to do with each other, and a loop that takes one call per
+turn spends a model round on each. We change the loop so a reply holds a
+list of calls, and the loop runs the whole list before it returns every
+result in one message. Then we add a call that needs one of those results
+and see why it waits for the next round.
+
+Every example runs against a fixture with a fake model, so you can predict
+the output and check yourself. The complete program is
+`site/examples/building-agents/parallel-tool-calls/agent.py` in the
+repository. Its `run` function is the loop from
+[When a tool fails](/building-agents/tool-errors/) with one change: a
+model reply holds a list under `calls`, each call has an `id`, and the tool
+message holds a list of results that name the `id` they answer. The
+`execute` parameter of `run` decides how the list runs, and the fake models
+read the message list to see which results they already have. The fixture
+prints one line per message, then the round count, the stop reason, and the
+answer. A round is one call to the model.
+
+## One call per turn
+
+The first fake model asks for one city at a time. It reads the weather
+results it has and asks for the first city that's missing. Once it has all
+three, it answers. A real model behaves this way when the request sets
+`disable_parallel_tool_use` to `true`, and the last lesson's loop only knew
+how to handle one call per reply anyway.
+
+```python
+def model_one_at_a_time(messages):
+    known = weather_so_far(messages)
+    missing = [city for city in CITIES if city not in known]
+    if missing:
+        return {"calls": [weather_call(len(known) + 1, missing[0])]}
+    return {"answer": summary(known)}
+```
+
+`weather_call(1, "Amsterdam")` builds
+`{"id": "call_1", "tool": "get_weather", "args": {"city": "Amsterdam"}}`.
+The loop counts its rounds and runs each reply's calls in the order they
+appear, with `in_order`:
+
+```python
+def call_tool(call: dict) -> dict:
+    tool = TOOLS[call["tool"]]
+    return {"id": call["id"], "content": tool["fn"](**call["args"])}
+
+def in_order(calls: list) -> list:
+    return [call_tool(call) for call in calls]
+
+def run(question, model, execute=in_order, max_steps=5):
+    messages = [{"role": "user", "content": question}]
+    rounds = 0
+    for _ in range(max_steps):
+        rounds += 1
+        reply = model(messages)
+        if "answer" in reply:
+            return outcome("end_turn", reply["answer"], rounds, messages)
+        results = execute(reply["calls"])
+        messages.append({"role": "assistant", "content": reply})
+        messages.append({"role": "tool", "content": results})
+    return outcome("max_steps", None, rounds, messages)
+```
+
+The `show` function prints an assistant line as `call_1 get_weather(city='Amsterdam')`
+and a tool line as `call_1 '14°C, rain'`. The weather table has
+`Amsterdam: 14°C, rain`, `Lisbon: 27°C, sun` and `Oslo: 6°C, snow`, and
+`summary` joins them in that order with a period after each.
+
+<Predict id="predict-one-at-a-time" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['parallel-calls', 'loop-from-scratch']}
+  context="In the lesson, a fake model asks for the weather of one city per reply, for Amsterdam, Lisbon and Oslo in that order, and answers once it has all three. The loop prints one line per message, then the number of model rounds, the stop reason and the answer."
+  title="Predict the rounds, one call per turn" hint="How many replies does the model give before the one that holds the answer, and does the answer reply count as a round?"
+  answer={`user: 'Compare the weather in Amsterdam, Lisbon and Oslo.'
+assistant: call_1 get_weather(city='Amsterdam')
+tool: call_1 '14°C, rain'
+assistant: call_2 get_weather(city='Lisbon')
+tool: call_2 '27°C, sun'
+assistant: call_3 get_weather(city='Oslo')
+tool: call_3 '6°C, snow'
+rounds: 4
+stop: end_turn
+answer: Amsterdam: 14°C, rain. Lisbon: 27°C, sun. Oslo: 6°C, snow.`} run="building-agents/parallel-tool-calls/one_at_a_time.py">
+
+What does this print?
+
+```python
+show(run(QUESTION, model=model_one_at_a_time))
+```
+
+</Predict>
+
+Four rounds for three lookups. Each round is a full trip to the model with
+the whole message list, and those trips cost most of the time and the
+tokens. If
+each lookup took a second and each model round took two, the run would
+take about eleven seconds, and nine of them are waiting for the model to
+ask for the next city.
+
+## All three in one reply
+
+The second fake model asks for every city in its first reply. Nothing in
+the loop needs to change for that, because `execute` already takes a list.
+The list can run in a different way, though. `together` hands the calls to
+a thread pool, and `map` returns the results in the order of the calls, whichever
+one finishes first.
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+
+def model_all_at_once(messages):
+    known = weather_so_far(messages)
+    if not known:
+        return {"calls": [weather_call(number, city) for number, city in enumerate(CITIES, 1)]}
+    return {"answer": summary(known)}
+
+def together(calls: list) -> list:
+    with ThreadPoolExecutor() as pool:
+        return list(pool.map(call_tool, calls))
+```
+
+The loop appends one assistant message with the three calls and one tool
+message with the three results.
+
+<Predict id="predict-together" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['parallel-calls', 'loop-from-scratch']}
+  context="In the lesson, a fake model asks for the weather of Amsterdam, Lisbon and Oslo in one reply, as three calls with the ids call_1 to call_3. The loop runs the three calls in a thread pool with map, appends one tool message with the three results, and prints one line per message, then the number of model rounds, the stop reason and the answer."
+  title="Predict the rounds, three calls in one reply" hint="How many messages does the loop append per round now, and in which order does map return the results?"
+  answer={`user: 'Compare the weather in Amsterdam, Lisbon and Oslo.'
+assistant: call_1 get_weather(city='Amsterdam'), call_2 get_weather(city='Lisbon'), call_3 get_weather(city='Oslo')
+tool: call_1 '14°C, rain', call_2 '27°C, sun', call_3 '6°C, snow'
+rounds: 2
+stop: end_turn
+answer: Amsterdam: 14°C, rain. Lisbon: 27°C, sun. Oslo: 6°C, snow.`} run="building-agents/parallel-tool-calls/together.py">
+
+What does this print?
+
+```python
+show(run(QUESTION, model=model_all_at_once, execute=together))
+```
+
+</Predict>
+
+Two rounds instead of four, and the same answer. With the timings from
+the last section the run takes about five seconds. The three lookups
+overlap, so they cost one second together, and the model is asked twice.
+A batch of independent reads is the common case in agents that work on
+files or records, where the model wants five files and there is no reason
+to fetch them one per round (@AEC-03).
+
+The Claude API works the same way (@Claude docs parallel-tool-use). A
+reply with `stop_reason` `tool_use` can hold several `tool_use` blocks,
+each with its own `id`. Your loop answers with one `user` message that
+holds one `tool_result` block per `tool_use` block, each naming its
+`tool_use_id`, and any text in that message comes after the results
+(@Claude docs handle-tool-calls). How you run the calls is up to you, since
+`in_order` and `together` both produce a valid reply. Sending each result in its own `user` message
+is a formatting error, and a history with that pattern also teaches the
+model to stop asking for several tools at once. To turn the batching off,
+set `disable_parallel_tool_use: true` inside the `tool_choice` object.
+With the default `tool_choice` type `auto` the model then makes at most
+one tool call per reply, and the run looks like the first section.
+
+## A call that needs a result
+
+The third fake model wants to add packing advice for Amsterdam. The
+`suggest_clothing` tool takes a weather report as its argument, so the
+model can't ask for it in the first reply: the argument is a result it
+doesn't have yet. It asks for the three lookups, then for the advice, then
+answers.
+
+```python
+def model_with_follow_up(messages):
+    known = weather_so_far(messages)
+    if not known:
+        return {"calls": [weather_call(number, city) for number, city in enumerate(CITIES, 1)]}
+    requests, results = results_by_call(messages)
+    advice = [text for call_id, text in results.items() if requests[call_id]["tool"] == "suggest_clothing"]
+    if not advice:
+        call = {"id": "call_4", "tool": "suggest_clothing", "args": {"weather": known["Amsterdam"]}}
+        return {"calls": [call]}
+    return {"answer": f"{summary(known)} Pack {advice[0]} for Amsterdam."}
+```
+
+`suggest_clothing` returns `"a raincoat"` for a report that mentions rain.
+
+<Predict id="predict-follow-up" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['parallel-calls', 'loop-from-scratch']}
+  context="In the lesson, a fake model asks for the weather of Amsterdam, Lisbon and Oslo in one reply, then asks a clothing tool what to pack for the Amsterdam report, then answers with the summary and the advice. The loop runs each reply's calls together and prints one line per message, then the number of model rounds, the stop reason and the answer."
+  title="Predict the rounds with a dependent call" hint="Which of the four calls can't be made until a result is back, and how many replies does the model give in total?"
+  answer={`user: 'Compare the weather in Amsterdam, Lisbon and Oslo.'
+assistant: call_1 get_weather(city='Amsterdam'), call_2 get_weather(city='Lisbon'), call_3 get_weather(city='Oslo')
+tool: call_1 '14°C, rain', call_2 '27°C, sun', call_3 '6°C, snow'
+assistant: call_4 suggest_clothing(weather='14°C, rain')
+tool: call_4 'a raincoat'
+rounds: 3
+stop: end_turn
+answer: Amsterdam: 14°C, rain. Lisbon: 27°C, sun. Oslo: 6°C, snow. Pack a raincoat for Amsterdam.`} run="building-agents/parallel-tool-calls/follow_up.py">
+
+What does this print?
+
+```python
+show(run(QUESTION, model=model_with_follow_up, execute=together))
+```
+
+</Predict>
+
+Three rounds for four calls. The batch saved two rounds on the lookups,
+and the dependent call cost one round of its own, because a round is the
+only place where a result can flow into an argument. The rule for what
+goes in one reply is the data flow: calls whose arguments are all known
+now can share a reply, and a call whose argument is another call's result
+waits for the reply after it.
+
+A model doesn't always get this right. When a dependent call does arrive
+in the same batch, the docs' advice is to run what you can and return a
+`tool_result` with `is_error` set to `true` for the call you skipped, with
+a short note on why. The model reissues that call in the next round with
+the real argument (@Claude docs parallel-tool-use). The exercise below
+builds that case.
+
+<Pitfall title="Returning results in the order they finished">
+The thread pool also offers `as_completed`, which yields each result as
+its call finishes, so the slow Oslo lookup comes last even when the model
+asked for it first. Return that list without the ids, or pair results
+with calls by position, and the model learns that Amsterdam has snow.
+Rule: every result names the `id` of the call it answers, and the model
+reads the pairing from the ids, never from the position.
+</Pitfall>
+
+## Side effects under concurrency
+
+A weather lookup is safe to run at any time and in any order, because it
+doesn't change anything. Tools that write are different. Two appends to the same
+file end up in either order when they run in two threads, and a write
+followed by a read of the same record can return the old value if the
+read runs first. The choice of `in_order` or `together` is a property of
+the tools in the batch (@Claude docs parallel-tool-use). A harness that
+knows which tools only read can use both strategies in one round: the
+read-only calls go to the thread pool, and the writes wait their turn. The
+reply still holds one result per call, whichever way each call ran.
+
+<Choice id="which-pair-runs-together" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['parallel-calls']}
+  context="The lesson's loop can run a batch of tool calls at the same time in a thread pool or one after another in the order the model asked for them. The question is which pair of calls is safe to run at the same time."
+  title="Which pair can run together?" hint="For each pair, ask whether either call reads something the other writes, or needs the other's result as its argument."
+  options={[
+    { text: 'Fetch the weather for Amsterdam and fetch the weather for Lisbon.', correct: true },
+    { text: 'Create an order and cancel the order with the id the first call returns.', why: 'The second call takes the first call\'s result as its argument, so it can only be made after that result is back.' },
+    { text: 'Write a new value to a settings record and read that record back.', why: 'When the read runs first it returns the old value, and the model then works from stale data.' },
+    { text: 'Append a line to a log file and append a second line to the same file.', why: 'Two writes to one file in two threads can land in either order, and the log order was the point.' },
+  ]}>
+The model asked for two tool calls in one reply. Which pair is safe to
+run at the same time?
+</Choice>
+
+<Exercise stretch="Add a third strategy to the fixture, next to in_order and together: run every get_weather call in the thread pool and every other call one after another, in the same round. Check that the follow-up run's output stays the same.">
+
+Copy `agent.py` from the repository. Change `model_with_follow_up` so its
+first reply holds four calls, the three lookups and a `suggest_clothing`
+call whose `weather` argument is the string `"call_1"`, the way a model
+does when it guesses that it can refer to a result it doesn't have. Run
+`show(run(QUESTION, model=model_with_follow_up, execute=together))` and
+look at what `suggest_clothing` returns for that string. Then change
+`call_tool` so a call whose argument is another call's id isn't run and
+returns `{"id": ..., "content": "not run: depends on call_1", "is_error": True}`
+instead, and make the fake model treat that result as missing advice so
+it asks again with the real report. Run again and compare both message
+lists and round counts with the lesson's follow-up run. Doing this once
+shows you what the harness can and can't do about a dependent call: it
+can refuse to run it, and only the next round can supply the argument.
+
+A good result: the first run answers with advice for the string `call_1`
+in two rounds, which is wrong and fast. The second run shows the error
+result for `call_4` in the first tool message, a second reply with the
+real `weather` argument, and three rounds, the same count as the lesson's
+follow-up run. What would the harness need to know to tell a dependent
+call from an independent one without a rule about ids in arguments?
+
+</Exercise>
+
+<Recap>
+
+1. A model reply can hold several tool calls at once. The loop runs the
+   list and returns one result per call, all in the next message, each
+   under the id of the call it answers (@Claude docs parallel-tool-use).
+2. Three independent lookups cost one round in a batch and three rounds
+   one at a time. The batch saves model round trips, and running the
+   calls in a thread pool saves the wait for the tools too (@AEC-03).
+3. A call whose argument is another call's result waits for the next
+   round. Data flow decides what can share a reply.
+4. Running a batch at the same time is safe for calls that only read. For
+   calls that write, run them in order, and keep the ids on every result
+   either way.
+
+</Recap>
