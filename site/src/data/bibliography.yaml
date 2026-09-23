@@ -480,3 +480,10 @@ Claude Code permission modes:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/permission-modes
+Claude Code permissions:
+  type: reference
+  title: Configure permissions
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/permissions
