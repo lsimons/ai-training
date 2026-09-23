@@ -32,6 +32,7 @@ Tervonen
 Brindlewick
 
 # Products, tools, projects
+gitleaks
 Beamer
 Cowork
 Merriweather
