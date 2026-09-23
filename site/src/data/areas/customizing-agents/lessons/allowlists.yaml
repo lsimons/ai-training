@@ -1,18 +1,33 @@
 id: customizing-agents/allowlists
 title: Allowing the commands the task needs
+description: >-
+  Run one small task with a coding agent twice, first with nothing pre-approved and then with an
+  allowlist for the test command and the files it edits, then prune every rule the run never used.
 mode: tutorial
 covers: customizing-agents/hooks-permissions
 serves: [customizing-agents/configures-agent/sets-permissions]
 introduces: [allowlists]
 assumes:
   - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
+sources-checked: 2026-09-23
+review-by: 2027-03-23
 after: [customizing-agents/permission-modes]
 shorts: [How a wildcard pattern widens an allowlist beyond the command that prompted it]
 exercise:
   kind: do
   brief: >-
-    Start from deny by default, allow the test command and the read-only version-control commands,
+    Start from nothing pre-approved, allow the test command and the read-only version-control commands,
     finish the fixture task, then remove every entry the transcript shows was not used.
-sources: []
-issue: 179
+sources: [Claude Code permissions, Claude Code permission modes]
 minutes: 15
+notes: >-
+  The fixture task reuses the first-session to-do directory, copied and given its own first commit,
+  with a new `clear` command so a learner who did the permission-modes lesson starts from a fresh
+  change. Both runs are in Manual mode: "deny by default" in the plan brief means an empty allowlist,
+  because a mode that denies instead of prompting would hide the prompts the first section is about.
+  The read-only git entries in the allowlist are on purpose redundant (Claude Code runs read-only git
+  without a prompt in every mode), so the prune step removes them from the learner's own tally. Rule
+  syntax, matching and precedence come from code.claude.com/docs/en/permissions and must be
+  re-checked by review-by.
