@@ -1,19 +1,19 @@
 import { Choice, Scenario, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
 
-In this lesson we give an agent a brief with a gap in it and watch what
-the agent does with the gap. Then we answer the agent's question in two
-places, first in the chat and then in the brief. A second run after each
-answer shows which one survives. After that we change a limit in the brief
-while the work is under way, and we stop a run whose first result shows
-the goal itself was wrong. The task is small, and you can run
-it as often as you like.
+In this lesson we give an agent a brief with a gap in it and watch what the
+agent does with the gap. Then we answer the agent's question in two places,
+first in the chat and then in the brief. A second run after each answer
+shows which one survives. After that we change a limit in the brief while
+the work is under way, and we stop a run whose first result shows the goal
+itself was wrong. The task is small, and you can run it as often as you
+like.
 
-You need an agent that can read a folder of files, such as Claude Cowork
-or a chat tool with file access. If your tool reads only what you paste, paste the four files below into
-the chat with their names above them. Every step of the lesson then works
-the same way. Every exchange
-shown here is illustrative. The author wrote it to show the pattern, and
-your agent gives a different text.
+You need an agent that can read a folder of files, such as Claude Cowork or
+a chat tool with file access. If your tool reads only what you paste, paste
+the four files below into the chat with their names above them. Every step
+of the lesson then works the same way. Every exchange shown here is
+illustrative. The author wrote it to show the pattern, and your agent gives
+a different text.
 
 ## The task and its gap
 
@@ -78,10 +78,10 @@ one should I use?
 </Response>
 
 Some agents ask, as this one does. Others pick one, write the update and
-mention the pick at the end, or don't mention it at all. Either way the
-gap is the same gap. When the agent asks, the gap is now your question. When the agent
-guesses, the gap is filled with a default you didn't choose. Both tell you something
-the brief left out, and that is the thing you have to add.
+mention the pick at the end, or don't mention it at all. Either way the gap
+is the same gap. When the agent asks, the gap is now your question. When the
+agent guesses, the gap is filled with a default you didn't choose. Both tell
+you something the brief left out, and that is the thing you have to add.
 
 ## Chat or brief
 
@@ -95,32 +95,39 @@ finish.
 Use full-update.md.
 </Prompt>
 <Response>
+
+```text
 Subject: Calibration team, week 38
 
 ## Done
-- Finished the recalibration of the 20 torque wrenches for the Delft site (Jonas)
-- Storeroom B stock count: two calipers over, three probes short (Sam)
+- Finished the recalibration of the 20 torque wrenches for the Delft site
+- Storeroom B stock count done, two calipers over, three probes short
 
 ## In progress
-- Thermocouple batch for the food lab, 12 of 40 done (Mira)
+- Thermocouple batch for the food lab, 12 of 40 done
 
 ## Blocked
-- 1 kg reference weight from the supplier, due 26 Sep (Mira)
+- 1 kg reference weight from the supplier, due 26 Sep
 
 ## Next week
 - Finish the thermocouple batch
 - Start the spirit levels for the survey team
+```
+
 </Response>
 
-Check it against the done-criteria. The notes hold five lines and the update has seven bullets, because
-the last line of the notes holds two items. Every item appears once, under a heading that fits, and the
-update follows the template. The result passes. Now close this session,
-open a fresh one on the same folder, and send "Do the task in brief.md"
-again. The agent asks the same question. The answer you typed was part of
-the chat, and a new session starts from the files. The chat is over, and
-nothing in the folder says which template you meant. The same thing
-happens next week when a colleague runs the brief, or when you run it
-yourself after the tool has forgotten the conversation.
+Check it against the done-criteria. The notes hold five lines and the
+update has six bullets, because the last line of the notes holds two
+items. Every item appears once, under a heading that fits, and the update
+follows the template. The names in brackets are gone, and the template's
+one-line limit is a fair reason for that. The result passes. Now close
+this session, open a fresh one on the same folder, and send "Do the task
+in brief.md" again. The agent asks the same question, or picks a template
+again, and the pick is the agent's default and not your answer. The
+answer you typed was part of the chat, and a new session starts from the
+files. The chat is over, and nothing in the folder says which template you
+meant. The same thing happens next week when a colleague runs the brief,
+or when you run it in a session that doesn't have this conversation.
 
 Now put the answer in the second place. Edit `brief.md` and change "use
 the template in templates/" to "use the template in
@@ -137,7 +144,7 @@ every run.
 
 <Choice id="where-the-answer-goes" objective="using-agents/delegates-and-checks/adjusts-mid-task"
   concepts={['task-brief']}
-  context="A learner runs a written brief with an agent that reads a folder of files. The brief points at a folder of templates without naming one, and the agent asks which template to use."
+  context="A learner runs a written brief with an agent that reads a folder of files. The brief points at a folder of two templates without naming one, the other template is used for another weekly message, and the agent asks which template to use."
   title="Where does the answer go?" hint="Which of these will the next run of this brief still see?"
   options={[
     { text: 'Reply in the chat with the template name and let the agent finish.', why: 'The run finishes, and the next run starts from the files and asks the same question. The chat is not among the files.' },
@@ -145,24 +152,25 @@ every run.
     { text: 'Edit the brief so it names the template file, then restart the agent from the edited brief.', correct: true },
     { text: 'Delete the template you did not want, so the agent has only one to find.', why: 'It removes the question for this brief and breaks every other brief that used the short template. The gap was in the brief, so the fix belongs in the brief.' },
   ]}>
-The agent asks which of two templates to use. You know the answer. Where
-do you put it, so that the next run does not ask again?
+The agent asks which of two templates to use. You know the answer, and the short
+template is used for another weekly message. Where does the answer belong?
 </Choice>
 
-## Changing a limit while the work runs
+## Changing a limit between runs
 
 The full template says "keep each bullet to one line". The first update
-came back, and the director wants to know who is responsible for each
-item, which the notes have and the one-line bullets barely fit. You want
+came back without the names, and the director wants to know who is
+responsible for each item. The notes have the names, and a one-line bullet
+barely fits them. You want
 the bullets to name the person and be allowed a second line. This is a
 change to a limit, and how you state it matters.
 
 Type "add who is responsible to each bullet" and the agent now has two
 instructions: the template's one-line limit and your new one. It tries to
 satisfy both. You get a bullet that makes room for the name by dropping
-another fact, or a name squeezed in as initials. Nothing told it the earlier limit no longer
-applies, so it holds on to it. State the change as a change instead, in
-the chat for this run and in the file for every run after it.
+another fact, or a name squeezed in as initials. Nothing told it the earlier
+limit no longer applies, so it holds on to it. State the change as a change
+instead, in the chat for this run and in the file for every run after it.
 
 <Prompt model="illustrative" recorded="illustrative">
 Replace the limit "keep each bullet to one line" with this one: each
@@ -170,10 +178,13 @@ bullet names the person responsible and may run to two lines. Rewrite
 the update with that change and nothing else changed.
 </Prompt>
 <Response>
+
+```text
 Subject: Calibration team, week 38
 
 ## Done
-- Finished the recalibration of the 20 torque wrenches for the Delft site. Responsible: Jonas.
+- Finished the recalibration of the 20 torque wrenches for the Delft site.
+  Responsible: Jonas.
 - Storeroom B stock count done, two calipers over, three probes short.
   Responsible: Sam.
 
@@ -181,17 +192,19 @@ Subject: Calibration team, week 38
 - Thermocouple batch for the food lab, 12 of 40 done. Responsible: Mira.
 
 ## Blocked
-- 1 kg reference weight from the supplier, due 26 September. Responsible: Mira.
+- 1 kg reference weight from the supplier, due 26 Sep. Responsible: Mira.
 
 ## Next week
-- Finish the thermocouple batch. Responsible: Mira.
+- Finish the thermocouple batch. Responsible: not in the notes.
 - Start the spirit levels for the survey team. Responsible: not in the notes.
+```
+
 </Response>
 
 The exchange above is illustrative. In your own result, look for a name
 on every bullet and no bullet cut short to make room. Where the notes give
-no name, a plain "not in the notes" is right and a guessed name is a
-failure. Then make the same change in `templates/full-update.md`, so
+no name, as on both next-week lines, a plain "not in the notes" is right
+and a guessed name is a failure, even where the guess is easy. Then make the same change in `templates/full-update.md`, so
 the next run gets the new limit without being told. The word "replace"
 did the work here. It names the old instruction and retires it, where
 "also" or "add" would have left it standing.
@@ -218,23 +231,24 @@ for. The update the brief asks for is the wrong document. Every
 criterion in the brief can pass, and the result is still no use.
 
 <Pitfall title="Letting it finish the wrong thing well">
-A learner reads the first draft, sees that the director wants decisions
-and the brief asks for a task list, and thinks "let it finish, then I'll
-ask for the decisions". The agent finishes a tidy task list. The done-criteria pass on review. The learner then asks for the decisions in the chat. The second result mixes a decision list into
-the task list, because the brief still asks for the task list. Two runs
-and two reviews went into a document that was wrong from the first line.
-The rule: when the first result shows the goal itself was wrong, stop the
-run and rewrite the goal and the done-criteria in the brief. A stopped run
-costs one run. A finished wrong result costs the run, the review, and the
-next run too.
+A learner reads the first draft, sees that the director wants decisions and
+the brief asks for a task list, and thinks "let it finish, then I'll ask for
+the decisions". The agent finishes a tidy task list. The done-criteria pass
+on review. The learner then asks for the decisions in the chat. The second
+result mixes a decision list into the task list, because the brief still
+asks for the task list. Two runs and two reviews went into a document that
+was wrong from the first line. The rule: when the first result shows the
+goal itself was wrong, stop the run and rewrite the goal and the done-
+criteria in the brief. A stopped run costs one run. A finished wrong result
+costs the run, the review, and the next run too.
 </Pitfall>
 
 Stopping is cheap because the work so far was the agent's, and the agent
 starts again from the brief without complaint. The expensive part is the
 review you would give a result that can pass every criterion and still
-miss the point. So the check on a first result has two questions. Does it
-meet the done-criteria? And does meeting them still get you what you
-wanted? When the answer to the second is no, the brief has the wrong goal,
+miss the point. So a first result gets checked against the done-criteria and then
+against the reason you wrote them. Does meeting them still get you what
+you wanted? When that answer is no, the brief has the wrong goal,
 and the edit goes there.
 
 <Scenario id="stop-or-finish" objective="using-agents/delegates-and-checks/adjusts-mid-task"
@@ -254,12 +268,12 @@ a list of work done. What do you do?
 
 ## The loop
 
-Every step in this lesson was the same move. A result came back, you read
-it against the brief, and what you learned went into the brief before the
-next run. The agent asked a question, and the answer went into the brief.
-A limit changed, and the change went into the template as a replacement.
-The goal turned out wrong, and the goal and the done-criteria changed
-before the run went on. Result, brief, run (@Academy
+Every step in this lesson was the same move. A result came back, you
+read it against the brief, and what you learned went into the brief
+before the next run. The agent's question became a line in the brief, the
+changed limit became a replacement in the template, and the wrong goal
+became a rewrite of the done-criteria before the run went on. A result
+comes back, the brief changes, and the run goes again (@Academy
 introduction-to-claude-cowork). The chat is where you steer this run, and
 the files are where the steering is kept.
 
@@ -279,8 +293,8 @@ you given an agent in the chat this week that belong in a file?
 
 <Recap>
 1. An agent that asks a question and an agent that guesses are showing you the same gap in the brief.
-2. An answer in the chat fixes this run. An answer in the brief fixes every run, because a new session starts from the files and the earlier chat is not among them.
-3. State a changed limit as a replacement, and name the old limit. An agent holds the earlier instruction and tries to satisfy both (@Academy ai-fluency-framework-foundations).
+2. An answer in the chat fixes this run. An answer in the brief fixes every later run of this brief, because a new session starts from the files and the earlier chat is not among them (@Academy ai-fluency-framework-foundations).
+3. State a changed limit as a replacement, and name the old limit. An agent holds the earlier instruction and tries to satisfy both.
 4. When a first result shows the goal itself was wrong, stop the run and rewrite the goal and the done-criteria. A stopped run costs one run, and a finished wrong result costs the run, the review, and the next run.
-5. Result, brief, run. Steer this run in the chat, and keep the steering in the files (@Academy introduction-to-claude-cowork).
+5. A result comes back, the brief changes, and the run goes again. Steer this run in the chat, and keep the steering in the files (@Academy introduction-to-claude-cowork).
 </Recap>
