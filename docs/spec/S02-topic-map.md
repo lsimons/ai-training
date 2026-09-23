@@ -191,9 +191,10 @@ The topic tables below name the material each topic can start from. Keys:
 | new                            | No usable source; written from scratch                                                                                                                              | -                           | -                                                                                                     |
 
 The `Academy <slug>` license is Proprietary, except the AI Fluency courses
-and *AI capabilities and limitations*, whose lesson pages carry CC BY-NC-SA
-4.0. NC is incompatible with this site's CC BY-SA 4.0, so no text is adapted
-from any Academy course regardless of its license.
+and *AI capabilities and limitations*, whose lesson pages end with a
+CC BY-NC-SA 4.0 notice. The NonCommercial (NC) term is incompatible with this
+site's CC BY-SA 4.0, so no text is adapted from any Academy course regardless
+of its license.
 
 | Key      | agent-engineer-course lesson                                                                  |
 | -------- | --------------------------------------------------------------------------------------------- |
