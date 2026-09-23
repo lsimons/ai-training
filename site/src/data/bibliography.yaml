@@ -529,6 +529,13 @@ Claude Code permissions:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/permissions
+Claude Code best practices:
+  type: reference
+  title: Best practices for Claude Code
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/best-practices
 Claude docs authentication:
   type: reference
   title: Authentication

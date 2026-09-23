@@ -1,10 +1,16 @@
 id: coding-with-agents/plan-then-test
 title: Plan first, then drive the change from a failing test
+description: >-
+  Put a coding agent in plan mode for a bug that spans three modules, correct one step of its plan
+  while corrections are cheap, then have it write the failing test, fix the code until the test
+  passes, and read the diff.
 mode: tutorial
 covers: coding-with-agents/workflow
 serves: [coding-with-agents/ships-with-agent/runs-a-session]
 introduces: [plan-mode, test-driven-change]
 assumes: []
+sources-checked: 2026-09-23
+review-by: 2027-03-23
 after: [coding-with-agents/first-session, coding-with-agents/decomposing-the-work]
 shorts: [when a test beats a spec and when a spec beats a test]
 exercise:
@@ -12,9 +18,21 @@ exercise:
   brief: >-
     In plan mode, have the agent propose steps for a bug fix in the fixture, correct one step, then
     let it write the failing test and implement until it passes.
-sources: [Academy claude-code-101, DLAI-6]
-issue: 153
+sources:
+  - Academy claude-code-101
+  - Claude Code permission modes
+  - Claude Code best practices
 minutes: 15
 notes: >-
-  Sources: Academy claude-code-101 for the explore, plan, code rhythm (paraphrased), DLAI-6 as
-  inspiration.
+  The fixture is the first-session to-do program a few weeks later, split into todo.py, store.py
+  and render.py, with a mutate-while-iterating bug in store.remove_done that the shipped tests don't
+  cover. The suite passes as the fixture ships, and the lesson's failing test is committed next to
+  the scripts as test_clear.py, which the fixtures copy into a temporary copy of the repository.
+  The wrong plan step the learner corrects is a change to render.py that hides done items, which
+  makes the symptom go away and leaves the bug. Plan mode facts (Shift+Tab, /plan,
+  --permission-mode plan, reads and explores but edits nothing until the plan is approved, the
+  three approve options, Ctrl+G) come from code.claude.com/docs/en/permission-modes, and the
+  explore, plan, code rhythm and the "if you could describe the diff in one sentence, skip the
+  plan" advice from code.claude.com/docs/en/best-practices. Both must be re-checked by review-by.
+  DLAI-6 was inspiration only and isn't cited on the page, so it stays on the topic and is left
+  out of this list. The spec-driven lesson isn't live, so the page names the topic without a link.
