@@ -71,27 +71,27 @@ follow-ups are found.
 
 ## The loop
 
-The dispatcher keeps a meta record, `docs/agents/sessions/<date>-meta.md`,
-with the run's remaining whitelist, the parked issues and one report per
-wave, so the history is a file and never the dispatcher's context. One
-tick:
+The dispatcher keeps a meta record, named once at the start of the run,
+`docs/agents/sessions/<start-date>-meta.md`, with the run's remaining
+whitelist, the parked issues and one report per wave, so the history is a
+file and never the dispatcher's context. One tick:
 
 1. **Pull.** `git pull --rebase` on `main`. The dispatcher commits its
    record after every wave, so the tree is clean here.
 2. **Wave number.** One more than the highest `wave-<n>` in
-   `docs/agents/sessions/` or in `origin/wave/<n>-*`, whichever is higher,
-   or 6 when there is none. `orchestration.md` keeps the records of waves 1
-   to 5 inline.
-3. **Resume check.** A wave failed when its lead never reported `merged`.
-   An `origin/wave/<n>-*` branch with the computed number, or a
-   `origin/feat/<issue>-*` branch for a whitelisted issue with no merged
-   pull request, is such a wave. The dispatcher then spawns a lead for that
-   wave number and branch with the resuming line filled in, and the lead
-   follows "Resuming a half-done wave" in the template: fetch, read each
-   issue's last review verdict, reuse the worktrees that exist, spawn only
-   what is missing, and never redo a branch with an approve verdict. The
-   wave branch is `wave/<n>-<kind>`, without a date, so a next-day resume
-   finds it.
+   `docs/agents/sessions/`, or 6 when there is none. `orchestration.md`
+   keeps the records of waves 1 to 5 inline.
+3. **Resume check.** An `origin/wave/<n>-*` branch with the computed
+   number is a wave whose lead never finished, and so is an `In flight`
+   line in the meta record with no report after it. The dispatcher then
+   spawns a lead for that wave number and branch with the resuming line
+   filled in, and the lead follows "Resuming a half-done wave" in the
+   template: fetch, read each issue's last review verdict, reuse the
+   worktrees that exist, spawn only what is missing, and never redo a
+   branch with an approve verdict. Only the issues on the `In flight` line
+   count for `origin/feat/<issue>-*` branches, so a stale branch from an
+   earlier run starts nothing. The wave branch is `wave/<n>-<kind>`,
+   without a date, so a next-day resume finds it.
 4. **Pick.** Run `mise run next-wave -- --size 6`, with `--kind` and the
    remaining whitelist as `--only`. For a lessons wave it lists the planned
    lessons whose issue is `ready-for-agent` and unassigned, and drops the
@@ -117,16 +117,20 @@ tick:
    branch, reviewed with a diff read plus the fast checks and no content
    review. A wave that is only the nits row proceeds. An empty table ends
    the loop.
-5. **Spawn the wave lead** with the filled template. The dispatcher then
-   waits for the lead's notification and does nothing else.
-6. **Read the report and commit the record.** Append the report to the
-   meta record, apply its `Add to collision notes` lines to the template,
-   and under `--only` remove the merged and the left-out issues from the
-   remaining whitelist, parking the left-out ones so the run never picks
-   them again. Run `mise run spell` and `mise run prose` on the two files,
-   commit them on `main` as `docs(agents): meta record wave <n>`, and push.
-   Nothing of the dispatcher's stays uncommitted between ticks, and the
-   wave lead never edits either file. Then, on `merged`, play the chime
+5. **Mark the wave in flight and spawn the wave lead.** The dispatcher
+   writes `In flight: wave <n>, branch <b>, issues #a #b ...` to the meta
+   record, commits and pushes it, then spawns the lead with the filled
+   template, waits for the lead's notification and does nothing else.
+6. **Read the report and commit the record.** Replace the `In flight` line
+   with the report, apply its `Add to collision notes` lines to the
+   template, and under `--only` remove the merged and the left-out issues
+   from the remaining whitelist, parking the left-out ones so the run
+   never picks them again. Run `mise run spell` and `mise run prose` on
+   the two files, commit them on `main` as
+   `docs(agents): meta record wave <n>`, `git pull --rebase` right before
+   the push because the lead merged into `origin/main` in the meantime,
+   and push. Nothing of the dispatcher's stays uncommitted between ticks,
+   and the wave lead never edits either file. Then, on `merged`, play the chime
    and go to step 1. On `open`, the lead has hit the standing-approval
    exception (below). Report it to the maintainer and stop. On `failed`,
    report to the maintainer and stop. The next `/wave` finds the wave in
