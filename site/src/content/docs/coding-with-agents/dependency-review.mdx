@@ -350,8 +350,38 @@ makes the next review a diff against this one instead of a fresh start.
 
 A good result fits on one page, answers every question that applies to a
 new direct dependency, names what you skipped and why, and has a verdict
-that a colleague could act on without asking you. Reflect: which dimension
-took the longest to answer, and did the time match the risk?
+that a colleague could act on without asking you.
+
+Then get a second opinion from an agent. A **skill** is a packaged
+procedure, a Markdown file of instructions that the agent loads when a task
+matches its description. The [Customizing agents](/customizing-agents/)
+course explains how skills work, in a lesson still to be written, and you
+need none of that to install one. The `sbp-dependency-audit` skill in the
+public [`schubergphilis/agents.md`](https://github.com/schubergphilis/agents.md/blob/main/skills/sbp-dependency-audit/SKILL.md)
+repository on GitHub walks an agent through a dependency audit
+(@sbp-dependency-audit). It lists what the project declares and what the
+code imports, sorts each package into keep, inline, replace with the
+standard library, vendor, or remove, and rates supply-chain risk from
+maintenance activity, known vulnerabilities, transitive count and
+install-time behavior. Copy the `skills/sbp-dependency-audit/` directory
+into the place your coding agent reads skills from (for Claude Code,
+`.claude/skills/` in the project, and other agents document their own
+directory), start a new session in the project, and ask the agent to audit
+the dependency you reviewed, using that skill.
+
+Compare its report with your page, and write the comparison under your
+verdict. Which of the six dimensions did the agent cover, and which did it
+skip or fold into another? Which questions did it answer differently from
+you, and which of you was right? A claim about the last release or the
+number of maintainers is a fact you can check at the source. Where its
+verdict differs from yours, say why, and map its category to your accept,
+accept with conditions, or reject before you compare, because the two lists
+are different. Last, name what you would still check by hand after reading
+the agent's report.
+
+End with two or three lines on which parts of a dependency review you can
+hand to an agent from now on, and which parts stay with you. Reflect: which
+dimension took the longest to answer, and did the time match the risk?
 </Exercise>
 
 <Recap>

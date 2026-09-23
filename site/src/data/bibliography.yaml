@@ -445,6 +445,13 @@ OpenSSF Scorecard:
   author: OpenSSF Scorecard contributors
   license: Apache-2.0
   url: https://scorecard.dev/
+sbp-dependency-audit:
+  type: reference
+  title: "sbp-dependency-audit: dependency audit skill for coding agents"
+  container: schubergphilis/agents.md on GitHub
+  author: agents.md contributors
+  license: Apache-2.0
+  url: https://github.com/schubergphilis/agents.md/blob/main/skills/sbp-dependency-audit/SKILL.md
 AI Act:
   type: reference
   title: "Regulation (EU) 2024/1689 (Artificial Intelligence Act), consolidated text of 27 July 2026"

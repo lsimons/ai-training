@@ -62,6 +62,7 @@ Dependabot
 Renovate
 pnpm
 microroute
+schubergphilis
 opencode
 ICMJE
 
