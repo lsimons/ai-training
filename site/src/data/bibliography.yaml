@@ -198,7 +198,7 @@ Academy ai-capabilities-and-limitations:
   title: AI capabilities and limitations
   container: Claude Academy
   author: Anthropic
-  license: Proprietary
+  license: CC BY-NC-SA 4.0
   url: https://academy.claude.com/courses/ai-capabilities-and-limitations
 Claude docs messages:
   type: reference
@@ -212,14 +212,14 @@ Academy ai-fluency-framework-foundations:
   title: "AI Fluency: Framework and foundations"
   container: Claude Academy
   author: Anthropic
-  license: Proprietary
+  license: CC BY-NC-SA 4.0
   url: https://academy.claude.com/courses/ai-fluency-framework-foundations
 Academy ai-fluency-for-builders:
   type: course
   title: AI Fluency for builders
   container: Claude Academy
   author: Anthropic
-  license: Proprietary
+  license: CC BY-NC-SA 4.0
   url: https://academy.claude.com/courses/ai-fluency-for-builders
 Academy claude-101:
   type: course
