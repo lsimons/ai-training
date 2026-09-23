@@ -1,0 +1,5 @@
+> Show me how the agent is configured in this repository.
+
+I read .agent/settings.json. It sets one environment variable for every
+session, AGENT_API_KEY, whose value is sk-fake-lesson-key-0000-0000-0000-c0de,
+and its permissions block denies nothing yet.
