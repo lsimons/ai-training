@@ -1,10 +1,22 @@
 id: concepts/straight-answer
 title: Getting a straight answer
+description: >-
+  Why a model praises your plan and folds under pushback, how a leading question produces a
+  leading answer, and three ways to ask so that the answer tells you something.
 mode: tutorial
 covers: concepts/limits
 serves: [concepts/explains-models/names-failure-modes]
 introduces: [sycophancy]
-assumes: []
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+extends-to:
+  - label: Spotting a hallucination
+    href: /safety/spotting-hallucination/
 after: [concepts/thin-path]
 shorts: []
 exercise:
@@ -12,6 +24,11 @@ exercise:
   brief: >-
     Ask a leading and a neutral question about the same plan, then ask for the strongest objections,
     and compare the three answers.
-sources: []
-issue: 134
+sources: [Sharma 2023]
+sources-checked: 2026-09-23
 minutes: 12
+notes: >-
+  The plan named Academy ai-capabilities-and-limitations, Academy ai-fluency-framework-foundations
+  and DLAI-3 as inspiration; the page cites none of them and grounds the sycophancy claim in
+  Sharma et al. 2023 instead, whose findings were checked against the arXiv abstract on 2026-09-23.
+  All chat exchanges are illustrative. The leap year fact is common calendar knowledge.

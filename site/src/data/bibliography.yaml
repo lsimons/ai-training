@@ -543,3 +543,10 @@ Gitleaks:
   author: Zachary Rice and contributors
   license: MIT
   url: https://github.com/gitleaks/gitleaks
+Sharma 2023:
+  type: reference
+  title: Towards Understanding Sycophancy in Language Models
+  container: arXiv preprint 2310.13548
+  author: Mrinank Sharma, Meg Tong, Tomasz Korbak and 16 others
+  license: CC BY 4.0
+  url: https://arxiv.org/abs/2310.13548
