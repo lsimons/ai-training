@@ -1,0 +1,305 @@
+import { Predict, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we give a coding agent one small task twice more, in the
+same to-do fixture as the last lesson. The first run has nothing
+pre-approved, and we write down every prompt. Before the second run we
+turn that list of prompts into a short file of rules, one line per command
+the task needs, and the run goes through with almost no prompts. Then we
+read the tally again and delete every rule that answered no prompt. What
+is left is an allowlist you can read in one glance and check into a
+repository.
+
+The rule syntax and the matching here are Claude Code's, checked against
+the vendor's documentation on the date shown above the lesson
+(@Claude Code permissions). Other coding agents have allowlists with
+other spellings. The method transfers, and the exact syntax may not.
+
+## Run one: nothing pre-approved
+
+The last lesson chose a mode for the whole session. This lesson keeps the
+mode fixed at Manual, where every edit and every command outside the
+built-in read-only set stops for you, and changes the other half of the
+setting. **Allowlists** are the rules that say which specific tools,
+commands and paths may run without a prompt, and deny rules say which may
+never run. In Claude Code they are three lists in a settings file,
+`allow`, `ask` and `deny`, each holding rules of the form `Tool` or
+`Tool(specifier)`. Claude Code checks a tool call against `deny` first,
+then `ask`, then `allow`, and the first match decides. A narrow allow rule
+never wins against a broader deny rule, whichever came first in the file
+(@Claude Code permissions).
+
+Make a fresh copy of the fixture directory,
+`site/examples/coding-with-agents/first-session/fixture-repo/`, outside the
+course repository, change into it, and give it a first commit, as you did
+in the last lesson. If you still have that copy, reset it with
+`git checkout -- .` and use it. Either way the copy is its own git
+repository, so no rule you saved in any other project applies here.
+
+```sh
+git init -q && git add -A && git commit -q -m "fixture"
+```
+
+Start the agent with `claude --permission-mode default`, type
+`/permissions`, and look at the dialog. It lists every permission rule in
+force and the settings file each one came from (@Claude Code permissions).
+In a fresh copy the list is empty. Close it and send this brief.
+
+```text
+Add a `clear` command to todo.py that removes every item marked done and
+prints how many it removed. Add one test for it to test_todo.py. Then run
+`python3 -m unittest -q`. One test, test_done_marks_the_numbered_item,
+already fails and is not your task. Leave it. Do not edit todos.json.
+```
+
+Keep a tally with one line per prompt: the file it asked to edit, or the
+exact command it asked to run. Approve each one after you have read it,
+and choose the plain "Yes" each time. The other option, "Yes, and don't
+ask again", writes a rule for you, and this lesson writes the rules by
+hand first so you can see what one looks like. Expect an edit to
+`todo.py`, an edit to `test_todo.py` and the test command, and don't be
+surprised by a second edit to a file or a second test run. The reads
+before the edits never prompt, because reading a file inside the working
+directory doesn't need approval (@Claude Code permissions).
+
+When the agent reports done, read the diff, then reset with
+`git checkout -- .`. The tally is the input for the next section, so keep
+it.
+
+## Run two: write the allowlist
+
+Look down the tally and sort the lines into what the agent read, what it
+wrote, and what it ran. Reads are absent, since none of them prompted.
+Writes are the two source files. Runs are the test command, once or
+twice. That sorting is the file. Create `.claude/settings.local.json` in
+the fixture copy with this content. The file is JSON (JavaScript Object
+Notation), the same format the "don't ask again" option writes to when
+it saves a rule (@Claude Code permissions).
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Edit(todo.py)",
+      "Edit(test_todo.py)",
+      "Bash(python3 -m unittest *)",
+      "Bash(git status *)",
+      "Bash(git diff *)"
+    ],
+    "deny": [
+      "Edit(todos.json)"
+    ]
+  }
+}
+```
+
+Each line is a rule with a tool name and a specifier in parentheses. For
+the `Edit` tool the specifier is a path, and a bare path such as
+`todo.py` is relative to the directory the agent runs in. For the `Bash`
+tool the specifier is the command text. A rule with no `*` matches one
+exact command, and a `*` matches any text, including spaces. When
+the only `*` is at the end after a space, the rule also matches the bare
+command, so `Bash(git status *)` covers `git status` and
+`git status --short`. The vendor's advice is to write the command you want
+to run without asking and replace the parts that vary with `*`
+(@Claude Code permissions). The `git status` and `git diff` entries are
+here because the plan for the run said "allow the read-only
+version-control commands". Whether they're needed is the question of the
+next section.
+
+The `deny` entry does a job the brief only asked for. "Do not edit
+`todos.json`" in a prompt is an instruction, and the agent decides whether
+to follow it. The deny rule is enforced by Claude Code, on its own file
+tools and on the file commands it recognizes in a shell command, such as
+`sed` or a redirect into the file (@Claude Code permissions). Note the limit: the fixture's own
+`python3 todo.py add` writes `todos.json` from inside Python, and a rule on
+the `Edit` tool doesn't see that. A rule matches the tool call the agent
+makes, and it isn't a wall around the file.
+
+Before the run, hold three rules of growing width against three commands.
+`matches` below is a small model of the vendor's matching for the two
+shapes this lesson uses, an exact rule and a rule with one trailing `*`.
+The complete file is `site/examples/customizing-agents/allowlists/width.py`
+in the repository.
+
+```python
+import fnmatch
+
+
+def matches(rule, command):
+    pattern = rule[len("Bash(") : -1]
+    if pattern.endswith(" *") and pattern.count("*") == 1:
+        prefix = pattern[:-2]
+        return command == prefix or command.startswith(prefix + " ")
+    return fnmatch.fnmatchcase(command, pattern)
+
+
+RULES = ["Bash(git log)", "Bash(git log *)", "Bash(git *)"]
+COMMANDS = ["git log", "git log --oneline main", "git push origin main"]
+```
+
+<Predict id="how-wide-is-the-rule" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['allowlists']}
+  context="A small Python function models how a coding agent matches a Bash allow rule against a command: a rule without a wildcard matches one exact command, a trailing wildcard after a space matches the bare command and any continuation, and a wildcard elsewhere matches any text. Three rules are held against three git commands."
+  title="How wide is each rule?" hint="Take each command in turn and walk the three rules: is it the exact text, does it start with the prefix before the wildcard, or does it start with a bare git?"
+  answer={`git log: 3
+git log --oneline main: 2
+git push origin main: 1`} run="customizing-agents/allowlists/width.py">
+
+What does this print, one line per command, with the number of rules
+that cover it?
+
+```python
+for command in COMMANDS:
+    hits = [r for r in RULES if matches(r, command)]
+    print(f"{command}: {len(hits)}")
+```
+
+</Predict>
+
+The last line is the one to remember. The rule `Bash(git *)` was never
+written with a push in mind, and it approves one anyway. Claude Code
+matches everything before the first `*` as written. The words before it
+are the whole limit of the rule (@Claude Code permissions).
+
+Now start the agent again in the same mode, `claude --permission-mode
+default`, and check `/permissions`. Every rule from the file is listed,
+with the file it came from. Send the same brief and tally again. The two
+edits and the test command go through without a prompt, and the session
+most likely runs to the end without stopping. If it does stop, write down
+what for. A prompt now means the agent ran something the list doesn't
+cover, such as `python3 todo.py list` to try the new command. That prompt
+is a decision for you. Does the command belong on the list, or was this
+one run enough? Read the diff as carefully as in run one, then reset.
+
+## Prune what the run never used
+
+An allowlist is a standing approval. Every rule in it approves a command
+in every future session in this repository, watched or not. A rule with no job only widens what a future session may run
+without you. The test is the tally from run one: a rule stays when it
+answers a prompt that was in the tally. A rule that answers none of them
+is either for a command the agent never ran, or for a command that never
+prompted in the first place.
+
+The `git status` and `git diff` entries fail that test for the second
+reason. Claude Code
+recognizes a built-in set of read-only commands, among them `ls`, `cat`,
+`grep` and the read-only forms of `git`, and runs them without a prompt
+in every mode (@Claude Code permissions). `git status` was never in the
+tally because it never stopped for you, and a rule for it changes
+nothing. Here is the prune as a program, with `TALLY` as the commands of
+a typical run one. The complete file is
+`site/examples/customizing-agents/allowlists/prune.py`, next to
+`width.py`, which it imports `matches` from.
+
+```python
+ALLOW = ["Bash(python3 -m unittest *)", "Bash(git status *)", "Bash(git diff *)"]
+TALLY = ["python3 -m unittest -q", "python3 -m unittest -q"]
+
+
+def unused(rules, prompted):
+    return [rule for rule in rules if not any(matches(rule, command) for command in prompted)]
+```
+
+<Predict id="prune-the-list" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['allowlists']}
+  context="A small Python function takes a list of Bash allow rules and the list of commands that stopped for a prompt during a run, and returns the rules that match none of those commands. The allowlist has a rule for the test command and two rules for read-only git commands, and the prompted commands are two runs of the test command."
+  title="Which rules go?" hint="Which rules in ALLOW cover neither line of TALLY?"
+  answer={`Bash(git status *)
+Bash(git diff *)`} run="customizing-agents/allowlists/prune.py">
+
+What does this print?
+
+```python
+for rule in unused(ALLOW, TALLY):
+    print(rule)
+```
+
+</Predict>
+
+Delete those two lines from `.claude/settings.local.json`. The `Edit`
+rules stay, because both files were in the tally, and the deny rule
+stays, because a deny rule is a limit and never widens anything. The
+file now has four lines of rules, and each one points at a line in your
+tally. That is what reviewable means here: a colleague who reads the file
+can ask "which prompt is this for?" about every entry and get an answer.
+
+The file grows on its own from here. The "Yes, and don't ask again"
+option on a Bash prompt adds a rule for that command to this same file.
+The rule then applies to every later session in the repository
+(@Claude Code permissions). Prune it the same way after each
+task: open `/permissions`, and for each rule ask which prompt it was for.
+The user-level file, `~/.claude/settings.json`, holds the rules you want
+in every project, and the project's `.claude/settings.json` holds the
+ones a team shares through the repository. A deny rule in any of those
+files wins over an allow rule in any other, because Claude Code
+evaluates the deny rules of every file before the allow rules of any
+(@Claude Code permissions).
+
+<Sort id="rule-or-no-rule" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['allowlists', 'permissions']}
+  context="A developer is writing the permission rules for a small task in a coding agent's Manual mode, where edits and commands outside a built-in read-only set stop for a prompt. The brief forbids one file. Reads inside the working directory and a built-in set of read-only shell commands never prompt."
+  title="Allow, deny, or no rule at all?" hint="Did this action stop for a prompt in run one, and did the brief forbid it or ask for it?"
+  buckets={['Allow rule: the task needs it and it prompted', 'Deny rule: the brief forbids it', 'No rule: it never prompts']}
+  items={[
+    { text: 'Run python3 -m unittest -q', bucket: 0 },
+    { text: 'Edit todo.py', bucket: 0 },
+    { text: 'Edit todos.json', bucket: 1 },
+    { text: 'Run git diff', bucket: 2 },
+    { text: 'Run cat test_todo.py', bucket: 2 },
+    { text: 'Edit test_todo.py', bucket: 0 },
+  ]}>
+Place each action from the fixture task in the list it belongs in, or in
+no list.
+</Sort>
+
+<Pitfall title="The wildcard that approved a push">
+A developer is prompted for `git commit -m "add clear"` and, wanting no
+more git prompts, saves the rule `Bash(git *)`. It does what they wanted
+for commits. A week later, in a session they are half watching, the agent
+asks for nothing before `git push --force origin main`. The same rule
+approved it, because everything after `git` is the wildcard. The rule:
+put the `*` after the subcommand, as in `Bash(git commit *)`, and write
+one rule per subcommand the task needs. Claude Code matches the text
+before the first `*` exactly, and nothing after it limits the rule
+(@Claude Code permissions).
+</Pitfall>
+
+<Exercise stretch="Approve one prompt in run two with the don't-ask-again option instead of the plain yes, then open the settings file and compare the rule Claude Code wrote with the one you would have written.">
+Do the runs from this lesson, if you haven't already, in a fresh copy of
+the fixture with its own first commit. Run one with nothing pre-approved
+and a tally of every prompt. Then write `.claude/settings.local.json`
+with the test command, the read-only git commands, the two edit rules and
+the deny rule, run the task again, and prune every rule that answers no
+line of the tally. The result is one small settings file and a tally with
+a line for each rule left in it. The point is to practice turning prompts
+into rules and rules back into a question, before you do it in a
+repository where the file stays in use for months.
+
+A good result: the final file has the test command, the two `Edit` rules
+and the deny rule, the two git entries are gone, run two stopped for
+nothing or for one command you can name, and both diffs contain the same
+change. Reflection: open the `settings.local.json` of a repository you
+work in every day. Which rule in it can you no longer say the prompt for?
+</Exercise>
+
+<Recap>
+1. An allowlist turns a stream of prompts into a file of rules, one per
+   command or path the task needs, and the file is what makes the
+   decision reviewable. In Claude Code the lists are `allow`, `ask` and
+   `deny` in a settings file, and `/permissions` shows every rule with
+   the file it came from (@Claude Code permissions).
+2. Claude Code checks `deny`, then `ask`, then `allow`, and the first
+   match decides. A narrower allow rule doesn't win against a broader
+   deny rule (@Claude Code permissions).
+3. A rule with no `*` matches one exact command. A trailing `*` after a
+   space also matches the bare command, and a `*` right after the
+   program name approves every subcommand, including the ones you never
+   thought of (@Claude Code permissions).
+4. Write the rule from the tally: sort the prompts into reads, writes and
+   runs, and give the writes and runs one line each. A read inside the
+   working directory doesn't prompt and doesn't need one.
+5. After the run, delete every rule that answered no prompt. A rule for a
+   command on the built-in read-only list does nothing, and the
+   don't-ask-again option adds rules to the same file, so prune it after
+   each task.
+</Recap>

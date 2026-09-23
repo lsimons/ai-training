@@ -111,6 +111,9 @@ retriable
 triaging
 Reflexion
 rstrip
+fnmatch
+fnmatchcase
+oneline
 sandboxing
 sandboxed
 scorable
