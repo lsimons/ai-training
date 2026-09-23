@@ -1,12 +1,25 @@
 id: safety/saying-ai-helped
 title: Saying that AI helped, and crediting what it copied
+description: >-
+  Write the disclosure line in its three parts, what the AI did, what you checked and who is
+  accountable, run a script that shows how much of a generated function came from a library, and
+  look up the disclosure rule of the place the work goes to.
 mode: tutorial
 covers: safety/responsible-use
 serves:
   - safety/handles-data-safely/discloses-ai-use
   - safety/handles-data-safely/respects-licenses
 introduces: []
-assumes: []
+assumes:
+  - objective: safety/handles-data-safely/discloses-ai-use
+    lesson: safety/responsible-use
+    section: saying-that-ai-helped
+  - objective: safety/handles-data-safely/respects-licenses
+    lesson: safety/responsible-use
+    section: where-the-output-came-from
+extends-to:
+  - label: Transparency duties in the EU AI Act
+    href: /safety/eu-ai-act/
 after: [safety/responsible-use]
 shorts: [Content credentials (C2PA), The license filter question for generated code]
 exercise:
@@ -14,9 +27,12 @@ exercise:
   brief: >-
     Write the disclosure line for three artifacts you produced this month, and for one of them find
     the rule of the place it went to.
-sources: []
-issue: 114
+sources: [ICMJE authorship, curl contribute, AI Act, Academy ai-fluency-framework-foundations]
+sources-checked: 2026-09-23
+review-by: 2027-03-23
 minutes: 15
 notes: >-
   Introduces no concept: deepens disclosure and licensing-and-attribution with a fixture that
   compares a generated function with a known library source and reports the near-verbatim match.
+  The library and its author in the fixture are invented. DLAI-2 was inspiration only and is not
+  cited on the page. The ICMJE and curl rules move, so review-by covers them.

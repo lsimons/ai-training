@@ -1,0 +1,291 @@
+import { Choice, Predict, Scenario, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+
+A supplier contract was translated from Dutch by an AI tool this month, and
+you read the English against the original before it went to legal. An email
+went out after you accepted the spelling checker's corrections. A ten-line
+function that an assistant wrote went into a pull request. Which of these
+needs a line saying that AI helped? The
+[first lesson](/safety/responsible-use/) of this course gave the test: say
+so when the reader would judge the work differently knowing it. In this
+lesson we write that line for the contract and for the function, one part
+at a time. A script then shows what the function was copied from, and the
+last section looks up the disclosure rule of the place a piece of work goes
+to.
+
+You need a terminal and `python3` for the middle section. The scripts are
+in the course repository under `site/examples/safety/saying-ai-helped/`.
+Copy that directory and change into it. The library in the fixture, and its
+author, are invented.
+
+## Which of these needs a line?
+
+Sort the three artifacts from the opener and two more before reading on.
+The test is the reader: would they treat the work differently if they knew
+what the tool did?
+
+<Sort id="which-needs-a-line" objective="safety/handles-data-safely/discloses-ai-use"
+  concepts={['disclosure']}
+  context="Each item is a finished piece of work in which an AI tool played some part. Sort it by whether the reader needs a line that says AI helped, using the test of whether they would judge the work differently knowing it."
+  title="Which of these needs a line?" hint="Did the tool produce the content, or did it correct a detail in content you produced?"
+  buckets={['Say that AI helped', 'No line needed']}
+  items={[
+    { text: 'A contract translated by an AI tool, and read against the original by you', bucket: 0 },
+    { text: 'An email you wrote, with the spelling checker\'s corrections accepted', bucket: 1 },
+    { text: 'A ten-line function an assistant generated, in a pull request', bucket: 0 },
+    { text: 'A report where you accepted grammar suggestions on your own sentences', bucket: 1 },
+    { text: 'A project status summary an assistant drafted and you edited', bucket: 0 },
+  ]} />
+
+The spelling checker and the grammar suggestions changed details in text
+you wrote. Knowing about them tells the reader nothing they would act on.
+The translation, the function and the summary were produced by the tool,
+and the reader wants to know who checked them.
+
+## The three parts of a disclosure line
+
+The first lesson gave one line for most documents: "Drafted with an AI
+assistant and reviewed by the author". That line works because it has three
+parts, and each part answers a question the reader has.
+
+| Part                  | The reader's question                | For the translated contract                            |
+| --------------------- | ------------------------------------ | ------------------------------------------------------ |
+| What the AI did       | How much of this came from a machine? | Machine-translated from Dutch                          |
+| What the person checked | What can I trust without rechecking? | Every clause read against the Dutch original           |
+| Who is accountable    | Whom do I ask when something is wrong? | Reviewed by Sanne de Wit, who is responsible for the English text |
+
+Put together: "Machine-translated from Dutch. Every clause was read against
+the Dutch original by Sanne de Wit, who is responsible for the English
+text." For a commit or a pull request the same three parts fit in one line
+of the message: "Function `shorten` written by an assistant. I ran the tests
+and read every line." The reader of the diff now knows where to look
+hardest, and knows that a person has already looked.
+
+The parts scale with the work. A memo gets the one line. A report or a
+published article gets a short paragraph that also names the tool and says
+how the facts were checked. The AI Fluency framework files this under
+diligence, and it names being open about how AI was involved as one of the
+duties toward the people the work affects
+(@Academy ai-fluency-framework-foundations).
+
+<Pitfall title='A bare "written with AI"'>
+A colleague adds "Written with AI" to the footer of every document they
+produce, from a two-line status update to a customer proposal. Readers stop
+seeing it within a week, and the one time it matters, when a figure in the
+proposal is wrong, the line tells nobody whether the figures were checked
+or who to ask. A disclosure that says the same thing on every document says
+nothing. Name what the tool did on this piece of work and what you checked.
+</Pitfall>
+
+<Choice id="pick-the-disclosure-line" objective="safety/handles-data-safely/discloses-ai-use"
+  concepts={['disclosure']}
+  context="A supplier contract was translated from Dutch into English by an AI tool. The person who commissioned the translation read every clause of the English against the Dutch original before sending it to the legal team. They need a line to put at the top."
+  title="Which line goes on the contract?" hint="Which of the three questions does each line leave unanswered: what the AI did, what the person checked, who is accountable?"
+  options={[
+    { text: 'Written with AI.', why: 'The reader learns that a machine was involved and nothing else. It leaves all three questions open: what the AI did, whether anyone checked, and whom to ask.' },
+    { text: 'Machine-translated from Dutch. Every clause was read against the Dutch original by Sanne de Wit, who is responsible for the English text.', correct: true },
+    { text: 'Translated by Sanne de Wit.', why: 'A person is named, and the reader is misled about how the translation was made. When a term is off, they will wonder how a translator missed it.' },
+    { text: 'This translation was produced by an AI tool. We accept no responsibility for errors in it.', why: 'It says what the AI did and then hands the risk to the reader. Legal will not accept a contract text that nobody stands behind.' },
+  ]}>
+The translated contract is ready for the legal team. Which line goes at the
+top?
+</Choice>
+
+## Crediting what it copied
+
+The function in the pull request is the second artifact. You asked an
+assistant for "a function that shortens a text to a number of words and
+adds three dots when it cut something", and it returned this. It is in the
+fixture as `generated.py`.
+
+```python
+def shorten(text, limit, marker="..."):
+    """Cut text after `limit` words and add the marker if anything was cut."""
+    words = text.split()
+    if len(words) <= limit:
+        return text
+    # Keep whole words only; never cut one in half
+    kept = " ".join(words[:limit])
+    # Drop trailing punctuation so the marker does not follow a comma
+    kept = kept.rstrip(",;:")
+    return kept + marker
+```
+
+The comments are more polished than the request, and they explain choices
+you didn't ask for. The first lesson called that the sign to search for a
+phrase. Searching for the comment about the comma finds
+`library/truncate.py` in the fixture, a file from a small open-source
+library.
+
+```python
+# truncate.py, from the Hazeldine text helpers
+# Copyright (c) 2021 M. Hazeldine
+# MIT License: keep this notice in every copy.
+
+
+def truncate_words(text, limit, marker="..."):
+    """Cut text after `limit` words and add the marker if anything was cut."""
+    words = text.split()
+    if len(words) <= limit:
+        return text
+    # Keep whole words only; never cut one in half
+    kept = " ".join(words[:limit])
+    # Drop trailing punctuation so the marker does not follow a comma
+    kept = kept.rstrip(",;:")
+    return kept + marker
+```
+
+`compare.py` puts a number on the resemblance. It reads the non-blank lines
+of `generated.py`, strips the spaces around each, and counts how many are
+also a line of `library/truncate.py`. It prints the count, and then the
+lines it found only in `generated.py`.
+
+<Predict id="how-much-was-copied" objective="safety/handles-data-safely/respects-licenses"
+  concepts={['licensing-and-attribution']}
+  context="An assistant returned a ten-line Python function, shorten, with a docstring and two comments. A search finds a library function, truncate_words, whose body is the same line for line, under a different function name and with a three-line license header above it. A script counts the non-blank lines of the generated file that also appear, once stripped of surrounding spaces, in the library file, prints that count as N of M lines, and then lists the lines found only in the generated file, each indented by two spaces."
+  title="How many lines match?" hint="Compare the two listings line by line. Which line of the generated function has no twin in the library file?"
+  answer={`9 of 10 lines of generated.py also appear in library/truncate.py
+only in generated.py:
+  def shorten(text, limit, marker="..."):`} run="safety/saying-ai-helped/compare.py">
+Before you run it, write down what the script prints.
+
+```sh
+python3 compare.py
+```
+
+</Predict>
+
+Nine of ten lines. The one difference is the function name. This is what
+the [first lesson](/safety/responsible-use/) meant by output that
+reproduces a source: the model saw this file, or a copy of it, in training,
+and gave it back nearly whole. The license of the original travels with
+the copy. The header says MIT, and the MIT license lets anyone use the
+code on one condition, that the copyright notice and the license text stay
+with every copy. So the function may go into the pull request with the
+header restored above it and a line in the description that says where it
+came from. The tool's own terms don't change this. They govern your use of
+the tool, and they can't grant rights to code the model took from someone
+else.
+
+Under a different license the answer changes. A copyleft license (one
+that requires a program using the code to be shared under the same
+license) is a condition your proprietary product can't meet by adding a
+notice, and there the copy has to go. The fixture holds one replacement,
+`rewritten.py`, written from the one-sentence requirement with the library
+file closed.
+
+```python
+def shorten(text, limit, marker="..."):
+    """Return at most limit words, with a marker when words were dropped."""
+    words = text.split()
+    if len(words) <= limit:
+        return text
+    return " ".join(words[:limit]).rstrip(",;:") + marker
+```
+
+<Predict id="compare-the-rewrite" title="Compare the rewrite"
+  answer={`3 of 6 lines of rewritten.py also appear in library/truncate.py
+only in rewritten.py:
+  def shorten(text, limit, marker="..."):
+  """Return at most limit words, with a marker when words were dropped."""
+  return " ".join(words[:limit]).rstrip(",;:") + marker`} run="safety/saying-ai-helped/compare_rewrite.py">
+Run the comparison on the rewrite, and compare what you see with the output
+below.
+
+```sh
+python3 compare.py rewritten.py
+```
+
+</Predict>
+
+Three lines still match, and each of them is a line any solution would
+have: split the text, compare the count, return the text unchanged. A
+shared line is a sign to look at the whole, and the whole here has its own
+docstring, its own structure and none of the library's comments. That
+difference is what a reviewer looks for.
+
+<Scenario id="the-copyleft-match" objective="safety/handles-data-safely/respects-licenses"
+  concepts={['licensing-and-attribution']}
+  context="A function an assistant generated for a proprietary product matches, nearly line for line, a function in an open-source library. The library's license is copyleft: a program that uses the code must be shared under the same license."
+  title="The match is under a copyleft license" hint="What does the license of the original ask of a program that includes the code, and which of these options meets it?"
+  options={[
+    { text: 'Keep the function and add the library\'s copyright notice above it.', consequence: 'A notice is what a permissive license asks for. This license asks that the program using the code be shared under the same terms, and your product is not.' },
+    { text: 'Rename the variables and reorder the comments until the comparison finds fewer shared lines.', consequence: 'The function is still a copy of the library function, now with its origin hidden. The obligation is unchanged, and a reviewer who finds it later has one more reason to distrust the pull request.' },
+    { text: 'Remove the function. Write a new one from the requirement with the library file closed, or add the library as a dependency the way its license allows.', correct: true, consequence: 'The pull request holds either your own work or a properly licensed dependency, and the description says which and why.' },
+    { text: 'Ask the assistant whether the function is original, and go ahead if it says yes.', consequence: 'The model has no record of where its output came from, and it answers the question with the same confidence either way.' },
+  ]}>
+Your search for the comment finds the function in a library whose license
+is copyleft. Your product is proprietary. What do you do with the function
+in the pull request?
+</Scenario>
+
+## The rule of the place the work goes to
+
+The three-part line is what to say when nobody has told you what to say.
+Many places have. Before a piece of work leaves, find the rule of where it
+is going.
+
+**A journal.** The recommendations most medical journals follow ask authors
+to disclose AI-assisted technology at submission, to describe in the paper
+how it was used (writing help in the acknowledgments, help with data or
+figures in the methods), and never to list an AI tool as an author, because
+a tool can't take responsibility for the work (@ICMJE authorship). Other
+fields have their own versions, and a conference or journal's author
+guidelines say which one applies.
+
+**An open-source project.** The curl project accepts code written with AI
+help, on the same standards as any other code, and requires anyone who
+used an AI tool to look for security problems to say so in the report
+(@curl contribute). Other projects refuse AI-written code altogether, and
+the file to read is `CONTRIBUTING` or the project's AI policy. Follow the
+rule whether or not you agree with it. Breaking it costs more than the
+disclosure would have.
+
+**An employer.** Your organization's AI policy, if it has one, says what to
+disclose and to whom. Where there is none, the person who approved the tool
+is the person to ask, and "our policy is that AI use is disclosed with the
+three parts" is a fine first draft for them.
+
+**The law.** For most work at your desk no law requires a disclosure. The
+[EU AI Act lesson](/safety/eu-ai-act/) covers the exception that matters
+most: text generated by an AI system and published to inform the public on
+a matter of public interest must be disclosed as such, unless a person
+reviewed it and holds editorial responsibility for it (@AI Act). The
+three-part line, with a named person, is that editorial responsibility
+written down.
+
+When the rule is stricter than the three parts, follow the rule. When
+there is no rule, use the three parts and ask. Every rule above accepts a
+disclosure that names what the tool did, what the person checked and who is
+accountable, so the line is never wrong to write.
+
+## Two habits
+
+Say what the AI did, and credit what it copied. The first is a line with
+three parts, sized to the work. The second is a search for a phrase when
+output looks more finished than the request, and then the license of
+whatever it finds decides what you do with the copy.
+
+<Exercise stretch="Take one of the three and find the disclosure line a colleague would have written for it. Compare theirs with yours.">
+Take three pieces of work you produced this month with an AI tool's help,
+whatever their size, and write the disclosure line for each on paper: what
+the tool did, what you checked, and who is accountable. Then pick one and
+find the disclosure rule of the place it went to, whether a customer, a
+team, a publication or a project, and write down where you found it. Plan
+on ten minutes. Once you have written the line three times you can write it
+without thinking, and you know where one rule is written down.
+
+A good result has three lines that a reader of each piece could act on:
+they know how much came from the tool and whom to ask. For the rule, a good
+result is either the sentence you found and where, or "no rule found, asked
+[name]". Then answer one question: for which of the three pieces was the
+line hardest to write, and was that because you had not checked the work as
+carefully as the line claims?
+</Exercise>
+
+<Recap>
+1. Say that AI helped when the reader would judge the work differently knowing it. A translation, a generated function or a drafted summary gets the line. Accepted spelling corrections don't.
+2. The line has three parts: what the AI did, what you checked, and who is accountable. A bare "written with AI" answers none of the reader's questions.
+3. Output that reproduces a source carries the source's license. A permissive license asks for its notice to stay with the copy. A copyleft license asks more than a notice, and then the copy is replaced by your own work or a proper dependency.
+4. When output looks more finished than the request, search for a phrase from it. A line-by-line comparison puts a number on the match, and the function name changing while the comments stay is the usual pattern.
+5. Find the disclosure rule of the place the work goes to (a journal, a project, an employer, or the law) and follow it. When there is none, use the three parts and ask.
+</Recap>

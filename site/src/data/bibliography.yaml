@@ -487,3 +487,17 @@ Claude docs vision:
   author: Anthropic
   license: Proprietary
   url: https://platform.claude.com/docs/en/build-with-claude/vision
+ICMJE authorship:
+  type: reference
+  title: Defining the role of authors and contributors
+  container: ICMJE Recommendations for the Conduct, Reporting, Editing, and Publication of Scholarly Work in Medical Journals
+  author: International Committee of Medical Journal Editors
+  license: Proprietary
+  url: https://www.icmje.org/recommendations/browse/roles-and-responsibilities/defining-the-role-of-authors-and-contributors.html
+curl contribute:
+  type: reference
+  title: Contributing to the curl project
+  container: curl documentation
+  author: Daniel Stenberg and the curl contributors
+  license: curl license
+  url: https://curl.se/dev/contribute.html
