@@ -3,8 +3,8 @@ import { Choice, Scenario, Repair, Pitfall, Exercise, Recap, Prompt, Response } 
 In this lesson we give an agent a brief with a gap in it and watch what the
 agent does with the gap. Then we answer the agent's question in two places,
 first in the chat and then in the brief. A second run after each answer
-shows which one survives. After that we change a limit in the brief while
-the work is under way, and we stop a run whose first result shows the goal
+shows which one survives. After that we change a limit in the brief between
+two runs, and we stop a run whose first result shows the goal
 itself was wrong. The task is small, and you can run it as often as you
 like.
 
@@ -119,7 +119,7 @@ Subject: Calibration team, week 38
 Check it against the done-criteria. The notes hold five lines and the
 update has six bullets, because the last line of the notes holds two
 items. Every item appears once, under a heading that fits, and the update
-follows the template. The names in brackets are gone, and the template's
+follows the template. The names in parentheses are gone, and the template's
 one-line limit is a fair reason for that. The result passes. Now close
 this session, open a fresh one on the same folder, and send "Do the task
 in brief.md" again. The agent asks the same question, or picks a template
