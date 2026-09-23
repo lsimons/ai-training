@@ -1,4 +1,4 @@
-"""The complete program behind the lesson "Connecting an agent to your systems".
+"""The complete program behind the lesson "Connecting an agent to your systems with MCP".
 
 Run any step with:  python3 ops.py <step>   where step is one of the names
 in STEPS below. The lesson's Predict checkpoints run these in CI.
