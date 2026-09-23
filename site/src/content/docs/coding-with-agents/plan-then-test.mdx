@@ -1,0 +1,408 @@
+import { Choice, Predict, Order, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we fix one bug with a coding agent, in two halves. In the
+first half the agent may read and may not edit: it works out where the bug
+is and writes down the steps it intends to take, and we correct one of them
+before any file changes. In the second half it writes a test that fails
+because of the bug and then changes the code until the test passes, and we
+read the diff. The bug is in a fixture that ships with this course, and it
+spans three files, which is the size of change where a few minutes of
+planning save more than they cost.
+
+The vendor of Claude Code teaches this rhythm for its own tool, explore
+first, then plan, then code (@Claude Code best practices), and its short
+course walks through the same loop (@Academy claude-code-101). Where this
+lesson names a Claude Code key or flag, it says so, and the source is
+checked on the date shown above the lesson. Other coding agents have a read-only mode under another name, and
+the rhythm is the same.
+
+## The fixture
+
+The fixture is the to-do program from *Your first session with a coding
+agent*, a few weeks later. It has grown a `clear` command that removes the
+done items, and it has been split into three modules: `todo.py` holds the
+commands, `store.py` reads, writes and prunes the list, and `render.py`
+formats it. It is in the course repository under
+`site/examples/coding-with-agents/plan-then-test/fixture-repo/`. Copy that
+directory somewhere, or work in a clone of the course repository, and
+change into it. `git checkout -- .` puts every file back.
+
+The committed list has four items, two of them done. Run the program
+before you run the agent, so you know what the list looks like now.
+
+<Predict id="run-list" title="Show the list"
+  answer={`1. [ ] Buy milk
+2. [x] Call the plumber
+3. [x] Renew the passport
+4. [ ] Water the plants
+2 open, 2 done`} run="coding-with-agents/plan-then-test/list.py">
+Run this, and compare what you see with the output below.
+
+```sh
+python3 todo.py list
+```
+</Predict>
+
+The tests pass. That is the first thing that is different from the last
+lesson: nothing here is red yet.
+
+<Predict id="run-tests" title="Run the tests"
+  answer="OK" run="coding-with-agents/plan-then-test/tests.py">
+Run the tests and keep only the last line of the output.
+
+```sh
+python3 -m unittest -q 2>&1 | tail -1
+```
+</Predict>
+
+Now the bug. Clear the done items on a copy of the list, and show what is
+left.
+
+<Predict id="run-clear-bug" title="Clear the done items"
+  answer={`removed 1 done item
+1. [ ] Buy milk
+2. [x] Renew the passport
+3. [ ] Water the plants
+2 open, 1 done`} run="coding-with-agents/plan-then-test/clear_bug.py">
+Run `clear` and then `list` against a copy, so the committed file doesn't
+change.
+
+```sh
+cp todos.json /tmp/todos.json
+TODO_FILE=/tmp/todos.json python3 todo.py clear
+TODO_FILE=/tmp/todos.json python3 todo.py list
+```
+</Predict>
+
+`clear` removed one of the two done items. The other is still there,
+still marked done. You have the evidence, and this time you don't know
+which of the three files holds the cause. That is the question the plan
+answers before anything changes.
+
+The examples in this lesson aren't graded. Each one is a command you run
+in the fixture, with the output the course itself checks on every build.
+The checkpoints ask about the session, because running the session is what
+this lesson teaches.
+
+## Put the agent in plan mode
+
+Plan mode is a read-only mode for the agent: it reads files, searches, and
+runs commands to explore, and it edits nothing. Instead of a diff you get
+a plan, a written list of the steps it intends to take, and the edits wait
+until you approve it. In Claude Code, `Shift+Tab` cycles through the
+permission modes until the status bar says plan mode is on, and
+`claude --permission-mode plan` starts a session in it. A `/plan` prefix
+puts one prompt in plan mode. `Shift+Tab` again leaves it without approving
+anything (@Claude Code permission modes).
+
+Start your coding agent in plan mode from inside `fixture-repo`, and hand
+it the evidence you gathered. The brief has the same parts as before: the
+goal, the context, what it may touch, and how you know it is done. The one
+new part is that you ask for a plan, and you ask it to name the cause
+before it names the fix.
+
+<Prompt model="illustrative" recorded="illustrative">
+`clear` leaves a done item behind. With the committed `todos.json` copied to
+`/tmp/todos.json`, `TODO_FILE=/tmp/todos.json python3 todo.py clear` prints
+"removed 1 done item" and the list still shows "Renew the passport" as done.
+Two items were done. Read the three modules and the tests, then give me a
+plan: where the cause is, which test you would write first, and which files
+you would change. Don't change anything yet. `todos.json` stays as it is.
+</Prompt>
+<Response>
+I read `todo.py`, `store.py`, `render.py` and `test_todo.py`, and ran the
+command you gave.
+
+Cause: `store.remove_done` removes items from the list while it is looping
+over the same list. After it removes item 2, item 3 moves into position 2,
+and the loop moves on to position 3, so every done item that follows a
+done item is skipped. `render.py` shows the list it is given, and it is
+right to show the item.
+
+Plan:
+
+1. Add `test_clear.py` with a test that calls `store.remove_done` on a
+   list with two done items next to each other, and asserts that it returns
+   2 and that only the two open items remain. Run it and confirm it fails.
+2. Rewrite `remove_done` in `store.py` to build the list of kept items and
+   assign it back in place, so the count and the callers keep working.
+3. Change `render.list_items` in `render.py` to skip done items, so a
+   `list` after `clear` never shows one.
+4. Run `python3 -m unittest -q` and confirm every test passes.
+
+Files changed: `test_clear.py` (new), `store.py`, `render.py`.
+</Response>
+
+The transcripts in this lesson are illustrative: they show what a good
+exchange looks like and don't record a specific model's words. Your agent
+phrases things differently, and its plan may have four steps or six.
+
+Read the plan the way you read a diff. Steps 1 and 2 follow from the cause
+the agent named, and step 3 has no cause behind it. The agent found the cause in
+`store.py`, and then proposed a change to `render.py` anyway, because that
+is where the symptom showed. Hiding done items in `list` would make the bug
+invisible without fixing it, and it would change what `list` means for
+every user who has a done item they haven't cleared yet.
+
+<Choice id="when-to-plan" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['plan-mode']}
+  context="Plan mode puts a coding agent in a read-only mode: it reads and explores and proposes steps, and it edits nothing until the plan is approved. A plan costs a few minutes at the start of a task."
+  title="Which task gets a plan?" hint="For which task could you not write the diff yourself in one sentence?"
+  options={[
+    { text: 'Fix a typo in the README.', why: 'You could write this diff in one sentence. A plan costs more than the change.' },
+    { text: 'Rename one variable in one function.', why: 'The change is bounded to a place you can already point at. Let the agent do it and read the diff.' },
+    { text: 'A command gives the wrong result and the code that could cause it is spread over three modules.', correct: true },
+    { text: 'Add one log line where an exception is caught.', why: 'The scope is clear and the fix is small. Plan mode adds a round trip and finds nothing you did not know.' },
+  ]}>
+Four tasks are waiting for the agent. Which one do you start in plan mode?
+</Choice>
+
+## Correct the plan while it is cheap
+
+The agent is still in plan mode, so correcting it costs a sentence. Tell
+it which step to drop and why, and ask for the plan again. In Claude Code
+the prompt under a finished plan offers to approve it, to approve it and
+review each edit, or to keep planning, and keep planning is the one you
+want here (@Claude Code permission modes). The same page names a shortcut,
+`Ctrl+G`, that opens the plan in your text editor so you can edit it
+directly. A sentence in the chat does the same job for a one-step fix.
+
+<Prompt model="illustrative" recorded="illustrative">
+Drop step 3. You found the cause in `store.py`, and `render.py` is showing
+the list correctly. Hiding done items would change what `list` does for
+everyone. Keep steps 1, 2 and 4, and change only `store.py` and the new
+test file.
+</Prompt>
+<Response>
+Agreed. Revised plan:
+
+1. Add `test_clear.py` with the failing test for `store.remove_done`. Run
+   it and confirm it fails.
+2. Rewrite `remove_done` in `store.py` to keep the open items and assign
+   them back in place.
+3. Run `python3 -m unittest -q` and confirm every test passes.
+
+Files changed: `test_clear.py` (new), `store.py`. `render.py` and
+`todos.json` stay as they are.
+</Response>
+
+Now the plan matches the cause. Approve it, and choose the option that
+still asks you before each edit. You know what the two edits should be,
+and the prompts let you check that those are the two you get.
+
+<Pitfall title="A confident change in the wrong module">
+An engineer skips the plan and briefs the agent to "make `clear` remove all
+the done items". The agent reads `render.py` first, because that is where
+the output comes from, and changes `list_items` to leave done items out.
+The symptom is gone, and `list` after `clear` doesn't show a done item. The bug is
+still in `store.py`, the file still holds the item, and `done 3` now marks
+an item the user can't see. The rule: for a change you can't place in one
+file, ask for the cause and the steps first, and read the steps against
+the cause before any of them runs.
+</Pitfall>
+
+<Scenario id="the-plan-has-an-extra-step" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['plan-mode']}
+  context="A learner has a coding agent in plan mode, a read-only mode where the agent proposes steps and edits nothing until the plan is approved. The agent's plan names the cause of a bug in one module and then also proposes a change to a second module where the symptom showed."
+  title="The plan has a step that doesn't follow" hint="Where is the cheapest place to remove a step: in the plan, in the diff, or in production?"
+  options={[
+    { text: 'Approve the plan. The agent has read more of the code than you have, and you can always revert the second file afterwards.', consequence: 'The agent makes both changes. The tests pass, and you now have to work out which of the two edits fixed the bug and which one changed the program for everyone.' },
+    { text: 'Tell the agent which step to drop and why, and ask for the plan again before you approve anything.', correct: true, consequence: 'The agent returns a shorter plan that changes one module and the test file. Nothing has been edited yet, and the correction cost you one sentence.' },
+    { text: 'Leave plan mode, do the fix yourself in the first module, and ask the agent to write the test afterwards.', consequence: 'You get the fix, and you lose the check that the agent understood the cause. The next plan it writes has the same habit.' },
+    { text: 'Approve the plan and deny the permissions prompt for the second file when it comes.', consequence: 'The agent stops at the prompt, confused about a step you approved a minute ago. You end up explaining what you could have said in the plan.' },
+  ]}>
+The plan names the cause in `store.py`, and step 3 changes `render.py` to
+hide done items. What do you do?
+</Scenario>
+
+## The failing test first
+
+The first step of the approved plan is a test, and the agent writes it
+before it touches `store.py`, because a test written after the fix asserts
+whatever the fixed code does. A test written
+before it has to describe the behavior you want, and it has to fail, which
+proves it is looking at the bug at all. The vendor's own advice for a bug
+report is the same: have the agent write a failing test that reproduces
+the issue, then fix it (@Claude Code best practices).
+
+The agent creates `test_clear.py` and asks permission for the new file.
+Read it before you approve.
+
+```python
+class ClearTests(unittest.TestCase):
+    def test_remove_done_removes_every_done_item(self):
+        items = [
+            {"text": "Buy milk", "done": False},
+            {"text": "Call the plumber", "done": True},
+            {"text": "Renew the passport", "done": True},
+            {"text": "Water the plants", "done": False},
+        ]
+        removed = store.remove_done(items)
+        self.assertEqual(removed, 2)
+        self.assertEqual([item["text"] for item in items], ["Buy milk", "Water the plants"])
+```
+
+The list has its done items next to each other, because that is the case
+the bug skips.
+A test with one done item would pass today and prove nothing. Approve the
+file, and run the suite yourself.
+
+<Predict id="run-failing-test" title="Run the suite with the new test"
+  answer="FAILED (failures=1)" run="coding-with-agents/plan-then-test/failing_test.py">
+With `test_clear.py` in place, run the tests and keep the last line. The
+course checks this against its own copy of the test, which is the one
+shown above.
+
+```sh
+python3 -m unittest -q 2>&1 | tail -1
+```
+</Predict>
+
+Red, for the reason you expected: the test reports that `remove_done`
+returned 1. The test is the agent's target now. It can run it on its own,
+as many times as it needs, and it can't say "done" until the line reads
+`OK`.
+
+<Choice id="the-test-passes-at-once" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['test-driven-change']}
+  context="A learner is driving a bug fix from a failing test: the coding agent writes a test that captures the wanted behavior first, runs it and sees it fail, and then changes the code until it passes. The agent has written the test and run it, before changing any other file."
+  title="The new test passes on the first run" hint="What does a passing test prove about a bug that is still in the code?"
+  options={[
+    { text: 'Good news. The bug must have been fixed by an earlier change, so ask the agent to move on to the cleanup.', why: 'You saw the bug a minute ago, and nothing has changed since. The test is not looking at it.' },
+    { text: 'The test does not capture the bug. Ask the agent to change the test until it fails on the code as it is.', correct: true },
+    { text: 'Fine either way. Approve the fix to store.py and run the suite again afterwards.', why: 'A test that passed before the fix also passes after it, whatever the fix does. It proves nothing about the change.' },
+    { text: 'Delete the test and let the agent fix the code directly, since the tests are unreliable here.', why: 'One test that missed the case is a wording problem in that test. Fixing without any test leaves you with the agent\'s word.' },
+  ]}>
+The agent writes the test, runs it, and reports that it passes. No other
+file has changed. What do you do?
+</Choice>
+
+## Implement until it passes, then read the diff
+
+The agent moves to step 2, asks permission to edit `store.py`, and you
+approve the one edit the plan named. Then it runs the suite, reads the
+verdict, and reports. Don't take the report. Run the check yourself.
+
+<Predict id="run-tests-after-fix" title="Run the suite after the fix"
+  answer="OK" run="coding-with-agents/plan-then-test/tests_after_fix.py">
+Run the tests and keep the last line. The course applies the fix shown
+below to its own copy and checks this output against it.
+
+```sh
+python3 -m unittest -q 2>&1 | tail -1
+```
+</Predict>
+
+Then read the diff. It is the second piece of evidence, and the test
+passing is only proof if the diff touched what the plan said.
+
+```sh
+git status --short
+git diff
+```
+
+```diff
+-    removed = 0
+-    for item in items:
+-        if item["done"]:
+-            items.remove(item)
+-            removed += 1
+-    return removed
++    kept = [item for item in items if not item["done"]]
++    removed = len(items) - len(kept)
++    items[:] = kept
++    return removed
+```
+
+`git status` names two files: `store.py` modified, `test_clear.py` new.
+`render.py` isn't in the list, and neither is `todos.json`. The diff builds
+the list of kept items first and assigns it back into the same list, so
+`todo.py`, which holds a reference to that list, sees the change. Your
+agent's version may use another construction. What matters is that it
+changes `remove_done` and nothing else.
+
+Prove it against the list one more time, on a copy.
+
+<Predict id="run-clear-after-fix" title="Clear the done items after the fix"
+  answer={`removed 2 done items
+1. [ ] Buy milk
+2. [ ] Water the plants
+2 open, 0 done`} run="coding-with-agents/plan-then-test/clear_after_fix.py">
+Run `clear` and then `list` against a fresh copy of the committed list.
+
+```sh
+cp todos.json /tmp/todos.json
+TODO_FILE=/tmp/todos.json python3 todo.py clear
+TODO_FILE=/tmp/todos.json python3 todo.py list
+```
+</Predict>
+
+The last step of the plan was the cleanup, and there is little of it here:
+the test file has a name that says what it covers, and the fix has no
+leftover print or comment. When there is more, ask for it as its own step
+and read that diff too. Then end the session, as the last lesson taught.
+The next task gets a fresh one.
+
+<Order id="test-driven-order" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['test-driven-change']}
+  context="Driving a change from a failing test: the test that captures the wanted behavior is written first, and the code is changed until it passes. The learner runs the checks and reads the diff at the end."
+  title="Put the test-driven steps in order" hint="What has to be red before anything turns green, and what do you read once it is green?"
+  steps={[
+    'The agent writes a test that describes the wanted behavior',
+    'Run the suite and confirm the new test fails',
+    'The agent changes the code the plan named',
+    'Run the suite yourself and confirm every test passes',
+    'Read the diff and check it touched only the files in the plan',
+  ]} />
+
+## When a test beats a spec
+
+A failing test suits a change whose wanted behavior fits in an assertion:
+a bug fix, or a bounded change to what one function or one command does.
+The test is precise, the agent can run it without you, and passing it is
+proof. It doesn't suit a change where the question is the design: which
+modules exist, what the interface between them is, what the data looks
+like. For those you write the specification first and the agent works from
+it, and this course has its own lesson on working from a spec in small
+increments. The two aren't rivals. A spec-driven feature has tests for
+each of its increments, and a test-driven fix has a one-line spec, the
+sentence that says what "fixed" means.
+
+<Sort id="test-or-spec" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['test-driven-change', 'spec-driven-change']}
+  context="A test-driven change starts from a failing test that captures the wanted behavior and suits bug fixes and bounded behavior changes. A spec-driven change starts from a written specification with success criteria and suits changes where the design matters more than any single test."
+  title="Test first, or spec first?" hint="Can you write the wanted behavior as one assertion that fails today? If you can, which way is that?"
+  buckets={['Start from a failing test', 'Start from a spec']}
+  items={[
+    { text: 'The clear command leaves a done item behind', bucket: 0 },
+    { text: 'The list command should show the count of open items at the bottom', bucket: 0 },
+    { text: 'Dates on items, with a due command that lists what is overdue', bucket: 1 },
+    { text: 'Split the program into a package with one module per command and a shared store', bucket: 1 },
+    { text: 'The done command should reject a number that is out of range with a message instead of a crash', bucket: 0 },
+    { text: 'Sync the list with a calendar service', bucket: 1 },
+  ]} />
+
+<Exercise stretch="Now do the same for a change you choose, for example making `done` accept several numbers at once. Decide first whether it starts from a test or a spec, and say why in one line.">
+In a fresh session, with the fixture reset, run the whole bug fix with
+your coding agent: start in plan mode with the brief above, read the plan,
+correct or drop any step that doesn't follow from the cause it names, then
+approve it and let the agent write the failing test and fix `store.py`.
+Run `python3 -m unittest -q` yourself at the red step and at the green
+step, and read `git diff` at the end. Plan on ten minutes. This is the
+rhythm you use on any change too big to describe in one sentence.
+
+A good result: the plan named `store.remove_done` as the cause, the test
+failed before the fix and passed after it, and the diff touches
+`store.py` and one new test file and nothing else. Finish by running
+`git checkout -- . && git clean -f test_clear.py` so the fixture is ready
+for next time. Then answer one question: which step of the plan would you
+have missed if the agent had gone straight to the diff?
+</Exercise>
+
+<Recap>
+1. For a change you can't place in one file, start the agent in plan mode: it reads and proposes, and it edits nothing until you approve (@Claude Code permission modes). If you could write the diff in one sentence, skip the plan (@Claude Code best practices).
+2. Read the plan against the cause it names, and correct or drop a step that doesn't follow while the correction costs a sentence.
+3. The failing test comes before the fix. It has to fail on the code as it is, or it isn't looking at the bug.
+4. The agent implements until the test passes. You run the check yourself, and you read the diff to see that it touched only what the plan said.
+5. A test suits a bug fix or a bounded behavior change. A design question starts from a spec, and the two work together.
+</Recap>
