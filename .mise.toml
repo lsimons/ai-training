@@ -98,7 +98,7 @@ dir = "site"
 run = "bun scripts/check-data.mjs"
 
 [tasks.next-wave]
-description = "Pick the next wave of lesson issues for meta-orchestration (docs/agents/meta-orchestration.md), with -- --size N and --json"
+description = "Pick the next wave of issues for meta-orchestration (docs/agents/meta-orchestration.md), with -- --size N, --kind lessons|content, --only N,N,... and --json"
 dir = "site"
 run = "bun scripts/next-wave.mjs"
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AreaTree } from '../../scripts/lib/area-tree.mjs';
-import { formatWave, pickWave } from '../../scripts/lib/next-wave.mjs';
+import { formatWave, NOT_IN_ONLY, pickWave } from '../../scripts/lib/next-wave.mjs';
 
 type Lesson = {
 	id: string;
@@ -31,7 +31,12 @@ function tree(areas: Area[]): AreaTree {
 		})),
 	};
 }
-const issue = (number: number, assignees: string[] = []) => ({ number, title: `Lesson #${number}`, assignees });
+const issue = (number: number, assignees: string[] = [], labels?: string[]) => ({
+	number,
+	title: `Lesson #${number}`,
+	assignees,
+	...(labels ? { labels } : {}),
+});
 const ids = (entries: { id: string }[]) => entries.map((e) => e.id);
 
 describe('pickWave', () => {
@@ -49,6 +54,7 @@ describe('pickWave', () => {
 		]);
 		const r = pickWave({ tree: t, livePageIds: ['a/one'], readyIssues: [issue(2), issue(3)], size: 6 });
 		expect(r).toEqual({
+			kind: 'lessons',
 			size: 6,
 			wave: [
 				{ issue: 2, id: 'a/two', title: 'Two', area: 'a', position: 2, afterPlanned: [] },
@@ -63,7 +69,7 @@ describe('pickWave', () => {
 	it('leaves out a lesson that already has a page, even when its issue is ready', () => {
 		const t = tree([{ dir: 'a', course: ['a/one'], lessons: [{ id: 'a/one', issue: 1 }] }]);
 		const r = pickWave({ tree: t, livePageIds: ['a/one'], readyIssues: [issue(1)], size: 6 });
-		expect(r).toEqual({ size: 6, wave: [], blocked: [], skipped: [], waiting: [] });
+		expect(r).toEqual({ kind: 'lessons', size: 6, wave: [], blocked: [], skipped: [], waiting: [] });
 	});
 
 	it('blocks a lesson that assumes an objective only a planned lesson serves, and names that lesson', () => {
@@ -244,11 +250,93 @@ describe('pickWave', () => {
 		const r = pickWave({ tree: t, livePageIds: [], readyIssues: [issue(1)] });
 		expect(r.wave.map((w) => w.position)).toEqual([1]);
 	});
+
+	it('rejects an unknown kind', () => {
+		const t = tree([]);
+		// @ts-expect-error the kind is checked at run time too, for the command line
+		expect(() => pickWave({ tree: t, livePageIds: [], readyIssues: [], kind: 'nope' })).toThrow(/unknown kind/);
+	});
+
+	it('with only, skips every planned lesson outside the whitelist before the ready check', () => {
+		const t = tree([
+			{
+				dir: 'a',
+				course: ['a/1', 'a/2', 'a/3'],
+				lessons: [
+					{ id: 'a/1', issue: 1 },
+					{ id: 'a/2', issue: 2 },
+					{ id: 'a/3', issue: 3 },
+				],
+			},
+		]);
+		const r = pickWave({ tree: t, livePageIds: [], readyIssues: [issue(1), issue(2)], only: [2, 999], size: 6 });
+		expect(ids(r.wave)).toEqual(['a/2']);
+		expect(r.skipped).toEqual([
+			{ issue: 1, id: 'a/1', reason: NOT_IN_ONLY },
+			{ issue: 3, id: 'a/3', reason: NOT_IN_ONLY },
+		]);
+	});
+});
+
+describe('pickWave with kind content', () => {
+	const planTree = tree([
+		{
+			dir: 'a',
+			course: ['a/1', 'a/2', 'a/live'],
+			lessons: [{ id: 'a/1', issue: 10 }, { id: 'a/2', issue: 20 }, { id: 'a/live' }],
+		},
+	]);
+
+	it('picks ready content issues by ascending number, leaving out planned lessons and other labels', () => {
+		const ready = [
+			issue(30, [], ['content', 'ready-for-agent']),
+			issue(20, [], ['content', 'ready-for-agent']),
+			issue(5, [], ['content']),
+			issue(7, [], ['code']),
+			issue(8),
+		];
+		const r = pickWave({ tree: planTree, livePageIds: [], readyIssues: ready, kind: 'content', size: 6 });
+		expect(r).toEqual({
+			kind: 'content',
+			size: 6,
+			wave: [
+				{ issue: 5, title: 'Lesson #5', labels: ['content'], mixed: false },
+				{ issue: 30, title: 'Lesson #30', labels: ['content', 'ready-for-agent'], mixed: false },
+			],
+			skipped: [],
+			waiting: [],
+		});
+	});
+
+	it('includes and marks an issue with both content and code labels', () => {
+		const ready = [issue(40, [], ['content', 'code']), issue(41, [], ['code', 'content', 'ready-for-agent'])];
+		const r = pickWave({ tree: planTree, livePageIds: [], readyIssues: ready, kind: 'content' });
+		expect(r.wave.map((w) => [w.issue, w.mixed])).toEqual([
+			[40, true],
+			[41, true],
+		]);
+	});
+
+	it('caps at size, skips assigned issues, and applies only', () => {
+		const ready = [50, 51, 52, 53].map((n) => issue(n, n === 52 ? ['someone'] : [], ['content']));
+		const r = pickWave({ tree: planTree, livePageIds: [], readyIssues: ready, kind: 'content', size: 1 });
+		expect(r.wave.map((w) => w.issue)).toEqual([50]);
+		expect(r.skipped).toEqual([{ issue: 52, reason: 'issue is assigned to someone' }]);
+		expect(r.waiting.map((w) => w.issue)).toEqual([51, 53]);
+
+		const o = pickWave({ tree: planTree, livePageIds: [], readyIssues: ready, kind: 'content', only: [51, 53] });
+		expect(o.wave.map((w) => w.issue)).toEqual([51, 53]);
+		expect(o.skipped).toEqual([
+			{ issue: 50, reason: NOT_IN_ONLY },
+			{ issue: 52, reason: NOT_IN_ONLY },
+		]);
+	});
 });
 
 describe('formatWave', () => {
 	it('renders the wave table and the three lists as markdown', () => {
 		const out = formatWave({
+			kind: 'lessons',
 			size: 6,
 			wave: [
 				{ issue: 1, id: 'a/1', title: 'One', area: 'a', position: 1, afterPlanned: [] },
@@ -303,10 +391,64 @@ describe('formatWave', () => {
 	});
 
 	it('renders an empty result with the headings and counts only', () => {
-		const out = formatWave({ size: 2, wave: [], blocked: [], skipped: [], waiting: [] });
+		const out = formatWave({ kind: 'lessons', size: 2, wave: [], blocked: [], skipped: [], waiting: [] });
 		expect(out).toContain('## Wave (0 of 2)');
 		expect(out).toContain('## Blocked (0)');
 		expect(out).toContain('## Skipped (0)');
 		expect(out).toContain('## Waiting for a later wave (0)');
+	});
+
+	it('groups the not-in-only skips on one line and keeps the other reasons one per line', () => {
+		const out = formatWave({
+			kind: 'lessons',
+			size: 6,
+			wave: [],
+			blocked: [],
+			skipped: [
+				{ issue: 1, id: 'a/1', reason: NOT_IN_ONLY },
+				{ issue: 2, id: 'a/2', reason: 'issue is assigned to someone' },
+				{ issue: 3, id: 'a/3', reason: NOT_IN_ONLY },
+			],
+			waiting: [],
+		});
+		expect(out).toContain(
+			['## Skipped (3)', '', '- not in --only: #1 #3', '- #2 `a/2`: issue is assigned to someone'].join('\n'),
+		);
+	});
+
+	it('renders a content wave as an issue table with the mixed mark, then the skipped and waiting lists', () => {
+		const out = formatWave({
+			kind: 'content',
+			size: 2,
+			wave: [
+				{ issue: 5, title: 'Fix the | table', labels: ['content'], mixed: false },
+				{ issue: 6, title: 'Widget', labels: ['content', 'code'], mixed: true },
+			],
+			skipped: [{ issue: 7, reason: 'issue is assigned to someone' }],
+			waiting: [
+				{ issue: 8, title: 'Later', labels: ['content'], mixed: false },
+				{ issue: 9, title: 'Later too', labels: ['code', 'content'], mixed: true },
+			],
+		});
+		expect(out).toBe(
+			[
+				'## Wave (2 of 2, content)',
+				'',
+				'| Issue | Title | Labels |',
+				'| ----- | ----- | ------ |',
+				'| #5 | Fix the \\| table | `content` |',
+				'| #6 | Widget | `content`, `code` (content and code) |',
+				'',
+				'## Skipped (1)',
+				'',
+				'- #7: issue is assigned to someone',
+				'',
+				'## Waiting for a later wave (2)',
+				'',
+				'- #8 Later',
+				'- #9 Later too (content and code)',
+				'',
+			].join('\n'),
+		);
 	});
 });
