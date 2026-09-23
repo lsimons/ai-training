@@ -30,6 +30,7 @@ Okonkwo
 Varga
 Tervonen
 Brindlewick
+Stenberg
 
 # Products, tools, projects
 Beamer
@@ -61,6 +62,7 @@ Renovate
 pnpm
 microroute
 opencode
+ICMJE
 
 # Course and certification codes
 CCAO
@@ -139,6 +141,4 @@ Boskoorn
 Norrbeck
 Kastanjelaan
 Hazeldine
-ICMJE
-Stenberg
 Sanne
