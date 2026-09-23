@@ -20,7 +20,9 @@ to ask for it.
 ```python
 def get_weather(city: str) -> str:
     data = {"Amsterdam": "14°C, rain", "Lisbon": "27°C, sun"}
-    return data.get(city, f"no data for {city}")
+    if city not in data:
+        raise LookupError(f"no data for {city}")
+    return data[city]
 
 TOOLS = {
     "get_weather": {
@@ -69,11 +71,13 @@ def fake_model(messages):
         city = last["content"].split(" in ")[-1].rstrip("?")
         return {"tool": "get_weather", "args": {"city": city}}
     if last["role"] == "tool":
+        if last["content"].startswith("error:"):
+            return {"answer": f"I could not check. The tool said: {last['content']}"}
         return {"answer": f"It is {last['content']} there."}
     return {"answer": "I can only help with weather."}
 ```
 
-And the loop itself. Read it slowly; every agent framework you ever
+And the loop itself. Read it slowly. Every agent framework you ever
 use is this with more error handling.
 
 ```python
@@ -83,11 +87,17 @@ def run(question, model=fake_model, max_steps=5):
         reply = model(messages)
         if "answer" in reply:
             return reply["answer"]
-        tool = TOOLS[reply["tool"]]
-        result = tool["fn"](**reply["args"])
+        tool = TOOLS.get(reply["tool"])
+        if tool is None:
+            result = f"error: unknown tool {reply['tool']}"
+        else:
+            try:
+                result = tool["fn"](**reply["args"])
+            except Exception as exc:
+                result = f"error: {exc}"
         messages.append({"role": "assistant", "content": str(reply)})
         messages.append({"role": "tool", "content": result})
-    return "gave up"
+    return "stopped: step limit"
 ```
 
 This reuses `TOOLS` and `fake_model` from above.
@@ -118,15 +128,30 @@ plays the role of the stop reason, and translating that field is most of
 the work of swapping in a real model.
 
 Notice `max_steps`. Without it, a model that keeps asking for tools runs
-forever and spends your money. A real loop has a budget.
+forever and spends your money. A real loop has a budget, and when the
+budget runs out it returns a string that names the limit
+(`stopped: step limit`), so the caller can tell a budget stop from an
+answer.
 
-A real loop also keeps going when a tool fails. When the function raises
-or times out, the error text goes into the message list as the tool
-result, marked as an error. The model can then retry with better arguments
-or tell the user what went wrong. An exception that escapes the loop ends
-the run with nothing to show. How many retries a step gets is a decision for the loop,
-and after the same error twice in a row it should stop and say which limit
-fired.
+The loop also keeps going when a tool fails. A tool name that isn't in
+`TOOLS`, or a function that raises, becomes a tool result that starts with
+`error:` and goes back to the model like any other result. The model can
+then retry with better arguments or tell the user what went wrong. An error
+never escapes the loop, so the run always ends with something to show.
+
+<Predict id="predict-tool-error" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['loop-from-scratch', 'stop-conditions']}
+  context="In the lesson, run() is a hand-written agent loop over a scripted model. get_weather raises LookupError for a city it has no data for, run() turns a raising tool into a tool result that starts with error:, and fake_model answers differently when the tool result starts with error:."
+  title="Predict the error path" hint="get_weather has no entry for Oslo. Follow the exception into the loop, then read the tool branch of fake_model."
+  answer="I could not check. The tool said: error: no data for Oslo" run="building-agents/agent-loop/tool_error.py">
+
+What does this print?
+
+```python
+print(run("What is the weather in Oslo?"))
+```
+
+</Predict>
 
 Every vendor SDK (software development kit) ships this loop under a name
 such as tool runner or agent SDK. You hand it your functions and it
