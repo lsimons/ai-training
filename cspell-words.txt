@@ -33,6 +33,7 @@ Brindlewick
 Stenberg
 
 # Products, tools, projects
+gitleaks
 Beamer
 Cowork
 Merriweather

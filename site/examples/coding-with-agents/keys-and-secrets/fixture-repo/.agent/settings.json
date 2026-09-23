@@ -1,0 +1,8 @@
+{
+  "env": {
+    "AGENT_API_KEY": "sk-fake-lesson-key-0000-0000-0000-c0de"
+  },
+  "permissions": {
+    "deny": []
+  }
+}

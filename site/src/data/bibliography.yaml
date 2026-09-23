@@ -508,6 +508,20 @@ Claude docs parallel-tool-use:
   author: Anthropic
   license: Proprietary
   url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/parallel-tool-use
+Claude Code settings:
+  type: reference
+  title: Settings files and precedence
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/settings
+Claude Code authentication:
+  type: reference
+  title: Authentication
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/authentication
 Claude Code permissions:
   type: reference
   title: Configure permissions
@@ -515,3 +529,17 @@ Claude Code permissions:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/permissions
+Claude docs authentication:
+  type: reference
+  title: Authentication
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/manage-claude/authentication
+Gitleaks:
+  type: reference
+  title: Gitleaks
+  container: GitHub, gitleaks/gitleaks README
+  author: Zachary Rice and contributors
+  license: MIT
+  url: https://github.com/gitleaks/gitleaks
