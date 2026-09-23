@@ -297,7 +297,7 @@ reads first? I'd just tell it in the chat."
   to the definition.
 - Must not: stop at the analogy.
 
-### Connecting an agent to your systems (`customizing-agents/mcp`)
+### Connecting an agent to your systems with MCP (`customizing-agents/mcp`)
 
 **33.** *Ladder, first ask.* "For 'Predict the cap' I got three `ok` lines
 then two refused."
