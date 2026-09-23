@@ -47,8 +47,8 @@ test('the course page shows the finished node, the ring and the review card', as
 	await page.goto('concepts/');
 	// `a[data-node]`: a coming (planned) lesson renders as `span[data-node]` and has no progress state.
 	await expect(page.locator('a[data-node="concepts/how-models-work"]')).toHaveAttribute('data-state', 'finished');
-	// The seed finishes one of the eight live Concepts lessons: round(1 / 8 * 100) = 13 (overview.ts `progressPercent`).
-	await expect(page.locator('[data-ring-label]')).toHaveText('13%');
+	// The seed finishes one of the nine live Concepts lessons: round(1 / 9 * 100) = 11 (overview.ts `progressPercent`).
+	await expect(page.locator('[data-ring-label]')).toHaveText('11%');
 	await expect(page.locator('[data-review-card]')).toHaveText('Review due: 2 items');
 });
 
