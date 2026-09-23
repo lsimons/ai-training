@@ -23,10 +23,13 @@ exercise:
     Upload the supplied screenshot of a stock count, ask for it as rows you can paste into a
     spreadsheet, paste them, and count the cells that came back wrong.
 sources: [Claude docs vision]
+sources-checked: 2026-09-23
+review-by: 2027-03-23
 minutes: 10
 notes: >-
   The screenshot is site/public/using-agents/working-from-files/stock-count.png, rendered from a
   hand-written SVG table so the page holds the true values. The issue named safety/responsible-use
   for the assumed objective; the page points at redact-before-you-paste "What the task needs"
   because its pitfall is an upload that holds more than the task needs, which that section teaches
-  directly. No fixture: the learner uses a chat tool, and every transcript is illustrative.
+  directly. The image limits come from the Claude docs vision page and must be re-checked by
+  review-by. No fixture: the learner uses a chat tool, and every transcript is illustrative.
