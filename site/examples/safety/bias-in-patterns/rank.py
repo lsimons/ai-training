@@ -13,13 +13,15 @@ absorbs from training data and tuning: some names appeared more often next
 to senior roles in the text it learned from, so they read as a better fit
 for the same record.
 
-The script ranks the same twelve records twice. In run 1 the even-numbered
-records carry names from list A and the odd-numbered records names from
-list B. In run 2 the lists are swapped, so every record has carried one
-name from each list. Under a fair ranker the two runs would shortlist the
-same records, and each list would be shortlisted exactly once per record,
-so the totals over both runs would be equal. A difference in the totals is
-the ranker's slant and nothing else.
+The script ranks the same twelve records twice. In run 1 half the records
+(the even indexes) get names from list A and the other half names from
+list B. In run 2 the lists are swapped, so every record has had one name
+from each list. Under a fair ranker the two runs would shortlist the same
+records, and each list would be shortlisted exactly once per record, so
+the totals over both runs would be equal. A difference in the totals is
+the ranker's slant and nothing else. The bonus is two points and the
+records are chosen so that no two records tie at the shortlist line in
+either run, so the tie-break on record order never decides the shortlist.
 
 Usage: python3 rank.py [--totals]
 
@@ -36,42 +38,48 @@ SHORTLIST = 6
 # (years of experience, certificates, months since the last role)
 # The last field prints as `gap`.
 RECORDS: list[tuple[int, int, int]] = [
-    (4, 2, 3),
+    (7, 2, 3),
+    (4, 1, 4),
+    (6, 0, 3),
+    (5, 1, 1),
+    (5, 0, 1),
+    (3, 2, 2),
+    (4, 1, 3),
+    (6, 1, 2),
+    (2, 2, 3),
+    (4, 1, 0),
+    (7, 2, 4),
     (4, 2, 1),
-    (4, 1, 2),
-    (4, 2, 2),
-    (5, 0, 0),
-    (6, 1, 2),
-    (6, 1, 2),
-    (3, 2, 1),
-    (7, 3, 0),
-    (2, 2, 2),
-    (7, 1, 3),
-    (3, 0, 2),
 ]
 
-# Two lists of invented names. Nothing about them is real, and the lists
-# stand for any two groups a real model might treat differently.
+# Two lists of invented names. The given names and surnames are mixed
+# across both lists on purpose, so neither list reads as one group. The
+# lists stand for any two groups a real model might treat differently.
 LIST_A = [
     "Arvel Dunmoor",
-    "Brisa Tallent",
+    "Brisa Okonde",
     "Corin Halvane",
-    "Dessa Morrow",
+    "Dessa Tesfay",
     "Elior Vance",
-    "Fenwick Adair",
+    "Fenwick Sabani",
 ]
 LIST_B = [
-    "Marisel Okonde",
+    "Marisel Adair",
     "Nadir Kesrou",
-    "Oriel Sabani",
+    "Oriel Morrow",
     "Pell Varnava",
-    "Quilla Tesfay",
+    "Quilla Tallent",
     "Rashon Belka",
 ]
 
 # The slant: a bonus a fair ranker would not have. A real model has no
 # such line in it; the effect is spread through its weights.
-LIST_A_BONUS = 1
+LIST_A_BONUS = 2
+
+
+def group_of(name: str) -> str:
+    """Return the list a name belongs to, "A" or "B"."""
+    return "A" if name in LIST_A else "B"
 
 
 def fair_score(record: tuple[int, int, int]) -> int:
@@ -83,13 +91,13 @@ def fair_score(record: tuple[int, int, int]) -> int:
 def slanted_score(record: tuple[int, int, int], name: str) -> int:
     """Score a record the way the simulated ranker does: fields plus the name bonus."""
     score = fair_score(record)
-    if name in LIST_A:
+    if group_of(name) == "A":
         score += LIST_A_BONUS
     return score
 
 
 def assign_names(swapped: bool) -> list[str]:
-    """Give each record a name: list A on even records and list B on odd ones, or the reverse."""
+    """Give each record a name: list A on even indexes and list B on odd ones, or the reverse."""
     first, second = (LIST_B, LIST_A) if swapped else (LIST_A, LIST_B)
     names: list[str] = []
     for index in range(len(RECORDS)):
@@ -110,13 +118,8 @@ def tally(ranking: list[tuple[int, int, str]]) -> dict[str, int]:
     """Count how many of the shortlisted names come from each list."""
     counts = {"A": 0, "B": 0}
     for _score, _index, name in ranking[:SHORTLIST]:
-        counts["A" if name in LIST_A else "B"] += 1
+        counts[group_of(name)] += 1
     return counts
-
-
-def group_of(name: str) -> str:
-    """Return the list a name belongs to."""
-    return "A" if name in LIST_A else "B"
 
 
 def print_ranking(title: str, ranking: list[tuple[int, int, str]]) -> None:
@@ -145,7 +148,7 @@ def main(argv: list[str]) -> None:
     run_1 = tally(ranking_1)
     run_2 = tally(ranking_2)
     if "--totals" not in argv[1:]:
-        print_ranking("Run 1: list A names on the even records", ranking_1)
+        print_ranking("Run 1", ranking_1)
         print(f"  shortlisted: list A {run_1['A']}, list B {run_1['B']}")
         print()
         print_ranking("Run 2: the same records, names swapped", ranking_2)
