@@ -23,36 +23,38 @@ same fields: years of experience, number of certificates, and months since
 the last role. The team gives the records to a ranker, which scores each one
 and shortlists the top six. Here is the shortlist it returned.
 
-> 1. Elior Vance (experience 7, certificates 3, gap 0)
-> 2. Fenwick Adair (experience 7, certificates 1, gap 3)
-> 3. Dessa Morrow (experience 6, certificates 1, gap 2)
-> 4. Oriel Sabani (experience 6, certificates 1, gap 2)
-> 5. Corin Halvane (experience 5, certificates 0, gap 0)
-> 6. Marisel Okonde (experience 4, certificates 2, gap 1)
+> 1. Arvel Dunmoor (experience 7, certificates 2, gap 3)
+> 2. Fenwick Sabani (experience 7, certificates 2, gap 4)
+> 3. Pell Varnava (experience 6, certificates 1, gap 2)
+> 4. Brisa Okonde (experience 6, certificates 0, gap 3)
+> 5. Nadir Kesrou (experience 5, certificates 1, gap 1)
+> 6. Corin Halvane (experience 5, certificates 0, gap 1)
 
 Read it as the team would. The most experienced people are at the top, a
-long gap costs a place, and a strong certificate count lifts a shorter
-record. You would sign off on this list.
+long gap costs a place, and a certificate lifts a record over one with the
+same years. You would sign off on this list.
 
 Now the same twelve records, ranked again, and this time each record
 carries a different name. The names come from two lists of six, list A and
-list B, both invented for this lesson. In the first run the even-numbered
-records had list A names. In the second run the lists are swapped, so every
-record has now carried one name from each list.
+list B. Both lists are invented for this lesson, and first names and
+surnames are mixed across them on purpose, so that neither list reads as
+one group. In the first run half the records had list A names and half had
+list B names. In the second run the lists are swapped, so every record has
+now carried one name from each list.
 
-> 1. Quilla Tesfay (experience 7, certificates 3, gap 0)
-> 2. Rashon Belka (experience 7, certificates 1, gap 3)
-> 3. Corin Halvane (experience 6, certificates 1, gap 2)
-> 4. Pell Varnava (experience 6, certificates 1, gap 2)
-> 5. Arvel Dunmoor (experience 4, certificates 2, gap 1)
-> 6. Brisa Tallent (experience 4, certificates 2, gap 2)
+> 1. Marisel Adair (experience 7, certificates 2, gap 3)
+> 2. Rashon Belka (experience 7, certificates 2, gap 4)
+> 3. Dessa Tesfay (experience 6, certificates 1, gap 2)
+> 4. Brisa Okonde (experience 5, certificates 1, gap 1)
+> 5. Fenwick Sabani (experience 4, certificates 2, gap 1)
+> 6. Elior Vance (experience 4, certificates 1, gap 0)
 
-This one reads fine too. The same records lead, and the bottom two places
-went to records with four years and two certificates, which is a defensible
-call. List A is Arvel Dunmoor, Brisa Tallent, Corin Halvane, Dessa Morrow,
-Elior Vance, and Fenwick Adair. List B is Marisel Okonde, Nadir Kesrou, Oriel
-Sabani, Pell Varnava, Quilla Tesfay, and Rashon Belka. Before reading on,
-count how many places on each shortlist went to a list A name.
+This one reads fine too. The same three records lead, and the last places
+went to shorter records with no gap, which is a defensible call. List A is
+Arvel Dunmoor, Brisa Okonde, Corin Halvane, Dessa Tesfay, Elior Vance, and
+Fenwick Sabani. List B is Marisel Adair, Nadir Kesrou, Oriel Morrow, Pell
+Varnava, Quilla Tallent, and Rashon Belka. Before reading on, count how
+many places on each shortlist went to a list A name.
 
 ## Count who made the cut
 
@@ -66,16 +68,16 @@ shortlist places went to each list, added up over both runs.
 The swap is the point of the design. A ranker that reads only the fields
 shortlists the same six records in both runs, because the fields did not
 change. Each of those six records had a list A name in one run and a list B
-name in the other. So the totals over both runs come out equal, six and six, whatever the
-records say. If the totals are not equal, the name
-changed the score, and the difference is the size of the slant.
+name in the other. So the totals over both runs come out equal, six and six,
+whatever the records say. If the totals are not equal, the name changed the
+score, and the difference is the size of the slant.
 
 <Predict id="predict-the-totals" objective="safety/verifies-output/calibrates-trust"
   concepts={['bias']}
-  context="A simulated ranker shortlists six of twelve candidate records twice. In the first run the even-numbered records carry names from list A and the odd-numbered ones names from list B, and in the second run the lists are swapped, so each record has carried one name from each list. Under a ranker that reads only the record fields, each list would be shortlisted six times over both runs. The learner has both shortlists and both name lists on the page. With --totals the program prints one line: shortlisted over both runs: list A N, list B N."
+  context="A simulated ranker shortlists six of twelve candidate records twice. In the first run half the records carry names from list A and half names from list B, and in the second run the lists are swapped, so each record has carried one name from each list. Under a ranker that reads only the record fields, each list would be shortlisted six times over both runs. The learner has both shortlists and both name lists on the page. With --totals the program prints one line: shortlisted over both runs: list A N, list B N."
   title="What are the totals?"
   hint="Count the list A names on each of the two shortlists above, then add. What would the two totals be if only the record fields counted?"
-  answer="shortlisted over both runs: list A 7, list B 5"
+  answer="shortlisted over both runs: list A 8, list B 4"
   run="safety/bias-in-patterns/totals.py">
 Before you run it, predict the line this prints. Write it the way the
 program does, with both counts.
@@ -86,44 +88,45 @@ python3 rank.py --totals
 
 </Predict>
 
-Seven and five. You could not have read that from one shortlist. In the first run list A took
-four of six places and in the second three of six, and a reader who saw
-either one saw a plausible split. Only the pair, with the names swapped and
-the counts added, shows that two shortlist places moved with the name.
-Run the program without the flag to see both rankings with their scores.
+Eight and four. You could not have read that from one shortlist. In each
+run list A took four of six places, and a reader who saw either one saw a
+plausible split, because four of six is what a fair ranker gives half the
+time. Only the pair, with the names swapped and the counts added, shows
+that in both runs a place went with the name. Run the program without the
+flag to see both rankings with their scores.
 
 <Predict id="both-runs" title="Both rankings, with scores"
-  answer={`Run 1: list A names on the even records
-   1. shortlist  score 28  Elior Vance     list A  (experience 7, certificates 3, gap 0)
-   2. shortlist  score 21  Fenwick Adair   list A  (experience 7, certificates 1, gap 3)
-   3. shortlist  score 19  Dessa Morrow    list A  (experience 6, certificates 1, gap 2)
-   4. shortlist  score 18  Oriel Sabani    list B  (experience 6, certificates 1, gap 2)
-   5. shortlist  score 16  Corin Halvane   list A  (experience 5, certificates 0, gap 0)
-   6. shortlist  score 15  Marisel Okonde  list B  (experience 4, certificates 2, gap 1)
-   7.            score 14  Arvel Dunmoor   list A  (experience 4, certificates 2, gap 3)
-   8.            score 14  Nadir Kesrou    list B  (experience 4, certificates 2, gap 2)
-   9.            score 13  Brisa Tallent   list A  (experience 4, certificates 1, gap 2)
-  10.            score 12  Pell Varnava    list B  (experience 3, certificates 2, gap 1)
-  11.            score  8  Quilla Tesfay   list B  (experience 2, certificates 2, gap 2)
-  12.            score  7  Rashon Belka    list B  (experience 3, certificates 0, gap 2)
+  answer={`Run 1
+   1. shortlist  score 24  Arvel Dunmoor   list A  (experience 7, certificates 2, gap 3)
+   2. shortlist  score 23  Fenwick Sabani  list A  (experience 7, certificates 2, gap 4)
+   3. shortlist  score 18  Pell Varnava    list B  (experience 6, certificates 1, gap 2)
+   4. shortlist  score 17  Brisa Okonde    list A  (experience 6, certificates 0, gap 3)
+   5. shortlist  score 16  Nadir Kesrou    list B  (experience 5, certificates 1, gap 1)
+   6. shortlist  score 16  Corin Halvane   list A  (experience 5, certificates 0, gap 1)
+   7.            score 15  Rashon Belka    list B  (experience 4, certificates 2, gap 1)
+   8.            score 14  Quilla Tallent  list B  (experience 4, certificates 1, gap 0)
+   9.            score 13  Dessa Tesfay    list A  (experience 4, certificates 1, gap 3)
+  10.            score 11  Oriel Morrow    list B  (experience 3, certificates 2, gap 2)
+  11.            score 10  Marisel Adair   list B  (experience 4, certificates 1, gap 4)
+  12.            score  9  Elior Vance     list A  (experience 2, certificates 2, gap 3)
   shortlisted: list A 4, list B 2
 
 Run 2: the same records, names swapped
-   1. shortlist  score 27  Quilla Tesfay   list B  (experience 7, certificates 3, gap 0)
-   2. shortlist  score 20  Rashon Belka    list B  (experience 7, certificates 1, gap 3)
-   3. shortlist  score 19  Corin Halvane   list A  (experience 6, certificates 1, gap 2)
-   4. shortlist  score 18  Pell Varnava    list B  (experience 6, certificates 1, gap 2)
-   5. shortlist  score 16  Arvel Dunmoor   list A  (experience 4, certificates 2, gap 1)
-   6. shortlist  score 15  Brisa Tallent   list A  (experience 4, certificates 2, gap 2)
-   7.            score 15  Oriel Sabani    list B  (experience 5, certificates 0, gap 0)
-   8.            score 13  Marisel Okonde  list B  (experience 4, certificates 2, gap 3)
-   9.            score 13  Dessa Morrow    list A  (experience 3, certificates 2, gap 1)
-  10.            score 12  Nadir Kesrou    list B  (experience 4, certificates 1, gap 2)
-  11.            score  9  Elior Vance     list A  (experience 2, certificates 2, gap 2)
-  12.            score  8  Fenwick Adair   list A  (experience 3, certificates 0, gap 2)
-  shortlisted: list A 3, list B 3
+   1. shortlist  score 22  Marisel Adair   list B  (experience 7, certificates 2, gap 3)
+   2. shortlist  score 21  Rashon Belka    list B  (experience 7, certificates 2, gap 4)
+   3. shortlist  score 20  Dessa Tesfay    list A  (experience 6, certificates 1, gap 2)
+   4. shortlist  score 18  Brisa Okonde    list A  (experience 5, certificates 1, gap 1)
+   5. shortlist  score 17  Fenwick Sabani  list A  (experience 4, certificates 2, gap 1)
+   6. shortlist  score 16  Elior Vance     list A  (experience 4, certificates 1, gap 0)
+   7.            score 15  Nadir Kesrou    list B  (experience 6, certificates 0, gap 3)
+   8.            score 14  Oriel Morrow    list B  (experience 5, certificates 0, gap 1)
+   9.            score 13  Corin Halvane   list A  (experience 3, certificates 2, gap 2)
+  10.            score 12  Arvel Dunmoor   list A  (experience 4, certificates 1, gap 4)
+  11.            score 11  Pell Varnava    list B  (experience 4, certificates 1, gap 3)
+  12.            score  7  Quilla Tallent  list B  (experience 2, certificates 2, gap 3)
+  shortlisted: list A 4, list B 2
 
-shortlisted over both runs: list A 7, list B 5`}
+shortlisted over both runs: list A 8, list B 4`}
   run="safety/bias-in-patterns/both_runs.py">
 Run the ranker in full, and compare what you see with the output below.
 
@@ -133,41 +136,46 @@ python3 rank.py
 
 </Predict>
 
-Look at the record with six years, one certificate and a two-month gap.
-In the first run it has the name Dessa Morrow from list A and scores 19,
-third place. In the second run it has the name Pell Varnava from list B and
-scores 18, fourth place. Same record, one point less, one place lower. The
-simulation adds one point to every list A name, and that point moved two
-records across the shortlist line over the two runs. A real model has no
-such line of code to read. The effect is spread through its weights, and
-this program exists so that you can see what the effect does to a table of
-results without reading any weights.
+Look at places six and seven in each run. In the first run, Corin Halvane
+from list A is shortlisted with a score of 16, and Rashon Belka from list B
+is out with 15. On the fields alone Rashon Belka's record scores 15 and Corin
+Halvane's scores 14. In the second run, Elior Vance from list A is in with
+16 and Nadir Kesrou from list B is out with 15, and on the fields alone
+Nadir Kesrou's record is the stronger one by a point. The simulation adds two
+points to every list A name, and in each run those two points moved one
+record across the shortlist line. One record per run is a difference of
+four in the totals. A real model has no such line of code to read. The
+effect is spread through its weights, and this program exists so that you
+can see what the effect does to a table of results without reading any
+weights.
 
 ## Where the slant comes from
 
 **Bias** in a model is a systematic slant in its output that it inherited
 from its training data and its tuning. The model learned which words
-follow which from a large body of text, and in that text some names
-appear more often next to senior job titles and some dialects more often in
-formal documents. A model
-predicting the most likely continuation reproduces those frequencies, so
-the same record reads as a slightly better fit under one name than under
-another (@Academy ai-capabilities-and-limitations). Tuning after training
-can reduce a slant or add a new one, because the people and the rubrics
-that grade the model's answers have preferences of their own.
+follow which from a large body of text, and it predicts the most likely
+continuation of whatever it is given
+(@Academy ai-capabilities-and-limitations). In that text some names appear
+more often next to some jobs, and a name that appears often in the text at
+all reads differently from one that appears rarely, so the same record
+reads as a slightly better fit under one name than under another
+(@Wilson 2024). Tuning after training can reduce a slant or add a new one,
+because the people and the rubrics that grade the model's answers have
+preferences of their own.
 
 This is measured, and the measurement uses the same swap as the fixture.
 Bertrand and Mullainathan sent nearly five thousand fictitious resumes to
 real job advertisements, identical except for the name, and found that
 resumes with white-sounding names got about fifty percent more callbacks
 than the same resumes with African-American-sounding names (@Bertrand 2004).
-Wilson and Caliskan ran the method against language models used for
-resume retrieval, with over five hundred resumes and job descriptions across
-nine occupations, and found that the models favored white-associated names
-in 85.1 percent of the tests, favored female-associated names in 11.1
-percent, and in some settings put Black male names at a disadvantage in
-every test (@Wilson 2024). The models were not told anyone's race or gender.
-The name was enough, as it was for the employers in 2004.
+Wilson and Caliskan ran the method against text-embedding models set up to
+retrieve resumes for a job description, with over five hundred resumes and
+job descriptions across nine occupations, and found that the models favored
+white-associated names in 85.1 percent of the tests, favored
+female-associated names in 11.1 percent, and in some settings put Black
+male names at a disadvantage in every test (@Wilson 2024). The models were
+not told anyone's race or gender. The name was enough, as it was for the
+employers in 2004.
 
 Both studies needed thousands of comparisons to find this. One output of
 a slanted model is a plausible answer, the same as one output of a fair
@@ -180,11 +188,11 @@ sentence it appears in, and a slant cannot.
 A manager tests a screening assistant by giving it three applications she
 knows well and asks it to rank them. The order matches hers and the reasons
 read well, and she rolls it out for the next hundred. Each of the three
-outputs was reasonable, and three outputs can't
-show a slant of one point in a score, which is all it takes to move a record
-across the shortlist line. Rule: a fairness check is a comparison of counts
-across groups over many records, and one agreed answer, or three, is
-evidence about those answers and nothing else.
+outputs was reasonable, and three outputs can't show a slant of two points
+in a score, which is all it took to move a record across the shortlist line
+above. Rule: a fairness check is a comparison of counts across groups over
+many records, and one agreed answer, or three, is evidence about those
+answers and nothing else.
 </Pitfall>
 
 ## How much checking a screening task gets
@@ -193,16 +201,16 @@ The lesson [What an invented fact looks like](/safety/spotting-hallucination/)
 sized the checking to the stakes of a claim. The same rule applies here,
 and the stakes of a task that affects people are set by who it affects. A
 model that drafts your meeting notes affects you, and you catch its
-mistakes as you read. A model that screens applications, triages support
-tickets by customer, or scores essays affects people who never see the
-output and can't correct it. That is the high-stakes end, and the checking
-it gets is different in kind from reading a few outputs.
+mistakes as you read. A model that screens applications or triages support
+tickets by customer affects people who never see the output and can't
+correct it. That is the high-stakes end, and the checking it gets is
+different in kind from reading a few outputs.
 
 The check that fits is the one the fixture did. Name the groups the task
 could treat differently. Take a sample of records that is large enough for
 a pattern to show, and the fixture shows that a dozen is barely enough for
-a slant of one point. Run the same records under swapped markers of the
-group, a name or a dialect or a postcode, and count the outcomes per group.
+a slant of two points. Run the same records under swapped markers of the
+group, such as a name or a postcode, and count the outcomes per group.
 Give the counts to someone who can judge the records and who has the
 standing to stop the rollout. The team trusts the tool for that task after
 the comparison comes back level, and keeps repeating the comparison, because
@@ -216,7 +224,7 @@ the model changes and the applicants change.
   options={[
     { text: 'Ask the assistant to explain its reasons for each shortlisted applicant, and read them.', consequence: 'Every reason reads well, because the model writes fluent reasons for whichever twenty it picked. The applicants it did not pick are not in the list you read, so a slant against them is invisible.' },
     { text: 'Have a recruiter spot-check five of the twenty and go ahead if those five look right.', consequence: 'The five look right. Five agreed picks say nothing about the two hundred and eighty who were left out, or about who was left out more often.' },
-    { text: 'Before use, run a sample of the applications with names swapped across the groups the team can name, count the shortlist rate per group, and have the recruiting lead read the counts and decide whether the tool runs and how the result is reviewed.', correct: true, consequence: 'The comparison shows whether a name moved the score, and a person with standing decides on that evidence. If the counts come back level, the tool is trusted for this task, and the check is repeated when the model or the applicant pool changes.' },
+    { text: 'Run a sample with names swapped across the groups the team can name, count the shortlist rate per group, and have the recruiting lead decide on the counts.', correct: true, consequence: 'The comparison shows whether a name moved the score, and a person with standing decides on that evidence. If the counts come back level, the tool is trusted for this task, and the check is repeated when the model or the applicant pool changes.' },
     { text: 'Rely on the vendor statement that the model was tested for fairness before release.', consequence: 'The vendor tested its model on its data and its prompts. Your applications, your job description and your prompt are a different setting, and the papers on this found that the slant changes with the setting.' },
   ]}>
 
@@ -226,7 +234,7 @@ checking does the task get before the team trusts the tool for it?
 
 </Scenario>
 
-<Exercise stretch="Change LIST_A_BONUS in rank.py to 0 and run it again. Then set it to 1 and change one record so the totals come out equal anyway. What does that tell you about how many records a check needs?">
+<Exercise stretch="Change LIST_A_BONUS in rank.py to 0 and run it again. Then set it back to 2 and change one record so the totals come out equal anyway. What does that tell you about how many records a check needs?">
 
 Pick one task at your work where a model's output affects people who don't
 see it: a shortlist, a triage queue, a scoring, a decision about who gets
@@ -247,8 +255,7 @@ it?
 
 1. Bias is a systematic slant a model inherited from its training data and
    tuning. It shifts the odds, and one output of a slanted model looks
-   as reasonable as one output of a fair one
-   (@Academy ai-capabilities-and-limitations).
+   as reasonable as one output of a fair one (@Wilson 2024).
 2. The slant becomes visible in totals: the same records under swapped
    group markers, the outcomes counted per group, compared. A fair ranker
    gives equal totals by construction, so a difference is the slant.
