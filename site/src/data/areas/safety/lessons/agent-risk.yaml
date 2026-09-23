@@ -39,4 +39,4 @@ notes: >-
   The plan also assumed concepts/recognizes-agents/tells-agent-from-assistant, which the page does
   not name. Two entries are stand-ins. The calibrates-trust assumes entry points at bias-in-patterns
   until checking-what-an-agent-changed (#128) is live, and extends-to points at eu-ai-act until
-  sizing-the-blast-radius (#130) is live. The builders of #128 and #130 repoint them.
+  sizing-the-blast-radius (#130) is live. The builders of #128 and #130 point them at those lessons.
