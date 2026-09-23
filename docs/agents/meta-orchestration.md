@@ -23,12 +23,12 @@ that only ever holds one short report per wave.
 
 ## Roles
 
-| Role       | How many          | Lives in                                | Context per wave                    |
-| ---------- | ----------------- | --------------------------------------- | ----------------------------------- |
-| Dispatcher | one               | the main checkout, on `main`, in a loop | one report, under 200 words         |
-| Wave lead  | one per wave      | its own context; spawns the others      | the whole wave, then discarded      |
-| Builder    | one per issue     | its own worktree and branch             | as in `orchestration.md`            |
-| Reviewer   | one per branch    | its own worktree                        | as in `orchestration.md`            |
+| Role       | How many       | Lives in                                | Context per wave               |
+| ---------- | -------------- | --------------------------------------- | ------------------------------ |
+| Dispatcher | one            | the main checkout, on `main`, in a loop | one report, under 200 words    |
+| Wave lead  | one per wave   | its own context; spawns the others      | the whole wave, then discarded |
+| Builder    | one per issue  | its own worktree and branch             | as in `orchestration.md`       |
+| Reviewer   | one per branch | its own worktree                        | as in `orchestration.md`       |
 
 Nested spawning works: a `general-purpose` agent can spawn its own agents,
 resume them with `SendMessage`, and receive their notifications. Only the
@@ -51,8 +51,9 @@ The dispatcher runs as a self-paced `/loop`. One tick:
    lesson can't assume a planned one; `mise run data` rejects it), orders
    the rest earliest-in-course first, takes them round-robin across the
    areas, and prints the wave as a table plus `--json` for the prompt. It
-   also lists what it skipped and why, so nothing drops silently. It reads
-   the tree of the checkout it runs in, so pull `main` first.
+   also lists what it blocked and skipped and why, and which candidates
+   wait for a later wave, so nothing drops silently. It reads the tree of
+   the checkout it runs in, so pull `main` first.
 2. **Spawn the wave lead** with the prompt below. Nothing else happens in the
    dispatcher until the lead's notification arrives. Schedule a long
    fallback wake-up (30 minutes) in case it never does.
@@ -60,7 +61,7 @@ The dispatcher runs as a self-paced `/loop`. One tick:
    `open`, the lead has hit the standing-approval exception (below); report
    it to the maintainer and stop the loop. On `failed`, read the session
    record the lead wrote, decide whether the failure is the wave's or the
-   loop's, and either respawn the lead for the same wave or stop.
+   loop's, and either spawn a new lead for the same wave or stop.
 4. **Keep the record.** Append the report to the session record file for
    the day, `docs/agents/sessions/<date>-meta.md`, so the history is a file
    and never the dispatcher's context.
@@ -88,6 +89,7 @@ as a file and paste it; don't retype it per wave.
 
 - The wave as `next-wave` printed it: issue numbers, lesson ids, courses,
   and for each lesson the `after` entries that are still planned.
+
 - The instruction to follow `docs/agents/orchestration.md` end to end, in
   integration mode: one builder per issue, one reviewer per pushed branch,
   the review on the issue, the revision loop until `Verdict: approve`, the
@@ -95,7 +97,9 @@ as a file and paste it; don't retype it per wave.
   `mise run ci` on the wave branch. The builder prompt items in that
   document, and everything its session records say the prompt should have
   said, are the builder brief.
+
 - The standing approval as written above, and the merge command.
+
 - The collision notes for a lesson wave, which every builder prompt
   repeats. On 2026-09-23 they are: add the sidebar line in
   `site/astro.config.mjs` at the lesson's course position; the word list,
@@ -105,6 +109,7 @@ as a file and paste it; don't retype it per wave.
   read `git ls-files`; run `mise run prose-sync` before `mise run prose`;
   the e2e specs count live lessons per course, and the lead fixes them on
   the wave branch. Add to this list from each wave's report.
+
 - What the lead writes and returns. It writes the session record to
   `docs/agents/sessions/<date>-wave-<n>.md` on the wave branch, in the form
   of the "Session record" sections of `orchestration.md`: counts, what
