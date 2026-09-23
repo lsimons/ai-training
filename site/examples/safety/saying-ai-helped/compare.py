@@ -1,0 +1,52 @@
+"""Report how much of one file also appears in another, line for line.
+
+No arguments:   python3 compare.py
+    Compares generated.py, the function an assistant returned, with
+    library/truncate.py, the library function it resembles.
+
+One argument:   python3 compare.py rewritten.py
+    Compares another file in this directory with the same library function.
+
+A line counts as shared when its text, with the spaces around it removed,
+is also a line of the library file. Blank lines are skipped.
+"""
+
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+LIBRARY = os.path.join("library", "truncate.py")
+
+
+def code_lines(path: str) -> "list[str]":
+    """The non-blank lines of the file at `path`, each stripped of surrounding spaces."""
+    with open(os.path.join(HERE, path), encoding="utf-8") as handle:
+        return [line.strip() for line in handle if line.strip()]
+
+
+def report(candidate: str, library: str = LIBRARY) -> str:
+    """Count the lines of `candidate` that also appear in `library`, and list the rest."""
+    library_lines = set(code_lines(library))
+    candidate_lines = code_lines(candidate)
+    shared = [line for line in candidate_lines if line in library_lines]
+    only_here = [line for line in candidate_lines if line not in library_lines]
+    lines = [
+        f"{len(shared)} of {len(candidate_lines)} lines of {candidate} also appear in {library}",
+        f"only in {candidate}:",
+    ]
+    lines.extend("  " + line for line in only_here)
+    return "\n".join(lines)
+
+
+def main(argv: "list[str]") -> None:
+    if len(argv) == 1:
+        candidate = "generated.py"
+    elif len(argv) == 2:
+        candidate = argv[1]
+    else:
+        raise SystemExit("usage: python3 compare.py [file.py]")
+    print(report(candidate))
+
+
+if __name__ == "__main__":
+    main(sys.argv)
