@@ -1,12 +1,22 @@
 id: using-agents/adjusting-the-brief
 title: Changing the brief while the agent works
+description: >-
+  Run a brief with a gap in it, answer the agent's question in the brief instead of the chat, state a
+  changed limit as a replacement, and stop a run whose first result shows the goal was wrong.
 mode: tutorial
 covers: using-agents/delegating
 serves: [using-agents/delegates-and-checks/adjusts-mid-task]
 introduces: []
 assumes:
   - objective: concepts/prompts-reliably/iterates-on-output
+    lesson: concepts/iterating-on-a-prompt
+    section: why-the-retry-gives-the-same-class-of-mistake
   - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+extends-to:
+  - label: Breaking work into pieces
+    href: /using-agents/breaking-work-into-pieces/
 after: [using-agents/delegating]
 shorts: [Why an answer in the chat is lost]
 exercise:
@@ -16,10 +26,14 @@ exercise:
     the brief instead of the chat, restart from the edited brief, and compare the two results. If
     the agent guesses instead of asking, its pick between the two named templates is the question to
     answer.
-sources: []
-issue: 148
+sources: [Academy ai-fluency-framework-foundations, Academy introduction-to-claude-cowork]
+sources-checked: 2026-09-23
+review-by: 2027-03-23
 minutes: 15
 notes: >-
   The plan named the topic concepts/how-models-work as assumed; taken as the objective
   concepts/explains-models/explains-generation. Introduces no concept: deepens task-brief and
-  checking-results from the live lesson.
+  checking-results from the live lesson. The lost chat answer is stated as a property of the
+  workflow (a new session starts from the files) and not as vendor behavior. No fixture: the learner
+  uses a chat tool with file access, and every exchange is illustrative. DLAI-11 and Ng from the plan
+  are not cited on the page, so they are not in sources.
