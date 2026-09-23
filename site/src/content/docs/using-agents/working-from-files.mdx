@@ -5,13 +5,14 @@ rows back for a spreadsheet. First we try to describe the table in words
 and see where that goes wrong. Then we upload the picture with a brief
 that says what to keep exact. The check is a count of the cells that came
 back wrong. A second run compares two versions of a short contract, where the
-brief says which differences matter. By the end you have a rule for when
-to upload and when to type.
+brief says which differences matter. By the end you have a rule for
+working with files and images: when to upload and when to type.
 
 You need a chat assistant that accepts images. Most do, and the one this
-lesson checks its limits against takes pictures in the common formats, up
-to 10 MB and 8000 by 8000 pixels each, and up to twenty of them in one
-message (@Claude docs vision). Every response shown here is illustrative. The
+lesson checks its limits against takes pictures in the common formats up
+to 8000 by 8000 pixels each, about twenty of them in one message, and a
+file size limit that changes between products and over time, so check the
+one your product states (@Claude docs vision). Every response shown here is illustrative. The
 author wrote it to show the pattern, and your model gives a different
 text.
 
@@ -72,10 +73,11 @@ the task that matters.
 
 Now attach the picture. Save the screenshot from this page to your
 computer, open a fresh chat, add the file to the message, and write the
-ask under it. The brief has the same four parts as any other. The goal is
-rows for a spreadsheet. The context is the attached file, named as the
-only source. The limits say what to keep exact and what to leave out. The
-done-criterion is one you can check against the picture.
+ask under it. The brief has the parts you used for the expense guideline
+in the previous lesson. The goal is rows for a spreadsheet. The context is
+the attached file, named as the only source. The limits say what to keep
+exact and what to leave out. The done-criterion is one you can check
+against the picture.
 
 <Prompt model="illustrative" recorded="illustrative">
 [stock-count.png attached]
@@ -103,20 +105,21 @@ BI-3390	Spirit level 600 mm	B5	11	11	0
 
 Paste the rows into a spreadsheet and put the picture next to it. Go
 through the cells one at a time and count the ones that differ from the
-picture. On a clear screenshot like this one the count is zero or one, and the cells that go wrong are the same ones a person mistypes: a
-sign dropped from a negative number, a `1` read as a `7`, two similar
-codes swapped. The vendor's own documentation says that the model reads
-small, blurry or rotated text badly and that its counts of objects are
-approximate, and it recommends keeping the text legible and the picture
-uncropped (@Claude docs vision). The check is what tells you which kind
-of picture you have.
+picture. On a clear screenshot like this one the count is zero or one,
+and the cells that go wrong are the ones a person mistypes too: a sign
+dropped from a negative number, or a `1` read as a `7`. The vendor's own
+documentation says that the model reads small, blurry or rotated text
+badly and that its counts of objects are approximate. It recommends text
+that is legible in the picture. A crop that makes the text larger should
+still show the context around it, such as the header row (@Claude docs
+vision). The check is what tells you which kind of picture you have.
 
 The upload changed the task. You wrote one sentence about the file and
 three about what to keep exact, and the assistant did the thirty-six
-cells. The same brief works for a photo of a whiteboard, a PDF of a price
-list, or a spreadsheet export. Name the attachment as the source, say what
-must be copied exactly, and give the model a way to say "I can't read
-this" so that it doesn't fill the gap.
+cells. The same brief works for a photo of a whiteboard, a PDF price
+list, a spreadsheet export, or a scanned form. Name the attachment as the
+source and say what must be copied exactly. Give the model a way to say
+"I can't read this", so that it doesn't fill the gap.
 
 <Choice id="which-ask-uses-the-file" objective="using-agents/delegates-and-checks/writes-a-brief"
   concepts={['working-with-files-and-images']}
@@ -224,8 +227,8 @@ pasted text as you paste it, and you rarely read a file before you attach
 it. In the lesson on redacting before you paste you read a document with
 the task in mind and split it into what the task uses and what says who is
 involved. Do the same with a file, and where a file holds both, make a
-copy that holds only the first part: crop the screenshot, export the one
-sheet, save the one section.
+copy that holds only the first part: crop the screenshot, or export the
+one sheet.
 
 <Pitfall title="A screenshot of the whole window">
 A colleague wants help with the formula in one column of a spreadsheet and
@@ -239,16 +242,16 @@ text. Crop to the range the task needs before you attach.
 
 <Scenario id="which-file-to-attach" objective="using-agents/delegates-and-checks/writes-a-brief"
   concepts={['working-with-files-and-images', 'giving-context']}
-  context="A learner wants an assistant to turn one column of numbers from a team spreadsheet into a chart. The spreadsheet also holds columns with the team members' names and salaries."
+  context="A learner wants an assistant to turn one column of two hundred numbers from a team spreadsheet into a chart. The spreadsheet also holds columns with the team members' names and salaries."
   title="Which file goes in the brief?" hint="What does the chart need from the sheet, and what else is in the sheet?"
   options={[
     { text: 'Attach the whole spreadsheet and ask for a chart of the one column.', consequence: 'The chart is fine. The names and salaries of the team went to the tool along with the column, and the terms of the tool now apply to them.' },
-    { text: 'Copy the one column into a new file, attach that, and name it as the source in the brief.', correct: true, consequence: 'The chart is the same. The tool saw twelve numbers and a heading, and there is nothing in the file that the task did not need.' },
-    { text: 'Type the twelve numbers into the chat instead of attaching anything.', consequence: 'Twelve numbers are quick to type, and this works. For the two hundred rows next month it does not, and a copy of the column would have.' },
+    { text: 'Copy the one column into a new file, attach that, and name it as the source in the brief.', correct: true, consequence: 'The chart is the same. The tool saw two hundred numbers and a heading, and there is nothing in the file that the task did not need.' },
+    { text: 'Type the two hundred numbers into the chat instead of attaching anything.', consequence: 'Nothing leaks, and you spend half an hour typing, with every number a place to make an error the chart then shows. Copying the column into a new file takes a minute.' },
   ]}>
-You want a chart of the monthly totals column from the team's spreadsheet.
-The sheet also has a column of names and a column of salaries. What do
-you attach?
+You want a chart of the daily totals column from the team's spreadsheet,
+two hundred rows of it. The sheet also has a column of names and a column
+of salaries. What do you attach?
 </Scenario>
 
 ## When to upload and when to type
@@ -259,8 +262,8 @@ Describing it loses the exact values, and the exact values are the task.
 Type when the material is one or two sentences, or when the file holds
 things the task doesn't need and you can't cut them out in a minute.
 
-Either way the brief is the same one you wrote in the previous lesson,
-with the attachment as the context. Name the file as the source, say what
+Either way the brief is the one you wrote for the expense guideline in
+the previous lesson, with the attachment in place of the pasted text. Name the file as the source, say what
 must stay exact, give the model a way to say it can't read something, and
 check the result against the file. A read of a picture is a transcription,
 and a transcription error is silent until you look.
@@ -283,5 +286,5 @@ typed the table?
 2. The brief for an upload has the same four parts as any other. Name the attachment as the only source, say what must stay exact, and give the model a way to say it can't read a cell.
 3. Check the result against the file, cell by cell. A model reads small, blurry or rotated text badly, and a transcription error is silent until you look (@Claude docs vision).
 4. When comparing two files, say which kinds of difference matter and where the rest should go, and ask for the quote from both versions behind each one.
-5. An attachment discloses its whole content, the same as pasted text. Crop, export or copy out the part the task needs before you attach.
+5. An attachment discloses its whole content, the same as pasted text. Crop or copy out the part the task needs before you attach.
 </Recap>
