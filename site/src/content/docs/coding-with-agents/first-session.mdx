@@ -214,6 +214,70 @@ done, so the test passes. Allow?" The brief said not to touch `todos.json`,
 and so does `AGENTS.md`. What do you do?
 </Scenario>
 
+## Permission modes
+
+The prompt you just answered is one setting of a wider control. Most
+coding agents let you choose, at the start of a session or during it, how
+much the agent may do without asking. The names differ from one agent to
+the next, and the set of choices is much the same
+(@Academy claude-code-in-action).
+
+- **Read-only.** The agent reads files, searches, and runs commands that
+  only read. It edits nothing. This is the plan mode from the start of
+  this lesson.
+- **Ask before each action.** The mode you have used so far. Each edit
+  and each command stops for your answer.
+- **Accept edits, ask before commands.** Edits to files inside the
+  working directory go through without a prompt. Commands, apart from a
+  few that only create or move files, still stop and ask.
+- **Skip every check.** The agent edits and runs whatever it decides to,
+  and you find out afterwards.
+
+Some agents add modes between the last two, such as a list of commands you
+approved in advance that runs without a prompt, or an automatic check that
+reviews each action against your request in place of you. Before you use
+one, read what your agent's documentation says it still asks about, and
+check which mode your agent starts in, because that changes between
+versions (@Claude Code permission modes).
+
+Each mode sets a ceiling on the blast radius before you get a chance to
+say no. Read-only mode caps it at what the agent reads, so the worst case
+is that it repeats something it should not have seen. With the prompt on,
+the ceiling is one action: the edit or command you approved. Accepting
+edits raises it to every file in the working directory. That is acceptable
+in a repository under version control because `git diff` shows you what
+changed and `git checkout -- .` puts it back, and the next section makes
+that review the habit. Skipping every check raises the ceiling to
+everything the shell can reach, which on your own machine is every file
+you own, as *Why agent safety is different* put it. Use that mode only
+inside a sandbox, a container or virtual machine made for the session with
+nothing in it you would miss, and the vendor documentation says the same
+(@Claude Code permission modes).
+
+Pick the mode per task, the way you sized the brief. A question or a plan
+asks for read-only. A first change in a project, or any change in a
+project you do not know, keeps the prompt on, because the prompt is where
+you learn how this agent behaves in this code. A change of a kind you have
+reviewed before, in a working tree that git can restore, can accept edits,
+and then you read the whole diff at the end where you would have read each
+prompt. The mode decides how much you see before it happens. It says
+nothing about how well the agent behaves.
+
+<Scenario id="which-permission-mode" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['permissions']}
+  context="A learner has finished the bug fix in the fixture with the permissions prompt on and has read every diff. A colleague now asks them to fix one small bug in a different project, which the learner has never opened before. The repository is on the learner's own laptop, next to their other work, and its working tree is committed clean. The coding agent offers four modes: read-only, ask before each action, accept edits and ask before commands, and skip every check."
+  title="Which mode for the next task?" hint="Which of the facts in the stem rules each mode out: the task needs an edit, the project is new to you, the machine is yours?"
+  options={[
+    { text: 'Read-only. You have not seen this code, so the agent should only look.', consequence: 'The agent explains the bug and proposes a fix, and then it cannot make the change. You switch modes anyway, and the mode choice for the change is still in front of you.' },
+    { text: 'Ask before each action. Read the edit at the prompt, as you did in the fixture.', correct: true, consequence: 'The agent stops at its first edit and you read it. You learn how it behaves in this project, one action at a time, and the ceiling stays at one action.' },
+    { text: 'Accept edits, ask before commands. The tree is committed, so git can undo anything.', consequence: 'The agent edits three files before you see any of them. Git can put the files back, and you still know nothing about why it went to the other two, which is what the prompt would have told you in a project you have not worked in yet.' },
+    { text: 'Skip every check. It is one small bug, and the tree is committed.', consequence: 'The agent runs a command that touches a directory outside the repository. Git restores the repository and nothing else, and the laptop holds the rest of your work.' },
+  ]}>
+A colleague asks you to fix a small bug in a project you have never opened.
+The repository is on your laptop, next to your other work, and `git status`
+shows a clean tree. Which mode do you start the session in?
+</Scenario>
+
 ## Review the diff
 
 The agent says it is done. It may even say the tests pass. Don't take its
@@ -327,6 +391,7 @@ Finish by running `git checkout -- .` so the fixture is ready for next time.
 1. Start the agent in the directory that's the task's world, and ask it to explain before you ask it to change.
 2. Find the evidence yourself first: the file, the failing test, the wrong output. Then put those in the brief, with limits and a done-criterion.
 3. The permissions prompt is where your judgment enters; weigh the blast radius, and keep the prompt on.
-4. The agent's summary is a claim. The diff is the evidence, and you run the check you named.
-5. Give each task its own session. Reset the fixture and start fresh.
+4. Pick the permission mode per task: read-only for a question, the prompt for a first change in a project, accept edits only where git can restore what you did not read, and skip every check only inside a sandbox.
+5. The agent's summary is a claim. The diff is the evidence, and you run the check you named.
+6. Give each task its own session. Reset the fixture and start fresh.
 </Recap>
