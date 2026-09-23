@@ -9,7 +9,9 @@ import sys
 
 def get_weather(city: str) -> str:
     data = {"Amsterdam": "14°C, rain", "Lisbon": "27°C, sun"}
-    return data.get(city, f"no data for {city}")
+    if city not in data:
+        raise LookupError(f"no data for {city}")
+    return data[city]
 
 
 TOOLS = {
@@ -26,6 +28,8 @@ def fake_model(messages):
         city = last["content"].split(" in ")[-1].rstrip("?")
         return {"tool": "get_weather", "args": {"city": city}}
     if last["role"] == "tool":
+        if last["content"].startswith("error:"):
+            return {"answer": f"I could not check. The tool said: {last['content']}"}
         return {"answer": f"It is {last['content']} there."}
     return {"answer": "I can only help with weather."}
 
@@ -36,16 +40,23 @@ def run(question, model=fake_model, max_steps=5):
         reply = model(messages)
         if "answer" in reply:
             return reply["answer"]
-        tool = TOOLS[reply["tool"]]
-        result = tool["fn"](**reply["args"])
+        tool = TOOLS.get(reply["tool"])
+        if tool is None:
+            result = f"error: unknown tool {reply['tool']}"
+        else:
+            try:
+                result = tool["fn"](**reply["args"])
+            except Exception as exc:
+                result = f"error: {exc}"
         messages.append({"role": "assistant", "content": str(reply)})
         messages.append({"role": "tool", "content": result})
-    return "gave up"
+    return "stopped: step limit"
 
 
 STEPS = {
     "tool_call": lambda: print(TOOLS["get_weather"]["fn"]("Lisbon")),
     "loop": lambda: print(run("What is the weather in Amsterdam?")),
+    "tool_error": lambda: print(run("What is the weather in Oslo?")),
 }
 
 if __name__ == "__main__":
