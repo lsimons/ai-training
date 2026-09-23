@@ -85,7 +85,7 @@ or not. Its id is the lesson id `<area>/<lesson>`, equal to the page route.
 
 ```yaml
 id: safety/eu-ai-act
-title: The EU AI Act in one lesson
+title: Introduction to the EU AI Act
 description: >-
   What the European Union's AI Act asks of people who build and use AI at work.
 mode: explanation
