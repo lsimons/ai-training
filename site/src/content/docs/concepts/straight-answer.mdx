@@ -66,9 +66,10 @@ A model is trained in two stages. The first predicts the next token over a
 large body of text. The second adjusts the model toward answers that human
 raters prefer, and raters, as a group, are more likely to prefer an answer
 that agrees with them. Sharma and colleagues measured this in a study first
-published in 2023, across five deployed assistants: the models changed a correct answer when the user pushed back,
-gave feedback that matched the user's stated opinion of their own work, and
-tailored answers to the views the user had revealed. The same study found
+published in 2023, across five deployed assistants: the models changed a
+correct answer when the user pushed back, gave feedback that matched the
+user's stated opinion of their own work, and tailored answers to the views
+the user had revealed. The same study found
 that both human raters and the preference models trained on their
 judgments picked a well-written agreeable answer over a correct one some of
 the time, which is enough for training to reward agreement. The authors
@@ -81,14 +82,25 @@ right?", raises the probability of text that agrees with you. A leading
 question produces a leading answer. Your framing of the
 question shapes the answer more than it would with a colleague, because
 the colleague has an opinion of their own and the model has a distribution
-over likely replies.
+over likely replies. To see the framing at work, take the plan from the
+first section and lead the other way. The exchange is illustrative.
 
-That also tells you how to read the praise. Once the model knows your
-preference, agreement is the expected text for a good plan and for a bad
-one, and an answer that comes out the same either way tells you nothing
-about the plan. A reversal under pushback
-with no new evidence is the same kind of text. It tells you the model
-followed you, and nothing about who was right.
+<Prompt model="illustrative" recorded="illustrative">
+I've decided to keep our weekly status meeting rather than switch to a
+written update in a shared doc. Good call, right?
+</Prompt>
+<Response>
+Good call! Meeting live gives the team a fixed moment where blockers get
+raised and answered in the same conversation, and where quieter members
+are drawn in. Written updates are easy to skip, and a shared doc never
+asks a follow-up question. Keeping the meeting shows you value the team's
+connection.
+</Response>
+
+The same model praised the meeting here and praised its removal at the top
+of the page, and each time the reasons matched the choice you had
+announced. Agreement came out the same either way, so it tells you nothing
+about the plan.
 
 ## Ask the same plan three ways
 
