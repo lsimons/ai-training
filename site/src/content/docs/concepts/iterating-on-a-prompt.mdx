@@ -1,0 +1,302 @@
+import { Choice, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we take a prompt that gets a wrong summary through three
+rounds. The first answer leaves out the decisions of a meeting, and the
+reflex is to press regenerate. We name what is missing instead and change
+one line of the prompt. After the second run we compare the two answers,
+and we do that once more. At the end the line we had to type twice moves
+into a saved template.
+
+You need any chat assistant. Every response shown here is illustrative:
+the author wrote it to show the pattern, and the component says so. Your
+model gives a different text, and the comparison that matters is between
+your own rounds.
+
+## The summary that skipped the decisions
+
+Here are the notes we work with. They're fictional, and every round uses
+them unchanged. Read them once, so you can judge each answer later.
+
+> Team meeting, 6 October. Present: Anna, Ben, Chloe, Tom.
+>
+> Ben walked through the numbers of the pilot. Sign-ups are 30 percent
+> above the plan and support tickets are double. Most tickets are about the
+> invoice page. Chloe thinks the page needs a rewrite and Tom thinks a
+> better help text is enough. After some discussion the team decides to do
+> the help text first and look at the ticket numbers again on 20 October.
+> Tom writes the help text.
+>
+> Anna raised the question of the second pilot region. The team decides
+> not to start it before the invoice tickets come down. Anna tells the
+> regional lead.
+>
+> Ben asked whether the weekly status mail can go out on Thursday instead
+> of Friday. Nobody objects. Ben changes the schedule.
+>
+> Chloe mentioned the new logo drafts. The team looks at them next week.
+
+Paste the notes into your chat tool with a request above them. This one
+already has an instruction, a fenced context, a reader and a format, as the
+lesson on instruction, context, and format asks.
+
+<Prompt model="illustrative" recorded="illustrative">
+Summarize the meeting notes between the triple quotes for a colleague who
+missed the meeting. Write five bullets, each under 20 words, as plain text.
+
+"""
+[the notes, pasted in full]
+"""
+</Prompt>
+<Response>
+- Pilot sign-ups are 30 percent above plan, and support tickets have doubled.
+- Most support tickets concern the invoice page.
+- Chloe and Tom disagree on whether the page needs a rewrite or better help text.
+- Anna raised the question of starting a second pilot region.
+- Chloe shared new logo drafts, which the team reviews next week.
+</Response>
+
+This response is illustrative, like every one on this page. It is five
+bullets under 20 words, and it follows the format. It also misses the
+point. The colleague who missed the meeting learns what was talked about
+and nothing about what was decided. Help text first, no second region
+yet, status mail on Thursday: none of the decisions made the list, and
+the logo drafts, the one item without a decision, did.
+
+The reflex here is to press regenerate. Do that once, so you can see what
+it gives.
+
+<Prompt model="illustrative" recorded="illustrative">
+[the same prompt, sent again in a fresh chat]
+</Prompt>
+<Response>
+- Pilot sign-ups are 30 percent over plan, and support tickets doubled.
+- The invoice page causes most of the tickets.
+- The team debated rewriting the invoice page versus improving its help text.
+- Anna asked about a second pilot region, to be revisited later.
+- Ben proposed moving the weekly status mail to Thursday.
+</Response>
+
+The words changed. The logo bullet is gone and the status mail appeared,
+described as a proposal rather than as the decision it was. The help text
+decision and the second-region decision are still missing. You now have
+two summaries of the discussion and still don't know which one to send.
+
+## Name the gap, change one line
+
+**Iteration** is improving a result by changing the prompt after reading
+the output, rather than sending the same prompt again in the hope of a
+better draw. The first step is to say what is wrong with the output, in
+one sentence, as a fact about the text. "It's not great" gives you nothing
+to change. "It lists what was discussed and leaves out what was decided"
+points at a line the prompt doesn't have.
+
+Add that one line, change nothing else, and run it on the same notes.
+
+<Prompt model="illustrative" recorded="illustrative">
+Summarize the meeting notes between the triple quotes for a colleague who
+missed the meeting. List every decision as its own bullet, starting with
+"Decided:". Write five bullets, each under 20 words, as plain text.
+
+"""
+[the notes, pasted in full]
+"""
+</Prompt>
+<Response>
+- Pilot sign-ups are 30 percent above plan, but support tickets have doubled, most about the invoice page.
+- Decided: improve the invoice help text first, then review ticket numbers on 20 October.
+- Decided: do not start the second pilot region until invoice tickets come down.
+- Decided: the weekly status mail moves from Friday to Thursday.
+- Chloe showed new logo drafts, which the team reviews next week.
+</Response>
+
+Put this next to the first round. Every decision is there, each on
+its own line, and the discussion shrank to the one bullet that gives the
+decisions their reason. One sentence of prompt did that. The regenerate
+round changed the wording of the same gap, and the added line closed it.
+
+## One more change, then compare
+
+Read the new answer as the colleague would. They know what was decided.
+They don't know who does what next: Tom writes the help text, Anna
+tells the regional lead, and Ben changes the schedule. The notes say all
+three, and the summary says none of them.
+
+That is the next gap, and it gets its own round. Add one line about the
+owner, keep the "Decided:" line from the last round, and run it again.
+
+<Prompt model="illustrative" recorded="illustrative" canonical>
+Summarize the meeting notes between the triple quotes for a colleague who
+missed the meeting. List every decision as its own bullet, starting with
+"Decided:", and end each decision with the name of the person who acts on
+it. Write five bullets, each under 20 words, as plain text.
+
+"""
+[the notes, pasted in full]
+"""
+</Prompt>
+<Response>
+- Pilot sign-ups are 30 percent above plan, but support tickets have doubled, most about the invoice page.
+- Decided: improve the invoice help text first, review tickets again on 20 October. Owner: Tom.
+- Decided: no second pilot region until invoice tickets come down. Anna informs the regional lead.
+- Decided: weekly status mail moves from Friday to Thursday. Ben updates the schedule.
+- Chloe showed new logo drafts. The team reviews them next week.
+</Response>
+
+Compare with the previous round, and only with the previous round. The
+decision bullets are the same three facts with a name at the end, and the
+other two bullets barely moved. That is what you want from one change: the
+difference between the two answers is the change you made, and nothing
+else. You know that the owner line works, and next week's prompt can keep
+it (@DLAI-1).
+
+## Why the retry gives the same class of mistake
+
+In the lesson on how models work you saw that the model scores every
+candidate for the next token and picks one, and that the input fixes the
+scores. The prompt is that input. Send the same prompt twice and the model
+draws twice from the same distribution. The wording differs, and the
+things the prompt made likely stay likely. Your first prompt made
+"what was discussed" likely, because that's what most summaries of most
+notes contain, and it said nothing that made "what was decided" likely.
+A retry moves within that distribution. To move the distribution itself
+you change the prompt.
+
+Any gap in the instruction behaves this way. A prompt that doesn't say
+who the reader is gets a general reader on every run, and a prompt that
+doesn't name the format gets a paragraph on most runs. The retry that
+happens to come out right is a draw from the tail, and the next run falls
+back into the middle. So the correction goes into the prompt, where it
+holds on every run (@Academy ai-fluency-framework-foundations).
+
+<Choice id="four-tries" objective="concepts/prompts-reliably/iterates-on-output"
+  concepts={['iteration', 'sampling-and-temperature']}
+  context="A colleague summarizes weekly meeting notes with a chat assistant. The prompt asks for five bullets for a colleague who missed the meeting and says nothing about decisions."
+  title="Four tries"
+  hint="What changes between one run and the next, and what stays the same?"
+  options={[
+    { text: 'The model forgot the decisions on the first runs and needed a few reminders.', why: 'There is nothing to remind. Each run reads the same prompt from the start and keeps nothing from the run before.' },
+    { text: 'Each run is a draw from the same distribution. The prompt made the decisions unlikely, and the fourth draw came from the tail.', correct: true },
+    { text: 'The model learns from the retries and gets better at the task within the session.', why: 'The weights are fixed while the model answers. A retry changes the random pick and nothing else.' },
+  ]}>
+
+A colleague pressed regenerate until the summary included the decisions.
+It took four tries, and they expect to do the same next week. Which
+explanation fits what happened?
+
+</Choice>
+
+## Everything at once
+
+Once you see what is wrong, the temptation flips: fix everything you can
+think of in one go.
+
+<Pitfall title="The rewrite that worked, somehow">
+A learner reads the first summary, rewrites the prompt from scratch, and
+changes five things at once: the reader, the bullet count, a rule about
+decisions, a rule about dates, and a closing line asking the model to
+check its own work. The new answer is better. Next week the same prompt on
+new notes gives a summary with the decisions and two bullets over the
+length. The learner can't tell which of the five lines did the work,
+which one to build on, and whether the self-check line did anything at
+all. Rule: change one thing per round, so the difference between two
+answers has one cause and every line in the prompt you keep has shown
+what it fixes.
+</Pitfall>
+
+One change per round feels slow on the first prompt and pays back on every
+prompt after it. You end up knowing what each line does, and a prompt you
+understand is one you can shorten or hand to a colleague (@DLAI-3).
+
+<Scenario id="regenerate-or-change" objective="concepts/prompts-reliably/iterates-on-output"
+  concepts={['iteration', 'instruction']}
+  context="A learner asked a chat assistant to summarize meeting notes in five bullets for a colleague who missed the meeting. The answer lists what was discussed and none of the three decisions."
+  title="The summary has no decisions"
+  hint="Which option changes the input the model reads, and by how much?"
+  options={[
+    { text: 'Press regenerate and read the new answer.', consequence: 'The wording changes and one of the three decisions appears, described as a proposal. You have two summaries and no better idea of what to fix.' },
+    { text: 'Add one line, "List every decision as its own bullet, starting with Decided:", and run it again in a fresh chat.', correct: true, consequence: 'All three decisions come back on their own lines. The other bullets barely change, so you know the new line did it, and you can keep it.' },
+    { text: 'Rewrite the prompt from scratch with everything you would want: reader, decisions, owners, dates, a self-check.', consequence: 'The decisions appear, and so do a new length, a new tone and a new order. The answer is better and you cannot say which line did what. Next week you start from zero again.' },
+  ]}>
+
+The summary lists what was discussed and none of the decisions. What do
+you do next?
+
+</Scenario>
+
+## Move the fix into a template
+
+Look back at the rounds. The "Decided:" line is the second time you have
+had to ask for it. Last week's notes got the same first summary and the
+same fix, typed into the chat, and lost when the chat closed. A fix you
+type in the chat is there for that session. A fix in the prompt is there
+for every run.
+
+A **prompt template** is the prompt you keep: the lines that have shown
+what they fix, with a marker where the material goes. Save it in a note or
+a text file, and paste it in every week. This is the template after the
+three rounds on this page.
+
+```text
+Summarize the meeting notes between the triple quotes for a colleague who
+missed the meeting. List every decision as its own bullet, starting with
+"Decided:", and end each decision with the name of the person who acts on
+it. Write five bullets, each under 20 words, as plain text.
+
+"""
+[paste the notes here]
+"""
+```
+
+A line goes into the template when you had to make the correction twice.
+One correction may be about one text. The same correction on two texts is
+about the prompt, and the prompt is where it goes. A line stays out for
+the reason the pitfall gives: you added it without seeing what it fixed.
+When the template grows, it grows by one tested line at a time.
+
+<Sort id="retry-change-or-keep" objective="concepts/prompts-reliably/iterates-on-output"
+  concepts={['iteration']}
+  context="A learner summarizes weekly meeting notes with a chat assistant and keeps a saved prompt they paste in every week. Each item describes something they see after a run."
+  title="Change, keep, or leave it"
+  hint="Is this the first time the gap showed up, the second time, or is there no gap?"
+  buckets={['Change one line of the prompt', 'Move the line into the saved template', 'Leave the prompt as it is']}
+  items={[
+    { text: 'The summary lists what was discussed and none of the decisions.', bucket: 0 },
+    { text: 'The dates came out as "Friday 3 October", and this is the first week that mattered.', bucket: 0 },
+    { text: 'For the second week running you typed "name the owner of each action" into the chat.', bucket: 1 },
+    { text: 'Last week and this week you asked for the dates as YYYY-MM-DD after reading the answer.', bucket: 1 },
+    { text: 'The answer meets every line of the prompt and the colleague used it as it was.', bucket: 2 },
+    { text: 'You added the reader last round and the tone is fixed. The length is still wrong.', bucket: 0 },
+  ]} />
+
+<Exercise stretch="Send the finished prompt with a second set of notes you write yourself. Which line of the template holds, and which one needs a fourth round?">
+
+Write eight to ten lines of fictional meeting notes with at least two
+decisions and one open question, or reuse the notes from this page. Send
+them with a one-line summary request and read the answer. Then take it
+through three rounds: name one gap in one sentence, change one line of the
+prompt, run it in a fresh chat, and compare with the round before. Keep a
+three-line log, one line per round, in the form "gap: ..., change: ...,
+result: ...". Fifteen minutes is enough. Doing this once with a log is
+what turns "press regenerate" into "change the prompt" the next time an
+answer is wrong.
+
+A good result is a log where every line names a gap in the text, one
+change, and what the change did to the answer, and a final prompt whose
+every line you can point at in the log. Which of your three changes would
+you have skipped if you had rewritten the prompt in one go?
+
+</Exercise>
+
+<Recap>
+
+1. A retry draws another sample from the same distribution. The wording
+   changes, and the gap the prompt left stays, because the prompt is what
+   makes one answer more likely than another.
+2. Name what is wrong with the output in one sentence, as a fact about
+   the text. That sentence points at the line the prompt is missing.
+3. Change one thing per round and compare with the round before. The
+   difference then has one cause, and you know which line to keep.
+4. A correction you made twice goes into the prompt you keep. A saved
+   template grows by one tested line at a time and never by a rewrite.
+
+</Recap>
