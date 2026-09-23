@@ -54,8 +54,8 @@ The command line adds rules the same way. `--disallowedTools` adds deny
 rules for the session, `--allowedTools` adds allow rules for the session,
 and a deny rule from any settings file still blocks a tool that
 `--allowedTools` names (@Claude Code permissions). The `/permissions`
-dialog lists every rule in force and the file each one came from, so when
-an outcome surprises you, that dialog is where to look (@Claude Code
+dialog lists every rule from your settings files with the file each one
+came from, so when an outcome surprises you, that dialog is where to look (@Claude Code
 permissions).
 
 <Order id="order-the-layers" objective="customizing-agents/configures-agent/sets-permissions"
@@ -89,7 +89,8 @@ started this session with `--disallowedTools "Bash(rm *)"`.
 ```
 
 The program below lists the same four layers in `LAYERS`, highest
-first, and derives the outcome for a list of tool calls. It is a model of
+first, under the short names `flag`, `local`, `project` and `user`, and
+derives the outcome for a list of tool calls. It is a model of
 the two documented rules, the highest layer decides a one-value key and
 lists merge and are read deny, ask, allow, with the same small matching
 as the allowlists lesson. Claude Code itself also strips wrappers and
@@ -99,6 +100,14 @@ leaves those out. The complete file is
 repository.
 
 ```python
+LAYERS = [
+    ("flag", {"deny": ["Bash(rm *)"]}),
+    ("local", {"allow": ["Bash(python3 *)", "Bash(git push *)"]}),
+    ("project", {"defaultMode": "default", "allow": [...], "deny": [...]}),
+    ("user", {"defaultMode": "acceptEdits", "allow": [...]}),
+]
+
+
 def decide(layers, action):
     for verdict in ("deny", "ask", "allow"):
         for name, permissions in layers:
@@ -158,9 +167,8 @@ in the committed `.claude/settings.json`: the deny rules for files that
 hold secrets, the allow rules for the test command and the build, the
 hooks, and the environment variables the project needs. Everyone who
 clones the repository gets them, and a change to them goes through the
-same review as a change to the code (@Claude Code settings). Two things
-about that file are easy to miss. Its allow rules and its extra
-directories grant capability, so Claude Code applies them only after you
+same review as a change to the code (@Claude Code settings). Its allow
+rules and its extra directories grant capability, so Claude Code applies them only after you
 accept the trust dialog for that folder, while its deny and ask rules
 apply right away (@Claude Code permissions). And `auto` and
 `bypassPermissions` as its `defaultMode` don't take effect from a project
@@ -211,10 +219,11 @@ every other `python3` command run unprompted. The committed file still
 shows one narrow rule, the local file is out of git, and a reviewer
 reading the repository doesn't see a change. The wide entry came from the local
 layer. Only the `/permissions` dialog says so, because it lists each rule
-with the file it came from (@Claude Code permissions). The rule: when a command runs without the prompt you
-expected, open `/permissions` and read the file column before you touch
-the committed file, and prune your local file the way the last lesson
-pruned the allowlist.
+from your settings files with the file it came from
+(@Claude Code permissions). So when a command runs without the prompt
+you expected, open `/permissions` and read the file column before you
+touch the committed file, and prune your local file the way the last
+lesson pruned the allowlist.
 </Pitfall>
 
 <Exercise stretch="Add an ask rule for Edit(todo.py) to the user layer as well, and check whether the committed allow rule for the same path still lets the edit through.">
@@ -230,11 +239,13 @@ around it.
 
 A good result: the push is still denied by the committed file, because a
 deny from any layer is read before an allow from any layer, so the new
-flag doesn't change the outcome. The test command is allowed by the committed file,
-the `add` command by the local file, the edit to `todo.py` by the
-committed file, the edit to `todos.json` is denied by the committed file,
-and the commit prompts, because no rule matches and the mode is `default`
-from the committed file. To check your answer, copy the fixture and add
+flag doesn't change the outcome. The test command and the `add` command
+are both allowed by your local file, whose wide `python3` rule is checked
+before the committed rule that was written for the test command, because
+the allow pass reads the layers highest first. The edit to `todo.py` is
+allowed by the committed file, the edit to `todos.json` is denied by the
+committed file, and the commit prompts, because no rule matches and the
+mode is `default` from the committed file. To check your answer, copy the fixture and add
 the flag rule to the `flag` layer as an `allow` list. Then add the missing
 calls to `ACTIONS` and run it. Reflection: in a repository you work in every day,
 which entries of your own `.claude/settings.local.json` would the team
