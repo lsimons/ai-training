@@ -1,5 +1,5 @@
 id: customizing-agents/mcp
-title: Connecting an agent to your systems
+title: Connecting an agent to your systems with MCP
 description: >-
   The operator's view of a remote tool server, from the identity the agent acts under to the point
   where a CLI is the better connection.
