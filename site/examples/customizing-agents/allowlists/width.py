@@ -5,8 +5,10 @@ uses (code.claude.com/docs/en/permissions, checked 2026-09-23): a rule with no
 `*` matches one exact command, a `*` stands in for any text including spaces,
 and a rule whose only `*` is at the end after a space also matches the bare
 command. The real tool also splits compound commands, strips a few wrappers
-and matches Read and Edit rules on paths. This is the part a learner needs to
-predict the two runs in the lesson.
+and matches Read and Edit rules on paths. It also knows `*` only: `?` and `[`
+are literal in Claude Code, and `fnmatchcase` below treats them as wildcards,
+so don't extend this model to rules that contain them. This is the part a
+learner needs to predict the two runs in the lesson.
 """
 
 import fnmatch
