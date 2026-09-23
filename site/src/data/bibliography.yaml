@@ -501,3 +501,10 @@ curl contribute:
   author: Daniel Stenberg and the curl contributors
   license: curl license
   url: https://curl.se/dev/contribute.html
+Claude docs parallel-tool-use:
+  type: reference
+  title: Parallel tool use
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/parallel-tool-use

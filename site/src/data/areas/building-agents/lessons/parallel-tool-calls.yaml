@@ -1,5 +1,9 @@
 id: building-agents/parallel-tool-calls
 title: Several tool calls in one turn
+description: >-
+  Let the fake model ask for three weather lookups in one reply, run them together and return the
+  results as one message, then watch a fourth call that needs the first result wait for its own
+  round.
 mode: tutorial
 covers: building-agents/tool-use
 serves: [building-agents/builds-agent-loop/implements-the-loop]
@@ -10,12 +14,18 @@ shorts: [Side effects under concurrency]
 exercise:
   kind: do
   brief: >-
-    Change the fixture loop to run the fake model's three independent weather calls together and
-    return the results in one turn, then add a fourth call that depends on the first and show why it
-    stays sequential.
-sources: []
-issue: 191
+    Copy agent.py, make the fake model put the dependent clothing call in the same reply as the
+    three weather calls, and change the loop so a call whose argument is another call's id is
+    returned as an error result instead of run. Compare the message list and the round count with
+    the lesson's follow-up run.
+sources:
+  - AEC-03
+  - Academy claude-platform-101
+  - Claude docs parallel-tool-use
+  - Claude docs handle-tool-calls
 minutes: 12
 notes: >-
-  The fake model requests three lookups in one reply. Predict the round count with sequential and
-  with concurrent execution, and the order of the results.
+  The fake model requests three lookups in one reply. Predict the round count with a model that
+  asks one call per turn and with one that asks for all three, and the order of the results. The
+  fixture is its own copy of the tool-errors program: a reply carries a list of calls with ids, and
+  `execute` runs them in order or together.
