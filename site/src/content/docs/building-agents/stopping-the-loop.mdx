@@ -4,8 +4,8 @@ In this lesson we take the loop from [When a tool fails](/building-agents/tool-e
 and give it every reason it needs to stop. The loop so far ends when the
 model answers, when the step budget runs out, or after two tool errors in
 a row. Then we swap in three fake models that never answer and watch which
-rule ends each run. The last one is caught by nothing in the loop, and we
-add the check that catches it.
+rule ends each run. The step limit catches the last one late, and the
+exercise adds the check that catches it early.
 
 Every example runs against a fixture with a fake model, so you can predict
 the output and check yourself. The complete program is
@@ -15,6 +15,8 @@ the harness checks gathered in one function, `check`, that returns the
 name of the rule that ended the run. The fixture prints one line per tool round,
 `round 1: read_file(path='notes/1.md') -> {...}`, with the tool result in
 `repr`, then the stop reason, and an answer line only when there is one.
+The last example prints its lines while the loop runs, and that output has
+no `user:` line.
 
 ## The rules that end a run
 
@@ -79,7 +81,9 @@ def run(question, model, tools=TOOLS, max_steps=4, max_errors=2, budget=5000, pr
 
 `repeated` and `progress` are explained where the lesson adds them. Until
 then, `repeated` returns `False` for every run on this page except the one
-that is built to trigger it.
+that is built to trigger it. The character budget never ends a run on this
+page either: four rounds of the first fixture put `spent` at 2062, well
+under 5000, and the other runs are shorter.
 
 ## A model that never answers
 
@@ -101,7 +105,7 @@ names a new path. `max_steps` is 4 in this fixture.
 <Predict id="predict-never-answers" objective="building-agents/builds-agent-loop/implements-the-loop"
   concepts={['stop-conditions']}
   context="In the lesson, a hand-written agent loop has a step limit of four, an error budget of two errors in a row, a repeated-round check and a character budget. A fake model asks to read notes/1.md, notes/2.md and so on, one new file per round, and never answers. Every read succeeds. The fixture prints the question, one line per round with the tool call and its result, then the stop reason."
-  title="Predict which rule fires" hint="Which of the checks can see a difference between this round and the last one, and which counter is the only one that moves?"
+  title="Predict which rule fires" hint="Which of the checks can see a difference between this round and the last one, and which counter reaches its limit?"
   answer={`user: 'Summarize the notes.'
 round 1: read_file(path='notes/1.md') -> {'ok': True, 'text': 'contents of notes/1.md'}
 round 2: read_file(path='notes/2.md') -> {'ok': True, 'text': 'contents of notes/2.md'}
@@ -147,9 +151,9 @@ def model_retries_forever(messages):
     return {"tool": "apply_fix", "args": {"change": "round the total"}}
 ```
 
-Repeating the same action after the same result is the loop failure
-mode that shows up first in planning agents (@AEC-06), and the defense is
-to remember what was tried. `rounds` gives the request and result of every
+Repeating the same action after the same result is the first loop failure
+mode the source lesson names for planning agents (@AEC-06), and the defense
+is to remember what was tried. `rounds` gives the request and result of every
 tool round, and `repeated` compares the last round with the one before it.
 
 ```python
@@ -206,9 +210,11 @@ show(run("Make the failing test pass.", model=model_alternates))
 </Predict>
 
 Round 3 is round 1 again, and `repeated` misses it because it only looks
-one round back. The step limit catches this run, at the price of two
-wasted rounds, and with `max_steps` at forty the price is thirty-eight.
-The exercise at the end of the lesson adds the check that catches it.
+one round back. The step limit catches this run one round later than a
+wider check would. With `max_steps` at forty, the character budget ends the
+same run with `budget_spent` after round 7, because the message list grows
+with every round and `spent` adds its whole length each time. The exercise
+at the end of the lesson adds the check that catches the alternation.
 
 ## Progress a person can see
 
@@ -293,7 +299,8 @@ catch it then?
    `max_tokens` and `pause_turn`, and your loop adds the ones only it can
    know (@Claude docs handling-stop-reasons).
 3. A loop runs in circles by repeating a round or by alternating between
-   two, and a check that remembers earlier rounds ends both (@AEC-06).
+   two. A check that compares with the previous round ends the first, and
+   one that compares with every earlier round ends both (@AEC-06).
 4. Progress a person can see while the loop runs is a stop rule too, and
    the harness reports which rule ended every run.
 
