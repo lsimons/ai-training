@@ -23,7 +23,7 @@ shorts:
 exercise:
   kind: judge
   brief: Classify a lockfile diff and write the verdict per dependency.
-sources: []
+sources: [Fuchsia review, OpenSSF Scorecard, Academy claude-code-in-action, Academy ai-native-sdlc-playbook, sbp-dependency-audit]
 minutes: 20
 notes: >-
   From issue #16 (closed). Sits after tests-and-docs because the topic's prerequisites are
