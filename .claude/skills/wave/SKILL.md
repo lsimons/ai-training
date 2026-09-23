@@ -35,36 +35,50 @@ prose and rejects a double hyphen there. The flags themselves keep them.
 
 ## The meta record
 
-`docs/agents/sessions/<date>-meta.md` is the run's memory. Create it on the
-first tick with a `# Meta session, <date>` heading and the arguments, then
-keep these sections current:
+The meta record is the run's memory. It is named once, at the start of the
+run, `docs/agents/sessions/<start-date>-meta.md`, and the whole run writes
+to that file, past midnight included. On a fresh session, first look for
+the newest meta record with an `In flight` line that no report resolves:
+that is a run to resume, and its file, arguments and remaining whitelist
+are yours. Otherwise create a new file with a `# Meta session, <date>`
+heading and the arguments. Keep these sections current:
 
 - `## Remaining --only`: the whitelist numbers not yet handled (only with
   `--only`).
 - `## Parked`: issues a lead left out, with the reason. A parked issue is
   never picked again in this run.
-- `## Waves`: one appended report per wave, plus the wave's branch name.
+- `## Waves`: per wave, first an `In flight: wave <n>, branch <b>, issues #a #b ...` line while the lead runs, replaced by the lead's report when
+  it arrives. An `In flight` line with no report after it marks a wave to
+  resume.
+
+Every commit of the meta record follows the same steps: run
+`mise run spell` and `mise run prose`, fix what they flag in the files you
+touched, commit on `main` with the attribution lines, `git pull --rebase`
+right before the push (the lead merges into `origin/main` while you wait,
+so the pull from step 1 is stale by then), push, and retry that pull and
+push once if the push is rejected.
 
 ## One tick of the loop
 
 1. **Pull.** `git pull --rebase` on `main`. The tree is clean between ticks
    (step 7), so this never stalls.
-2. **Wave number.** Take the highest `<n>` from
-   `docs/agents/sessions/*-wave-<n>.md` and from
-   `git ls-remote origin 'refs/heads/wave/*'` (branch names
-   `wave/<n>-...`), and add one. Use 6 when neither has any (waves 1 to 5
-   are recorded inline in `orchestration.md`).
-3. **Check for a failed wave first.** A wave failed when the lead never
-   reported `merged`. Its signs: an `origin/wave/<n>-*` branch whose `<n>`
-   is the number step 2 computed (its session record doesn't exist, so the
-   number wasn't advanced), or, under `--only`, an `origin/feat/<issue>-*`
-   branch for a remaining whitelist issue with no merged pull request
-   (`gh pr list --state merged --search "<issue>"` is empty). If either is
-   found, skip steps 4 and 5: fill the template for that wave number, the
-   existing branch (`wave/<n>-<kind>`, or the one the meta record names),
-   the wave's table from the meta record or, when there is none, a table of
-   the issues the `feat/` branches name, and the resuming form of
-   `{{RESUME}}` (below). Then go to step 6.
+2. **Wave number.** One more than the highest `<n>` in
+   `docs/agents/sessions/*-wave-<n>.md`, or 6 when there is none (waves 1
+   to 5 are recorded inline in `orchestration.md`). Wave branches on
+   `origin` don't count.
+3. **Check for an unfinished wave.** Two signs, and either one means
+   resume:
+   - `git ls-remote origin 'refs/heads/wave/<n>-*'` finds a branch for the
+     number step 2 computed. Its session record doesn't exist, so the lead
+     never finished. Resume wave `<n>` on that branch.
+   - The meta record has an `In flight` line with no report after it. Its
+     wave number, branch and issues are the wave to resume, and its issues
+     are the only ones whose `origin/feat/<issue>-*` branches count. A
+     `feat/` branch for any other issue is stale and ignored.
+     To resume, skip steps 4 and 5: fill the template for that wave number
+     and branch, the table from the `In flight` issues (as the picker would
+     print them, or one row per issue with its title), and the resuming form
+     of `{{RESUME}}` (below). Then go to step 6.
 4. **Pick.** Run `mise run next-wave -- --size <size> --kind <kind>`, and
    add `--only <remaining>` under `--only`, where `<remaining>` is the
    record's `Remaining --only` list. Then build the nits row: the open
@@ -90,31 +104,36 @@ keep these sections current:
      below, as written.
    - `{{RESUME}}`: for a new wave, `This is a fresh wave.` For a resume
      (step 3), these three sentences: `You are RESUMING wave <n> on branch <branch>.` `A previous lead stopped before reporting.` `Follow "Resuming a half-done wave" before anything else.`
-   - Before spawning, write the branch name into the meta record's
-     `## Waves` section. A later resume reads it from there.
-6. **Spawn the lead.** One `general-purpose` agent, with the filled text as
-   its whole prompt. Wait for its notification and do nothing else in the
-   meantime. Never spawn a second lead for any reason while one runs.
+6. **Mark the wave in flight, then spawn the lead.** Write
+   `In flight: wave <n>, branch <b>, issues #a #b ...` under `## Waves` in
+   the meta record (on a resume the line is already there), and commit and
+   push it as `docs(agents): meta record wave <n> in flight`, following
+   the commit steps above. Then spawn one `general-purpose` agent with the
+   filled text as its whole prompt. Wait for its notification and do
+   nothing else in the meantime. Never spawn a second lead for any reason
+   while one runs.
 7. **Read the report and commit the record.** The report is at most 200
    words plus the `Follow-ups` lines, in the form the template ends with.
    Whatever the status, do this first:
-   - Append the report to the meta record under `## Waves`.
+   - Replace the wave's `In flight` line in the meta record with the
+     report.
    - Apply every line under `Add to collision notes` to the template's
      collision list, as a new bullet each, and drop a note the report says
      is wrong.
    - Under `--only`: remove the `Merged issues` and the `Left out` numbers
      from `Remaining --only`, and add the `Left out` ones to `## Parked`
      with their reason.
-   - Run `mise run spell` and `mise run prose`. Fix what they flag in the
-     two files. Commit both files on `main` as
-     `docs(agents): meta record wave <n>` with the attribution lines, and
-     push. Nothing of the dispatcher's stays uncommitted between ticks.
+   - Commit the meta record and the template on `main` as
+     `docs(agents): meta record wave <n>`, following the commit steps
+     above. Nothing of the dispatcher's stays uncommitted between ticks.
    - Then act on the status.
    - `merged`: play `afplay /System/Library/Sounds/Glass.aiff` and go to
      step 1.
    - `open`: chime, report the lead's reason to the maintainer, and stop.
-   - `failed`: chime, report to the maintainer, and stop. The next `/wave`
-     finds the wave in step 3 and resumes it rather than restarting it.
+   - `failed`: chime, report to the maintainer, and stop. The `In flight`
+     line stays replaced by the report, so the next `/wave` finds the wave
+     through its `origin/wave/<n>-*` branch in step 3 and resumes it rather
+     than restarting it.
 
 ## Filing paragraphs
 
