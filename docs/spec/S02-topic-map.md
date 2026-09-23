@@ -19,7 +19,8 @@ Deferred: the map's side drawer, path lanes, and quizzes.
 Since 2026-09-20 each checkpoint names the concepts it exercises by id
 (S03 "Checkpoints"), and the build rejects an unknown id. A concept id is
 a public identifier like a topic id, and renaming one means updating the
-checkpoints that name it.
+checkpoints that name it. The `picks-a-model-by-fit` objective under
+`using-agents/chooses-tool-and-autonomy` was added on 2026-09-23 (#106).
 
 ## Introduction
 
@@ -347,6 +348,7 @@ Learning objectives:
 | `delegates-and-checks`      | `reviews-against-brief`          | base   | Reviews the result against the brief, not against a feeling |
 | `delegates-and-checks`      | `adjusts-mid-task`               | base   | Adjusts the brief when the work reveals new information     |
 | `chooses-tool-and-autonomy` | `picks-chat-agent-or-automation` | base   | Picks chat, agent or automation for a task and says why     |
+| `chooses-tool-and-autonomy` | `picks-a-model-by-fit`           | base   | Picks a model for a task by testing fit, cost and speed     |
 | `chooses-tool-and-autonomy` | `keeps-the-human-steps`          | base   | Names the steps that remain a human's job and why           |
 | `chooses-tool-and-autonomy` | `reasons-across-levels`          | expert | Re-applies judgment when the tool level rises               |
 
