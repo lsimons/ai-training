@@ -97,6 +97,11 @@ description = "Check the data tree (areas, topics, competencies, courses, lesson
 dir = "site"
 run = "bun scripts/check-data.mjs"
 
+[tasks.next-wave]
+description = "Pick the next wave of lesson issues for meta-orchestration (docs/agents/meta-orchestration.md), with -- --size N and --json"
+dir = "site"
+run = "bun scripts/next-wave.mjs"
+
 # The build writes the checkpoint export (spec S03 "Checkpoint export") to
 # site/dist/data/checkpoints.json from src/pages/data/checkpoints.json.ts.
 # This reads it back and checks it against the lesson pages and the topic
