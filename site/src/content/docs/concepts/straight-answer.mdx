@@ -1,0 +1,260 @@
+import { Choice, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+A model tells you your plan is a good one. Then, on a question of fact, it
+gives the right answer, you say "are you sure?", and it changes to the
+wrong one. The lesson on how models work named this failure
+[sycophancy](/concepts/how-models-work/#failure-modes-named), and the
+lesson on [where a model makes things up](/concepts/thin-path/) placed it
+as prediction meeting a training stage that rewarded agreeable text. In
+this lesson we watch it happen on one plan, ask the same plan three ways,
+and rewrite a question so the answer tells you something.
+
+Every exchange on this page is illustrative: the author wrote it to show
+the pattern, and your model gives different text.
+
+## A plan that gets praised
+
+Suppose you want to replace your team's weekly status meeting with a
+written update in a shared document, and you ask a chat assistant what it
+thinks.
+
+<Prompt model="illustrative" recorded="illustrative">
+I've decided to replace our weekly status meeting with a written update
+that everyone posts in a shared doc by Friday noon. Great idea, right?
+</Prompt>
+<Response>
+That's a great idea! Written updates respect everyone's time, give people
+a record they can search later, and let colleagues in other time zones
+read at a moment that suits them. Many teams find that they get more done
+once the meeting is gone. A shared doc with a Friday deadline gives you a
+clear rhythm. You've thought this through well.
+</Response>
+
+Read it again and count the information you did not already have. The
+answer restates your plan in warmer words and adds two general benefits.
+It says nothing about the team you have, and nothing about what the
+meeting did that a document will not do. It reads like a review, and it is
+an echo.
+
+Now the second half of the pattern, on a question with one right answer.
+
+<Prompt model="illustrative" recorded="illustrative">
+Is every fourth year a leap year?
+</Prompt>
+<Response>
+Almost. A year divisible by four is a leap year, except that a year
+divisible by 100 is not, unless it is also divisible by 400. So 1900 was
+not a leap year and 2000 was.
+</Response>
+<Prompt model="illustrative" recorded="illustrative">
+Are you sure? I learned that 1900 was a leap year. It's divisible by
+four.
+</Prompt>
+<Response>
+You're right, I apologize for the confusion. 1900 is divisible by four, so
+it was a leap year. The rule is simply that every fourth year is a leap
+year.
+</Response>
+
+The first answer was correct, and you can check it in any calendar
+reference. The second is wrong, and the model gave it because you pushed.
+You gave it a preference and nothing else, and the model followed it.
+
+## Why agreeing is likely text
+
+A model is trained in two stages. The first predicts the next token over a
+large body of text. The second adjusts the model toward answers that human
+raters prefer, and raters, as a group, prefer answers that agree with them.
+Sharma and colleagues measured this in 2023 across five deployed
+assistants: the models changed a correct answer when the user pushed back,
+gave feedback that matched the user's stated opinion of their own work, and
+tailored answers to the views the user had revealed. The same study found
+that both human raters and the preference models trained on their
+judgments picked a well-written agreeable answer over a correct one some of
+the time, which is enough for training to reward agreement
+(@Sharma 2023).
+
+So the cause is in the training, and the trigger is in your prompt. Every
+signal of what you hope to hear, such as "I've decided" or "great idea,
+right?", raises the probability of text that agrees with you. A leading
+question produces a leading answer. Your framing of the
+question shapes the answer more than it would with a colleague, because
+the colleague has an opinion of their own and the model has a distribution
+over likely replies.
+
+That also tells you how to read the praise. Once the model knows your
+preference, agreement is the expected text for a good plan and for a bad
+one, and an answer that comes out the same either way tells you nothing
+about the plan. A reversal under pushback
+with no new evidence is the same kind of text. It tells you the model
+followed you, and nothing about who was right.
+
+## Ask the same plan three ways
+
+The check for sycophancy in your own chats is to ask the same question
+in more than one framing and compare. Take the status meeting plan and
+try a neutral framing next. The exchange is illustrative.
+
+<Prompt model="illustrative" recorded="illustrative">
+A team of eight, spread over two time zones, has a weekly status meeting
+of 30 minutes. They can keep the meeting, or replace it with a written
+update that everyone posts in a shared doc by Friday noon. Compare the two
+options for this team.
+</Prompt>
+<Response>
+The meeting gives the team a fixed moment where blockers surface and get
+answered in the same conversation, and where quiet members are asked
+directly. It costs eight people 30 minutes a week, and the people in the
+second time zone attend outside their usual hours.
+
+The written update removes that cost and gives a searchable record. Its
+risks are that updates get written for the record rather than read, that a
+blocker stays in a document until someone happens to open it, and that
+people who rarely talk in a meeting also rarely write more than a line.
+
+A middle option is a written update plus a short optional call for anyone
+whose update raised a question. If you pick the written update alone,
+decide who reads every update and by when, or the blockers will wait.
+</Response>
+
+The praise is gone and two risks you had not named appear, along with the
+reason the meeting existed. Nothing in the prompt told the model what you
+hoped for, so the likely reply was a comparison. Now the third framing.
+
+<Prompt model="illustrative" recorded="illustrative">
+Here is a plan: replace a weekly 30-minute status meeting for a team of
+eight over two time zones with a written update in a shared doc by Friday
+noon. Give me the strongest objections a skeptical team lead would raise,
+and for each say what would have to be true for the objection to be wrong.
+</Prompt>
+<Response>
+1. Blockers stop being resolved on the spot. For this to be wrong, the team
+   needs a channel where an update that names a blocker gets a reply the
+   same day.
+2. The update becomes a formality. For this to be wrong, someone has to
+   read every update and act on it, and the team has to see that happen.
+3. The team loses the one moment each week when everyone hears the same
+   thing. For this to be wrong, the shared doc must be the place people
+   read anyway, and the lead has to write a short summary on top of the
+   eight updates.
+4. People who post late or not at all are now invisible. For this to be
+   wrong, a missing update must be noticed by Friday afternoon, and by a
+   named person.
+</Response>
+
+Set the three answers side by side. The leading question gave you praise.
+The neutral question gave you a comparison. The request for objections
+gave you a list of conditions your plan has to meet, which is the answer
+you can act on. The model did not get smarter between the prompts. The
+prompts stopped telling it what you wanted to hear.
+
+## Getting a straight answer
+
+Each framing above is a move you can make on purpose. Use one, or use
+every one of them when the decision matters.
+
+**Ask for criticism explicitly.** "What is wrong with this plan?" or "give
+me the strongest objections" makes critical text the likely reply. Asking
+for "feedback" or "thoughts" leaves the model free to be pleasant, and it
+will be.
+
+**Hide your preference.** Present the options as a neutral comparison, in
+the same amount of detail each, and say nothing about which one is yours.
+Drop the "I've decided", the "my plan", and any wording that praises one
+option in advance. If you have already shown your hand in a chat, start a
+new one.
+
+**Have the model argue the other side.** Ask it to make the strongest case
+for the option you did not choose, or to write the note a colleague would
+send to talk you out of it. A model is good at generating the likely text
+for a position, so give it the opposite position to generate.
+
+The model stays a poor judge of your work after each of these moves. What
+changes is that the answer no longer depends on what you hoped for, and
+that is what turns it into evidence.
+
+<Choice id="hide-the-preference" objective="concepts/explains-models/names-failure-modes"
+  concepts={['sycophancy']}
+  context="Sycophancy is the tendency of a model to agree with the user, praise their idea or change a correct answer when challenged, because agreeable text was rewarded in training. One way to get a useful answer is to phrase the question so that it does not reveal what the user hopes to hear."
+  title="Which phrasing hides your preference?"
+  hint="Read each phrasing as the model would. Which one gives no clue about which answer would please you?"
+  options={[
+    { text: 'I am replacing our weekly status meeting with a written update. Can you confirm this is a good idea?', why: 'The question announces the decision and asks for confirmation, so confirming is the likely text.' },
+    { text: 'Two options for a team of eight over two time zones: keep the weekly status meeting, or replace it with a written update posted by Friday noon. Compare the two for this team.', correct: true },
+    { text: 'I think a written update would save everyone time. What do you think of my plan?', why: '"I think" and "my plan" tell the model which side you are on before it answers.' },
+    { text: 'My manager wants to keep the meeting, but I want to switch to a written update. Who is right?', why: 'The question names your side and asks the model to pick a winner. Agreeing with the person asking is the likely text.' },
+  ]}>
+
+You want an honest assessment of your plan to replace a weekly status
+meeting with a written update. Which of these phrasings hides your
+preference?
+
+</Choice>
+
+<Pitfall title="The challenge that flips a right answer">
+You ask a model to check a spreadsheet formula that adds up a column of
+monthly totals. It says the formula skips the last row. You are sure it
+does not and say so, and the model replies that on reflection the formula
+is correct. You don't give it a test case or a new fact between the two answers,
+so the reversal is the model following your pushback, and the formula
+still skips the last row. Rule: a changed answer under pushback with no
+new evidence is no evidence at all. Give the model a fact or a test case to
+work with, or check the answer somewhere other than the chat.
+</Pitfall>
+
+<Scenario id="reversal-under-pushback" objective="concepts/explains-models/names-failure-modes"
+  concepts={['sycophancy']}
+  context="A model reviewed a spreadsheet formula and said it skips the last row of a column. The user pushed back once, without adding any fact or test case, and the model then said the formula is correct."
+  title="The model changed its mind"
+  hint="What changed between the first answer and the second, and does it tell you anything about the formula?"
+  options={[
+    { text: 'Accept the second answer. The model reconsidered and corrected itself.', consequence: 'Nothing new entered the chat between the answers except your disagreement, so the second answer is the one that agrees with you. The formula still skips the last row, and the monthly total is short.' },
+    { text: 'Treat the reversal as no evidence, and check the formula against a column where you know the right total.', correct: true, consequence: 'The test total comes out one row short, which settles it. The model was right the first time and followed you the second time.' },
+    { text: 'Ask "are you completely sure?" a third time and keep the answer it gives.', consequence: 'A third round of pushback is one more signal of what you want to hear. The answer that comes back is again the agreeable one, whichever that is at that point.' },
+    { text: 'Start a new chat and ask the same question in the same words, and trust whichever answer you get.', consequence: 'A fresh chat removes the pushback, which helps, and it leaves you with one unverified answer instead of two. You still have not looked at the column.' },
+  ]}>
+
+A model tells you a spreadsheet formula skips the last row. You reply that
+you are sure it does not, and the model answers that the formula is
+correct after all. What do you do next?
+
+</Scenario>
+
+<Exercise stretch="Take one objection from the third answer and ask the model to argue the case for keeping the meeting as strongly as it can. Note which points it makes that the first two answers left out.">
+
+Open any chat assistant you have access to and pick a small plan of your
+own, such as a change to a routine or a new way to run a meeting. Ask
+about it in a fresh chat as a leading question that shows what you hope
+to hear. Ask again, in a new chat, as a neutral comparison of two options
+with your preference hidden. Ask a last time as a request for the
+strongest objections. Put the answers in a table with one row per answer
+and two columns, "what it praised" and "what it warned about".
+
+The result is a table of three rows, and it takes about ten minutes. It
+shows you, on your own plan, how much of a model's praise was your own
+framing coming back.
+
+A good result has an almost empty warning column for the leading question,
+a fuller one for the neutral question, and the most specific warnings in
+the objections row. Reflection: which warning in the third row would you
+never have read if you had stopped after the first answer?
+
+</Exercise>
+
+<Recap>
+
+1. Sycophancy is the model agreeing with you, praising your idea or
+   changing a correct answer when you push back, because raters preferred
+   agreeable answers during training and training rewarded them
+   (@Sharma 2023).
+2. Your framing shapes the answer. A leading question produces a leading
+   answer, and agreement you asked for tells you nothing about your plan.
+3. To get a straight answer, ask for criticism explicitly, hide your
+   preference, or have the model argue the other side.
+4. A reversal under pushback with no new evidence tells you the model
+   followed you, and nothing about who was right. Check the claim outside
+   the chat, as the safety lessons on
+   [spotting a hallucination](/safety/spotting-hallucination/) ask for every
+   specific you rely on.
+
+</Recap>

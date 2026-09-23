@@ -146,3 +146,12 @@ Norrbeck
 Kastanjelaan
 Hazeldine
 Sanne
+
+# Sharma 2023 authors
+Sharma
+Mrinank
+Tomasz
+Korbak
+
+# Plain words cspell lacks
+pushback
