@@ -20,16 +20,25 @@
  *
  * A `content` wave picks the ready, unassigned issues with the `content`
  * label that no plan file claims as its lesson issue, in ascending issue
- * number, with no dependency logic. An issue that also carries the `code`
+ * number, with no dependency logic. An issue that also has the `code`
  * label is included and marked, so the lead can give it a code review too.
+ * A nits issue (title starting `Nits` or `Cosmetic nits`) is left out, since
+ * the dispatcher adds those to a wave as the nits row.
  *
  * `only` narrows either kind to a set of issue numbers. Everything else is
- * reported as skipped with the reason `not in --only`.
+ * reported as skipped with the reason `not in --only`, and every listed
+ * number that did not make the wave is reported under `notPicked` with the
+ * reason, so an unattended run never drops a number silently. `openIssues`
+ * (every open issue number) tells `no such open issue` from
+ * `not ready-for-agent`, and defaults to the ready issues when absent.
  */
 import { courseLessonIds } from './area-tree.mjs';
 
 /** The skipped reason `--only` gives. `formatWave` groups these on one line. */
 export const NOT_IN_ONLY = 'not in --only';
+
+/** A nits issue by title, the marker the dispatcher and `/wave` use (the repo has no nits label). */
+export const NITS_TITLE = /^(nits|cosmetic nits)\b/i;
 
 /**
  * @typedef {{ number: number, title: string, assignees: string[], labels?: string[] }} ReadyIssue
@@ -38,11 +47,12 @@ export const NOT_IN_ONLY = 'not in --only';
  * @typedef {{ issue: number, id: string, blockedBy: Blocker[] }} BlockedEntry
  * @typedef {{ issue: number, id?: string, reason: string }} SkippedEntry `id` is the lesson id, and a content issue has none.
  * @typedef {{ area: string, lessons: WaveEntry[] }} WaitingArea
- * @typedef {{ kind: 'lessons', size: number, wave: WaveEntry[], blocked: BlockedEntry[], skipped: SkippedEntry[], waiting: WaitingArea[] }} LessonsWave
- * @typedef {{ issue: number, title: string, labels: string[], mixed: boolean }} ContentEntry `mixed` is true when the issue carries both `content` and `code`.
- * @typedef {{ kind: 'content', size: number, wave: ContentEntry[], skipped: SkippedEntry[], waiting: ContentEntry[] }} ContentWave
+ * @typedef {{ issue: number, reason: string }} NotPickedEntry A number from `only` that is not in the wave, and why.
+ * @typedef {{ kind: 'lessons', size: number, only: number[] | null, wave: WaveEntry[], blocked: BlockedEntry[], skipped: SkippedEntry[], waiting: WaitingArea[], notPicked: NotPickedEntry[] }} LessonsWave
+ * @typedef {{ issue: number, title: string, labels: string[], mixed: boolean }} ContentEntry `mixed` is true when the issue has both `content` and `code`.
+ * @typedef {{ kind: 'content', size: number, only: number[] | null, wave: ContentEntry[], skipped: SkippedEntry[], waiting: ContentEntry[], notPicked: NotPickedEntry[] }} ContentWave
  * @typedef {LessonsWave | ContentWave} Wave
- * @typedef {{ tree: import('./area-tree.mjs').AreaTree, livePageIds: Iterable<string>, readyIssues: ReadyIssue[], size?: number, kind?: 'lessons' | 'content', only?: Iterable<number> | null }} PickInput
+ * @typedef {{ tree: import('./area-tree.mjs').AreaTree, livePageIds: Iterable<string>, readyIssues: ReadyIssue[], openIssues?: Iterable<number> | null, size?: number, kind?: 'lessons' | 'content', only?: Iterable<number> | null }} PickInput
  */
 
 /**
@@ -82,10 +92,14 @@ export function pickWave(input) {
  * @param {PickInput} input
  * @returns {LessonsWave}
  */
-function pickLessonsWave({ tree, livePageIds, readyIssues, size = 6, only = null }) {
+function pickLessonsWave({ tree, livePageIds, readyIssues, openIssues = null, size = 6, only = null }) {
 	const live = new Set(livePageIds);
 	const ready = new Map(readyIssues.map((i) => [i.number, i]));
-	const onlySet = only ? new Set(only) : null;
+	const open = new Set(openIssues ?? ready.keys());
+	const onlyList = only ? [...only] : null;
+	const onlySet = onlyList ? new Set(onlyList) : null;
+	/** @type {Map<number, string>} planned lesson issue to its lesson id, live pages included */
+	const plannedIssues = new Map();
 
 	/** @type {Set<string>} objectives some live lesson serves */
 	const servedLive = new Set();
@@ -114,6 +128,7 @@ function pickLessonsWave({ tree, livePageIds, readyIssues, size = 6, only = null
 		const candidates = [];
 		for (const { data: l } of a.lessons) {
 			if (typeof l?.issue !== 'number' || typeof l?.id !== 'string') continue;
+			plannedIssues.set(l.issue, l.id);
 			if (live.has(l.id)) continue;
 			if (onlySet && !onlySet.has(l.issue)) {
 				skipped.push({ issue: l.issue, id: l.id, reason: NOT_IN_ONLY });
@@ -169,7 +184,31 @@ function pickLessonsWave({ tree, livePageIds, readyIssues, size = 6, only = null
 	const waiting = perArea
 		.filter(({ candidates }) => candidates.length)
 		.map(({ area, candidates }) => ({ area, lessons: candidates }));
-	return { kind: 'lessons', size, wave, blocked, skipped, waiting };
+
+	/** @type {NotPickedEntry[]} */
+	const notPicked = [];
+	const inWave = new Set(wave.map((w) => w.issue));
+	for (const n of onlyList ?? []) {
+		if (inWave.has(n)) continue;
+		const id = plannedIssues.get(n);
+		const b = blocked.find((x) => x.issue === n);
+		const s = skipped.find((x) => x.issue === n);
+		let reason;
+		if (id === undefined) reason = open.has(n) ? 'not a planned lesson (use --kind content)' : 'no such open issue';
+		else if (live.has(id)) reason = `lesson ${id} is live`;
+		else if (b) reason = `blocked by ${blockedByText(b)}`;
+		else if (s) reason = s.reason.startsWith('issue is assigned') ? 'assigned' : 'not ready-for-agent';
+		else reason = 'waiting (wave full)';
+		notPicked.push({ issue: n, reason });
+	}
+	return { kind: 'lessons', size, only: onlyList, wave, blocked, skipped, waiting, notPicked };
+}
+
+/** The lessons that serve a blocked lesson's missing objectives, or the objectives when no lesson does. */
+function blockedByText(b) {
+	const lessons = [...new Set(b.blockedBy.flatMap((x) => x.servedBy))];
+	if (lessons.length) return lessons.join(', ');
+	return `objective ${b.blockedBy.map((x) => x.objective).join(', ')} (no lesson serves it)`;
 }
 
 /**
@@ -181,8 +220,11 @@ function pickLessonsWave({ tree, livePageIds, readyIssues, size = 6, only = null
  * @param {PickInput} input
  * @returns {ContentWave}
  */
-function pickContentWave({ tree, readyIssues, size = 6, only = null }) {
-	const onlySet = only ? new Set(only) : null;
+function pickContentWave({ tree, readyIssues, openIssues = null, size = 6, only = null }) {
+	const ready = new Map(readyIssues.map((i) => [i.number, i]));
+	const open = new Set(openIssues ?? ready.keys());
+	const onlyList = only ? [...only] : null;
+	const onlySet = onlyList ? new Set(onlyList) : null;
 	const planned = new Set();
 	for (const a of tree.areas) {
 		for (const { data: l } of a.lessons) if (typeof l?.issue === 'number') planned.add(l.issue);
@@ -193,7 +235,7 @@ function pickContentWave({ tree, readyIssues, size = 6, only = null }) {
 	const candidates = [];
 	for (const i of [...readyIssues].sort((x, y) => x.number - y.number)) {
 		const labels = i.labels ?? [];
-		if (!labels.includes('content') || planned.has(i.number)) continue;
+		if (!labels.includes('content') || planned.has(i.number) || NITS_TITLE.test(i.title)) continue;
 		if (onlySet && !onlySet.has(i.number)) {
 			skipped.push({ issue: i.number, reason: NOT_IN_ONLY });
 			continue;
@@ -204,7 +246,24 @@ function pickContentWave({ tree, readyIssues, size = 6, only = null }) {
 		}
 		candidates.push({ issue: i.number, title: i.title, labels, mixed: labels.includes('code') });
 	}
-	return { kind: 'content', size, wave: candidates.slice(0, size), skipped, waiting: candidates.slice(size) };
+	const wave = candidates.slice(0, size);
+	const waiting = candidates.slice(size);
+	/** @type {NotPickedEntry[]} */
+	const notPicked = [];
+	for (const n of onlyList ?? []) {
+		if (wave.some((w) => w.issue === n)) continue;
+		const i = ready.get(n);
+		let reason;
+		if (!open.has(n)) reason = 'no such open issue';
+		else if (!i) reason = 'not ready-for-agent';
+		else if (planned.has(n)) reason = 'a planned lesson (use --kind lessons)';
+		else if (!(i.labels ?? []).includes('content')) reason = 'not a content issue';
+		else if (NITS_TITLE.test(i.title)) reason = 'a nits issue (the dispatcher adds it as the nits row)';
+		else if (i.assignees.length) reason = 'assigned';
+		else reason = 'waiting (wave full)';
+		notPicked.push({ issue: n, reason });
+	}
+	return { kind: 'content', size, only: onlyList, wave, skipped, waiting, notPicked };
 }
 
 const code = (s) => `\`${s}\``;
@@ -257,7 +316,20 @@ export function formatWave(result) {
 	const count = result.waiting.reduce((n, w) => n + w.lessons.length, 0);
 	lines.push('', `## Waiting for a later wave (${count})`, '');
 	for (const w of result.waiting) lines.push(`- ${w.area}: ${w.lessons.map((l) => `#${l.issue}`).join(' ')}`);
+	lines.push(...notPickedLines(result));
 	return `${lines.join('\n')}\n`;
+}
+
+/**
+ * The `Not picked from --only` section, present whenever `only` was given.
+ * @param {Wave} result
+ * @returns {string[]}
+ */
+function notPickedLines(result) {
+	if (!result.only) return [];
+	const lines = ['', `## Not picked from --only (${result.notPicked.length})`, ''];
+	for (const n of result.notPicked) lines.push(`- #${n.issue}: ${n.reason}`);
+	return lines;
 }
 
 /**
@@ -274,5 +346,6 @@ function formatContentWave(result) {
 	lines.push('', `## Skipped (${result.skipped.length})`, '', ...skippedLines(result.skipped));
 	lines.push('', `## Waiting for a later wave (${result.waiting.length})`, '');
 	for (const w of result.waiting) lines.push(`- #${w.issue} ${w.title}${w.mixed ? ' (content and code)' : ''}`);
+	lines.push(...notPickedLines(result));
 	return `${lines.join('\n')}\n`;
 }
