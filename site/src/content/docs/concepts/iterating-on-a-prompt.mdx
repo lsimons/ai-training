@@ -63,7 +63,8 @@ yet, status mail on Thursday: none of the decisions made the list, and
 the logo drafts, the one item without a decision, did.
 
 The reflex here is to press regenerate. Do that once, so you can see what
-it gives.
+it gives. On a first turn, pressing regenerate and sending the same prompt
+in a fresh chat are the same draw, so either works here.
 
 <Prompt model="illustrative" recorded="illustrative">
 [the same prompt, sent again in a fresh chat]
@@ -121,8 +122,11 @@ They don't know who does what next: Tom writes the help text, Anna
 tells the regional lead, and Ben changes the schedule. The notes say all
 three, and the summary says none of them.
 
-That is the next gap, and it gets its own round. Add one line about the
-owner, keep the "Decided:" line from the last round, and run it again.
+That is the next gap, and it gets its own round. It is also a familiar
+one. Last week's summary of the previous meeting skipped the decisions
+and the owners too, and both fixes went into the chat and closed with it.
+Add one line about the owner, keep the "Decided:" line from the last
+round, and run it again.
 
 <Prompt model="illustrative" recorded="illustrative" canonical>
 Summarize the meeting notes between the triple quotes for a colleague who
@@ -136,9 +140,9 @@ it. Write five bullets, each under 20 words, as plain text.
 </Prompt>
 <Response>
 - Pilot sign-ups are 30 percent above plan, but support tickets have doubled, most about the invoice page.
-- Decided: improve the invoice help text first, review tickets again on 20 October. Owner: Tom.
-- Decided: no second pilot region until invoice tickets come down. Anna informs the regional lead.
-- Decided: weekly status mail moves from Friday to Thursday. Ben updates the schedule.
+- Decided: improve the invoice help text first, review tickets again on 20 October. Tom.
+- Decided: no second pilot region until invoice tickets come down. Anna tells the regional lead.
+- Decided: weekly status mail moves from Friday to Thursday. Ben.
 - Chloe showed new logo drafts. The team reviews them next week.
 </Response>
 
@@ -162,8 +166,9 @@ A retry moves within that distribution. To move the distribution itself
 you change the prompt.
 
 Any gap in the instruction behaves this way. A prompt that doesn't say
-who the reader is gets a general reader on every run, and a prompt that
-doesn't name the format gets a paragraph on most runs. The retry that
+who the reader is gets a general reader on every run, and when a prompt
+doesn't name the format, the format is the model's choice and varies
+between runs. The retry that
 happens to come out right is a draw from the tail, and the next run falls
 back into the middle. So the correction goes into the prompt, where it
 holds on every run (@Academy ai-fluency-framework-foundations).
@@ -225,16 +230,17 @@ you do next?
 
 ## Move the fix into a template
 
-Look back at the rounds. The "Decided:" line is the second time you have
-had to ask for it. Last week's notes got the same first summary and the
-same fix, typed into the chat, and lost when the chat closed. A fix you
-type in the chat is there for that session. A fix in the prompt is there
-for every run.
+Look back at the rounds. The "Decided:" line and the owner line are each
+the second time you had to ask for them. Last week's notes got the same
+first summary and the same two fixes, typed into the chat, and lost when
+the chat closed. A fix you type in the chat is there for that session. A
+fix in the prompt is there for every run.
 
 A **prompt template** is the prompt you keep: the lines that have shown
 what they fix, with a marker where the material goes. Save it in a note or
 a text file, and paste it in every week. This is the template after the
-three rounds on this page.
+three rounds on this page, with both lines that came up for the second
+time.
 
 ```text
 Summarize the meeting notes between the triple quotes for a colleague who
@@ -257,7 +263,7 @@ When the template grows, it grows by one tested line at a time.
   concepts={['iteration']}
   context="A learner summarizes weekly meeting notes with a chat assistant and keeps a saved prompt they paste in every week. Each item describes something they see after a run."
   title="Change, keep, or leave it"
-  hint="Is this the first time the gap showed up, the second time, or is there no gap?"
+  hint="How many times has this correction come up, and does the answer meet the prompt as it stands?"
   buckets={['Change one line of the prompt', 'Move the line into the saved template', 'Leave the prompt as it is']}
   items={[
     { text: 'The summary lists what was discussed and none of the decisions.', bucket: 0 },
@@ -281,8 +287,8 @@ what turns "press regenerate" into "change the prompt" the next time an
 answer is wrong.
 
 A good result is a log where every line names a gap in the text, one
-change, and what the change did to the answer, and a final prompt whose
-every line you can point at in the log. Which of your three changes would
+change, and what the change did to the answer, and a final prompt in
+which every line you added has a line in the log. Which of your three changes would
 you have skipped if you had rewritten the prompt in one go?
 
 </Exercise>
