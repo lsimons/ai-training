@@ -2,7 +2,7 @@ id: using-agents/trying-two-models
 title: Trying two models on the same task
 mode: tutorial
 covers: using-agents/choosing-tools
-serves: [using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation]
+serves: [using-agents/chooses-tool-and-autonomy/picks-a-model-by-fit]
 introduces: [model-fit, cost-and-speed]
 assumes:
   - objective: concepts/explains-models/names-failure-modes
@@ -21,6 +21,5 @@ minutes: 15
 notes: >-
   The plan named the topic concepts/limits as assumed; taken as the objective
   concepts/explains-models/names-failure-modes. The plan named the topic concepts/how-models-work as
-  assumed; taken as the objective concepts/explains-models/explains-generation. note: no objective
-  in S02 covers model fit yet. Issue #106 proposes a base objective under chooses-tool-and-autonomy;
-  `serves` to be updated when #106 lands.
+  assumed; taken as the objective concepts/explains-models/explains-generation. The served objective
+  picks-a-model-by-fit was added by #106.

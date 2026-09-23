@@ -23,6 +23,28 @@ objectives:
           tenth.
         example: Replying to support tickets stays at agent-with-approval because one in fifty tickets is a
           legal complaint.
+  - id: using-agents/chooses-tool-and-autonomy/picks-a-model-by-fit
+    statement: Picks a model for a task by testing fit, cost and speed
+    level: base
+    behaviors:
+      - claim: The learner runs a few representative inputs on each candidate model and compares, rather
+          than defaulting to the most capable one.
+        why: The most capable model is also the slowest and the most expensive, and on many tasks a smaller
+          one gives the same answer.
+        example: Before picking a model for tagging support tickets, the learner runs the same ten tickets
+          through a small and a large model and finds that the tags match on nine.
+      - claim: The learner states what the task needs (reformatting, classification, multi-step reasoning,
+          fresh facts) before naming a model.
+        why: The kind of work decides which model can do it, and a model named first gets the task bent to
+          fit it.
+        example: '"This is reformatting, so any model will do. This one needs today''s prices, so it needs
+          a model with search, whatever its size."'
+      - claim: The learner weighs the price and delay per call at the volume they expect, and measures
+          before scaling repeated work.
+        why: A cost that is small for one call is the whole budget at ten thousand calls a day, and a delay
+          that is fine in chat blocks a loop.
+        example: The learner times one call at four seconds, multiplies by the five hundred documents in
+          the nightly batch, and moves the job to the faster model before scheduling it.
   - id: using-agents/chooses-tool-and-autonomy/keeps-the-human-steps
     statement: Names the steps that stay human and why
     level: base
