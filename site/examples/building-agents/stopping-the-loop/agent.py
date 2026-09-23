@@ -36,7 +36,11 @@ TOOLS = {
 
 
 def rounds(messages) -> list:
-    """The (request, result) pair of every tool round in the message list, in order."""
+    """The (request, result) pair of every tool round in the message list, in order.
+
+    Relies on the layout run keeps: the user message first, then one assistant message
+    and one tool message per round, always appended together.
+    """
     return [
         (messages[i]["content"], messages[i + 1]["content"]) for i in range(1, len(messages) - 1, 2)
     ]
