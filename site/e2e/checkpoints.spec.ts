@@ -199,11 +199,11 @@ test('the coding lesson shows three ungraded examples CI verifies, and grades on
 	await expect(examples.locator('.cp-check')).toHaveCount(0);
 	await expect(examples.locator('[data-checkpoint]')).toHaveCount(0);
 	await expect(page.locator('#run-tests .example-output')).toHaveText('FAILED (failures=1)');
-	await expect(page.locator('[data-checkpoint]')).toHaveCount(5);
+	await expect(page.locator('[data-checkpoint]')).toHaveCount(6);
 	for (const [kind, count] of [
 		['sort', 1],
 		['repair', 1],
-		['scenario', 1],
+		['scenario', 2],
 		['choice', 2],
 		['predict', 0],
 	] as const) {

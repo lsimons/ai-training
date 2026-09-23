@@ -41,12 +41,16 @@ test('without a comfort level both cards stay hidden until a checkpoint result',
 	await expect(page.locator('[data-route=ahead]')).toBeHidden();
 });
 
-/** Pass the second and third checkpoint of agent-loop on the first try. */
+/** Pass the second, third and fourth checkpoint of agent-loop on the first try. */
 async function passTheRest(page: Page) {
 	const second = page.locator('#predict-loop');
 	await second.locator('textarea').fill('It is 14°C, rain there.');
 	await second.locator('.cp-check').click();
 	await expect(second).toHaveAttribute('data-state', 'passed');
+	const third = page.locator('#predict-tool-error');
+	await third.locator('textarea').fill('I could not check. The tool said: error: no data for Oslo');
+	await third.locator('.cp-check').click();
+	await expect(third).toHaveAttribute('data-state', 'passed');
 	const order = page.locator('#order-the-loop');
 	const items = order.locator('ol li');
 	const count = await items.count();

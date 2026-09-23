@@ -37,7 +37,7 @@ test('finish is enabled once every checkpoint is passed, and persists across a r
 
 test('the finish note counts the open checkpoints', async ({ page }) => {
 	await page.goto('building-agents/agent-loop/');
-	await expect(page.locator('[data-finish-note]')).toHaveText('Pass or skip 3 more checkpoints to finish this lesson.');
+	await expect(page.locator('[data-finish-note]')).toHaveText('Pass or skip 4 more checkpoints to finish this lesson.');
 	await expect(page.locator('.recap-sources')).toHaveCount(0);
 	await expect(page.locator('.recap-next')).toHaveCount(0);
 });
