@@ -20,7 +20,7 @@ PATTERNS = [
     ("password assignment", re.compile(r"(password|passwd|pwd)[^\s@]*[=:][^\s@]+", re.IGNORECASE)),
 ]
 SKIP_DIRS = {".git", "__pycache__"}
-SKIP_FILES = {"scan.py"}
+SKIP_FILES = {"scan.py", "env.sample"}
 
 
 def files_under(root: str) -> Iterator[str]:

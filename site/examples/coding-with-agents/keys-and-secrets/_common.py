@@ -3,6 +3,11 @@
 Every fixture copies `fixture-repo` to a temporary directory and works on the
 copy, so the committed fixture stays in its starting state. The copy is what
 the learner's own edits would produce at that point in the lesson.
+
+The fixture's `.env` is committed as `env.sample`, because the site's
+`.gitignore` ignores every `.env`. The copy gets it back under its real
+name, which is the name the lesson, the scanner and the deny rule use. A
+learner working in the fixture directory copies it once, as the README says.
 """
 
 import json
@@ -23,6 +28,7 @@ DENY = ["Read(./.env)", "Edit(./.agent/settings.json)"]
 def copy_repo(tmpdir: str) -> str:
     copy = os.path.join(tmpdir, "fixture-repo")
     shutil.copytree(REPO, copy)
+    shutil.copyfile(os.path.join(copy, "env.sample"), os.path.join(copy, ".env"))
     return copy
 
 
