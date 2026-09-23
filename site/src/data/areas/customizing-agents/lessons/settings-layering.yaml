@@ -1,10 +1,16 @@
 id: customizing-agents/settings-layering
 title: Where a setting comes from
+description: >-
+  Why a coding agent's setting seems ignored: the settings files in override order, one worked
+  example where four layers disagree and the effective permission set is derived entry by entry,
+  and what a team commits versus what each person keeps local.
 mode: explanation
 covers: customizing-agents/hooks-permissions
 serves: [customizing-agents/configures-agent/sets-permissions]
 introduces: [settings-layering]
 assumes: []
+sources-checked: 2026-09-23
+review-by: 2027-03-23
 after: [customizing-agents/allowlists]
 shorts: []
 exercise:
@@ -12,6 +18,13 @@ exercise:
   brief: >-
     Given a user file, a committed project file, a local override and a session flag that disagree,
     write down the effective permission set and which layer decided each entry.
-sources: []
-issue: 181
+sources: [Claude Code settings, Claude Code permissions]
 minutes: 10
+notes: >-
+  Explanation mode. The fixture `effective.py` is a model of two documented rules (single-value key
+  takes the highest layer; rule lists merge and are read deny, ask, allow) over four layers, and the
+  page says so. It reuses the trailing-wildcard Bash matching from the allowlists fixture. Nothing on
+  the page claims a local file overrides a committed allow entry: the pitfall is a wider local allow
+  rule merged into the effective set, which is what the settings page documents. File names,
+  precedence and merging come from code.claude.com/docs/en/settings and /permissions and must be
+  re-checked by review-by.
