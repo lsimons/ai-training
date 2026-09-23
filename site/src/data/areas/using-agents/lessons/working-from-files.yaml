@@ -1,18 +1,32 @@
 id: using-agents/working-from-files
 title: Working from your own files and images
+description: >-
+  Hand an assistant a screenshot of a table instead of describing it, get the rows back for a
+  spreadsheet, and count the cells that came back wrong. Then compare two versions of a contract
+  with a brief that says which differences matter.
 mode: tutorial
 covers: using-agents/assistant-work
 serves: [using-agents/delegates-and-checks/writes-a-brief]
 introduces: [working-with-files-and-images]
 assumes:
   - objective: safety/handles-data-safely/decides-what-to-share
-after: [using-agents/finding-information]
+    lesson: safety/redact-before-you-paste
+    section: what-the-task-needs
+extends-to:
+  - label: Delegating a task to an agent
+    href: /using-agents/delegating/
+after: []
 shorts: [What an upload discloses]
 exercise:
   kind: do
   brief: >-
-    Upload a supplied screenshot of a table, ask for it as rows you can paste into a spreadsheet,
-    and count the cells that came back wrong.
-sources: []
-issue: 136
+    Upload the supplied screenshot of a stock count, ask for it as rows you can paste into a
+    spreadsheet, paste them, and count the cells that came back wrong.
+sources: [Claude docs vision]
 minutes: 10
+notes: >-
+  The screenshot is site/public/using-agents/working-from-files/stock-count.png, rendered from a
+  hand-written SVG table so the page holds the true values. The issue named safety/responsible-use
+  for the assumed objective; the page points at redact-before-you-paste "What the task needs"
+  because its pitfall is an upload that holds more than the task needs, which that section teaches
+  directly. No fixture: the learner uses a chat tool, and every transcript is illustrative.
