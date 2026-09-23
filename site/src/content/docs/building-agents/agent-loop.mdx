@@ -130,14 +130,14 @@ the work of swapping in a real model.
 Notice `max_steps`. Without it, a model that keeps asking for tools runs
 forever and spends your money. A real loop has a budget, and when the
 budget runs out it returns a string that names the limit
-(`stopped: step limit`), so the caller can tell a budget stop from an
-answer.
+(`stopped: step limit`) rather than an empty answer. The next lesson
+replaces the bare string with a dict that has a stop reason field.
 
 The loop also keeps going when a tool fails. A tool name that isn't in
 `TOOLS`, or a function that raises, becomes a tool result that starts with
 `error:` and goes back to the model like any other result. The model can
-then retry with better arguments or tell the user what went wrong. An error
-never escapes the loop, so the run always ends with something to show.
+then retry with better arguments or tell the user what went wrong. A tool
+error never escapes the loop, so the run always ends with something to show.
 
 <Predict id="predict-tool-error" objective="building-agents/builds-agent-loop/implements-the-loop"
   concepts={['loop-from-scratch', 'stop-conditions']}

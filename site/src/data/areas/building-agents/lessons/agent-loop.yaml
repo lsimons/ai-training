@@ -26,5 +26,5 @@ exercise:
 sources: []
 minutes: 25
 notes: >-
-  Live. Issue #91 adds the error path and a named stop reason to this lesson's code and is a section
+  Live. Issue #91 added the error path and a named stop reason to this lesson's code as a section
   here, so it has no entry of its own.
