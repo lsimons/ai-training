@@ -64,8 +64,10 @@ def run(question, model, execute=in_order, max_steps=5):
     return outcome("max_steps", None, rounds, messages)
 ```
 
-The `show` function prints an assistant line as `call_1 get_weather(city='Amsterdam')`
-and a tool line as `call_1 '14°C, rain'`. The weather table has
+The `show` function prints the `user` line as the question in `repr`, the
+same as the last lesson, an assistant line as `call_1 get_weather(city='Amsterdam')`
+and a tool line as `call_1 '14°C, rain'`. When one message holds more
+than one call or result, they go on one line, joined with commas. The weather table has
 `Amsterdam: 14°C, rain`, `Lisbon: 27°C, sun` and `Oslo: 6°C, snow`, and
 `summary` joins them in that order with a period after each.
 
@@ -92,12 +94,11 @@ show(run(QUESTION, model=model_one_at_a_time))
 
 </Predict>
 
-Four rounds for three lookups. Each round is a full trip to the model with
-the whole message list, and those trips cost most of the time and the
-tokens. If
-each lookup took a second and each model round took two, the run would
-take about eleven seconds, and nine of them are waiting for the model to
-ask for the next city.
+The three lookups took four rounds. Each round is a full trip to the
+model with the whole message list, and those trips cost most of the time
+and the tokens. If each lookup took a second and each model round took
+two, the run would take about eleven seconds, and eight of them are spent
+waiting for the model.
 
 ## All three in one reply
 
@@ -143,8 +144,8 @@ show(run(QUESTION, model=model_all_at_once, execute=together))
 
 </Predict>
 
-Two rounds instead of four, and the same answer. With the timings from
-the last section the run takes about five seconds. The three lookups
+The same answer came back in two rounds instead of four. With the
+timings from the last section the run takes about five seconds. The three lookups
 overlap, so they cost one second together, and the model is asked twice.
 A batch of independent reads is the common case in agents that work on
 files or records, where the model wants five files and there is no reason
@@ -155,10 +156,12 @@ reply with `stop_reason` `tool_use` can hold several `tool_use` blocks,
 each with its own `id`. Your loop answers with one `user` message that
 holds one `tool_result` block per `tool_use` block, each naming its
 `tool_use_id`, and any text in that message comes after the results
-(@Claude docs handle-tool-calls). How you run the calls is up to you, since
-`in_order` and `together` both produce a valid reply. Sending each result in its own `user` message
-is a formatting error, and a history with that pattern also teaches the
-model to stop asking for several tools at once. To turn the batching off,
+(@Claude docs handle-tool-calls). Whether those calls ran one after
+another or at the same time is invisible in that message, so `in_order`
+and `together` both produce a valid reply. The docs name
+one result per `user` message as the most common formatting mistake: the
+API accepts it, and a history with that pattern teaches the model to stop
+asking for several tools at once (@Claude docs parallel-tool-use). To turn the batching off,
 set `disable_parallel_tool_use: true` inside the `tool_choice` object.
 With the default `tool_choice` type `auto` the model then makes at most
 one tool call per reply, and the run looks like the first section.
@@ -207,25 +210,25 @@ show(run(QUESTION, model=model_with_follow_up, execute=together))
 
 </Predict>
 
-Three rounds for four calls. The batch saved two rounds on the lookups,
+The four calls took three rounds. The batch saved two rounds on the lookups,
 and the dependent call cost one round of its own, because a round is the
 only place where a result can flow into an argument. The rule for what
 goes in one reply is the data flow: calls whose arguments are all known
 now can share a reply, and a call whose argument is another call's result
 waits for the reply after it.
 
-A model doesn't always get this right. When a dependent call does arrive
-in the same batch, the docs' advice is to run what you can and return a
-`tool_result` with `is_error` set to `true` for the call you skipped, with
-a short note on why. The model reissues that call in the next round with
-the real argument (@Claude docs parallel-tool-use). The exercise below
-builds that case.
+A model doesn't always get this right, and a dependent call can arrive in
+the same batch as the call it needs. The docs say to return a
+`tool_result` with `is_error` set to `true` and a short note for any call
+you choose not to run (@Claude docs parallel-tool-use). A model that reads
+such an error usually asks again with the real argument
+(@Claude docs handle-tool-calls). The exercise below builds that case.
 
 <Pitfall title="Returning results in the order they finished">
 The thread pool also offers `as_completed`, which yields each result as
-its call finishes, so the slow Oslo lookup comes last even when the model
-asked for it first. Return that list without the ids, or pair results
-with calls by position, and the model learns that Amsterdam has snow.
+its call finishes. Say the Amsterdam lookup is slow: the list comes back
+as Lisbon, Oslo, Amsterdam. Pair that list with the calls by position and
+the model learns that Amsterdam has 27°C and sun and that Oslo has rain.
 Rule: every result names the `id` of the call it answers, and the model
 reads the pairing from the ids, never from the position.
 </Pitfall>
@@ -274,9 +277,10 @@ can refuse to run it, and only the next round can supply the argument.
 
 A good result: the first run answers with advice for the string `call_1`
 in two rounds, which is wrong and fast. The second run shows the error
-result for `call_4` in the first tool message, a second reply with the
-real `weather` argument, and three rounds, the same count as the lesson's
-follow-up run. What would the harness need to know to tell a dependent
+result for `call_4` in the first tool message, then a second reply with
+the real `weather` argument, and three rounds, the same count as the
+lesson's follow-up run. Your fake model asks again by construction. A
+real model usually does, and the harness can't count on it. What would the harness need to know to tell a dependent
 call from an independent one without a rule about ids in arguments?
 
 </Exercise>
