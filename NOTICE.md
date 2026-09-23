@@ -12,7 +12,10 @@ terms. Add an entry whenever you bring in content from elsewhere.
   Licensed under the Apache License 2.0. Files derived from it have been
   changed; the Apache license text is at
   <https://www.apache.org/licenses/LICENSE-2.0>. No endorsement is implied.
-- **CS50** (<https://cs50.harvard.edu/>), Harvard University, David J. Malan and
+  The course is published at <https://lsimons.github.io/agent-engineer-course/>,
+  and the bibliography cites each lesson by its page there.
+- **CS50x** (<https://cs50.harvard.edu/x/>) and **CS50ai**
+  (<https://cs50.harvard.edu/ai/>), Harvard University, David J. Malan and
   Brian Yu. Licensed under CC BY-NC-SA 4.0, which this CC BY-SA work can't
   adapt. This project adopts and cites CS50's teaching approach and
   vocabulary as ideas only. Any CS50 page included verbatim is marked with its

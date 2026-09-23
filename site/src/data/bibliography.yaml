@@ -10,126 +10,126 @@ AEC-01:
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/01-what-are-ai-agents/
 AEC-02:
   type: course
   title: "How agents think: tokens and context, reasoning strategies, model choice, system prompts"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/02-how-agents-think/
 AEC-03:
   type: course
   title: "Tools, giving agents hands: function calling, schema design, the N x M problem"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/03-tools-giving-agents-hands/
 AEC-04:
   type: course
   title: "Agentic design patterns: ReAct, reflection, tool use, planning"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/04-agentic-design-patterns/
 AEC-05:
   type: course
   title: "Memory and context: context engineering, memory kinds, memory versus RAG, context rot"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/05-memory-and-context/
 AEC-06:
   type: course
   title: "Planning and reasoning: the loop, plan-then-execute, hierarchy"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/06-planning-and-reasoning/
 AEC-07:
   type: course
   title: "Multi-agent systems: architectures, roles, the orchestration tax"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/07-multi-agent-systems/
 AEC-08:
   type: course
   title: "Agentic RAG: the retrieve, evaluate, refine loop; when basic RAG is enough"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/08-agentic-rag/
 AEC-09:
   type: course
   title: "Evaluating and testing agents: quality pillars, metrics, trajectories, LLM as judge"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/09-evaluating-and-testing-agents/
 AEC-10:
   type: course
   title: "Guardrails and safety: why agent safety differs, defense layers, injection, human in the loop"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/10-guardrails-and-safety/
 AEC-11:
   type: course
   title: "From prototype to production: eval-gated deploys, rollout, cost"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/11-from-prototype-to-production/
 AEC-12:
   type: course
   title: Getting started with Claude Code
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/12-getting-started-with-claude-code/
 AEC-13:
   type: course
   title: "Building your first agent: the loop from scratch, then with an SDK"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/13-building-your-first-agent/
 AEC-14:
   type: course
   title: Agent protocols, MCP and A2A
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/14-agent-protocols-mcp-and-a2a/
 AEC-15:
   type: course
   title: "AGENTS.md: contents, monorepo hierarchies, with a builder widget"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/15-agents-md/
 AEC-16:
   type: course
   title: "MCP deep dive: MCP versus CLI, security failure modes, token cost"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/16-mcp-deep-dive/
 AEC-17:
   type: course
   title: "Agent skills: skills versus tools, the spec, progressive disclosure"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/17-agent-skills/
 AEC-18:
   type: course
   title: "Orchestrators: code- versus model-driven, patterns, anti-patterns"
   container: Agent Engineer Course
   author: Addy Osmani, Ivar Soares Urdalen, Leo Simons
   license: Apache-2.0
-  url: https://github.com/lsimons/agent-engineer-course
+  url: https://lsimons.github.io/agent-engineer-course/18-orchestrators/
 DLAI-1:
   type: course
   title: ChatGPT Prompt Engineering for Developers
@@ -312,13 +312,20 @@ Academy building-with-the-claude-api:
   author: Anthropic
   license: Proprietary
   url: https://academy.claude.com/courses/building-with-the-claude-api
-CS50:
+CS50x:
   type: course
-  title: Harvard CS50 and its AI tutor
+  title: CS50's Introduction to Computer Science
   container: Harvard CS50
   author: Harvard University, CS50
   license: CC BY-NC-SA 4.0
-  url: https://cs50.harvard.edu/
+  url: https://cs50.harvard.edu/x/
+CS50ai:
+  type: course
+  title: CS50's Introduction to Artificial Intelligence with Python
+  container: Harvard CS50
+  author: Harvard University, CS50
+  license: CC BY-NC-SA 4.0
+  url: https://cs50.harvard.edu/ai/
 Ng:
   type: reference
   title: "AI engineering skills map: build and deploy AI applications, software engineering fundamentals, use coding agents, shape the build"
