@@ -1,0 +1,287 @@
+import { Choice, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we hand an assistant a screenshot of a table and get the
+rows back for a spreadsheet. First we try to describe the table in words
+and see where that goes wrong. Then we upload the picture with a brief
+that says what to keep exact. The check is a count of the cells that came
+back wrong. A second run compares two versions of a short contract, where the
+brief says which differences matter. By the end you have a rule for when
+to upload and when to type.
+
+You need a chat assistant that accepts images. Most do, and the one this
+lesson checks its limits against takes pictures in the common formats, up
+to 10 MB and 8000 by 8000 pixels each, and up to twenty of them in one
+message (@Claude docs vision). Every response shown here is illustrative. The
+author wrote it to show the pattern, and your model gives a different
+text.
+
+## The table
+
+Here is the material. It is a stock count from Brindlewick Instruments,
+the fictional company from the previous lesson, and it exists only as a
+picture: someone photographed the count sheet, or took a screenshot of a
+system you have no export from. The task is to get these six rows into a
+spreadsheet.
+
+![A screenshot of a table titled "Storeroom B, stock count, 18 September" with six rows and the columns Item code, Description, Shelf, Counted, Expected and Difference.](/using-agents/working-from-files/stock-count.png)
+
+Look at it once now. Thirty-six cells, some of them one digit, some
+of them a minus sign in front of a digit. You could type them, and typing
+is where a `-1` becomes a `1`. The point of this lesson is to make the
+assistant do the typing and to make the check quick.
+
+## Describe the table in words
+
+The first instinct is to describe what you see. Before you read on,
+predict what comes back when you do that. Where does the assistant get the
+values you leave out?
+
+<Prompt model="illustrative" recorded="illustrative">
+I have a stock count table with six rows. The columns are item code,
+description, shelf, counted, expected and difference. The items are a
+torque wrench, a calibration weight, two digital calipers, a thermocouple
+probe and a spirit level. The item codes start with BI and a dash and a
+four-digit number. Can you give me the rows to paste into a spreadsheet?
+</Prompt>
+<Response>
+Here is the table as tab-separated rows. I have filled in the codes and
+numbers as placeholders where you did not give them, so replace those with
+the real values.
+
+```text
+Item code	Description	Shelf	Counted	Expected	Difference
+BI-0001	Torque wrench	B1	10	10	0
+BI-0002	Calibration weight	B1	5	5	0
+BI-0003	Digital caliper	B2	12	12	0
+BI-0004	Digital caliper	B2	12	12	0
+BI-0005	Thermocouple probe	B3	8	8	0
+BI-0006	Spirit level	B3	4	4	0
+```
+
+</Response>
+
+The response says so itself, and it is still no use. Every number is
+made up, because the prompt gave none, and the two calipers are
+indistinguishable because the prompt did not say how they differ. You
+would now type thirty numbers into the assistant's placeholders, which is
+the work you wanted to hand over. A description is a lossy copy of the
+picture, and the loss is in the exact values, which is the one part of
+the task that matters.
+
+## Upload the screenshot
+
+Now attach the picture. Save the screenshot from this page to your
+computer, open a fresh chat, add the file to the message, and write the
+ask under it. The brief has the same four parts as any other. The goal is
+rows for a spreadsheet. The context is the attached file, named as the
+only source. The limits say what to keep exact and what to leave out. The
+done-criterion is one you can check against the picture.
+
+<Prompt model="illustrative" recorded="illustrative">
+[stock-count.png attached]
+
+Attached is a screenshot of a stock count. Give me every row as
+tab-separated values that I can paste into a spreadsheet, with the header
+row first and the rows in the same order as the picture. Keep the item
+codes and the numbers exactly as shown, including the sign. Do not add a
+total or any row that is not in the picture. Where a cell is unreadable,
+write a question mark instead of guessing.
+</Prompt>
+<Response>
+
+```text
+Item code	Description	Shelf	Counted	Expected	Difference
+BI-1042	Torque wrench 20-100 Nm	B3	14	15	-1
+BI-1108	Calibration weight 1 kg	B1	8	8	0
+BI-2260	Digital caliper 150 mm	B4	21	19	+2
+BI-2271	Digital caliper 300 mm	B4	6	6	0
+BI-3015	Thermocouple probe, type K	B2	37	40	-3
+BI-3390	Spirit level 600 mm	B5	11	11	0
+```
+
+</Response>
+
+Paste the rows into a spreadsheet and put the picture next to it. Go
+through the cells one at a time and count the ones that differ from the
+picture. On a clear screenshot like this one the count is zero or one, and the cells that go wrong are the same ones a person mistypes: a
+sign dropped from a negative number, a `1` read as a `7`, two similar
+codes swapped. The vendor's own documentation says that the model reads
+small, blurry or rotated text badly and that its counts of objects are
+approximate, and it recommends keeping the text legible and the picture
+uncropped (@Claude docs vision). The check is what tells you which kind
+of picture you have.
+
+The upload changed the task. You wrote one sentence about the file and
+three about what to keep exact, and the assistant did the thirty-six
+cells. The same brief works for a photo of a whiteboard, a PDF of a price
+list, or a spreadsheet export. Name the attachment as the source, say what
+must be copied exactly, and give the model a way to say "I can't read
+this" so that it doesn't fill the gap.
+
+<Choice id="which-ask-uses-the-file" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['working-with-files-and-images']}
+  context="The lesson turns a screenshot of a six-row stock count table into rows for a spreadsheet, and the learner can attach the screenshot to the chat."
+  title="Which ask gets the table?" hint="Which ask gives the model the values, and which asks give it room to invent them?"
+  options={[
+    { text: 'I have a stock count with six rows and six columns, items like a torque wrench and two calipers. Give me the rows for a spreadsheet.', why: 'The model has the shape of the table and none of its values, so every number it returns is a placeholder or a guess.' },
+    { text: 'What is in this image?', why: 'The file is there, but the ask has no format, no limits and nothing you can check. You get a paragraph about a table, and the rows are still to do.' },
+    { text: 'Attached is a screenshot of a stock count. Give me every row as tab-separated values, header first, codes and numbers exactly as shown. Write a question mark for any cell you cannot read.', correct: true },
+    { text: 'Type up the attached table for me and make sure it is accurate.', why: 'Asking for accuracy changes nothing you can check, and "type up" leaves the format to the model. Say what exact means: the codes, the numbers, the sign.' },
+  ]}>
+You have the screenshot of the stock count and a chat open. Which ask gets
+you rows you can paste and check in a minute?
+</Choice>
+
+## Compare two versions of a contract
+
+Here is a second use of the same move. A short service agreement has
+come back from the other side with changes, and you want to know what
+changed. The
+versions are below, and each is short on purpose so that you can check
+the answer. In your own work they would be two files, and you attach both.
+
+> **Service agreement, calibration services (version 1)**
+>
+> 1. Brindlewick Instruments calibrates the Client's measuring equipment
+>    listed in Schedule A once every twelve months.
+> 2. The fee is 1,200 euros per visit, invoiced after each visit and
+>    payable within 30 days.
+> 3. Either party may end this agreement with 60 days' written notice.
+> 4. Brindlewick repeats a faulty calibration free of charge when the
+>    Client reports it within 14 days of the visit.
+> 5. Brindlewick keeps the calibration records for five years and provides
+>    copies on request.
+> 6. Brindlewick may not subcontract the work without the Client's written
+>    consent.
+
+> **Service agreement, calibration services (version 2)**
+>
+> 1. Brindlewick Instruments calibrates the Client's measuring equipment
+>    listed in Schedule A once a year.
+> 2. The fee is 1,350 euros per visit, invoiced after each visit and
+>    payable within 30 days.
+> 3. Either party may end this agreement with 30 days' written notice.
+> 4. Brindlewick repeats a faulty calibration without charge when the Client
+>    reports it within 14 days of the visit.
+> 5. Brindlewick keeps the calibration records for five years and provides
+>    copies on request.
+> 6. Brindlewick may subcontract the work to a certified laboratory and
+>    remains responsible for it.
+
+"Compare these two" gives you a list in which a fee increase and a changed
+turn of phrase sit side by side with the same weight. The brief says which
+differences matter and what to do with the rest.
+
+<Prompt model="illustrative" recorded="illustrative">
+[contract-v1.txt and contract-v2.txt attached]
+
+Attached are two versions of a service agreement. List every difference
+that changes an amount, a period, a deadline or an obligation. For each
+one, quote the sentence from both versions. Rewording that keeps the
+meaning goes in one line at the end, and if a clause is unchanged, do not
+mention it.
+</Prompt>
+<Response>
+
+1. **Fee.** Version 1: "The fee is 1,200 euros per visit". Version 2:
+   "The fee is 1,350 euros per visit".
+2. **Notice period.** Version 1: "with 60 days' written notice". Version
+   2: "with 30 days' written notice".
+3. **Subcontracting.** Version 1: "Brindlewick may not subcontract the
+   work without the Client's written consent." Version 2: "Brindlewick may
+   subcontract the work to a certified laboratory and remains responsible
+   for it." The Client's consent is no longer needed.
+
+Rewording only: clause 1 says "once a year" instead of "once every twelve
+months", and clause 4 says "without charge" instead of "free of charge".
+
+</Response>
+
+Check it against the two texts. Each of the three items quotes both
+versions, so the check is finding two sentences, and the reworded clauses
+are named and set aside rather than mixed in. The brief did that. It named
+the kinds of change that matter (amount, period, deadline, obligation),
+asked for the quote behind each, and gave the rewording a place to go.
+
+<Sort id="which-differences-matter" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['working-with-files-and-images']}
+  context="The lesson compares two versions of a short fictional service agreement with a brief that asks for every change to an amount, a period, a deadline or an obligation, and asks for rewording to be listed separately."
+  title="Which differences does the brief ask for?" hint="For each change, ask: does one party owe, pay, wait or get something different, or is it the same rule in other words?"
+  buckets={['A change the brief asks for', 'Rewording the brief sets aside']}
+  items={[
+    { text: 'The fee goes from 1,200 to 1,350 euros per visit', bucket: 0 },
+    { text: '"Once every twelve months" becomes "once a year"', bucket: 1 },
+    { text: 'The notice period goes from 60 to 30 days', bucket: 0 },
+    { text: '"Free of charge" becomes "without charge"', bucket: 1 },
+    { text: 'Subcontracting no longer needs the Client\'s written consent', bucket: 0 },
+  ]} />
+
+## What an upload discloses
+
+An attachment goes to the same place as pasted text, under the same
+terms, and the model reads all of it. The difference is that you read
+pasted text as you paste it, and you rarely read a file before you attach
+it. In the lesson on redacting before you paste you read a document with
+the task in mind and split it into what the task uses and what says who is
+involved. Do the same with a file, and where a file holds both, make a
+copy that holds only the first part: crop the screenshot, export the one
+sheet, save the one section.
+
+<Pitfall title="A screenshot of the whole window">
+A colleague wants help with the formula in one column of a spreadsheet and
+takes a screenshot of the whole window. The picture shows the column, and
+also the browser tabs behind it, a customer's name in a chat notification
+in the corner, and the salary column next to the one they asked about. The
+assistant answers the formula question well, and the whole picture went
+with it. An attachment discloses its whole content, the same as pasted
+text. Crop to the range the task needs before you attach.
+</Pitfall>
+
+<Scenario id="which-file-to-attach" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['working-with-files-and-images', 'giving-context']}
+  context="A learner wants an assistant to turn one column of numbers from a team spreadsheet into a chart. The spreadsheet also holds columns with the team members' names and salaries."
+  title="Which file goes in the brief?" hint="What does the chart need from the sheet, and what else is in the sheet?"
+  options={[
+    { text: 'Attach the whole spreadsheet and ask for a chart of the one column.', consequence: 'The chart is fine. The names and salaries of the team went to the tool along with the column, and the terms of the tool now apply to them.' },
+    { text: 'Copy the one column into a new file, attach that, and name it as the source in the brief.', correct: true, consequence: 'The chart is the same. The tool saw twelve numbers and a heading, and there is nothing in the file that the task did not need.' },
+    { text: 'Type the twelve numbers into the chat instead of attaching anything.', consequence: 'Twelve numbers are quick to type, and this works. For the two hundred rows next month it does not, and a copy of the column would have.' },
+  ]}>
+You want a chart of the monthly totals column from the team's spreadsheet.
+The sheet also has a column of names and a column of salaries. What do
+you attach?
+</Scenario>
+
+## When to upload and when to type
+
+Upload when the material is long, structured or visual: a table, a
+diagram, a photo of a whiteboard, a document with numbering you want kept.
+Describing it loses the exact values, and the exact values are the task.
+Type when the material is one or two sentences, or when the file holds
+things the task doesn't need and you can't cut them out in a minute.
+
+Either way the brief is the same one you wrote in the previous lesson,
+with the attachment as the context. Name the file as the source, say what
+must stay exact, give the model a way to say it can't read something, and
+check the result against the file. A read of a picture is a transcription,
+and a transcription error is silent until you look.
+
+<Exercise stretch="Shrink the screenshot to half its width in any image editor, run the same brief on the smaller copy, and see whether the count of wrong cells changes.">
+Save the stock count screenshot from this page, open a fresh chat, attach
+it, and send the brief from the "Upload the screenshot" section. Paste the
+rows into a spreadsheet and compare them with the picture, cell by cell,
+and write down the number of cells that differ and what each one says. It
+takes about five minutes and produces one number and at most a few lines.
+Doing it once by hand shows you what kind of error a picture read makes,
+so you know what to check for next time. A good result is a count you can
+name, with a line for each wrong cell, and zero is a fine count. Which of
+the wrong cells, if any, would you have got wrong yourself if you had
+typed the table?
+</Exercise>
+
+<Recap>
+1. A description of a table is a lossy copy of it, and the loss is in the exact values. Attach the picture or the file, and let the model do the typing.
+2. The brief for an upload has the same four parts as any other. Name the attachment as the only source, say what must stay exact, and give the model a way to say it can't read a cell.
+3. Check the result against the file, cell by cell. A model reads small, blurry or rotated text badly, and a transcription error is silent until you look (@Claude docs vision).
+4. When comparing two files, say which kinds of difference matter and where the rest should go, and ask for the quote from both versions behind each one.
+5. An attachment discloses its whole content, the same as pasted text. Crop, export or copy out the part the task needs before you attach.
+</Recap>
