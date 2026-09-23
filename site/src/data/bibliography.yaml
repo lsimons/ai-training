@@ -543,3 +543,17 @@ Gitleaks:
   author: Zachary Rice and contributors
   license: MIT
   url: https://github.com/gitleaks/gitleaks
+Wilson 2024:
+  type: reference
+  title: Gender, Race, and Intersectional Bias in Resume Screening via Language Model Retrieval
+  container: Proceedings of the AAAI/ACM Conference on AI, Ethics, and Society (AIES 2024), arXiv preprint 2407.20371
+  author: Kyra Wilson and Aylin Caliskan
+  license: CC BY-NC-SA 4.0
+  url: https://arxiv.org/abs/2407.20371
+Bertrand 2004:
+  type: reference
+  title: "Are Emily and Greg More Employable than Lakisha and Jamal? A Field Experiment on Labor Market Discrimination"
+  container: American Economic Review 94(4), 991-1013
+  author: Marianne Bertrand and Sendhil Mullainathan
+  license: Copyright American Economic Association
+  url: https://www.aeaweb.org/articles?id=10.1257/0002828042002561
