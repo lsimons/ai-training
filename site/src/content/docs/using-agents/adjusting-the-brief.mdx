@@ -1,0 +1,286 @@
+import { Choice, Scenario, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we give an agent a brief with a gap in it and watch what
+the agent does with the gap. Then we answer the agent's question in two
+places, first in the chat and then in the brief. A second run after each
+answer shows which one survives. After that we change a limit in the brief
+while the work is under way, and we stop a run whose first result shows
+the goal itself was wrong. The task is small, and you can run
+it as often as you like.
+
+You need an agent that can read a folder of files, such as Claude Cowork
+or a chat tool with file access. If your tool reads only what you paste, paste the four files below into
+the chat with their names above them. Every step of the lesson then works
+the same way. Every exchange
+shown here is illustrative. The author wrote it to show the pattern, and
+your agent gives a different text.
+
+## The task and its gap
+
+Make a folder with these files. They belong to Brindlewick Instruments,
+the fictional company from the earlier lessons, and the task is the
+calibration team's weekly status update for the operations director.
+
+`notes.md`:
+
+```text
+Week 38, calibration team
+- Finished the recalibration of the 20 torque wrenches for the Delft site (Jonas)
+- Started the thermocouple batch for the food lab, 12 of 40 done (Mira)
+- Waiting on the 1 kg reference weight from the supplier, due 26 Sep (Mira)
+- Storeroom B stock count done, two calipers over, three probes short (Sam)
+- Next week: finish the thermocouple batch, start the spirit levels for the survey team
+```
+
+`templates/short-update.md`:
+
+```text
+Subject: Calibration team, week <number>
+One paragraph of at most 120 words: what was finished, what is in
+progress, what is blocked and by whom, and what comes next week.
+```
+
+`templates/full-update.md`:
+
+```text
+Subject: Calibration team, week <number>
+## Done
+## In progress
+## Blocked
+## Next week
+One bullet per item under each heading. Keep each bullet to one line.
+```
+
+`brief.md`:
+
+```text
+Write this week's status update for the operations director. Take the
+items from notes.md and use the template in templates/. Use only the
+notes as your source, and do not add work that is not in them. Done when
+every item in the notes appears exactly once, each under the heading that
+fits it, and the update follows the template.
+```
+
+The brief has the four parts from the lesson on delegating: a goal, the
+context to use, limits, and done-criteria. It also has a gap, and you can
+see it before the agent does. The folder holds two templates and the brief
+says "the template". Predict what happens when you send it. Then open a
+fresh session in your agent, point it at the folder, and send this.
+
+<Prompt model="illustrative" recorded="illustrative">
+Do the task in brief.md.
+</Prompt>
+<Response>
+Before I write the update: `templates/` holds two files, `short-update.md`
+(one paragraph, at most 120 words) and `full-update.md` (four headings
+with bullets). The brief says "the template" and doesn't say which. Which
+one should I use?
+</Response>
+
+Some agents ask, as this one does. Others pick one, write the update and
+mention the pick at the end, or don't mention it at all. Either way the
+gap is the same gap. When the agent asks, the gap is now your question. When the agent
+guesses, the gap is filled with a default you didn't choose. Both tell you something
+the brief left out, and that is the thing you have to add.
+
+## Chat or brief
+
+You have the answer. You want the full update, with the four headings. The
+question is where the answer goes. Try both places, one after the other.
+
+First, answer in the chat. Type the answer as a reply and let the agent
+finish.
+
+<Prompt model="illustrative" recorded="illustrative">
+Use full-update.md.
+</Prompt>
+<Response>
+Subject: Calibration team, week 38
+
+## Done
+- Finished the recalibration of the 20 torque wrenches for the Delft site (Jonas)
+- Storeroom B stock count: two calipers over, three probes short (Sam)
+
+## In progress
+- Thermocouple batch for the food lab, 12 of 40 done (Mira)
+
+## Blocked
+- 1 kg reference weight from the supplier, due 26 Sep (Mira)
+
+## Next week
+- Finish the thermocouple batch
+- Start the spirit levels for the survey team
+</Response>
+
+Check it against the done-criteria. The notes hold five lines and the update has seven bullets, because
+the last line of the notes holds two items. Every item appears once, under a heading that fits, and the
+update follows the template. The result passes. Now close this session,
+open a fresh one on the same folder, and send "Do the task in brief.md"
+again. The agent asks the same question. The answer you typed was part of
+the chat, and a new session starts from the files. The chat is over, and
+nothing in the folder says which template you meant. The same thing
+happens next week when a colleague runs the brief, or when you run it
+yourself after the tool has forgotten the conversation.
+
+Now put the answer in the second place. Edit `brief.md` and change "use
+the template in templates/" to "use the template in
+templates/full-update.md". Open a fresh session, send the same one line,
+and this time there is no question. The agent writes the update, and it
+does so every time anyone runs this brief from now on.
+
+This is the same fact you met when iterating on a prompt: a correction
+holds only where the next run reads it (@Academy
+ai-fluency-framework-foundations). In a chat, the next run reads the
+prompt. In a delegated task, the next run reads the brief and the files
+next to it. A reply in the chat fixes this run. An edit to the brief fixes
+every run.
+
+<Choice id="where-the-answer-goes" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['task-brief']}
+  context="A learner runs a written brief with an agent that reads a folder of files. The brief points at a folder of templates without naming one, and the agent asks which template to use."
+  title="Where does the answer go?" hint="Which of these will the next run of this brief still see?"
+  options={[
+    { text: 'Reply in the chat with the template name and let the agent finish.', why: 'The run finishes, and the next run starts from the files and asks the same question. The chat is not among the files.' },
+    { text: 'Reply in the chat, and once the result passes, save the result as the template for next time.', why: 'The result is one update. The brief still says "the template", and the next run still has two to choose from.' },
+    { text: 'Edit the brief so it names the template file, then restart the agent from the edited brief.', correct: true },
+    { text: 'Delete the template you did not want, so the agent has only one to find.', why: 'It removes the question for this brief and breaks every other brief that used the short template. The gap was in the brief, so the fix belongs in the brief.' },
+  ]}>
+The agent asks which of two templates to use. You know the answer. Where
+do you put it, so that the next run does not ask again?
+</Choice>
+
+## Changing a limit while the work runs
+
+The full template says "keep each bullet to one line". The first update
+came back, and the director wants to know who is responsible for each
+item, which the notes have and the one-line bullets barely fit. You want
+the bullets to name the person and be allowed a second line. This is a
+change to a limit, and how you state it matters.
+
+Type "add who is responsible to each bullet" and the agent now has two
+instructions: the template's one-line limit and your new one. It tries to
+satisfy both. You get a bullet that makes room for the name by dropping
+another fact, or a name squeezed in as initials. Nothing told it the earlier limit no longer
+applies, so it holds on to it. State the change as a change instead, in
+the chat for this run and in the file for every run after it.
+
+<Prompt model="illustrative" recorded="illustrative">
+Replace the limit "keep each bullet to one line" with this one: each
+bullet names the person responsible and may run to two lines. Rewrite
+the update with that change and nothing else changed.
+</Prompt>
+<Response>
+Subject: Calibration team, week 38
+
+## Done
+- Finished the recalibration of the 20 torque wrenches for the Delft site. Responsible: Jonas.
+- Storeroom B stock count done, two calipers over, three probes short.
+  Responsible: Sam.
+
+## In progress
+- Thermocouple batch for the food lab, 12 of 40 done. Responsible: Mira.
+
+## Blocked
+- 1 kg reference weight from the supplier, due 26 September. Responsible: Mira.
+
+## Next week
+- Finish the thermocouple batch. Responsible: Mira.
+- Start the spirit levels for the survey team. Responsible: not in the notes.
+</Response>
+
+The exchange above is illustrative. In your own result, look for a name
+on every bullet and no bullet cut short to make room. Where the notes give
+no name, a plain "not in the notes" is right and a guessed name is a
+failure. Then make the same change in `templates/full-update.md`, so
+the next run gets the new limit without being told. The word "replace"
+did the work here. It names the old instruction and retires it, where
+"also" or "add" would have left it standing.
+
+<Repair id="state-the-change" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['task-brief']}
+  title="State the change as a change" hint="Which earlier instruction does the agent still hold, and does your message tell it to let go?"
+  broken={`Also put the name of the person responsible on each bullet.`}
+  model={`Replace the limit "keep each bullet to one line" with: each bullet names the person responsible and may run to two lines. Change nothing else.`}>
+The template the agent has just used says "keep each bullet to one line".
+A colleague sends the message below and gets bullets with initials
+squeezed onto the end of each line. Rewrite the message so the agent drops
+the old limit.
+</Repair>
+
+## When the first result shows the goal was wrong
+
+Sometimes the first result tells you something worse than a missing name.
+It tells you the goal was wrong. Suppose the update comes back with the torque wrenches under "Done", and
+that line reminds you of what the director said last week: she signed
+those off in a meeting and wants the update to cover the decisions she
+has to take. A list of what happened was never the document she asked
+for. The update the brief asks for is the wrong document. Every
+criterion in the brief can pass, and the result is still no use.
+
+<Pitfall title="Letting it finish the wrong thing well">
+A learner reads the first draft, sees that the director wants decisions
+and the brief asks for a task list, and thinks "let it finish, then I'll
+ask for the decisions". The agent finishes a tidy task list. The done-criteria pass on review. The learner then asks for the decisions in the chat. The second result mixes a decision list into
+the task list, because the brief still asks for the task list. Two runs
+and two reviews went into a document that was wrong from the first line.
+The rule: when the first result shows the goal itself was wrong, stop the
+run and rewrite the goal and the done-criteria in the brief. A stopped run
+costs one run. A finished wrong result costs the run, the review, and the
+next run too.
+</Pitfall>
+
+Stopping is cheap because the work so far was the agent's, and the agent
+starts again from the brief without complaint. The expensive part is the
+review you would give a result that can pass every criterion and still
+miss the point. So the check on a first result has two questions. Does it
+meet the done-criteria? And does meeting them still get you what you
+wanted? When the answer to the second is no, the brief has the wrong goal,
+and the edit goes there.
+
+<Scenario id="stop-or-finish" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['checking-results']}
+  context="An agent is producing a weekly status update from a brief. The brief asks for a list of work items under four headings, with done-criteria about every item appearing once. Partway through, the first section shows the reader wanted a list of decisions to take, not a list of work done."
+  title="Stop or finish?" hint="What does the brief's goal say, and will finishing this run change what the brief says?"
+  options={[
+    { text: 'Let the run finish, review it against the done-criteria, and then ask for the decisions in the chat.', consequence: 'The result passes every criterion and is the wrong document. The follow-up asks for something the brief still does not say, so the next result mixes the two, and you have reviewed twice.' },
+    { text: 'Stop the run, rewrite the goal and the done-criteria in the brief to ask for the decisions the director has to take, and restart from the edited brief.', correct: true, consequence: 'One run is lost. The next result is checked against criteria that describe the document the director asked for, and the brief is right for next week as well.' },
+    { text: 'Let the run finish and fix the document yourself, since you know what the director wants.', consequence: 'You have the document, and the brief still asks for the task list. Next week the agent produces the task list again and you fix it again.' },
+    { text: 'Stop the run and tell the agent in the chat to write the decisions instead, then let it continue.', consequence: 'This run comes out right. The brief still holds the old goal and the old done-criteria, so the next session asks for the task list again, and your review has nothing written down to tick.' },
+  ]}>
+The agent is halfway through the update, and the "Done" section shows you
+the director wanted the decisions she has to take, and the brief asks for
+a list of work done. What do you do?
+</Scenario>
+
+## The loop
+
+Every step in this lesson was the same move. A result came back, you read
+it against the brief, and what you learned went into the brief before the
+next run. The agent asked a question, and the answer went into the brief.
+A limit changed, and the change went into the template as a replacement.
+The goal turned out wrong, and the goal and the done-criteria changed
+before the run went on. Result, brief, run (@Academy
+introduction-to-claude-cowork). The chat is where you steer this run, and
+the files are where the steering is kept.
+
+<Exercise stretch="Run the original brief with 'the template' left ambiguous in three fresh sessions and note whether the agent asks or picks each time, and which template it picks.">
+Make the folder from this lesson and run `brief.md` as written, so the
+agent has to choose between the two templates. Answer its question once
+in the chat and once by editing the brief, and after each answer start a
+fresh session and run the brief again. Write down, in two or three lines,
+what the second run did in each case. It takes ten minutes and shows you
+which of your answers the next run can see, which is what protects next
+week's run from this week's question. A good result is two lines that say
+"asked again" for the chat answer and "no question" for the edited brief.
+If your agent picked a template instead of asking, its pick is the
+question, and you answer it the same two ways. Which other answers have
+you given an agent in the chat this week that belong in a file?
+</Exercise>
+
+<Recap>
+1. An agent that asks a question and an agent that guesses are showing you the same gap in the brief.
+2. An answer in the chat fixes this run. An answer in the brief fixes every run, because a new session starts from the files and the earlier chat is not among them.
+3. State a changed limit as a replacement, and name the old limit. An agent holds the earlier instruction and tries to satisfy both (@Academy ai-fluency-framework-foundations).
+4. When a first result shows the goal itself was wrong, stop the run and rewrite the goal and the done-criteria. A stopped run costs one run, and a finished wrong result costs the run, the review, and the next run.
+5. Result, brief, run. Steer this run in the chat, and keep the steering in the files (@Academy introduction-to-claude-cowork).
+</Recap>
