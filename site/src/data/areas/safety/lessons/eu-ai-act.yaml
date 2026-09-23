@@ -1,5 +1,5 @@
 id: safety/eu-ai-act
-title: The EU AI Act in one lesson
+title: Introduction to the EU AI Act
 description: >-
   What the European Union's AI Act asks of people who build and use AI at work. Whether a tool is an
   AI system, which risk tier a use falls in, whether you are provider or deployer, and which
@@ -25,7 +25,7 @@ exercise:
     For one AI tool used at your work, decide whether your organization is provider or deployer and
     name the one transparency duty that applies. Reflection: which of the Act's duties touch your
     own daily work?
-sources: []
+sources: [AI Act, AI Act OJ, EC AI Act, EC AI Office]
 minutes: 15
 notes: >-
   The AI literacy pointer that issue #10 asked for lands here, and the transparency duties connect
