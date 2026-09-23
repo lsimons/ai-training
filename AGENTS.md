@@ -235,6 +235,8 @@ patterns below after the fact. Write so that it has nothing to say.
   pass with the maintainer: `docs/agents/triage.md`.
 - Running many builder and reviewer agents in parallel against the issues,
   from triage to merge queue: `docs/agents/orchestration.md`.
+- Running wave after wave from one long session, with a dispatcher that
+  spawns a wave lead per wave: `docs/agents/meta-orchestration.md`.
 - Tutor mode: `.claude/skills/tutor/SKILL.md`. Run the site locally and
   invoke `/tutor`.
 - Commits follow [Conventional Commits](https://conventionalcommits.org/)
