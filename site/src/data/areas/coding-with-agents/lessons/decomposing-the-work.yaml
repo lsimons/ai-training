@@ -1,5 +1,9 @@
 id: coding-with-agents/decomposing-the-work
 title: Splitting the work into components the agent can build one at a time
+description: >-
+  Split a feature into components with one responsibility and a one-sentence interface each, order
+  them by dependency, and write the acceptance test for the first one before it exists, so it fails
+  on a stub.
 mode: tutorial
 covers: coding-with-agents/specification
 serves:
@@ -8,6 +12,8 @@ serves:
 introduces: [decomposition-into-components, dependencies, designing-the-verification]
 assumes:
   - objective: using-agents/delegates-and-checks/adjusts-mid-task
+    lesson: using-agents/adjusting-the-brief
+    section: changing-a-limit-between-runs
 after: [coding-with-agents/deciding-what-to-build]
 shorts: [a check that would fail on a stub]
 exercise:
@@ -22,4 +28,7 @@ minutes: 15
 notes: >-
   The plan named the topic using-agents/decomposition as assumed; taken as the objective
   using-agents/delegates-and-checks/adjusts-mid-task. Tutorial because the acceptance test runs.
-  Sources: Brilliant SPC, Academy ai-native-sdlc-playbook.
+  Sources: Brilliant SPC, Academy ai-native-sdlc-playbook (paraphrased ideas only). The fixture is
+  the three-module to-do program with `remove_done` already fixed, copied from plan-then-test, and
+  the import feature is designed in the page and never built in the fixture: the acceptance test
+  and the stub parser sit next to the fixture repo and are copied in at run time.
