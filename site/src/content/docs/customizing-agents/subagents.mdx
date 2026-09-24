@@ -322,7 +322,8 @@ conversation in a mode that asks before an edit (@Claude Code subagents).
 In a fresh copy of the fixture with its own first commit, create
 `.claude/agents/reviewer.md` from this lesson, apply `clear.diff`, and
 save `git diff` to `review.diff`. Run `git status --short` and keep the
-output: two modified files, and `.claude/` and `review.diff` untracked.
+output: two modified files, and `.claude/`, `clear.diff` and
+`review.diff` untracked.
 Start the agent in Manual mode, note the `/context` total, ask it to use the reviewer subagent on `review.diff`
 and to say whether it read the file itself, then note `/context` again. In
 a second fresh session, ask the main agent to review `review.diff` with
@@ -360,6 +361,6 @@ you read once and never needed again?
 5. A subagent's `permissionMode` applies when the main conversation is in
    `default`, `dontAsk` or `plan`. In `acceptEdits`, `auto` or
    `bypassPermissions` the subagent runs in the main conversation's mode,
-   and a subagent can never declare `bypassPermissions` for itself
-   (@Claude Code subagents).
+   and a subagent that declares `bypassPermissions` gets the main
+   conversation's mode instead (@Claude Code subagents).
 </Recap>
