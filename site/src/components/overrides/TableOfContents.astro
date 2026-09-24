@@ -1,14 +1,47 @@
 ---
 /**
- * Starlight `TableOfContents` override: no "On this page" when the only
- * entry would be the page title ("Overview"). The right column itself stays
- * (Starlight keeps it whenever `toc` is set), so skimming between pages
- * doesn't shift the content.
+ * Starlight `TableOfContents` override. On a lesson page the headings list is
+ * followed by a "Checkpoints" group and an "Examples" group (issue #220,
+ * `lib/lesson-toc.ts`), each entry linking to its section id. No "On this
+ * page" when the only entry would be the page title ("Overview"); the right
+ * column itself stays (Starlight keeps it whenever `toc` is set), so skimming
+ * between pages doesn't shift the content.
+ *
+ * The groups sit next to Starlight's `<starlight-toc>` element rather than in
+ * it: its list and its current-heading script are internal to the package.
+ * The script highlights the heading before a checkpoint while the checkpoint
+ * is in view, as it did before; the group entries themselves carry no
+ * highlight.
  */
 import Default from '@astrojs/starlight/components/TableOfContents.astro';
+import { lessonEntryOf } from '@lib/lesson-context';
+import { isLessonEntry, lessonTocGroups, showToc } from '@lib/lesson-toc';
 
 const { toc } = Astro.locals.starlightRoute;
-const onlyTitle = !toc || (toc.items.length === 1 && toc.items[0]?.children.length === 0);
+const entry = lessonEntryOf(Astro);
+const groups = isLessonEntry(entry) ? lessonTocGroups(entry) : [];
 ---
 
-{!onlyTitle && <Default><slot /></Default>}
+{
+	showToc(toc, groups) && (
+		<>
+			<Default>
+				<slot />
+			</Default>
+			{groups.map((group) => (
+				<nav class="lesson-toc" aria-labelledby={`lesson-toc-${group.slug}`}>
+					<h2 id={`lesson-toc-${group.slug}`}>{group.label}</h2>
+					<ul>
+						{group.entries.map((item) => (
+							<li>
+								<a href={`#${item.id}`}>
+									<span>{item.title}</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				</nav>
+			))}
+		</>
+	)
+}

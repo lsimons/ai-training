@@ -200,7 +200,12 @@ pitfall and the exercise.
 - Every checkpoint is keyboard operable and announces its feedback to
   assistive technology.
 - A checkpoint's id is its section id. Authors keep section slugs stable
-  once published, because progress and review items hang off them.
+  once published, because progress and review items hang off them. The
+  right-hand "On this page" menu lists the checkpoints and the ungraded
+  examples of the page in two groups after the headings, each entry a link
+  to its section id (decided 2026-09-24, #220), and each title shows the same
+  hover permalink a heading has. The menu and the export read the same
+  source, so an id is unique across the checkpoints and examples of a page.
 - A checkpoint is a standalone item as well as a section. It names the
   concepts it exercises, and where its stem depends on the page it has a
   one-paragraph context. A review page or a tutor can then ask it outside

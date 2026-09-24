@@ -1,0 +1,22 @@
+---
+/**
+ * The title of a checkpoint or example section, with the hover permalink
+ * Markdown headings get from Starlight's `markdown.headingLinks` (issue #220).
+ * The markup and classes are those of Starlight's `AnchorHeading`, so its
+ * `anchor-links.css` styles the icon, the hover and the focus state. The id
+ * stays on the section (progress, the review page and the export link to
+ * it), so the heading itself carries none and the link points at the
+ * section. Without an id on the heading, Starlight's "On this page" script
+ * keeps treating the whole section as body text under the heading before it.
+ */
+import { Icon } from '@astrojs/starlight/components';
+
+interface Props {
+	/** The section id the permalink points at. */
+	id: string;
+	title: string;
+}
+const { id, title } = Astro.props;
+---
+
+<div class="sl-heading-wrapper cp-title-wrap"><h3 class="cp-title">{title}</h3><a class="sl-anchor-link" href={`#${id}`}><span aria-hidden="true" class="sl-anchor-icon"><Icon name="link-alt" /></span><span class="sr-only">Section titled “{title}”</span></a></div>

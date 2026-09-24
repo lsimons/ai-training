@@ -23,7 +23,9 @@
 .checkpoint[data-state='passed'] { border-left-color: var(--at-done); }
 .checkpoint[data-state='skipped'] { border-left-color: var(--sl-color-gray-3); }
 .cp-head { display: flex; justify-content: space-between; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sl-color-gray-3); }
-.cp-title { margin: 0.25rem 0 0.5rem; font-size: 1.05rem; }
+/* The title sits in Starlight's heading wrapper (SectionTitle.astro), which makes the h3 inline, so the wrapper carries the margins. */
+.cp-title-wrap { margin: 0.25rem 0 0.5rem; }
+.cp-title { margin: 0; font-size: 1.05rem; }
 .checkpoint .cp-stem > :first-child { margin-top: 0; }
 /* The standalone context paragraph; hidden in the lesson, shown on the review page. */
 .cp-context { margin: 0 0 0.75rem; color: var(--sl-color-gray-2); font-size: 0.95rem; }
@@ -274,3 +276,8 @@
 .sl-markdown-content ol.references li:target { background: color-mix(in srgb, var(--sl-color-accent) 15%, transparent); }
 .sl-markdown-content a.term { color: inherit; text-decoration: underline dotted var(--sl-color-accent); text-decoration-thickness: 1.5px; text-underline-offset: 0.2em; cursor: help; }
 .sl-markdown-content a.term:hover { text-decoration-style: solid; }
+
+/* The "Checkpoints" and "Examples" groups of the right-hand menu (overrides/TableOfContents.astro), styled like Starlight's headings list. The PageSidebar rules give the h2 and the links their color and size. */
+.lesson-toc { margin-top: 1rem; }
+.lesson-toc ul { list-style: none; padding: 0; margin: 0; }
+.lesson-toc a { display: block; padding: 0.25rem 0.5rem; border-radius: 0.25rem; line-height: 1.25; }
