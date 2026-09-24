@@ -26,4 +26,4 @@ Content is in `site/src/content/docs/`, and static assets are in `site/public/`.
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
 Git hooks (formatting, linting, link checking, secret scanning, commit-message
 linting) are managed with [prek](https://prek.j178.dev); install them once per
-clone with `prek install -t pre-commit -t commit-msg`.
+clone with `prek install -t pre-commit -t commit-msg -t pre-push`.

@@ -46,10 +46,11 @@ Git hooks (formatting, linting, link checking, secret scanning, commit-message l
 
 ```bash
 mise run site-install-frozen
-prek install -t pre-commit -t commit-msg
+prek install -t pre-commit -t commit-msg -t pre-push
 ```
 
 `mise run lint` runs the same hooks over every file, so CI catches what an
-uninstalled hook would have missed.
+uninstalled hook would have missed. The `pre-push` hook also runs the
+`spell` and `prose` checks on the files a push changes.
 
 Since this is a small hobby project, we may not notice your contribution for a while if we're busy elsewhere. Sorry.
