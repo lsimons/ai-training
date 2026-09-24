@@ -86,10 +86,10 @@ opens it. Every spec blocks requests that leave `localhost` and fails on a
 on `workflow_dispatch`, but on a pull request only when the diff touches a
 file outside this skip set: `docs/`, any `.md` file outside `site/`,
 `.vale.ini`, `.vale/`, `cspell-words.txt`, `.markdownlint-cli2.jsonc`,
-`.lychee.toml` and the license files. An empty diff runs the job. The `paths` step of the `build` job computes it with
-`git diff --name-only` against the base branch and the `e2e` job has a
-job-level `if:` on its output, so a skipped run still reports a (skipped)
-status for the job.
+`.lychee.toml` and the license files. An empty diff runs the job. The
+`paths` step of the `build` job computes it with `git diff --name-only`
+against the base branch and the `e2e` job has a job-level `if:` on its
+output, so a skipped run still reports a (skipped) status for the job.
 
 Lesson pages under `site/src/content/` and the data tree under
 `site/src/data/` aren't in the skip set. The specs in `site/e2e/` derive
