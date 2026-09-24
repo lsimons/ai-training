@@ -33,7 +33,8 @@ describe('load', () => {
 		};
 		localStorage.setItem(progress.storageKeyFor(1), JSON.stringify(v1));
 		const r = progress.load();
-		expect(r.version).toBe(2);
+		expect(r.version).toBe(progress.VERSION);
+		expect(r.habits).toEqual({});
 		expect(r.lessons['a/x']).toEqual({ state: 'finished', at: '2026-03-10' });
 		expect(r.reviews['a/x#c']).toEqual({
 			stage: 2,
@@ -176,6 +177,19 @@ describe('wrappers write through storage', () => {
 		expect(progress.dueReviewIds(progress.load(), 'a/')).toEqual(['a/x#c']);
 		expect(progress.dueReviews(progress.load(), 'a/')).toEqual(['a/x#c']);
 	});
+	it('habit results go through the record and the due list reads today', () => {
+		progress.update((r) => {
+			r.habits['a/x#h'] = { since: '2000-01-01', next: '2000-01-02', history: [] };
+		});
+		expect(progress.dueHabits(progress.load(), 'a/')).toEqual(['a/x#h']);
+		expect(progress.recordHabit('a/x#h', 'done')).toEqual({
+			since: '2000-01-01',
+			next: null,
+			history: [{ at: progress.today(), result: 'done' }],
+		});
+		expect(progress.dueHabits(progress.load())).toEqual([]);
+		expect(progress.recordHabit('a/x#missing', 'skipped')).toBeUndefined();
+	});
 	it('prunes orphans and resets outdated reviews only when something changes', () => {
 		progress.finishLesson('a/x', [{ id: 'a/x#c', revision: 1 }]);
 		progress.markLessonRead('gone/y');
@@ -199,7 +213,8 @@ describe('wrappers write through storage', () => {
 			reviews: { 'a/x#c': { stage: 1, due: '2026-03-11', last: 'fail', history: ['pass', 'fail'], revision: 1 } },
 		});
 		expect(progress.importJson(text)).toEqual({ ok: true });
-		expect(stored().version).toBe(2);
+		expect(stored().version).toBe(progress.VERSION);
+		expect(stored().habits).toEqual({});
 		expect(stored().reviews['a/x#c']).toMatchObject({
 			stage: 1,
 			due: '2026-03-11',

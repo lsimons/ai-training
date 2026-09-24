@@ -13,6 +13,9 @@ export type {
 	CheckpointState,
 	Comfort,
 	GoalEntry,
+	HabitEntry,
+	HabitResult,
+	HabitTrace,
 	LessonEntry,
 	LessonState,
 	ProgressRecord,
@@ -27,7 +30,10 @@ export {
 	DEFAULT_REVISION,
 	emptyRecord,
 	exportJson,
+	HABIT_DAYS,
+	habitCardState,
 	migrate,
+	nextOccurrence,
 	normalize,
 	OLDEST_MIGRATABLE_VERSION,
 	priorStorageKeys,
@@ -123,8 +129,8 @@ export function update(fn: (r: ProgressRecord) => void): ProgressRecord {
 // --- Content changes (spec S04 and S05 "Content changes") --------------------
 
 /**
- * Drop entries whose id the build no longer knows: `first` checkpoint ids and
- * `practice` ids in separate lists (`pruneOrphanEntries`). Needs the whole catalog, so
+ * Drop entries whose id the build no longer knows: `first` checkpoint ids,
+ * `practice` ids and habit ids in separate lists (`pruneOrphanEntries`). Needs the whole catalog, so
  * it runs where that is available (the progress page), not in `load()`. Saves
  * only when something was dropped.
  */
@@ -132,9 +138,10 @@ export function pruneOrphans(
 	knownLessonIds: Iterable<string>,
 	knownCheckpointIds: Iterable<string>,
 	knownPracticeIds: Iterable<string>,
+	knownHabitIds: Iterable<string> = [],
 ): number {
 	const r = load();
-	const dropped = model.pruneOrphanEntries(r, knownLessonIds, knownCheckpointIds, knownPracticeIds);
+	const dropped = model.pruneOrphanEntries(r, knownLessonIds, knownCheckpointIds, knownPracticeIds, knownHabitIds);
 	if (dropped) save(r);
 	return dropped;
 }
@@ -217,6 +224,22 @@ export function dueReviewIds(record: ProgressRecord, prefix: string): string[] {
 /** The due items for one session: `dueReviewIds` capped at `REVIEW_CAP` (spec S05). */
 export function dueReviews(record: ProgressRecord, prefix: string): string[] {
 	return model.dueReviewsOn(record, prefix, model.today());
+}
+
+// --- Habits (spec S07) --------------------------------------------------------
+
+/** Done or Skip on a habit today: the result goes on its history and `next` moves on (spec S07 "Schedule"). */
+export function recordHabit(id: string, result: model.HabitResult): model.HabitEntry | undefined {
+	let out: model.HabitEntry | undefined;
+	update((r) => {
+		out = model.recordHabit(r, id, result, model.today());
+	});
+	return out;
+}
+
+/** Every habit due today whose id starts with `prefix`. */
+export function dueHabits(record: ProgressRecord, prefix = ''): string[] {
+	return model.dueHabits(record, model.today(), prefix);
 }
 
 export function setComfort(level: Comfort | undefined): void {

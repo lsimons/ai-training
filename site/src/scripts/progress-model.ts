@@ -1,10 +1,10 @@
 /**
- * The learner's progress record, per spec S04, and the review schedule per
- * spec S05, as pure functions over a record. Nothing here touches the browser:
+ * The learner's progress record, per spec S04, the review schedule per spec
+ * S05 and the habit schedule per spec S07, as pure functions over a record. Nothing here touches the browser:
  * every function takes the record (and, where a date matters, the day) and
  * returns what it computed. `progress.ts` wraps these with local storage.
  */
-export const VERSION = 2;
+export const VERSION = 3;
 /** The oldest record version `migrate` can bring up to `VERSION`. */
 export const OLDEST_MIGRATABLE_VERSION = 1;
 export const storageKeyFor = (version: number) => `ai-training-progress-v${version}`;
@@ -59,6 +59,23 @@ export interface QuizEntry {
 	score: number;
 	at: string;
 }
+export type HabitResult = 'done' | 'skipped';
+/** One habit result: the local calendar day and what the learner reported (spec S07 "Storage"). */
+export interface HabitTrace {
+	at: string;
+	result: HabitResult;
+}
+/**
+ * A habit's schedule (spec S07 "Storage"): `since` is the day the lesson was
+ * first finished and never changes, `next` the day the habit is next due or
+ * `null` once it has retired, `history` the results so far, oldest first,
+ * capped at `HABIT_HISTORY_LENGTH`.
+ */
+export interface HabitEntry {
+	since: string;
+	next: string | null;
+	history: HabitTrace[];
+}
 export interface ProgressRecord {
 	version: number;
 	comfort?: Comfort;
@@ -72,6 +89,8 @@ export interface ProgressRecord {
 	 */
 	practice: Record<string, CheckpointEntry>;
 	quizzes: Record<string, QuizEntry>;
+	/** Per habit, keyed `<lesson id>#<habit id>` (spec S07 "Storage"). Added in version 3. */
+	habits: Record<string, HabitEntry>;
 }
 
 /** A checkpoint as the build knows it; what `finishLesson` and `resetOutdatedReviews` need. */
@@ -88,6 +107,10 @@ export const REVIEW_CAP = 12;
 export const DEFAULT_REVISION = 1;
 /** How many results a review item remembers. */
 export const HISTORY_LENGTH = 20;
+/** Days after the lesson's finish day on which a habit falls due (spec S07 "Schedule"). */
+export const HABIT_DAYS: readonly number[] = [1, 3, 7];
+/** One result per occurrence, so a habit's history is as long as its schedule. */
+export const HABIT_HISTORY_LENGTH = HABIT_DAYS.length;
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -111,7 +134,16 @@ export function stageDays(stage: number): number {
 }
 
 export function emptyRecord(): ProgressRecord {
-	return { version: VERSION, goals: [], lessons: {}, checkpoints: {}, reviews: {}, practice: {}, quizzes: {} };
+	return {
+		version: VERSION,
+		goals: [],
+		lessons: {},
+		checkpoints: {},
+		reviews: {},
+		practice: {},
+		quizzes: {},
+		habits: {},
+	};
 }
 
 // --- Shape validation -------------------------------------------------------
@@ -147,6 +179,16 @@ function isGoalEntry(v: unknown): v is GoalEntry {
 }
 function isQuizEntry(v: unknown): v is QuizEntry {
 	return isObject(v) && typeof v.score === 'number' && isDay(v.at);
+}
+const isHabitResult = (v: unknown): v is HabitResult => v === 'done' || v === 'skipped';
+function isHabitTrace(v: unknown): v is HabitTrace {
+	return isObject(v) && isDay(v.at) && isHabitResult(v.result);
+}
+function isHabitEntry(v: unknown): v is HabitEntry {
+	if (!isObject(v)) return false;
+	const nextOk = v.next === null || isDay(v.next);
+	const historyOk = Array.isArray(v.history) && v.history.every(isHabitTrace);
+	return isDay(v.since) && nextOk && historyOk;
 }
 
 /** What `normalize` had to drop, so the caller can say so. */
@@ -209,9 +251,14 @@ function migrateV1(doc: Record<string, unknown>): Record<string, unknown> {
 	return { ...doc, version: 2, reviews };
 }
 
+/** Version 2 to 3: a copy of the record with an empty `habits` map (spec S07 "Storage"). */
+function migrateV2(doc: Record<string, unknown>): Record<string, unknown> {
+	return { ...doc, version: 3, habits: {} };
+}
+
 type MigrationStep = (doc: Record<string, unknown>) => Record<string, unknown>;
 /** Each step brings a record from the keyed version to the next one. */
-const MIGRATIONS: Record<number, MigrationStep> = { 1: migrateV1 };
+const MIGRATIONS: Record<number, MigrationStep> = { 1: migrateV1, 2: migrateV2 };
 
 /**
  * Bring a parsed record of an older version up to `VERSION`, one step at a
@@ -272,6 +319,7 @@ export function normalize(raw: unknown, warnings: NormalizeWarning[] = []): Prog
 	// Absent in a record written before practice existed: empty, with no warning (cleanMap warns only on a value).
 	record.practice = cleanMap('practice', parsed.practice, isCheckpointEntry, warnings);
 	record.quizzes = cleanMap('quizzes', parsed.quizzes, isQuizEntry, warnings);
+	record.habits = cleanMap('habits', parsed.habits, isHabitEntry, warnings);
 	return record;
 }
 
@@ -283,21 +331,24 @@ export function describeWarning(w: NormalizeWarning): string {
 // --- Content changes (spec S04 and S05 "Content changes") --------------------
 
 /**
- * Drop lesson, checkpoint, review and practice entries whose id the build no
- * longer knows. Each map is pruned against its own list: `checkpoints` and
- * `reviews` against the `first` checkpoint ids, `practice` against the
- * `practice` ids, so a checkpoint moved from `first` to `practice` loses its
- * review item. Mutates `r`; returns how many entries went.
+ * Drop lesson, checkpoint, review, practice and habit entries whose id the
+ * build no longer knows. Each map is pruned against its own list:
+ * `checkpoints` and `reviews` against the `first` checkpoint ids, `practice`
+ * against the `practice` ids, so a checkpoint moved from `first` to
+ * `practice` loses its review item, and `habits` against the habit ids (spec
+ * S07 "Content changes"). Mutates `r`; returns how many entries went.
  */
 export function pruneOrphanEntries(
 	r: ProgressRecord,
 	knownLessonIds: Iterable<string>,
 	knownCheckpointIds: Iterable<string>,
 	knownPracticeIds: Iterable<string>,
+	knownHabitIds: Iterable<string> = [],
 ): number {
 	const lessons = new Set(knownLessonIds);
 	const checkpoints = new Set(knownCheckpointIds);
 	const practice = new Set(knownPracticeIds);
+	const habits = new Set(knownHabitIds);
 	let dropped = 0;
 	for (const id of Object.keys(r.lessons)) {
 		if (lessons.has(id)) continue;
@@ -317,6 +368,11 @@ export function pruneOrphanEntries(
 	for (const id of Object.keys(r.practice)) {
 		if (practice.has(id)) continue;
 		delete r.practice[id];
+		dropped++;
+	}
+	for (const id of Object.keys(r.habits)) {
+		if (habits.has(id)) continue;
+		delete r.habits[id];
 		dropped++;
 	}
 	return dropped;
@@ -552,6 +608,58 @@ export function servedCheckpoint(
 		if (count < bestCount || (count === bestCount && last < bestLast)) best = c;
 	}
 	return best;
+}
+
+// --- Habits (spec S07) --------------------------------------------------------
+
+/**
+ * When a habit whose lesson was finished on `since` is next due after `day`
+ * (spec S07 "Schedule"): the first of `since` + 1, 3, 7 days that is later
+ * than `day`, or `null` when none is left and the habit retires. Anchored on
+ * `since`, so a learner who comes back late skips the occurrences they missed.
+ */
+export function nextOccurrence(since: string, day: string): string | null {
+	for (const n of HABIT_DAYS) {
+		const due = addDays(since, n);
+		if (due > day) return due;
+	}
+	return null;
+}
+
+/**
+ * Done or Skip on `day` (spec S07 "Schedule"): the result goes on the
+ * history, capped at one per occurrence, and `next` moves to the next
+ * occurrence after `day`. With the history full, or no occurrence left, the
+ * habit retires (`next` is `null`). Returns the entry, or `undefined` when
+ * there is no such habit.
+ */
+export function recordHabit(r: ProgressRecord, id: string, result: HabitResult, day: string): HabitEntry | undefined {
+	const entry = r.habits[id];
+	if (!entry) return undefined;
+	entry.history = [...entry.history, { at: day, result }].slice(-HABIT_HISTORY_LENGTH);
+	entry.next = entry.history.length >= HABIT_HISTORY_LENGTH ? null : nextOccurrence(entry.since, day);
+	return entry;
+}
+
+/** Every habit due on or before `day` whose id starts with `prefix`, in id order. A retired habit is never due. */
+export function dueHabits(r: ProgressRecord, day: string, prefix = ''): string[] {
+	return Object.entries(r.habits)
+		.filter(([id, h]) => id.startsWith(prefix) && h.next !== null && h.next <= day)
+		.map(([id]) => id)
+		.sort();
+}
+
+export type HabitCardState = 'unfinished' | 'waiting' | 'due' | 'retired';
+
+/**
+ * What the habit card shows (spec S07 "Where habits surface"): the text only
+ * while the lesson is unfinished (no entry), the next date while waiting, Done
+ * and Skip when due, and the results once retired.
+ */
+export function habitCardState(entry: HabitEntry | undefined, day: string): HabitCardState {
+	if (!entry) return 'unfinished';
+	if (entry.next === null) return 'retired';
+	return entry.next <= day ? 'due' : 'waiting';
 }
 
 export function applyComfort(r: ProgressRecord, level: Comfort | undefined): void {
