@@ -10,6 +10,7 @@ import { type CheckpointKind, CONCEPTS_FORM, DEFAULT_REVISION, isReviewable } fr
 import { assertKnownConcepts, knownConceptIds } from '@lib/concepts';
 import { lessonIdOf } from '@lib/lesson-context';
 import { href } from '@lib/url';
+import SectionTitle from './SectionTitle.astro';
 
 interface Props {
 	id: string;
@@ -82,7 +83,7 @@ const reviewable = isReviewable({ kind, review, honor });
 		<span class="cp-kind">Checkpoint · {kind}</span>
 		<span class="cp-state" aria-live="polite"></span>
 	</header>
-	<h3 class="cp-title">{title}</h3>
+	<SectionTitle {id} {title} />
 	{context && <p class="cp-context" hidden>{context}</p>}
 	<div class="cp-stem"><slot /></div>
 	<div class="cp-body"><slot name="body" /></div>

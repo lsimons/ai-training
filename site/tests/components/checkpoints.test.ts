@@ -43,6 +43,13 @@ describe('CheckpointShell (through Choice)', () => {
 		}
 		expect(html).toContain('href="/ai-training/concepts/how-models-work/#cp"');
 	});
+	it('renders the title in a heading wrapper with a permalink to the section id and an accessible name', async () => {
+		const html = await render(Choice, { ...base, options: [{ text: 'a', correct: true }] });
+		expect(html).toMatch(
+			/<section\s+class="checkpoint not-content"\s+id="cp"[\s\S]*<div class="sl-heading-wrapper cp-title-wrap"><h3 class="cp-title">Title<\/h3><a class="sl-anchor-link" href="#cp"><span aria-hidden="true" class="sl-anchor-icon"><svg[\s\S]*<\/svg><\/span><span class="sr-only">Section titled “Title”<\/span><\/a><\/div>/,
+		);
+		expect(html.match(/ id="cp"/g)).toHaveLength(1);
+	});
 	it('carries the concept ids, and an unknown or empty concepts list fails the build', async () => {
 		const options = [{ text: 'a', correct: true }];
 		const html = await render(Choice, { ...base, concepts: ['token', 'context-window'], options });
@@ -123,6 +130,10 @@ describe('Predict', () => {
 		);
 		expect(html).toContain('<section class="example not-content" id="run-list" data-example data-run="x/list.py">');
 		expect(html).toMatch(/<pre class="example-output">1\. \[ \] Buy milk<\/pre>/);
+		expect(html).toMatch(
+			/<div class="sl-heading-wrapper cp-title-wrap"><h3 class="cp-title">Show the list<\/h3><a class="sl-anchor-link" href="#run-list">/,
+		);
+		expect(html).toContain('<span class="sr-only">Section titled “Show the list”</span>');
 		expect(html).toContain('Output verified in CI from');
 		expect(html).toContain('Run this.');
 		for (const s of [
