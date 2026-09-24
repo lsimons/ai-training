@@ -35,8 +35,9 @@ def check_list_shows_date(repo: str) -> None:
     run_todo(repo, "due", "1", "2026-10-01")
     after = run_todo(repo, "list").stdout.splitlines()
     problems = []
-    if after[0] != "1. [ ] Buy milk (due 2026-10-01)":
-        problems.append(f"first line is {after[0]!r}")
+    first = after[0] if after else ""
+    if first != "1. [ ] Buy milk (due 2026-10-01)":
+        problems.append(f"first line is {first!r}")
     if after[1:] != before[1:]:
         problems.append("other lines changed")
     verdict(1, "due then list", problems)
@@ -59,7 +60,7 @@ def check_committed_file_lists_as_before(repo: str) -> None:
 
 
 def check_overdue(repo: str) -> None:
-    run_todo(repo, "due", "1", "2026-10-01")
+    """Runs after criterion 1 set the date on item 1, as the spec's order has it."""
     problems = []
     past = run_todo(repo, "overdue", today="2026-10-02").stdout
     if past != "1. [ ] Buy milk (due 2026-10-01)\n":
