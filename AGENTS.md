@@ -34,7 +34,10 @@ The site's own checks, in the order `ci` runs them after the prose tasks:
 
 `site-e2e` and `site-screenshot` need `mise run site-browser` once per
 machine. `docs/agents/testing.md` says which layer a new assertion belongs
-in.
+in. On a pull request the CI workflow skips the Playwright job when every
+changed file is under `docs/`, is a `.md` file, or is prose tooling config
+(`docs/agents/testing.md`, "When the browser suite runs"). Lesson pages and
+`site/src/data` changes still run it. A push to `main` always runs it.
 
 The Python tasks are prefixed `py-`: `py-install-frozen` (uv sync from
 `uv.lock`), `py-lint` (ruff check and format check), `py-format` (ruff

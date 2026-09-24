@@ -19,6 +19,8 @@ jobs:
   build:
     name: Lint, check and build
     runs-on: ubuntu-latest
+    outputs:
+      e2e: ${{ steps.paths.outputs.e2e }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -28,7 +30,42 @@ jobs:
           # history. At the default fetch-depth of 1 it would see a single
           # commit, so CI would run a far weaker check than a developer
           # does locally while the README advertises them as the same one.
+          # The `paths` step below also needs the base branch present.
           fetch-depth: 0
+
+      # On a pull request the browser walkthrough (the `e2e` job) runs only
+      # when the diff touches a file outside the skip set below. The skip
+      # set is prose and its tooling: `docs/`, Markdown files anywhere, the
+      # Vale, cspell, markdownlint and lychee configs, and the license and
+      # notice files. Lesson pages (`site/src/content/`) and the data tree
+      # (`site/src/data/`) are deliberately NOT in it: the e2e specs derive
+      # their lesson and checkpoint counts from the data tree and click
+      # through lesson pages, so a content change can break them. A push to
+      # `main` and `workflow_dispatch` always run the walkthrough.
+      - name: Decide whether the browser walkthrough runs
+        id: paths
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "Not a pull request: the walkthrough runs."
+            echo "e2e=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed="$(git diff --name-only "origin/${BASE_REF}...HEAD")"
+          skip_set='^(docs/|.*\.md$|\.vale\.ini$|\.vale/|cspell-words\.txt$|\.markdownlint-cli2\.jsonc$|\.lychee\.toml$|LICENSE(-CODE)?$|NOTICE\.md$)'
+          outside="$(printf '%s\n' "$changed" | grep -Ev "$skip_set" || true)"
+          if [ -z "$outside" ]; then
+            echo "Every changed file is in the skip set: the walkthrough is skipped."
+            printf '%s\n' "$changed"
+            echo "e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Changed files outside the skip set: the walkthrough runs."
+            printf '%s\n' "$outside"
+            echo "e2e=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up mise
         uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
@@ -123,10 +160,13 @@ jobs:
   # reports before the browser install and the build finish here. It builds
   # the site again rather than passing dist/ around: the build is fast and
   # the artifact plumbing is not worth the moving parts.
+  # Skipped, and reported as skipped, on a pull request whose diff stays in
+  # the skip set the `paths` step of the `build` job describes.
   e2e:
     name: Browser walkthrough (Playwright)
     runs-on: ubuntu-latest
     needs: build
+    if: needs.build.outputs.e2e == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
