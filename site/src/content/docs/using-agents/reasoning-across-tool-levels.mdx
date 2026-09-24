@@ -8,13 +8,13 @@ working when the tool took over, and the check that replaces it. You don't
 run anything in this lesson. The pairs are supplied, and the work is
 reading them and naming the checks.
 
-The earlier lessons of this course gave you four questions for picking a
-tool. Does the model fit the task, what do the cost and the speed buy, is
-this a job for a chat or an agent or an automation, and which steps stay
-human. This lesson is about what happens to those questions afterwards,
-because tools keep getting more capable, and a task you delegate today to
-an agent may run unattended next year, where the same four questions still
-need an answer from a different place.
+This part of the course asks four questions about picking a tool. Does
+the model fit the task, what do the cost and the speed buy, is this a job
+for a chat or an agent or an automation, and which steps stay human. This
+lesson is about what happens to those questions afterwards. Tools keep
+getting more capable, so a task you delegate today to an agent may run
+unattended next year. The same four questions still need an answer then,
+from a different place.
 
 ## The ladder of tools
 
@@ -27,9 +27,9 @@ accept or reject each one, so you watched everything that happened.
 **Chat** produces a whole answer from one message. You no longer see the
 answer forming word by word, and you read it as a piece.
 
-**An agent** takes a brief and works through steps with tools, reading
-files and drafting and checking, and shows you the result. You see the
-result and a log, and you didn't watch the steps.
+**An agent** takes a brief and works through steps with tools. It reads
+the files, drafts the result and checks its own work, and then it shows you
+the result. You see the result and a log, and you didn't watch the steps.
 
 **A system of agents**, or an automation, runs on a trigger without you
 present. One agent may hand pieces to others. You see a dashboard or a
@@ -66,7 +66,7 @@ members with a conflict are asked to contact the team lead by
 30 September.
 ```
 
-Both summaries are correct. Read them once, and then read the next section
+Both summaries are accurate. Read them once, and then read the next section
 with the question in mind: what did you do while writing the first one that
 nobody did for the second?
 
@@ -82,12 +82,17 @@ The check that replaces it sits one level up. You stop checking sentences
 and start checking whether the summary answers the question its reader
 has. The people who read this summary want to know when the review is, why
 it moved and what they have to do. Read the agent's summary against those
-three questions, and read the memo once for anything the summary dropped.
-That's a different check from the one you did before. It is also a check
-you could have done on your own summary and probably didn't, because you
-trusted the sentences you had written. The agent's summary has one such
-gap: it says the review moves to Tuesday, and it doesn't say it moved from
-Thursday. A reader who had Thursday in their calendar has to work that out.
+three questions, and read the memo once for anything the summary dropped
+or added. That one read is also where an invented fact shows: a sentence
+in the summary with no line in the memo behind it. Comparing sentence by
+sentence would find the same thing at a much higher cost. It would still
+miss what the summary left out, because a missing point has no sentence
+to compare. That's a different check from the one you did
+before. It is also a check you could have done on your own summary and
+probably didn't, because you trusted the sentences you had written. The
+agent's summary has one such gap: it says the review moves to Tuesday, and
+it doesn't say it moved from Thursday. A reader who had Thursday in their
+calendar has to work that out.
 
 The questions about fit, cost, risk and what to keep human work the same
 way. Picking an agent over a chat for a task meant asking whether it fit
@@ -96,10 +101,10 @@ that agent becomes an automation that runs every Monday, the same
 questions apply to the automation, and the answers change. The agent you
 briefed cost one session and could touch what you gave it. The weekly
 automation costs fifty-two sessions a year, on a morning when nobody is
-watching, and it can touch every account it is connected to. The
-step you kept human at the agent level,
-say the send button on an email, needs a new place in the automation, or it
-is gone (@Academy building-effective-human-agent-teams).
+watching, and it can touch every account it is connected to. The step you
+kept human at the agent level, say the send button on an email, needs a
+new place in the automation, or it is gone
+(@Academy building-effective-human-agent-teams).
 
 Here is the second pair. Both are the state of a shared folder after the
 week's incoming documents were filed.
@@ -154,9 +159,9 @@ Match each line to the check it names.
   context="A learner used to write a weekly status update by hand and now has an agent draft it from the team's notes. They are deciding what to check in the draft."
   title="What does the learner check now?" hint="Which check was part of writing by hand, and which one can still be asked of a finished draft?"
   options={[
-    { text: 'Every sentence, one by one, against the notes it came from, as they did when writing by hand.', why: 'That check was cheap when it was part of writing. Done on someone else\'s draft, it is a full second reading, and it still misses what the draft left out.' },
-    { text: 'Whether the draft tells its readers what they need to know this week, and whether anything in the notes is missing from it.', correct: true },
-    { text: 'Nothing beyond a quick read, because the agent works from the same notes the learner used.', why: 'The notes are the same. The reading of them happened where the learner was not looking, and the questions about the result did not go away.' },
+    { text: 'Every sentence of the draft, one by one, against the line in the notes it came from, as they did when writing by hand.', why: 'That check lived at the level the agent took over. Done on the finished draft, it costs a full second writing, and a point the draft left out has no sentence to compare, so it passes.' },
+    { text: 'Whether the draft tells its readers what they need to know this week, and whether anything in the notes is missing from it or added to it.', correct: true },
+    { text: 'Nothing beyond a quick read for typos, because the agent works from the same notes the learner used to write from.', why: 'The notes are the same. The reading of them happened where the learner was not looking, and the questions about the result did not go away.' },
   ]}>
 A learner who used to write the weekly status update by hand now has an
 agent draft it from the team's notes. Which check belongs at the new
@@ -192,9 +197,8 @@ filed by hand, the mistake was a document in the wrong folder because you
 were tired. An automation isn't tired, and it will file every document that
 mentions an amount under `invoices` on a rule it never questions, so its
 mistakes come in batches. The checks that catch a tired person catch
-neither. The check changes with the tool, and the way to find the new check
-is to ask what this tool gets wrong, rather than what you used to get
-wrong.
+neither. The check changes with the tool, and the new check comes from
+asking what this tool gets wrong.
 
 <Scenario id="round-number" objective="using-agents/chooses-tool-and-autonomy/reasons-across-levels"
   concepts={['reasoning-across-tool-levels', 'trust-but-verify-for-agents']}
@@ -203,7 +207,7 @@ wrong.
   options={[
     { text: 'Accept the report. Zero unsorted and a fast run are both good news.', consequence: 'You find out in November that the run stopped after the first 500 of 1,400 documents, and the other 900 were never filed.' },
     { text: 'Open the incoming folder and the filed folders, count what came in and what was filed, and compare with 500.', correct: true, consequence: 'The incoming folder had 1,400 documents and the filed folders hold 500. The run stopped early, and the dashboard reported the batch size it reached.' },
-    { text: 'Turn the automation off and go back to filing by hand until the vendor explains the number.', consequence: 'You spend the month filing 1,400 documents by hand. A ten-minute count would have told you what went wrong, and the automation, once fixed, would file the rest.' },
+    { text: 'Turn the automation off and go back to filing by hand until the vendor explains the number.', consequence: 'You spend the month filing the 900 documents the run left behind by hand, plus everything that arrives. A ten-minute count would have told you what went wrong, and the automation, once fixed, would file the rest.' },
     { text: 'Ask the automation, in its chat window, whether the number is right.', consequence: 'It says the run completed successfully, because from where it sits, the run did. The count it reports is the count it reached.' },
   ]}>
 Your filing automation's dashboard shows exactly 500 documents processed,
@@ -230,8 +234,8 @@ that kind of mistake.
     { text: 'A sentence that reads well and says something nobody said.', correct: true },
     { text: 'A typo in the name of the room where the meeting was held, on the first line of the summary.', why: 'That is a mistake of a tired hand. An agent rarely makes it, and a check for it passes without telling you much.' },
     { text: 'A decision dropped because the notes gave it one line.', correct: true },
-    { text: 'A date written in the wrong month because the writer had last week\'s notes open beside this week\'s summary.', why: 'That is a slip of attention. An agent working from the notes it was given copies the date it sees.' },
-    { text: 'The same point misplaced in every summary this quarter.', correct: true },
+    { text: 'A date typed with the digits of the day and the month swapped, because the writer was hurrying to finish before leaving.', why: 'That is a slip of a hurried hand. An agent working from the notes it was given copies the date as it is written there.' },
+    { text: 'The same point listed under the wrong heading in every summary this quarter.', correct: true },
   ]}>
 Which of these are mistakes that an agent's summaries make and a hand-written
 summary rarely did, so the checks have to change to catch them?
