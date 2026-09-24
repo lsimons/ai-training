@@ -308,6 +308,20 @@ patterns below after the fact. Write so that it has nothing to say.
 - A push to `main` deploys to GitHub Pages (`.github/workflows/deploy.yml`).
   The site is pre-release and says so on the front page and in the README.
 
+## Asking the maintainer
+
+- Decide routine triage yourself. Apply your recommendation and list what
+  you decided. Ask only when a decision touches a spec, a rule in this
+  file, the scope of the work, or its cost.
+- A question holds one decision, in plain words. Say what the problem
+  is, what you would do and what you need decided, and give one
+  recommendation. An issue number alone is never the question.
+- Keep open questions in a `Waiting on you` block at the end of every
+  status update until they're answered.
+- File a bug you find as an issue instead of asking whether to file it.
+  Work outside your task becomes an issue, and you leave the fix for
+  later.
+
 ## Session completion
 
 Work isn't complete until every change is committed, pushed, and CI passes.
