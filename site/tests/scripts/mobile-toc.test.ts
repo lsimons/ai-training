@@ -11,7 +11,7 @@ const dropdown = `
 </mobile-starlight-toc>`;
 const groups = `
 <div class="lesson-toc-mobile" data-lesson-toc-mobile hidden>
-  <nav><h2>Checkpoints</h2><ul><li><a href="#cp">Checkpoint</a></li></ul></nav>
+  <div role="group"><h2>Checkpoints</h2><ul><li><a href="#cp">Checkpoint</a></li></ul></div>
 </div>`;
 
 function page(html: string): HTMLElement {

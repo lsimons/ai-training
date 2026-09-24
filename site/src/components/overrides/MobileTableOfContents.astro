@@ -11,9 +11,11 @@
  * dropdown has no slot inside its `<details>`, so the move is the way in
  * that keeps its markup, styles and current-heading script untouched.
  *
- * The markup of a group is the pattern of `TableOfContents.astro`, with the
- * `lesson-toc-mobile` class so `styles/lesson.css` can style the entries
- * like Starlight's mobile headings list. A page that is not a lesson, or a
+ * The markup of a group is the pattern of `TableOfContents.astro`, as a
+ * `role="group"` div rather than a `<nav>`, since the groups end up inside
+ * Starlight's mobile `<nav>` and a nested landmark would repeat it. The
+ * `lesson-toc-mobile` class lets `styles/lesson.css` style the entries like
+ * Starlight's mobile headings list. A page that is not a lesson, or a
  * lesson without checkpoints and examples, renders the default alone.
  */
 import Default from '@astrojs/starlight/components/MobileTableOfContents.astro';
@@ -31,7 +33,7 @@ const groups = isLessonEntry(entry) ? lessonTocGroups(entry) : [];
 	groups.length > 0 && (
 		<div class="lesson-toc-mobile" data-lesson-toc-mobile hidden>
 			{groups.map((group) => (
-				<nav aria-labelledby={`lesson-toc-mobile-${group.slug}`}>
+				<div role="group" aria-labelledby={`lesson-toc-mobile-${group.slug}`}>
 					<h2 id={`lesson-toc-mobile-${group.slug}`}>{group.label}</h2>
 					<ul>
 						{group.entries.map((item) => (
@@ -42,7 +44,7 @@ const groups = isLessonEntry(entry) ? lessonTocGroups(entry) : [];
 							</li>
 						))}
 					</ul>
-				</nav>
+				</div>
 			))}
 		</div>
 	)
