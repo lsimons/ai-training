@@ -31,5 +31,9 @@ describe('TutorBlock', () => {
 		expect(html).toContain('<a href="/ai-training/settings/">settings</a>');
 		expect(html).toContain('<a href="/ai-training/guides/tutor/">');
 		expect(html).toContain("The tutor can't read the progress stored in this browser.");
+		// Astro drops the newline after a closing tag, so the link and the word after it stay on one source line.
+		expect(html).toContain('settings</a> page and paste the file');
+		expect(html).toContain('aria-label="Copy the install command"');
+		expect(html).toContain('aria-label="Copy the /tutor line"');
 	});
 });
