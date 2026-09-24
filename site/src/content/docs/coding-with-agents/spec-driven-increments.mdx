@@ -12,10 +12,10 @@ When code and spec disagree, we decide which one changes.
 Where a bug fix has one assertion that says what "fixed" means, a feature
 has decisions in it: a new command, a new field in the data file, a new
 line in the output. The spec holds those decisions in one place, where
-the agent can read them and you can check against them, and the
-playbook Anthropic publishes for engineering teams describes the same
-practice, the spec as the source of truth the agent iterates against
-(@Academy ai-native-sdlc-playbook).
+the agent can read them and you can check against them. The playbook
+Anthropic publishes for engineering teams describes the same order of
+work, the intent and the requirements written down before the build
+starts (@Academy ai-native-sdlc-playbook).
 
 ## The fixture
 
@@ -60,8 +60,15 @@ those is what this lesson teaches.
 ## Write the spec
 
 The feature is due dates. An item gets an optional date, `list` shows it,
-and a new `overdue` command lists the items whose date has passed. Before the
-agent sees any of that, write it down. A spec for a change this size fits
+and a new `overdue` command lists the items whose date has passed. In
+*Deciding what to build* you wrote success criteria for a smaller version
+of this feature, with the date given on `add` and "any notion of overdue"
+out of scope. This spec takes that feature up again and changes two
+decisions on purpose. The date is set by its own `due` command, so an
+existing item can get one. `overdue` is back in, because it is the reason
+to store a date at all. Changing the decision in the spec, before
+any code, is what the spec is for. Before the agent sees any of that,
+write it down. A spec for a change this size fits
 on one page: a goal in one or two sentences, the commands with what each
 one prints, the limits, and success criteria you can check one by one.
 The limits say what must keep working and what the change may not do. Save it as
@@ -127,9 +134,9 @@ meant.
   title="The diff and the spec disagree" hint="Which document does the reviewer check the next increment against, and does it still say what you want?"
   options={[
     { text: 'Accept the diff. The agent read the code more closely than you did when you wrote the spec.', why: 'The spec now says one thing and the program does another, and the next increment is checked against a document that is already wrong.' },
-    { text: 'Decide which one is right. Then either change the spec first, or have the agent bring the code back to it.', correct: true },
     { text: 'Accept the diff and add a comment in the code that explains the difference.', why: 'A comment in the code is where nobody checking the criteria will look. The spec is the document you review against.' },
     { text: 'Reject the diff without comment, because the spec is fixed once the work starts.', why: 'A spec that can never change turns every good idea into a workaround. It changes on purpose, and it can change.' },
+    { text: 'Decide which one is right. Then either change the spec first, or have the agent bring the code back to it.', correct: true },
   ]}>
 The agent's diff prints the date before the text, and the spec says
 after. Both would work. What do you do?
@@ -139,8 +146,8 @@ after. Both would work. What do you do?
 
 An agent given the whole spec at once builds the whole spec at once, and
 hands you one diff with two new commands, a changed output line, input
-validation and their tests. Reviewing that diff means holding
-four changes in your head while you read. So
+validation and their tests. Reviewing that diff means holding every one
+of those changes in your head while you read. So
 the brief asks for increments, and it says what an increment is: a step
 that leaves the program working and its tests passing, and that adds one
 thing you can show. Asking for increments is part of the brief, because
@@ -179,7 +186,7 @@ exchange looks like and don't record a specific model's words. Your
 agent's list may put the details differently.
 
 The agent's question is a spec question, and the spec answers it: the
-`list` line says "numbered as in `list`" for `overdue` and says nothing
+`overdue` line says "numbered as in `list`", the `list` line says nothing
 about sorting, and the limits say `list` keeps working as it does. The
 answer is no, and if you did want sorting, you would add it to the spec
 before anyone wrote it.
@@ -220,8 +227,14 @@ first increment adds a field that some items have and some don't, and
 carries it through all three modules and the existing tests. If that
 assumption fails, the data format and every module change, and you would
 rather know before `overdue` is written on top of it. The `overdue`
-command is arithmetic on a format that already works by then, and date
-validation is polish.
+command is arithmetic on a format that already works by then. Date
+validation waits until after it, even though a bad date could be stored
+meanwhile. The committed list has no dates and the test from increment 1
+pins the format, so the only bad date is one you type yourself before
+increment 3 is done. Validation guards against input, and the question
+`overdue` answers first is whether the stored format is right.
+Wording changes to the messages come last of all, because nothing depends
+on them.
 
 That first increment is also the thin end-to-end path: one command in and
 one line out, through every module the feature touches and nothing more. It proves that the modules pass the new field to each other before any
@@ -231,12 +244,12 @@ small correction (@Brilliant INC).
 <Order id="order-the-increments" objective="coding-with-agents/ships-with-agent/works-in-increments"
   concepts={['sequencing-for-early-feedback']}
   context="A team is adding a feature to a program with a coding agent, in increments. The ordering rule is that the increment whose assumption is least certain comes first, and the thin end-to-end path comes before the details."
-  title="Order the increments" hint="Which step would force a rewrite of the others if its assumption turned out wrong? Which one can only be polish?"
+  title="Order the increments" hint="Which step would force a rewrite of the others if its assumption turned out wrong? Which step depends on nothing, so nothing waits for it?"
   steps={[
     'Store the new field and show it in the output, through every module',
     'Add the command that computes something from the new field',
-    'Refuse malformed input to the new command',
-    'Tidy the wording of the messages the new commands print',
+    'Refuse malformed input to the command that sets the field',
+    'Reword the messages the new commands print',
   ]} />
 
 <Scenario id="riskiest-first" objective="coding-with-agents/ships-with-agent/works-in-increments"
@@ -249,8 +262,9 @@ small correction (@Brilliant INC).
     { text: 'Build the outside-service increment in a separate branch alongside the others, and merge it when both are done.', consequence: 'Both branches are done in a week. The merge shows that the other branch assumed a response format the service doesn\'t have, and half of it is rewritten.' },
     { text: 'Skip the outside service for now and hard-code its response, so the ordering question goes away.', consequence: 'Every increment passes against the hard-coded response. The first real call, after the review, returns something else.' },
   ]}>
-One of the five increments talks to a service nobody on the team has
-called before. Where does it go in the order?
+Suppose a different feature, with five increments, and one of them talks
+to a service nobody on the team has called before. Where does it go in
+the order?
 </Scenario>
 
 ## Land the first increment
@@ -304,9 +318,11 @@ TODO_FILE=/tmp/todos.json python3 todo.py list
 ```
 </Predict>
 
-The first line is criterion 1 word for word, and the three items without
-a date print as they did before, which is criterion 2. The agent's diff
-is two functions and a test file. The change to `render.py` is one `if`:
+The first `list` line is criterion 1 word for word, and the three items
+without a date print as they did before, which is the second sentence of
+criterion 1. The agent's diff is one new function and one new branch in
+`main` in `todo.py`, one `if` in `render.py`, and a test file. The change
+to `render.py`:
 
 ```python
         line = f"{number}. [{mark}] {item['text']}"
@@ -366,8 +382,8 @@ and its criterion.
   context="A team lands a feature with a coding agent in increments. The ordering rule is that the increment with the least certain assumption goes first, as a thin path through every module the feature touches."
   title="Why this one first?" hint="What would the team have to redo if the first increment's assumption turned out wrong after the others were built?"
   options={[
-    { text: 'It is the smallest increment, so it gives the fastest sense of progress.', why: 'Size is a side effect. A small increment that tests nothing uncertain teaches you nothing about the rest.' },
     { text: 'If its assumption is wrong, every later increment changes with it.', correct: true },
+    { text: 'It is the smallest increment, so it gives the fastest sense of progress.', why: 'Size is a side effect. A small increment that tests nothing uncertain teaches you nothing about the rest.' },
     { text: 'It is the one users will notice first, so it is the most valuable to ship.', why: 'Visible value is a fine second rule. The first rule is the assumption that could force a rewrite.' },
     { text: 'It touches the fewest files, so its diff is the easiest to review.', why: 'The thin path often touches every module the feature does. It is thin in depth, and it is wide across the seams.' },
   ]}>
