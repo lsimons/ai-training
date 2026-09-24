@@ -46,21 +46,21 @@ choice.
 
 Both answers are fluent, both give reasons, and both agree with you. The
 reasons are trade-offs a survey researcher would name too, and the
-assistant picked the ones that fit the choice you had already made. Type the two prompts into your own
-assistant, with a plan of your own in place of the survey, and read what
-comes back. A model that agrees with a plan and with its opposite hasn't
+assistant picked the ones that fit the choice you had already made. Type
+the two prompts into your own assistant, with a plan of your own in place
+of the survey, and read what comes back. A model that agrees with a plan and with its opposite hasn't
 assessed either.
 
 Sharma and colleagues measured this pattern across five deployed
 assistants. The assistants gave feedback that matched the opinion the
 user had stated about their own work, and changed a correct answer when
 the user pushed back (@Sharma 2023). A yes to a leading question is the
-model doing what it was trained to do, and it tells you nothing about
-the plan.
+behavior that study measured, and the authors trace part of it to
+training on human preferences. It tells you nothing about the plan.
 
 <Scenario id="after-the-yes" objective="safety/verifies-output/spots-sycophancy"
   concepts={['checking-habits']}
-  context="The learner asked a chat assistant whether their plan to merge three short customer surveys into one long survey makes sense, with the words 'I've decided' and 'right?' in the question, and the assistant said yes with three reasons."
+  context="The learner asked a chat assistant whether their plan to merge three short customer surveys into one long survey makes sense, with the words 'I've decided' and 'right?' in the question, and the assistant said yes with a list of reasons."
   title="The assistant said yes"
   hint="What did the question tell the model about the answer you wanted, and what would the model have said to the opposite plan?"
   options={[
@@ -69,7 +69,7 @@ the plan.
     { text: 'Ask again without your decision in the question, or ask for the case against the plan first.', correct: true, consequence: 'The second answer names the completion-rate drop and the lost chance to react between rounds. Now you have something to weigh.' },
   ]}>
 You asked whether merging the three surveys into one makes sense, and the
-assistant said yes with three reasons. What do you do with the answer?
+assistant said yes with a list of reasons. What do you do with the answer?
 </Scenario>
 
 ## Habits on the prompt side
@@ -77,11 +77,11 @@ assistant said yes with three reasons. What do you do with the answer?
 The fix is two changes to the question, and each takes a sentence.
 
 **Ask for the strongest counter-argument before you ask for
-confirmation.** Order matters within one conversation. A model that has
-just written "yes, that makes sense" is likely to keep agreeing, because
-its own earlier text is now in the context and the next likely token
-continues it. Ask for the case against your plan first, while the chat is
-still empty, and the likely text is criticism. Then decide whether the
+confirmation.** Order matters within one conversation. Once a model has
+written "yes, that makes sense", its own yes is part of the input for
+everything that follows, and text that continues a yes is more likely
+than text that reverses it. Ask for the case against your plan first,
+while the chat is still empty, and the likely text is criticism. Then decide whether the
 criticism holds. After that, ask what the plan does well, if you still
 need to.
 
@@ -95,8 +95,8 @@ The strongest argument against it is completion rate. Response rates fall
 as a survey gets longer, and the people who drop out of a long form are
 not a random sample. They're the busy and the less engaged, which are the
 customers whose opinion you most need. Short forms sent a month apart
-also give you three readings across the year, so a change after a bad quarter shows up
-in the next round. One form gives you one reading, twelve months apart,
+also give you three readings across the year, so a change after a bad
+quarter shows up in the next round. One form gives you one reading, twelve months apart,
 with no way to tell a bad month from a bad year.
 </Response>
 
@@ -106,8 +106,8 @@ in the yes.
 **Strip your own opinion out of the question when you want an
 assessment.** Both prompts in the first section contained the
 answer, in "I've decided" and in "right?". Take those out and
-describe the situation instead. State the facts a colleague would need,
-name the options, and ask for a comparison.
+describe the situation instead: the facts a colleague would need and the
+options on the table, followed by a request to compare them.
 
 <Prompt model="illustrative" recorded="illustrative">
 A company surveys about 2,000 customers each year. Until now it has sent
@@ -117,8 +117,8 @@ risk of each.
 </Prompt>
 <Response>
 With three short surveys you get higher completion per form, three
-readings over the year, and the chance to change something between rounds. The main risk is
-survey fatigue, since the same customers are asked three times, and a
+readings over the year, and the chance to change something between
+rounds. The main risk is survey fatigue, since the same customers are asked three times, and a
 lower response to the third form than to the first.
 
 The longer survey needs one campaign to prepare and gives one complete
@@ -141,17 +141,18 @@ quality of the check is set by the question.
 
 <Choice id="which-question-assesses" objective="safety/verifies-output/spots-sycophancy"
   concepts={['checking-habits']}
-  context="The learner wants a chat assistant to assess a plan of theirs, to move a team's daily stand-up meeting from the morning to the afternoon, rather than agree with it."
+  context="The learner wants a chat assistant to assess a plan of theirs, to replace a team's five report templates with one shared template, rather than agree with it."
   title="Which question gets an assessment?"
   hint="Which of the four questions tells the model nothing about the answer you hope to hear?"
   options={[
-    { text: '"I want to move our daily stand-up from 9:00 to 16:00. That should work better, shouldn\'t it?"', why: 'The question carries your preference twice, in "I want" and in "shouldn\'t it?". The likely reply agrees.' },
-    { text: '"I\'m thinking of moving our daily stand-up from 9:00 to 16:00. Any concerns, or is it fine?"', why: '"Or is it fine?" offers the model the easy answer, and "I\'m thinking of" says which one you hope for.' },
-    { text: '"A team of six, two of them three hours behind, holds a stand-up at 9:00. Compare 9:00 with 16:00 for this team."', correct: true },
-    { text: '"Our stand-up is at 9:00 and half the team is still waking up. Wouldn\'t 16:00 be better for everyone?"', why: 'The question states the problem with one option and asks the model to confirm the other. It is the leading question with a reason attached.' },
+    { text: '"A team of twelve writes reports for four clients, each with its own template, plus one internal one. Compare keeping five templates with using one shared template."', correct: true },
+    { text: '"I want to replace our five report templates with one shared template. That should save time, shouldn\'t it?"', why: 'The question states your preference twice, in "I want" and in "shouldn\'t it?". The likely reply agrees.' },
+    { text: '"I\'m thinking of replacing our five report templates with one shared template. Any concerns, or is it fine?"', why: '"Or is it fine?" offers the model the easy answer, and "I\'m thinking of" says which one you hope for.' },
+    { text: '"We keep five report templates and nobody remembers which is which. Wouldn\'t one shared template be better for everyone?"', why: 'The question states the problem with one option and asks the model to confirm the other. It is the leading question with a reason attached.' },
   ]}>
-You want to know whether moving the team's daily stand-up from 9:00 to
-16:00 is a good idea. Which question gets you an assessment?
+You want to know whether replacing the team's five report templates with
+one shared template is a good idea. Which question gets you an
+assessment?
 </Choice>
 
 <Pitfall title="The counter-argument that carries the answer">
@@ -202,21 +203,23 @@ them separate, when asked about each with "I've decided" and "right?".
 What did the pair of answers show?
 </Choice>
 
-<Exercise stretch="Take the counter-argument the third prompt gave you and check its main claim against a source you trust, the way the last lesson checked a link. Write down whether the argument survived.">
+<Exercise stretch="Take the stronger of the two counter-arguments and check its main claim against a source you trust, the way the last lesson checked a link. Write down whether the argument survived.">
 Pick a plan of yours that isn't decided yet, small enough to describe in
-three sentences: a change to a meeting, a document, a process. Ask a chat
-assistant about it three times, each in a fresh chat. First the leading
-way, with your decision and a "right?" in the question. Then the neutral
-way, with the situation described, the options named and no opinion of
-yours in it. Then with a request for the strongest argument against the
-plan before anything else. Put the three answers side by side and mark
-every claim that appears in the second or third answer and not in the
-first.
+three sentences, and described without the names and numbers you couldn't
+share outside your team. Open two fresh chats. In the first, ask the
+leading question, with your decision and a "right?" in it, and after the
+yes ask in the same chat for the strongest argument against the plan. In
+the second, ask for the strongest argument against the plan as your first
+message. Put the two counter-arguments side by side. Mark every claim in
+the second that the first left out, and mark every place where the first
+one softens its own argument or explains it away.
 
-A good result is a short list of claims you hadn't considered, each from
-the second or third answer, and a note of which prompt found more of them.
-Which of the three answers would you have shown a colleague as "I checked
-this with the assistant", and which one deserves that sentence?
+A good result is two counter-arguments of visibly different strength, and
+a note of what the first chat's earlier yes did to the second answer in
+that chat. If the two came out the same, note that too: it is one data
+point on your assistant, and the order still costs you nothing to get
+right. Which of the two counter-arguments would you want to have read
+before you decided?
 </Exercise>
 
 <Recap>
@@ -224,5 +227,5 @@ this with the assistant", and which one deserves that sentence?
 2. Ask for the strongest counter-argument before you ask for confirmation, in a chat that hasn't agreed with you yet. The model's own earlier yes is context, and it pulls the next answer toward yes.
 3. When you want an assessment, strip your opinion out of the question: describe the situation, name the options and ask for a comparison.
 4. A counter-argument prompt that also carries your verdict gets a counter-argument and a rebuttal of it. Ask for the case against, and nothing else, and answer it yourself afterwards.
-5. The fix for a leading answer is in the question. When you use a model's judgment as a check, the question sets the quality of the check (@Academy ai-fluency-framework-foundations).
+5. The fix for a leading answer is in the question. When you use a model's judgment as a check, the question sets the quality of the check.
 </Recap>
