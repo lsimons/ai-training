@@ -1,5 +1,4 @@
 ---
-import { getCollection, render } from 'astro:content';
 /**
  * Starlight `MarkdownContent` override. For lesson pages (frontmatter has
  * `mode`) it wraps the content in a lesson frame carrying the ids the client
@@ -7,6 +6,7 @@ import { getCollection, render } from 'astro:content';
  * and loads the lesson script once. The comfort level that drives the
  * routing is set on the settings page. Other pages render as Starlight does.
  */
+import { getCollection, render } from 'astro:content';
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
 import ReviewLine from '@components/lesson/ReviewLine.astro';
 import { getAreas, isEngineering } from '@lib/areas';
