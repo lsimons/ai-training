@@ -276,7 +276,7 @@ everything below.
   the review on the issue, the revision loop until `Verdict: approve`, the
   wave branch `wave/<name>-<k>`, one pull request with the review table,
   `mise run ci` on the wave branch. The builder prompt items in that
-  document, and everything its session records say the prompt should have
+  document, and everything the session records say the prompt should have
   said, are the builder brief.
 
 - The standing approval as written above, and the merge command.
@@ -302,8 +302,8 @@ everything below.
   comment on the run issue for the dispatcher to file when the run ends.
 
 - What the lead writes and returns. It puts the session record in the
-  wave pull request body, in the form of the "Session record" sections of
-  `orchestration.md`: counts, what review caught, what the builder prompt
+  wave pull request body, in the form of the records in
+  `docs/agents/sessions/2026-09-20-waves-1-5.md`: counts, what review caught, what the builder prompt
   should have said. It returns a report of at most 200 words in exactly
   this form:
 
