@@ -23,6 +23,8 @@ a `Predict` without `objective` is an ungraded example whose output CI
 still asserts (2026-09-20, see "Examples"). A lesson in the `foundations`
 group keeps code fences, `Predict run` and terminal instructions off the
 page, and `mise run data` checks it (2026-09-24, see "Foundations audience").
+Checkpoints take a `phase` (`first`, `review` or `practice`) and a lesson may have a "More practice" section between the exercise and the recap. The export lists the alternates and `mise run checkpoints` checks them
+(2026-09-24, see "Checkpoints", "Checkpoint props" and "More practice").
 
 ## Introduction
 
@@ -60,6 +62,7 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 | Pitfall           | At least one, placed right after the teaching it belongs to. It gives the setup and what went wrong, then states the rule. Short in tutorial mode.                      |
 | Checkpoints       | At least one per served objective. A checkpoint's `objective` names the one objective it evidences, and its `concepts` the concept ids it exercises.                    |
 | Exercise          | One by default. A longer lesson may have more; the lesson file (S11) lists them.                                                                                        |
+| More practice     | Optional, between the exercise and the recap: zero to three `practice` checkpoints. See "More practice".                                                                |
 | Recap             | Numbered takeaways and the served objectives as "You can now...". Where to go next is the page footer's previous/next.                                                  |
 | Habit             | Zero, one or two, after the recap. A small task in the learner's own work with a stable `id`. A later spec sets its schedule and storage.                               |
 | Canonical example | The one example the learner's reference shows for the lesson: the `Predict` or `Prompt` block with `canonical`, or the first of either in source order. See "Examples". |
@@ -227,6 +230,20 @@ pitfall and the exercise.
   counting every item, and an exempt item is never a hit).
   `guessable="reason"` exempts an item. The check prints every reason and
   fails on an exemption that no cue needs, so a stale one is removed.
+- A checkpoint has a `phase` (S01 "Checkpoint"). A `first` checkpoint is
+  the lesson's own and renders where the author puts it. A `review`
+  alternate is written in the same page, right after its sibling,
+  and is in the page's markup but hidden: it has no `data-checkpoint`
+  attribute, so nothing on the lesson page binds it, counts it, numbers it
+  or lists it in the "On this page" menu, and the review page takes it from
+  there. A `practice` alternate renders in the "More practice" section.
+- Every graded `first` checkpoint has at least one `review` alternate where
+  the objective allows it, of a different interaction type than the sibling
+  where that fits. A review then tests the idea rather than recognition of one wording. A `review` alternate is gradable in a review, which rules out a `repair`, an honor-system `predict` and `review={false}`.
+  `mise run checkpoints` fails an alternate without a `first` sibling and a
+  `review` alternate that isn't gradable, and it warns, without failing,
+  per lesson, on each reviewable `first` checkpoint that has no `review`
+  alternate. Alternates pass the same guessability check as every item.
 
 ### Checkpoint props
 
@@ -245,6 +262,7 @@ guide.
 | `review`    | no       | `false` opts the checkpoint out of review (spec S05). Default `true`.                                                                                            |
 | `revision`  | no       | Bumped when the answer changes, which resets outdated review items (spec S05). Default 1.                                                                        |
 | `guessable` | no       | `"<cue>: reason"`: the cues a `choice`, `scenario` or `multi-choice` item may trip, and why. The check prints it and fails on a named cue that doesn't trip.     |
+| `phase`     | no       | `first`, `review` or `practice` (S01 "Checkpoint"). Default `first`. A `practice` checkpoint sits inside `<MorePractice>`, and every other one outside it.       |
 
 Difficulty has no tag. The `objective` has a level in S02, so difficulty
 is derivable.
@@ -260,8 +278,11 @@ reads it to ask a checkpoint as a standalone item.
   then page order. `version` changes when a field changes meaning.
 - Each item has `id`, `lesson`, `kind`, `objective`, `concepts`, `context`
   (`null` when absent), `stem` (the children as Markdown source),
-  `options`, `answer`, `hint`, `reviewable`, `revision` and `guessable`
-  (the exemption reason, `null` when absent).
+  `options`, `answer`, `hint`, `reviewable`, `revision`, `guessable`
+  (the exemption reason, `null` when absent) and `phase`. Alternates are
+  items like any other, in page order. `reviewable` is whether finishing
+  the lesson schedules a `first` item, whether the review page can serve a
+  `review` item, and always `false` for a `practice` item.
 - `options` is what the learner is shown and `answer` the correct response,
   in the form of the kind: `choice` and `scenario` list the option texts
   and the correct text; `multi-choice` lists the option texts and the
@@ -276,7 +297,9 @@ reads it to ask a checkpoint as a standalone item.
   page appears once, no item lacks a page, every field is present with its
   type, and every concept id is a concept in the topic YAML. The same
   check runs the guessability heuristics of "Checkpoints" over the `choice`,
-  `scenario` and `multi-choice` items.
+  `scenario` and `multi-choice` items, and the alternate rules of
+  "Checkpoints": every `review` or `practice` item has a `first` item with
+  the same objective in its lesson, and every `review` item is `reviewable`.
 
 ## Exercises
 
@@ -299,6 +322,27 @@ reads it to ask a checkpoint as a standalone item.
   (compare, measure, assess, red-team). Both are the one `Exercise` kind.
   The distinction is authoring guidance, so a course doesn't end up with
   only one flavor by accident.
+
+## More practice
+
+A lesson may offer extra checkpoints for a learner who wants more than the
+body asks for. They're in one `<MorePractice>` block, which renders as a
+"More practice" H2 section.
+
+- The block comes after the `<Exercise>` and before the `<Recap>`, once per
+  page at most, and holds one to three checkpoints, each with
+  `phase="practice"`. The page build fails on a `practice` checkpoint
+  outside the block, a checkpoint of another phase inside it, an empty
+  block, a second block, or a block before the exercise or after the recap.
+- A `practice` checkpoint serves an objective of the lesson that a `first`
+  checkpoint also serves. It is graded like any checkpoint, with a Hint and
+  unlimited retries, and without Skip, because nothing waits on it.
+- Its result is recorded in the progress record under its own key. It never
+  counts toward finishing the lesson, toward any progress figure, or toward
+  the routing cards, and it never becomes a review item.
+- The lesson bundle's prose shows the section as a `## More practice`
+  heading with its checkpoints, and leaves out the hidden `review`
+  alternates.
 
 ## Foundations audience
 

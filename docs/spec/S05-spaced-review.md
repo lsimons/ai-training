@@ -9,7 +9,9 @@ stage pills, the per-item frequency control, `review: false`, `revision`
 resets, the course review card, the sidebar due count, the due lines on the
 landing and progress pages, the tutor's recall question and every reviewable
 interaction type (`match` and `multi-choice` included) are implemented
-(2026-09-20). Deferred: variants and the routing rule for items failed twice.
+(2026-09-20). Alternates on the review page and the `served` history field
+are implemented (2026-09-24). Deferred: the routing rule for items failed
+twice.
 
 ## Introduction
 
@@ -26,16 +28,51 @@ the only mechanism that brings a learner back to old material.
 
 ## What gets reviewed
 
-- Every **checkpoint** in a lesson becomes a **review item** when the lesson
-  is finished, regardless of whether it was passed or skipped in the lesson.
+- Every `first` **checkpoint** in a lesson becomes a **review item** when
+  the lesson is finished, regardless of whether it was passed or skipped in
+  the lesson. A `review` or `practice` alternate (S01 "Checkpoint") never
+  becomes a review item of its own.
 - Reviewable interaction types: `predict`, `choice`, `multi-choice`,
   `match`, `sort`, `order`, `scenario`.
 - Not reviewed: `repair`, `self-grade`, `exercise` and `reflection`. They
   are too long or not gradable.
 - Authors may mark a checkpoint `review: false` (a one-off that doesn't
-  bear repeating) or supply **variants**: alternative stems with the same
-  answer, or alternative option orders. Variants make a review test the idea
-  rather than recognition of the wording.
+  bear repeating).
+- Authors may write `review` alternates: checkpoints in the same lesson
+  with the same objective, often of another interaction type, that the
+  review page asks in place of the item's own checkpoint. An alternate
+  makes a review test the idea rather than recognition of the wording.
+
+### Which checkpoint a review asks
+
+The review item is keyed on its `first` checkpoint, so its schedule,
+stage and history don't depend on what was asked. When the item is due,
+the review page picks what to ask from the candidates: the item's own
+checkpoint, then its lesson's `review` alternates with the same objective,
+in page order.
+
+1. Count how often each candidate was asked, from the item's `history`: an
+   entry with `served` counts for that alternate, and an entry without it
+   counts for the item's own checkpoint.
+2. The first alternate that was never asked is picked.
+3. When every alternate was asked, the candidate asked least often is
+   picked. Among those, the page picks the one whose last ask is oldest,
+   and the item's own checkpoint counts as oldest when the history doesn't
+   show it. The page rotates through every candidate this way.
+
+The page shows the picked checkpoint as it shows any item: its `context`
+goes above the stem, and it gets Give Up and the stage pills. It records
+the result against the item, and writes the alternate's id as `served` in
+the new `history` entry. If the alternate is missing from the
+lesson page, the page asks the item's own checkpoint.
+
+| Example `history` (oldest first)                         | Candidates    | Asked next |
+| -------------------------------------------------------- | ------------- | ---------- |
+| `[]`                                                     | own, `a`, `b` | `a`        |
+| `[{served: a}]`                                          | own, `a`, `b` | `b`        |
+| `[{served: a}, {served: b}]`                             | own, `a`, `b` | own        |
+| `[{served: a}, {served: b}, {}]`                         | own, `a`, `b` | `a`        |
+| `[{}]`, the item had no alternate when it was last asked | own, `a`      | `a`        |
 
 ## Schedule
 
@@ -101,12 +138,12 @@ A progress bar in the header counts the items in this session.
 The schedule is stored in the progress record's `reviews` map, keyed by
 checkpoint id, with the structure shown in the progress record spec.
 
-| Field     | Meaning                                                                                               |
-| --------- | ----------------------------------------------------------------------------------------------------- |
-| `stage`   | 1 to 5, or `done`                                                                                     |
-| `due`     | ISO calendar day in the learner's local time zone; the item is due when `due <= today`                |
-| `last`    | `pass` or `fail` (Give Up records `fail`)                                                             |
-| `history` | Answers as `{ at, result }` (the local day and `pass` or `fail`), oldest first, capped at the last 20 |
+| Field     | Meaning                                                                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `stage`   | 1 to 5, or `done`                                                                                                                                                  |
+| `due`     | ISO calendar day in the learner's local time zone; the item is due when `due <= today`                                                                             |
+| `last`    | `pass` or `fail` (Give Up records `fail`)                                                                                                                          |
+| `history` | Answers as `{ at, result }` (the local day and `pass` or `fail`), oldest first, capped at the last 20. An answer to an alternate adds `served`, the alternate's id |
 
 - Because the schedule is inside the progress record, it moves with the
   learner by export and import, and it resets when the record resets.
