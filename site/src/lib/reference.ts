@@ -91,11 +91,14 @@ function linkHref(url: string): string {
 }
 
 function renderProse(md: string): string {
-	return escapeHtml(md)
-		.replace(/\s*\(@[A-Za-z0-9-]+\)/g, '')
-		.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-		.replace(/\*([^*]+)\*/g, '<em>$1</em>')
-		.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, text: string, url: string) => `<a href="${linkHref(url)}">${text}</a>`);
+	return (
+		escapeHtml(md)
+			.replace(/\s*\(@[A-Za-z0-9-]+\)/g, '')
+			.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+			// Emphasis needs a non-space right inside each `*`, as in CommonMark, so `2 * 3 * 4` stays literal.
+			.replace(/\*(\S(?:[^*]*\S)?)\*/g, '<em>$1</em>')
+			.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, text: string, url: string) => `<a href="${linkHref(url)}">${text}</a>`)
+	);
 }
 
 /**
