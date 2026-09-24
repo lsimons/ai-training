@@ -218,6 +218,35 @@ run = "lychee --no-progress --config .lychee.toml ."
 description = "Fetch the pinned Vale style packages (network)"
 run = "vale sync"
 
+# Runs before `prose` and `prose-extended` (`depends`). The synced styles
+# are gitignored, and in a fresh clone or worktree Vale otherwise runs with
+# only the House rules and reports a clean page that isn't (issue #103).
+# Each `.zip` on the `Packages` lines of the two configs unpacks to
+# `.vale/styles/<name>/`, so a missing directory means the sync hasn't
+# run. Comment lines (`;` or `#`) are skipped, and an empty list is a
+# parse failure rather than a pass. Local (no network) and cheap. It does
+# not detect a stale unpack: after moving a pin in the ini, run
+# `prose-sync` again yourself.
+[tasks.prose-check-packages]
+description = "Fail when a Vale package pinned in .vale.ini or .vale-extended.ini is not under .vale/styles/"
+hide = true
+run = """
+set -e
+for ini in .vale.ini .vale-extended.ini; do
+  pkgs=$(grep -v '^[[:space:]]*[;#]' "$ini" | grep -o '[^/[:space:],]*\\.zip' | sed 's/\\.zip$//' || true)
+  if [ -z "$pkgs" ]; then
+    echo "prose: no .zip packages found on the Packages lines of $ini" >&2
+    exit 1
+  fi
+  for pkg in $pkgs; do
+    if [ ! -d ".vale/styles/$pkg" ]; then
+      echo "prose: Vale package '$pkg' from $ini is not synced under .vale/styles/. Run 'mise run prose-sync' first." >&2
+      exit 1
+    fi
+  done
+done
+"""
+
 # Which files: every tracked Markdown/MDX file plus the topic, competency
 # and bibliography YAML under site/src/data (Vale reads YAML as plain text,
 # keys included). Going through `git ls-files` is what excludes site/dist,
@@ -236,22 +265,11 @@ run = "vale sync"
 # `TokenIgnores` (which hides the bibliography URLs from the term-casing
 # rule, see .vale.ini) only works for markup formats, and YAML is not one.
 # The `[*.{yaml,yml}]` section still selects the rules by file name.
-#
-# The package check first: the synced styles are gitignored, and in a fresh
-# clone or worktree Vale runs with only the House rules and reports a clean
-# page that isn't (issue #103). Each `.zip` in the `Packages` list of the
-# config unpacks to `.vale/styles/<name>/`, so a missing directory means
-# the sync hasn't run. The check is local (no network); `prose-sync` is.
 [tasks.prose]
 description = "Vale prose lint over Markdown, MDX and the site data YAML. Errors gate; warnings advise."
+depends = ["prose-check-packages"]
 run = """
 set -e
-for pkg in $(grep -o '[A-Za-z-]*\\.zip' .vale.ini | sed 's/\\.zip$//'); do
-  if [ ! -d ".vale/styles/$pkg" ]; then
-    echo "prose: Vale package '$pkg' is not synced under .vale/styles/. Run 'mise run prose-sync' first." >&2
-    exit 1
-  fi
-done
 files=$(git ls-files -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
 yaml=$(git ls-files -- 'site/src/data/**/*.yaml' 'site/src/data/*.yaml')
 # shellcheck disable=SC2086
@@ -269,14 +287,9 @@ vale --minAlertLevel=error --ext=.md $yaml
 # Run it every so often and rewrite the sentences that hide who does what.
 [tasks.prose-extended]
 description = "Vale prose lint with the extended (passive-voice) rules; advisory only"
+depends = ["prose-check-packages"]
 run = """
 set -e
-for pkg in $(grep -o '[A-Za-z-]*\\.zip' .vale-extended.ini | sed 's/\\.zip$//'); do
-  if [ ! -d ".vale/styles/$pkg" ]; then
-    echo "prose-extended: Vale package '$pkg' is not synced under .vale/styles/. Run 'mise run prose-sync' first." >&2
-    exit 1
-  fi
-done
 files=$(git ls-files -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
 yaml=$(git ls-files -- 'site/src/data/**/*.yaml' 'site/src/data/*.yaml')
 # shellcheck disable=SC2086

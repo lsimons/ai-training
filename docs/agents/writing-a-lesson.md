@@ -431,8 +431,8 @@ to `/glossary/#<id>` must name a real concept id, or the build fails.
   semicolon clause, no count-then-list, no rule of three, no clipped
   motto, no "not X but Y", no sentence-initial transition word.
   `mise run prose` reports every hit, and a lesson should read clean before
-  it is committed. In a fresh worktree run `mise run prose-sync` first;
-  without the packages `prose` stops and names that task.
+  it is committed. In a fresh worktree run `mise run prose-sync` first,
+  because without the packages `prose` stops and names that task.
 
 - Component children are Markdown but must be separated from the tags by a
   blank line if they contain block elements (code fences, lists).
