@@ -395,6 +395,8 @@ nothing for it beyond the props above.
 
 ## Other components
 
+Every prop of every component in a lesson body is a literal (a string, a number, a boolean, an array or an object of those), because the build reads the props from the MDX tree without running the page.
+
 ```mdx
 <Pitfall title="Asking the model why">
 Setup, what went wrong, the rule. Two to five sentences.

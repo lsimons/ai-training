@@ -9,7 +9,7 @@ import {
 	type JsxElement,
 	type MdxNode,
 	parseMdx,
-	stringProp,
+	propValue,
 } from './checkpoint-tags';
 import { getLessons, type Lesson } from './lessons';
 import { absoluteUrl } from './url';
@@ -157,7 +157,8 @@ export function setAsideCode(src: string): CodeAside {
 /**
  * One component, as plain Markdown. `children` is already rendered, with code set aside. A `Prompt` or
  * `Response` body is restored and fenced here, and the fenced block is set aside again, so the link pass
- * that follows leaves a code span inside it alone. `where` names the component in error messages.
+ * that follows leaves a code span inside it alone. `where` names the lesson in error messages, which have the
+ * shape `attrsOf` uses: `<where>: <problem> of <Tag>`.
  */
 function renderTag(
 	where: string,
@@ -166,7 +167,12 @@ function renderTag(
 	children: string,
 	aside: CodeAside,
 ): string {
-	const str = (n: string) => stringProp(where, attrs, n);
+	const str = (n: string) => {
+		const v = propValue(attrs, n);
+		if (v !== undefined && typeof v !== 'string')
+			throw new Error(`${where}: ${n} of <${name}> must be a string, got ${typeof v}`);
+		return v;
+	};
 	const body = children.trim();
 	const withHeading = (heading: string) => (body ? `${heading}\n\n${body}` : heading);
 	if (CHECKPOINT_TAGS.has(name)) {
@@ -243,17 +249,16 @@ function renderComponents(
 	for (const node of components) {
 		const name = node.name as string;
 		const { start, end } = spanOf(node, where);
-		const tagWhere = `${where} <${name}>`;
 		const attrs = attrsOf(node, where);
 		let children = '';
 		const first = node.children[0];
 		const last = node.children.at(-1);
 		if (first && last) {
-			const range = { from: spanOf(first, tagWhere).start, to: spanOf(last, tagWhere).end };
+			const range = { from: spanOf(first, where).start, to: spanOf(last, where).end };
 			children = renderComponents(src, range.from, range.to, componentsUnder(node), aside, where);
 		}
 		// A component is a block of its own, so blank lines set it off from its neighbors.
-		const rendered = renderTag(tagWhere, name, attrs, children, aside);
+		const rendered = renderTag(where, name, attrs, children, aside);
 		out += src.slice(pos, start) + (rendered ? `\n\n${rendered}\n\n` : '');
 		pos = end;
 	}
