@@ -113,7 +113,17 @@ Body of the response.
 				{ objective: 'o1', lesson: 'concepts/how-models-work', section: 's' },
 			],
 		},
-		body: '',
+		body: `
+## Going deeper
+
+<Recap>
+1. Go one level deeper.
+</Recap>
+
+<Habit id="go-one-level-deeper">
+The next time you *review* a change, go one level deeper.
+</Habit>
+`,
 	},
 ];
 
