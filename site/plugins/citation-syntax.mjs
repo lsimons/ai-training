@@ -91,9 +91,30 @@ export function unknownKeyMessage(where, key) {
 }
 
 /**
+ * Whether `key` holds more than one key. Spec S03 defines one key per
+ * `(@key)` token, so a second `@` inside one, as in `(@a, @b)`, is a
+ * mistake that would otherwise be reported as one unknown key.
+ * @param {string} key
+ */
+export function hasMultipleKeys(key) {
+	return key.includes('@');
+}
+
+/**
+ * The error for a token that holds more than one key. `where` names the
+ * page or the competency, the way its renderer reports it.
+ * @param {string} where
+ * @param {string} key
+ */
+export function multipleKeysMessage(where, key) {
+	return `${where}: citation key "${key}" contains "@". Write one key per token: (@a) (@b).`;
+}
+
+/**
  * Reference numbering for one page: `numberOf(key)` is the 1-based number of
  * `key` by first appearance, and `order` holds the keys in that order. An
- * unknown key throws `unknownKeyMessage`, so a typo fails the build.
+ * unknown key throws `unknownKeyMessage`, so a typo fails the build, and a
+ * token with more than one key throws `multipleKeysMessage`.
  * @param {Record<string, unknown>} bibliography
  * @param {string} where
  * @returns {{ numberOf: (key: string) => number, order: string[] }}
@@ -106,6 +127,7 @@ export function createNumbering(bibliography, where) {
 		numberOf(key) {
 			let n = order.indexOf(key);
 			if (n === -1) {
+				if (hasMultipleKeys(key)) throw new Error(multipleKeysMessage(where, key));
 				if (!(key in bibliography)) throw new Error(unknownKeyMessage(where, key));
 				order.push(key);
 				n = order.length - 1;

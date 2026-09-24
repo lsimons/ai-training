@@ -44,7 +44,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
-import { citationKeys } from '../../plugins/citation-syntax.mjs';
+import { citationKeys, hasMultipleKeys, multipleKeysMessage } from '../../plugins/citation-syntax.mjs';
 import { propValue } from '../../src/lib/checkpoint-tags.ts';
 import { checkExtendsToHref, checkExternalSourceHref } from '../../src/lib/extends-to.ts';
 import { unsupportedInline } from '../../src/lib/inline-markdown.ts';
@@ -249,7 +249,9 @@ export function checkBehaviorCitations(tree, rel) {
 				(o.behaviors ?? []).forEach((b, i) => {
 					for (const field of ['claim', 'why', 'example']) {
 						for (const key of citationKeys(String(b?.[field] ?? ''))) {
-							if (!tree.bibliographyKeys.has(key)) {
+							if (hasMultipleKeys(key)) {
+								errors.push(multipleKeysMessage(`${rel(file)}: objective ${o.id} behavior ${i + 1} ${field}`, key));
+							} else if (!tree.bibliographyKeys.has(key)) {
 								errors.push(
 									`${rel(file)}: objective ${o.id} behavior ${i + 1} ${field} cites "${key}", which is not a bibliography key`,
 								);
@@ -498,7 +500,8 @@ export function checkData(dataDir, contentDir, { foundationsExempt = FOUNDATIONS
 		if (owned.length) fail(`${where}: frontmatter sets ${owned.join(', ')}, which the lesson file owns`);
 		// The plan may list a source the page doesn't cite (consulted, not quoted), so only this direction is checked.
 		for (const key of citationKeys(readFileSync(join(contentDir, `${id}.mdx`), 'utf8'))) {
-			if (!sourcesOf.get(id).has(key)) fail(`${where}: cites "${key}", which its plan file's sources list lacks`);
+			if (hasMultipleKeys(key)) fail(multipleKeysMessage(where, key));
+			else if (!sourcesOf.get(id).has(key)) fail(`${where}: cites "${key}", which its plan file's sources list lacks`);
 		}
 	}
 	for (const e of checkBehaviorMarkdown(tree, rel)) fail(e);
