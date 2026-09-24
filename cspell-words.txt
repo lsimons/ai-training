@@ -82,6 +82,7 @@ psets
 
 # Section slugs named in lesson data (`assumes[].section`)
 arent
+doesnt
 
 # Jargon
 distractor
@@ -153,6 +154,7 @@ Norrbeck
 Kastanjelaan
 Hazeldine
 Sanne
+Duarte
 
 # Sharma 2023 authors
 Sharma
