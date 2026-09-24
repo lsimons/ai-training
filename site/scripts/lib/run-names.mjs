@@ -153,6 +153,19 @@ export function nameTakenBy(runs, own) {
 }
 
 /**
+ * The run issues with `issue` added when the list lacks it. `gh issue list`
+ * with a label can miss an issue for a few seconds after it is created (the
+ * #353 dry run hit this), so `--check N` fetches issue N on its own and
+ * merges it in. An older rival has had those seconds, so the list shows it.
+ * @param {RunIssue[]} issues
+ * @param {RunIssue} issue
+ * @returns {RunIssue[]}
+ */
+export function withIssue(issues, issue) {
+	return issues.some((i) => i.number === issue.number) ? issues : [...issues, issue];
+}
+
+/**
  * `[--check N]` from the command line, or an error message.
  * @param {string[]} argv
  * @returns {{ check: number | null } | { error: string }}
