@@ -191,17 +191,17 @@ function offsets(node: MdxNode): { start: number; end: number } {
 }
 
 /**
- * The "More practice" rules (spec S03 "More practice"): at most one
+ * The "More practice" rules (spec S03 "More practice"), checked over
+ * `elements`, the tree's JSX elements in source order: at most one
  * `<MorePractice>` block, after the `<Exercise>` and before the `<Recap>`,
  * holding one to `MAX_PRACTICE` checkpoints, all `practice` and every
  * `practice` checkpoint in it. Throws on the first break, naming `where`.
  */
 function checkPracticePlacement(
-	tree: MdxNode,
+	elements: readonly JsxElement[],
 	tags: { node: JsxElement; info: CheckpointTagInfo; id: string }[],
 	where: string,
 ): void {
-	const elements = jsxElements(tree);
 	const blocks = elements.filter((n) => n.name === MORE_PRACTICE_TAG);
 	if (blocks.length > 1) throw new Error(`${where}: <${MORE_PRACTICE_TAG}> is used ${blocks.length} times; use one`);
 	const block = blocks[0];
@@ -240,7 +240,8 @@ export function checkpointTagsIn(tree: MdxNode, src: string, where: string): Che
 	const out: CheckpointTagInfo[] = [];
 	const placed: { node: JsxElement; info: CheckpointTagInfo; id: string }[] = [];
 	const ids = new Set<string>();
-	for (const node of jsxElements(tree)) {
+	const elements = jsxElements(tree);
+	for (const node of elements) {
 		const kind: CheckpointKind | undefined = node.name ? KIND_OF_TAG[node.name as CheckpointTag] : undefined;
 		if (!kind) continue;
 		const tag = node.name as CheckpointTag;
@@ -264,7 +265,7 @@ export function checkpointTagsIn(tree: MdxNode, src: string, where: string): Che
 		out.push(info);
 		placed.push({ node, info, id: label });
 	}
-	checkPracticePlacement(tree, placed, where);
+	checkPracticePlacement(elements, placed, where);
 	return out;
 }
 

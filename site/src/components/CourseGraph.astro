@@ -9,7 +9,7 @@ import { getCollection } from 'astro:content';
 import { areaOf, getAreas } from '@lib/areas';
 import { dependenciesOf, getCoursePlan, isLive, planLevels } from '@lib/courses';
 import { jsonForScript } from '@lib/json';
-import { firstCheckpointsOf } from '@lib/lessons';
+import { checkpointsOf } from '@lib/lessons';
 import { href } from '@lib/url';
 
 interface Props {
@@ -30,7 +30,7 @@ const nodes = lessons.map((l) => ({
 	id: l.id,
 	title: l.data.title,
 	mode: l.data.mode,
-	checkpoints: firstCheckpointsOf(l).map((c) => ({ id: c.id, reviewable: c.reviewable, revision: c.revision })),
+	checkpoints: checkpointsOf(l).map((c) => ({ id: c.id, reviewable: c.reviewable, revision: c.revision })),
 }));
 const edges = plan.flatMap((e) => dependenciesOf(e, area).map((from) => ({ from, to: e.id })));
 const coming = plan.length - lessons.length;

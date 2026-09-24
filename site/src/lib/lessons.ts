@@ -98,16 +98,13 @@ export function checkpointOf(lesson: Lesson, { tag, kind, attrs, stem, phase }: 
 	};
 }
 
-/** The checkpoints of a lesson, read from the MDX tree of its body, alternates included. */
-export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
-	return checkpointTagsOf(lesson).map((t) => checkpointOf(lesson, t));
-}
-
 /**
- * The lesson's own checkpoints: the `first` phase, which the lesson page
- * counts, finishing needs, and progress figures use (spec S04 "Progress
- * display"). Alternates are left out.
+ * The checkpoints of a lesson, read from the MDX tree of its body. By default
+ * only the lesson's own `first` phase, which the lesson page counts, finishing
+ * needs, and progress figures use (spec S04 "Progress display"). Pass
+ * `{ alternates: true }` to include the `review` and `practice` checkpoints too.
  */
-export function firstCheckpointsOf(lesson: Lesson): CheckpointInfo[] {
-	return checkpointsOf(lesson).filter((c) => c.phase === 'first');
+export function checkpointsOf(lesson: Lesson, options: { alternates?: boolean } = {}): CheckpointInfo[] {
+	const all = checkpointTagsOf(lesson).map((t) => checkpointOf(lesson, t));
+	return options.alternates ? all : all.filter((c) => c.phase === 'first');
 }
