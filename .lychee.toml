@@ -23,7 +23,7 @@ accept = ["100..=299", "403", "429"]
 # ordinary external links and get checked. Add a site here when a lesson
 # starts citing it.
 include = [
-  '^https://lsimons\.github\.io/agent-engineer-course/',
+  '^https?://lsimons\.github\.io/agent-engineer-course/',
 ]
 
 # - lsimons.github.io: this site's own deploy (the deploy workflow proves it,
