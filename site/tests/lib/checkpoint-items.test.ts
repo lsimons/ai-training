@@ -42,11 +42,16 @@ describe('checkpointItemsOf', () => {
 			hint: 'h',
 			reviewable: true,
 			revision: 1,
+			guessable: null,
 		});
 		const scenario = one(
 			`<Scenario ${base} context="Ctx." options={[{ text: 'a', correct: true, consequence: 'c' }, { text: 'b', consequence: 'd' }]}>\n</Scenario>`,
 		);
 		expect(scenario).toMatchObject({ kind: 'scenario', context: 'Ctx.', options: ['a', 'b'], answer: 'a' });
+		const exempt = one(
+			`<Choice ${base} guessable="the key is the full sentence" options={[{ text: 'a', why: 'w' }, { text: 'b', correct: true }]}>\nStem.\n</Choice>`,
+		);
+		expect(exempt?.guessable).toBe('the key is the full sentence');
 	});
 	it('shapes multi-choice, match, order and sort', () => {
 		expect(

@@ -22,7 +22,7 @@ import { allTopics, readAreaTree } from './area-tree.mjs';
 import { lessonPages } from './data.mjs';
 import { walkMdx } from './examples.mjs';
 
-/** Field name to the `typeof` it must have. `context`, `options` and `answer` may be null and are not listed. */
+/** Field name to the `typeof` it must have. `context`, `options`, `answer` and `guessable` may be null and are not listed. */
 export const REQUIRED = {
 	id: 'string',
 	lesson: 'string',
@@ -95,7 +95,7 @@ export function checkCheckpoints(file, contentDir, dataDir) {
 			const actual = typeof item?.[field];
 			if (actual !== type) fail(`${where}: ${field} must be a ${type}`);
 		}
-		for (const field of ['context', 'options', 'answer']) {
+		for (const field of ['context', 'options', 'answer', 'guessable']) {
 			if (!(field in (item ?? {}))) fail(`${where}: ${field} is missing (null when absent)`);
 		}
 		if (!kinds.has(item?.kind)) fail(`${where}: kind ${JSON.stringify(item?.kind)} is not a checkpoint kind`);

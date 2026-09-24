@@ -31,6 +31,12 @@ interface Props {
 	revision?: number;
 	/** Set by Predict when there is no `answer`: honor-system, never reviewed. */
 	honor?: boolean;
+	/**
+	 * Opt-out from the surface-cue check (`mise run checkpoints`, spec S03 "Checkpoints"): the reason
+	 * the item may stay guessable. The check prints every reason and fails on one that no heuristic
+	 * trips. Exported as `guessable`; not rendered.
+	 */
+	guessable?: string;
 	checkLabel?: string;
 }
 
@@ -45,8 +51,11 @@ const {
 	review = true,
 	revision = DEFAULT_REVISION,
 	honor = false,
+	guessable,
 	checkLabel = 'Check',
 } = Astro.props;
+if (guessable !== undefined && (typeof guessable !== 'string' || guessable.trim() === ''))
+	throw new Error(`Checkpoint "${id}": guessable must be a non-empty reason, got ${JSON.stringify(guessable)}`);
 if (!Number.isInteger(revision) || revision < 1)
 	throw new Error(`Checkpoint "${id}": revision must be a positive integer, got ${revision}`);
 const lessonId = lessonIdOf(Astro);
