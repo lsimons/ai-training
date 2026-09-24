@@ -39,7 +39,10 @@ describe('literalOf', () => {
 		expect(() => literalOf(estree('{ ...rest }'))).toThrow(/SpreadElement in an object literal/);
 		expect(() => literalOf(estree('{ [k]: 1 }'))).toThrow(/in an object literal/);
 		expect(() => literalOf(estree('!true'))).toThrow(/! expression/);
-		expect(() => literalOf(undefined)).toThrow(/hole/);
+		expect(() => literalOf(null)).toThrow(/hole/);
+		expect(() => literalOf(undefined)).toThrow(/an empty expression/);
+		expect(() => literalOf(estree('/a/'))).toThrow(/a RegExp literal/);
+		expect(() => literalOf(estree('1n'))).toThrow(/a BigInt literal/);
 	});
 });
 
@@ -67,6 +70,9 @@ describe('checkpointTagsOfSource', () => {
 	it('ignores components that are not checkpoints and reads nested ones', () => {
 		const src = '<Aside>\n<Choice id="in" concepts={["c"]} options={[]}>\nS\n</Choice>\n</Aside>\n';
 		expect(checkpointTagsOfSource(src, 'x').map((t) => [t.tag, t.stem])).toEqual([['Choice', 'S']]);
+	});
+	it('names the lesson in a parse error', () => {
+		expect(() => checkpointTagsOfSource('<Choice id="a>', 'x/y')).toThrow(/^x\/y: Unexpected end of file/);
 	});
 	it('leaves a stray expression child in the stem source rather than failing', () => {
 		const src = '<Choice id="a">\n{/* note */}\n\nStem.\n</Choice>';

@@ -39,7 +39,7 @@ describe('checkpointTagsOf', () => {
 	it('reads a tag inside a paragraph too, and rejects what the MDX parser rejects', () => {
 		expect(checkpointTagsOf(body('Text <Choice id="c" /> more.'))).toHaveLength(1);
 		expect(() => checkpointTagsOf(body('<Choice id="c">\nStem.\n'))).toThrow(/closing tag/);
-		expect(() => checkpointTagsOf(body('<Choice id="a" options={['))).toThrow(/Unexpected end of file/);
+		expect(() => checkpointTagsOf(body('<Choice id="a" options={['))).toThrow(/^x\/y: Unexpected end of file/);
 		expect(() => checkpointTagsOf(body('<Choice id="a>'))).toThrow(/Unexpected end of file/);
 	});
 });

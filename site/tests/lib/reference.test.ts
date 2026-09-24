@@ -103,6 +103,12 @@ describe('canonicalExampleOf', () => {
 		expect(canonicalExampleOf(lesson('<Choice id="c" options={[]}>\n</Choice>'))).toBeUndefined();
 		expect(canonicalExampleOf(lesson())).toBeUndefined();
 	});
+	it('pairs a Prompt with the Response that follows it even when the Prompt has a JSX child', () => {
+		const withChild =
+			'<Prompt model="gpt" recorded="2026-09">\nDo it.\n\n<Aside>\nNote.\n</Aside>\n</Prompt>\n<Response>\nDone.\n</Response>';
+		const ex = canonicalExampleOf(lesson(withChild));
+		expect(ex?.kind === 'prompt' && ex.response).toEqual([{ kind: 'text', html: '<p>Done.</p>' }]);
+	});
 	it('takes an ungraded example (a Predict without an objective) as the canonical example', () => {
 		const shown = '<Predict id="e" title="Shown" answer="2" run="y.py">\nRun this.\n</Predict>';
 		expect(canonicalExampleOf(lesson(`${shown}\n${predict}`))).toEqual({
