@@ -1,0 +1,84 @@
+---
+/**
+ * The objectives of one competency page (spec S02 "Stable URLs"): each
+ * objective's behaviors table, the lessons serving it, and a References list
+ * for the `(@key)` citations in the behaviors, rendered by lib/citations.
+ */
+import { getCollection } from 'astro:content';
+import { type BibliographyEntry, createCitations } from '@lib/citations';
+import { getLessons } from '@lib/lessons';
+import { href } from '@lib/url';
+
+interface Behavior {
+	claim: string;
+	why: string;
+	example: string;
+}
+interface Objective {
+	id: string;
+	statement: string;
+	level: string;
+	behaviors: Behavior[];
+}
+interface Props {
+	competency: { id: string; objectives: Objective[] };
+}
+
+const { competency } = Astro.props;
+const lessons = await getLessons();
+const serving = (objectiveId: string) => lessons.filter((l) => l.data.serves.includes(objectiveId));
+const bibliography: Record<string, BibliographyEntry> = Object.fromEntries(
+	(await getCollection('bibliography')).map((e) => [e.id, e.data]),
+);
+const citations = createCitations(bibliography, `competency ${competency.id}`);
+const objectives = competency.objectives.map((o) => ({
+	...o,
+	behaviors: o.behaviors.map((b) => ({
+		claim: citations.render(b.claim),
+		why: citations.render(b.why),
+		example: citations.render(b.example),
+	})),
+}));
+const references = citations.references();
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+---
+
+{
+	objectives.map((o) => (
+		<section>
+			<h3 id={o.id.split('/').pop()}>{o.statement} <small>({o.level})</small></h3>
+			{o.behaviors.length ? (
+				<table>
+					<thead><tr><th>Claim</th><th>Why</th><th>Example</th></tr></thead>
+					<tbody>{o.behaviors.map((b) => <tr><td set:html={b.claim} /><td set:html={b.why} /><td set:html={b.example} /></tr>)}</tbody>
+				</table>
+			) : (
+				<p><em>Behaviors not written yet.</em></p>
+			)}
+			{serving(o.id).length ? (
+				<p>Served by: {serving(o.id).map((l, i) => (<>{i > 0 && ', '}<a href={href(`/${l.id}/`)}>{l.data.title}</a></>))}</p>
+			) : (
+				<p>No lesson serves this objective yet.</p>
+			)}
+		</section>
+	))
+}
+
+{
+	references.length > 0 && (
+		<>
+			<h2 id="references">References</h2>
+			<ol class="references">
+				{references.map(({ n, key, entry }) => (
+					<li id={`ref-${n}`}>
+						{entry.author && `${entry.author}. `}
+						{entry.url ? <a href={entry.url}><em>{entry.title}</em></a> : <em>{entry.title}</em>}.
+						{entry.container && entry.container !== entry.title && ` ${entry.container}.`}
+						{` ${capitalize(entry.type)}. `}
+						<code>{key}</code>
+					</li>
+				))}
+			</ol>
+		</>
+	)
+}

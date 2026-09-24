@@ -11,28 +11,10 @@
  * checkpoint stem still resolves when a review page clones it. Only code is
  * left alone.
  */
+import { CITATION, splitCitations } from './citation-syntax.mjs';
 import { CODE_ONLY, walkText } from './mdast-walk.mjs';
 
-const CITATION = /\(@([^()\n]+?)\)/g;
 const DOCS_DIR = /[\\/]src[\\/]content[\\/]docs[\\/]/;
-
-/**
- * The citation keys in `source`, in order of first appearance, matched the
- * way the plugin matches them. This scans raw text, so it also sees a
- * `(@key)` inside a code block, which the plugin leaves alone; the data
- * check accepts that, because no lesson shows the syntax in code.
- * @param {string} source
- * @returns {string[]}
- */
-export function citationKeys(source) {
-	/** @type {string[]} */
-	const keys = [];
-	for (const m of source.matchAll(CITATION)) {
-		const key = (m[1] ?? '').trim();
-		if (!keys.includes(key)) keys.push(key);
-	}
-	return keys;
-}
 
 /**
  * The root-relative URL of the page a file renders to, per Starlight's
@@ -115,26 +97,19 @@ export function remarkCitations({ bibliography }) {
  * @param {string} page root-relative URL of the page, so the link survives cloning
  */
 function splitText(node, numberOf, page) {
-	/** @type {any[]} */
-	const out = [];
-	let last = 0;
-	for (const m of node.value.matchAll(CITATION)) {
-		const index = /** @type {number} */ (m.index);
-		if (index > last) out.push({ type: 'text', value: node.value.slice(last, index) });
-		const key = (m[1] ?? '').trim();
-		const n = numberOf(key);
-		out.push({
+	const parts = splitCitations(node.value);
+	if (parts.length === 1 && parts[0]?.type === 'text') return [node];
+	return parts.map((part) => {
+		if (part.type === 'text') return { type: 'text', value: part.value };
+		const n = numberOf(part.key);
+		return {
 			type: 'link',
 			url: `${page}#ref-${n}`,
-			title: key,
-			data: { hProperties: { className: ['citation'], 'data-key': key } },
+			title: part.key,
+			data: { hProperties: { className: ['citation'], 'data-key': part.key } },
 			children: [{ type: 'text', value: `[${n}]` }],
-		});
-		last = index + m[0].length;
-	}
-	if (out.length === 0) return [node];
-	if (last < node.value.length) out.push({ type: 'text', value: node.value.slice(last) });
-	return out;
+		};
+	});
 }
 
 /**
