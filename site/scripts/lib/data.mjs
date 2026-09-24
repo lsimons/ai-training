@@ -19,8 +19,9 @@
  * - a lesson covers an unknown topic or one from another area, serves or
  *   assumes an unknown objective, comes `after` a lesson not in its area,
  *   introduces an unknown concept or one another lesson introduces, cites
- *   a source key the bibliography lacks, or sets one of `sources-checked`
- *   and `review-by` without the other (spec S11 pairs them);
+ *   a source key the bibliography lacks, sets one of `sources-checked`
+ *   and `review-by` without the other (spec S11 pairs them), or has a
+ *   `review-by` on or before `sources-checked`;
  * - a lesson page (`<area>/<lesson>.mdx`) has no lesson file, carries a
  *   frontmatter field the lesson file owns, cites a source (`(@key)`, the
  *   remark citation plugin's form) that its lesson file's `sources` list
@@ -90,18 +91,23 @@ export const LESSON_OWNED_FIELDS = [
 ];
 
 /**
- * The error for a lesson that sets one of `sources-checked` and `review-by`
- * without the other, or `null` when it sets both or neither. Spec S11
- * "Lesson file" pairs the two: the check date means nothing without the date
- * the sources are due again, and the reverse.
+ * The error for a lesson whose `sources-checked` and `review-by` disagree,
+ * or `null` when it sets both in order or neither. Spec S11 "Lesson file"
+ * pairs the two: the check date means nothing without the date the sources
+ * are due again, and the reverse, and the due date comes after the check.
+ * A value that isn't a date is left to the content schema at build.
  */
 export function reviewDatePairError(lesson) {
-	const checked = lesson?.['sources-checked'] != null;
-	const due = lesson?.['review-by'] != null;
-	if (checked === due) return null;
-	return checked
-		? 'sets sources-checked without review-by, which spec S11 pairs with it'
-		: 'sets review-by without sources-checked, which spec S11 pairs with it';
+	const checkedRaw = lesson?.['sources-checked'];
+	const dueRaw = lesson?.['review-by'];
+	if (checkedRaw == null && dueRaw == null) return null;
+	if (dueRaw == null) return 'sets sources-checked without review-by, which spec S11 pairs with it';
+	if (checkedRaw == null) return 'sets review-by without sources-checked, which spec S11 pairs with it';
+	const checked = new Date(String(checkedRaw)).getTime();
+	const due = new Date(String(dueRaw)).getTime();
+	if (Number.isNaN(checked) || Number.isNaN(due)) return null;
+	if (due <= checked) return `review-by ${dueRaw} is not after sources-checked ${checkedRaw}`;
+	return null;
 }
 
 /**

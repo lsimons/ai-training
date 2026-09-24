@@ -187,6 +187,10 @@ describe('checkData', () => {
 		expect(check(tree({ 'data/areas/a/lessons/p.yaml': `${PLANNED}review-by: 2027-03-20\n` })).errors).toEqual([
 			'src/data/areas/a/lessons/p.yaml: sets review-by without sources-checked, which spec S11 pairs with it',
 		]);
+		const same = `${LIVE}sources-checked: 2026-09-20\nreview-by: 2026-09-20\n`;
+		expect(check(tree({ 'data/areas/a/lessons/x.yaml': same })).errors).toEqual([
+			'src/data/areas/a/lessons/x.yaml: review-by 2026-09-20 is not after sources-checked 2026-09-20',
+		]);
 	});
 	it('reports a lesson page without a lesson file, and frontmatter that the data owns', () => {
 		const { errors } = check(
@@ -212,6 +216,8 @@ describe('helpers', () => {
 		expect(reviewDatePairError({ 'sources-checked': '2026-09-20', 'review-by': '2027-03-20' })).toBeNull();
 		expect(reviewDatePairError({ 'sources-checked': '2026-09-20' })).toMatch(/without review-by/);
 		expect(reviewDatePairError({ 'review-by': '2027-03-20' })).toMatch(/without sources-checked/);
+		expect(reviewDatePairError({ 'sources-checked': '2026-09-20', 'review-by': '2026-09-19' })).toMatch(/not after/);
+		expect(reviewDatePairError({ 'sources-checked': 'soon', 'review-by': '2027-03-20' })).toBeNull();
 	});
 	it('frontmatter parses the YAML block and returns {} without one', () => {
 		expect(frontmatter('---\ntitle: X\n---\n\nBody.\n')).toEqual({ title: 'X' });
