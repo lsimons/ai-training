@@ -17,7 +17,10 @@ a description each. Run `mise trust` and `mise install` once per clone.
 `mise run ci` is the full gate and runs the same list the CI job runs, in the
 same order. `mise run links` (lychee, external URLs) and `mise run site-audit`
 (`bun audit`) are network calls that flake, so they're not part of `ci`. Run
-them now and then.
+them now and then. `mise run vuln` (osv-scanner over `uv.lock` and
+`site/bun.lock`) is a network call too and stays out of `ci`, but the CI
+workflow runs it in its own `vuln` job, so a known advisory against a pinned
+version fails the pull request.
 
 The site's own checks, in the order `ci` runs them after the prose tasks:
 
@@ -224,6 +227,10 @@ patterns below after the fact. Write so that it has nothing to say.
   the same ruff version.
 - `mise run site-audit` (`bun audit`) must be clean. Fix an advisory in a
   *transitive* package with the `overrides` block in `site/package.json`.
+- `mise run vuln` (osv-scanner) must be clean, and CI runs it as the `vuln`
+  job. It fails when the scanner did not open `uv.lock` or `site/bun.lock`,
+  so a new lockfile goes in the glob list of the task in `.mise.toml`. Fix
+  a Python advisory by bumping the pin with `mise run py-install`.
 - Pin GitHub Actions to full-length commit SHAs. `zizmor` enforces it.
 - Every `.mise.toml` tool is exact-pinned and invisible to dependabot.
   Refresh with `mise up` and read the diff.
