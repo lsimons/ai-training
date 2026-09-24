@@ -125,6 +125,7 @@ notes: >-
 | `introduces`      | yes       | The concept ids first taught in this lesson. Every concept of the area's topics is introduced by exactly one lesson, or the check warns. May be empty.        |
 | `assumes`         | yes       | The objectives the lesson relies on, from any area, as `{objective, lesson?, section?}`. Once live, each names the lesson and the `##` section that teach it. |
 | `extends-to`      | yes       | Where a confident learner goes next, as `{label, href}` (S03 "Frontmatter"): a page path or an `https://` URL under a bibliography `url`. May be empty.       |
+| `covered-by`      | no        | One external course that covers each objective the lesson `serves`, as `{label, href}`, an `https://` URL under a bibliography `url`. Shows a skip tip.       |
 | `after`           | yes       | Lesson ids of this area the lesson comes after, for its place in the lesson graph while it is coming. A live lesson takes its place from `assumes`.           |
 | `shorts`          | yes       | Titles of the shorts the lesson would link to for depth (S01 "Short"), or an empty list. The short pages are still to be written.                             |
 | `exercise`        | one of    | The lesson's hands-on task: `{kind, brief}` with `kind` `do` or `judge` (S03 "Exercises") and a one-sentence brief.                                           |
@@ -156,8 +157,8 @@ is planned on `main` until the branch merges, which is the truth.
 
 The MDX page has no frontmatter. At build the docs loader
 (`site/src/content.config.ts`) copies `title`, `description`, `mode`,
-`covers`, `serves`, `assumes`, `extends-to`, `sources-checked` and
-`review-by` from the lesson file onto the page's docs entry, so every
+`covers`, `serves`, `assumes`, `extends-to`, `covered-by`, `sources-checked`
+and `review-by` from the lesson file onto the page's docs entry, so every
 component that read the page frontmatter before reads the same names now.
 Until #112 the loader copied `sources-checked` onto Starlight's
 `lastUpdated`, so a prose fix that moved the footer date also moved the

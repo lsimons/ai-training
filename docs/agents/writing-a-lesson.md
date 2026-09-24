@@ -12,8 +12,8 @@ A lesson is two files. Its **plan** is
 lesson is written and holds everything the site knows about it. Its **page**
 is `site/src/content/docs/<area>/<lesson>.mdx`, which has no frontmatter:
 the build copies `title`, `description`, `mode`, `covers`, `serves`,
-`assumes`, `extends-to`, `sources-checked` and `review-by` from the plan
-onto the page. The lesson id is
+`assumes`, `extends-to`, `covered-by`, `sources-checked` and `review-by`
+from the plan onto the page. The lesson id is
 `<area>/<lesson>`, the same as the page route and the plan's `id`. Spec S11
 is the rule, and this section is the mechanics.
 
@@ -34,6 +34,9 @@ assumes:                  # once live, each names the lesson section that teache
 extends-to:               # a root-relative page path, or an https:// URL under a bibliography `url`
   - label: Decomposing work
     href: /using-agents/decomposition/
+covered-by:               # optional: one external course that covers every served objective
+  label: AI capabilities and limitations
+  href: https://academy.claude.com/courses/ai-capabilities-and-limitations
 after: []                 # lesson ids of this area, for the graph while the lesson is coming
 shorts: [Asking for sources]                               # titles of shorts to write, or []
 exercise:                 # or `exercises:` with a list, for a longer lesson
@@ -437,7 +440,12 @@ previous/next, which follows the sidebar order. `extends-to` only feeds the
 "You are ahead" card. An `extends-to` href may also be an `https://` URL
 that starts with the `url` of a bibliography entry, for example a Claude
 Academy course, and the card renders it as a plain link marked "(external
-link)". Sources are listed on the topic page, from the topic YAML, not on
+link)". `covered-by` names one external course that covers each objective
+the lesson serves, and the page then shows a tip next to the menu, "If you
+have followed <label>, you can skip this lesson", with a skip button that
+does what the recap's does. Set it only when the whole lesson is covered,
+and use an `https://` URL under a bibliography `url`, as for `extends-to`.
+Sources are listed on the topic page, from the topic YAML, not on
 the lesson.
 
 Widgets are their own components under `site/src/components/widgets/` and

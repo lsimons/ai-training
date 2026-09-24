@@ -13,3 +13,13 @@ export async function knownPagePaths(): Promise<Set<string>> {
 	for (const t of topics) paths.add(`/topics/${t.data.id}/`);
 	return paths;
 }
+
+/**
+ * Every bibliography key with its `url` (missing for a source without one),
+ * in the form `checkExtendsToHref` and `checkExternalSourceHref` take. Shared
+ * by MarkdownContent (`extends-to`) and TableOfContents (`covered-by`).
+ */
+export async function bibliographySources(): Promise<[string, string | null | undefined][]> {
+	const bibliography = await getCollection('bibliography');
+	return bibliography.map((b) => [b.id, b.data.url]);
+}

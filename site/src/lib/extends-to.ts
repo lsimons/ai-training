@@ -58,6 +58,26 @@ export function checkExtendsToHref(
 	if (!isExternalHref(href)) {
 		return { kind: 'invalid', reason: `${field} href must be a root-relative path or an https:// URL, got ${href}` };
 	}
+	return checkExternalSourceHref(href, sources, field);
+}
+
+/** The result of `checkExternalSourceHref`: an external href, or the reason it is invalid. */
+export type ExternalSourceHref = Exclude<ExtendsToHref, { kind: 'internal' }>;
+
+/**
+ * Check an href that must be an `https://` URL under a bibliography `url`.
+ * `checkExtendsToHref` calls it for the external form of `extends-to`, and a
+ * lesson's `covered-by` (spec S11 "Lesson file") uses it directly, since a
+ * page of this site cannot cover a lesson. `field` names the field in the error.
+ */
+export function checkExternalSourceHref(
+	href: string,
+	sources: Iterable<[string, string | null | undefined]>,
+	field: string,
+): ExternalSourceHref {
+	if (!isExternalHref(href)) {
+		return { kind: 'invalid', reason: `${field} href must be an https:// URL, got ${href}` };
+	}
 	for (const [key, url] of sources) {
 		if (url && isUnderUrl(href, url)) return { kind: 'external', source: key };
 	}

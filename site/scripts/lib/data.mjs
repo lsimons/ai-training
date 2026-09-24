@@ -95,6 +95,7 @@ export const LESSON_OWNED_FIELDS = [
 	'serves',
 	'assumes',
 	'extends-to',
+	'covered-by',
 	'sources-checked',
 	'review-by',
 	'lastUpdated',
