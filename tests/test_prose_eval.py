@@ -278,6 +278,14 @@ def test_main_stops_before_writing_when_not_synced(
 def test_styles_path_is_resolved_from_the_repository_root(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # Imported here so the import block stays as #299 leaves it.
+    import importlib
+
+    # Reload with another working directory, so a cwd-relative STYLES would differ.
     monkeypatch.chdir(tmp_path)
-    assert prose_eval.STYLES.is_absolute()
-    assert prose_eval.STYLES == REPO_ROOT / ".vale" / "styles"
+    try:
+        styles = importlib.reload(prose_eval).STYLES
+    finally:
+        monkeypatch.undo()
+        importlib.reload(prose_eval)
+    assert styles == REPO_ROOT / ".vale" / "styles"
