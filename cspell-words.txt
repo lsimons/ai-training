@@ -142,6 +142,7 @@ upsell
 upvotes
 worktrees
 pseudonymized
+reflog
 
 # Invented people and companies in lesson fixtures
 Renske

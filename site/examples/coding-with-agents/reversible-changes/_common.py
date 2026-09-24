@@ -23,8 +23,19 @@ DUE_TEST = os.path.join(SIBLING, "test_due.py")
 OVERDUE_TEST = os.path.join(HERE, "test_overdue.py")
 BAD_DATE_TEST = os.path.join(HERE, "test_bad_date.py")
 
+# Variables that would point git at another repository than the copy's own.
+GIT_LOCATION_VARIABLES = (
+    "GIT_DIR",
+    "GIT_WORK_TREE",
+    "GIT_INDEX_FILE",
+    "GIT_COMMON_DIR",
+    "GIT_PREFIX",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+)
+
 GIT_ENV = dict(
-    os.environ,
+    {key: value for key, value in os.environ.items() if key not in GIT_LOCATION_VARIABLES},
     GIT_AUTHOR_NAME="Learner",
     GIT_AUTHOR_EMAIL="learner@example.com",
     GIT_COMMITTER_NAME="Learner",
@@ -178,6 +189,8 @@ def git(repo: str, *args: str) -> "subprocess.CompletedProcess[str]":
 def init_repo(repo: str) -> None:
     """The fixture as the learner receives it: one commit on main, and a branch."""
     git(repo, "init", "-q", "--initial-branch=main")
+    with open(os.path.join(repo, ".gitignore"), "w", encoding="utf-8") as handle:
+        handle.write("__pycache__/\n")
     git(repo, "add", ".")
     git(repo, "commit", "-q", "-m", "chore: the to-do program before due dates")
     shutil.copyfile(SPEC, os.path.join(repo, "SPEC.md"))

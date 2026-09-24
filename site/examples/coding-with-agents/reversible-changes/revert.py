@@ -2,8 +2,9 @@
 
 After `git revert HEAD~1` the `overdue` command is gone, and its test with it,
 while `due` and the date in `list` from the first commit and the date check
-from the third are untouched. The suite passes, the malformed date is still
-refused, and `overdue` falls through to the usage message with status 2.
+from the third are untouched. The script prints the log, the suite's last
+line, what `due 1 tomorrow` prints, and the exit status of `overdue`, which
+is now an unknown command.
 """
 
 import sys
