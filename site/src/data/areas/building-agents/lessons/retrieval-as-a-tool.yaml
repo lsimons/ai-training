@@ -23,7 +23,6 @@ exercise:
     model's coverage threshold so it answers `not found` for it instead of inventing a policy. The
     output is the test set results before and after.
 sources:
-  - AEC-05
   - AEC-08
   - Claude docs define-tools
   - Claude docs handle-tool-calls
