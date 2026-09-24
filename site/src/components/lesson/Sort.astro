@@ -1,5 +1,6 @@
 ---
 /** Place chips into labeled buckets by drag-and-drop, or click-to-select then click-a-bucket (spec S01 `sort`). */
+import type { CheckpointPhase } from '@lib/checkpoint-rules';
 import CheckpointShell from './CheckpointShell.astro';
 
 interface Item {
@@ -17,17 +18,19 @@ interface Props {
 	context?: string;
 	review?: boolean;
 	revision?: number;
+	/** `first` (default), `review` or `practice` (spec S03 "Checkpoint props"). */
+	phase?: CheckpointPhase;
 	buckets: string[];
 	items: Item[];
 }
-const { id, objective, title, hint, concepts, context, review, revision, buckets, items } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, buckets, items, phase } = Astro.props;
 for (const it of items) {
 	if (it.bucket < 0 || it.bucket >= buckets.length)
 		throw new Error(`Sort "${id}": item "${it.text}" points at bucket ${it.bucket}`);
 }
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} kind="sort">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} {phase} kind="sort">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-sort">

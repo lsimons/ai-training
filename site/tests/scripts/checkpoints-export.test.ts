@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { checkCheckpoints, conceptIds, pageCheckpointIds } from '../../scripts/lib/checkpoints.mjs';
+import { checkAlternates, checkCheckpoints, conceptIds, pageCheckpointIds } from '../../scripts/lib/checkpoints.mjs';
 
 const roots: string[] = [];
 afterAll(() => {
@@ -27,8 +27,14 @@ const item = (id: string, over: Record<string, unknown> = {}) => ({
 	reviewable: true,
 	revision: 1,
 	guessable: null,
+	phase: 'first',
 	...over,
 });
+/** The warnings of an export whose two reviewable items `one` and `two` have no review alternate. */
+const NO_ALTERNATES = [
+	'a/x: 2 reviewable checkpoints without a review alternate: one, two',
+	'2 of 2 reviewable checkpoints have no review alternate',
+];
 const GOOD = { version: 1, items: [item('one'), item('two', { kind: 'sort', stem: '' })] };
 
 /** A temp tree with one topic, one lesson page `a/x` with two checkpoints, and the given export (an object, or raw text). */
@@ -54,7 +60,7 @@ const check = (root: string) =>
 
 describe('checkCheckpoints', () => {
 	it('passes a consistent export and counts the items', () => {
-		expect(check(tree(GOOD))).toEqual({ errors: [], items: 2, exemptions: [] });
+		expect(check(tree(GOOD))).toEqual({ errors: [], items: 2, exemptions: [], warnings: NO_ALTERNATES });
 	});
 	it('reports a missing file, a file that is not JSON, a wrong version and a missing items list', () => {
 		expect(check(tree(null)).errors[0]).toMatch(/does not exist; run site-build first/);
@@ -74,6 +80,7 @@ describe('checkCheckpoints', () => {
 			errors: [],
 			items: 2,
 			exemptions: ['a/x#one: guessable (longest): the key is a rule the lesson states in full'],
+			warnings: NO_ALTERNATES,
 		});
 	});
 	it('reports a checkpoint missing from the export and an item no page has', () => {
@@ -101,6 +108,58 @@ describe('checkCheckpoints', () => {
 		expect(errors).toContain('a/x#two: listed twice');
 		expect(errors).toContain('items[3]: lesson must be a string');
 		expect(errors).toContain('items[3]: context is missing (null when absent)');
+	});
+	it('reports a phase that is not a phase, and checks the alternates of a page that has them', () => {
+		const page = `${PAGE}\n<Choice id="alt" phase="review" objective="o" title="T" hint="h" concepts={['c1']} options={[]}>\nS.\n</Choice>\n`;
+		const items = [
+			item('one', { phase: 'later' }),
+			item('two', { kind: 'sort', stem: '' }),
+			item('alt', { phase: 'review' }),
+		];
+		const { errors, warnings } = check(tree({ version: 1, items }, { 'content/a/x.mdx': page }));
+		expect(errors).toEqual(['a/x#one: phase "later" is not one of first, review, practice']);
+		expect(warnings).toEqual([]);
+	});
+});
+
+describe('checkAlternates', () => {
+	it('passes a review alternate that shares the objective of a first item, and warns on one without', () => {
+		const items = [
+			item('one'),
+			item('one-again', { phase: 'review', kind: 'multi-choice' }),
+			item('two', { objective: 'p' }),
+			item('shown', { objective: 'p', reviewable: false, kind: 'repair' }),
+		];
+		expect(checkAlternates(items)).toEqual({
+			errors: [],
+			warnings: [
+				'a/x: 1 reviewable checkpoint without a review alternate: two',
+				'1 of 2 reviewable checkpoints have no review alternate',
+			],
+		});
+	});
+	it('fails an alternate without a first sibling and a review alternate that is not gradable', () => {
+		const items = [
+			item('one'),
+			item('stray', { phase: 'practice', objective: 'q', reviewable: false }),
+			item('elsewhere', { phase: 'review', lesson: 'a/y' }),
+			item('self-graded', { phase: 'review', kind: 'repair', reviewable: false }),
+		];
+		expect(checkAlternates(items).errors).toEqual([
+			'a/x#stray: a practice alternate needs a first checkpoint with objective "q" in its lesson',
+			'a/x#self-graded: a review alternate must be gradable in a review (not a repair, an honor-system predict or review={false})',
+			'a/y#elsewhere: a review alternate needs a first checkpoint with objective "o" in its lesson',
+		]);
+	});
+	it('does not count a practice item or an ungradable alternate as covering its sibling, and skips malformed items', () => {
+		const items = [
+			item('one'),
+			item('extra', { phase: 'practice', reviewable: false }),
+			item('broken', { phase: 'review', reviewable: false }),
+			{ id: 'x' },
+		];
+		const { warnings } = checkAlternates(items);
+		expect(warnings[0]).toBe('a/x: 1 reviewable checkpoint without a review alternate: one');
 	});
 });
 

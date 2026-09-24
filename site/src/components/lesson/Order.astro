@@ -1,5 +1,6 @@
 ---
 /** Put steps in sequence by dragging rows or with the arrows (spec S01 `order`). `steps` is the correct order; the page shuffles. */
+import type { CheckpointPhase } from '@lib/checkpoint-rules';
 import CheckpointShell from './CheckpointShell.astro';
 
 interface Props {
@@ -13,12 +14,14 @@ interface Props {
 	context?: string;
 	review?: boolean;
 	revision?: number;
+	/** `first` (default), `review` or `practice` (spec S03 "Checkpoint props"). */
+	phase?: CheckpointPhase;
 	steps: string[];
 }
-const { id, objective, title, hint, concepts, context, review, revision, steps } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, steps, phase } = Astro.props;
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} kind="order">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} {phase} kind="order">
 	<slot />
 	<Fragment slot="body">
 		<ol class="cp-order" aria-label="Steps to order">

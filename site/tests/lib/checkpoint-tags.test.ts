@@ -74,8 +74,53 @@ describe('checkpointTagsOfSource', () => {
 	it('names the lesson in a parse error', () => {
 		expect(() => checkpointTagsOfSource('<Choice id="a>', 'x/y')).toThrow(/^x\/y: Unexpected end of file/);
 	});
+	it('reads the phase, first when absent', () => {
+		const src =
+			'<Choice id="a" concepts={["c"]}>\n</Choice>\n\n<Order id="b" phase="review" concepts={["c"]} steps={[]} />\n';
+		expect(checkpointTagsOfSource(src, 'x').map((t) => t.phase)).toEqual(['first', 'review']);
+		expect(() => checkpointTagsOfSource('<Choice id="a" phase={1} />', 'x')).toThrow(
+			/^x#a: phase must be one of first, review, practice, got 1/,
+		);
+	});
 	it('leaves a stray expression child in the stem source rather than failing', () => {
 		const src = '<Choice id="a">\n{/* note */}\n\nStem.\n</Choice>';
 		expect(checkpointTagsOfSource(src, 'x')[0]?.stem).toBe('{/* note */}\n\nStem.');
+	});
+});
+
+describe('the More practice rules', () => {
+	const practice = (id: string) => `<Choice id="${id}" phase="practice" concepts={["c"]} />`;
+	const block = (...children: string[]) => `<MorePractice>\n\n${children.join('\n\n')}\n\n</MorePractice>`;
+	const page = (...parts: string[]) => parts.join('\n\n');
+	const exercise = '<Exercise>\nDo.\n</Exercise>';
+	const recap = '<Recap>\nDone.\n</Recap>';
+	const read = (src: string) => () => checkpointTagsOfSource(src, 'x/y');
+
+	it('accepts one block of practice checkpoints between the exercise and the recap', () => {
+		const src = page('<Choice id="a" concepts={["c"]} />', exercise, block(practice('p1'), practice('p2')), recap);
+		expect(checkpointTagsOfSource(src, 'x/y').map((t) => [t.attrs.get('id')?.value, t.phase])).toEqual([
+			['a', 'first'],
+			['p1', 'practice'],
+			['p2', 'practice'],
+		]);
+	});
+	it('rejects a practice checkpoint outside the block and another phase inside it', () => {
+		expect(read(page(exercise, practice('p'), recap))).toThrow(
+			/x\/y: "p" has phase="practice" but is outside <MorePractice>/,
+		);
+		expect(read(page(exercise, block('<Choice id="f" concepts={["c"]} />'), recap))).toThrow(
+			/x\/y: "f" is inside <MorePractice>, so it needs phase="practice"/,
+		);
+	});
+	it('rejects an empty block, a block with more than three, and a second block', () => {
+		expect(read(page(exercise, block('Text only.'), recap))).toThrow(/holds 0 checkpoints; it takes 1 to 3/);
+		expect(read(page(exercise, block(practice('a'), practice('b'), practice('c'), practice('d')), recap))).toThrow(
+			/holds 4 checkpoints/,
+		);
+		expect(read(page(exercise, block(practice('a')), block(practice('b')), recap))).toThrow(/is used 2 times/);
+	});
+	it('rejects a block before the exercise or after the recap', () => {
+		expect(read(page(block(practice('a')), exercise, recap))).toThrow(/must come after the <Exercise>/);
+		expect(read(page(exercise, recap, block(practice('a'))))).toThrow(/must come before the <Recap>/);
 	});
 });

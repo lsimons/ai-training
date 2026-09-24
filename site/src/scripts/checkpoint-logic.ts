@@ -5,6 +5,23 @@ import type { ReviewTrace } from './progress-model';
  * rendered markup.
  */
 
+/**
+ * Whether a checkpoint section's `data-phase` marks a `practice` checkpoint
+ * (spec S03 "More practice"): recorded apart, never needed to finish.
+ */
+export function isPracticeSection(phase: string | undefined): boolean {
+	return phase === 'practice';
+}
+
+/**
+ * Whether a checkpoint section counts on its lesson page (spec S04 "Lesson
+ * states"): toward finishing, the finish note and the routing cards. Only a
+ * `first` checkpoint does. A section without `data-phase` is `first`.
+ */
+export function countsForLesson(phase: string | undefined): boolean {
+	return phase === undefined || phase === 'first';
+}
+
 /** A feedback line and how it is styled. */
 export interface Feedback {
 	kind: 'ok' | 'nope' | 'note';

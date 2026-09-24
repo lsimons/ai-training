@@ -180,6 +180,9 @@ function renderTag(
 	const body = children.trim();
 	const withHeading = (heading: string) => (body ? `${heading}\n\n${body}` : heading);
 	if (CHECKPOINT_TAGS.has(name)) {
+		// A `review` alternate is hidden on the page (S03 "Checkpoints"), so the prose leaves it out too.
+		// The bundle's `checkpoints` still lists it.
+		if (propValue(attrs, 'phase') === 'review') return '';
 		// A <Predict> without an objective is a worked example, not a checkpoint (S03 "Examples").
 		const label = attrs.has('objective') ? 'Checkpoint' : 'Example';
 		const title = str('title') ?? str('id') ?? name;
@@ -204,6 +207,8 @@ function renderTag(
 			const stretch = str('stretch');
 			return withHeading('## Exercise') + (stretch ? `\n\nStretch: ${stretch}` : '');
 		}
+		case 'MorePractice':
+			return withHeading('## More practice');
 		case 'Recap':
 			return withHeading('## Recap');
 		default:

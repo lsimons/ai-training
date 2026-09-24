@@ -150,10 +150,22 @@ describe('wrappers write through storage', () => {
 		progress.skipCheckpoint('a/x#d');
 		expect(stored().checkpoints['a/x#d']).toEqual({ state: 'skipped', attempts: 1 });
 	});
+	it('practice results go to their own map', () => {
+		expect(progress.recordPractice('a/x#p', true)).toEqual({ state: 'passed', attempts: 1 });
+		expect(stored().practice['a/x#p']).toEqual({ state: 'passed', attempts: 1 });
+		expect(stored().checkpoints['a/x#p']).toBeUndefined();
+	});
 	it('review results, stage adjustment and due lists', () => {
 		progress.finishLesson('a/x', [{ id: 'a/x#c', revision: 1 }]);
 		expect(progress.recordReview('a/x#c', true)?.stage).toBe(2);
 		expect(progress.recordReview('a/x#missing', true)).toBeUndefined();
+		progress.recordReview('a/x#c', false, 'c-again');
+		expect(stored().reviews['a/x#c'].history.at(-1)).toEqual({
+			at: progress.today(),
+			result: 'fail',
+			served: 'c-again',
+		});
+		expect(progress.servedCheckpoint('c', ['c-again'], stored().reviews['a/x#c'].history)).toBe('c');
 		progress.adjustReviewStage('a/x#c', -1);
 		expect(stored().reviews['a/x#c'].stage).toBe(1);
 		expect(progress.dueReviewIds(progress.load(), 'a/')).toEqual([]);

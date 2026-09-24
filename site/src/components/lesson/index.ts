@@ -1,6 +1,7 @@
 export { default as Choice } from './Choice.astro';
 export { default as Exercise } from './Exercise.astro';
 export { default as Match } from './Match.astro';
+export { default as MorePractice } from './MorePractice.astro';
 export { default as MultiChoice } from './MultiChoice.astro';
 export { default as Order } from './Order.astro';
 export { default as Pitfall } from './Pitfall.astro';

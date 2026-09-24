@@ -1,8 +1,10 @@
 import {
 	answersMatch,
 	choiceFeedback,
+	countsForLesson,
 	dropPlacement,
 	historyDisplay,
+	isPracticeSection,
 	isSequential,
 	matchVerdict,
 	multiChoiceVerdict,
@@ -88,6 +90,20 @@ describe('feedback', () => {
 		expect(sortFeedback(2, false).text).toBe('2 items still to place.');
 		expect(sortFeedback(0, true).kind).toBe('ok');
 		expect(sortFeedback(0, false).text).toBe('Some items are in the wrong bucket.');
+	});
+});
+
+describe('phases', () => {
+	it('only a first checkpoint counts on its lesson page, and a missing phase is first', () => {
+		expect(countsForLesson('first')).toBe(true);
+		expect(countsForLesson(undefined)).toBe(true);
+		expect(countsForLesson('practice')).toBe(false);
+		expect(countsForLesson('review')).toBe(false);
+	});
+	it('marks a practice section', () => {
+		expect(isPracticeSection('practice')).toBe(true);
+		expect(isPracticeSection('first')).toBe(false);
+		expect(isPracticeSection(undefined)).toBe(false);
 	});
 });
 

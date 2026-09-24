@@ -9,7 +9,7 @@ import { getCollection } from 'astro:content';
 import { areaOf, getAreas } from '@lib/areas';
 import { dependenciesOf, getCoursePlan, isLive, planLevels } from '@lib/courses';
 import { jsonForScript } from '@lib/json';
-import { checkpointsOf } from '@lib/lessons';
+import { firstCheckpointsOf } from '@lib/lessons';
 import { href } from '@lib/url';
 
 interface Props {
@@ -24,12 +24,13 @@ const lessons = plan.filter(isLive).map((e) => e.lesson);
 const levels = planLevels(plan, area);
 const maxLevel = Math.max(0, ...levels.values());
 const rows = Array.from({ length: maxLevel + 1 }, (_, i) => plan.filter((e) => levels.get(e.id) === i));
-// Only live lessons reach the client: progress never counts a coming lesson.
+// Only live lessons reach the client: progress never counts a coming lesson. The node ring and the
+// counts use the `first` checkpoints only; alternates count nowhere (spec S04 "Progress display").
 const nodes = lessons.map((l) => ({
 	id: l.id,
 	title: l.data.title,
 	mode: l.data.mode,
-	checkpoints: checkpointsOf(l).map((c) => ({ id: c.id, reviewable: c.reviewable, revision: c.revision })),
+	checkpoints: firstCheckpointsOf(l).map((c) => ({ id: c.id, reviewable: c.reviewable, revision: c.revision })),
 }));
 const edges = plan.flatMap((e) => dependenciesOf(e, area).map((from) => ({ from, to: e.id })));
 const coming = plan.length - lessons.length;

@@ -40,8 +40,11 @@ export function liveTopicLessons(topic: string): string[] {
 	return liveTopicLessonIds(DATA_DIR, CONTENT_DIR, topic);
 }
 
-/** The graded checkpoints of a lesson page, `{ id, kind }` in page order, read from its MDX source. */
-export function lessonCheckpoints(lesson: string): { id: string; kind: string }[] {
+/**
+ * The graded checkpoints a lesson page shows, `{ id, kind, phase }` in page order, read from its MDX source:
+ * the `first` ones and the "More practice" ones, without the hidden `review` alternates.
+ */
+export function lessonCheckpoints(lesson: string): { id: string; kind: string; phase: string }[] {
 	return pageCheckpoints(CONTENT_DIR, lesson);
 }
 
@@ -56,7 +59,7 @@ export interface Seed {
 			stage: number | 'done';
 			due: string;
 			last: null | 'pass' | 'fail';
-			history: { at: string; result: 'pass' | 'fail' }[];
+			history: { at: string; result: 'pass' | 'fail'; served?: string }[];
 			revision?: number;
 		}
 	>;

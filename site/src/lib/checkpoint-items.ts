@@ -1,4 +1,4 @@
-import type { CheckpointKind } from './checkpoint-rules';
+import type { CheckpointKind, CheckpointPhase } from './checkpoint-rules';
 import { type CheckpointAttr, propValue, stringProp } from './checkpoint-tags';
 import { assertKnownConcepts, knownConceptIds } from './concepts';
 import { checkpointOf, checkpointTagsOf, getLessons, type Lesson } from './lessons';
@@ -20,10 +20,16 @@ export interface CheckpointItem {
 	options: unknown;
 	answer: unknown;
 	hint: string;
+	/**
+	 * For a `first` item, whether finishing the lesson schedules it; for a `review` alternate, whether the
+	 * review page can ask it; always false for a `practice` item (spec S03 "Checkpoint export").
+	 */
 	reviewable: boolean;
 	revision: number;
 	/** The `guessable` opt-out (`"<cue>: reason"`), or null. The guessability check in `mise run checkpoints` reads it. */
 	guessable: string | null;
+	/** `first`, `review` or `practice` (spec S01 "Checkpoint"). Added in version 1 without a bump: it changes no field. */
+	phase: CheckpointPhase;
 }
 
 export interface CheckpointExport {
@@ -105,6 +111,7 @@ export function checkpointItemsOf(lesson: Lesson): CheckpointItem[] {
 			reviewable: c.reviewable,
 			revision: c.revision,
 			guessable: stringProp(where, tag.attrs, 'guessable') ?? null,
+			phase: c.phase,
 		};
 	});
 }

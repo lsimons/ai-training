@@ -34,6 +34,7 @@ export {
 	REVIEW_CAP,
 	STAGE_DAYS,
 	STORAGE_KEY,
+	servedCheckpoint,
 	storageKeyFor,
 	today,
 	VERSION,
@@ -174,17 +175,26 @@ export function recordCheckpoint(id: string, passed: boolean): model.CheckpointE
 	return entry ?? { state: passed ? 'passed' : 'attempted', attempts: 1 };
 }
 
+/** A Check press on a `practice` checkpoint: written to `practice`, never to `checkpoints` (spec S04). */
+export function recordPractice(id: string, passed: boolean): model.CheckpointEntry {
+	let entry: model.CheckpointEntry | undefined;
+	update((r) => {
+		entry = model.applyPracticeResult(r, id, passed);
+	});
+	return entry ?? { state: passed ? 'passed' : 'attempted', attempts: 1 };
+}
+
 export function skipCheckpoint(id: string): void {
 	update((r) => model.applyCheckpointSkipped(r, id));
 }
 
 // --- Reviews -----------------------------------------------------------------
 
-/** A review answer: pass moves up a stage, fail drops to stage 1 (spec S05). */
-export function recordReview(id: string, passed: boolean): model.ReviewEntry | undefined {
+/** A review answer: pass moves up a stage, fail drops to stage 1 (spec S05). `served` names the alternate asked, if any. */
+export function recordReview(id: string, passed: boolean, served?: string): model.ReviewEntry | undefined {
 	let out: model.ReviewEntry | undefined;
 	update((r) => {
-		out = model.applyReviewResult(r, id, passed, model.today());
+		out = model.applyReviewResult(r, id, passed, model.today(), served);
 	});
 	return out;
 }
