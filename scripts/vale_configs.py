@@ -37,7 +37,7 @@ shows what Vale does, the rule names the file:
   Every next line is part of the value, a `#` or `;` line included, until
   one that does not end in a backslash. Vale's ini library does the same
   (`readContinuationLines` in
-  https://github.com/errata-ai/ini/blob/v1.63.0/parser.go), so keep comment
+  https://github.com/vale-cli/ini/blob/v1.63.0/parser.go), so keep comment
   lines out of a continued value.
 - A key set twice in one section is a parse error that names the section
   and the key, because Vale's two readers disagree on it. The lint run
@@ -47,9 +47,12 @@ shows what Vale does, the rule names the file:
   while `vale sync` loads it with plain `ini.Load` and keeps only the last
   `Packages` (`GetPackages` in
   https://github.com/vale-cli/vale/blob/275cd4c74d4353b01191b34a133008860389abf7/internal/core/config.go).
-- Text after a value is part of the value. The lint run would drop a
-  ` #` or ` ;` inline comment (`SpaceBeforeInlineComment` in `shadowLoad`),
-  so the configs keep their comments on lines of their own.
+- Text after a value is part of the value. On a one-line value the lint
+  run would drop a ` #` or ` ;` inline comment (`SpaceBeforeInlineComment`
+  in `shadowLoad`). On a continued value the ini library returns before
+  that step and keeps the ` #` (`readValue` in the parser.go above). The
+  configs keep their comments on lines of their own, so neither case
+  comes up.
 
 Usage: scripts/vale_configs.py [base-ini] [extended-ini]
 """
