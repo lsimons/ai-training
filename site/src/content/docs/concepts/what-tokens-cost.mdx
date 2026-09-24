@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
 
 Your team wants a chat assistant to write a summary of every meeting's notes
 for the finance team, about a thousand times a month. Before anyone approves it, someone
@@ -11,7 +11,7 @@ that a long instruction file buried.
 The lesson on [what the model can see](/concepts/context-window/) counted a
 page of text in tokens. This lesson puts a price on each one.
 
-## Two prompts for one task
+## The same task, asked twice
 
 The short prompt states the task, the format and the audience, then gives
 the notes.
@@ -52,38 +52,43 @@ about you and your feelings about the task. The summary comes out the same witho
 ## What a token costs
 
 A vendor charges by the million tokens, with one price for the tokens the
-model reads (input) and a higher price for the tokens it writes (output),
-because writing a token takes far more computing than reading one.
-The table below uses round example numbers for "a small model" and "a
-large model". They follow the pattern on the market in 2026, where a vendor's
-large model costs several times its small one and output costs about
-five times input. The current prices are on the vendor pricing pages
+model reads (input) and a higher price for the tokens it writes (output).
+The model reads the whole prompt in one pass, and then each token of the
+answer takes a pass of its own through the model. A written token costs
+the vendor more than a read one for that reason. The table below uses round example
+numbers for "a small model" and "a large model", chosen for this lesson.
+They follow the pattern on the market in 2026, where a vendor's large model
+costs several times its small one and output costs about five times
+input. The current prices are on the vendor pricing pages
 (@Claude docs pricing), and they change more often than this page does.
 
 | Example prices, per million tokens | Input | Output |
 | ---------------------------------- | ----- | ------ |
-| A small model                      | $1    | $5     |
-| A large model                      | $10   | $50    |
+| A small model                      | $0.60 | $3     |
+| A large model                      | $6    | $30    |
 
 A call is the prompt going in and the answer coming out. Suppose every
 summary is the same five bullets, about 120 tokens of output. Priced at
-the example numbers, once and for the 30,000 calls a month a busy support
-team might make, the two prompts come to this.
+the example numbers, once and for the thousand summaries a month the team
+at the top of the page wants, the two prompts come to this.
 
 ```text
-                            one call    30,000 calls
-small model, short prompt    $0.0007          $21.33
-small model, long prompt     $0.0009          $28.29
-large model, short prompt    $0.0071         $213.30
-large model, long prompt     $0.0094         $282.90
+                            one call     1,000 calls
+small model, short prompt    $0.0004           $0.43
+small model, long prompt     $0.0006           $0.57
+large model, short prompt    $0.0043           $4.27
+large model, long prompt     $0.0057           $5.66
 ```
 
 Read the table down and then across. Down, the choice of model moves the
 price by ten times. Across, the extra 232 tokens of politeness move it by
 about a third. One call costs a fraction of a cent on either model, which
-is why nobody notices the price of one chat. At 30,000 calls the same
-fraction is a monthly bill, and the difference between the two models is
-the difference between a lunch and a laptop.
+is why nobody notices the price of one chat. At a thousand calls a month
+the summaries cost the team under a dollar on the small model and about
+five on the large one, which answers the first question from the top of
+the page. The same table for a support team that makes a hundred times as
+many calls has two more zeros in every row, and there the choice of model
+is a line in the budget.
 
 The answer is often the expensive part of a call, because output costs
 more per token, so asking for five bullets instead of a page saves more
@@ -105,8 +110,8 @@ before it, on top of the new ones (@AEC-02).
     { text: 'Ask the model to answer faster.', why: 'Speed is a property of the model and the answer length. A request in the prompt adds tokens and changes nothing else.' },
   ]}>
 
-A colleague runs a summary call 30,000 times a month and wants to lower
-the bill. Which one change saves the most money?
+A colleague runs a summary call many thousands of times a month and wants
+to lower the bill. Which one change saves the most money?
 
 </Choice>
 
@@ -114,9 +119,9 @@ the bill. Which one change saves the most money?
 
 Vendors publish models in a family with several sizes, and the sizes
 share a name and a release date but differ in price and in what they can
-do. The larger model has more weights, follows a complex instruction more
-reliably and reasons through more steps, and it costs more per token and
-produces each token more slowly. The smaller one is cheaper and faster,
+do. The larger model follows a complex instruction more reliably and reasons
+through more steps, and it costs more per token and produces each token
+more slowly. The smaller one is cheaper and faster,
 and for a narrow task with a clear instruction, such as a five-bullet
 summary in a fixed format, it is often good enough
 (@Academy ai-capabilities-and-limitations).
@@ -132,7 +137,7 @@ every token, and both grow faster on a larger model.
 Which model fits which task is a decision of its own, and the course on
 using agents has a lesson that puts a small and a large model side by
 side on the same inputs. Here the point is only what changes when you
-switch, which is the price and the wait, by a factor and not by a little.
+switch: the price and the wait, and each by a factor of several times.
 
 <Sort id="price-or-wait" objective="concepts/explains-models/explains-generation"
   concepts={['cost-and-latency', 'model-family-and-size']}
@@ -213,7 +218,7 @@ and never a guarantee (@Academy ai-capabilities-and-limitations).
     { text: 'The model keeps a checklist of the rules it was given and ran out of room at the seventh.', why: 'There is no checklist. The model predicts tokens from the whole window, and a rule is tokens like everything else.' },
     { text: 'Twenty words is too few for a summary of these notes, so the model overrode the rule.', why: 'A model has no opinion about your rules. It produced likely text, and the likely text for a summary of these notes was longer.' },
     { text: 'The rule sat in the middle of a long file and weighed less than the rules at either end.', correct: true },
-    { text: 'The model forgot the rule because the chat was two hours old.', why: 'This was the first message of a fresh chat. Nothing had fallen out of the window yet. Look at the file itself.' },
+    { text: 'The model forgot the rule because the chat was two hours old.', why: 'This was the first message of a fresh chat, so the whole file was in the window when the model answered.' },
   ]}>
 
 The instruction file above was pasted as the first message of a new chat,
@@ -308,8 +313,8 @@ answer, and what would change if you asked for half as much of it?
 1. A vendor charges per million tokens, with a lower price for the tokens
    the model reads and a higher one for the tokens it writes, and a large
    model in a family costs several times a small one (@Claude docs pricing).
-2. One call costs a fraction of a cent, and a thousand calls a day is a
-   bill. The choice of model moves the price by a factor, the length of the
+2. One call costs a fraction of a cent, and the bill comes from the number
+   of calls. The choice of model moves the price by a factor, the length of the
    prompt and the answer by a share, and a long chat pays for every earlier
    turn again (@AEC-02).
 3. The wait grows the same way, because a model writes one token at a

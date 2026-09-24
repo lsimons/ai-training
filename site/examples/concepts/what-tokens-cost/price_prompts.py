@@ -26,16 +26,16 @@ PIECE = re.compile(r"\w+|[^\w\s]")
 # Example prices in dollars per million tokens: (input, output). Vendors
 # charge more for a token the model writes than for one it reads.
 PRICES = {
-    "small model": (1.0, 5.0),
-    "large model": (10.0, 50.0),
+    "small model": (0.6, 3.0),
+    "large model": (6.0, 30.0),
 }
 
 # The model's answer is priced at the output rate. The lesson assumes the
 # same five-bullet summary, about 120 tokens, for every call.
 ANSWER_TOKENS = 120
 
-# One call for every ticket a support team of ten closes in a month.
-CALLS_PER_MONTH = 30_000
+# The lesson's team wants a summary of every meeting, about a thousand a month.
+CALLS_PER_MONTH = 1_000
 
 SHORT_PROMPT = """\
 Summarize these meeting notes in five bullet points for the finance team.
