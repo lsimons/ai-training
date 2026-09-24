@@ -377,7 +377,17 @@ describe('pickWave', () => {
 			expect(r.waiting.map((w) => [w.area, ids(w.lessons)])).toEqual([['a', ['a/memory', 'a/first']]]);
 		});
 
-		it('does not count a blocked lesson that is skipped or outside --only, and does not count a lesson twice', () => {
+		// Without `a/blocked-one`, `a/loop` unblocks `a/blocked-two` and
+		// `b/blocked-three`, and `a/memory` unblocks `a/blocked-two` and
+		// `a/both`. `a/blocked-two` assumes both objectives and counts once
+		// for each.
+		const withoutBlockedOne = [
+			['a/loop', 2],
+			['a/memory', 2],
+			['a/first', 0],
+		];
+
+		it('does not count a blocked lesson whose issue is assigned, and does not count a lesson twice', () => {
 			// #4 is assigned, so `a/blocked-one` is not a blocked candidate.
 			const withSkip = [issue(1), issue(2), issue(3), issue(4, ['someone']), issue(5), issue(6), issue(7)];
 			const r = pickWave({
@@ -387,11 +397,36 @@ describe('pickWave', () => {
 				size: 6,
 				unblockersFirst: true,
 			});
-			expect(r.wave.map((w) => [w.id, w.unblocks])).toEqual([
-				['a/loop', 2],
-				['a/memory', 2],
-				['a/first', 0],
-			]);
+			expect(r.skipped.map((s) => [s.id, s.reason])).toEqual([['a/blocked-one', 'issue is assigned to someone']]);
+			expect(r.wave.map((w) => [w.id, w.unblocks])).toEqual(withoutBlockedOne);
+		});
+
+		it('does not count a blocked lesson whose issue is not ready', () => {
+			// #4 is not in the ready list, so `a/blocked-one` is not a blocked candidate.
+			const withoutFour = [1, 2, 3, 5, 6, 7].map((n) => issue(n));
+			const r = pickWave({
+				tree: unblockTree(),
+				livePageIds: [],
+				readyIssues: withoutFour,
+				size: 6,
+				unblockersFirst: true,
+			});
+			expect(r.skipped.map((s) => [s.id, s.reason])).toEqual([['a/blocked-one', 'issue is not ready-for-agent']]);
+			expect(r.wave.map((w) => [w.id, w.unblocks])).toEqual(withoutBlockedOne);
+		});
+
+		it('does not count a blocked lesson outside --only', () => {
+			// #4 is ready but not in `only`, so `a/blocked-one` is not a blocked candidate.
+			const r = pickWave({
+				tree: unblockTree(),
+				livePageIds: [],
+				readyIssues: ready,
+				size: 6,
+				only: [1, 2, 3, 5, 6, 7],
+				unblockersFirst: true,
+			});
+			expect(r.skipped.map((s) => [s.id, s.reason])).toEqual([['a/blocked-one', NOT_IN_ONLY]]);
+			expect(r.wave.map((w) => [w.id, w.unblocks])).toEqual(withoutBlockedOne);
 		});
 
 		it('with the flag, keeps the planned after rule ahead of the count, and breaks a tie on the count by course position', () => {
