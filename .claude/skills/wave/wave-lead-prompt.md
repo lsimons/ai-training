@@ -77,6 +77,10 @@ If the line under the first paragraph says you are resuming, a previous lead for
 - When a sibling branch replaces every reader of lesson source (as #98 did), new code that reads lesson source uses that reader and starts from that branch.
 - The lead names, per branch, the files a sibling also edits, including test files and import blocks.
 - A builder that says an item is already done on `main` quotes the line that shows it.
+- A CSS rule for markup inside a Starlight sidebar is checked in the built page at the target width, because Starlight's own styles apply there and Container API tests don't see CSS.
+- A sentence about vendor behavior (a CLI flag, a GitHub notification) names the vendor page that states it. Drop what no page states.
+- The gate's result beats the list in the issue body. #286 named two lessons, and seven tags in four lessons failed.
+- An e2e in-viewport assertion after a click needs a not-in-viewport assertion before it.
 
 ## Filing
 
