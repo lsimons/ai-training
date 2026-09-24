@@ -20,7 +20,9 @@ same order. `mise run links` (lychee, external URLs) and `mise run site-audit`
 them now and then. `mise run vuln` (osv-scanner over `uv.lock` and
 `site/bun.lock`) is a network call too and stays out of `ci`, but the CI
 workflow runs it in its own `vuln` job, so a known advisory against a pinned
-version fails the pull request.
+version fails the pull request. `.github/workflows/vuln.yml` runs the same
+scan on `main` every Monday, so an advisory published while nobody pushes
+fails a scheduled run. No advisory is ever ignored.
 
 The site's own checks, in the order `ci` runs them after the prose tasks:
 
@@ -220,7 +222,8 @@ patterns below after the fact. Write so that it has nothing to say.
   and why, on the same line.
 - Never weaken a control to make a check pass. That covers unpinning an
   action, dropping a `prek.toml` hook, excluding a really broken URL in
-  `.lychee.toml`, lowering the coverage floor, and deleting a test.
+  `.lychee.toml`, lowering the coverage floor, deleting a test, and adding
+  an `osv-scanner.toml` ignore for an advisory.
 
 **Supply chain:**
 
@@ -241,10 +244,20 @@ patterns below after the fact. Write so that it has nothing to say.
   the same ruff version.
 - `mise run site-audit` (`bun audit`) must be clean. Fix an advisory in a
   *transitive* package with the `overrides` block in `site/package.json`.
-- `mise run vuln` (osv-scanner) must be clean, and CI runs it as the `vuln`
-  job. It scans `uv.lock` and `site/bun.lock` by name and fails when either
-  is missing or does not parse. A new lockfile goes in the list of the
-  task in `.mise.toml`. Fix a Python advisory by editing the `==` pin in
+- `mise run vuln` (osv-scanner) must be clean. CI runs it as the `vuln`
+  job on every push and pull request, and `.github/workflows/vuln.yml`
+  runs it on `main` every Monday (cron `17 6 * * 1`, and on
+  `workflow_dispatch`), because GitHub's dependency graph reads
+  `package.json` and not `site/bun.lock`, so dependabot alerts see only a
+  small part of the npm tree. GitHub emails the last person who changed
+  the cron line when a scheduled run fails, and there is no other
+  notifier. Every advisory the scanner reports counts. The repository
+  has no `osv-scanner.toml`, and an `IgnoredVulns` or `ignoreUntil`
+  entry never goes in. An advisory without a fix keeps the scan red until
+  a fix ships or the dependency is replaced. It scans
+  `uv.lock` and `site/bun.lock` by name and fails when either is missing
+  or does not parse. A new lockfile goes in the list of the task in
+  `.mise.toml`. Fix a Python advisory by editing the `==` pin in
   the `dev` group of `pyproject.toml` and running `mise run py-install`
   (and moving the `ruff-pre-commit` rev in `prek.toml` when it is ruff, see
   the `uv.lock` bullet above). For a transitive package, add a

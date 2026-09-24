@@ -63,6 +63,7 @@ static assets are in `site/public/`.
 ai-training/
 ├── .github/workflows/ci.yml      # lint + Astro check + build, and the zizmor audit
 ├── .github/workflows/deploy.yml  # build and publish to GitHub Pages
+├── .github/workflows/vuln.yml    # weekly osv-scanner scan of the lockfiles on main
 ├── .github/dependabot.yml        # weekly bun + github-actions updates
 ├── .claude/settings.json         # shared agent permissions (tracked on purpose)
 ├── .mise.toml                    # toolchain pins + every repo task
