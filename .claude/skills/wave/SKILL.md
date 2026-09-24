@@ -80,7 +80,11 @@ run stops, with a last comment that names the stop condition.
    open `dispatcher-run` issues and `next`, the name the next run takes
    (the letter after the newest run's name, skipping names an open run
    holds). Your first message to the maintainer lists the open runs, or
-   says there are none.
+   says there are none. Also run
+   `gh issue list -l harness-review -s all -L 1 --json number,createdAt`.
+   When the newest review issue is more than seven days old, or there is
+   none, add one line to that message: `The last harness review was <date> (#<n>). Run /harness-review when there is time.` The line is only a
+   reminder, and the run goes on (`docs/agents/harness-review.md`).
 3. **Resume or open.** With `--resume <Name>`, find the open run issue
    with that name among them, and stop when there is none. Its body gives
    the arguments, and its `In flight` line, if any, is the wave to resume
