@@ -148,7 +148,7 @@ in the briefs.
   context="A weekly usage export for an eight-week bike pilot has one week flagged as an incomplete count because the docking station was offline for two days. You are about to write the brief for the piece that turns the export into the usage section of a report."
   title="The week that is flagged" hint="Who ends up making this decision if you do not, and will you be able to tell?"
   options={[
-    { text: 'Write the brief without mentioning week 5 and see what the agent does with it.', consequence: 'The agent picks one reading, drops the week or reports 96 as a normal count, and the section reads fine either way. You find out only if you compare it with the export line by line.' },
+    { text: 'Write the brief without mentioning week 5 and see what the agent does with it when it reaches that row.', consequence: 'The agent picks one reading, drops the week or reports 96 as a normal count, and the section reads fine either way. You find out only if you compare it with the export line by line.' },
     { text: 'Decide now that week 5 goes in with a note that the count is incomplete, and put that in the brief and in the check.', correct: true, consequence: 'The decision is made once, in writing. The agent has no gap to fill, and the check tells you whether it did what you decided.' },
     { text: 'Leave week 5 out of the source you paste, so the agent never sees the problem.', consequence: 'The section shows seven weeks and a total that does not match the export. The outage is hidden from the manager, and the check "eight weeks each appear once" fails.' },
     { text: 'Tell the agent to handle week 5 in whatever way it thinks is best.', consequence: 'You have delegated the decision and kept the accountability. The agent chooses, and the choice is not written anywhere you can review.' },
@@ -215,10 +215,10 @@ taught. The riders and cost pieces are unchanged while you do that.
   title="Which pieces are ready to brief?" hint="For each piece, find its input, its output and its check. Is one of the three missing, or written as a feeling?"
   options={[
     { text: 'Input: the survey note. Output: four bullets, each as "n of 41 replies". Check: every count is in the note and no percentage appears.', correct: true },
-    { text: 'Input: the survey note. Output: a short section on what riders think.', why: 'There is an output but no check. What would you tick when it comes back?' },
-    { text: 'Output: a cost paragraph. Check: the amounts match the quote.', why: 'Which source? Without an input the agent picks its own, and "the quote" could be either of the two options in the email.' },
-    { text: 'Input: the vendor email. Output: both options with price and what each includes, plus the minimum term. Check: both prices appear once and match the email, and the twelve-month term is stated.', correct: true },
-    { text: 'Input: the usage export. Output: the usage section. Check: it reads well and looks complete.', why: 'The check is a feeling. Two readers can disagree about "reads well", so nothing here can be ticked.' },
+    { text: 'Input: the survey note. Output: a short section on what riders think, in the tone of the rest of the report.', why: 'There is an output but no check. What would you tick when it comes back?' },
+    { text: 'Output: a cost paragraph with both amounts and the term. Check: the amounts match the quote we were sent.', why: 'Which source? Without an input the agent picks its own, and "the quote" could be either of the two options in the email.' },
+    { text: 'Input: the vendor email. Output: both options with price and what each includes, plus the minimum term. Check: both prices appear once and match the email.', correct: true },
+    { text: 'Input: the usage export. Output: the usage section. Check: it reads well, looks complete and matches the tone of the report.', why: 'The check is a feeling. Two readers can disagree about "reads well", so nothing here can be ticked.' },
   ]}>
 Which of these pieces are ready to have a brief written for them?
 </MultiChoice>

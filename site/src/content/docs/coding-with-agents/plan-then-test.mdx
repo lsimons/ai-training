@@ -153,8 +153,8 @@ every user who has a done item they haven't cleared yet.
   context="Plan mode puts a coding agent in a read-only mode: it reads and explores and proposes steps, and it edits nothing until the plan is approved. A plan costs a few minutes at the start of a task."
   title="Which task gets a plan?" hint="For which task could you not write the diff yourself in one sentence?"
   options={[
-    { text: 'Bump the version string in one file for a release.', why: 'You could write this diff in one sentence. A plan costs more than the change.' },
-    { text: 'A command gives the wrong result and the code that could cause it is spread over three modules.', correct: true },
+    { text: 'Bump the version string in `pyproject.toml` from 1.4.0 to 1.4.1 for a release.', why: 'You could write this diff in one sentence. A plan costs more than the change.' },
+    { text: 'A command gives the wrong result, and the code that could cause it is spread over three modules.', correct: true },
     { text: 'Add one log line where an exception is caught.', why: 'The scope is clear and the fix is small. Plan mode adds a round trip and finds nothing you did not know.' },
     { text: 'Rename one variable in one function.', why: 'The change is bounded to a place you can already point at. Let the agent do it and read the diff.' },
   ]}>
@@ -274,9 +274,9 @@ as many times as it needs, and it can't say "done" until the line reads
   title="The new test passes on the first run" hint="What does a passing test prove about a bug that is still in the code?"
   options={[
     { text: 'Good news. The bug must have been fixed by an earlier change, so ask the agent to move on to the cleanup.', why: 'You saw the bug a minute ago, and nothing has changed since. The test is not looking at it.' },
-    { text: 'The test does not capture the bug. Ask the agent to change the test until it fails on the code as it is.', correct: true },
     { text: 'Fine either way. Approve the fix to store.py and run the suite again afterwards.', why: 'A test that passed before the fix also passes after it, whatever the fix does. It proves nothing about the change.' },
     { text: 'Delete the test and let the agent fix the code directly, since the tests are unreliable here.', why: 'One test that missed the case is a wording problem in that test. Fixing without any test leaves you with the agent\'s word.' },
+    { text: 'The test does not capture the bug. Ask the agent to change the test until it fails on the code as it is.', correct: true },
   ]}>
 The agent writes the test, runs it, and reports that it passes. No other
 file has changed. What do you do?

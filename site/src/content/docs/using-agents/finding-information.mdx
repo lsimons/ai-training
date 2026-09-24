@@ -155,10 +155,10 @@ minute.
   context="The lesson pastes a fictional company expense guideline into a chat assistant and asks what a new hire must know before a first business trip."
   title="Which ask can you check?" hint="For each ask, how would you tell a right answer from a confident wrong one without reading the whole guideline again?"
   options={[
-    { text: 'What do I need to know about expenses before my first trip?', why: 'Nothing here says where the answer should come from, so you cannot tell whether it came from the guideline or from the model\'s memory.' },
-    { text: 'Summarize the guideline below in three bullet points.', why: 'The format is fixed, but each bullet is still a claim with no place in the text you can look up.' },
-    { text: 'Using only the guideline below, list the three things a new hire must know before a first trip, and quote the sentence each one comes from.', correct: true },
-    { text: 'Read the guideline below carefully and make sure your answer is accurate.', why: 'Asking for accuracy changes nothing you can check. The model was already trying to be accurate.' },
+    { text: 'What do I need to know about expenses before my first trip? Keep it short and practical.', why: 'Nothing here says where the answer should come from, so you cannot tell whether it came from the guideline or from the model\'s memory.' },
+    { text: 'Summarize the guideline below in three bullet points that a new hire can read on the way to the airport.', why: 'The format is fixed, but each bullet is still a claim with no place in the text you can look up.' },
+    { text: 'Using only the guideline below, list the three things a new hire must know before a first trip, and quote the sentence for each.', correct: true },
+    { text: 'Read the guideline below carefully and make sure your answer is accurate and complete.', why: 'Asking for accuracy changes nothing you can check. The model was already trying to be accurate.' },
   ]}>
 You are about to paste the expense guideline into an assistant. Which ask
 gives you an answer you can check against the text in a minute?
@@ -220,10 +220,10 @@ source of each claim, and check anything you will repeat or act on.
   context="A colleague asked a chat assistant a factual question about the company's expense rules without giving it the company's guideline, and got a confident specific answer."
   title="A confident answer with no source" hint="What did the assistant have in front of it when it answered, and what would change that?"
   options={[
-    { text: 'Trust it. The answer was specific and did not hedge, so the model was sure.', why: 'Confidence in the prose is a property of the text, and it says nothing about whether the fact is right.' },
-    { text: 'Ask the assistant whether it is sure, and trust the answer if it says yes.', why: 'A model that agrees when pushed is showing sycophancy. Asking it to check itself adds no new information.' },
-    { text: 'Paste the guideline, ask the question again with "using only the text below", and ask for the sentence the answer comes from.', correct: true },
-    { text: 'Ask the same question in a second chat and trust the answer if both agree.', why: 'Two answers from memory can agree on the same general rule and both be wrong for this company.' },
+    { text: 'Trust it. The answer was specific and did not hedge, so the model was sure of the number.', why: 'Confidence in the prose is a property of the text, and it says nothing about whether the fact is right.' },
+    { text: 'Ask the assistant whether it is sure about the 30 days, and trust the answer if it says yes.', why: 'A model that agrees when pushed is showing sycophancy. Asking it to check itself adds no new information.' },
+    { text: 'Paste the guideline, ask again with "using only the text below", and ask for the sentence the answer comes from.', correct: true },
+    { text: 'Ask the same question in a second chat, and trust the answer if both chats say 30 days.', why: 'Two answers from memory can agree on the same general rule and both be wrong for this company.' },
   ]}>
 A colleague asks an assistant "how many days do I have to submit an
 expense claim?" without pasting anything, and gets "30 days". What do you

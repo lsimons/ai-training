@@ -120,10 +120,10 @@ mysterious.
   title="Name the failure"
   hint="When did the model's training data end, and when did the event happen?"
   options={[
-    { text: 'Sycophancy', why: 'Sycophancy is agreeing with the user. Nobody suggested a date here.' },
+    { text: 'Sycophancy triggered by the phrasing of the question', why: 'Sycophancy is agreeing with the user. Nobody suggested a date here.' },
     { text: 'Hallucination driven by the training cutoff', correct: true },
-    { text: 'Instruction dilution', why: 'Nothing in the conversation was long enough to dilute; this is a single question.' },
-    { text: 'A tokenization problem', why: 'Tokenization affects things like counting letters, not knowledge of recent events.' },
+    { text: 'Instruction dilution in a long conversation', why: 'Nothing in the conversation was long enough to dilute; this is a single question.' },
+    { text: 'A tokenization problem with the version number', why: 'Tokenization affects things like counting letters, not knowledge of recent events.' },
   ]}>
 
 You ask for the release date of a library version that came out last
