@@ -1,5 +1,5 @@
 /** Routing cards driven by the comfort level and by checkpoint results (spec S02 "Differentiation by routing"). */
-import { expect, passRemaining, test } from './fixtures';
+import { expect, liveCourseLessons, passRemaining, test } from './fixtures';
 
 test('the comfort level is set on the settings page, not on a lesson', async ({ page }) => {
 	await page.goto('settings/');
@@ -64,4 +64,14 @@ test('a retry on one checkpoint keeps the ahead card hidden even when all pass',
 	await expect(page.locator('[data-finish]')).toBeEnabled();
 	await expect(page.locator('[data-route=ahead]')).toBeHidden();
 	await expect(page.locator('[data-route=behind]')).toBeHidden();
+});
+
+test('the "Open in tutor" block is on a lesson page and not on a course page', async ({ page }) => {
+	const lesson = liveCourseLessons('building-agents')[0];
+	await page.goto(`${lesson}/`);
+	const block = page.locator('[data-tutor-block]');
+	await expect(block).toHaveCount(1);
+	await expect(block.locator('code').nth(1)).toHaveText(`/tutor https://lsimons.github.io/ai-training/${lesson}/`);
+	await page.goto('building-agents/');
+	await expect(page.locator('[data-tutor-block]')).toHaveCount(0);
 });
