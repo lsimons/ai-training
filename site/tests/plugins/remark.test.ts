@@ -183,6 +183,19 @@ describe('remarkCitations', () => {
 		]);
 		expect(citationKeys('No citation here.\n')).toEqual([]);
 	});
+	it('citationKeys resolves a key wrapped over a soft line break, and stops at a blank line or a plain parenthesis', () => {
+		expect(citationKeys('One long line (@Brilliant\nTAS). Then (@ AEC-02\n  ) again.\n')).toEqual([
+			'Brilliant TAS',
+			'AEC-02',
+		]);
+		expect(citationKeys('Ends here (@Brilliant\n\nTAS). Next (@AEC-02).\n')).toEqual(['AEC-02']);
+		expect(citationKeys('(@AEC-02) text (b) and (@Brilliant TAS) more (c)\n')).toEqual(['AEC-02', 'Brilliant TAS']);
+		expect(splitCitations('a (@K\n1) b')).toEqual([
+			{ type: 'text', value: 'a ' },
+			{ type: 'citation', key: 'K 1' },
+			{ type: 'text', value: ' b' },
+		]);
+	});
 	it('splitCitations keeps the text runs around each token and returns plain text as one part', () => {
 		expect(splitCitations('A (@K-1) b (@ K-2 ).')).toEqual([
 			{ type: 'text', value: 'A ' },
@@ -278,6 +291,18 @@ describe('remarkCitations', () => {
 		await expect(run('Body (@NOPE).\n')).rejects.toThrow('unknown citation key "NOPE"');
 		await expect(run('## Loops (@AEC-02)\n')).rejects.toThrow('citation (@AEC-02) inside a heading');
 		await expect(run('[the loop (@AEC-02)](/x/)\n')).rejects.toThrow('inside a link');
+	});
+
+	it('resolves a citation wrapped over a soft line break, and leaves one that spans a paragraph break as text', async () => {
+		const wrapped = await run('A point that runs long (@Brilliant\nTAS). Another (@AEC-02).\n');
+		expect(links(wrapped, 'citation').map((c) => [c.title, text(c)])).toEqual([
+			['Brilliant TAS', '[1]'],
+			['AEC-02', '[2]'],
+		]);
+		expect(text(wrapped.children?.[0] as Node)).toBe('A point that runs long [1]. Another [2].');
+		const split = await run('Broken (@Brilliant\n\nTAS). Whole (@AEC-02).\n');
+		expect(links(split, 'citation').map((c) => c.title)).toEqual(['AEC-02']);
+		expect(text(split.children?.[0] as Node)).toBe('Broken (@Brilliant');
 	});
 
 	it('leaves a citation inside code alone', async () => {
