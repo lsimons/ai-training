@@ -69,7 +69,7 @@ describe('checkCheckpoints', () => {
 		expect(check(tree({ version: 1, items: [guessable, item('two', { kind: 'sort', stem: '' })] })).errors).toEqual([
 			expect.stringMatching(/^a\/x#one: longest: /),
 		]);
-		const exempt = { ...guessable, guessable: 'the key is a rule the lesson states in full' };
+		const exempt = { ...guessable, guessable: 'longest: the key is a rule the lesson states in full' };
 		expect(check(tree({ version: 1, items: [exempt, item('two', { kind: 'sort', stem: '' })] }))).toEqual({
 			errors: [],
 			items: 2,

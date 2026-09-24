@@ -254,7 +254,7 @@ reads the file, and you use that instead.
   title="Which request can the tracker import?"
   hint="For each request, ask: does it name the fields the tracker needs, and does it say which values each field may hold?"
   options={[
-    { text: '"Put the action items from these notes in a table with owner, task, due date and priority, so I can import them into the tracker."', why: 'A table names the columns and nothing about their values. The model picks the date form and the column order, and the priority is whatever word it chooses, so the import still needs a person to fix the file.' },
+    { text: '"Put the action items from these notes in a table with owner, task, due date and priority, so I can import them into the tracker."', why: 'A table names the columns and nothing about their values. The model picks the date form, and the priority is whatever word it chooses, so the import still needs a person to fix the file.' },
     { text: '"Return the action items from these notes as JSON, one object per item with the usual fields. I will import the file into our tracker."', why: 'JSON is the type the import reads, but the keys are unnamed and the values are free. The next run gives other keys, and a priority of "urgent" fails the import.' },
     { text: '"One line per item, fields separated by tabs, in this order: owner (first name), task (under 12 words), due (YYYY-MM-DD, year 2026), priority (high, medium or low)."', correct: true },
   ]}>

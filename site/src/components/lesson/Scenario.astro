@@ -18,7 +18,7 @@ interface Props {
 	context?: string;
 	review?: boolean;
 	revision?: number;
-	/** Opt-out from the surface-cue check with its reason (spec S03 "Checkpoints"). */
+	/** Opt-out from the guessability check, `"<cue>: reason"` (spec S03 "Checkpoints"). */
 	guessable?: string;
 	options: Option[];
 }

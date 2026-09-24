@@ -204,9 +204,9 @@ and this lesson is about building the habit of reading.
   title="The agent asks for a different file" hint="Which document already answered this question before the agent asked it?"
   options={[
     { text: 'Allow it. The agent has read more of the code than you have, and it probably knows what it is doing.', consequence: 'The agent edits the committed data file. The test still fails, because it builds its own list and never reads that file, and now there are two changes to undo instead of one.' },
-    { text: 'Deny the edit, and ask why it needs to change a file the brief said to leave alone.', correct: true, consequence: 'The agent re-reads the test, sees that it builds its own list and never reads todos.json, and comes back with the one-line change to done() in todo.py.' },
     { text: 'Stop the session, reset the fixture and start over with the same brief.', consequence: 'You lose only time, but you learn nothing about why the agent went there. The next session may make the same move, and you will face the same prompt.' },
     { text: 'Allow it, and revert the file with git afterwards.', consequence: 'The rest of the agent\'s work builds on the edited file. After the revert, its account of the fix no longer matches the code.' },
+    { text: 'Deny the edit, and ask why it needs to change a file the brief said to leave alone.', correct: true, consequence: 'The agent re-reads the test, sees that it builds its own list and never reads todos.json, and comes back with the one-line change to done() in todo.py.' },
   ]}>
 You send the repaired brief. The agent reads `todo.py` and `test_todo.py`,
 and then asks: "I would like to edit `todos.json` to mark item 2 as not
@@ -334,8 +334,8 @@ every time.
   context="A learner briefed a coding agent to fix an off-by-one bug in todo.py, a small Python program, by making a failing unit test pass without changing the test. The agent reports that it is done and that every test passes."
   title="The diff moved the test" hint="What did the brief say about the test, and what does a passing run prove if the test itself changed?"
   options={[
-    { text: 'Accept it. The done-criterion was a passing test run, and the tests pass.', why: 'The brief said the test must not change. A passing run proves nothing once the test expects the buggy output.' },
     { text: 'Ask the agent to undo its change to the test and make the original test pass by editing todo.py alone.', correct: true },
+    { text: 'Accept it. The done-criterion was a passing test run, and the tests pass.', why: 'The brief said the test must not change. A passing run proves nothing once the test expects the buggy output.' },
     { text: 'Put the test back by hand and keep the rest of the diff.', why: 'That leaves the reason unexamined. The change to todo.py may only work together with the moved test, and you would not find out until later.' },
     { text: 'Run the tests again yourself to confirm they pass.', why: 'They will pass, because the test now expects the buggy output. Running the check again tells you nothing you did not know.' },
   ]}>
