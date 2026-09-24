@@ -51,6 +51,7 @@ def resolve(claim: str, citation: str, bibliography: "dict[str, str]") -> "list[
 def summary(paragraph: "list[tuple[str, str]]", bibliography: "dict[str, str]") -> str:
     """Return the closing line: how many citations exist and how many claims match."""
     exists = sum(1 for _, citation in paragraph if citation in bibliography)
+    # The compare is exact: a claim matches only when it repeats the recorded finding word for word.
     matches = sum(1 for claim, citation in paragraph if bibliography.get(citation) == claim)
     counts = f"citations: {len(paragraph)}  reports found: {exists}"
     return f"{counts}  claims that match the report: {matches}"
