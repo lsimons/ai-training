@@ -11,6 +11,13 @@ import { absoluteUrl } from './url';
  * breaks once the route is bundled for prerendering).
  */
 
+/**
+ * Where the build publishes the instruction file, root-relative. The route
+ * file `src/pages/data/tutor.md.ts` fixes the path, and the bootstrap test
+ * checks that the route file is at this path and that `SKILL.md` names it.
+ */
+export const TUTOR_INSTRUCTIONS_PATH = '/data/tutor.md';
+
 /** The bundle URL template the frontmatter ships, root-relative (S08 "URL scheme"). */
 export const BUNDLE_URL_TEMPLATE = '/data/lessons/{area}/{lesson}.json';
 
