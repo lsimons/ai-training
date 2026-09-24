@@ -1,5 +1,5 @@
 import { buildCatalog } from '@lib/catalog';
-import { checkpointsOf, checkpointTagsOf, getLessons, type Lesson } from '@lib/lessons';
+import { checkpointsOf, checkpointTagsOf, getLessons, habitsOf, type Lesson } from '@lib/lessons';
 import { knownPagePaths } from '@lib/links';
 import { describe, expect, it, vi } from 'vitest';
 import { type DocFixture, docs } from './content';
@@ -218,5 +218,17 @@ describe('knownPagePaths', () => {
 		expect(paths.has('/index/')).toBe(true);
 		expect(paths.has('/topics/concepts/models/')).toBe(true);
 		expect(paths.has('/nowhere/')).toBe(false);
+	});
+});
+
+describe('habitsOf', () => {
+	it('reads the habits after the recap, and applies the authoring rules', () => {
+		expect(habitsOf(body('<Recap>\n1. A.\n</Recap>\n<Habit id="h">\nDo it.\n</Habit>'))).toEqual([
+			{ id: 'h', text: 'Do it.' },
+		]);
+		expect(habitsOf(lesson('safety/agent-risk'))).toEqual([]);
+		expect(() => habitsOf(body('<Habit id="h">\nDo it.\n</Habit>'))).toThrow(
+			/x\/y#h: <Habit> must come after the <Recap>/,
+		);
 	});
 });

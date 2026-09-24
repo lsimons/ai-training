@@ -167,6 +167,11 @@ describe('proseOf', () => {
 		);
 		expect(md).toBe('#### Checkpoint: Own\n\nAsk.\n\n## More practice\n\n#### Checkpoint: Extra\n\nMore.\n');
 	});
+	it('titles a habit by its id', () => {
+		expect(
+			proseOf('<Recap>\n1. A.\n</Recap>\n<Habit id="check-the-diff">\nRead the diff first.\n</Habit>\n', site),
+		).toBe('## Recap\n\n1. A.\n\n#### Habit: check-the-diff\n\nRead the diff first.\n');
+	});
 	it('leaves a link inside a Prompt or Response body alone, in a code span or not', () => {
 		expect(proseOf('<Response>\nSee `[a](/x/)` and [b](/y/).\n</Response>\n', site)).toBe(
 			'#### Response\n\n```text\nSee `[a](/x/)` and [b](/y/).\n```\n',
