@@ -192,6 +192,7 @@ export default defineConfig({
 				{ slug: 'progress', label: 'Your progress' },
 				{ slug: 'reference', label: 'Your reference' },
 				{ slug: 'settings', label: 'Settings' },
+				{ slug: 'guides/tutor', label: 'Study with the tutor' },
 				// The Foundations and Engineering groups come from the data tree; see courseSidebar().
 				...courseSidebar(),
 				{
