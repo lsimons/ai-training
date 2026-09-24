@@ -128,14 +128,16 @@ export function setAsideCode(src: string): CodeAside {
 		out.push(keep(block.join('\n')));
 	}
 	// Inline spans are matched over the whole text, since a span may wrap across a line break. A blank line
-	// ends a paragraph and so a span, and the fenced blocks are placeholders by now, so no backtick is theirs.
+	// ends a paragraph and so a span, so the body pattern excludes one and a stray backtick before a blank
+	// line pairs with nothing. The fenced blocks are placeholders by now, so no backtick is theirs.
 	// A backtick next to a brace (`={\`` and `\`}`) delimits a template literal in a component attribute, and
 	// is never a span's edge, so two such attributes on adjacent lines don't pair up as one span.
-	const text = out
-		.join('\n')
-		.replace(/(?<!\{)(`+)(?!\})([^`]|[^`][\s\S]*?[^`])(?<!\{)\1(?!`)(?!\})/g, (m) =>
-			/\n[ \t]*\n/.test(m) ? m : keep(m),
-		);
+	const notBlank = '(?:[^`\\n]|\\n(?![ \\t]*\\n))';
+	const span = new RegExp(
+		`(?<!\\{)(\`+)(?!\\})(${notBlank}|${notBlank}${notBlank}*?${notBlank})(?<!\\{)\\1(?!\`)(?!\\})`,
+		'g',
+	);
+	const text = out.join('\n').replace(span, (m) => keep(m));
 	return {
 		text,
 		keep,
