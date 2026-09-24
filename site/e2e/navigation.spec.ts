@@ -27,8 +27,17 @@ function lessonWithCheckpointsAndExamples(): string {
 	throw new Error('no live lesson has both a graded checkpoint and an ungraded example');
 }
 
+/** The last live lesson of the concepts course, read from the data tree so a new lesson changes nothing here. */
+function lastLiveConceptsLesson(): string {
+	const last = liveLessons()
+		.filter((id) => id.startsWith('concepts/'))
+		.at(-1);
+	if (!last) throw new Error('no live concepts lesson');
+	return last;
+}
+
 test('the last lesson of a course links to the next course, and the footer carries the AI notice', async ({ page }) => {
-	await page.goto('concepts/straight-answer/');
+	await page.goto(`${lastLiveConceptsLesson()}/`);
 	await expect(page.locator('.site-footer a[rel=next]')).toHaveAttribute('href', '/ai-training/safety/');
 	await expect(page.locator('.ai-notice')).toHaveText('Content co-authored by AI.');
 });
