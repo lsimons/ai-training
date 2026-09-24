@@ -1,5 +1,31 @@
-/** Footer, sidebar and the generated reference pages. */
-import { expect, test } from './fixtures';
+/** Footer, sidebar, the lesson menu and the generated reference pages. */
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { attrsOf, jsxElements, parseMdx } from '../src/lib/checkpoint-tags';
+import { expect, lessonCheckpoints, liveCourseLessons, test } from './fixtures';
+
+const SITE = fileURLToPath(new URL('..', import.meta.url));
+
+/**
+ * The first live lesson, in area and course order, whose page has a graded
+ * checkpoint and an ungraded example (a `<Predict>` without an `objective`),
+ * so its menu shows both groups. Read from the data tree and the MDX source
+ * (issue #242), so a new lesson changes nothing here.
+ */
+function lessonWithCheckpointsAndExamples(): string {
+	for (const area of readdirSync(join(SITE, 'src/data/areas')).sort()) {
+		for (const id of liveCourseLessons(area)) {
+			if (lessonCheckpoints(id).length === 0) continue;
+			const src = readFileSync(join(SITE, 'src/content/docs', `${id}.mdx`), 'utf8');
+			const examples = jsxElements(parseMdx(src)).filter(
+				(node) => node.name === 'Predict' && !attrsOf(node, id).has('objective'),
+			);
+			if (examples.length > 0) return id;
+		}
+	}
+	throw new Error('no live lesson has both a graded checkpoint and an ungraded example');
+}
 
 test('the last lesson of a course links to the next course, and the footer carries the AI notice', async ({ page }) => {
 	await page.goto('concepts/straight-answer/');
@@ -61,4 +87,25 @@ test('clicking an open course heading opens the course page with the group still
 	await page.locator('nav.sidebar li.linked > a[href="/ai-training/concepts/"] + details > summary').click();
 	await expect(lesson).toBeHidden();
 	await expect(page).toHaveURL(/\/ai-training\/concepts\/$/);
+});
+
+test('a Checkpoints or Examples menu entry scrolls to its section (#220, #291)', async ({ page }) => {
+	const lesson = lessonWithCheckpointsAndExamples();
+	await page.goto(`${lesson}/`);
+	const groups = [
+		{ slug: 'checkpoints', marker: 'data-checkpoint' },
+		{ slug: 'examples', marker: 'data-example' },
+	];
+	for (const { slug, marker } of groups) {
+		const link = page.locator(`nav.lesson-toc[aria-labelledby="lesson-toc-${slug}"] li a`).first();
+		const href = await link.getAttribute('href');
+		expect(href, `the first ${slug} entry links to a fragment`).toMatch(/^#.+/);
+		const id = (href as string).slice(1);
+		await link.click();
+		await expect(page).toHaveURL(new RegExp(`/${lesson}/#${id}$`));
+		// The fragment names a section of the group's kind, and the click brought it on screen.
+		const section = page.locator(`[id="${id}"]`);
+		await expect(section).toHaveAttribute(marker, /.*/);
+		await expect(section).toBeInViewport();
+	}
 });
