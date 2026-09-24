@@ -9,8 +9,16 @@ import {
 import { absoluteUrl } from '@lib/url';
 import { describe, expect, it } from 'vitest';
 
-const site = 'https://lsimons.github.io';
-const ROOT = 'https://lsimons.github.io/ai-training';
+/** Astro's `site` from astro.config.mjs, so a change there fails the SKILL.md checks below. */
+function siteFromAstroConfig(): string {
+	const config = readFileSync(new URL('../../astro.config.mjs', import.meta.url), 'utf8');
+	const match = /^\tsite: '([^']+)',$/m.exec(config)?.[1];
+	if (!match) throw new Error("site/astro.config.mjs has no `site: '...'` line to read");
+	return match;
+}
+
+const site = siteFromAstroConfig();
+const ROOT = `${site}/ai-training`;
 
 describe('renderTutorInstructions', () => {
 	const text = renderTutorInstructions({ body: '# Tutor\n\nBody.\n', site, built: '2026-09-24' });
