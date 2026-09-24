@@ -8,7 +8,7 @@ We also read what the reviewer couldn't do. The change under review is the `clea
 from the [allowlists lesson](/customizing-agents/allowlists/), saved as a
 diff in the repository so everyone reviews the same lines.
 
-The file format, the field names and the delegation behavior here are
+The file format, the field names, and the delegation behavior here are
 Claude Code's, checked against the vendor's documentation on the date shown
 above the lesson (@Claude Code subagents). Other coding agents delegate in
 other ways. The idea, a narrower agent for a bounded job, transfers.
@@ -18,14 +18,15 @@ other ways. The idea, a narrower agent for a bounded job, transfers.
 A **subagent** is a separate agent instance the main agent delegates a task
 to. It has a context window of its own and a system prompt of its own.
 Its tool list and its permission mode can be narrower than the main
-agent's. It starts empty. The main conversation isn't in it, and neither are the files
-the main agent has read. The main agent writes a delegation message that
-describes the task, the subagent works from that, and when it is done its
-result comes back to the main conversation. Everything the subagent read or
+agent's. It starts with its own system prompt, the task message the main
+agent writes for it, the project's `CLAUDE.md` files and a snapshot of
+`git status`. The main conversation isn't in it, and neither are the files
+the main agent has read. The subagent works from the task message, and
+when it is done its result comes back to the main conversation. Everything the subagent read or
 searched on the way stays in its own window (@Claude Code subagents).
 
 That gives two things you can use. The first is context: a task that would
-fill the main conversation with search results, logs or file contents runs
+fill the main conversation with search results, logs, or file contents runs
 elsewhere. The result comes back, and the search results don't. The second is permissions: a
 subagent's tool list can be shorter than the main agent's, so a job that
 needs only reading runs in an agent that can only read. The [blast
@@ -94,8 +95,9 @@ sentence "You never edit files" in the body is an instruction, and the
 `tools` line is what enforces it. `model: inherit` runs the reviewer on the
 same model as the main conversation. The other field you'll meet is
 `disallowedTools`, which removes tools from the inherited list instead of
-naming the ones to keep. When a file sets both, Claude Code applies
-`disallowedTools` first and then resolves `tools` against what remains
+naming the ones to keep. A file may set both. The removals in
+`disallowedTools` happen first, and the `tools` list then picks from
+whatever survived them, so a tool named in both is gone
 (@Claude Code subagents).
 
 Here is that resolution as a small program, over a shortened tool pool.
@@ -173,10 +175,10 @@ report as it came back, and then tell me in one line whether you read
 review.diff yourself.
 ```
 
-In the transcript the delegation appears as a tool call row with the
-subagent's name and a short task description, such as
-`reviewer(Review the clear change)` (@Claude Code subagents). The report
-comes back into the main conversation, and the main agent shows it to you.
+You see the handoff in the transcript as one tool call, labeled with the
+subagent's name and a few words about the task, `reviewer(...)`
+(@Claude Code subagents). The report comes back into the main
+conversation, and the main agent shows it to you.
 Below is the kind of report the reviewer file above produces. It is
 illustrative, written for this page and not recorded from a model, and
 your reviewer's findings differ in detail.
@@ -200,8 +202,8 @@ Not checked: the pre-existing failure in `test_done_marks_the_numbered_item` is 
 </Response>
 
 Run `/context` again and compare the total with the one you wrote down.
-The difference is the delegation message the main agent wrote plus the
-report that came back. The diff itself was read in the reviewer's window,
+The difference is what the main agent sent to the reviewer and what came
+back from it. The diff itself was read in the reviewer's window,
 and `todo.py` and `test_todo.py` with it. The last line of the main
 agent's answer says the same thing in words: it did not read
 `review.diff`. To feel the difference, ask the main agent in a fresh
@@ -238,9 +240,11 @@ instructions cap the report at 25 lines for that reason.
 
 Now the second comparison, what the reviewer could do. Its `tools` line
 gave it three tools. If your reviewer's report says it ran the tests, it
-didn't, and its transcript doesn't contain a command. Open the subagent's
-transcript through `/tasks` while its row is shown, or ask the main agent
-what tools the reviewer used (@Claude Code subagents).
+didn't, and its transcript doesn't contain a command. When the reviewer
+finishes, its row under the prompt disappears and the footer shows a
+`/tasks` hint for 30 seconds. Run `/tasks` within that time and press
+Enter on the reviewer to open its transcript. After that, ask the main
+agent what tools the reviewer used (@Claude Code subagents).
 
 <Sort id="who-can-do-what" objective="customizing-agents/configures-agent/sets-permissions"
   concepts={['subagents', 'permissions']}
@@ -275,15 +279,16 @@ run in (@Claude Code subagents)?
 <MultiChoice id="what-narrows-a-subagent" phase="review"
   objective="customizing-agents/configures-agent/sets-permissions"
   concepts={['subagents']}
-  context="A subagent in a coding agent is a Markdown file with YAML frontmatter and a system prompt body. The frontmatter can list tools, remove tools, set a model and set a permission mode."
-  title="Which lines enforce the limit?" hint="Which of these can the subagent disobey, and which does the tool itself apply?"
+  context="A subagent in a coding agent is a Markdown file with YAML frontmatter and a system prompt body. The frontmatter can list the tools to keep, remove tools from the inherited list, set a model and set a permission mode. The Bash tool runs shell commands, which can change files too."
+  title="Which lines enforce the limit?" hint="For each line, ask two things: does the agent itself apply it, and does it leave any tool that can change a file?"
   options={[
     { text: 'A `tools` line that names Read, Grep and Glob', correct: true },
     { text: 'A sentence in the body that says the subagent must not edit files', why: 'The body is the system prompt. It asks, and a tool list enforces.' },
-    { text: 'A `disallowedTools` line that names Edit and Write', correct: true },
-    { text: 'A `model` line that names a smaller model', why: 'The model changes cost and speed. It does not change which tools the subagent has.' },
+    { text: 'A `disallowedTools` line that names Edit and Write', why: 'Edit and Write are gone, and Bash stays. A shell command can still rewrite a file.' },
+    { text: 'A `disallowedTools` line that names Edit, Write and Bash', correct: true },
+    { text: 'A `model` line that names a smaller model', why: 'The model changes cost and speed. It doesn\'t change which tools the subagent has.' },
   ]}>
-You want a subagent that can read files and cannot change them. Which two
+You want a subagent that can read files and can't change them. Which two
 of these lines make that true whatever the subagent decides to do?
 </MultiChoice>
 
@@ -293,9 +298,9 @@ of these lines make that true whatever the subagent decides to do?
   context="A developer's coding agent needs to find every place a function is called across a large repository before changing its signature. The developer can let the main agent search, or delegate the search to a subagent."
   title="Why a subagent here?" hint="What fills up when an agent reads many files, and where does that filling happen when a subagent does the reading?"
   options={[
-    { text: 'The subagent searches faster, because it runs with a shorter system prompt and fewer instructions.', why: 'Nothing on the vendor page says a subagent is faster. It starts fresh and may need time to gather context.' },
+    { text: 'The subagent searches faster, because it runs with a shorter system prompt and fewer instructions.', why: 'Speed isn\'t among the vendor\'s reasons. A subagent begins with none of the main conversation\'s context, so it often spends turns collecting it.' },
     { text: 'The subagent reads the files in its own window, and its list of call sites comes back.', correct: true },
-    { text: 'The subagent can read files the main agent has no permission to read in this session.', why: 'A subagent inherits the main conversation\'s tools and can only be narrower. It gains no access the main agent lacks.' },
+    { text: 'The subagent can read files the main agent has no permission to read in this session.', why: 'The vendor\'s reasons are context and tool restrictions. Wider file access isn\'t one of them, and the permission rules of the session apply to the subagent too.' },
   ]}>
 Which of these is a reason the vendor gives to delegate the search to a
 subagent?
@@ -305,18 +310,20 @@ subagent?
 A developer writes `.claude/agents/reviewer.md` with a `name`, a
 `description` and a careful body that says "report findings, do not
 change anything", and leaves out the `tools` line. The main conversation
-runs in `acceptEdits`. The subagent inherits every tool, edits go through
-without a prompt, and the reviewer's report says "fixed the plural and
-committed". Both the fix and the commit happened. The body asked, and
-nothing enforced. Two lines were missing: `tools: Read, Grep, Glob`, and
-a main conversation in a mode that asks (@Claude Code subagents).
+runs in `acceptEdits`, so the subagent does too, and in that mode a file
+edit in the working directory needs no prompt. The subagent inherits every
+tool, and its report ends with "I also fixed the plural in the message".
+`git diff` shows the edit. The body asked, and nothing enforced. Two lines
+were missing: `tools: Read, Grep, Glob` in the file, and a main
+conversation in a mode that asks before an edit (@Claude Code subagents).
 </Pitfall>
 
 <Exercise stretch="Add a second subagent, a test runner with `tools: Read, Bash` and a body that says to run the tests and report only the failures, and have the main agent chain the two: review first, then tests. Read what came back from each.">
 In a fresh copy of the fixture with its own first commit, create
 `.claude/agents/reviewer.md` from this lesson, apply `clear.diff`, and
-save `git diff` to `review.diff`. Start the agent in Manual mode, note
-the `/context` total, ask it to use the reviewer subagent on `review.diff`
+save `git diff` to `review.diff`. Run `git status --short` and keep the
+output: two modified files, and `.claude/` and `review.diff` untracked.
+Start the agent in Manual mode, note the `/context` total, ask it to use the reviewer subagent on `review.diff`
 and to say whether it read the file itself, then note `/context` again. In
 a second fresh session, ask the main agent to review `review.diff` with
 no subagent and note `/context` before and after that too. The result is
@@ -327,16 +334,18 @@ and to read the report knowing what the reviewer could not have done.
 A good result: the reviewer's report has a summary, findings with file
 and line, and a line on what it did not check; the main agent says it did
 not read `review.diff`; the delegated pair grew by less than the direct
-pair; and nothing in the copy changed, which `git status` confirms.
+pair; and `git status --short` after the delegation prints the same
+lines it printed before it, with `git diff --stat` unchanged too.
 Reflection: which task in your own work last week produced a long output
 you read once and never needed again?
 </Exercise>
 
 <Recap>
 1. A subagent is a separate agent instance with its own context window,
-   system prompt, tool list and permission mode. It starts without the
-   main conversation, and only its result comes back
-   (@Claude Code subagents).
+   system prompt, tool list and permission mode. It starts with that
+   prompt, the task message, the `CLAUDE.md` files and a `git status`
+   snapshot, and without the main conversation. Its result comes back,
+   and what it read doesn't (@Claude Code subagents).
 2. In Claude Code a subagent is a Markdown file in `.claude/agents/` or
    `~/.claude/agents/`, with `name` and `description` required and the
    body as its system prompt. `tools` names what it may use,
@@ -350,6 +359,7 @@ you read once and never needed again?
    main window took in the report (@Claude Code context window).
 5. A subagent's `permissionMode` applies when the main conversation is in
    `default`, `dontAsk` or `plan`. In `acceptEdits`, `auto` or
-   `bypassPermissions` the subagent runs in the main conversation's mode
+   `bypassPermissions` the subagent runs in the main conversation's mode,
+   and a subagent can never declare `bypassPermissions` for itself
    (@Claude Code subagents).
 </Recap>

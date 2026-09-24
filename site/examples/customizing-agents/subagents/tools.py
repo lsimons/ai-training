@@ -2,12 +2,13 @@
 
 The rules follow the vendor's subagents page (code.claude.com/docs/en/sub-agents,
 checked 2026-09-24): a subagent inherits every tool available to subagents
-when `tools` is omitted, `disallowedTools` removes tools from that pool, and
-when both fields are set, `disallowedTools` is applied first and `tools` is
-then resolved against what remains. The real tool pool is longer than the
-short one below, and the real filters also remove a few tools from every
-subagent and narrow the set for a subagent that runs in the background. This
-model covers only the three frontmatter cases the lesson compares.
+when `tools` is omitted, and `disallowedTools` removes tools from that pool.
+With both fields present the removals come first, and the `tools` list then
+picks from what survived them, so a tool named in both is gone. The real tool
+pool is longer than the short one below, and the real filters also remove a
+few tools from every subagent and narrow the set for a subagent that runs in
+the background. This model covers only the three frontmatter cases the lesson
+compares.
 """
 
 from typing import Optional
