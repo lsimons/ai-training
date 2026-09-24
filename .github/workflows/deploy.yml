@@ -21,6 +21,14 @@ jobs:
     # repo, and none of the Pages write scopes below belong to it.
     permissions:
       contents: read
+    # This job only builds the site (`site-install-frozen`, `site-build`;
+    # both bun-only, neither has `depends`), so only bun is installed. The
+    # `install_args` below limits what mise-action installs, and this env
+    # stops `mise run` from auto-installing every other [tools] entry
+    # before a task. A task that needs a missing tool then fails instead
+    # of downloading it. ci.yml keeps the full install.
+    env:
+      MISE_TASK_RUN_AUTO_INSTALL: "false"
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -30,9 +38,7 @@ jobs:
       - name: Set up mise
         uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
-          # This job only builds the site, so install only bun. The lint
-          # tools in [tools] are not needed on the runner that produces the
-          # Pages artifact; ci.yml keeps the full install.
+          # Only bun (see the job-level env for the other half).
           install_args: bun
           install: true
           cache: true

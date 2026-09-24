@@ -201,9 +201,9 @@ bun scripts/screenshot.mjs "$usage_out" "$usage_path"
 # them here too so the checks are enforced in CI rather than only for
 # people who remembered `prek install`.
 #
-# The markdownlint hook runs the binary from site/node_modules/.bin (see
-# prek.toml), so `site-install-frozen` has to have run first. `ci` and
-# ci.yml both do.
+# The markdownlint hook runs the binary from site/node_modules/.bin through
+# the pinned bun (see prek.toml), so `site-install-frozen` has to have run
+# first. `ci` and ci.yml both do.
 #
 # `lychee` is skipped: it is a network check that flakes on rate limits and
 # TLS handshakes, so it lives in `mise run links` instead of the gate.
@@ -321,15 +321,16 @@ run = "uv run --locked pytest"
 # Spell check in American English over the same files as `prose`. cspell's
 # en-US dictionary is separate from en-GB, so British spellings fail. Names
 # and jargon go in cspell-words.txt; inline code spans are skipped. cspell
-# comes from the bun-locked site install (see [tools]), so
-# `site-install-frozen` has to have run first. `ci` and ci.yml both do.
+# comes from the bun-locked site install (see [tools]) and runs through
+# the pinned bun, so no system node is involved. `site-install-frozen` has
+# to have run first. `ci` and ci.yml both do.
 [tasks.spell]
 description = "cspell (American English) over Markdown, MDX and the site data YAML"
 run = """
 set -e
 files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md')
 # shellcheck disable=SC2086
-site/node_modules/.bin/cspell --no-progress $files
+bun site/node_modules/.bin/cspell --no-progress $files
 """
 
 # Sequential rather than `depends`, which mise runs in parallel:
