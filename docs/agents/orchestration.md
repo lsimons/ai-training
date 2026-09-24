@@ -274,12 +274,11 @@ removes it too. Scratch files never go under `/tmp`, where a delete asks
 the maintainer for permission, and two agents' files never share a
 directory.
 
-The Bash guard hook (`.claude/hooks/README.md`) rejects a force push, a
-push to `main` from anyone but the dispatcher, `gh pr merge` from anyone
-but the wave lead, the dispatcher or a coordinator, and `git stash`,
-`git reset --hard` or `git checkout -- .` in the main checkout. The
-dispatcher, the wave lead and a coordinator prefix those commands with
-`AI_TRAINING_ROLE=<role>`.
+The Bash guard hook (`.claude/hooks/README.md`) rejects a force push, any
+push to `main`, `gh pr merge` from anyone but the wave lead, the
+dispatcher or a coordinator, and `git stash`, `git reset --hard` or
+`git checkout -- .` in the main checkout. The wave lead and a coordinator
+prefix a merge with `AI_TRAINING_ROLE=<role>`.
 
 ## What a builder prompt says about history
 

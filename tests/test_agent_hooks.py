@@ -70,7 +70,7 @@ def test_ordinary_and_lease_pushes_of_a_branch_pass(command: str) -> None:
 def test_push_to_main_is_rejected(command: str) -> None:
     reason = check(command)
     assert reason is not None
-    assert "only the dispatcher" in reason
+    assert "no agent pushes to `main`" in reason
 
 
 def test_plain_push_on_main_is_a_push_to_main() -> None:
@@ -78,9 +78,9 @@ def test_plain_push_on_main_is_a_push_to_main() -> None:
     assert check("git push origin HEAD", branch="main") is not None
 
 
-def test_dispatcher_may_push_main_by_prefix_or_environment() -> None:
-    assert check("AI_TRAINING_ROLE=dispatcher git push origin main") is None
-    assert check("git push origin main", env={"AI_TRAINING_ROLE": "dispatcher"}) is None
+def test_no_role_may_push_main() -> None:
+    assert check("AI_TRAINING_ROLE=dispatcher git push origin main") is not None
+    assert check("git push origin main", env={"AI_TRAINING_ROLE": "dispatcher"}) is not None
     assert check("AI_TRAINING_ROLE=wave-lead git push origin main") is not None
 
 

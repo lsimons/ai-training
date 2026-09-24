@@ -20,10 +20,10 @@ works around it on purpose. It splits the command at `&&`, `||`, `;`, `|`
 and newlines outside quotes, skips here-document bodies (a commit message
 is data), follows `cd`, and reads `git -C <dir>`.
 
-Roles: a push to `main` and `gh pr merge` are allowed only when
-`AI_TRAINING_ROLE` names a role that may do them, either in the hook's
-environment or as a prefix on the command itself
-(`AI_TRAINING_ROLE=dispatcher git push`).
+No agent pushes to `main` (#353): every change reaches it through a pull
+request. `gh pr merge` is allowed only when `AI_TRAINING_ROLE` names a
+role that may merge, either in the hook's environment or as a prefix on
+the command itself (`AI_TRAINING_ROLE=wave-lead gh pr merge`).
 """
 
 import contextlib
@@ -39,7 +39,7 @@ from pathlib import Path
 from typing import Any, cast
 
 ROLE_VAR = "AI_TRAINING_ROLE"
-PUSH_MAIN_ROLES = frozenset({"dispatcher"})
+PUSH_MAIN_ROLES: frozenset[str] = frozenset()
 MERGE_ROLES = frozenset({"dispatcher", "wave-lead", "coordinator"})
 MAX_SLEEP_SECONDS = 60
 MAIN_BRANCH = "main"
@@ -257,9 +257,8 @@ def check_segment(
             )
         if pushes_main(rest, branch_of(where)) and role_of(segment, env) not in PUSH_MAIN_ROLES:
             return (
-                "Push to `main`: only the dispatcher commits to `main`. Push your own branch "
-                "and open a pull request. The dispatcher prefixes the push with "
-                f"`{ROLE_VAR}=dispatcher`."
+                "Push to `main`: no agent pushes to `main`. Push your own branch and open "
+                "a pull request. A dispatcher keeps its record in its run issue, not in git."
             )
         return None
     destructive = (
