@@ -154,6 +154,17 @@ depends = ["require-setup"]
 dir = "site"
 run = "bun scripts/next-wave.mjs"
 
+# What a resuming wave lead needs (#351): per issue, the pushed
+# `feat/<issue>-*` branches and the last `Verdict:` comment, counting only
+# the accounts in TRUSTED_VERDICT_AUTHORS (site/scripts/lib/wave-status.mjs),
+# plus the wave branch and the local worktrees, as JSON. Network (git
+# ls-remote, gh).
+[tasks.wave-status]
+description = "State of a wave for a resuming lead, as JSON: mise run wave-status -- <wave-branch> <issue>..."
+depends = ["require-setup"]
+dir = "site"
+run = "bun scripts/wave-status.mjs"
+
 # The build writes the checkpoint export (spec S03 "Checkpoint export") to
 # site/dist/data/checkpoints.json from src/pages/data/checkpoints.json.ts.
 # This reads it back and checks it against the lesson pages and the topic
