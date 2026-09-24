@@ -101,3 +101,61 @@ test('the review page clones an order checkpoint that drags like the lesson copy
 	const history = (record.reviews?.[item] as { history: { result: string }[] } | undefined)?.history ?? [];
 	expect(history.map((h) => h.result)).toEqual(['pass']);
 });
+
+// The worked example of review alternates (spec S05 "Which checkpoint a review asks"): one `review` alternate,
+// a multi-choice, shares the objective of this choice checkpoint.
+const ALT_LESSON = 'concepts/straight-answer';
+const OWN_ID = 'hide-the-preference';
+const OWN = `${ALT_LESSON}#${OWN_ID}`;
+const ALTERNATE = 'spot-the-open-question';
+
+function dueWith(history: { at: string; result: 'pass' | 'fail'; served?: string }[]) {
+	return {
+		lessons: { [ALT_LESSON]: { state: 'finished' as const, at: TODAY } },
+		reviews: { [OWN]: { stage: 1, due: '2000-01-01', last: null, history, revision: 1 } },
+	};
+}
+
+test('the review page asks an alternate never asked before in place of the item, and records it as served', async ({
+	page,
+	seed,
+}) => {
+	await seed(dueWith([]));
+	await page.goto('concepts/review/');
+	const cp = page.locator('.review [data-checkpoint]');
+	await expect(cp).toBeVisible();
+	await expect(cp).toHaveAttribute('id', ALTERNATE);
+	await expect(cp).toHaveAttribute('data-kind', 'multi-choice');
+	// The result is the item's: the copy is keyed on the item's progress id and links to the item's own checkpoint.
+	await expect(cp).toHaveAttribute('data-progress-id', OWN);
+	await expect(cp.locator('.cp-context')).toBeVisible();
+	await expect(cp.locator('.cp-lesson-link')).toHaveAttribute('href', `/ai-training/${ALT_LESSON}/#${OWN_ID}`);
+	for (const label of await cp.locator('label[data-correct]').all()) await label.click();
+	await cp.locator('.cp-check').first().click();
+	await expect(cp.locator('.cp-feedback')).toHaveText('Correct.');
+	await expect(cp.locator('.cp-stage-label')).toHaveText('stage 2 of 5');
+
+	const record = await storedRecord(page);
+	const history =
+		(record.reviews?.[OWN] as { history: { result: string; served?: string }[] } | undefined)?.history ?? [];
+	expect(history.map(({ result, served }) => ({ result, served }))).toEqual([{ result: 'pass', served: ALTERNATE }]);
+	expect(Object.keys(record.reviews ?? {})).toEqual([OWN]);
+	expect(record.checkpoints?.[OWN]).toBeUndefined();
+});
+
+test("once every alternate was asked, the review page asks the item's own checkpoint", async ({ page, seed }) => {
+	await seed(dueWith([{ at: '2000-01-01', result: 'pass', served: ALTERNATE }]));
+	await page.goto('concepts/review/');
+	const cp = page.locator('.review [data-checkpoint]');
+	await expect(cp).toBeVisible();
+	await expect(cp).toHaveAttribute('id', OWN_ID);
+	await expect(cp).toHaveAttribute('data-kind', 'choice');
+	await expect(cp).not.toHaveAttribute('data-served');
+	await cp.locator('label[data-correct]').click();
+	await cp.locator('.cp-check').first().click();
+	await expect(cp.locator('.cp-stage-label')).toHaveText('stage 2 of 5');
+	const record = await storedRecord(page);
+	const history =
+		(record.reviews?.[OWN] as { history: { result: string; served?: string }[] } | undefined)?.history ?? [];
+	expect(history.map((h) => h.served ?? null)).toEqual([ALTERNATE, null]);
+});
