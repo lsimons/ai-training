@@ -22,7 +22,10 @@ def frontmatter(text: str) -> dict[str, str]:
     fields: dict[str, str] = {}
     if not text.startswith("---\n"):
         return fields
-    for line in text.split("\n", 1)[1].split("\n---\n", 1)[0].splitlines():
+    rest = text.split("\n", 1)[1]
+    if "\n---\n" not in rest:
+        raise ValueError("the front matter has no closing --- line")
+    for line in rest.split("\n---\n", 1)[0].splitlines():
         key, sep, value = line.partition(":")
         if sep:
             fields[key.strip()] = value.strip()

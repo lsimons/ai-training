@@ -703,6 +703,6 @@ Agent Skills spec:
   type: reference
   title: Agent Skills specification
   container: agentskills.io
-  author: Anthropic and the Agent Skills contributors
-  license: Proprietary
+  author: Anthropic
+  license: CC BY 4.0
   url: https://agentskills.io/specification
