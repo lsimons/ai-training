@@ -222,8 +222,8 @@ pitfall and the exercise.
   than 40 percent longer than the longest distractor, or for `multi-choice` the
   mean key is that much longer than the mean distractor), `hedge` (only the
   key hedges), `echo` (only the key repeats a content word of the stem)
-  and `fixed-position` (three or more `choice`/`scenario` items in one
-  lesson with the key at one index). `guessable="reason"` exempts an item.
+  and `fixed-position` (in a lesson with four or more `choice`/`scenario`
+  items, one index holds the key in more than three quarters of them). `guessable="reason"` exempts an item.
   The check prints every reason and fails on an exemption that no cue
   needs, so a stale one is removed.
 

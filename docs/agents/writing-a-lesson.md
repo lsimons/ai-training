@@ -234,8 +234,9 @@ counted without Markdown marks; for `MultiChoice` the mean length of the
 keys against the mean of the distractors), `hedge` (a key hedges and no
 distractor does), `echo` (a key shares a content word of four or more
 letters with the stem and no distractor does) and `fixed-position`
-(three or more `Choice` or `Scenario` items in one lesson with the key
-at the same index). Fix a hit by tightening the key or making the
+(in a lesson with four or more `Choice` or `Scenario` items, one index
+holds the key in more than three quarters of them, so four of four
+fails and three of four passes). Fix a hit by tightening the key or making the
 distractors as specific and as long. Moving the key or giving a
 distractor its own hedge also works. When a rewrite would read worse,
 add `guessable="<cue>: reason"` to the tag, naming the cue (or cues,
