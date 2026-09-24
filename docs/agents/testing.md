@@ -1,7 +1,9 @@
 # Testing the site
 
 Which check catches what, and which layer a new assertion belongs in. All
-of the layers run from `mise run ci` and from the CI workflow.
+of the layers run from `mise run ci` and from the CI workflow, with one
+exception: on a pull request the CI workflow skips the e2e layer when every
+changed file is prose or prose tooling (see "When the browser suite runs").
 
 | Layer     | Task                   | Runs                                                                 | Catches                                                                                                             |
 | --------- | ---------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -76,6 +78,25 @@ file: `cd site && bunx playwright test e2e/review.spec.ts`. On a failure the
 trace is under `site/test-results/`, and `bunx playwright show-trace <zip>`
 opens it. Every spec blocks requests that leave `localhost` and fails on a
 `pageerror` or console error (`site/e2e/fixtures.ts`).
+
+## When the browser suite runs
+
+`mise run ci` always runs `site-e2e`. The CI workflow
+(`.github/workflows/ci.yml`) runs the `e2e` job on every push to `main` and
+on `workflow_dispatch`, but on a pull request only when the diff touches a
+file outside this skip set: `docs/`, any `.md` file, `.vale.ini`, `.vale/`,
+`cspell-words.txt`, `.markdownlint-cli2.jsonc`, `.lychee.toml`, the license
+files and `NOTICE.md`. The `paths` step of the `build` job computes it with
+`git diff --name-only` against the base branch and the `e2e` job has a
+job-level `if:` on its output, so a skipped run still reports a (skipped)
+status for the job.
+
+Lesson pages under `site/src/content/` and the data tree under
+`site/src/data/` are not in the skip set. The specs in `site/e2e/` derive
+their live-lesson and checkpoint counts from the data tree and click
+through lesson pages, so a content change can break them, and the round
+trip through a red `main` costs more than the job does. Widen the skip set
+only for files no spec can read.
 
 `astro preview` is not used here: in Astro 7 it hands the port to a
 detached child and exits, so a supervisor cannot stop it. The static server
