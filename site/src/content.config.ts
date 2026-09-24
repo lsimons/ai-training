@@ -265,7 +265,7 @@ export const collections = {
 	bibliography: defineCollection({
 		loader: file('./src/data/bibliography.yaml'),
 		schema: z.object({
-			type: z.enum(['book', 'course', 'reference', 'video']),
+			type: z.enum(['book', 'course', 'paper', 'reference', 'video']),
 			title: z.string(),
 			container: z.string().nullable().optional(),
 			author: z.string().nullable().optional(),

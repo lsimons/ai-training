@@ -405,8 +405,8 @@ inline URL.
 The model never runs anything. Your loop does (@AEC-13).
 ```
 
-A bibliography entry has `type` (`book`, `course`, `reference` or `video`,
-per S01), `title`, `container`, `author`, `license` and `url`. `url` is a
+A bibliography entry has `type` (`book`, `course`, `paper`, `reference` or
+`video`, per S01), `title`, `container`, `author`, `license` and `url`. `url` is a
 public URL only where the licensing rules in `AGENTS.md` allow linking the
 source; otherwise `null`. Add a new entry to the YAML and to the source
 table in S02 together.
