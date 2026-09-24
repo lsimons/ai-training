@@ -20,7 +20,9 @@ exercise:
     After the fixture increments, explain from memory how the parts fit and why, then check the
     explanation against the code and record one decision in a decisions folder the instructions
     point at.
-sources: [Brilliant INC]
+sources: [Brilliant INC, Claude Code memory]
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 issue: 166
 minutes: 10
 notes: >-
@@ -32,4 +34,5 @@ notes: >-
   are explained in a sentence on the page (AGENTS.md or CLAUDE.md, read at the start of every
   session) with a link to customizing-agents/instructions, because coding-with-agents/project-instructions
   was not live when this lesson was written. The transcript and the decision file on the page are
-  illustrative and the page says so. Source: Brilliant INC, paraphrased.
+  illustrative and the page says so. Sources: Brilliant INC, paraphrased, and Claude Code memory for
+  what a session loads at its start (CLAUDE.md and auto memory), stated as a fact and dated.
