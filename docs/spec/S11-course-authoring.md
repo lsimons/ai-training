@@ -132,7 +132,7 @@ notes: >-
 | `sources`         | yes       | Bibliography keys the lesson draws on. Each must exist. May be empty.                                                                                         |
 | `issue`           | no        | The lesson's GitHub issue number.                                                                                                                             |
 | `minutes`         | yes       | Target length. Keep lessons short.                                                                                                                            |
-| `sources-checked` | no        | The day the sources were last checked. Becomes Starlight's `lastUpdated` on the page. Set with `review-by`.                                                   |
+| `sources-checked` | no        | The day the sources were last checked, shown in the page's review line. Set with `review-by`, and move both only after re-checking the sources.               |
 | `review-by`       | no        | The date by which the sources must be checked again, for a lesson whose facts move (S03 "Frontmatter").                                                       |
 | `notes`           | no        | Free prose for authors: rationale, a content sketch, pointers to issues, what the plan named that the page later changed. Never rendered.                     |
 
@@ -153,10 +153,11 @@ is planned on `main` until the branch merges, which is the truth.
 
 The MDX page has no frontmatter. At build the docs loader
 (`site/src/content.config.ts`) copies `title`, `description`, `mode`,
-`covers`, `serves`, `assumes`, `extends-to`, `sources-checked` (as
-`lastUpdated`) and `review-by` from the lesson file onto the page's docs
-entry, so every component that read the page frontmatter before reads the
-same names now. The course page `<area>/index.mdx` gets its `title` and
+`covers`, `serves`, `assumes`, `extends-to`, `sources-checked` and
+`review-by` from the lesson file onto the page's docs entry, so every
+component that read the page frontmatter before reads the same names now.
+The lesson file doesn't set Starlight's `lastUpdated`. That field describes
+the page, and the site leaves it off. The footer has no date line. The course page `<area>/index.mdx` gets its `title` and
 `description` from `area.yaml` the same way (S09).
 
 A page that sets one of those fields in its own frontmatter fails

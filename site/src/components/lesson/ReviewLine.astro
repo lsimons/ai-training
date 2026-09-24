@@ -8,11 +8,11 @@ import { isoDate, reviewLine } from '@lib/review-line';
 
 interface Props {
 	reviewBy?: Date | undefined;
-	lastUpdated?: Date | boolean | undefined;
+	sourcesChecked?: Date | undefined;
 }
 
-const { reviewBy, lastUpdated } = Astro.props;
-const text = reviewLine(reviewBy, lastUpdated);
+const { reviewBy, sourcesChecked } = Astro.props;
+const text = reviewLine(reviewBy, sourcesChecked);
 ---
 
 {

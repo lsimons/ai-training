@@ -37,7 +37,9 @@ const lessonDocsFields = z.object({
 	serves: z.array(idSchema).optional(),
 	assumes: z.array(assumesSchema).optional(),
 	'extends-to': z.array(extendsToSchema).optional(),
-	/** The date by which the page's sources must be checked again, shown with `lastUpdated` (spec S03). */
+	/** The day the page's sources were last checked, shown in the review line with `review-by` (spec S03). */
+	'sources-checked': z.date().optional(),
+	/** The date by which the page's sources must be checked again (spec S03). */
 	'review-by': z.date().optional(),
 });
 
@@ -67,7 +69,7 @@ const lessonPlanSchema = z
 		issue: z.number().int().positive().optional(),
 		/** Target length in minutes; keep lessons short. */
 		minutes: z.number().int().positive(),
-		/** The day the sources were last checked (Starlight's `lastUpdated`), paired with `review-by`. */
+		/** The day the sources were last checked, paired with `review-by`. Not Starlight's `lastUpdated`, which is about the page. */
 		'sources-checked': z.coerce.date().optional(),
 		'review-by': z.coerce.date().optional(),
 		/** Free prose for authors: rationale, a content sketch, pointers to issues. Never rendered. */
@@ -119,7 +121,7 @@ function lessonDocsLoader(): Loader {
 						serves: lesson.serves,
 						assumes: lesson.assumes,
 						'extends-to': lesson['extends-to'],
-						lastUpdated: lesson['sources-checked'],
+						'sources-checked': lesson['sources-checked'],
 						'review-by': lesson['review-by'],
 					};
 					for (const k of Object.keys(fields)) if (fields[k] === undefined) delete fields[k];

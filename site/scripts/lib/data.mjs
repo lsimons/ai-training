@@ -79,7 +79,7 @@ export const LESSON_OWNED_FIELDS = [
 	'serves',
 	'assumes',
 	'extends-to',
-	'lastUpdated',
+	'sources-checked',
 	'review-by',
 ];
 
