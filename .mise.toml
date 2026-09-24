@@ -447,28 +447,40 @@ bun site/node_modules/.bin/cspell --no-progress $files
 # `site-e2e-only` is last because it needs `site-build`'s dist and the
 # browser from `site-browser`; in the workflow the walkthrough is its own
 # job after the build, so there it runs `site-e2e` (build and run).
+#
+# A loop instead of a `run` list, so the last line names the task that
+# failed and the exit code stays non-zero (#345). `mise run ci | tail`
+# loses the exit code, and the line is what is left.
 [tasks.ci]
 description = "Full CI gate: install + lint + Python lint/typecheck/test + prose + spell + examples + course plans + Astro check + Biome + unit tests + build + checkpoint export + lesson bundles + e2e"
-run = [
-  "mise run site-install-frozen",
-  "mise run py-install-frozen",
-  "mise run lint",
-  "mise run py-lint",
-  "mise run py-typecheck",
-  "mise run py-test",
-  "mise run prose-sync",
-  "mise run prose",
-  "mise run spell",
-  "mise run examples",
-  "mise run data",
-  "mise run site-check",
-  "mise run site-lint",
-  "mise run site-test",
-  "mise run site-build",
-  "mise run checkpoints",
-  "mise run bundles",
-  "mise run site-e2e-only",
-]
+run = """
+set -u
+for task in site-install-frozen py-install-frozen lint py-lint py-typecheck py-test prose-sync prose spell examples data site-check site-lint site-test site-build checkpoints bundles site-e2e-only; do
+  if ! mise run "$task"; then
+    echo "ci: FAILED in task '$task'. Rerun it with 'mise run $task'."
+    exit 1
+  fi
+done
+echo "ci: passed, every task green"
+"""
+
+# The `ci` list without the network installs and without the browser
+# walkthrough: the builder's definition of done and the check every fix
+# commit runs (docs/agents/orchestration.md). Run `mise run setup` once in
+# a fresh worktree first. The wave branch's `mise run ci` is the one e2e
+# run of a wave.
+[tasks.fast]
+description = "The ci list without the installs and the e2e walkthrough (run `mise run setup` once first)"
+run = """
+set -u
+for task in lint py-lint py-typecheck py-test prose spell examples data site-check site-lint site-test site-build checkpoints bundles; do
+  if ! mise run "$task"; then
+    echo "fast: FAILED in task '$task'. Rerun it with 'mise run $task'."
+    exit 1
+  fi
+done
+echo "fast: passed, every task green"
+"""
 
 # Local mirror of the `zizmor` CI job, using the mise-pinned zizmor. Not
 # part of `ci` because it needs network access and a GitHub token for the
