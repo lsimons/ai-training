@@ -5,7 +5,7 @@ spec, two directories over, and never change them. Each fixture copies that
 directory to a temporary place, turns the copy into a git repository with the
 program and the spec on `main`, and then lands the prepared agent branch
 `due-dates` as one commit. The branch is the one the lesson reviews. It does
-most of what `SPEC.md` asks and hides four problems: `overdue` prints nothing
+most of what `SPEC.md` asks and hides five problems: `overdue` prints nothing
 instead of `nothing overdue`, a malformed date is refused with the message but
 exit status 0, `render.py` drops the `nothing to do` line and the test for it
 is deleted, `store.py` gets a new default file name, and `test_clear.py` is
@@ -27,29 +27,20 @@ AGENT_TEST = os.path.join(HERE, "test_due_dates.py")
 
 COMMIT_SUBJECT = "feat: due dates with overdue and date validation"
 
-# Variables that would point git at another repository than the copy's own.
-GIT_LOCATION_VARIABLES = (
-    "GIT_DIR",
-    "GIT_WORK_TREE",
-    "GIT_INDEX_FILE",
-    "GIT_COMMON_DIR",
-    "GIT_PREFIX",
-    "GIT_OBJECT_DIRECTORY",
-    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
-    "GIT_CEILING_DIRECTORIES",
-    "GIT_NAMESPACE",
-    "GIT_DISCOVERY_ACROSS_FILESYSTEM",
-)
-
-GIT_ENV = dict(
-    {key: value for key, value in os.environ.items() if key not in GIT_LOCATION_VARIABLES},
-    GIT_AUTHOR_NAME="Agent",
-    GIT_AUTHOR_EMAIL="agent@example.com",
-    GIT_COMMITTER_NAME="Agent",
-    GIT_COMMITTER_EMAIL="agent@example.com",
-    GIT_CONFIG_GLOBAL=os.devnull,
-    GIT_CONFIG_SYSTEM=os.devnull,
-)
+# git runs with only these variables, so nothing in the learner's environment
+# (a GIT_DIR pointing elsewhere, GIT_EXTERNAL_DIFF, GIT_CONFIG_PARAMETERS) can
+# reach it. HOME is set per copy, below, so no user config is read either.
+GIT_ENV_BASE = {
+    "PATH": os.environ.get("PATH", ""),
+    "LANG": "C",
+    "LC_ALL": "C",
+    "GIT_AUTHOR_NAME": "Agent",
+    "GIT_AUTHOR_EMAIL": "agent@example.com",
+    "GIT_COMMITTER_NAME": "Agent",
+    "GIT_COMMITTER_EMAIL": "agent@example.com",
+    "GIT_CONFIG_GLOBAL": os.devnull,
+    "GIT_CONFIG_SYSTEM": os.devnull,
+}
 
 # The agent's todo.py. `due` and `overdue` are there, `valid_date` is there,
 # and the malformed date prints its message but the command still exits 0.
@@ -175,7 +166,7 @@ DELETED_TEST = """
 STORE_DEFAULT_BEFORE = 'TODO_FILE = os.environ.get("TODO_FILE", "todos.json")\n'
 STORE_DEFAULT_AFTER = 'TODO_FILE = os.environ.get("TODO_FILE", ".todos.json")\n'
 
-# test_clear.py, reformatted with single quotes and the list on one line per item.
+# test_clear.py, reformatted from double quotes to single quotes and nothing else.
 AGENT_TEST_CLEAR = """import unittest
 
 import store
@@ -224,7 +215,7 @@ def git(repo: str, *args: str) -> "subprocess.CompletedProcess[str]":
     result = subprocess.run(
         ["git", "-c", "commit.gpgsign=false", *args],
         cwd=repo,
-        env=GIT_ENV,
+        env=dict(GIT_ENV_BASE, HOME=os.path.dirname(repo)),
         capture_output=True,
         text=True,
     )
@@ -245,7 +236,7 @@ def init_repo(repo: str) -> None:
 
 
 def land_agent_branch(repo: str) -> None:
-    """The prepared agent branch: one commit with the whole feature and the four problems."""
+    """The prepared agent branch: one commit with the whole feature and the five problems."""
     git(repo, "switch", "-q", "-c", "due-dates")
     _write(repo, "todo.py", AGENT_TODO)
     _write(repo, "render.py", AGENT_RENDER)
@@ -288,9 +279,14 @@ def test_verdict(repo: str) -> str:
     return lines[-1] if lines else ""
 
 
+def build(parent: str) -> str:
+    """Copies the fixture into `parent`, makes it a repository and lands the branch."""
+    repo = copy_repo(parent)
+    init_repo(repo)
+    land_agent_branch(repo)
+    return repo
+
+
 def in_copy(fn: Callable[[str], int]) -> int:
     with tempfile.TemporaryDirectory() as tmpdir:
-        repo = copy_repo(tmpdir)
-        init_repo(repo)
-        land_agent_branch(repo)
-        return fn(repo)
+        return fn(build(tmpdir))
