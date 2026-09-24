@@ -594,3 +594,10 @@ Liu 2024:
   author: Nelson F. Liu, Kevin Lin, John Hewitt and 4 others
   license: CC BY 4.0
   url: https://aclanthology.org/2024.tacl-1.9/
+Claude docs pricing:
+  type: reference
+  title: Pricing
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/about-claude/pricing
