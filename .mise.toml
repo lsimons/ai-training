@@ -439,38 +439,39 @@ zizmor --strict-collection .
 # Unlike `audit` this needs no token and fails loudly when the database
 # is unreachable, so there is no silent-downgrade case to guard against.
 #
-# `-r` is load-bearing, and its absence is silent: `osv-scanner scan
-# source` is NOT recursive by default, so without it the walk stops at
-# the top level and `site/bun.lock` is never opened. The directory scan
-# respects .gitignore, which keeps .venv and site/node_modules out.
-#
-# Because that failure mode is silent, the scan is not trusted on its
-# own: the loop below re-derives the lockfile list from git and fails if
-# the scanner did not report opening every one. Adding a package manager
-# means adding its lockfile to the glob list here.
+# Each lockfile is named with `-L` rather than found by a directory walk
+# (`-r .`), so a lesson fixture that commits a lockfile with a deliberately
+# old version (spec S03 "Examples") is never swept in, and a lockfile that
+# is missing or does not parse is the scanner's own error (exit 127)
+# instead of a silently narrower scan. The list comes from `git ls-files`,
+# and an empty list fails: adding a package manager means adding its
+# lockfile to the glob list here. A lockfile that parses to zero packages
+# prints a warning and passes: the scanner gives no exit code for it, and
+# an empty dependency group is a real state, not an error.
 [tasks.vuln]
 description = "osv-scanner audit of every committed lockfile (uv.lock, site/bun.lock) against the OSV database (network; not part of `ci`)"
 run = """
 set -eu
+locks=$(git ls-files -- 'uv.lock' 'site/bun.lock')
+if [ -z "$locks" ]; then
+  echo "vuln: no committed lockfile matched. Check the glob list in .mise.toml." >&2
+  exit 1
+fi
+args=""
+for lock in $locks; do
+  args="$args -L $lock"
+done
 status=0
-out=$(osv-scanner scan source -r . 2>&1) || status=$?
+# shellcheck disable=SC2086
+out=$(osv-scanner scan source $args 2>&1) || status=$?
 echo "$out"
-
-missing=0
-for lock in $(git ls-files -- '*uv.lock' '*bun.lock'); do
+for lock in $locks; do
   case "$out" in
-    *"/$lock file and found"*) ;;
-    *)
-      echo "osv-scanner never opened $lock: its dependencies went unscanned." >&2
-      missing=1
+    *"/$lock file and found 0 packages"*)
+      echo "vuln: warning: $lock parsed to zero packages." >&2
       ;;
   esac
 done
-if [ "$missing" -ne 0 ]; then
-  echo "Every committed lockfile must be scanned. Check that osv-scanner" >&2
-  echo "supports its format, and that the -r flag is still present." >&2
-  exit 1
-fi
 exit "$status"
 """
 
