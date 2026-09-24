@@ -4,7 +4,7 @@ In this lesson you review a branch a coding agent made and you didn't
 watch it make. The branch implements the due-dates spec from *Working
 from a spec in small increments*, and it arrives with a summary that
 says the work is done and a test suite that passes. The course keeps a copy of that branch as a fixture,
-so everyone reviews the same code. It hides four problems, and the
+so everyone reviews the same code. It hides five problems, and the
 lesson is the order of reading that finds them. Reviewing code you did
 not write is a different kind of reading from reviewing your own. You
 have no memory of why a line exists, so every line has to justify itself
@@ -39,13 +39,15 @@ it says what was asked. The tests say what the agent thinks it built.
 The diff says what changed. Reading in that order means the first
 question you answer is whether the change does what was asked, and only
 then how it does it. Well-written code that solves a slightly different
-problem is the most common agent failure and the hardest to see line by
-line, because every line looks reasonable on its own (@Academy ai-fluency-for-builders).
+problem is a common agent failure and a hard one to see line by line,
+because every line looks reasonable on its own (@Academy ai-fluency-for-builders).
 
 Open `SPEC.md` and write down what the review has to find: the three
 commands, the four limits, and the five success criteria. Then ask git
-which files the branch touched. `git diff --stat main` prints one line per
-changed file, with the count of changed lines, and a total (@Git docs git-diff).
+which files the branch touched. `git diff --stat=80 main` prints one line
+per changed file, with the number of lines added plus removed in it, and
+a total. The `=80` fixes the width, so the output is the same whatever
+size your terminal is (@Git docs git-diff).
 
 <Predict id="run-stat" title="Which files did the branch touch?"
   answer={` render.py         |  7 ++++---
@@ -69,11 +71,15 @@ The examples in this lesson aren't graded. Each one is a command you
 run, with output the course itself checks on every build. The
 checkpoints ask what a reviewer does with what the commands show.
 
-Hold the list against the spec before opening a file. The spec
-names `todo.py`, `render.py` and the tests for the new behavior. The
-branch touched six files. `store.py` isn't about due dates, `test_clear.py`
-isn't either, and `test_todo.py` lost three lines. Three of the six
-files are already questions, and you found them without reading any
+Hold the list against the spec before opening a file. The spec names no
+file. It asks for two new commands and for a date after the text in the
+`list` output, and it asks for tests that pass. The files you expect
+from that are the one with the commands, the one that renders the list,
+and a new test. The branch touched six.
+`store.py` reads and writes the file and has no command in it,
+`test_clear.py` tests `clear`, which the spec says keeps working as it
+does, and `test_todo.py` lost three lines and gained none. Three of the
+six files are already questions, and you found them without reading any
 code.
 
 <Choice id="first-question" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
@@ -97,7 +103,8 @@ those are the riskiest part of an agent's diff. They pass unread because
 the reviewer's attention is on the feature. Read each one and ask what
 it does to the program and who asked for it.
 
-`store.py` changed two lines. Before, the list was read from
+`store.py` shows two lines in the diffstat: one removed, and one added.
+Before, the list was read from
 `todos.json` unless `TODO_FILE` said otherwise. After, the default is
 `.todos.json`. No line of the spec mentions the file name, and the
 limits say `add`, `list`, `done` and `clear` keep working as they do. A
@@ -105,8 +112,9 @@ learner who runs `python3 todo.py list` on the branch gets an empty list,
 because the program is now looking at a file that doesn't exist. That's
 a silent behavior change in a file the feature had no reason to touch.
 
-`test_clear.py` changed twelve lines. Read them side by side and every
-change is a double quote turned into an apostrophe. The file does the
+`test_clear.py` shows twelve lines: six removed, and six added. Read them
+side by side and every change is a double quote turned into an
+apostrophe. The file does the
 same thing as before. The reformat is the tidying the summary mentioned,
 and it costs the reviewer twelve lines of reading that hide nothing and
 find nothing. The ask is to drop it from this change, or to put it in a
@@ -163,7 +171,7 @@ makes.
 
 <MultiChoice id="changes-to-question" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
   concepts={['reviewing-code-you-did-not-write']}
-  context="A coding agent's branch for a due-dates feature touched six files. The spec named the program file, the rendering file and new tests. The learner decides which changes to send back."
+  context="A coding agent's branch for a due-dates feature touched six files. The spec describes two new commands, a change to the list output and passing tests, and names no file. The learner decides which changes to send back."
   title="Which changes do you ask the agent to drop or split out?" hint="For each file, who asked for the change, and what does it do to the program?"
   options={[
     { text: 'The new default file name in `store.py`.', correct: true },
@@ -245,7 +253,7 @@ in `store.py` read as harmless until you run `python3 todo.py list`
 in the copy without `TODO_FILE` set and get an empty list where the
 committed items should be. Reading catches design problems, and running
 catches the behavior the tests missed. A review that does both is the
-one that finds every problem on this branch.
+one that finds all five problems on this branch.
 
 <Choice id="green-but-not-done" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
   concepts={['verifying-against-the-specification']}
@@ -276,13 +284,22 @@ do you do before approving?
 </Scenario>
 
 <Exercise stretch="Then brief your own coding agent to fix the branch: name the two failing criteria, the deleted test and the two files to leave alone. Review the fix the same way, and count what the second review finds.">
-Build the branch on a copy with the course's `stat.py`, or make your own
-copy of the fixture, and review it as if a colleague had asked you to.
+Build the branch into a directory of your own with the course's
+`build.py`, from `site/examples/coding-with-agents/reviewing-the-diff/`,
+and review it as if a colleague had asked you to. The copy stays until
+you delete it.
+
+```sh
+python3 build.py ~/review-me
+cd ~/review-me/fixture-repo
+```
+
 Write your review as a list of findings, one line each, before you look
 at the model answer. Spend fifteen minutes. Read the spec first, then
 the tests, then every changed file, and finish by running the five
 criteria by hand. This is the review a branch gets before it reaches
-`main`, and the habit is what you take from the fixture.
+`main`, and the habit is what you take from the fixture. Delete the
+directory when you are done.
 
 A good result lists five findings: `overdue` prints an empty line where
 the spec says `nothing overdue`, a bad date exits with status 0 where the
