@@ -8,9 +8,12 @@ GitHub Pages deploy as the publish step.
 **Status:** In progress - bundles implemented 2026-09-24 (#68):
 `site/src/lib/lesson-bundles.ts` builds them and
 `site/src/pages/data/lessons/[...id].json.ts` writes them. The instruction
-file, the page block and the getting-started page are not built yet. The
-current `.claude/skills/tutor/SKILL.md` is the local-repo tutor this spec
-replaces.
+file and the bootstrap shipped 2026-09-24 (#69): `site/src/tutor/instructions.md`
+is the source, `site/src/lib/tutor-instructions.ts` adds the frontmatter,
+`site/src/pages/data/tutor.md.ts` writes `/data/tutor.md`, and
+`.claude/skills/tutor/SKILL.md` is the bootstrap. The install check by hand
+(step 3 of #69) waits for the first deploy that includes the file. The page
+block and the getting-started page aren't built yet.
 
 ## Introduction
 
@@ -116,8 +119,12 @@ https://lsimons.github.io/ai-training/data/tutor.md
 
 The file's body is the text that was in `.claude/skills/tutor/SKILL.md`,
 moved and rewritten for a reader who has the bundle rather than the repo.
-Its source in the repo is a Markdown file under `site/`, and the build
-copies it into the output with the frontmatter fields filled in.
+Its source in the repo is `site/src/tutor/instructions.md`, and the build
+copies it into the output unchanged with the frontmatter fields filled in.
+Where the body means the `site` field it writes `{site}` and says so, so
+the build doesn't substitute anything and the source reads as the published
+file does. `version` is `BUNDLE_VERSION` from `site/src/lib/lesson-bundles.ts`,
+so the two files can't disagree, and `built` is the UTC date of the build.
 
 ## Lesson bundles
 
