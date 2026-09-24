@@ -1,9 +1,13 @@
 # Source material keyed as in docs/spec/S02-topic-map.md "Source material".
-# type is per spec S01 "Source" (book, course, reference or video). url is a
+# type is per spec S01 "Source" (book, course, paper, reference or video). url is a
 # public URL only where the licensing rules in AGENTS.md allow a link to the
 # source (agent-engineer-course, DeepLearning.AI, Claude Academy, CS50,
 # Diátaxis, Fuchsia, OpenSSF); otherwise null. Academy keys are
 # `Academy <slug>`, one per cited course, and link to the public course page.
+# A paper is keyed `<First author surname> <year>`; author lists the authors
+# ("and N others" past three), container is the venue with volume, year and
+# pages, and url is the publisher or ACL Anthology page over the arXiv page
+# when both exist.
 AEC-01:
   type: course
   title: "What are AI agents: model versus agent, autonomy levels, when a prompt suffices"
@@ -390,7 +394,7 @@ Brilliant ABS:
   license: Proprietary
   url: null
 Brown 2020:
-  type: reference
+  type: paper
   title: Language Models are Few-Shot Learners
   container: arXiv preprint 2005.14165
   author: Tom B. Brown, Benjamin Mann, Nick Ryder and 28 others
@@ -565,23 +569,30 @@ Gitleaks:
   license: MIT
   url: https://github.com/gitleaks/gitleaks
 Sharma 2023:
-  type: reference
+  type: paper
   title: Towards Understanding Sycophancy in Language Models
   container: arXiv preprint 2310.13548
   author: Mrinank Sharma, Meg Tong, Tomasz Korbak and 16 others
   license: CC BY 4.0
   url: https://arxiv.org/abs/2310.13548
 Wilson 2024:
-  type: reference
+  type: paper
   title: Gender, Race, and Intersectional Bias in Resume Screening via Language Model Retrieval
   container: Proceedings of the AAAI/ACM Conference on AI, Ethics, and Society (AIES 2024), arXiv preprint 2407.20371
   author: Kyra Wilson and Aylin Caliskan
   license: CC BY-NC-SA 4.0
   url: https://arxiv.org/abs/2407.20371
 Bertrand 2004:
-  type: reference
+  type: paper
   title: "Are Emily and Greg More Employable than Lakisha and Jamal? A Field Experiment on Labor Market Discrimination"
   container: American Economic Review 94(4), 991-1013
   author: Marianne Bertrand and Sendhil Mullainathan
   license: Copyright American Economic Association
   url: https://www.aeaweb.org/articles?id=10.1257/0002828042002561
+Liu 2024:
+  type: paper
+  title: "Lost in the Middle: How Language Models Use Long Contexts"
+  container: Transactions of the Association for Computational Linguistics 12 (2024), 157-173
+  author: Nelson F. Liu, Kevin Lin, John Hewitt and 4 others
+  license: CC BY 4.0
+  url: https://aclanthology.org/2024.tacl-1.9/

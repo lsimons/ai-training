@@ -166,7 +166,7 @@ learner can do afterwards. They're kept outside the map and point into it.
 | **Level**              | `base` or `expert`, tagged on a learning objective. See "Levels".                                                                                                                                              | grade, rank, seniority, maturity   |
 | **Goal**               | A learner-chosen destination expressed as a competency at a level, for example "Building agents: base". Paths are the routes to goals.                                                                         | objective, target                  |
 | **Link**               | A typed edge between topics. See "Links".                                                                                                                                                                      | dependency, relation, tag          |
-| **Source**             | An external resource a lesson or competency points to, typed `book`, `course`, `reference` or `video`. Carries license notes when the material may not be copied.                                              | link, resource, reading            |
+| **Source**             | An external resource a lesson or competency points to, typed `book`, `course`, `paper`, `reference` or `video`. Carries license notes when the material may not be copied.                                     | link, resource, reading            |
 | **Alignment**          | A row mapping an external framework's item (framework, code, what it asks) to the learning objectives here that address it. Kept per competency.                                                               | standard, crosswalk, mapping       |
 
 ### Levels
