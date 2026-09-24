@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Wave picker (`mise run next-wave -- --size 6 [--kind lessons|content]
- * [--only N,N,...] [--json]`): the issues the next wave of builders should
+ * [--only N,N,...] [--unblockers-first] [--json]`): the issues the next wave of builders should
  * take on, from the data tree of this checkout and the `ready-for-agent`
  * issues on GitHub (`gh issue list`). The rules and the markdown output are
  * in scripts/lib/next-wave.mjs, which tests/scripts/next-wave.test.ts
@@ -18,15 +18,19 @@ const REPO = 'lsimons/ai-training';
 /**
  * `--size N` (default 6, a positive integer in plain digits), `--kind`
  * (`lessons`, the default, or `content`), `--only N,N,...` (issue numbers,
- * the whitelist) and `--json` from the command line.
+ * the whitelist), `--unblockers-first` (rank a lesson that unblocks other
+ * candidates ahead of the course order within its area) and `--json` from
+ * the command line.
  */
 function parseArgs(argv) {
 	let size = 6;
 	let kind = 'lessons';
 	let only = null;
+	let unblockersFirst = false;
 	let json = false;
 	for (let i = 0; i < argv.length; i++) {
 		if (argv[i] === '--json') json = true;
+		else if (argv[i] === '--unblockers-first') unblockersFirst = true;
 		else if (argv[i] === '--size') {
 			const raw = argv[++i] ?? '';
 			if (!/^[1-9][0-9]*$/.test(raw)) {
@@ -53,7 +57,7 @@ function parseArgs(argv) {
 			process.exit(2);
 		}
 	}
-	return { size, kind, only, json };
+	return { size, kind, only, unblockersFirst, json };
 }
 
 /**
@@ -81,12 +85,12 @@ function openIssues() {
 	}));
 }
 
-const { size, kind, only, json } = parseArgs(process.argv.slice(2));
+const { size, kind, only, unblockersFirst, json } = parseArgs(process.argv.slice(2));
 const root = new URL('..', import.meta.url).pathname;
 const tree = readAreaTree(join(root, 'src/data'));
 const livePageIds = lessonPages(join(root, 'src/content/docs'), new Set(tree.areas.map((a) => a.dir))).keys();
 const issues = openIssues();
 const readyIssues = issues.filter((i) => i.labels.includes('ready-for-agent'));
 const openNumbers = issues.map((i) => i.number);
-const result = pickWave({ tree, livePageIds, readyIssues, openIssues: openNumbers, size, kind, only });
+const result = pickWave({ tree, livePageIds, readyIssues, openIssues: openNumbers, size, kind, only, unblockersFirst });
 process.stdout.write(json ? `${JSON.stringify(result, null, 2)}\n` : formatWave(result));
