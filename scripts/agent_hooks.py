@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """Claude Code hooks for this repo (`.claude/settings.json`, issues #349 and #342).
 
-Two entry points, each reading the hook's JSON event on stdin:
+Three entry points, each reading the hook's JSON event on stdin:
 
 - `guard-bash` (PreToolUse on Bash) rejects a command that breaks a rule
   of `AGENTS.md` or `docs/agents/orchestration.md` and exits 2 with a
   reason that names the alternative, which Claude Code shows the agent.
+- `review-bash` (PreToolUse on Bash in the `code-reviewer` agent,
+  `.claude/agents/code-reviewer.md`, #348) allows only the read-only
+  commands a review needs: `git diff|log|show|status`, `gh pr diff|view`,
+  `gh issue view`, `mise run <task>`, `cd`, and `head`, `tail`, `grep` and
+  `wc` to filter their output. Anything else exits 2.
 - `format` (PostToolUse on Edit and Write) runs Biome on an edited file
   under `site/` and ruff on an edited `.py` file. It never fails the tool
   call: a formatter that is missing or errors is skipped.
@@ -309,6 +314,49 @@ def guard_bash(event: Mapping[str, Any], env: Mapping[str, str]) -> tuple[int, s
     return 0, ""
 
 
+REVIEW_COMMANDS = (
+    ("git", "diff"),
+    ("git", "log"),
+    ("git", "show"),
+    ("git", "status"),
+    ("gh", "pr", "diff"),
+    ("gh", "pr", "view"),
+    ("gh", "issue", "view"),
+    ("mise", "run"),
+    ("head",),
+    ("tail",),
+    ("grep",),
+    ("wc",),
+)
+
+
+def review_allows(words: Sequence[str]) -> bool:
+    """True when a simple command is one the code reviewer may run."""
+    if words[0] == "cd":
+        return True
+    if words[0] == "git":
+        parsed = git_args(words, ".")
+        args = parsed[0] if parsed else []
+        return bool(args) and ("git", args[0]) in REVIEW_COMMANDS
+    return any(tuple(words[: len(allowed)]) == allowed for allowed in REVIEW_COMMANDS)
+
+
+def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
+    """Exit code and message for the code reviewer's PreToolUse event on Bash."""
+    tool_input: Mapping[str, Any] = event.get("tool_input") or {}
+    command = tool_input.get("command")
+    if not isinstance(command, str):
+        return 0, ""
+    for segment in split_segments(command, "."):
+        if segment.role is not None or not review_allows(segment.words):
+            allowed = ", ".join(" ".join(c) for c in REVIEW_COMMANDS)
+            return 2, (
+                f"Blocked by the code-reviewer hook: `{' '.join(segment.words)}` is not a "
+                f"review command. A reviewer runs only {allowed} and cd, and never edits."
+            )
+    return 0, ""
+
+
 def formatter_for(path: Path, root: Path) -> tuple[list[str], Path] | None:
     """The formatter command for an edited file and the directory to run it in, or None."""
     try:
@@ -362,8 +410,8 @@ def format_file(event: Mapping[str, Any]) -> int:
 
 
 def main(argv: Sequence[str], stdin: str, env: Mapping[str, str]) -> int:
-    if len(argv) != 2 or argv[1] not in {"guard-bash", "format"}:
-        print("usage: agent_hooks.py guard-bash|format < event.json", file=sys.stderr)
+    if len(argv) != 2 or argv[1] not in {"guard-bash", "review-bash", "format"}:
+        print("usage: agent_hooks.py guard-bash|review-bash|format < event.json", file=sys.stderr)
         return 1
     try:
         parsed: object = json.loads(stdin)
@@ -374,7 +422,10 @@ def main(argv: Sequence[str], stdin: str, env: Mapping[str, str]) -> int:
     event = cast("dict[str, Any]", parsed)
     if argv[1] == "format":
         return format_file(event)
-    code, message = guard_bash(event, env)
+    if argv[1] == "review-bash":
+        code, message = review_bash(event)
+    else:
+        code, message = guard_bash(event, env)
     if message:
         print(message, file=sys.stderr)
     return code
