@@ -2,8 +2,8 @@ import { Choice, MultiChoice, Order, Predict, Sort, Pitfall, Exercise, Recap } f
 
 The to-do program gets a feature: "Let me import my old list. I have a
 text file with one task per line, and I don't want to type forty `add`
-commands." The last lesson decided to build it and wrote
-the success criteria. In this lesson we take the feature apart before any
+commands." The last lesson taught how to write success criteria a stranger
+could check, and this feature has them. In this lesson we take the feature apart before any
 agent sees it. We split it into components with one responsibility each,
 we draw the dependencies between them and put them in order, and we write
 the check for the first component before it exists. Then we run that
@@ -12,11 +12,11 @@ check and watch it fail, which is the state the agent starts from.
 An agent given a whole feature makes the split itself, and it makes a
 different one every session. It also builds the parts together and
 tests them at the end, so a mistake in the first part is hidden by the
-second and found by the third. Brilliant's skills map for coding with AI
+parts built on it. Brilliant's skills map for coding with AI
 lists decomposition, dependency analysis, and designing the verification as
 skills of the engineer (@Brilliant SPC), and Claude Academy's playbook for
-an AI-native development process writes the intent and the check down
-before the code (@Academy ai-native-sdlc-playbook). Both put the split in
+an AI-native development process writes the intent down in a file before
+the code and keeps the checks running throughout (@Academy ai-native-sdlc-playbook). Both put the split in
 your hands. The agent gets one component at a time, with its check.
 
 ## The fixture
@@ -68,13 +68,14 @@ what this lesson teaches.
 
 ## One responsibility per component
 
-The success criteria from the last lesson, shortened: `todo import tasks.txt`
-reads a text file with one task per line, a line that starts with `x ` is
-a done item, blank lines are skipped, a task already in the list isn't
-added twice, and the command prints how many items it imported and how
-many it skipped. `add`, `list`, `done` and `clear` keep working.
+The success criteria for the import feature: `todo import tasks.txt` reads
+a text file with one task per line. Spaces before and after a line are
+dropped, a line that starts with `x ` is a done item, and blank lines are
+skipped. A task already in the list isn't added twice, and the command
+prints how many items it imported and how many it skipped. `add`, `list`,
+`done` and `clear` keep working.
 
-The feature reads as one thing. It is three. A component has one
+The request names one feature, and the work in it is three components. A component has one
 responsibility, an interface you can state in a sentence, and a size that
 fits one agent session and one change you can review in a few minutes. Cut
 the feature where the data changes form: text lines become items, items
@@ -94,13 +95,12 @@ problem and nobody else's, and "already in the list" is the merge's
 problem, so the command has nothing to decide.
 
 Write the list before the brief, and put it in the brief. The agent builds
-the parser to the interface you named, and the merge you brief next week
-builds against the same interface, whether the same agent writes it or
-not.
+the parser to the interface you named, and the brief for the merge names
+the same interface, whether the same agent writes it or not.
 
 <MultiChoice id="one-responsibility" objective="coding-with-agents/specifies-work/decomposes-into-components"
   concepts={['decomposition-into-components']}
-  context="A coding agent is going to add an import command to a small command-line to-do program. The feature reads a text file with one task per line, skips blank lines, treats a leading x as a done mark, leaves out tasks already in the list, and prints how many it imported and skipped. The learner is splitting it into components."
+  context="A coding agent is going to add an import command to a small command-line to-do program. The feature reads a text file with one task per line, drops the spaces around a line, skips blank lines, treats a leading x as a done mark, leaves out tasks already in the list, and prints how many it imported and skipped. The learner is splitting it into components."
   title="Which of these are components with one responsibility?" hint="Can you state what the component does, and what it takes and returns, in one sentence each?"
   options={[
     { text: 'A function that turns a list of text lines into a list of items, handling the done mark and the blank lines.', correct: true },
@@ -126,25 +126,28 @@ Which of these are components with one responsibility each?
 
 ## Order the work by dependency
 
-Three components, and they can't be built in any order. The merge takes
-items, and the item format is the parser's output. The command calls both.
-Draw the arrows. The parser has no dependency. The merge depends on the
-parser's format, and the command depends on both. That order is the plan,
-and each step is checked before the next one starts.
+Three components, and they can't be built in any order. The table fixes
+the item format, so the merge could be written against it today. Its
+check couldn't. The merge's test has to run on items the real parser
+produced, or it proves the merge works on items you typed by hand and
+says nothing about the imported ones. So the dependency runs from a
+component to the checked output of the one before it. Draw the arrows.
+The parser has no dependency. The merge depends on a checked parser, and
+the command depends on both. That order is the plan, and each step is
+checked before the next one starts.
 
-The order also names the risky assumption. Everything rests on the item
-format the parser produces. If the parser is wrong about what an item is,
-the merge inherits the mistake and the command shows it. So the parser
-goes first. It is checked alone with its own test, and only then is the
-merge briefed. A component that passes its own check becomes solid ground for
-the next one.
+The order also names the assumption everything rests on: the item format
+the parser produces. The parser goes first and is checked alone with its
+own test, and only then is the merge briefed. A component that passes its
+own check is a fixed point the next brief can name.
 
-The dependency drawing also shows which components have no arrow between them. If the
-feature had a fourth component, a `render` change that shows how many
-items came from an import, it would depend on the command and not on the
-parser, and a second agent session could build it in parallel once the
-command's interface was fixed. Naming the dependencies is what tells you
-what can run side by side and what has to wait.
+The dependency drawing also shows which components have no arrow between
+them. If the feature had a fourth component, a `render` change that shows
+how many items came from an import, its arrow would point at the command
+and not at the parser. A second agent session could build it once the
+command was checked, while the merge was still in progress. Naming the
+dependencies is what tells you what can run side by side and what has to
+wait.
 
 <Pitfall title="The merge inherited the parser's mistake">
 An engineer briefed the parser and the merge together. The agent built
@@ -161,10 +164,10 @@ feed the second component's test what the first one produces.
 <Order id="dependency-order" objective="coding-with-agents/specifies-work/decomposes-into-components"
   concepts={['dependencies']}
   context="A coding agent is adding an import command to a small command-line to-do program in three components: a parser that turns text lines into items, a merge that adds new items to the list and leaves duplicates out, and the command that reads the file, calls both and prints a report. Each component is checked before the next is briefed."
-  title="Put the steps in dependency order" hint="Which component's output does each of the others take as input?"
+  title="Put the steps in dependency order" hint="Which component's test needs the output of another component to run on?"
   steps={[
     'Brief the parser and check that its test passes',
-    'Brief the merge against the parser\'s item format and check its test',
+    'Brief the merge and check its test on items the parser produced',
     'Brief the command that reads the file and calls both',
     'Run the whole import against a copy of the list',
   ]} />
@@ -172,11 +175,11 @@ feed the second component's test what the first one produces.
 <Choice id="what-rests-on-what" phase="review" objective="coding-with-agents/specifies-work/decomposes-into-components"
   concepts={['dependencies']}
   context="A coding agent is adding an import command to a small command-line to-do program in three components: a parser that turns text lines into items, a merge that adds new items to the list and leaves duplicates out, and the command that reads the file, calls both and prints a report."
-  title="Which component is built first?" hint="Which component's output is another component's input, and which one has no input from the others?"
+  title="Which component is built first?" hint="Which component's test can run on nothing but its own input, and which tests need another component's output?"
   options={[
     { text: 'The command, because it is what the user sees, and the parser and merge can be filled in behind it.', why: 'The command calls both of the others. Built first, it has nothing to call, and its check can only pass against stubs.' },
-    { text: 'The merge, because duplicates are the part most likely to go wrong.', why: 'The merge takes the parser\'s items as input. Built first, it is tested on items typed by hand, and a parser mistake reaches it later unseen.' },
-    { text: 'The parser, because the other two take its output as input.', correct: true },
+    { text: 'The merge, because duplicates are the part most likely to go wrong.', why: 'The merge takes the parser\'s items as input. Built first, its test runs on items typed by hand, and a parser mistake reaches it later unseen.' },
+    { text: 'The parser, because the other two are checked on its output.', correct: true },
     { text: 'Any of them, because the agent runs the whole suite at the end anyway.', why: 'A suite run at the end tells you something failed, and three components built together give it three places to look. The order is what makes each failure point at one component.' },
   ]}>
 Which component do you brief first, and why?
@@ -268,10 +271,10 @@ last line of the brief closes that door.
   context="Before a coding agent builds a parser that turns text lines into to-do items, the learner writes an acceptance test for it. The test should reject a stub, a version of the parser that has the right function name and does no real work."
   title="Which test would fail on a stub?" hint="Imagine a parser that returns an empty list, and one that returns every line as an open item. Which test rejects both?"
   options={[
-    { text: 'Assert that `parse_lines` on the same four lines returns a list and not `None`.', why: 'A stub that returns an empty list passes. The test checks the type and never the work.' },
+    { text: 'Assert that `parse_lines` on the same four lines returns a list of dictionaries, each with a `text` and a `done` key.', why: 'A stub that returns an empty list passes, because every item in an empty list has the keys. The test checks the format and never the work.' },
     { text: 'Assert that `parse_lines` on the same four lines runs to the end without raising an error.', why: 'Every stub passes this. A function that does nothing raises nothing.' },
-    { text: 'Assert that `parse_lines` on four lines, one blank and one marked done, returns three items with the right texts and marks.', correct: true },
-    { text: 'Assert that `importer.py` exists in the directory and defines a function called `parse_lines`.', why: 'That is what a stub is: the name without the work. The check would pass on the file you just deleted.' },
+    { text: 'Assert that `parse_lines` on the same four lines returns three items, with the texts and done marks the lines describe.', correct: true },
+    { text: 'Assert that `importer.py` exists next to `todo.py` and defines a function called `parse_lines` that takes one argument.', why: 'That is what a stub is: the name without the work. The check would pass on the file you just deleted.' },
   ]}>
 Which of these tests would fail on a stub parser?
 </Choice>
@@ -296,24 +299,24 @@ looking at the table above. Write the components as a list with one
 responsibility and one interface sentence each, draw the dependency
 arrows between them, and put them in build order. Then write the failing
 acceptance test for the first component, run
-`python3 -m unittest -q`, and check that the last line says the test
-failed. Add a stub with the right name and run it again, and the line
-must still say it failed. Fifteen lines of notes and one test file is
+`python3 -m unittest -q`, and check that the last line starts with
+`FAILED`. Add a stub with the right name and run it again, and the line
+must still start with `FAILED`. Fifteen lines of notes and one test file is
 enough. You do this so that the agent builds one checked component at a
 time and never gets to choose the split.
 
 A good result: each component's interface fits in a sentence, the first
-one in your order is the one the others take input from, the test fails
-before the component exists and fails again on the stub, and the brief
+one in your order is the one the others take input from, the suite says
+`FAILED` before the component exists and again on the stub, and the brief
 names the test run as what done means. Reflect: which of your components
 would you have merged if the agent had been given the whole feature, and
 what mistake could then have hidden inside it?
 </Exercise>
 
 <Recap>
-1. A component has one responsibility, an interface that fits in a sentence, and a size that fits one agent session and one reviewable change. Cut where the data changes form (@Brilliant SPC).
+1. A component has one responsibility, an interface that fits in a sentence, and a size that fits one agent session and one reviewable change. Cut where the data changes form.
 2. Dependencies set the build order. The component whose output the others take is built and checked first, so a mistake in it never reaches the next one unseen.
-3. A component checked alone is solid ground. Feed the next component's test what the first one produces, or the second inherits and hides the first one's mistakes.
-4. Write the acceptance test before the component exists, put it in the suite and name the test run in the brief as what done means (@Academy ai-native-sdlc-playbook).
+3. A component checked alone is a fixed point for the next brief. Feed the next component's test what the first one produces, or the second inherits and hides the first one's mistakes.
+4. Write the acceptance test before the component exists, put it in the suite and name the test run in the brief as what done means.
 5. A check that passes on a stub doesn't check the work. Run it against a version with the right name and no work, and the line must still say it failed.
 </Recap>
