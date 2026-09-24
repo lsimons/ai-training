@@ -212,6 +212,9 @@ function renderTag(
 			return withHeading('## More practice');
 		case 'Recap':
 			return withHeading('## Recap');
+		case 'Habit':
+			// The habit text under its own heading, so the tutor can name it when one is due (S07 "Tutor mode").
+			return withHeading(`#### Habit: ${str('id') ?? ''}`.trimEnd());
 		default:
 			// Any other component, a widget included, is its children. A self-closing widget leaves nothing.
 			return body;

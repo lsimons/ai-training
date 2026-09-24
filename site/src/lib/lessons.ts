@@ -1,6 +1,7 @@
 import { type CollectionEntry, getCollection } from 'astro:content';
 import { type CheckpointKind, type CheckpointPhase, DEFAULT_REVISION, isReviewable } from './checkpoint-rules';
 import { type CheckpointTagInfo, checkpointTagsOfSource, conceptsProp, stringProp } from './checkpoint-tags';
+import { type HabitInfo, habitTagsOfSource } from './habit-tags';
 
 /**
  * A lesson page: a docs entry whose data the lesson docs loader filled from
@@ -17,6 +18,7 @@ export type Lesson = Omit<CollectionEntry<'docs'>, 'data'> & { data: LessonData 
 
 export type { CheckpointAttr, CheckpointTagInfo } from './checkpoint-tags';
 export { conceptsProp } from './checkpoint-tags';
+export type { HabitInfo } from './habit-tags';
 
 export interface CheckpointInfo {
 	id: string;
@@ -107,4 +109,14 @@ export function checkpointOf(lesson: Lesson, { tag, kind, attrs, stem, phase }: 
 export function checkpointsOf(lesson: Lesson, options: { alternates?: boolean } = {}): CheckpointInfo[] {
 	const all = checkpointTagsOf(lesson).map((t) => checkpointOf(lesson, t));
 	return options.alternates ? all : all.filter((c) => c.phase === 'first');
+}
+
+/**
+ * The habits of a lesson (spec S07 "Authoring"), read from the MDX tree of
+ * its body by `lib/habit-tags.ts`, which also applies the authoring rules:
+ * at most two, kebab-case ids that are unique and not a section slug, after
+ * the recap. The review page and the progress catalog read the text here.
+ */
+export function habitsOf(lesson: Lesson): HabitInfo[] {
+	return habitTagsOfSource(lesson.body ?? '', lesson.id);
 }

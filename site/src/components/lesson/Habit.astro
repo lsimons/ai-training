@@ -1,0 +1,39 @@
+---
+/**
+ * A habit (spec S07): a small task the learner does in their own work after
+ * finishing the lesson, brought back 1, 3 and 7 days later. Renders the
+ * habit card after the recap, in a `not-content` container the lesson script
+ * binds (`scripts/habits.ts`): the text only before the lesson is finished,
+ * the next date while waiting, Done and Skip when due, and the results once
+ * retired. The progress id is `<lesson id>#<id>`, and the card's element id
+ * is the habit id, so an author's id must not be a section slug too
+ * (`lib/habit-tags.ts` checks that, with the count and the placement).
+ */
+import { assertHabitId } from '@lib/habit-tags';
+import { lessonIdOf } from '@lib/lesson-context';
+
+interface Props {
+	/** Lowercase kebab-case, unique in the lesson, stable once published. */
+	id: string;
+}
+
+const lessonId = lessonIdOf(Astro);
+const id = assertHabitId(lessonId, Astro.props.id);
+---
+
+<aside class="habit not-content" id={id} data-habit data-progress-id={`${lessonId}#${id}`} data-state="unfinished" aria-label="Habit">
+	<p class="habit-title">Habit</p>
+	<div class="habit-text"><slot /></div>
+	<p class="habit-status" data-habit-status role="status"></p>
+	<div class="habit-actions" data-habit-actions hidden>
+		<button type="button" class="habit-done" data-habit-done>Done</button>
+		<button type="button" class="habit-skip" data-habit-skip>Skip</button>
+	</div>
+	<ol class="habit-results" data-habit-results hidden></ol>
+</aside>
+
+<script>
+	import { bindHabits } from '@scripts/habits';
+
+	bindHabits(document);
+</script>
