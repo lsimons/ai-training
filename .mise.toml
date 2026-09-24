@@ -243,29 +243,17 @@ run = "vale sync"
 # only the House rules and reports a clean page that isn't (issue #103).
 # Each `.zip` on the `Packages` lines of the two configs unpacks to
 # `.vale/styles/<name>/`, so a missing directory means the sync hasn't
-# run. Comment lines (`;` or `#`) are skipped, and an empty list is a
-# parse failure rather than a pass. Local (no network) and cheap. It does
-# not detect a stale unpack: after moving a pin in the ini, run
-# `prose-sync` again yourself.
+# run. The check is `check_packages_synced` in scripts/prose_eval.py, the
+# same function `prose-eval` and `prose-metrics` run on .vale-eval.ini
+# (issue #295), so one tested parser reads every Vale config. Comment
+# lines (`;` or `#`) are skipped, a bare package name is not supported,
+# and an empty list is a failure rather than a pass. Local (no network)
+# and cheap. It does not detect a stale unpack: after moving a pin in the
+# ini, run `prose-sync` again yourself.
 [tasks.prose-check-packages]
 description = "Fail when a Vale package pinned in .vale.ini or .vale-extended.ini is not under .vale/styles/"
 hide = true
-run = """
-set -e
-for ini in .vale.ini .vale-extended.ini; do
-  pkgs=$(grep -v '^[[:space:]]*[;#]' "$ini" | grep -o '[^/[:space:],]*\\.zip' | sed 's/\\.zip$//' || true)
-  if [ -z "$pkgs" ]; then
-    echo "prose: no .zip packages found on the Packages lines of $ini" >&2
-    exit 1
-  fi
-  for pkg in $pkgs; do
-    if [ ! -d ".vale/styles/$pkg" ]; then
-      echo "prose: Vale package '$pkg' from $ini is not synced under .vale/styles/. Run 'mise run prose-sync' first." >&2
-      exit 1
-    fi
-  done
-done
-"""
+run = "scripts/prose_eval.py --check-packages .vale.ini .vale-extended.ini"
 
 # .vale-extended.ini must stay a superset of .vale.ini (same TokenIgnores,
 # BasedOnStyles and rule levels per section, issue #289). The script names
@@ -330,8 +318,12 @@ vale --no-exit --config .vale-extended.ini --ext=.md $yaml
 # goes (.vale.ini, .vale-extended.ini or off). Every hit as JSON plus word
 # counts per area, into docs/prose/reports/<package>/. See docs/prose/README.md.
 # Both scripts read .vale-eval.ini, whose packages `prose-sync` does not
-# fetch, and stop with a message naming `vale sync --config .vale-eval.ini`
-# when one is not under .vale/styles/ (the eval side of #103, issue #276).
+# fetch, and stop with a message naming `prose-eval-sync` when one is not
+# under .vale/styles/ (the eval side of #103, issues #276 and #295).
+[tasks.prose-eval-sync]
+description = "Fetch the Vale packages pinned in .vale-eval.ini, for prose-eval and prose-metrics (network)"
+run = "vale sync --config .vale-eval.ini"
+
 [tasks.prose-eval]
 description = "Collect every hit of a Vale package for review: mise run prose-eval -- <package>"
 run = "scripts/prose_eval.py"

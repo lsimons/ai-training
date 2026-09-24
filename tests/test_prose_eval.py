@@ -168,7 +168,26 @@ def test_check_packages_synced_exits_naming_the_sync_command(tmp_path: pathlib.P
         prose_eval.check_packages_synced(ini, styles)
     message = str(exc.value)
     assert "write-good, ai-tells" in message
-    assert "vale sync --config .vale-eval.ini" in message
+    assert "mise run prose-eval-sync" in message
+
+
+def test_check_packages_synced_names_prose_sync_for_the_main_configs(
+    tmp_path: pathlib.Path,
+) -> None:
+    styles = tmp_path / "styles"
+    styles.mkdir()
+    for name in (".vale.ini", ".vale-extended.ini"):
+        ini = tmp_path / name
+        ini.write_text(EVAL_INI_TEXT)
+        with pytest.raises(SystemExit) as exc:
+            prose_eval.check_packages_synced(ini, styles)
+        assert "mise run prose-sync" in str(exc.value)
+        assert "prose-eval-sync" not in str(exc.value)
+
+
+def test_pinned_packages_ignores_a_bare_package_name(tmp_path: pathlib.Path) -> None:
+    ini = write_ini(tmp_path, "StylesPath = .vale/styles\nPackages = Google\n")
+    assert prose_eval.pinned_packages(ini) == []
 
 
 def test_check_packages_synced_exits_on_empty_package_list(tmp_path: pathlib.Path) -> None:
@@ -176,6 +195,35 @@ def test_check_packages_synced_exits_on_empty_package_list(tmp_path: pathlib.Pat
     with pytest.raises(SystemExit) as exc:
         prose_eval.check_packages_synced(ini, tmp_path)
     assert "no .zip packages" in str(exc.value)
+    assert "bare package name is not supported" in str(exc.value)
+
+
+def test_pinned_packages_reads_the_real_main_configs() -> None:
+    for name in (".vale.ini", ".vale-extended.ini"):
+        assert "write-good" in prose_eval.pinned_packages(REPO_ROOT / name)
+
+
+def test_main_check_packages_runs_every_named_config(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    styles = tmp_path / "styles"
+    for name in ("write-good", "ai-tells"):
+        (styles / name).mkdir(parents=True)
+    monkeypatch.setattr(prose_eval, "STYLES", styles)
+    good = write_ini(tmp_path)
+    bad = tmp_path / ".vale.ini"
+    bad.write_text("Packages = https://example.com/missing.zip\n")
+    prose_eval.main(["prose_eval.py", "--check-packages", str(good)])
+    with pytest.raises(SystemExit) as exc:
+        prose_eval.main(["prose_eval.py", "--check-packages", str(good), str(bad)])
+    assert "missing" in str(exc.value)
+    assert "mise run prose-sync" in str(exc.value)
+
+
+def test_main_check_packages_without_a_config_exits_with_usage() -> None:
+    with pytest.raises(SystemExit) as exc:
+        prose_eval.main(["prose_eval.py", "--check-packages"])
+    assert "Usage" in str(exc.value)
 
 
 def test_main_stops_before_writing_when_not_synced(

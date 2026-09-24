@@ -32,13 +32,17 @@ script with its reason, so add the entry when you add the rule.
 
 ## Process for a package
 
-1. Add the package to `.vale-eval.ini`, run
-   `vale sync --config .vale-eval.ini` to fetch it, and run
+1. Add the package to `.vale-eval.ini` by its release `.zip` URL (a bare
+   package name is not supported), run `mise run prose-eval-sync` (that is
+   `vale sync --config .vale-eval.ini`) to fetch it, and run
    `mise run prose-eval -- <package>`. This writes every hit as JSON and word
    counts per area into `docs/prose/reports/<package>/`. `mise run prose-sync`
    reads `.vale.ini` only, so the eval packages need this separate sync, and
-   `prose-eval` and `prose-metrics` stop with a message naming the command
+   `prose-eval` and `prose-metrics` stop with a message naming the task
    when a package pinned in `.vale-eval.ini` isn't under `.vale/styles/`.
+   The `prose` and `prose-extended` tasks run the same check, from the same
+   function in `scripts/prose_eval.py`, on `.vale.ini` and
+   `.vale-extended.ini` and name `mise run prose-sync` instead.
 2. For each rule, an agent writes `reports/<package>/<Rule>.md` following
    `report-template.md`: stats, representative examples in context,
    concentration. The report gathers and doesn't judge.
