@@ -218,8 +218,8 @@ order:
 The block is the same component (`TutorBlock.astro`) on every lesson, and
 the MarkdownContent override passes it the lesson URL built from Astro's
 `site` and the base path. The code lines are the component's own markup
-with a small copy script, so the block needs no Markdown rendering. It never shows on course pages, guides or reference
-pages.
+with a small copy script, so the block needs no Markdown rendering. It
+never shows on course pages, guides or reference pages.
 
 ## Getting-started page
 
