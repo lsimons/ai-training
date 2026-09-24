@@ -302,7 +302,7 @@ patterns below after the fact. Write so that it has nothing to say.
   (`/wave --no-filing`), are listed in the session record for the
   maintainer to file. Session records and transcripts are otherwise not a
   place work waits.
-- Commits follow [Conventional Commits](https://conventionalcommits.org/)
+- Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`type(scope): description`), and commitlint enforces it.
 - A push to `main` deploys to GitHub Pages (`.github/workflows/deploy.yml`).
   The site is pre-release and says so on the front page and in the README.
