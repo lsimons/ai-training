@@ -3,6 +3,10 @@
 # `mise install` installs everything under [tools]; `mise run <task>` runs
 # the tasks below. `mise run ci` is the full gate.
 
+# CI pins this same mise release (`version` and `sha256` on every
+# mise-action step). The three move together; see AGENTS.md, Supply chain.
+min_version = "2026.9.12"
+
 [settings]
 minimum_release_age = "7d"
 lockfile = true

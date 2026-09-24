@@ -230,6 +230,14 @@ patterns below after the fact. Write so that it has nothing to say.
 - Pin GitHub Actions to full-length commit SHAs. `zizmor` enforces it.
 - Every `.mise.toml` tool is exact-pinned and invisible to dependabot.
   Refresh with `mise up` and read the diff.
+- The mise binary itself is pinned too: `version` and `sha256` on every
+  `mise-action` step in the workflows, and `min_version` in `.mise.toml`.
+  Dependabot does not see any of them. To refresh: pick a release at
+  least seven days old, download its `mise-v<version>-linux-x64.tar.gz`
+  and check it against the release's `SHASUMS256.txt`, extract it and
+  hash the extracted `mise/bin/mise` with `shasum -a 256` (the action
+  checks that binary against `sha256`), then update the workflows and
+  `.mise.toml` in one commit.
 - `prek.toml` hook repos are pinned by commit SHA (tag in the comment),
   and each Python hook lists its full transitive tree in
   `additional_dependencies`, exact-pinned. Both are invisible to
