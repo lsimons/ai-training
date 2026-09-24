@@ -67,17 +67,18 @@ runs six builders plus up to six reviewers, under the cap with room for the
 ## Starting the loop
 
 `/wave` (`.claude/skills/wave/SKILL.md`) is the dispatcher. On a fresh
-session in this repo it pulls `main`, runs the picker, fills the wave lead
-template at `.claude/skills/wave/wave-lead-prompt.md`, spawns the lead,
-reads the report, commits the record, and repeats until a stop condition,
-with no further instruction from the maintainer. Its arguments:
-`/wave [size]`, default 6, then any of `--kind lessons|content` (what the
-picker selects, planned lessons by default), `--only N,N,...` (an issue
-whitelist for the run, and the picker skips everything else) and
-`--no-filing`. The skill loops on its own and waits for each lead in the
-foreground. An optional watchdog is the maintainer's choice, and a second
-`/wave` on a session with a lead running would spawn a second dispatcher,
-so don't run one.
+session in this repo it runs the preflight, opens or resumes a run issue,
+pulls `main`, runs the picker, fills the wave lead template at
+`.claude/skills/wave/wave-lead-prompt.md`, spawns the lead, reads the
+report, updates the run issue, and repeats until a stop condition, with
+no further instruction from the maintainer. Its arguments: `/wave [size]`,
+default 6, then any of `--kind lessons|content` (what the picker selects,
+planned lessons by default), `--only N,N,...` (an issue whitelist for the
+run, and the picker skips everything else), `--no-filing` and
+`--resume <Name>`. The skill loops on its own and waits for each lead in
+the foreground. An optional watchdog is the maintainer's choice, and a
+second `/wave` in a session with a lead running would spawn a second
+dispatcher, so don't run one.
 
 `--no-filing` is the bounded-run mode for an unattended session. In the
 default mode every wave files follow-up issues, and some of those are
@@ -86,36 +87,91 @@ and never reach the empty wave that ends the loop. With `--no-filing`
 nobody files an issue while the run goes, so the queue only shrinks and
 the loop ends. The follow-up rule is otherwise the same in both modes:
 each lead writes the issue it would have filed, title, body and labels,
-to a follow-ups file on its wave branch, and when the run ends the
-dispatcher checks each entry once against `main` and files the ones that
-still hold. The overnight run of 2026-09-24 left 24 follow-ups in a record
-instead, and 6 of them were obsolete by the evening. Nothing waits in a
-record for the maintainer to reconcile.
+in one comment on the run issue, and when the run ends the dispatcher
+checks each entry once against `main` and files the ones that still hold.
+The overnight run of 2026-09-24 left 24 follow-ups in a record instead,
+and 6 of them were obsolete by the evening. Nothing waits in a record for
+the maintainer to reconcile.
+
+## Runs and run issues
+
+A run is one `/wave` session from its start to its stop condition, and
+its record is one GitHub issue with the `dispatcher-run` label, titled
+`Run: <Name> (<kind>)`. The body holds the arguments, `Remaining --only`,
+`Parked`, `Pending collision notes` and the `## Waves` list with the
+`In flight` line, and the dispatcher edits it as the run goes. Each wave
+report is a comment, and the issue closes with a comment that names the
+stop condition. The dispatcher commits nothing to `main`, so its record
+costs one API call and no commit, lint pass, CI run or deploy, and the
+maintainer can read it from a phone. The per-wave session record goes in
+the body of the wave pull request, under the review table. The files under
+`docs/agents/sessions/` are the records of the runs before 2026-09-25 and
+don't get new ones (`docs/agents/sessions/README.md`).
+
+Runs are named after animals in alphabetical order, like hurricanes:
+Axolotl, then Badger, Capybara and so on, from the two lists in
+`.claude/skills/wave/run-names.yaml`. `mise run run-name` prints the open
+runs and the next name, the letter after the newest run's name, skipping
+a name an open run still holds. After Z the second list starts at A, and
+after its Z the first list comes back. A name never says which machine
+or session a run is on, and `/wave` never guesses it. A session
+continues its own run with `--resume <Name>` and otherwise starts a new
+one.
+
+Wave `k` of run Capybara is on the branch `wave/capybara-<k>`, and reports
+call it `CAPYBARA wave <k>`. The count starts at 1 in every run.
+
+## Concurrent runs
+
+More than one run may be open at once, for example a lessons run and a
+code run on two machines. One set of rules covers one run or several:
+
+- **Preflight.** Before the first wave the dispatcher runs `git fetch` and
+  stops when the local `main` is behind, ahead of or diverged from
+  `origin/main`. On 2026-09-24 one checkout was 60 commits ahead and 360
+  behind after a history rewrite.
+- **Names.** A new run takes the next name, opens its issue, and checks
+  again (`mise run run-name -- --check <n>`). When an older open run got
+  the same name first, it closes its issue and takes the next letter.
+- **Claims.** When a wave starts, the dispatcher assigns each issue, so
+  the other run's picker skips it, and comments
+  `Claimed by run <Name>, wave <k>`. Then it reads each issue again, and
+  when another open run's claim comment is older, it drops the issue from
+  the wave and says so. The maintainer starts runs by hand minutes apart,
+  so the check after the claim catches the rare race.
+- **The shared template.** While another run issue is open, a run doesn't
+  edit the wave lead template. Its collision notes wait in the
+  `Pending collision notes` section of its own run issue, and each later
+  lead of that run gets them in its prompt.
+- **Files the other run touches.** A code wave leaves lesson pages, lesson
+  and plan YAML, the bibliography, `cspell-words.txt` and the S02 table
+  alone unless its issue names them. Every lead rebases the wave branch on
+  `origin/main` and reruns `mise run ci` right before the merge, since the
+  other run may have merged in the meantime, and names any stricter check
+  in the pull request body.
+- **The cap.** Both runs share the concurrent-agent cap, so keep their
+  wave sizes small enough that two leads with all their builders and
+  reviewers fit.
 
 ## The loop
 
-The dispatcher keeps a meta record, named once at the start of the run,
-`docs/agents/sessions/<start-date>-meta.md`, with the run's remaining
-whitelist, the parked issues and one report per wave, so the history is a
-file and never the dispatcher's context. One tick:
+One tick:
 
-1. **Pull.** `git pull --rebase` on `main`. The dispatcher commits its
-   record after every wave, so the tree is clean here.
-2. **Wave number.** One more than the highest `wave-<n>` in
-   `docs/agents/sessions/`, or 6 when there is none. `orchestration.md`
-   keeps the records of waves 1 to 5 inline.
-3. **Resume check.** An `origin/wave/<n>-*` branch with the computed
-   number is a wave whose lead never finished, and so is an `In flight`
-   line in the meta record with no report after it. The dispatcher then
-   spawns a lead for that wave number and branch with the resuming line
-   filled in, and the lead follows "Resuming a half-done wave" in the
-   template: run `mise run wave-status`, which reads each issue's last
-   review verdict from the trusted accounts only, reuse the worktrees
-   that exist, spawn only what is missing, and never redo a branch with
-   an approve verdict. Only the issues on the `In flight` line
-   count for `origin/feat/<issue>-*` branches, so a stale branch from an
-   earlier run starts nothing. The wave branch is `wave/<n>-<kind>`,
-   without a date, so a next-day resume finds it.
+1. **Pull.** `git pull --rebase` on `main`. The dispatcher commits
+   nothing, so this is a fast-forward.
+2. **Wave number.** One more than the finished waves on the run issue's
+   `## Waves` list.
+3. **Resume check.** An `In flight` line on the run issue is a wave whose
+   lead never finished. The dispatcher then spawns a lead for that wave
+   and branch with the resuming line filled in, and the lead follows
+   "Resuming a half-done wave" in its agent file: run
+   `mise run wave-status`, which reads each issue's last review verdict
+   from the trusted accounts only, reuse the worktrees that exist, spawn
+   only what is missing, and never redo a branch with an approve verdict.
+   Only the issues on the `In flight` line count for
+   `origin/feat/<issue>-*` branches, so a stale branch from an earlier
+   run starts nothing. The wave branch has no date, so a next-day resume
+   finds it.
 4. **Pick.** Run `mise run next-wave -- --size 6`, with `--kind` and the
    remaining whitelist as `--only`. For a lessons wave it lists the planned
    lessons whose issue is `ready-for-agent` and unassigned, and drops the
@@ -146,25 +202,23 @@ file and never the dispatcher's context. One tick:
    lines or the table is otherwise empty. A wave that is only the nits
    row proceeds. An empty table ends
    the loop.
-5. **Mark the wave in flight and spawn the wave lead.** The dispatcher
-   writes `In flight: wave <n>, branch <b>, issues #a #b ...` to the meta
-   record, commits and pushes it, then spawns the lead with the filled
-   template, waits for the lead's notification and does nothing else.
-6. **Read the report and commit the record.** Replace the `In flight` line
-   with the report, copy its `Add to collision notes` and
-   `Remove from collision notes` lines to the record's
-   `Pending collision notes` section, and under `--only` remove the merged and the left-out issues
+5. **Claim, mark the wave in flight and spawn the wave lead.** The
+   dispatcher claims the wave's issues (see "Concurrent runs"), writes
+   `In flight: wave <k>, branch <b>, issues #a #b ...` on the run issue,
+   then spawns the lead with the filled template, waits for the lead's
+   notification and does nothing else.
+6. **Read the report and update the run issue.** Post the report as a
+   comment on the run issue, replace the `In flight` line with the wave's
+   status and pull request, copy its `Add to collision notes` and
+   `Remove from collision notes` lines to the `Pending collision notes`
+   section, and under `--only` remove the merged and the left-out issues
    from the remaining whitelist, parking the left-out ones so the run
-   never picks them again. Run `mise run spell` and `mise run prose` on
-   the two files, commit them on `main` as
-   `docs(agents): meta record wave <n>`, `git pull --rebase` right before
-   the push because the lead merged into `origin/main` in the meantime,
-   and push. Nothing of the dispatcher's stays uncommitted between ticks,
-   and the wave lead never edits either file. Then, on `merged`, play the chime
-   and go to step 1. On `open`, the lead has hit the standing-approval
-   exception (below). Report it to the maintainer and stop. On `failed`,
-   report to the maintainer and stop. The next `/wave` finds the wave in
-   step 3 and resumes it.
+   never picks them again. The wave lead never edits the run issue's
+   body. Then, on `merged`, play the chime and go to step 1. On `open`,
+   the lead has hit the standing-approval exception (below). Report it to
+   the maintainer and stop. On `failed`, the `In flight` line stays,
+   report to the maintainer and stop. The next `/wave --resume <Name>`
+   finds the wave in step 3 and resumes it.
 7. **File the follow-ups.** Every item on the report's maintainer line,
    every nit the lead left open on a merged branch, and every improvement
    deferred during the session becomes a GitHub issue before the next wave
@@ -177,11 +231,14 @@ file and never the dispatcher's context. One tick:
    that issue has 10 or more lines or the picker's table is otherwise
    empty, so the nits no longer chain from wave to wave (#256 to #315 were
    eight such issues). With `--no-filing` the lead writes its follow-ups
-   file instead, and the dispatcher files it when the run ends.
+   comment on the run issue instead, and the dispatcher files it when the
+   run ends.
 
-The dispatcher edits no code and runs no check of the site. The loop ends
-on an empty wave, an exhausted whitelist, an `open` or `failed` report, or
-the maintainer saying stop, and the dispatcher reports which.
+The dispatcher edits no code, commits nothing and runs no check of the
+site. The loop ends on a failed preflight, an empty wave, an exhausted
+whitelist, an `open` or `failed` report, or the maintainer saying stop,
+and the dispatcher reports which, comments it on the run issue and closes
+it (except on `failed`).
 
 ## Standing approval
 
@@ -202,8 +259,8 @@ The lead starts with no context but its agent file,
 by name, integration, the standing approval, the waiting rule, the
 two-round revision limit and the resume steps. Its prompt is the template
 at `.claude/skills/wave/wave-lead-prompt.md`, which `/wave` fills with the
-wave number, the branch, the date, the picker's table, the filing
-paragraph and the fresh-or-resuming line. Between them they hold
+wave's name, the run issue, the branch, the date, the picker's table, the
+filing paragraph and the fresh-or-resuming line. Between them they hold
 everything below.
 
 - The wave as `next-wave` printed it: issue numbers, lesson ids, course
@@ -217,7 +274,7 @@ everything below.
 - The instruction to follow `docs/agents/orchestration.md` end to end, in
   integration mode: one builder per issue, one reviewer per pushed branch,
   the review on the issue, the revision loop until `Verdict: approve`, the
-  wave branch `wave/<n>-<slug>`, one pull request with the review table,
+  wave branch `wave/<name>-<k>`, one pull request with the review table,
   `mise run ci` on the wave branch. The builder prompt items in that
   document, and everything its session records say the prompt should have
   said, are the builder brief.
@@ -232,31 +289,32 @@ everything below.
   review") instead. Each list holds at most 15 bullets. A wave report
   proposes changes on its `Add to collision notes` and
   `Remove from collision notes` lines, the dispatcher keeps them under
-  `Pending collision notes` in the meta record, and they reach the
-  template only after the maintainer has read them. At the cap a new note
-  replaces an old one or becomes a check.
+  `Pending collision notes` on the run issue, and they reach the template
+  only after the maintainer has read them, through a later wave branch
+  while no other run is open. At the cap a new note replaces an old one
+  or becomes a check.
 
 - The nits row rule and the "Resuming a half-done wave" section, so a lead
   that starts after a failed one knows what to reuse and what to spawn.
 
 - The filing paragraph: file per `triage.md` and append open nits to the
   one `Cosmetic nits` issue, or, under `--no-filing`, write the follow-ups
-  file for the dispatcher to file when the run ends.
+  comment on the run issue for the dispatcher to file when the run ends.
 
-- What the lead writes and returns. It writes the session record to
-  `docs/agents/sessions/<date>-wave-<n>.md` on the wave branch, in the form
-  of the "Session record" sections of `orchestration.md`: counts, what
-  review caught, what the builder prompt should have said. It returns a
-  report of at most 200 words in exactly this form:
+- What the lead writes and returns. It puts the session record in the
+  wave pull request body, in the form of the "Session record" sections of
+  `orchestration.md`: counts, what review caught, what the builder prompt
+  should have said. It returns a report of at most 200 words in exactly
+  this form:
 
   ```text
-  WAVE <n> <merged|open|failed>
+  <NAME> wave <k> <merged|open|failed>
   PR: #<number>
   Merged issues: #a #b ...
   Left out: #c (<reason>) ...
   For the maintainer: <decisions needed, or none>
   Filed: #<issue> <title> ... (or none)
-  Follow-ups: <none, or the follow-ups file under --no-filing>
+  Follow-ups: <none, or the link to the follow-ups comment under --no-filing>
   Add to collision notes: <lessons|code: one line each, or none>
   Remove from collision notes: <lessons|code: the bullet's first words and why, one line each, or none>
   ```
