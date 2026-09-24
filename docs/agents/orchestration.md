@@ -41,9 +41,9 @@ both, so the builder and the reviewer never talk to each other.
    - the branch name (`feat/<issue>-<slug>`);
    - the setup a fresh worktree needs before any check runs:
      `mise run site-install-frozen` before the `site-*` tasks and
-     `mise run prose-sync` before `mise run prose`. Without the sync Vale
-     runs only the House rules and says nothing, and the `ai-tells` errors
-     appear in CI instead (issue #103);
+     `mise run prose-sync` before `mise run prose`. Without the sync
+     `prose` stops and names the sync task, so the `ai-tells` errors
+     can't appear only in CI (issue #103);
    - the definition of done: `mise run ci` green locally, pushed, a pull
      request against `main` whose body says `Closes #N`, GitHub CI green,
      not merged;

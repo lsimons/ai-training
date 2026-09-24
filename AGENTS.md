@@ -183,7 +183,9 @@ patterns below after the fact. Write so that it has nothing to say.
   entry.
 - Vale (`mise run prose`): errors fail the build, style warnings print and
   are the house style. Fix a warning by rewriting unless the rewrite reads
-  worse. The vocabulary in
+  worse. The style packages are gitignored, so a fresh clone or worktree
+  needs `mise run prose-sync` (network) once, and `prose` stops with a
+  message naming that task when a package is missing. The vocabulary in
   `.vale/styles/config/vocabularies/ai-training/accept.txt` holds the
   canonical casing of names, and every entry has its casing enforced
   everywhere, so common words never go in. `House.Quotes`: a comma or
