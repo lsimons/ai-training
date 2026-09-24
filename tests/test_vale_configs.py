@@ -130,6 +130,13 @@ def test_compare_reports_a_stale_or_misplaced_extended_only_entry() -> None:
     ]
 
 
+@pytest.mark.parametrize("name", [".vale.ini", ".vale-extended.ini", ".vale-eval.ini"])
+def test_parse_ini_reads_every_real_config(name: str) -> None:
+    # scripts/prose_eval.py reads the Packages key of all three through parse_ini.
+    config = vale_configs.parse_ini((REPO_ROOT / name).read_text(encoding="utf-8"))
+    assert config[""]["Packages"].count(".zip") >= 1
+
+
 def test_the_real_configs_agree() -> None:
     assert vale_configs.check(REPO_ROOT / ".vale.ini", REPO_ROOT / ".vale-extended.ini") == []
 

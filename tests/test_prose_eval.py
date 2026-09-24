@@ -121,13 +121,13 @@ def test_main_writes_report(
     assert capsys.readouterr().out.startswith("3 hits in 2 files; 5 words\n")
 
 
-EVAL_INI_TEXT = """\
-# Evaluation config
-StylesPath = .vale/styles
-; Packages = https://example.com/commented-out.zip
-Packages = https://github.com/errata-ai/write-good/releases/download/v0.4.1/write-good.zip, \\
-  https://github.com/tbhb/vale-ai-tells/releases/download/v1.37.0/ai-tells.zip
-"""
+# One line, no comments: the ini forms (comments, continuation lines, a
+# repeated key) are vale_configs.parse_ini's and tested in test_vale_configs.py.
+EVAL_INI_TEXT = (
+    "StylesPath = .vale/styles\n"
+    "Packages = https://github.com/errata-ai/write-good/releases/download/v0.4.1/write-good.zip, "
+    "https://github.com/tbhb/vale-ai-tells/releases/download/v1.37.0/ai-tells.zip\n"
+)
 
 
 def write_ini(tmp_path: pathlib.Path, text: str = EVAL_INI_TEXT) -> pathlib.Path:
@@ -136,7 +136,7 @@ def write_ini(tmp_path: pathlib.Path, text: str = EVAL_INI_TEXT) -> pathlib.Path
     return ini
 
 
-def test_pinned_packages_reads_names_and_skips_comments(tmp_path: pathlib.Path) -> None:
+def test_pinned_packages_reads_the_names(tmp_path: pathlib.Path) -> None:
     assert prose_eval.pinned_packages(write_ini(tmp_path)) == ["write-good", "ai-tells"]
 
 
@@ -205,11 +205,27 @@ def test_check_packages_synced_exits_on_a_mixed_list(tmp_path: pathlib.Path) -> 
     assert "bare package name is not supported" in message
 
 
-def test_package_entries_joins_continuation_lines(tmp_path: pathlib.Path) -> None:
+def test_package_entries_splits_the_top_level_value(tmp_path: pathlib.Path) -> None:
     assert prose_eval.package_entries(write_ini(tmp_path)) == [
         "https://github.com/errata-ai/write-good/releases/download/v0.4.1/write-good.zip",
         "https://github.com/tbhb/vale-ai-tells/releases/download/v1.37.0/ai-tells.zip",
     ]
+
+
+def test_package_entries_ignores_packages_under_a_section(tmp_path: pathlib.Path) -> None:
+    ini = write_ini(
+        tmp_path, "StylesPath = .vale/styles\n[*.md]\nPackages = https://e.test/a.zip\n"
+    )
+    assert prose_eval.package_entries(ini) == []
+
+
+def test_check_packages_synced_exits_on_a_parse_error(tmp_path: pathlib.Path) -> None:
+    ini = write_ini(tmp_path, EVAL_INI_TEXT + "nonsense\n")
+    with pytest.raises(SystemExit) as exc:
+        prose_eval.check_packages_synced(ini, tmp_path)
+    message = str(exc.value)
+    assert message.startswith(f"prose: {ini}: line is not a comment")
+    assert "'nonsense'" in message
 
 
 def test_check_packages_synced_exits_on_empty_package_list(tmp_path: pathlib.Path) -> None:

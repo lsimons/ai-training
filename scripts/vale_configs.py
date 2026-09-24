@@ -15,16 +15,28 @@ Rules, per section (the top-level settings count as the section ""):
 - Every key only in .vale-extended.ini must be in EXTENDED_ONLY, which
   lists the rules the extended run adds on purpose, with the reason.
 
-The parser is the small subset of Vale's ini this repository uses: `#` and
-`;` comment lines, `[section]` headers taken verbatim (Vale's globs such
-as `[*.{md,mdx}]` are just names here), `key = value` pairs, and a value
-continued over lines that end in a backslash. Vale unions the list keys
-(`TokenIgnores`, `BasedOnStyles`, `Vocab`) across repeats in one section,
-which this parser does not model, so a repeated key is a parse error that
-names the section and key. An inline comment after a value (Vale's
-`SpaceBeforeInlineComment`) is not supported either and would become part of
-the value. Values are compared after trimming the whitespace around each
-line of a continuation.
+`parse_ini` is the one reader of Vale ini files in this repository, and
+scripts/prose_eval.py reads the `Packages` key through it too.
+
+The parser reads the small subset of Vale's ini that the configs here use.
+Vale's page on the file (https://docs.vale.sh/topics/.vale.ini, sections
+"The file" and "Sections") states two of its rules: the keys above the
+first section header apply to the whole run, and every other section
+header is a glob. The parser takes a header verbatim, so `[*.{md,mdx}]` is
+just a name here.
+
+That page does not describe comment lines, a value continued over several
+lines, or the same key set twice in one section. The parser handles them
+the way the configs in this repository write them, and no Vale page backs
+these choices:
+
+- A line that starts with `#` or `;` is a comment and is skipped.
+- A value that ends in a backslash continues on the next line. The lines
+  are joined with one space, after trimming the whitespace around each.
+- A key set twice in one section is a parse error that names the section
+  and the key, so the parser never has to guess how Vale merges the two.
+- Text after a value is part of the value, so the configs keep their
+  comments on lines of their own.
 
 Usage: scripts/vale_configs.py [base-ini] [extended-ini]
 """
@@ -64,7 +76,11 @@ EXTENDED_ONLY: dict[str, dict[str, str]] = {
 
 
 def parse_ini(text: str) -> Config:
-    """Parse Vale's ini subset described in the module docstring."""
+    """Parse Vale's ini subset described in the module docstring.
+
+    Raises `ValueError` for a line the subset does not cover and for a
+    repeated key, with a message that names the line or the key.
+    """
     config: Config = {"": {}}
     section = ""
     key: str | None = None

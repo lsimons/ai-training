@@ -241,15 +241,16 @@ run = "vale sync"
 # Runs before `prose` and `prose-extended` (`depends`). The synced styles
 # are gitignored, and in a fresh clone or worktree Vale otherwise runs with
 # only the House rules and reports a clean page that isn't (issue #103).
-# Each `.zip` on the `Packages` lines of the two configs unpacks to
-# `.vale/styles/<name>/`, so a missing directory means the sync hasn't
+# Each `.zip` on the top-level `Packages` key of the two configs unpacks
+# to `.vale/styles/<name>/`, so a missing directory means the sync hasn't
 # run. The check is `check_packages_synced` in scripts/prose_eval.py, the
 # same function `prose-eval` and `prose-metrics` run on .vale-eval.ini
-# (issue #295), so one tested parser reads every Vale config. Comment
-# lines (`;` or `#`) are skipped, a bare package name is not supported,
-# and an empty list is a failure rather than a pass. Local (no network)
-# and cheap. It does not detect a stale unpack: after moving a pin in the
-# ini, run `prose-sync` again yourself.
+# (issue #295). It reads the file through `parse_ini` in
+# scripts/vale_configs.py, the parser `prose-check-configs` uses (issue
+# #299), so one tested parser reads every Vale config. A bare package name
+# is not supported, and an empty list is a failure rather than a pass.
+# Local (no network) and cheap. It does not detect a stale unpack: after
+# moving a pin in the ini, run `prose-sync` again yourself.
 [tasks.prose-check-packages]
 description = "Fail when a Vale package pinned in .vale.ini or .vale-extended.ini is not under .vale/styles/"
 hide = true
