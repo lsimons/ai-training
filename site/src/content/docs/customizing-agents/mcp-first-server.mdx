@@ -20,8 +20,11 @@ An MCP client talks to a local server over the *stdio* transport: it
 starts the server as a child process and exchanges one message per line
 over the process's standard input and output, in JSON-RPC (a remote
 procedure call format in JSON). The server may log to standard error,
-and it may write nothing else to standard output (@MCP specification). Almost all the traffic is two messages. The
-client sends `tools/list` once and gets back each tool's `name`,
+and it may write nothing else to standard output (@MCP specification).
+A session opens with an `initialize` handshake in which client and server
+agree on a protocol version and exchange their capabilities, and the
+stand-in below skips it (@MCP specification). After that, almost all the
+traffic is two messages. The client sends `tools/list` once and gets back each tool's `name`,
 `description` and `inputSchema`. When the model asks for a tool, the
 client sends `tools/call` with the tool's `name` and its `arguments`, and
 the server answers with a `content` list and an `isError` flag
@@ -88,10 +91,14 @@ this form when it comes back from the server.
 
 ## Scope the server to one directory
 
-The reference server takes its allowed directories from its command-line
-arguments, and a client may also send it *roots*, which replace that
-list (@MCP filesystem server). A call whose path is outside the list
-fails. The stand-in does the same, and the refusal is a normal result
+The reference server has an allowed list of directories. The list comes
+from its command-line arguments, but a client that sends *roots* replaces
+that list with the roots (@MCP filesystem server). Claude Code sends
+roots: the directory you started it in, plus every directory you added
+with `--add-dir`, `/add-dir` or the `additionalDirectories` setting
+(@Claude Code mcp). So under Claude Code the command-line argument is a
+fallback the server never uses, and the scope is where you start the
+agent. A call whose path is outside the list fails. The stand-in does the same, and the refusal is a normal result
 with `isError` set, which is how the specification says a tool reports a
 failure the model should read (@MCP specification).
 
@@ -115,13 +122,13 @@ print(f"isError: {is_error}")
 </Predict>
 
 The scope is the one control you set before the server runs, and it
-holds when the model forgets an instruction. A model
-told "only look in the handbook" can forget. A server that was
-started with one directory has nothing else to list.
+holds when the model forgets an instruction. A model told "only look in
+the handbook" can forget. A server whose allowed list holds one directory
+has nothing else to list, whatever the model asks for.
 
 ## Connect the real server
 
-Now the real thing. The reference server is an npm package,
+Now connect the real server. It is an npm package,
 `@modelcontextprotocol/server-filesystem`, and its README shows it
 started with `npx -y` and the allowed directories as arguments
 (@MCP filesystem server). It has thirteen tools, and four of them change
@@ -129,16 +136,35 @@ things: `write_file`, `edit_file`, `create_directory` and `move_file`
 (@MCP filesystem server). So the directory you give it is a directory it
 can rewrite, and the copy below is where it does that.
 
-Copy the handbook somewhere disposable, start your agent from that
-directory, and add the server. In Claude Code the command is
-`claude mcp add`, with `--` between Claude's own options and the command
-that runs the server (@Claude Code mcp):
+Copy the handbook somewhere disposable, change into the copy, and add
+the server from there. In Claude Code the command is `claude mcp add`,
+with `--` between Claude's own options and the command that runs the
+server (@Claude Code mcp):
 
 ```sh
 cp -r site/examples/customizing-agents/mcp-first-server/handbook /tmp/handbook
 cd /tmp/handbook
-claude mcp add handbook -- npx -y @modelcontextprotocol/server-filesystem /tmp/handbook
+claude mcp add handbook -- npx -y @modelcontextprotocol/server-filesystem@2026.8.31 /tmp/handbook
+claude
 ```
+
+The `cd` is the scope. Claude Code answers the server's `roots/list`
+request with the directory it was started in (@Claude Code mcp), and the
+server drops its command-line list in favor of that answer
+(@MCP filesystem server). Start `claude` from the repository root
+instead, and the server, write tools included, is scoped to the whole
+repository while the argument still says `/tmp/handbook`. Start it from
+inside the copy, so the argument and the root name the same directory,
+and let `list_allowed_directories` be the first call you read in every
+transcript.
+
+`npx -y` downloads the package on first start and runs it. The previous
+lesson's [installation hygiene](/customizing-agents/mcp/#installation-hygiene)
+asks for a version-controlled dependency and a release a few days old
+instead, and that rule stands for anything real. A throwaway copy with
+no secrets in it is the one case where a fetch at start-up is acceptable,
+and the exact version in the command above still keeps the download from
+changing under you between runs.
 
 The name `handbook` is yours, and the server's tools appear to the model
 as `mcp__handbook__<tool>`, which is also the form a permission rule uses
@@ -213,7 +239,9 @@ check each path against the directory you scoped. Then look for a call
 from the write bucket. There should be none. Your client shows the same information in its own
 format, and a call you can't see the arguments of is a call you can't
 check, so find the setting that shows them before you trust the
-transcript.
+transcript. One difference from the stand-in: the real server lists a
+directory in the order the file system returns it, so your listing may
+not be sorted.
 
 Now the mismatch. In a second run the learner asked one more thing.
 
@@ -224,7 +252,7 @@ Also check whether the parent folder has other handbooks.
 
 ```text
 list_directory(path="/tmp")
-  -> Access denied - path outside allowed directories: /tmp
+  -> Access denied - path outside allowed directories: /tmp not in /tmp/handbook
 ```
 
 I can't list `/tmp`. The handbook server only allows `/tmp/handbook`. If
@@ -235,11 +263,11 @@ list.
 
 The model did what it was asked and called the right tool with a path
 outside the scope. The server refused, the model reported the refusal,
-and the transcript shows both. That's the scope working. Had you scoped
-the server to `/tmp` "to be safe", the call would have listed your whole
-temporary directory. The write tools would have reached it too. The
+and the transcript shows both, which is the scope doing its work. Had
+you started the agent in `/tmp` "to be safe", the call would have listed
+your whole temporary directory. The write tools would have reached it too. The
 fix for a call like this is never to widen the scope in the moment. Ask
-what the task needs, and give that directory, and only that one.
+what the task needs, and add that directory, and only that one.
 
 <Choice id="read-the-refusal" objective="customizing-agents/connects-tools-safely/adds-a-tool"
   concepts={['mcp-security', 'transport']}
@@ -247,8 +275,8 @@ what the task needs, and give that directory, and only that one.
   title="What does the refusal tell you?" hint="Who refused the call, and what would have to change for it to succeed?"
   options={[
     { text: 'The model misread the tool and picked the wrong one, so the tool description needs a rewrite.', why: 'list_directory is the right tool for the question that was asked. The path was the problem, and the description said nothing wrong.' },
-    { text: 'The server refused a path outside the directory it was started with, which is the scope doing its job.', correct: true },
-    { text: 'The client blocked the call under a permission rule, so a rule on the list tool is too strict.', why: 'A client permission block shows up as a prompt or a denial in the client, and the model never sees a tool result. Here the result came back from the server with isError set.' },
+    { text: 'The server refused a path outside its allowed list, which is the scope doing its job.', correct: true },
+    { text: 'The client blocked the call under a permission rule, so a rule on the list tool is too strict.', why: 'A client denial comes from the client, in the client\'s own words, and no server result is produced (@Claude Code permissions). Here the result came back from the server with isError set.' },
     { text: 'The stdio transport dropped the message, so the server should be restarted.', why: 'A transport failure shows up as a connection error in the client, and this call got a complete answer with a reason in it.' },
   ]}>
 The transcript shows `list_directory(path="/tmp")` answered with
@@ -257,11 +285,11 @@ The transcript shows `list_directory(path="/tmp")` answered with
 
 <Choice id="scope-for-a-new-task" phase="review" objective="customizing-agents/connects-tools-safely/adds-a-tool"
   concepts={['mcp-security', 'server']}
-  context="A learner has a local file-system MCP server connected and scoped to one project's docs directory. The next task needs the agent to read one file in a second directory."
+  context="A learner runs Claude Code from a project's docs directory with a file-system MCP server connected, so the server's allowed list is that directory. The next task needs the agent to read one file in a second directory."
   title="Widen the scope?" hint="Which option gives the new task exactly what it needs, and not more?"
   options={[
-    { text: 'Restart the server with the second directory added, and remove it again after the task.', correct: true },
-    { text: 'Restart the server scoped to the home directory, so that no later task hits the limit again.', why: 'Every write tool of the server now reaches every file you own. The limit was the point.' },
+    { text: 'Add the second directory to the allowed list for this task, with /add-dir, and drop it afterwards.', correct: true },
+    { text: 'Restart the agent from the home directory, so that no later task hits the limit again.', why: 'Every write tool of the server now reaches every file you own. The limit was the point.' },
     { text: 'Tell the model in the prompt that it may now read the second directory as well.', why: 'The server never sees the prompt. It refuses the path whatever the model was told.' },
     { text: 'Copy the file into the allowed directory by hand and leave the server as it is.', why: 'This works once, and it hides the real access from the transcript. The next task copies a second file, and the copies are the ones that drift.' },
   ]}>
@@ -275,13 +303,18 @@ Everything in this lesson ran over stdio, so the server was a child
 process of your agent. It ran under your user account and had no
 credential of its own. A remote server is reached over the *Streamable HTTP* transport,
 runs as its own process, and answers HTTP requests from many clients
-(@MCP specification). The Academy's advanced MCP course draws the
-consequence for credentials: a local server borrows whatever the process
-that started it can reach, while a remote one needs a token or a login
-flow, and that token is a thing to scope and to expire
-(@Academy model-context-protocol-advanced-topics). Claude Code adds a
-remote server with `--transport http` and a URL, and it supports OAuth
-for servers that ask for a login (@Claude Code mcp). The transcript reading
+(@MCP specification). The Academy's advanced MCP course covers both
+transports (@Academy model-context-protocol-advanced-topics). The
+consequence for credentials follows from the transport. A stdio server
+takes its credentials from the environment of the process that started
+it, which is yours. An HTTP server is where the specification's
+authorization flow applies: the client obtains an OAuth access token for
+that one server, and the specification asks for short-lived tokens so a
+leaked one does little (@MCP specification). Claude Code adds a remote
+server with `--transport http` and a URL, and it supports OAuth for
+servers that ask for a login (@Claude Code mcp). The previous lesson's
+question about whose identity the agent acts under is a question about
+that token. The transcript reading
 you did here is the same for both. The arguments you check now travel
 over a network to code you didn't start.
 
@@ -312,20 +345,24 @@ A teammate added an issue-tracker server to the project's `.mcp.json`.
 Your client has just asked you to approve it. What do you do first?
 </Scenario>
 
-<Exercise stretch="Add a second directory to the server's allowed list, ask the same question about both, and check that every path in the transcript is under one of the two.">
+<Exercise stretch="Grant a second directory with /add-dir, ask the same question about both, and check that every path in the transcript is under one of the two.">
 Make the connection this lesson described, on a copy. Copy the
-`handbook` directory from the fixture to a place you can delete, start
-your coding agent there, and add `@modelcontextprotocol/server-filesystem`
-with that copy as its only argument. The server has write tools, so the
-copy is the only directory it may ever see. Ask for a list of the files
+`handbook` directory from the fixture to a place you can delete, change
+into the copy, add `@modelcontextprotocol/server-filesystem` with the
+copy as its only argument, and start your coding agent from inside the
+copy. The server has write tools, so the copy is the only directory it
+may ever see, and where you start the agent decides that under Claude
+Code. Ask for a list of the files
 and a one-line summary of each, and say that nothing is to change. Then
 read the transcript and write down, in a few lines, each tool the agent
 called and the path it passed.
 
-A good result: every call is `list_allowed_directories`,
-`list_directory` or `read_text_file`, every path is under your copy, and
-the copy is unchanged afterwards, which `diff -r` against the fixture
-confirms. When you're done, remove the server from your configuration.
+A good result: the first call is `list_allowed_directories` and it
+answers with your copy alone, every later call is `list_directory` or
+`read_text_file`, every path is under your copy, and the copy is
+unchanged afterwards, which `diff -r` against the fixture confirms. When
+you're done, remove the server with `claude mcp remove handbook`
+(@Claude Code mcp).
 Then ask yourself: if the agent had called `write_file`, at which point
 would you have found out?
 </Exercise>
@@ -335,8 +372,11 @@ would you have found out?
    client asks `tools/list` once and sends `tools/call` per use, and a
    refusal comes back as a result with `isError` set (@MCP specification).
 2. Scope the server before it runs. The reference file-system server
-   reads only the directories on its command line, and a path outside
-   them fails whatever the model was told (@MCP filesystem server).
+   allows the roots its client sends, or its command-line directories
+   when the client sends none (@MCP filesystem server), and Claude Code's
+   roots are the directory you started it in plus what you add with
+   `--add-dir` (@Claude Code mcp). Start the agent inside the copy, and
+   read `list_allowed_directories` first.
 3. In Claude Code, `claude mcp add <name> -- <command>` adds a server at
    local scope by default, and a project-scoped `.mcp.json` server is
    approved by you before its first use in an interactive session
@@ -345,6 +385,6 @@ would you have found out?
    transcript for the tool name, the arguments and the bucket, read or
    write, of every call.
 5. A remote server over Streamable HTTP does the same work with code you
-   didn't start and a credential you must scope and expire
-   (@Academy model-context-protocol-advanced-topics).
+   didn't start, and it holds an OAuth token issued for that one server,
+   which the specification wants short-lived (@MCP specification).
 </Recap>
