@@ -27,4 +27,18 @@ Add to collision notes: A rewrap of lesson prose keeps every `(@key)` citation o
 Add to collision notes: A plan title that says the learner runs something is checked against the foundations rule that the learner runs nothing.
 ```
 
-In flight: wave 15, branch wave/15-lessons, issues #143 #120 #164 #157 #159 #182 #149 #135 #168 #166, nits row #312
+### Wave 15
+
+```text
+WAVE 15 merged
+PR: #316
+Merged issues: #143 #120 #164 #157 #159 #182 #149 #135 #168 #166 #312
+Left out: none
+For the maintainer: none
+Filed: #314 Point two wave 15 assumes stand-ins at their live teaching lessons; #315 Cosmetic nits left open on wave 15 branches (plus a heads-up comment on #138 about an Academy framing its plan note asks for, which the course doesn't state)
+Follow-ups: none
+Add to collision notes: Reviewers start the `code-review` skill from inside the review worktree, because it reviews the checkout it runs in (three reviewers got an empty result this wave), and they probe by hand when it returns nothing.
+Add to collision notes: A fixture that shells out to git removes `GIT_DIR`, `GIT_WORK_TREE`, `GIT_INDEX_FILE` and the other repository variables from the env it passes, and reads input directories with a glob, not `iterdir()`.
+Add to collision notes: A claim about how an agent product loads context (skills, MCP tools, memory files) names the vendor page and matches today's default behavior.
+Add to collision notes: Builders never message reviewers. Only the lead asks for a re-check.
+```

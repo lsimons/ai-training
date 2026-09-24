@@ -91,6 +91,10 @@ If the line under the first paragraph says you are resuming, a previous lead for
 - A foundations lesson backed by a fixture pastes its output into a `text` fence and doesn't add a test or CI check of its own until #237 is merged (then see #311).
 - A rewrap of lesson prose keeps every `(@key)` citation on one line, and the builder compares the built page's citation count with main.
 - A plan title that says the learner runs something is checked against the foundations rule that the learner runs nothing.
+- Reviewers start the `code-review` skill from inside the review worktree, because it reviews the checkout it runs in (three reviewers got an empty result this wave), and they probe by hand when it returns nothing.
+- A fixture that shells out to git removes `GIT_DIR`, `GIT_WORK_TREE`, `GIT_INDEX_FILE` and the other repository variables from the env it passes, and reads input directories with a glob, not `iterdir()`.
+- A claim about how an agent product loads context (skills, MCP tools, memory files) names the vendor page and matches today's default behavior.
+- Builders never message reviewers. Only the lead asks for a re-check.
 
 ## Filing
 
