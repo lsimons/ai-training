@@ -139,11 +139,11 @@ Would you like me to expand on any of these?
 
 The small model's answer to the ambiguous request is a generic list. Every
 item could apply to any offsite anywhere. The one fact in the message,
-that a third of the budget is gone, appears in none of them. This is the
-failure mode you learned to name in the lesson on how models work. The
-model produced the most likely text for a question like this, one token
-at a time, and nothing in that process notices what the question left
-out.
+that a third of the budget is gone, appears in none of them. The answer
+is fluent and beside the point. As you saw in the lesson on how models
+work, the model produced the most likely text for a question like this,
+one token at a time, and nothing in that process notices what the
+question left out.
 
 <Response>
 ```text
@@ -169,8 +169,8 @@ act on. It names the missing fact, shows how the choice depends on it, and
 asks the two questions whose answers pick the option. This is what the
 concept of model fit describes: a small model handles reformatting and
 classification, and a larger one handles reasoning about an ambiguous
-request (@AEC-02). Fit is tested with a run like this one, and it isn't
-assumed from the size of the model.
+request (@AEC-02). A run like this one is how you find out the fit. The
+size of the model on its own tells you nothing about it.
 
 The example run's table then reads like this. "Yes" means good enough
 to use as it is.
@@ -211,8 +211,8 @@ do you tell them?
 ## Read the table at volume
 
 For one chat, the difference between the two columns is a few seconds and
-a fraction of a cent. That is why the picker set to "large" feels free. The
-table starts to matter when the task repeats.
+a price too small to notice on a monthly bill. That is why the picker set
+to "large" feels free. The table starts to matter when the task repeats.
 
 Suppose the classification task is real: your team gets five thousand
 customer messages a day, and someone wants a model to label each one. From
@@ -220,7 +220,8 @@ your run, the small model labeled the five messages as well as the large
 one. Now scale the other two columns. If the large model took four seconds
 per answer where the small one took one, that is a difference of three
 seconds a message, and three seconds times five thousand is more than four
-hours of waiting a day. If the large model costs several times the small
+hours of waiting a day when the messages run one after another. If the
+large model costs several times the small
 one per message, the cost gap is also multiplied by five thousand, every
 day. Cost and speed, per call, become the whole budget of a repeated task
 (@Academy ai-fluency-for-builders).
@@ -296,8 +297,8 @@ and what does that tell you about your default?
 </Exercise>
 
 <Recap>
-1. Say what a task needs before you name a model: reformatting, classification, multi-step reasoning, or fresh facts (@AEC-02).
-2. Model fit is tested, with a few representative inputs on each candidate, and not assumed from size.
+1. Say what a task needs before you name a model: reformatting, classification, multi-step reasoning, or fresh facts.
+2. Find the model fit by running a few representative inputs on each candidate. The size of a model doesn't tell you its fit on your task.
 3. A small model is often good enough for reformatting and classification, and a large one pays off on an ambiguous request. Fresh facts need a model with a search tool, whatever its size.
 4. Cost and speed are per call. At the volume of a repeated task they become the whole budget, so measure before you schedule.
 5. Leaving the picker on the largest model is a choice too, and the table is how you check it.
