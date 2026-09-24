@@ -1,10 +1,16 @@
 id: using-agents/when-to-stop
 title: When to stop delegating and do it yourself
+description: >-
+  Read three round logs, name the three signs that another round costs more than doing the step
+  yourself, and see why taking a step back says nothing about the tool or about you.
 mode: explanation
 covers: using-agents/decomposition
 serves: [using-agents/delegates-and-checks/adjusts-mid-task]
 introduces: [when-to-stop-and-do-it-yourself]
-assumes: []
+assumes:
+  - objective: using-agents/delegates-and-checks/reviews-against-brief
+    lesson: using-agents/delegating
+    section: reviewing-against-the-brief
 after: [using-agents/delegating-in-rounds]
 shorts: [The third round on one piece is the signal]
 exercise:
@@ -12,6 +18,13 @@ exercise:
   brief: >-
     Read three supplied round logs and mark, for each, the round where taking the step back would
     have been cheaper, with the sign that shows it.
-sources: []
-issue: 156
+sources: [DLAI-11, Academy ai-fluency-framework-foundations]
 minutes: 10
+notes: >-
+  The lesson that teaches working in rounds (delegating-in-rounds) is still planned, so the page
+  explains a round in one paragraph of its own and never refers to that lesson. It assumes
+  reviews-against-brief from the live delegating lesson because every log reads a result against
+  its done-criteria. The logs use Brindlewick Instruments, the fictional company from the earlier
+  lessons, and the people in them have no names, so no invented name can collide with a real one.
+  DLAI-11 is cited for the cost view of a round and Academy ai-fluency-framework-foundations for
+  the judgment of when to delegate, both as inspiration in our own words.
