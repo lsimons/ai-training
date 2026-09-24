@@ -18,6 +18,8 @@ def run_check(package: Path) -> str:
         text=True,
         check=False,
     )
+    if result.returncode not in (0, 1) or result.stderr:
+        return f"exit {result.returncode}: {result.stdout}{result.stderr}".rstrip("\n")
     return result.stdout.rstrip("\n")
 
 
