@@ -1,24 +1,41 @@
 id: building-agents/retrieval-as-a-tool
 title: Retrieval as a tool the agent calls
+description: >-
+  Build a keyword search as a tool, run it once per question and then in a bounded loop against a
+  twelve-document handbook, and use a six-question test set to decide which version a question needs.
 mode: tutorial
 covers: building-agents/retrieval-memory
 serves: [building-agents/builds-agent-loop/adds-retrieval]
 introduces: [when-basic-rag-suffices, agentic-rag-loop]
 assumes:
   - objective: concepts/explains-models/explains-grounding
+    lesson: concepts/retrieval
+    section: grounding-and-what-it-doesnt-fix
+  - objective: building-agents/builds-agent-loop/defines-a-tool
+    lesson: building-agents/agent-loop
+    section: a-tool-is-a-function-plus-a-description
 after: [building-agents/stopping-the-loop]
 shorts: [Chunking and indexes]
 exercise:
   kind: do
   brief: >-
-    Add a question with no answer in the fixture corpus to the small test set, and change the
-    retrieval prompt so the fake agent answers `not found` for it instead of inventing a policy. The
+    Add a question with no answer in the fixture corpus to the small test set, and raise the fake
+    model's coverage threshold so it answers `not found` for it instead of inventing a policy. The
     output is the test set results before and after.
-sources: [Academy claude-platform-101]
+sources:
+  - AEC-05
+  - AEC-08
+  - Claude docs define-tools
+  - Claude docs handle-tool-calls
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 issue: 198
 minutes: 15
 notes: >-
-  Basic retrieval first: a fake search over a twelve-document corpus, top matches in the prompt,
-  answer. Then one multi-hop question it fails, and a bounded loop that reformulates. Predict which
-  questions the basic version answers. The Academy's just-in-time loading pattern is the same idea
-  for a real agent (Academy claude-platform-101).
+  Basic retrieval first: a fake search over a twelve-document corpus, the top match in the prompt,
+  answer. Then one multi-hop question it fails, and a bounded loop that follows a pointer sentence
+  and searches again. Predict which questions the basic version answers and how many rounds the loop
+  takes. The fake model answers with the passage sentence that shares the most keywords with the
+  question, and a MIN_SHARED threshold stands in for a real model obeying the prompt frame. The
+  Academy claude-platform-101 source from the plan was dropped because the page cites no claim from
+  it.
