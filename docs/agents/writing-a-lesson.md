@@ -193,31 +193,36 @@ wrong. The page tells the learner how many to select. A wrong pick shows
 its `why`; a missed correct item is only counted ("1 of 2 so far"), never
 named. Use `Choice` when one option is right.
 
-**Writing distractors.** A learner who has not read the lesson must not
+**Writing distractors.** A learner who hasn't read the lesson must not
 be able to pick the key from the look of the options. Write the options
-at a similar length and level of detail, so the key is not the one full
+at a similar length and level of detail, so the key isn't the one full
 sentence among three fragments. Make every distractor a misconception a
 real learner holds, with a `why` (or `consequence`) that names what it
 gets wrong. Never write "all of the above" or "none of the above". If the
-key hedges (`usually`, `often`, `may`, `might`, `depends`, `in most cases`, `typically`, `generally`, `sometimes`, `not always`), give a
+key hedges (`usually`, `often`, `may`, `might`, `depends`, `typically`,
+`generally`, `sometimes`, `not always`, `in most cases`), give a
 distractor a hedge too, or drop it. If the key repeats a word from the
 stem, let a distractor repeat one as well. Vary the position of the key
-across a lesson. `Choice` does not shuffle, and a learner notices when
+across a lesson. `Choice` doesn't shuffle, and a learner notices when
 every answer is the second option.
 
 `mise run checkpoints` fails a `Choice`, `Scenario` or `MultiChoice` on
 four cues, named in its output: `longest` (the key is more than 40
-percent longer than the longest distractor; for `MultiChoice` the mean
-length of the keys against the mean of the distractors), `hedge` (only
-the key hedges), `echo` (only the key shares a content word of four or
-more letters with the stem) and `fixed-position` (three or more `Choice`
-or `Scenario` items in one lesson with the key at the same index). Fix a
-hit by tightening the key or making the distractors as specific and as
-long. Moving the key or giving a distractor its own hedge also works. When a
-rewrite would read worse, add `guessable="reason"` to the tag with the
-reason a reader of the check output will accept. The check prints every
-exemption, and fails on one that no cue trips, so remove the prop once
-the item is fixed.
+percent and at least 12 characters longer than the longest distractor,
+counted without Markdown marks; for `MultiChoice` the mean length of the
+keys against the mean of the distractors), `hedge` (a key hedges and no
+distractor does), `echo` (a key shares a content word of four or more
+letters with the stem and no distractor does) and `fixed-position`
+(three or more `Choice` or `Scenario` items in one lesson with the key
+at the same index). Fix a hit by tightening the key or making the
+distractors as specific and as long. Moving the key or giving a
+distractor its own hedge also works. When a rewrite would read worse,
+add `guessable="<cue>: reason"` to the tag, naming the cue (or cues,
+comma-separated) and a reason a reader of the check output accepts. An
+example: `guessable="longest: the key is the rule in full"`. The check
+prints every exemption, fails on a named cue that doesn't trip, and
+fails on a cue that trips and isn't named, so remove the prop once the
+item is fixed.
 
 ```mdx
 <Match id="smallest-access" objective="..." title="What is the smallest access that still does the job?" hint="..."

@@ -3,7 +3,7 @@
  * Checkpoint export check (`mise run checkpoints`, after `site-build`): the
  * built dist/data/checkpoints.json must parse and list every checkpoint of
  * every lesson page with valid concept ids (spec S03 "Checkpoint export"),
- * and no choice item is guessable from a surface cue (S03 "Checkpoints").
+ * and no choice item is guessable from a cue (S03 "Checkpoints").
  * The logic and the list of what it rejects are in scripts/lib/checkpoints.mjs,
  * which tests/scripts/checkpoints-export.test.ts covers; this file only reports.
  */

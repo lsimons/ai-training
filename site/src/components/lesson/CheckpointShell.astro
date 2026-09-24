@@ -32,9 +32,9 @@ interface Props {
 	/** Set by Predict when there is no `answer`: honor-system, never reviewed. */
 	honor?: boolean;
 	/**
-	 * Opt-out from the surface-cue check (`mise run checkpoints`, spec S03 "Checkpoints"): the reason
-	 * the item may stay guessable. The check prints every reason and fails on one that no heuristic
-	 * trips. Exported as `guessable`; not rendered.
+	 * Opt-out from the guessability check (`mise run checkpoints`, spec S03 "Checkpoints"), in the form
+	 * `"<cue>[, <cue>]: reason"`. The check prints every exemption and fails on a named cue that does
+	 * not trip. Exported as `guessable`; not rendered.
 	 */
 	guessable?: string;
 	checkLabel?: string;
@@ -54,8 +54,8 @@ const {
 	guessable,
 	checkLabel = 'Check',
 } = Astro.props;
-if (guessable !== undefined && (typeof guessable !== 'string' || guessable.trim() === ''))
-	throw new Error(`Checkpoint "${id}": guessable must be a non-empty reason, got ${JSON.stringify(guessable)}`);
+if (guessable !== undefined && (typeof guessable !== 'string' || !/^[a-z, -]+:\s*\S/.test(guessable)))
+	throw new Error(`Checkpoint "${id}": guessable must be "<cue>: reason", got ${JSON.stringify(guessable)}`);
 if (!Number.isInteger(revision) || revision < 1)
 	throw new Error(`Checkpoint "${id}": revision must be a positive integer, got ${revision}`);
 const lessonId = lessonIdOf(Astro);

@@ -159,8 +159,8 @@ an incident if the conversation leaked.
   concepts={['confidentiality']}
   title="Search or no search?" hint="How many companies see part of this prompt if search stays on, and what does each of them keep?"
   options={[
-    { text: 'Ask as planned, with the customer name and the incident details, and let the assistant search.', consequence: 'The assistant sends a query naming the customer and the type of breach to a search provider. That provider keeps the query under its own terms, which you have not read.' },
     { text: 'Turn off web search, or use a general prompt without the customer name, and look up the specific law yourself.', correct: true, consequence: 'The model vendor sees a general question about notification rules. Nobody outside the chain you already checked learns who the customer is or what happened.' },
+    { text: 'Ask as planned, with the customer name and the incident details, and let the assistant search.', consequence: 'The assistant sends a query naming the customer and the type of breach to a search provider. That provider keeps the query under its own terms, which you have not read.' },
     { text: 'Refuse to use the assistant for anything about this incident.', consequence: 'Safe, and a legitimate choice, but you gave up a useful tool for drafting and structuring work that never needed the customer name in it at all.' },
   ]}>
 A customer has had a security incident and you are helping them work out
@@ -314,8 +314,8 @@ as the source demands or replace it.
   title="The function that arrived finished" hint="What does the presence of someone else's comments tell you about where the text came from?"
   options={[
     { text: 'Use it as it is. The tool produced it, so the tool\'s license covers it, whatever the header comment says.', why: 'A tool\'s terms cover your use of the tool. They cannot grant you rights to code the model reproduced from somewhere else.' },
-    { text: 'Search for a distinctive line from it. If it matches a public source, follow that source\'s license or write your own version.', correct: true },
     { text: 'Delete the header comment and use the code. Without the comment nobody can tell where it came from.', why: 'Removing the evidence of copying does not remove the obligation, and it makes the copy harder to trace when a reviewer asks.' },
+    { text: 'Search for a distinctive line from it. If it matches a public source, follow that source\'s license or write your own version.', correct: true },
   ]}>
 A coding assistant returns a forty-line function in one go, including a
 header comment with an author name and a year that is not yours. It does
