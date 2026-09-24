@@ -1,24 +1,17 @@
 /** The linked-group logic behind overrides/SidebarSublist.astro (issue #228). */
 
 import type { SidebarEntry, SidebarGroup, SidebarLink } from '@lib/sidebar-groups';
-import {
-	attrsWithoutClass,
-	GROUP_LINK_CLASS,
-	hasCurrent,
-	isGroupLink,
-	linkedGroup,
-	startsOpen,
-} from '@lib/sidebar-groups';
+import { GROUP_LINK_ATTR, hasCurrent, isGroupLink, linkedGroup, startsOpen } from '@lib/sidebar-groups';
 import { describe, expect, it } from 'vitest';
 
-function link(label: string, opts: { current?: boolean; cls?: string } = {}): SidebarLink {
+function link(label: string, opts: { current?: boolean; heading?: boolean } = {}): SidebarLink {
 	return {
 		type: 'link',
 		label,
 		href: `/ai-training/${label}/`,
 		isCurrent: opts.current ?? false,
 		badge: undefined,
-		attrs: opts.cls ? { class: opts.cls } : {},
+		attrs: opts.heading ? { [GROUP_LINK_ATTR]: '' } : {},
 	};
 }
 
@@ -27,23 +20,21 @@ function group(label: string, entries: SidebarEntry[], collapsed = false): Sideb
 }
 
 describe('isGroupLink', () => {
-	it('matches only a link with the group-link class, alone or among others', () => {
-		expect(isGroupLink(link('a', { cls: GROUP_LINK_CLASS }))).toBe(true);
-		expect(isGroupLink(link('a', { cls: `x ${GROUP_LINK_CLASS}` }))).toBe(true);
-		expect(isGroupLink(link('a', { cls: 'group-linkish' }))).toBe(false);
+	it('matches only a link with the data-group-link attribute', () => {
+		expect(isGroupLink(link('a', { heading: true }))).toBe(true);
 		expect(isGroupLink(link('a'))).toBe(false);
-		expect(isGroupLink(group('g', [link('a', { cls: GROUP_LINK_CLASS })]))).toBe(false);
+		expect(isGroupLink(group('g', [link('a', { heading: true })]))).toBe(false);
 	});
 });
 
 describe('linkedGroup', () => {
 	it('splits the heading link from the rest', () => {
-		const heading = link('concepts', { cls: GROUP_LINK_CLASS });
+		const heading = link('concepts', { heading: true });
 		const part = group('Prompting', [link('concepts/prompting')]);
 		expect(linkedGroup(group('Concepts', [heading, part]))).toEqual({ link: heading, entries: [part] });
 	});
 	it('is undefined for a plain group, an empty group, or a group-link that is not first', () => {
-		expect(linkedGroup(group('g', [link('a'), link('b', { cls: GROUP_LINK_CLASS })]))).toBeUndefined();
+		expect(linkedGroup(group('g', [link('a'), link('b', { heading: true })]))).toBeUndefined();
 		expect(linkedGroup(group('g', []))).toBeUndefined();
 	});
 });
@@ -57,14 +48,5 @@ describe('hasCurrent and startsOpen', () => {
 		expect(startsOpen(group('g', [link('a', { current: true })], true))).toBe(true);
 		expect(startsOpen(group('g', [link('a')], true))).toBe(false);
 		expect(startsOpen(group('g', [link('a')], false))).toBe(true);
-	});
-});
-
-describe('attrsWithoutClass', () => {
-	it('drops class and keeps the other attributes', () => {
-		const l = link('a', { cls: GROUP_LINK_CLASS });
-		l.attrs = { ...l.attrs, 'data-x': '1' };
-		expect(attrsWithoutClass(l)).toEqual({ 'data-x': '1' });
-		expect(attrsWithoutClass(link('b'))).toEqual({});
 	});
 });

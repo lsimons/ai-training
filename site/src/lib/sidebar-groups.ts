@@ -2,7 +2,7 @@
  * The sidebar's linked groups (issue #228). Starlight's sidebar model gives a
  * group a label and no link, so an overview page (a course page, the topic
  * map) would sit as a leaf next to its children. `astro.config.mjs` marks the
- * overview link with the `group-link` class and puts it first in the group.
+ * overview link with a `data-group-link` attribute and puts it first in the group.
  * `overrides/SidebarSublist.astro` then renders that link as the group's
  * heading and the rest of the entries under it. The logic is here, without
  * DOM access, so Vitest covers it.
@@ -13,8 +13,8 @@ export type SidebarEntry = StarlightRouteData['sidebar'][number];
 export type SidebarLink = Extract<SidebarEntry, { type: 'link' }>;
 export type SidebarGroup = Extract<SidebarEntry, { type: 'group' }>;
 
-/** The class `astro.config.mjs` puts on the first link of a group whose heading is that link. */
-export const GROUP_LINK_CLASS = 'group-link';
+/** The attribute `astro.config.mjs` puts on the first link of a group whose heading is that link. */
+export const GROUP_LINK_ATTR = 'data-group-link';
 
 /** A group split into its heading link and the entries under it. */
 export interface LinkedGroup {
@@ -22,15 +22,13 @@ export interface LinkedGroup {
 	entries: SidebarEntry[];
 }
 
-/** True when the link carries the `group-link` class. */
+/** True when the link carries the `data-group-link` attribute. */
 export function isGroupLink(entry: SidebarEntry): entry is SidebarLink {
-	if (entry.type !== 'link') return false;
-	const cls = entry.attrs.class;
-	return typeof cls === 'string' && cls.split(/\s+/).includes(GROUP_LINK_CLASS);
+	return entry.type === 'link' && GROUP_LINK_ATTR in entry.attrs;
 }
 
 /**
- * Splits a group whose first entry is a `group-link` into the link and the
+ * Splits a group whose first entry is a group link into the link and the
  * remaining entries. Returns undefined for a plain group, so the caller
  * renders Starlight's label heading instead.
  */
@@ -52,15 +50,4 @@ export function hasCurrent(entries: SidebarEntry[]): boolean {
  */
 export function startsOpen(group: SidebarGroup): boolean {
 	return hasCurrent(group.entries) || !group.collapsed;
-}
-
-/**
- * A link's attributes without `class`, for spreading onto an `<a>` whose
- * class list is set separately. Spreading `class` as well would emit the
- * attribute twice.
- */
-export function attrsWithoutClass(link: SidebarLink): Record<string, string | number | boolean | undefined> {
-	const out: Record<string, string | number | boolean | undefined> = {};
-	for (const [k, v] of Object.entries(link.attrs)) if (k !== 'class') out[k] = v;
-	return out;
 }
