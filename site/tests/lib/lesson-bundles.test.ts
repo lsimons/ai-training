@@ -38,6 +38,14 @@ describe('setAsideCode', () => {
 		const paragraphs = 'Odd ` tick.\n\nAnother ` tick.';
 		expect(setAsideCode(paragraphs).text).toBe(paragraphs);
 	});
+	it('a stray backtick before a blank line does not shift the spans of the next paragraph', () => {
+		const src = 'Stray ` here.\n\nA `<Tag>` span, and <Real /> after.';
+		const { text, restore } = setAsideCode(src);
+		expect(text).not.toContain('<Tag>');
+		expect(text).toContain('<Real />');
+		expect(text).toContain('Stray ` here.');
+		expect(restore(text)).toBe(src);
+	});
 	it('does not pair the backticks of template-literal attributes on adjacent lines as a span', () => {
 		const tag = '<Repair broken={`# a\n\nb`}\n  model={`# c\n\nd`}>\nWhy?\n</Repair>';
 		expect(setAsideCode(tag).text).toBe(tag);
