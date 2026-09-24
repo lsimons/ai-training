@@ -276,6 +276,17 @@ describe('extends-to and covered-by hrefs', () => {
 		]);
 		expect(checkSourceHrefs(readAreaTree(join(tree(), 'data')), (f) => f)).toEqual([]);
 	});
+	it('fails an entry without an href in either field, naming the entry', () => {
+		const { errors } = check(
+			tree({
+				'data/areas/a/lessons/x.yaml': `${LIVE}extends-to:\n  - {label: Next}\ncovered-by: {label: Course}\n`,
+			}),
+		);
+		expect(errors).toEqual([
+			'src/data/areas/a/lessons/x.yaml: extends-to entry "Next" has no href',
+			'src/data/areas/a/lessons/x.yaml: covered-by has no href',
+		]);
+	});
 });
 
 describe('foundations audience', () => {
