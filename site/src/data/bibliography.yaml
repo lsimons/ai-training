@@ -671,3 +671,17 @@ Claude Code custom tools:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/agent-sdk/custom-tools
+Claude Code skills:
+  type: reference
+  title: Extend Claude with skills
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/skills
+Claude Code mcp:
+  type: reference
+  title: Connect Claude Code to tools via MCP
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/mcp
