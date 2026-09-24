@@ -101,11 +101,14 @@ test('a Checkpoints or Examples menu entry scrolls to its section (#220, #291)',
 		const href = await link.getAttribute('href');
 		expect(href, `the first ${slug} entry links to a fragment`).toMatch(/^#.+/);
 		const id = (href as string).slice(1);
-		await link.click();
-		await expect(page).toHaveURL(new RegExp(`/${lesson}/#${id}$`));
-		// The fragment names a section of the group's kind, and the click brought it on screen.
+		// The fragment names a section of the group's kind, off screen before the click so the
+		// in-viewport check after it means the click scrolled.
 		const section = page.locator(`[id="${id}"]`);
 		await expect(section).toHaveAttribute(marker, /.*/);
+		await page.evaluate(() => window.scrollTo(0, 0));
+		await expect(section).not.toBeInViewport();
+		await link.click();
+		await expect(page).toHaveURL((url) => url.pathname.endsWith(`/${lesson}/`) && url.hash === `#${id}`);
 		await expect(section).toBeInViewport();
 	}
 });
