@@ -309,6 +309,12 @@ def test_format_file_never_fails(repo: Path, tmp_path: Path) -> None:
         "gh issue view 12 --comments",
         "mise run site-test",
         "cd ../ai-training-wt/feat/1-x && git diff origin/main...HEAD | head -50",
+        "ls site/src",
+        "grep -rn 'a > b' site 2>/dev/null",
+        "git diff 2>&1 | head",
+        "grep -c x file >/dev/null",
+        'grep -n "=>" site/src/lib/url.ts',
+        "git log -1 &>/dev/null",
     ],
 )
 def test_review_bash_allows_the_read_only_review_commands(command: str) -> None:
@@ -334,6 +340,31 @@ def test_review_bash_rejects_anything_else(command: str) -> None:
     code, message = agent_hooks.review_bash({"tool_input": {"command": command}})
     assert code == 2
     assert "not a review command" in message
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "grep -rn foo . > out.txt",
+        "wc -l a >> b",
+        "wc -l a>>b",
+        "git diff > review.patch",
+        "grep a &> f",
+        "grep a >| f",
+        "git log 2>err.txt",
+    ],
+)
+def test_review_bash_rejects_a_redirect_to_a_file(command: str) -> None:
+    code, message = agent_hooks.review_bash({"tool_input": {"command": command}})
+    assert code == 2
+    assert "redirects output to a file" in message
+
+
+def test_output_redirects_skips_quoted_and_escaped_text() -> None:
+    assert agent_hooks.output_redirects("grep 'a>b' f") == []
+    assert agent_hooks.output_redirects('grep "a>b \\" > x" f') == []
+    assert agent_hooks.output_redirects(r"grep a\>b f") == []
+    assert agent_hooks.output_redirects("cmd 2>&1 >&- > out") == ["&1", "&-", "out"]
 
 
 def test_review_bash_through_main(capsys: pytest.CaptureFixture[str]) -> None:
