@@ -34,7 +34,7 @@ function render(data: Record<string, unknown>) {
 describe('Footer', () => {
 	it('shows the review line, and not "Last updated", on a lesson with review-by', async () => {
 		const html = await render({ 'sources-checked': new Date('2026-09-20'), 'review-by': new Date('2027-03-20') });
-		expect(html).toContain('<p class="lesson-review not-content" data-review-by="2027-03-20">');
+		expect(html).toContain('<p class="lesson-review" data-review-by="2027-03-20">');
 		expect(html).toContain('Sources checked on September 20, 2026. Review due by March 20, 2027.');
 		expect(html).not.toContain('page.lastUpdated');
 		expect(html).not.toContain('<time');
