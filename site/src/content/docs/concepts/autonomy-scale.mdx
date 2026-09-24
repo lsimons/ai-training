@@ -101,7 +101,8 @@ the mode decides which actions the agent takes without asking
 
 The agent, the model and the tools are the same in all three, and the
 agent is at three places on the scale. One setting in the harness made
-the difference, so a product on its own can't be placed. A product page that says "agent" describes a range, and
+the difference, so a product on its own can't be placed. A product page
+that says "agent" describes a range, and
 the place on the scale is fixed only once someone picks the setting for
 a task (@Claude Code permission modes).
 
@@ -116,7 +117,7 @@ or "hard", pick a setting that asks before that step.
 
 <Choice id="pick-the-setting" objective="concepts/recognizes-agents/places-on-autonomy-scale"
   concepts={['degree-of-autonomy', 'harness']}
-  context="A coding agent has three permission settings: manual (asks before every edit and command), accept-edits (edits, moves, copies and removes files in the project folder by itself and asks before any other command) and skip-all-checks (nearly no prompts, for use inside an isolated container only). The right setting depends on how costly a mistake is and how easily it can be undone."
+  context="A coding agent has three permission settings: manual (asks before every edit and nearly every command), accept-edits (edits, moves, copies and removes files in the project folder by itself and asks before any other command) and skip-all-checks (nearly no prompts, for use inside an isolated container only). The right setting depends on how costly a mistake is and how easily it can be undone."
   title="Which setting for this task?" hint="Which steps of this task are cheap to undo, and which one isn't?"
   options={[
     { text: 'Manual, so that she approves each of the many small edits by hand.', why: 'The edits are tracked by version control and cheap to undo. Approving each of them one by one costs her time and buys her nothing that reading the result afterwards would not.' },
