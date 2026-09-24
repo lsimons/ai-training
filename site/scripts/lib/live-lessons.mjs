@@ -8,12 +8,12 @@
  *
  * The tree is read through `readAreaTree` and the pages through
  * `lessonPages`, the same readers `check-data` uses, and the checkpoints
- * through the tag scanner the build uses. `tests/scripts/live-lessons.test.ts`
+ * through the tag reader the build uses. `tests/scripts/live-lessons.test.ts`
  * covers this; `e2e/fixtures.ts` wraps it with the repository paths.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { scanCheckpointTags } from '../../src/lib/checkpoint-source.ts';
+import { checkpointTagsOfSource } from '../../src/lib/checkpoint-tags.ts';
 import { courseLessonIds, readAreaTree } from './area-tree.mjs';
 import { lessonPages } from './data.mjs';
 
@@ -83,9 +83,9 @@ export function liveTopicLessonIds(dataDir, contentDir, topic) {
  */
 export function pageCheckpoints(contentDir, lesson) {
 	const src = readFileSync(join(contentDir, `${lesson}.mdx`), 'utf8');
-	return scanCheckpointTags(src, lesson).map((t) => {
+	return checkpointTagsOfSource(src, lesson).map((t) => {
 		const id = t.attrs.get('id');
-		if (!id || id.expr) throw new Error(`${lesson}: <${t.tag}> without an id="..."`);
+		if (!id || id.expr || typeof id.value !== 'string') throw new Error(`${lesson}: <${t.tag}> without an id="..."`);
 		return { id: id.value, kind: t.kind };
 	});
 }

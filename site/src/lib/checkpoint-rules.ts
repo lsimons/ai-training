@@ -7,7 +7,7 @@
 /**
  * Component name (the MDX tag) to checkpoint kind (the `data-kind` value).
  * `CheckpointKind` is derived from it, so a new kind must enter here first
- * and the lesson catalog's tag scanner picks it up at the same time.
+ * and the lesson catalog's tag reader picks it up at the same time.
  */
 export const KIND_OF_TAG = {
 	Choice: 'choice',
@@ -22,6 +22,9 @@ export const KIND_OF_TAG = {
 
 export type CheckpointTag = keyof typeof KIND_OF_TAG;
 export type CheckpointKind = (typeof KIND_OF_TAG)[CheckpointTag];
+
+/** The form every checkpoint writes its concepts in; error messages show it. */
+export const CONCEPTS_FORM = "concepts={['concept-id', ...]}";
 
 /** Default `revision` for a checkpoint that does not declare one. */
 export const DEFAULT_REVISION = 1;

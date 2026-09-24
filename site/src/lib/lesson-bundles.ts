@@ -1,7 +1,7 @@
 import { getCollection } from 'astro:content';
 import { buildCheckpointExport, type CheckpointItem } from './checkpoint-items';
 import { KIND_OF_TAG } from './checkpoint-rules';
-import { openingTagEnd, parseAttrs } from './checkpoint-source';
+import { openingTagEnd, parseAttrs } from './jsx-source';
 import { getLessons, type Lesson } from './lessons';
 import { absoluteUrl } from './url';
 

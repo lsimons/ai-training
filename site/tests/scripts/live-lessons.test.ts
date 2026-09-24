@@ -109,7 +109,7 @@ describe('pageCheckpoints', () => {
 	it('throws on a checkpoint without a string id', () => {
 		const { content } = tree({
 			'content/a/y.mdx':
-				'<Choice id={x} objective="o" title="T" hint="h" concepts={[\'c1\']} options={[]}>S</Choice>\n',
+				'<Choice id={\'x\'} objective="o" title="T" hint="h" concepts={[\'c1\']} options={[]}>S</Choice>\n',
 		});
 		expect(() => pageCheckpoints(content, 'a/y')).toThrow('a/y: <Choice> without an id="..."');
 	});

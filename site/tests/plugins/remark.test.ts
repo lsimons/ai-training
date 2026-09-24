@@ -4,6 +4,7 @@ import { unified } from 'unified';
 import { describe, expect, it } from 'vitest';
 import { citationKeys, splitCitations } from '../../plugins/citation-syntax.mjs';
 import { CODE_AND_COMPONENTS, CODE_ONLY, walkText } from '../../plugins/mdast-walk.mjs';
+import { remarkCheckpoints } from '../../plugins/remark-checkpoints.mjs';
 import { remarkCitations } from '../../plugins/remark-citations.mjs';
 import { remarkTerms } from '../../plugins/remark-terms.mjs';
 
@@ -300,5 +301,36 @@ describe('walkText', () => {
 		walkText(t, { frozen: CODE_ONLY, onText: (n) => [{ type: 'text', value: `${n.value}!` }] });
 		expect(text(t)).toBe('hc!p!x');
 		expect([...CODE_AND_COMPONENTS]).toEqual(['code', 'inlineCode', 'mdxJsxFlowElement', 'mdxJsxTextElement']);
+	});
+});
+
+describe('remarkCheckpoints', () => {
+	const run = (src: string, path = '/repo/site/src/content/docs/a/b.mdx') => {
+		const file = { path, value: src, data: {} as { astro?: { frontmatter?: Record<string, unknown> } } };
+		const tree = unified().use(remarkParse).use(remarkMdx).parse(src);
+		remarkCheckpoints()(tree, file);
+		return file.data.astro?.frontmatter?.checkpoints;
+	};
+	it('writes every graded tag with its props and stem into the frontmatter', () => {
+		const src =
+			'<Choice id="a" concepts={[\'c\']} review={false} options={[{ text: \'x\', correct: true }]}>\n\nStem.\n\n</Choice>\n\n<Predict id="e" answer="1" run="x.py">\nShown.\n</Predict>\n';
+		expect(run(src)).toEqual([
+			{
+				tag: 'Choice',
+				kind: 'choice',
+				props: { id: 'a', concepts: ['c'], review: false, options: [{ text: 'x', correct: true }] },
+				stem: 'Stem.',
+			},
+		]);
+	});
+	it('fails the page on a prop that is not a literal, naming the file', () => {
+		expect(() => run('<Choice id="a" options={opts} />')).toThrow(
+			/docs\/a\/b\.mdx: cannot read options=\{\.\.\.\} of <Choice>: Identifier is not a literal/,
+		);
+	});
+	it('leaves a page without tags with an empty list and keeps other frontmatter', () => {
+		const file = { path: 'p', value: 'Text.', data: { astro: { frontmatter: { title: 'T' } } } };
+		remarkCheckpoints()(unified().use(remarkParse).use(remarkMdx).parse('Text.'), file);
+		expect(file.data.astro.frontmatter).toEqual({ title: 'T', checkpoints: [] });
 	});
 });

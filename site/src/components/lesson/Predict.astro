@@ -8,7 +8,7 @@
  * Without `objective`, the block is an ungraded example (spec S03 "Examples",
  * decided 2026-09-20): the page shows the command and its output, CI still
  * runs the fixture, and nothing is a checkpoint. It renders no checkpoint
- * markup, the tag scanner (`lib/checkpoint-source.ts`) skips it, and so it
+ * markup, the tag reader (`lib/checkpoint-tags.ts`) skips it, and so it
  * is in no progress record, review page, sidebar count or export. It needs
  * `answer` and `run` (an example that is shown has to be verified) and takes
  * no `hint`, `concepts` or `context`.

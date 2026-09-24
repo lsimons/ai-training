@@ -1,5 +1,5 @@
 import type { CheckpointKind } from './checkpoint-rules';
-import { type CheckpointAttr, propValue, stringProp } from './checkpoint-source';
+import { type CheckpointAttr, propValue, stringProp } from './checkpoint-tags';
 import { assertKnownConcepts, knownConceptIds } from './concepts';
 import { checkpointOf, checkpointTagsOf, getLessons, type Lesson } from './lessons';
 
@@ -46,12 +46,8 @@ interface ItemLike {
 }
 
 /** `options` and `answer` for one checkpoint, per kind. */
-function shapeOf(
-	where: string,
-	kind: CheckpointKind,
-	attrs: Map<string, CheckpointAttr>,
-): { options: unknown; answer: unknown } {
-	const prop = (name: string): unknown => propValue(where, attrs, name);
+function shapeOf(kind: CheckpointKind, attrs: Map<string, CheckpointAttr>): { options: unknown; answer: unknown } {
+	const prop = (name: string): unknown => propValue(attrs, name);
 	switch (kind) {
 		case 'choice':
 		case 'scenario': {
@@ -94,7 +90,7 @@ export function checkpointItemsOf(lesson: Lesson): CheckpointItem[] {
 	return checkpointTagsOf(lesson).map((tag) => {
 		const c = checkpointOf(lesson, tag);
 		const where = `${lesson.id}#${c.id}`;
-		const { options, answer } = shapeOf(where, c.kind, tag.attrs);
+		const { options, answer } = shapeOf(c.kind, tag.attrs);
 		return {
 			id: c.id,
 			lesson: lesson.id,

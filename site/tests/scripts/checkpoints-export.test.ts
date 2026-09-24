@@ -114,21 +114,21 @@ describe('helpers', () => {
 		expect([...ids]).not.toContain('a/x#shown');
 		expect(check(tree(GOOD)).errors).toEqual([]);
 	});
-	it('pageCheckpointIds reads lesson pages only, not the course page, with the same scanner as the build', () => {
+	it('pageCheckpointIds reads lesson pages only, not the course page, with the same reader as the build', () => {
 		const spaced = PAGE.replace('<Choice id="one"', '<Choice id = "one"');
 		const root = tree(GOOD, { 'content/a/x.mdx': spaced });
 		const { ids, errors } = pageCheckpointIds(join(root, 'content'), join(root, 'data'));
 		expect([...ids].sort()).toEqual(['a/x#one', 'a/x#two']);
 		expect(errors).toEqual([]);
 	});
-	it('pageCheckpointIds reports a tag without a string id and a tag the scanner rejects', () => {
-		const noId = PAGE.replace('<Choice id="one"', '<Choice id={x}');
+	it('pageCheckpointIds reports a tag without a string id and a tag the reader rejects', () => {
+		const noId = PAGE.replace('<Choice id="one"', "<Choice id={'x'}");
 		const root = tree(GOOD, { 'content/a/x.mdx': noId });
 		expect(pageCheckpointIds(join(root, 'content'), join(root, 'data')).errors).toEqual([
 			'a/x: <Choice> without an id="..."',
 		]);
 		const broken = PAGE.replace('<Choice id="one"', '<Choice id="one" {...rest}');
 		const { errors } = check(tree(GOOD, { 'content/a/x.mdx': broken }));
-		expect(errors[0]).toMatch(/a\/x: <Choice> unexpected/);
+		expect(errors[0]).toMatch(/a\/x: <Choice> has a spread prop/);
 	});
 });
