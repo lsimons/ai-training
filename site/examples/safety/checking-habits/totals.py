@@ -52,7 +52,7 @@ def main() -> None:
         print(line)
     print(check_grand_total(TABLE, WRITTEN_GRAND_TOTAL))
     wrong = mismatches(TABLE)
-    print(f"{len(wrong)} of {len(TABLE)} rows do not add up: {', '.join(wrong)}")
+    print(f"rows that do not add up: {len(wrong)} of {len(TABLE)} ({', '.join(wrong)})")
 
 
 if __name__ == "__main__":
