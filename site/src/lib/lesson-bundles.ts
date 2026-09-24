@@ -1,4 +1,5 @@
 import { getCollection } from 'astro:content';
+import { BUNDLE_VERSION } from './bundle-version';
 import { buildCheckpointExport, type CheckpointItem } from './checkpoint-items';
 import { KIND_OF_TAG } from './checkpoint-rules';
 import { openingTagEnd, parseAttrs } from './jsx-source';
@@ -14,8 +15,7 @@ import { absoluteUrl } from './url';
  * is the one function that reads the collections.
  */
 
-/** Bumped when a field changes meaning; equal to the tutor instruction file's `version` (S08). */
-export const BUNDLE_VERSION = 1;
+export { BUNDLE_VERSION };
 
 export interface BundleTopic {
 	id: string;

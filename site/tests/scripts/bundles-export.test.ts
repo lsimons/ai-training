@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { bundleIds, checkBundle, checkBundles, fencedBlocks } from '../../scripts/lib/bundles.mjs';
+import { bundleIds, checkBundle, checkBundles, fencedBlocks, isLessonUrl } from '../../scripts/lib/bundles.mjs';
 
 const roots: string[] = [];
 afterAll(() => {
@@ -85,6 +85,14 @@ describe('checkBundles', () => {
 			'a/x: version is 2, expected 1',
 			'a/x: id is "a/y"',
 		]);
+	});
+	it('reports a url that is relative or names another lesson', () => {
+		expect(check(tree({ 'a/x': bundle({ url: '/ai-training/a/x/' }) })).errors).toEqual([
+			'a/x: url is "/ai-training/a/x/", expected an absolute URL ending in /a/x/',
+		]);
+		expect(check(tree({ 'a/x': bundle({ url: 'https://s/ai-training/a/y/' }) })).errors).toHaveLength(1);
+		expect(isLessonUrl('https://s/a/x/', 'a/x')).toBe(true);
+		expect(isLessonUrl('https://s/a/x', 'a/x')).toBe(false);
 	});
 	it('reports a missing or mistyped field and an unknown mode', () => {
 		const { title: _title, checkpoints: _checkpoints, ...rest } = bundle();
