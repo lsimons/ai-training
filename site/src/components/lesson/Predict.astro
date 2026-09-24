@@ -14,6 +14,7 @@
  * no `hint`, `concepts` or `context`.
  */
 import CheckpointShell from './CheckpointShell.astro';
+import SectionTitle from './SectionTitle.astro';
 
 interface Props {
 	id: string;
@@ -93,7 +94,7 @@ if (!graded) {
 			<header class="cp-head">
 				<span class="cp-kind">Example · run it</span>
 			</header>
-			<h3 class="cp-title">{title}</h3>
+			<SectionTitle {id} {title} />
 			<div class="cp-stem">
 				<slot />
 			</div>
