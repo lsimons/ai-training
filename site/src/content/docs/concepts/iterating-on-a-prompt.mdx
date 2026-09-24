@@ -179,9 +179,9 @@ holds on every run (@Academy ai-fluency-framework-foundations).
   title="Four tries"
   hint="What changes between one run and the next, and what stays the same?"
   options={[
-    { text: 'The model forgot the decisions on the first runs and needed a few reminders.', why: 'There is nothing to remind. Each run reads the same prompt from the start and keeps nothing from the run before.' },
-    { text: 'Each run is a draw from the same distribution. The prompt made the decisions unlikely, and the fourth draw came from the tail.', correct: true },
-    { text: 'The model learns from the retries and gets better at the task within the session.', why: 'The weights are fixed while the model answers. A retry changes the random pick and nothing else.' },
+    { text: 'The model forgot the decisions on the first runs and needed a few reminders before it kept them in mind.', why: 'There is nothing to remind. Each run reads the same prompt from the start and keeps nothing from the run before.' },
+    { text: 'Each run is a draw from one distribution, and the prompt made the decisions unlikely. The fourth draw came from the tail.', correct: true },
+    { text: 'The model learns from the retries inside the session and gets better at the task each time it is asked.', why: 'The weights are fixed while the model answers. A retry changes the random pick and nothing else.' },
   ]}>
 
 A colleague pressed regenerate until the summary included the decisions.

@@ -222,10 +222,10 @@ model changes and the applicants change.
   title="The internship shortlist"
   hint="Who is affected by a wrong shortlist, and can they correct it? What kind of check can show a shift in the odds?"
   options={[
-    { text: 'Ask the assistant to explain its reasons for each shortlisted applicant, and read them.', consequence: 'Every reason reads well, because the model writes fluent reasons for whichever twenty it picked. The applicants it did not pick are not in the list you read, so a slant against them is invisible.' },
-    { text: 'Have a recruiter spot-check five of the twenty and go ahead if those five look right.', consequence: 'The five look right. Five agreed picks say nothing about the two hundred and eighty who were left out, or about who was left out more often.' },
+    { text: 'Ask the assistant to explain its reasons for each shortlisted applicant, read the reasons, and go ahead if none of them names a group.', consequence: 'Every reason reads well, because the model writes fluent reasons for whichever twenty it picked. The applicants it did not pick are not in the list you read, so a slant against them is invisible.' },
+    { text: 'Have a recruiter spot-check five of the twenty, and go ahead if those five look like people the recruiter would have picked.', consequence: 'The five look right. Five agreed picks say nothing about the two hundred and eighty who were left out, or about who was left out more often.' },
     { text: 'Run a sample with names swapped across the groups the team can name, count the shortlist rate per group, and have the recruiting lead decide on the counts.', correct: true, consequence: 'The comparison shows whether a name moved the score, and a person with standing decides on that evidence. If the counts come back level, the tool is trusted for this task, and the check is repeated when the model or the applicant pool changes.' },
-    { text: 'Rely on the vendor statement that the model was tested for fairness before release.', consequence: 'The vendor tested its model on its data and its prompts. Your applications, your job description and your prompt are a different setting, and the papers on this found that the slant changes with the setting.' },
+    { text: 'Rely on the vendor statement that the model was tested for fairness before release, and keep a copy of the statement on file.', consequence: 'The vendor tested its model on its data and its prompts. Your applications, your job description and your prompt are a different setting, and the papers on this found that the slant changes with the setting.' },
   ]}>
 
 A team wants to use a chat assistant to shortlist twenty interview

@@ -160,9 +160,9 @@ reliable as the check that runs after it, on every run.
   hint="What did the one run measure, and what does a paying process need to know about every run?"
   options={[
     { text: 'Yes. The prompt gave the right total, and the model is deterministic enough for a fixed email.', consequence: 'The process runs the prompt on hundreds of emails and some totals come back as text, in another currency, or with a second number appended. Nobody notices until the payments are compared with the bank statement.' },
-    { text: 'Yes, if the temperature is set to 0, because then every run gives the same answer.', consequence: 'The runs are more consistent and still differ now and then, and a wrong total at temperature 0 is as wrong as at temperature 1. The process pays it.' },
-    { text: 'Not yet. Run it on a set of emails with known totals, count how often the answer is right and in the right form, and add a check that rejects an answer that fails either.', correct: true, consequence: 'The trial run shows the failure rate and the forms a bad answer takes, and the check turns each of those into a rejected item instead of a payment.' },
-    { text: 'Not yet. Ask the model whether it is confident in the total, and only pay when it says yes.', consequence: 'The confidence statement is more predicted text and it varies between runs like the total does. The check now has two answers to trust instead of one.' },
+    { text: 'Yes, if the temperature is set to 0, because then every run gives the same answer and the process never sees a different total.', consequence: 'The runs are more consistent and still differ now and then, and a wrong total at temperature 0 is as wrong as at temperature 1. The process pays it.' },
+    { text: 'Not yet. Run it on a set of emails with known totals, count the answers that are right and in the right form, and add a check that rejects an answer that fails either.', correct: true, consequence: 'The trial run shows the failure rate and the forms a bad answer takes, and the check turns each of those into a rejected item instead of a payment.' },
+    { text: 'Not yet. Ask the model whether it is confident in the total, and only pay when it says yes. A model usually knows when it is unsure.', consequence: 'The confidence statement is more predicted text and it varies between runs like the total does. The check now has two answers to trust instead of one.' },
   ]}>
 
 A colleague ran their invoice prompt once, got the right total, and wants
