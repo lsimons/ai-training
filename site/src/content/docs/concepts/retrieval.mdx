@@ -2,9 +2,9 @@ import { Choice, MultiChoice, Scenario, Pitfall, Exercise, Recap } from '@compon
 
 A product assistant on a web shop is asked what the yearly plan costs,
 and it answers with last year's price. The price went up in January,
-and the model was trained before that. The first wish is to retrain the
-model on the new price list, which is slow, expensive, and out of date
-again at the next price change. In this lesson we look at what
+and the model was trained before that. The obvious fix seems to be to retrain
+the model on the new price list, which is slow, expensive, and out of
+date again at the next price change. In this lesson we look at what
 assistants do instead. A search step finds the passages that fit the
 question and puts them in the prompt, and the model answers from what
 it can see. You read the output of a small keyword search over four
@@ -25,13 +25,15 @@ is called **retrieval (RAG)**, short for retrieval-augmented generation, and it
 is how an assistant answers about your files or a company wiki without
 anyone retraining anything.
 
-The steps are the same in every retrieval product. The documents are
+In its basic form, retrieval has a fixed set of steps. The documents are
 split into passages. When a question comes in, a search scores each
 passage against the question and picks the best few. Those passages are
 pasted into the prompt above the question, with an instruction such as
 "answer from the passages below". The model then writes an answer from
 text it can see. Update the document, and the next answer uses the new
-text. The model never changed.
+text. The model never changed. Agentic retrieval, where the model itself
+decides when to search and searches again after a poor result, builds on
+these same steps (@AEC-08).
 
 The search is the weak point. A model can only ground its answer in the
 passages the search gave it. When the search returns the wrong passage,
@@ -44,10 +46,10 @@ how it searches.
 The simplest search matches words. The question is split into words,
 common words such as "how" and "the" are dropped, and each document is
 scored by how many of the remaining words it contains. The best score
-wins and becomes the passage in the prompt. Similarity search, which
-most products use, scores meaning instead of exact words. The keyword
-version is the one you can check by eye, so it is the one this lesson
-uses.
+wins and becomes the passage in the prompt. Products also use
+similarity search, which scores meaning instead of exact words, on its
+own or combined with keywords. The keyword version is the one you can
+check by eye, so it is the one this lesson uses.
 
 The policy texts are one paragraph each, on annual leave, expenses,
 remote work, and laptops. Here is the search on a question that uses
@@ -106,8 +108,8 @@ nothing, although both questions ask the same thing. Why?
 
 ## Grounding, and what it doesn't fix
 
-**Grounding** is tying an answer to sources the model was given, and
-not to what it remembers from training. A grounded answer does two
+**Grounding** is tying an answer to the sources the model was given,
+rather than to its training data. A grounded answer does two
 things. It points at the passage it relied on, so you can read the
 passage yourself. And it says so when the passages don't cover the
 question (@Academy ai-capabilities-and-limitations).
@@ -128,7 +130,7 @@ per day.
 
 ```text
 question: What is the daily rate for working away from the office?
-keywords: daily, office, rate, working
+keywords: away, daily, office, rate, working
   expenses.txt: 0 matches
   laptops.txt: 0 matches
   leave.txt: 0 matches
@@ -142,8 +144,8 @@ the expenses policy scores zero. The remote work policy contains
 "office" and wins with one match. A model that grounds its answer in
 this passage might say the daily rate is 30 euros, and cite the remote
 work policy for it. The citation is real, the passage is real, and the
-answer is wrong twice: the 30 euros is a monthly allowance, and it is
-for a home office and not for working away. A grounded wrong answer
+answer is wrong twice: the 30 euros is a monthly allowance, and it
+covers a home office while the question asked about a work trip. A grounded wrong answer
 looks the same as a grounded right one until you read the passage.
 
 <Scenario id="outdated-price" objective="concepts/explains-models/explains-grounding"
@@ -154,7 +156,7 @@ looks the same as a grounded right one until you read the passage.
     { text: 'Ask the vendor to retrain the model on the new price list.', consequence: 'Weeks pass and money is spent. The retrained model repeats the new price until the next change, and then it is wrong again.' },
     { text: 'Check the passage the answer was grounded in, and update that document.', correct: true, consequence: 'The passage shows the old price list. You replace the document, and the next question retrieves the new one.' },
     { text: 'Add "always give the current price" to the assistant\'s instructions.', consequence: 'The model cannot tell current from old. It has only the passage in its prompt, and the passage still holds last year\'s price.' },
-    { text: 'Turn off retrieval so the model answers from what it knows.', consequence: 'The model now answers from training data, which is older than the document was. The price is still wrong, and now there is no passage to check.' },
+    { text: 'Turn off retrieval so the model answers from what it knows.', consequence: 'The model answers from training data alone, which predates even the old document. You lose the passage, and with it the way to see where any price came from.' },
   ]}>
 The web shop's assistant answers from a folder of product documents.
 A customer asks what the yearly plan costs and gets last year's price.
@@ -178,8 +180,8 @@ the question. Which of these does grounding take care of?
 
 <Pitfall title="Two clauses, one sentence">
 An assistant is asked what the company pays for working from home. The
-search returns two passages, the remote work policy, and the expenses
-policy, because both mention euros and both mention days. The answer
+search returns two passages, because the remote work policy and the
+expenses policy both mention euros and both mention days. The answer
 reads: "Staff may work from home up to three days per week, and are
 reimbursed up to 40 euros per day with a receipt." Each half is a real
 clause from a real policy. Together they say the company pays 40 euros
