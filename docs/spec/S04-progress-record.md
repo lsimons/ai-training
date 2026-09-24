@@ -159,8 +159,8 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
   version 1 kept no other date.
 - The `practice` map and the `served` field joined version 2 on
   2026-09-24 without a bump, because they add data and change the meaning
-  of nothing stored. A record without them reads as before, and a site from before the change drops
-  them on load.
+  of nothing stored. A record without them reads as before, and a site
+  from before the change drops them on load.
   - `practice`: a map like `checkpoints`, keyed `<lesson>#<checkpoint>`,
     for `practice` checkpoints only. Absent reads as empty.
   - `served` on a review `history` entry: the id (within its lesson) of the
