@@ -75,6 +75,7 @@ The installed `SKILL.md` is the bootstrap. It contains, and only contains:
 | Version check    | The bootstrap declares the `version` it understands. If the fetched file's `version` is higher, the tutor tells the learner to reinstall the skill with the install command and then continues as far as the instructions still make sense to it.            |
 | Lesson step      | Ask the learner for the lesson URL, or take it from what they pasted. Derive the bundle URL by the scheme below, fetch it, and follow the fetched instructions from there.                                                                                   |
 | Base             | Both fetches use the base of the pasted lesson URL (everything through `/ai-training/`), so a `localhost` URL from `mise run site-dev` or `site-preview` fetches the local instruction file and bundle. Without a pasted URL the base is the published site. |
+| Allowed origins  | The base must be the published site or `http://localhost:<port>/ai-training/`. For any other host or scheme the bootstrap says so in one sentence and stops without a fetch, since it follows the fetched file as instructions.                              |
 | Offline message  | If either fetch fails, say so in one sentence, name the URL that failed, and offer to continue from the lesson page the learner has open, as a plain conversation without the verbs. Never invent lesson content when the fetch fails.                       |
 
 On a local base the fetched files still cite the published origin, because

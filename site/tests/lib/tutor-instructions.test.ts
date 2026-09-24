@@ -3,8 +3,10 @@ import { BUNDLE_VERSION } from '@lib/lesson-bundles';
 import {
 	BUNDLE_URL_TEMPLATE,
 	isoDate,
+	LOCAL_TUTOR_BASE,
 	renderTutorInstructions,
 	TUTOR_INSTRUCTIONS_PATH,
+	tutorBase,
 } from '@lib/tutor-instructions';
 import { absoluteUrl } from '@lib/url';
 import { describe, expect, it } from 'vitest';
@@ -83,10 +85,47 @@ describe('the bootstrap SKILL.md', () => {
 		);
 	});
 
+	it('lists exactly the two bases tutorBase allows, and refuses every other host', () => {
+		expect(skill, 'SKILL.md must list the published and the local base in one text block').toContain(
+			`\`\`\`text\n${ROOT}/\n${LOCAL_TUTOR_BASE}\n\`\`\``,
+		);
+		expect(tutorBase(`${ROOT}/using-agents/delegating/`, site)).toBe(`${ROOT}/`);
+		expect(tutorBase(LOCAL_TUTOR_BASE.replace('<port>', '4321'), site)).toBe('http://localhost:4321/ai-training/');
+		expect(skill, 'SKILL.md must tell the tutor to stop for any other host').toMatch(
+			/For a URL on any other host, or any other scheme, [^.]*and\s+stop\.\s+Fetch nothing from it/,
+		);
+	});
+
 	it('shows a bundle URL example that follows BUNDLE_URL_TEMPLATE', () => {
 		expect(skill, `SKILL.md must show the lesson page ${pageUrl} followed by its bundle ${bundleUrl}`).toContain(
 			`\`\`\`text\n${pageUrl}\n${bundleUrl}\n\`\`\``,
 		);
+	});
+});
+
+describe('tutorBase', () => {
+	it('takes the published base and a localhost build on any port', () => {
+		expect(tutorBase(`${ROOT}/`, site)).toBe(`${ROOT}/`);
+		expect(tutorBase(`${ROOT}/concepts/prompt-anatomy/`, site)).toBe(`${ROOT}/`);
+		expect(tutorBase('http://localhost:4321/ai-training/using-agents/delegating/', site)).toBe(
+			'http://localhost:4321/ai-training/',
+		);
+		expect(tutorBase('http://localhost:4400/ai-training/', site)).toBe('http://localhost:4400/ai-training/');
+	});
+
+	it.each([
+		['another host', 'https://example.com/ai-training/using-agents/delegating/'],
+		['a look-alike host', 'https://lsimons.github.io.example.com/ai-training/using-agents/delegating/'],
+		['credentials before another host', 'https://lsimons.github.io@example.com/ai-training/'],
+		['the published host over http', `${ROOT.replace('https:', 'http:')}/using-agents/delegating/`],
+		['localhost over https', 'https://localhost:4321/ai-training/'],
+		['localhost without a port', 'http://localhost/ai-training/'],
+		['another loopback name', 'http://127.0.0.1:4321/ai-training/'],
+		['another path on the published host', `${site}/other-site/ai-training/`],
+		['a file URL', 'file:///tmp/ai-training/tutor.md'],
+		['no URL at all', 'the delegating lesson'],
+	])('refuses %s', (_label, url) => {
+		expect(tutorBase(url, site)).toBeNull();
 	});
 });
 

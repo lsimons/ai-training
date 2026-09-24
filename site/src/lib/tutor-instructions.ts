@@ -53,3 +53,30 @@ export function renderTutorInstructions({ body, site, built }: TutorInstructions
 	].join('\n');
 	return `${frontmatter}\n\n${body.trim()}\n`;
 }
+
+/** The local base the bootstrap accepts besides the published one, as `SKILL.md` writes it. */
+export const LOCAL_TUTOR_BASE = 'http://localhost:<port>/ai-training/';
+
+/**
+ * The fetch base for a lesson URL the learner pasted, or null when the bootstrap
+ * must refuse it (spec S08 "Bootstrap contract", #351). The bootstrap follows the
+ * fetched `tutor.md` as instructions, so a base on another host would load someone
+ * else's. Only the published base (from Astro's `site`) and a local build on
+ * `http://localhost:<port>/ai-training/` are allowed. `SKILL.md` states the same
+ * rule in words, and the bootstrap test checks the two agree.
+ */
+export function tutorBase(lessonUrl: string, site: string): string | null {
+	let url: URL;
+	try {
+		url = new URL(lessonUrl);
+	} catch {
+		return null;
+	}
+	const published = absoluteUrl('/', site);
+	if (url.username !== '' || url.password !== '') return null;
+	if (url.pathname !== '/ai-training/' && !url.pathname.startsWith('/ai-training/')) return null;
+	const base = `${url.origin}/ai-training/`;
+	if (base === published) return base;
+	if (url.protocol === 'http:' && url.hostname === 'localhost' && url.port !== '') return base;
+	return null;
+}
