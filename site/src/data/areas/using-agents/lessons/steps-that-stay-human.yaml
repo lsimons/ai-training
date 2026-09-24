@@ -1,12 +1,19 @@
 id: using-agents/steps-that-stay-human
 title: The steps that stay human
+description: >-
+  Walk an eight-step hiring process twice, once for what an agent could do and once for what stays
+  with a person, and learn the three reasons a step stays human and why the list is decided early.
 mode: explanation
 covers: using-agents/choosing-tools
 serves: [using-agents/chooses-tool-and-autonomy/keeps-the-human-steps]
 introduces: [what-to-keep-human]
 assumes:
   - objective: safety/judges-agent-risk/chooses-human-in-loop
+    lesson: safety/agent-risk
+    section: human-in-the-loop
   - objective: safety/judges-agent-risk/sets-oversight
+    lesson: safety/eu-ai-act
+    section: what-each-role-owes
 after: [using-agents/chat-agent-or-automation]
 shorts: [A human path when the tool is down]
 exercise:
@@ -15,9 +22,18 @@ exercise:
     In a supplied eight-step process (hiring a contractor), mark the steps that stay with a person
     and give the reason per step, accountability, knowledge the agent cannot reach, or keeping your
     own judgment sharp.
-sources: []
+sources:
+  - Academy building-effective-human-agent-teams
+  - Academy ai-fluency-for-builders
 issue: 164
 minutes: 10
 notes: >-
   The plan named the topic safety/governance as assumed; taken as the objective
-  safety/judges-agent-risk/sets-oversight.
+  safety/judges-agent-risk/sets-oversight, which the live eu-ai-act lesson teaches in its section
+  on what each role owes (writing-an-ai-policy, the other lesson that serves it, is planned). The
+  planned after lesson chat-agent-or-automation is ordering only, and the page never refers to it.
+  The process uses Brindlewick Instruments, the fictional company from the earlier lessons, and no
+  person in it has a name. Academy building-effective-human-agent-teams is cited for accountability
+  staying with people, and Academy ai-fluency-for-builders for deciding the human steps by design,
+  both as paraphrased ideas in our own words. AEC-12 and Brilliant ABS from the plan are not cited,
+  because the page is a foundations lesson with no coding tool in it, so they are not in sources.

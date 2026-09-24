@@ -1,0 +1,227 @@
+import { Choice, MultiChoice, Match, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we read the eight steps of one everyday process, hiring a
+contractor, twice. The first reading asks which steps an agent could do,
+and the answer is most of them. The second reading asks which steps stay with
+a person anyway, and gives the reason per step. The second list is much
+shorter than the first, and the gap between them is the subject of the
+lesson. You
+don't run anything here. The process is supplied, and the work is reading
+it and deciding.
+
+The safety course showed where to put the approval before an irreversible
+step. This lesson is about a wider set of steps: the ones a person keeps
+even when nothing irreversible happens in them, because of who has to
+answer for the step, where its information is, or what doing it does for
+your own judgment.
+
+## What an agent could do
+
+The process below is the one the operations lead at Brindlewick
+Instruments, the fictional company from the earlier lessons, follows when
+the team needs an outside specialist for a few months. Read it once as a
+list of steps, without deciding anything yet.
+
+```text
+Hiring a contractor, in eight steps
+
+1. Write the job description from the project notes.
+2. Post it on two job boards and collect the applications.
+3. Screen the applications against the requirements into a shortlist.
+4. Interview the shortlisted candidates.
+5. Check the references of the two finalists.
+6. Choose the contractor.
+7. Agree the rate and sign the contract.
+8. Set up accounts, access and a first-week plan.
+```
+
+Now ask, step by step, whether an agent with a browser, your email and
+your calendar could do it. Step 1 is a drafting task from notes it can
+read. Step 2 is form filling and collecting mail. Step 3 is reading
+applications against a written list of requirements and sorting them.
+Step 4 is scheduling and, with a meeting tool, even taking notes. Step 5 is
+sending the reference emails and summarizing the answers. Step 6 is a
+comparison of the notes and the summaries. Step 7 is filling in a contract
+template. Step 8 is creating accounts and writing a plan from the job
+description. The agent could take part in every step and could carry out
+seven of the eight on its own. The only step where a person has to be
+present is the interview, and even there the agent could book the room
+and write the notes.
+
+A person who stops at this point concludes that the whole process can be
+handed over with an approval before the contract is signed. That
+conclusion mistakes "could do" for "should do", and the next section is
+about the difference.
+
+## Why a person keeps a step anyway
+
+Set the process aside for a moment, because the reasons are easier to see
+in smaller examples. A step stays with a person for one of three reasons.
+
+**Someone has to answer for it.** A manager's performance review has a
+rating in it, and an agent can draft a fair rating from the year's notes.
+The rating stays with the manager, because the person who has to explain
+it to the employee later is the one who must have decided it. When a colleague asks "why a three?", the answer
+"the tool said so" ends the manager's part in the process, and the
+process was there to have a manager in it. An agent can prepare a step it
+can't be accountable for, and accountability is the reason the step
+stays with the person who holds it
+(@Academy building-effective-human-agent-teams).
+
+**The information is in no system the agent can reach.** Picking a time
+for a difficult meeting looks like a calendar task. The agent reads every
+calendar and finds the free slot on Thursday afternoon. You know that the
+colleague you are meeting has had a hard week and that Thursday afternoon
+is the last thing they need, and you know it because they told you in the
+corridor. Nothing the agent can read holds that fact. A step whose input
+is in your memory, in a conversation, or in the look on someone's face
+stays with you because the agent would do it without the input that
+matters.
+
+**Doing it is what keeps you able to judge the agent's work.** Reading the
+first few applications yourself is slower than reading a shortlist. It is
+also how you learn what this year's applications look like and
+whether the shortlist the agent made left the right people out. A person
+who has read none of the applications for two years can approve any
+shortlist and reject none, because they no longer have a sense of what a
+good one contains. A person keeps some steps as the price of being
+qualified to check the rest, in the same way a pilot flies some landings by hand to stay
+able to take over from the autopilot.
+
+A step can have more than one of these reasons, and none of them is about
+what the agent can do. The agent can draft the rating, find the slot, and
+read the applications. The person keeps the step for a reason about the
+person, and naming that reason is what tells you the step is a choice
+rather than a limitation that the next version of the tool removes.
+
+<Match id="reason-per-example" objective="using-agents/chooses-tool-and-autonomy/keeps-the-human-steps"
+  concepts={['what-to-keep-human']}
+  context="The lesson gives three reasons a step stays with a person even when an agent could do it: someone has to answer for it, the information is in no system the agent can reach, and doing the step keeps the person able to judge the agent's work."
+  title="Why does each step stay with a person?" hint="For each step, ask what the person would lose, or what the agent would lack, if the agent did it."
+  options={['Someone has to answer for it', 'The information is in no system the agent can reach', 'Doing it keeps you able to judge the agent\'s work']}
+  rows={[
+    { statement: 'Deciding the rating in a performance review', option: 0, why: 'Who has to explain the rating to the employee afterwards?' },
+    { statement: 'Picking the time for a difficult meeting with a colleague who told you in person about their week', option: 1, why: 'Where does the fact that matters for this choice exist, and can the agent read it?' },
+    { statement: 'Reading a sample of the applications before looking at the shortlist', option: 2, why: 'What does a person who has read no applications know about whether the shortlist is a good one?' },
+  ]}
+  rationale="A person keeps each step for a reason about the person, and the agent could do all three. The reason tells you the step is a choice.">
+Match each step to the reason it stays with a person.
+</Match>
+
+<Choice id="not-a-capability-gap" objective="using-agents/chooses-tool-and-autonomy/keeps-the-human-steps"
+  concepts={['what-to-keep-human']}
+  context="A team keeps the final rating in performance reviews with the manager, and an agent drafts the rest of the review. The question is about what happens to that rule when the agent gets better."
+  title="Does a better agent change the list?" hint="Which of the three reasons is about the agent's ability, and which are about the person?"
+  options={[
+    { text: 'The rating moves to the agent once its drafts match the managers\' ratings often enough.', why: 'The rating stayed with the manager because the manager has to answer for it. A more accurate draft does not change who answers.' },
+    { text: 'The rating stays with the manager, and the better agent changes the quality of the draft the manager starts from.', correct: true },
+    { text: 'The rating moves to the agent, and the manager keeps an approval before the review is sent.', why: 'An approval at the end is a check on the text. The reason the step stayed human was accountability for the decision, and an approval is not a decision.' },
+  ]}>
+A team's rule is that the agent drafts each performance review and the
+manager decides the rating. A year later the agent's drafts are much
+better. What happens to the rule?
+</Choice>
+
+## Naming the step is a design choice
+
+The list of steps a person keeps is a decision you make, and the time to
+make it is when the process is set up,
+because of how automation spreads through a process that nobody has
+mapped this way. Each step the agent can do gets handed over when
+someone is busy and the tool looks ready. Nobody decides to automate the
+rating in the review or the choice of contractor. One month the draft has
+a rating in it, the manager is short of time, and the rating goes out as
+drafted. The step nobody named as human is automated by default, one busy
+week at a time, and it happens sooner as tools improve
+(@Academy ai-fluency-for-builders).
+
+A named step behaves differently. "Step 6, choosing the contractor, is
+done by the hiring manager" is a line in the process description, and
+when the agent's summary comes with a recommendation, the line is there
+to say that the recommendation is input and the choice is still a
+person's. A team that writes an AI policy names these steps in it as the
+approvals a task needs, which is the same list seen from the
+organization's side. The rule about which step a person keeps and who
+oversees it is written down in both places, and the lesson on the EU AI
+Act shows the same idea as a duty on the organization that deploys an AI
+system.
+
+Naming the human steps has a second effect. A process with named human
+steps keeps working when the tool is down, because the person who owns a
+step knows how to do it, has done it recently, and can do the neighboring
+steps by hand for a day. A process where every step was handed over as
+soon as it could be has nobody who remembers how step 3 was done, and the
+outage of a tool becomes the outage of the process. The human path is the
+one you keep on purpose, the same way an office keeps a paper form for
+the day the system is unavailable.
+
+<Scenario id="the-recommendation-arrives" objective="using-agents/chooses-tool-and-autonomy/keeps-the-human-steps"
+  concepts={['what-to-keep-human', 'human-in-the-loop']}
+  context="A hiring process has eight steps. An agent has done the screening, scheduled the interviews and summarized the references, and its summary of the two finalists ends with a recommendation. The process description never said who chooses the contractor."
+  title="The summary ends with a recommendation" hint="Which step is this, who will answer for it later, and what does the process description say about it?"
+  options={[
+    { text: 'Accept the recommendation and move on to the contract, since the agent has read every application, every interview note and every reference, and you have read its summary.', consequence: 'The contractor is chosen. Three months later the project lead asks why this person was picked over the other finalist, and the answer is a summary you didn\'t write. Nobody in the team decided.' },
+    { text: 'Read the two interview notes and the reference summaries yourself, make the choice, and add a line to the process that names the hiring manager as the one who chooses.', correct: true, consequence: 'The choice is yours and you can explain it. Next time the summary arrives, the process description already says what the recommendation is for.' },
+    { text: 'Ask the agent to explain its recommendation in more detail, with the interview notes and references it weighed, and accept it once the explanation reads well.', consequence: 'The explanation is longer and reads well. The choice is still the agent\'s, and the question of who answers for it is unchanged.' },
+    { text: 'Reject the recommendation and redo the screening of every application yourself, since the agent has gone one step further than you intended it to.', consequence: 'The screening was a step the agent could do, and redoing it costs a day. The step that needed a person was the choice, and you spent the day on the wrong one.' },
+  ]}>
+The agent's summary of the two finalists arrives, and its last line is
+"Recommendation: candidate B". The process description says nothing about
+who chooses. What do you do?
+</Scenario>
+
+<MultiChoice id="reasons-that-hold" phase="review" objective="using-agents/chooses-tool-and-autonomy/keeps-the-human-steps"
+  concepts={['what-to-keep-human']}
+  context="A team is deciding which steps of a process to keep with a person when an agent could do them, and is listing the reasons a person keeps a step."
+  title="Which of these are reasons a step stays with a person?" hint="For each line, ask whether it is about the person and the process or about what the agent can do today."
+  options={[
+    { text: 'A named person has to explain the outcome of the step afterwards.', correct: true },
+    { text: 'The agent gets the step wrong about one time in five, and its results usually need a correction before they are used.', why: 'An error rate is about the agent, and a better version changes it. The lesson\'s reasons hold whatever the agent can do.' },
+    { text: 'The fact the step needs was said in a conversation and is written nowhere the agent can read.', correct: true },
+    { text: 'The step takes a person only a few minutes, so handing it to an agent saves little time either way.', why: 'A quick step is cheap to keep, and cheap to hand over. The time it takes says nothing about who should do it.' },
+    { text: 'Doing the step is how the person stays able to tell a good result from a poor one.', correct: true },
+  ]}>
+Which of these are reasons a step stays with a person even when an agent
+could do it?
+</MultiChoice>
+
+<Pitfall title="Being careful as the boundary">
+A team agrees that the agent may do the whole hiring process "as long as
+we are careful", and everyone means it. Six months later the agent is
+choosing contractors, because careful has no step number, so no step ever
+came up for a decision. "Be careful" is a mood, and a process can't hold
+a mood. The boundary that holds is a named step with a named owner: "Step
+6 is done by the hiring manager." Write the step, and the care has a
+place to happen.
+</Pitfall>
+
+<Exercise stretch="Take a process from your own work with five or more steps, write the steps out, and mark the ones that stay with a person, with the reason per step. Then check whether your team's written process says so.">
+Go back to the eight-step process at the top of the lesson. For each
+step, write down whether it stays with a person or goes to the agent,
+and for each step that stays, name the reason: someone has to answer for
+it, the information is in no system the agent can reach, or doing it
+keeps you able to judge the agent's work. Ten minutes is enough, and the
+answer is a list of eight lines.
+
+A good answer keeps step 6, the choice, because the hiring manager has to
+answer for it. It keeps the decision in step 7, agreeing the rate and
+signing, for the same reason, and it may let the agent fill in the
+contract template. It keeps step 4, the interviews, because what the
+candidate is like in the room is in no system the agent can reach, even
+if the agent books the rooms and writes the notes. It keeps part of step
+3, reading a sample of the applications, as the step that keeps the
+manager able to judge the shortlist. Steps 1, 2, 5 and 8 go to the agent,
+with the manager reading the results. Where your answer differs, write
+down the reason you weighed differently, because a different reason is a
+fine answer and a missing one is the thing to fix. Which step in your
+list would be automated by default if nobody wrote it down?
+</Exercise>
+
+<Recap>
+1. An agent could take part in almost every step of an everyday process, and "could do" is a different question from "should do".
+2. A step stays with a person for one of three reasons: someone has to answer for it, the information is in no system the agent can reach, or doing it keeps the person able to judge the agent's work (@Academy building-effective-human-agent-teams).
+3. The reasons are about the person and the process, so a better agent changes the draft the person starts from and leaves the list of human steps as it was.
+4. A step nobody named is automated by default, one busy week at a time, so the list is written when the process is set up (@Academy ai-fluency-for-builders).
+5. Named human steps keep the process running when the tool is down, because someone still knows how to do them.
+6. The boundary that holds is a named step with a named owner, and "be careful" names no step.
+</Recap>
