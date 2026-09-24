@@ -44,8 +44,9 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { citationKeys } from '../../plugins/citation-syntax.mjs';
+import { propValue } from '../../src/lib/checkpoint-tags.ts';
 import { allTopics, courseLessonIds, readAreaTree } from './area-tree.mjs';
-import { findPredictTags } from './examples.mjs';
+import { predictTags } from './examples.mjs';
 
 /** Every file under `dir`, recursively. */
 export function* walk(dir) {
@@ -156,22 +157,13 @@ export function foundationsSurfaces(src) {
 		const m = BANNED_WORDS.exec(text.replace(/`[^`]*`/g, ''));
 		if (m) out.push({ line: i + 1, surface: `the word "${m[1]}"` });
 	});
-	// Blank out fence bodies and comments, keeping every newline so offsets still map to lines.
-	const blank = (s) => s.replace(/[^\n]/g, ' ');
-	const prose = lines
-		.map((text, i) => (inFence[i] ? blank(text) : text))
-		.join('\n')
-		.replace(/\{\/\*[\s\S]*?\*\/\}/g, blank);
-	for (const { props, index } of findPredictTags(prose)) {
-		if (props.has('run')) out.push({ line: lineOf(prose, index), surface: `<Predict run="${props.get('run')}">` });
+	// The tags come from the MDX tree (`predictTags`), which puts a fence body and a comment in nodes
+	// of their own, so a tag quoted in either is not a JSX element and is skipped.
+	for (const { attrs, line } of predictTags(src, 'lesson')) {
+		const run = propValue(attrs, 'run');
+		if (run !== undefined) out.push({ line, surface: `<Predict run="${run}">` });
 	}
 	return out.sort((a, b) => a.line - b.line);
-}
-
-function lineOf(src, index) {
-	let n = 1;
-	for (let i = 0; i < index; i++) if (src[i] === '\n') n++;
-	return n;
 }
 
 /**

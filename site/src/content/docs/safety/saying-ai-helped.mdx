@@ -144,8 +144,8 @@ lines it found only in `generated.py`.
   context="An assistant returned a ten-line Python function, shorten, with a docstring and two comments. A search finds a library function, truncate_words, whose body is the same line for line, under a different function name and with a three-line license header above it. A script counts the non-blank lines of the generated file that also appear, once stripped of surrounding spaces, in the library file, prints that count as N of M lines, and then lists the lines found only in the generated file, each indented by two spaces."
   title="How many lines match?" hint="Compare the two listings line by line. Which line of the generated function has no twin in the library file?"
   answer={`9 of 10 lines of generated.py also appear in library/truncate.py
-only in generated.py:
-  def shorten(text, limit, marker="..."):`} run="safety/saying-ai-helped/compare.py">
+  only in generated.py:
+    def shorten(text, limit, marker="..."):`} run="safety/saying-ai-helped/compare.py">
 Before you run it, write down what the script prints.
 
 ```sh
@@ -186,10 +186,10 @@ def shorten(text, limit, marker="..."):
 
 <Predict id="compare-the-rewrite" title="Compare the rewrite"
   answer={`3 of 6 lines of rewritten.py also appear in library/truncate.py
-only in rewritten.py:
-  def shorten(text, limit, marker="..."):
-  """Return at most limit words, with a marker when words were dropped."""
-  return " ".join(words[:limit]).rstrip(",;:") + marker`} run="safety/saying-ai-helped/compare_rewrite.py">
+  only in rewritten.py:
+    def shorten(text, limit, marker="..."):
+    """Return at most limit words, with a marker when words were dropped."""
+    return " ".join(words[:limit]).rstrip(",;:") + marker`} run="safety/saying-ai-helped/compare_rewrite.py">
 Run the comparison on the rewrite, and compare what you see with the output
 below.
 
