@@ -278,6 +278,10 @@ describe('habits (spec S07 "Schedule")', () => {
 	});
 	it('names the card state from the entry and the day', () => {
 		expect(habitCardState(undefined, DAY)).toBe('unfinished');
+		expect(habitCardState(undefined, DAY, { state: 'read', at: DAY })).toBe('unfinished');
+		// Finished before the habit existed: never shown (S07 "Content changes").
+		expect(habitCardState(undefined, DAY, { state: 'finished', at: DAY })).toBe('hidden');
+		expect(habitCardState(habit(), DAY, { state: 'finished', at: DAY })).toBe('waiting');
 		expect(habitCardState(habit({ next: '2026-03-11' }), DAY)).toBe('waiting');
 		expect(habitCardState(habit({ next: DAY }), DAY)).toBe('due');
 		expect(habitCardState(habit({ next: '2026-03-01' }), DAY)).toBe('due');
@@ -301,12 +305,12 @@ describe('content changes', () => {
 		expect(Object.keys(r.practice)).toEqual(['a/x#p1']);
 		expect(Object.keys(r.habits)).toEqual(['a/x#h1']);
 		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'], ['a/x#h1'])).toBe(0);
-		// Without a habit list every habit entry is an orphan.
-		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'])).toBe(1);
+		// An empty habit list makes every habit entry an orphan, so the caller always passes the real one.
+		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'], [])).toBe(1);
 		expect(r.habits).toEqual({});
 		// A checkpoint moved from `first` to `practice` keeps its practice entry and loses its review item.
 		r.reviews['a/x#p1'] = review();
-		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'])).toBe(1);
+		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'], [])).toBe(1);
 		expect(Object.keys(r.reviews)).toEqual(['a/x#c1']);
 	});
 	it('resets a review item whose revision changed, treating a missing revision as 1', () => {

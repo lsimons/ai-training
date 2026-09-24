@@ -64,7 +64,7 @@ passed the checkpoint on the page.
 1. Read the bundle. Name the lesson by its `title` and say you have the
    page at `url`.
 2. If the learner has pasted their progress export (a JSON file with
-   `"version": 3`), read it. For every item in `reviews` whose `due` is
+   `"version": 2` or `"version": 3`), read it. For every item in `reviews` whose `due` is
    today or earlier, ask **one** recall question from that checkpoint before
    anything else. Each item's `history` lists its answers, oldest first, as
    `{ "at": "YYYY-MM-DD", "result": "pass" | "fail" }`, so a run of recent
@@ -74,8 +74,9 @@ passed the checkpoint on the page.
    lesson's "More practice" checkpoints, which never fall due. If they haven't
    exported, point them at the course review page,
    `{site}/<area>/review/`, for when items are due.
-3. In the same opener, look at the `habits` map of the export. An entry is
-   keyed `<area>/<lesson>#<habit id>` and has `since`, `next` and `history`.
+3. In the same opener, look at the `habits` map of the export. A version 2
+   export has none, and a missing map means no habits. An entry is keyed
+   `<area>/<lesson>#<habit id>` and has `since`, `next` and `history`.
    For every entry whose `next` is today or earlier, ask whether the learner
    did that habit. The habit text is under `#### Habit: <habit id>` at the
    end of the bundle's `prose` when the habit is from this lesson, and

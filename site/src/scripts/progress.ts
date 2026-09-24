@@ -138,7 +138,7 @@ export function pruneOrphans(
 	knownLessonIds: Iterable<string>,
 	knownCheckpointIds: Iterable<string>,
 	knownPracticeIds: Iterable<string>,
-	knownHabitIds: Iterable<string> = [],
+	knownHabitIds: Iterable<string>,
 ): number {
 	const r = load();
 	const dropped = model.pruneOrphanEntries(r, knownLessonIds, knownCheckpointIds, knownPracticeIds, knownHabitIds);

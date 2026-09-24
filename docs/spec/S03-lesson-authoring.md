@@ -66,7 +66,7 @@ and does it serve **study** (acquiring a craft) or **work** (applying it)?
 | Exercise          | One by default. A longer lesson may have more; the lesson file (S11) lists them.                                                                                        |
 | More practice     | Optional, between the exercise and the recap: zero to three `practice` checkpoints. See "More practice".                                                                |
 | Recap             | Numbered takeaways and the served objectives as "You can now...". Where to go next is the page footer's previous/next.                                                  |
-| Habit             | Zero, one or two, after the recap. A small task in the learner's own work with a stable `id`. A later spec sets its schedule and storage.                               |
+| Habit             | Zero, one or two, after the recap. A small task in the learner's own work with a stable `id`. [S07](S07-habits.md) sets its schedule and storage.                       |
 | Canonical example | The one example the learner's reference shows for the lesson: the `Predict` or `Prompt` block with `canonical`, or the first of either in source order. See "Examples". |
 
 Objectives are frontmatter data that drive checkpoints, routing, and tutor
