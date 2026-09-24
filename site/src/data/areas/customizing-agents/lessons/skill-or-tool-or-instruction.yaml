@@ -1,11 +1,19 @@
 id: customizing-agents/skill-or-tool-or-instruction
 title: Instruction, skill or tool?
+description: >-
+  Three ways to change what an agent does, the question to ask before choosing one, and what each
+  costs in context and access.
 mode: explanation
 covers: customizing-agents/skills
 serves: [customizing-agents/writes-skill/chooses-skill-over-tool]
 introduces: [skill-vs-tool-vs-instruction]
 assumes:
   - objective: concepts/recognizes-agents/names-the-loop
+    lesson: concepts/agent-loop
+    section: a-model-in-a-loop-with-two-tools
+  - objective: customizing-agents/configures-agent/writes-project-instructions
+    lesson: customizing-agents/instructions
+    section: when-instructions-arent-enough
 after: [customizing-agents/instructions]
 shorts:
   - A skill that wraps a CLI as the middle way between a CLI and a server (Academy claude-code-101)
@@ -14,6 +22,9 @@ exercise:
   brief: >-
     Sort eight team needs into instruction, skill, tool or "the agent can already do it", and write
     the one-line reason next to each.
-sources: []
+sources:
+  - AEC-17
+  - Academy claude-code-101
+  - Academy introduction-to-agent-skills
 issue: 159
 minutes: 10

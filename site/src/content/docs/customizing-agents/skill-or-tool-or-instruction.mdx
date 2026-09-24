@@ -1,0 +1,230 @@
+import { Choice, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+
+A team of four adopts a coding agent. In the first month they notice
+three things it keeps getting wrong. It commits with a message format the
+team doesn't use. It writes release notes in a different order every time.
+It can't tell whether a customer's account is on the old billing plan or
+the new one, because that lives in an internal service. Someone on the
+team has heard of skills, so they write a skill for each. Two of the three
+don't work. This lesson is about why, and about the question to ask
+before you write anything.
+
+You don't run anything here. The examples are short file contents and
+one worked decision, and the exercise is a sort you do on paper.
+
+## Three mechanisms, side by side
+
+In the agent loop from the concepts course, the model reads its context
+and decides what to do next, and the software around it runs the tools it
+asks for (@AEC-17). Every way to customize an agent changes one of those
+two parts. Either it puts different text in the context, or it gives the
+software a different set of tools to run.
+
+An **instruction** is standing text, loaded at the start of every session
+and present on every turn. `AGENTS.md` from the last lesson is one. It
+suits a rule that always applies: the test command, the branch rule, the
+commit format. The agent doesn't decide whether to read it. It is there
+whether the task needs it or not (@Academy claude-code-101).
+
+A **skill** is a procedure with a trigger. It is a directory with a
+short description of when it applies, and the agent sees only that
+description until a task matches it. Then it loads the full instructions,
+follows them, and the text leaves the context when the session moves on.
+A skill suits work the agent could do on its own but does inconsistently:
+a release checklist, a review routine, a migration recipe
+(@Academy introduction-to-agent-skills).
+
+A **tool** is a function the software runs when the model asks. It adds an
+ability the model doesn't have. A database query and a call to an
+internal service are two examples. The agent sees the tool's name and
+description on every turn, and the function itself runs outside the
+model. A tool suits a need the agent can't meet with text alone.
+
+The same fact, laid out:
+
+| | Instruction | Skill | Tool |
+| --- | --- | --- | --- |
+| What it is | Standing text | A procedure with a trigger | A function the software runs |
+| Loaded | On every turn of every session | When a task matches its description | Name and description every turn, body never |
+| Fixes | The agent doesn't know a rule | The agent knows how but does it differently each time | The agent can't do it at all |
+| Example | "Test with `uv run pytest`" | "Prepare a release: bump, changelog, tag" | `billing_plan(account_id)` |
+
+Back to the team. The commit format is a rule that applies to every
+commit. Written as a skill, the agent loads it only when it decides a
+task is about committing. A good part of the time it doesn't decide
+that. The format belongs in an instruction. The release notes are a procedure the agent can already
+write and keeps writing differently, so it belongs in a skill, and it is
+the one of the three that worked. The billing plan is a fact the agent
+has no way to reach, and no text can teach it, so it needs a tool.
+
+<Choice id="which-mechanism-for-the-rule" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
+  concepts={['skill-vs-tool-vs-instruction', 'agents-md-claude-md']}
+  title="Where does the rule go?" hint="Does the rule apply to a kind of task, or to every task?"
+  options={[
+    { text: 'A skill, so the agent loads the rule when it commits.', why: 'The agent decides when a skill applies, and a rule for every commit can\'t depend on that decision.' },
+    { text: 'A tool that writes the commit for the agent.', why: 'The agent can already write a commit. A tool adds an ability the agent lacks.' },
+    { text: 'An instruction, in the project file the agent reads every session.', correct: true },
+  ]}>
+The team wants every commit message to start with a ticket number, on
+every task, in every session. Which mechanism fits?
+</Choice>
+
+## The question to ask first
+
+Before choosing among the three, ask whether the agent can already do the
+task with what it has. A coding agent ships with a shell, a file reader
+and an editor, and the model behind it has read a great deal of
+documentation. Much of what a team reaches for a skill or a tool to do is
+already within reach.
+
+Take a concrete case. The team wants the agent to check a pull request's
+CI status before it says the work is done. Someone starts a skill:
+
+```markdown
+---
+name: check-ci
+description: Check whether the CI run for the current pull request passed.
+---
+
+Run `gh pr checks` and read the status of each check. If any check
+failed, run `gh run view --log-failed` for that run and summarize the
+failure.
+```
+
+Now ask the question. The agent has a shell. The `gh` command is on the
+machine. The model knows `gh pr checks` and `gh run view` as well as any
+of us, because their documentation is public and common. Asked to "check
+whether CI passed", the agent runs those commands without help. The skill
+adds a name to the skill list on every turn and teaches nothing the
+agent didn't know.
+
+What the team wanted wasn't the procedure. It was for the agent to check
+CI *before* claiming to be done, every time. That is one line in
+`AGENTS.md`: "Before you say a task is done, run `gh pr checks` and
+report the result." The rule always applies, so it belongs in standing
+text.
+
+A skill earns its place when the procedure holds something the agent
+would have to guess: the order your team does things in, the file a
+result goes into, a check the agent wouldn't think to make, a script that
+does a deterministic step the same way each time. A skill that repeats
+what the model already knows is context spent for nothing.
+
+<Scenario id="can-it-already" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
+  concepts={['skill-vs-tool-vs-instruction']}
+  title="Can the agent already do it?" hint="Which parts of this does the model already know, and which parts are the team's own?"
+  options={[
+    { text: 'Write a tool that returns the list of failing tests.', consequence: 'The tool duplicates what the shell and the test runner already give the agent. It adds a tool description to every turn and nothing the agent could not do.', },
+    { text: 'Write a skill with the three test commands and the order in which to run them.', consequence: 'The agent runs the commands, but it already knew how. The three-command sequence is the one part the agent could not guess, and it applies to every test run, not to a kind of task.', },
+    { text: 'Add the three commands and their order to the project instructions, and write nothing else.', correct: true, consequence: 'The agent runs the right commands in the right order on every task. The only thing it lacked was the team\'s order, and that is a rule that always applies.', },
+  ]}>
+The team's tests run in three stages, each with its own command, and the
+second stage is only valid after the first passed. The agent keeps
+running the stages out of order. What do you do?
+</Scenario>
+
+## What each one costs
+
+The three mechanisms differ in what they take from the agent on every
+turn and in what they let it do. Put them on two axes.
+
+**Context.** An instruction file is read in full on every turn of every
+session, whether or not the task needs it. A skill puts one line, its
+description, in the context on every turn, and the full body only while
+it is in use. A tool puts its name, description and parameter schema in
+the context on every turn, and a server that exposes thirty tools puts
+thirty of them there (@AEC-17). The last lesson's warning about long
+instruction files is the same warning as the one about connecting too
+many tool servers. Both spend the same budget.
+
+**Permission.** An instruction and a skill change what the agent does
+with the abilities it already has. Neither one lets it reach anything
+new. A tool does. It is a new ability, with whatever access its
+credentials carry, and each one the agent gains is one more thing to
+think about when you size what a mistake can reach.
+
+Those two axes leave a gap between a command the agent can already run
+and a tool server that wraps a system. Take an internal service with a
+command-line client the team already uses. The agent has a shell, so it
+can run the client as it is, and often that is enough. When the client's
+flags are unusual, or the team's use of it has a fixed order of steps,
+a skill that wraps the client fills the gap. It loads only when the task
+calls for the service, it costs one description line the rest of the
+time, and it adds no new ability, because the shell and the client were
+already there. Anthropic's own guidance points at this middle way: reach
+for a skill around a command before you write or connect a tool server
+for it (@Academy claude-code-101). A tool server is right when there is
+no client to wrap, when the ability is new to the agent, or when you
+need the schema and the access control that a tool gives you and a shell
+command doesn't.
+
+<Sort id="sort-by-mechanism" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
+  concepts={['skill-vs-tool-vs-instruction', 'mcp-vs-cli']}
+  title="Which mechanism?" hint="For each need, ask in order: can the agent already do it, does the rule always apply, does the agent know how but do it inconsistently, or does it lack the ability?"
+  buckets={['Instruction', 'Skill', 'Tool', 'Already possible']}
+  items={[
+    { text: 'Use the repository\'s task runner for every command, never the underlying tool', bucket: 0 },
+    { text: 'Draft a customer-facing incident report in the team\'s five-section format', bucket: 1 },
+    { text: 'Look up which feature flags are on for a given customer in the internal flag service', bucket: 2 },
+    { text: 'Rename a function across a codebase', bucket: 3 },
+    { text: 'Never edit files under the generated directory', bucket: 0 },
+    { text: 'Onboard a new service into the monitoring stack, in the order the platform team requires', bucket: 1 },
+  ]} />
+
+<Sort id="sort-by-mechanism-review" phase="review" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
+  concepts={['skill-vs-tool-vs-instruction']}
+  context="The lesson sorts team needs into four categories by asking whether the agent can already do the task, whether a rule always applies, whether the agent knows how but is inconsistent, and whether it lacks the ability."
+  title="Sort these needs" hint="Does the need apply to every task, to a kind of task, or does it need an ability the agent doesn't have?"
+  buckets={['Instruction', 'Skill', 'Tool', 'Already possible']}
+  items={[
+    { text: 'Use the wording from the team\'s glossary in every user-facing string', bucket: 0 },
+    { text: 'Rotate a service credential, following the security team\'s eight steps', bucket: 1 },
+    { text: 'Read the current on-call schedule from the paging system', bucket: 2 },
+    { text: 'Write a unit test for a function', bucket: 3 },
+    { text: 'Post a summary of a merged change to the team chat channel', bucket: 2 },
+    { text: 'Run the linter before proposing a change', bucket: 0 },
+  ]} />
+
+<Pitfall title="The rule that never fired">
+A team writes a skill called `no-secrets` whose body says "never commit
+a file that contains an API key". Its description reads "Prevent secrets
+from being committed". Two weeks later the agent commits a `.env` file.
+Nobody asked it to prevent anything, so no task ever matched the
+description, and the skill was never loaded. A skill is loaded when the
+agent decides a task matches it. A rule that has to hold on every task
+belongs in the instruction file, and a rule that must never be broken
+belongs in a hook that blocks the action, as the last lesson said.
+</Pitfall>
+
+<Exercise stretch="For each need you sorted as a skill, write the one line of its description, the sentence the agent reads to decide whether the skill applies. Then check that none of your instruction-bucket needs could be described that way.">
+Write down eight recurring needs a team you know has of a coding agent,
+or use the ones from the checkpoints above if you have no team in mind.
+Sort each into instruction, skill, tool or "the agent can already do
+it", and write the one-line reason next to it. Use the four questions in
+order: can it already do this, does the rule apply to every task, does
+the agent know how but do it inconsistently, does it lack the ability?
+
+A good result names a reason for each item that a teammate would accept
+without seeing your sort, and puts no more than two items in the tool
+bucket. Most of what a team wants is a rule or a procedure, and the
+agent already has the hands. Which item took you longest to place, and
+what was the question that settled it?
+</Exercise>
+
+<Recap>
+1. An instruction is standing text on every turn, a skill is a procedure
+   loaded when a task matches its description, and a tool is a function
+   for an ability the agent lacks (@AEC-17).
+2. Before writing any of them, ask whether the agent can already do the
+   task with a shell and what the model knows. A skill that repeats public
+   documentation adds a line to every turn and teaches nothing.
+3. Choose by whether the rule always applies (instruction), whether the
+   agent knows how but is inconsistent (skill), or whether it lacks the
+   ability (tool).
+4. Instructions and skills spend context and add no new access. A tool
+   spends context on every turn and adds an ability with whatever access
+   its credentials carry.
+5. A skill that wraps a command the agent can already run is the middle
+   way between using the command bare and connecting a tool server
+   (@Academy claude-code-101).
+</Recap>
