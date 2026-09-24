@@ -64,8 +64,8 @@ Review finds these in almost every first pass. Check each one yourself.
 - When the issue asks for a GitHub comment, edit only the comment id your
   own `gh issue comment` call returned.
 
-- Never edit `.claude/skills/wave/wave-lead-prompt.md`, a file under
-  `docs/agents/sessions/`, or a `dispatcher-run` issue.
+- Never edit `.claude/skills/wave/wave-lead-prompt.md` or a
+  `dispatcher-run` issue.
 
 - When you say an item is already done on `main`, quote the line that
   shows it. When a gate's result and the list in the issue disagree, the

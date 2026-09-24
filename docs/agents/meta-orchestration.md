@@ -104,9 +104,9 @@ report is a comment, and the issue closes with a comment that names the
 stop condition. The dispatcher commits nothing to `main`, so its record
 costs one API call and no commit, lint pass, CI run or deploy, and the
 maintainer can read it from a phone. The per-wave session record goes in
-the body of the wave pull request, under the review table. The files under
-`docs/agents/sessions/` are the records of the runs before 2026-09-25 and
-don't get new ones (`docs/agents/sessions/README.md`).
+the body of the wave pull request, under the review table. The runs before 2026-09-25 kept their
+records in files, and those records are now closed run issues too, from
+Badger (#359, waves 1 to 5) to Ferret (#363).
 
 Runs are named after animals in alphabetical order, like hurricanes:
 Axolotl, then Badger, Capybara and so on, from the two lists in
@@ -302,8 +302,8 @@ everything below.
   comment on the run issue for the dispatcher to file when the run ends.
 
 - What the lead writes and returns. It puts the session record in the
-  wave pull request body, in the form of the records in
-  `docs/agents/sessions/2026-09-20-waves-1-5.md`: counts, what review caught, what the builder prompt
+  wave pull request body, in the form of the wave comments on the
+  older run issues (Capybara, #360, for example): counts, what review caught, what the builder prompt
   should have said. It returns a report of at most 200 words in exactly
   this form:
 
