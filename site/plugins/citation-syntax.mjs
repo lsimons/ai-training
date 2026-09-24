@@ -7,7 +7,33 @@
  */
 
 // Module-private: a `/g` regex carries `lastIndex` state, so callers use the functions below.
-const CITATION = /\(@([^()\n]+?)\)/g;
+// The key may contain whitespace, newlines included, so a token that a
+// rewrap splits over a soft line break still resolves. `isCitation` rejects
+// a candidate that spans a blank line.
+const CITATION = /\(@([^()]+?)\)/g;
+const BLANK_LINE = /\n[ \t]*\n/;
+const WHITESPACE_RUN = /\s+/g;
+
+/**
+ * Whether a `(@...)` candidate is a citation. A blank line inside it means
+ * the token spans a paragraph break. remark never puts one inside a text
+ * node, so the plugin could not resolve such a token, and `citationKeys`
+ * on raw source must agree with the plugin.
+ * @param {string} inner the text between `(@` and `)`
+ */
+function isCitation(inner) {
+	return !BLANK_LINE.test(inner);
+}
+
+/**
+ * The lookup key for the text between `(@` and `)`: trimmed, with every run
+ * of whitespace (a soft line break and its indentation included) collapsed
+ * to one space.
+ * @param {string} inner
+ */
+function normalizeKey(inner) {
+	return inner.replace(WHITESPACE_RUN, ' ').trim();
+}
 
 /**
  * @typedef {{ type: 'text', value: string } | { type: 'citation', key: string }} CitationPart
@@ -15,7 +41,9 @@ const CITATION = /\(@([^()\n]+?)\)/g;
 
 /**
  * `text` split into plain runs and citation tokens, in order. Keys are
- * trimmed. Text without a token comes back as one text part.
+ * trimmed and their inner whitespace collapsed, so `(@Claude Code\n
+ * permissions)` is the key `Claude Code permissions`. Text without a token
+ * comes back as one text part.
  * @param {string} text
  * @returns {CitationPart[]}
  */
@@ -24,9 +52,11 @@ export function splitCitations(text) {
 	const out = [];
 	let last = 0;
 	for (const m of text.matchAll(CITATION)) {
+		const inner = m[1] ?? '';
+		if (!isCitation(inner)) continue;
 		const index = /** @type {number} */ (m.index);
 		if (index > last) out.push({ type: 'text', value: text.slice(last, index) });
-		out.push({ type: 'citation', key: (m[1] ?? '').trim() });
+		out.push({ type: 'citation', key: normalizeKey(inner) });
 		last = index + m[0].length;
 	}
 	if (last < text.length || out.length === 0) out.push({ type: 'text', value: text.slice(last) });
