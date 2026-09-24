@@ -20,22 +20,27 @@ describe('examplesOf', () => {
 			{ id: 'plain', title: 'plain' },
 		]);
 	});
-	it('reads a string value that contains > and spans lines, and an expression that contains braces and quotes', () => {
-		const src = '<Predict id="a" title="two\nlines" answer="a > b" run="p.py" opts={{ s: "}", t: `{` }}>';
-		expect(examplesOf(src, 'x/y')).toEqual([{ id: 'a', title: 'two\nlines' }]);
+	it('reads a title given as an expression, decodes an entity, and reads a string value that contains >', () => {
+		const src = `<Predict id="a" title={'Run it'} answer="a > b" run="p.py" />\n\n<Predict id="b" title="Bob&apos;s run" answer="1" run="p.py" />`;
+		expect(examplesOf(src, 'x/y')).toEqual([
+			{ id: 'a', title: 'Run it' },
+			{ id: 'b', title: "Bob's run" },
+		]);
 	});
-	it('ignores other tags and text that starts with Predict', () => {
-		expect(examplesOf('<Prediction id="n" /> Predict the <Predictor />', 'x/y')).toEqual([]);
+	it('ignores a Predict in a fenced code block or a comment, and other tags', () => {
+		const src =
+			'```mdx\n<Predict id="fenced" answer="1" run="p.py" />\n```\n\n{/* <Predict id="noted" answer="1" run="p.py" /> */}\n\n<Prediction id="n" />';
+		expect(examplesOf(src, 'x/y')).toEqual([]);
 	});
-	it('rejects a tag without an id, an unterminated tag, string or expression, and an unquoted value', () => {
+	it('rejects a tag without an id, a non-string title, a spread prop, and an unclosed tag', () => {
 		expect(() => examplesOf('<Predict title="t" answer="a" run="r" />', 'x/y')).toThrow(
 			/x\/y: <Predict> without an id/,
 		);
-		expect(() => examplesOf('<Predict id="a" ', 'x/y')).toThrow(/unterminated <Predict> tag/);
-		expect(() => examplesOf('<Predict id="a>', 'x/y')).toThrow(/unterminated string for id/);
-		expect(() => examplesOf('<Predict id="a" opts={[ />', 'x/y')).toThrow(/unterminated expression for opts/);
-		expect(() => examplesOf('<Predict id=a>', 'x/y')).toThrow(/unquoted value for id/);
-		expect(() => examplesOf('<Predict id="a" {...rest}>', 'x/y')).toThrow(/unexpected "\{\.\.\.rest\}>"/);
+		expect(() => examplesOf('<Predict id="a" title={3} answer="a" run="r" />', 'x/y')).toThrow(
+			/x\/y#a: title must be a string, got number/,
+		);
+		expect(() => examplesOf('<Predict id="a" {...rest} />', 'x/y')).toThrow(/has a spread prop/);
+		expect(() => examplesOf('<Predict id="a">', 'x/y')).toThrow(/^x\/y: /);
 	});
 });
 
@@ -57,9 +62,9 @@ describe('lessonTocGroups', () => {
 			['Examples', ['shown']],
 		]);
 	});
-	it('rejects an id used by a checkpoint and an example (the checkpoint reader may reject it first)', () => {
+	it('rejects an id used by a checkpoint and an example, through the checkpoint reader', () => {
 		const dup = example.replace('id="ex"', 'id="cp"');
-		expect(() => lessonTocGroups(body(`${checkpoint}\n${dup}`))).toThrow(/x\/y: .*"cp" is used/);
+		expect(() => lessonTocGroups(body(`${checkpoint}\n\n${dup}`))).toThrow(/x\/y: id "cp" is used twice/);
 	});
 });
 
