@@ -1,17 +1,35 @@
 id: concepts/retrieval
 title: Answers from documents the model never saw
+description: >-
+  Read the output of a small keyword search over four policy texts, see it find the leave policy in
+  the document's own words and miss it in a colleague's words, and learn what grounding promises
+  and what it leaves for you to check.
 mode: tutorial
 covers: concepts/grounding
 serves: [concepts/explains-models/explains-grounding]
 introduces: [retrieval-rag, grounding]
-assumes: []
+assumes:
+  - objective: concepts/recognizes-agents/names-the-loop
+    lesson: concepts/agent-loop
+    section: a-model-in-a-loop-with-two-tools
 after: [concepts/agent-loop]
 shorts: [keyword search versus similarity search]
 exercise:
-  kind: do
+  kind: judge
   brief: >-
-    Search a small folder of policy texts with the retrieval fixture, ask a question in other words
-    than the document uses, and record what the search missed.
-sources: []
+    Read the pasted output of the keyword search on a question asked in other words than the
+    document uses, and write down which document held the answer, which the search retrieved, and
+    what a reader would have to open to notice the answer is wrong.
+sources: [AEC-05, AEC-08, Academy ai-capabilities-and-limitations]
 issue: 149
 minutes: 15
+notes: >-
+  Foundations page, so the learner runs nothing. The plan's exercise had the learner search a
+  folder with the retrieval fixture. The page pastes the fixture's output into text fences instead,
+  and the exercise is a judge kind on that output. The fixture is
+  site/examples/concepts/retrieval/keyword_search.py over four committed policy texts in
+  policies/. No test wires the fixture to the page yet, because how a hidden fixture backs a
+  foundations page in CI is decided in #237 (then #311). The issue asked for a Predict block on the
+  fixture's miss. A Predict needs run= (rejected on a foundations page) or is honor-system and not
+  reviewable, so the miss is a Choice instead. AEC-05 and AEC-08 are cited for ideas in our own
+  words, so NOTICE.md gets no new entry. The company and the policy texts are invented.
