@@ -37,7 +37,12 @@ of the layers run from `mise run ci` and from the CI workflow.
   page; the review page fetching checkpoint markup from a lesson) goes in
   `site/e2e/`, one spec file per mechanism. Seed progress with the `seed`
   fixture instead of clicking through an earlier flow, and use auto-waiting
-  `expect(locator)` assertions rather than sleeps.
+  `expect(locator)` assertions rather than sleeps. A count of live lessons
+  in a course or a topic, or of the checkpoints on a lesson page, comes from
+  `liveCourseLessons`, `liveTopicLessons` or `lessonCheckpoints` in
+  `site/e2e/fixtures.ts` (over `site/scripts/lib/live-lessons.mjs`), never
+  from a literal, so a new lesson page or checkpoint changes no spec.
+  `passRemaining` passes whatever checkpoints a page still has open.
 - **A code example's output** is already asserted: `<Predict run="..." answer="...">` names the fixture and `mise run examples` compares it, so it gets no separate test.
 
 ## Coverage

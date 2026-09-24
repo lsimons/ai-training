@@ -1,5 +1,6 @@
 /** Every checkpoint kind, graded in a lesson page (spec S01 "Interaction types", S03 "Checkpoints"). */
-import { drag, expect, orderByDrag, storedRecord, test } from './fixtures';
+import { KIND_OF_TAG } from '../src/lib/checkpoint-rules';
+import { drag, expect, lessonCheckpoints, orderByButtons, orderByDrag, storedRecord, test } from './fixtures';
 
 test('choice: a wrong pick shows its why, the right one passes', async ({ page }) => {
 	await page.goto('concepts/how-models-work/');
@@ -53,17 +54,7 @@ test('order: opens shuffled and passes once sorted', async ({ page }) => {
 	const cp = page.locator('#order-the-loop');
 	await cp.locator('.cp-check').click();
 	await expect(cp.locator('.cp-feedback')).toHaveText('Not the right order yet.');
-	const items = cp.locator('ol li');
-	const count = await items.count();
-	for (let pos = 1; pos <= count; pos++) {
-		for (let k = 0; k < count; k++) {
-			const idx = await items.evaluateAll(
-				(lis, p) => lis.findIndex((l) => Number((l as HTMLElement).dataset.pos) === p),
-				pos,
-			);
-			if (idx > pos - 1) await items.nth(idx).locator('button[data-move=up]').click();
-		}
-	}
+	await orderByButtons(cp);
 	await cp.locator('.cp-check').click();
 	await expect(cp.locator('.cp-feedback')).toHaveText('Correct order.');
 	await expect(cp).toHaveAttribute('data-state', 'passed');
@@ -199,14 +190,12 @@ test('the coding lesson shows three ungraded examples CI verifies, and grades on
 	await expect(examples.locator('.cp-check')).toHaveCount(0);
 	await expect(examples.locator('[data-checkpoint]')).toHaveCount(0);
 	await expect(page.locator('#run-tests .example-output')).toHaveText('FAILED (failures=1)');
-	await expect(page.locator('[data-checkpoint]')).toHaveCount(6);
-	for (const [kind, count] of [
-		['sort', 1],
-		['repair', 1],
-		['scenario', 2],
-		['choice', 2],
-		['predict', 0],
-	] as const) {
+	// The graded checkpoints are the ones the page source has, kind by kind, and the examples are none of them.
+	const checkpoints = lessonCheckpoints('coding-with-agents/first-session');
+	expect(checkpoints.length).toBeGreaterThan(0);
+	await expect(page.locator('[data-checkpoint]')).toHaveCount(checkpoints.length);
+	for (const kind of Object.values(KIND_OF_TAG)) {
+		const count = checkpoints.filter((c) => c.kind === kind).length;
 		await expect(page.locator(`[data-checkpoint][data-kind="${kind}"]`)).toHaveCount(count);
 	}
 });

@@ -1,0 +1,91 @@
+/**
+ * What the e2e specs need to know about the content without counting it by
+ * hand: which lessons are live, per course and per topic, and which graded
+ * checkpoints a lesson page has. A lesson is live when its lesson file under
+ * site/src/data has a page under site/src/content/docs, so the course
+ * percentage a spec expects depends on the content directory. The specs
+ * compute their counts from here and a new lesson page needs no spec change.
+ *
+ * The tree is read through `readAreaTree` and the pages through
+ * `lessonPages`, the same readers `check-data` uses, and the checkpoints
+ * through the tag scanner the build uses. `tests/scripts/live-lessons.test.ts`
+ * covers this; `e2e/fixtures.ts` wraps it with the repository paths.
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { scanCheckpointTags } from '../../src/lib/checkpoint-source.ts';
+import { courseLessonIds, readAreaTree } from './area-tree.mjs';
+import { lessonPages } from './data.mjs';
+
+/**
+ * @typedef {{ id: string, area: string, topic: string }} LiveLesson A live lesson, its area (which is its course, spec S01) and the topic it covers.
+ * @typedef {{ id: string, kind: string }} PageCheckpoint One graded checkpoint tag of a lesson page.
+ */
+
+/**
+ * Every live lesson in course order, across areas. A lesson a course lists
+ * without a page is planned and left out.
+ * @param {string} dataDir site/src/data
+ * @param {string} contentDir site/src/content/docs
+ * @returns {LiveLesson[]}
+ */
+export function liveLessons(dataDir, contentDir) {
+	const tree = readAreaTree(dataDir);
+	const pages = lessonPages(contentDir, new Set(tree.areas.map((a) => a.dir)));
+	/** @type {LiveLesson[]} */
+	const out = [];
+	for (const a of tree.areas) {
+		const covers = new Map(a.lessons.map((l) => [l.data?.id, l.data?.covers ?? '']));
+		for (const course of a.courses) {
+			for (const id of courseLessonIds(course.data)) {
+				if (!pages.has(id)) continue;
+				out.push({ id, area: a.dir, topic: covers.get(id) ?? '' });
+			}
+		}
+	}
+	return out;
+}
+
+/**
+ * The live lesson ids of the course of `area`, in course order.
+ * @param {string} dataDir
+ * @param {string} contentDir
+ * @param {string} area
+ * @returns {string[]}
+ */
+export function liveCourseLessonIds(dataDir, contentDir, area) {
+	return liveLessons(dataDir, contentDir)
+		.filter((l) => l.area === area)
+		.map((l) => l.id);
+}
+
+/**
+ * The live lesson ids that cover `topic`, in course order.
+ * @param {string} dataDir
+ * @param {string} contentDir
+ * @param {string} topic
+ * @returns {string[]}
+ */
+export function liveTopicLessonIds(dataDir, contentDir, topic) {
+	return liveLessons(dataDir, contentDir)
+		.filter((l) => l.topic === topic)
+		.map((l) => l.id);
+}
+
+/**
+ * The graded checkpoints of the page of `lesson`, in page order. An ungraded
+ * example (a `<Predict>` without an objective) is not listed, as in the
+ * build. A tag without a string `id` is reported as an error by the export
+ * check, so here it throws.
+ * @param {string} contentDir
+ * @param {string} lesson `<area>/<lesson>`
+ * @returns {PageCheckpoint[]}
+ */
+export function pageCheckpoints(contentDir, lesson) {
+	const src = readFileSync(join(contentDir, `${lesson}.mdx`), 'utf8');
+	return scanCheckpointTags(src, lesson).map((t) => {
+		const id = t.attrs.get('id');
+		if (!id || id.expr) throw new Error(`${lesson}: <${t.tag}> without an id="..."`);
+		return { id: id.value, kind: t.kind };
+	});
+}
