@@ -90,8 +90,8 @@ const formats = [
 		/**
 		 * Today's due habits of this course, above the review items, each with Done and Skip (spec S07 "Where
 		 * habits surface"). The card is the lesson page's markup, built here from the catalog text, and bound by
-		 * the same script, so a result moves the habit on and the card shows its next date. With nothing due
-		 * the block stays hidden.
+		 * the same script. A result moves the habit on and removes its card, and the block hides once nothing
+		 * is due (S07: "A course with no habits due shows nothing extra").
 		 */
 		function drawHabits() {
 			const due = progress.dueHabits(progress.load(), `${area}/`);
@@ -104,7 +104,6 @@ const formats = [
 				card.className = 'habit';
 				card.dataset.habit = '';
 				card.dataset.progressId = progressId;
-				card.setAttribute('aria-label', 'Habit');
 				const title = document.createElement('p');
 				title.className = 'habit-title';
 				title.textContent = `Habit from ${lesson.title}`;
@@ -136,7 +135,14 @@ const formats = [
 			});
 			habitsBlock.replaceChildren(...cards);
 			habitsBlock.hidden = cards.length === 0;
-			for (const card of cards) bindHabit(card);
+			for (const card of cards) {
+				bindHabit(card, {
+					onResult: (el) => {
+						el.remove();
+						habitsBlock.hidden = habitsBlock.querySelector('[data-habit]') === null;
+					},
+				});
+			}
 		}
 		drawHabits();
 

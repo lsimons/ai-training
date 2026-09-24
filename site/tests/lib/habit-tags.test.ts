@@ -39,10 +39,14 @@ describe('habitTagsOfSource (spec S07 "Authoring")', () => {
 		expect(HABIT_ID.test('-leading')).toBe(false);
 		expect(assertHabitId('x/y', 'ok-id')).toBe('ok-id');
 	});
-	it('rejects an id that is also a section slug, because both are # fragments of the page', () => {
+	it('rejects an id that is also a heading slug or a checkpoint id, because each is a DOM id on the page', () => {
 		expect(() => habitTagsOfSource(page('<Habit id="blast-radius">\nT.\n</Habit>'), 'x/y')).toThrow(
-			/habit id "blast-radius" is also a section slug/,
+			/habit id "blast-radius" is also a heading slug/,
 		);
+		const withH3 = `### Deeper still\n\n${page('<Habit id="deeper-still">\nT.\n</Habit>')}`;
+		expect(() => habitTagsOfSource(withH3, 'x/y')).toThrow(/habit id "deeper-still" is also a heading slug/);
+		const withCheckpoint = page('<Habit id="pick-one">\nT.\n</Habit>', '<Choice id="pick-one" />\n\n');
+		expect(() => habitTagsOfSource(withCheckpoint, 'x/y')).toThrow(/habit id "pick-one" is also a checkpoint id/);
 	});
 	it('rejects a habit before the recap, or without a recap, and one without text', () => {
 		expect(() => habitTagsOfSource(page('', '<Habit id="a">\nT.\n</Habit>\n\n'), 'x/y')).toThrow(
@@ -62,8 +66,8 @@ describe('section slugs', () => {
 		expect(slugOf('Prompt injection: when the data gives orders')).toBe('prompt-injection-when-the-data-gives-orders');
 		expect(slugOf('  Human in the loop ')).toBe('human-in-the-loop');
 	});
-	it('reads the ## headings only', () => {
+	it('reads the headings at every depth', () => {
 		const src = '# Title\n\n## One two\n\n### Three\n\nText\n\n## Four';
-		expect(sectionSlugsIn(parseMdx(src), src)).toEqual(['one-two', 'four']);
+		expect(sectionSlugsIn(parseMdx(src), src)).toEqual(['title', 'one-two', 'three', 'four']);
 	});
 });

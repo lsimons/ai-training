@@ -33,6 +33,7 @@ describe('habitStatusText', () => {
 		expect(habitStatusText(entry({ next: '2026-03-11' }), '2026-03-10')).toBe('Next on 2026-03-11.');
 		expect(habitStatusText(entry({ next: '2026-03-10' }), '2026-03-10')).toBe('Due today. Did you do it?');
 		expect(habitStatusText(entry({ next: null }), '2026-03-10')).toBe('Done with this habit.');
+		expect(habitStatusText(undefined, '2026-03-10', { state: 'finished', at: '2026-03-10' })).toBe('');
 	});
 });
 
@@ -46,6 +47,22 @@ describe('bindHabit', () => {
 		expect(el.dataset.state).toBe('waiting');
 		expect(status(el)).toBe(`Next on ${addDays(today(), 1)}.`);
 		expect(actions(el).hidden).toBe(true);
+	});
+	it('hides the card of a finished lesson that has no entry, as for a learner who finished before the habit existed', () => {
+		progress.update((r) => {
+			r.lessons['a/x'] = { state: 'finished', at: '2026-03-10' };
+		});
+		const el = card();
+		bindHabit(el);
+		expect(el.dataset.state).toBe('hidden');
+		expect(el.hidden).toBe(true);
+		expect(status(el)).toBe('');
+		// A lesson only read keeps the unfinished card.
+		progress.update((r) => {
+			r.lessons['a/x'] = { state: 'read', at: '2026-03-10' };
+		});
+		expect(el.dataset.state).toBe('unfinished');
+		expect(el.hidden).toBe(false);
 	});
 	it('shows Done and Skip when due, records the result and lists it', () => {
 		progress.update((r) => {
