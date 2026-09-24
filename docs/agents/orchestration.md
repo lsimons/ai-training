@@ -53,6 +53,9 @@ both, so the builder and the reviewer never talk to each other.
      because another builder is removing bash support);
    - what not to run: `site-dev`, whose Astro daemon stays on its port
      after the shell exits;
+   - the worktree path, `../ai-training-wt/feat/<issue>-<slug>`, and the
+     scratch directory, `.scratch/` in that worktree (see "Scratch space
+     and worktrees");
    - when the issue asks for a comment on GitHub, edit only the comment
      whose id the builder's own `gh issue comment` call returned. One
      builder overwrote two siblings' comments by id.
@@ -145,7 +148,7 @@ the revisions and re-checks follow it there.
 
 The coordinator keeps the integration branch, `wave/<n>-<slug>`, in a
 dedicated worktree created from `main`
-(`git worktree add ../wave-3 -b wave/3-course-plans origin/main`). When a
+(`git worktree add ../ai-training-wt/wave/3-course-plans -b wave/3-course-plans origin/main`). When a
 branch is approved, it is rebased onto the wave branch rather than merged
 into it. The wave history then has no merge commits, and the later rebase
 merge into `main` keeps one commit per change:
@@ -245,6 +248,29 @@ The cases that come up:
 - Rebase merges keep every commit. An intermediate commit that would fail a
   gate added later (a `.sh` fixture that a later commit removes) is fine as
   long as the tip is green.
+
+## Scratch space and worktrees
+
+Every agent worktree goes under one directory next to the repository,
+`../ai-training-wt/<branch>`, so a builder for `feat/12-x` works in
+`../ai-training-wt/feat/12-x`. The wave lead removes the worktrees it and
+its agents created at the end of the wave (`git worktree remove --force`)
+and leaves the branches in place. A worktree left behind after a failed
+wave is found in one place.
+
+An agent's scratch files go in `.scratch/` at the root of its own
+worktree. The directory is gitignored, the project allowlist lets any
+agent run `rm -rf .scratch` without a prompt, and removing the worktree
+removes it too. Scratch files never go under `/tmp`, where a delete asks
+the maintainer for permission, and two agents' files never share a
+directory.
+
+The Bash guard hook (`.claude/hooks/README.md`) rejects a force push, a
+push to `main` from anyone but the dispatcher, `gh pr merge` from anyone
+but the wave lead, the dispatcher or a coordinator, and `git stash`,
+`git reset --hard` or `git checkout -- .` in the main checkout. The
+dispatcher, the wave lead and a coordinator prefix those commands with
+`AI_TRAINING_ROLE=<role>`.
 
 ## What a builder prompt says about history
 

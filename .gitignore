@@ -108,3 +108,7 @@ __pycache__/
 .vale/styles/.vale-config/
 .vale/styles/config/dictionaries/
 docs/prose/reports/
+
+# Per-agent scratch space in a worktree (docs/agents/orchestration.md,
+# "Scratch space and worktrees"). Agents may delete it freely.
+.scratch/

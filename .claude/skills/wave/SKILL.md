@@ -55,8 +55,10 @@ Every commit of the meta record follows the same steps: run
 `mise run spell` and `mise run prose`, fix what they flag in the files you
 touched, commit on `main` with the attribution lines, `git pull --rebase`
 right before the push (the lead merges into `origin/main` while you wait,
-so the pull from step 1 is stale by then), push, and retry that pull and
-push once if the push is rejected.
+so the pull from step 1 is stale by then), push with
+`AI_TRAINING_ROLE=dispatcher git push` (the Bash guard hook rejects any
+other push to `main`), and retry that pull and push once if the push is
+rejected.
 
 ## One tick of the loop
 
