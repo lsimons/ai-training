@@ -14,6 +14,7 @@ import {
 	parseMdx,
 	stringProp,
 } from './checkpoint-tags';
+import { CODE_SPAN, EMPHASIS, LINK, STRONG } from './inline-markdown';
 import type { Lesson } from './lessons';
 import { href } from './url';
 
@@ -91,25 +92,23 @@ function linkHref(url: string): string {
 }
 
 function renderProse(md: string): string {
-	return (
-		escapeHtml(md)
-			.replace(/\s*\(@[A-Za-z0-9-]+\)/g, '')
-			.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-			// Emphasis needs a non-space right inside each `*`, as in CommonMark, so `2 * 3 * 4` stays literal.
-			.replace(/\*(\S(?:[^*]*\S)?)\*/g, '<em>$1</em>')
-			.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, text: string, url: string) => `<a href="${linkHref(url)}">${text}</a>`)
-	);
+	return escapeHtml(md)
+		.replace(/\s*\(@[A-Za-z0-9-]+\)/g, '')
+		.replace(STRONG, '<strong>$1</strong>')
+		.replace(EMPHASIS, '<em>$1</em>')
+		.replace(LINK, (_, text: string, url: string) => `<a href="${linkHref(url)}">${text}</a>`);
 }
 
 /**
  * The inline Markdown the recaps and prompt blocks use, as HTML: code spans,
  * strong, emphasis, links, and `(@key)` citations, which are dropped because
  * the topic page has its own Sources section. Everything else is escaped text.
+ * The patterns are in `lib/inline-markdown.ts`, next to `unsupportedInline`.
  */
 export function renderInline(md: string): string {
 	const parts: string[] = [];
 	let last = 0;
-	for (const m of md.matchAll(/`([^`]+)`/g)) {
+	for (const m of md.matchAll(CODE_SPAN)) {
 		parts.push(renderProse(md.slice(last, m.index)));
 		parts.push(`<code>${escapeHtml(m[1] ?? '')}</code>`);
 		last = m.index + m[0].length;

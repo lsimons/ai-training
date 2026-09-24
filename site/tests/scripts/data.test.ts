@@ -5,6 +5,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { allLessons, allTopics, courseLessonIds, readAreaTree, yamlFilesIn } from '../../scripts/lib/area-tree.mjs';
 import {
 	checkBehaviorCitations,
+	checkBehaviorMarkdown,
 	checkData,
 	FOUNDATIONS_EXEMPT,
 	foundationsSurfaces,
@@ -217,6 +218,42 @@ describe('checkData', () => {
 			'src/content/docs/a/y.mdx: lesson page without a lesson file at src/data/areas/a/lessons/y.yaml',
 			'src/content/docs/a/index.mdx: frontmatter sets title, which area.yaml owns',
 		]);
+	});
+});
+
+describe('competency behavior markdown', () => {
+	const behaviors = (example: string) =>
+		`${COMPETENCY}    behaviors:\n      - claim: Reads (@AEC-01).\n        why: w\n        example: ${JSON.stringify(example)}\n`;
+	const error = (form: string) =>
+		`src/data/areas/a/competencies/c.yaml: objective a/c/o behavior 1 example uses ${form}, which the competency page does not render`;
+	it('fails underscore emphasis, naming the objective, cell and form', () => {
+		expect(check(tree({ 'data/areas/a/competencies/c.yaml': behaviors('Reads _the log_ first.') })).errors).toEqual([
+			error('underscore emphasis'),
+		]);
+		expect(check(tree({ 'data/areas/a/competencies/c.yaml': behaviors('Reads __the log__.') })).errors).toEqual([
+			error('underscore emphasis'),
+		]);
+	});
+	it('fails strong or emphasis that spans a citation', () => {
+		expect(check(tree({ 'data/areas/a/competencies/c.yaml': behaviors('**Reads (@AEC-01)** first.') })).errors).toEqual(
+			[error('strong or emphasis around a citation')],
+		);
+		expect(check(tree({ 'data/areas/a/competencies/c.yaml': behaviors('*Reads (@AEC-01)* first.') })).errors).toEqual([
+			error('strong or emphasis around a citation'),
+		]);
+	});
+	it('fails a link with a title', () => {
+		expect(
+			check(tree({ 'data/areas/a/competencies/c.yaml': behaviors('See [the map](/map/ "Map").') })).errors,
+		).toEqual([error('link with a title')]);
+	});
+	it('passes snake_case in a code span, an underscore in a URL, a lone underscore and the supported forms', () => {
+		const ok = behaviors(
+			'Calls `search_customers` at https://example.com/a_b, writes _ alone, **reads** (@AEC-01), *em*, [m](/map/).',
+		);
+		expect(check(tree({ 'data/areas/a/competencies/c.yaml': ok })).errors).toEqual([]);
+		const root = tree();
+		expect(checkBehaviorMarkdown(readAreaTree(join(root, 'data')), (f) => f)).toEqual([]);
 	});
 });
 
