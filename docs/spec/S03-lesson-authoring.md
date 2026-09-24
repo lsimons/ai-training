@@ -197,7 +197,7 @@ pitfall and the exercise.
   concepts it exercises, and where its stem depends on the page it has a
   one-paragraph context. A review page or a tutor can then ask it outside
   the lesson.
-- A `choice`, `scenario` or `multi-choice` item is not answerable from the
+- A `choice`, `scenario` or `multi-choice` item isn't answerable from the
   look of its options. The options are of similar length and specificity,
   every distractor is a plausible misconception with its own `why` or
   `consequence`, no option is "all of the above" or "none of the above",
