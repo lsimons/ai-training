@@ -1,12 +1,19 @@
 id: using-agents/chat-agent-or-automation
 title: Chat, agent or automation
+description: >-
+  Pick chat, agent or automation for a task by its worst case, match the checks to the level, and
+  write the rule that would move the pick up or back.
 mode: explanation
 covers: using-agents/choosing-tools
 serves: [using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation]
 introduces: [chat-vs-agent-vs-automation]
 assumes:
   - objective: concepts/recognizes-agents/tells-agent-from-assistant
+    lesson: concepts/assistant-or-agent
+    section: one-test-what-can-it-do-without-another-prompt
   - objective: safety/judges-agent-risk/chooses-human-in-loop
+    lesson: safety/agent-risk
+    section: human-in-the-loop
 after: [using-agents/choosing-autonomy]
 shorts: [Picking for the tenth time]
 exercise:
@@ -14,6 +21,16 @@ exercise:
   brief: >-
     For five supplied tasks, pick chat, agent or automation for the task's worst case, and write
     what would move each one level up and what would move it back.
-sources: []
+sources:
+  - Academy building-effective-human-agent-teams
+  - Academy ai-fluency-for-builders
 issue: 158
 minutes: 15
+notes: >-
+  Academy building-effective-human-agent-teams is cited for checks growing with the autonomy handed
+  over, and Academy ai-fluency-for-builders for making the delegation level a deliberate, written
+  decision, both as paraphrased ideas in our own words. AEC-12 and Brilliant ABS from the plan are
+  not cited, because the page is a foundations lesson with no coding tool in it, so they are not in
+  sources. The planned after lesson choosing-autonomy is ordering only, and the page never refers
+  to it. The support queue, the invoice mailbox and the monthly report are invented examples with
+  no named person or company.
