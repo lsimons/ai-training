@@ -99,9 +99,6 @@
 	box-shadow: 0 0.5rem 1rem -0.5rem rgba(0, 0, 0, 0.4);
 }
 
-/* Lesson pages nest under their course in the sidebar. */
-.lesson-link { padding-left: 1.75rem !important; }
-
 /* The due review count next to a course link (overrides/Sidebar.astro adds
    it on the client, only while something is due). The current page's link
    already uses the accent background, so the pill inverts there. */
@@ -138,7 +135,8 @@
 /* The left menu: link text the size of the table of contents (13px), group
    labels one step up. Starlight's own rules are layered, so these win. */
 @media (min-width: 50rem) {
-	.sidebar-content a {
+	.sidebar-content a,
+	.sidebar-content .part-label {
 		font-size: var(--sl-text-xs);
 	}
 	.sidebar-content .large {

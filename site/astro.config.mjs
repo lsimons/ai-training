@@ -71,36 +71,40 @@ function topicSidebar() {
 }
 
 /**
- * The course sidebar, one group per S01 group: each area's course page, then
- * its live lessons in course order (spec S11 "Sidebar"). A course with parts
- * nests each part as a group. A lesson is live when its page exists, so a new
- * lesson appears in the menu the moment its page lands. Lesson labels come
- * from the lesson YAML, the same source as the page title.
+ * The course sidebar, one group per S01 group: per area, a group whose heading
+ * is the course page link, holding the live lessons in course order (spec S11
+ * "Sidebar"). A course with parts nests each part as a group. A lesson is live
+ * when its page exists, so a new lesson appears in the menu the moment its
+ * page lands. Lesson labels come from the lesson YAML, the same source as the
+ * page title. The `group-link` class on the first link is what makes
+ * overrides/SidebarSublist.astro render it as the heading (lib/sidebar-groups.ts).
  */
 function courseSidebar() {
 	return tree.groups.map((g) => ({
 		label: g.name,
-		items: g.areas.flatMap((/** @type {string} */ slug) => {
+		items: g.areas.map((/** @type {string} */ slug) => {
 			const a = tree.areas.find((x) => x.dir === slug);
 			if (!a) throw new Error(`groups.yaml names area ${slug}, but src/data/areas/${slug}/ does not exist`);
 			const course = a.courses.find((c) => c.data.id === slug)?.data;
 			if (!course) throw new Error(`src/data/areas/${slug}/courses/${slug}.yaml is missing`);
 			const byId = new Map(a.lessons.map((l) => [l.data.id, l.data]));
-			// In a flat course the `lesson-link` class indents a lesson under its course
-			// page (styles/custom.css); inside a part, the group already nests it.
-			const lessonItem = (/** @type {string} */ id, /** @type {boolean} */ inPart) => {
+			const lessonItem = (/** @type {string} */ id) => {
 				const l = byId.get(id);
 				if (!l) throw new Error(`course ${slug} lists ${id}, which has no lesson file`);
 				if (!existsSync(new URL(`${id}.mdx`, `file://${docsDir}`))) return [];
-				return [inPart ? { slug: id, label: l.title } : { slug: id, label: l.title, attrs: { class: 'lesson-link' } }];
+				return [{ slug: id, label: l.title }];
 			};
 			const items = course.parts
 				? course.parts.flatMap((/** @type {{ title: string, lessons: string[] }} */ p) => {
-						const live = p.lessons.flatMap((id) => lessonItem(id, true));
+						const live = p.lessons.flatMap(lessonItem);
 						return live.length ? [{ label: p.title, collapsed: false, items: live }] : [];
 					})
-				: courseLessonIds(course).flatMap((id) => lessonItem(id, false));
-			return [{ slug, label: a.area?.name ?? slug }, ...items];
+				: courseLessonIds(course).flatMap(lessonItem);
+			return {
+				label: a.area?.name ?? slug,
+				collapsed: false,
+				items: [{ slug, label: a.area?.name ?? slug, attrs: { class: 'group-link' } }, ...items],
+			};
 		}),
 	}));
 }
@@ -186,8 +190,12 @@ export default defineConfig({
 				{
 					label: 'Reference',
 					items: [
-						{ slug: 'map', label: 'Topic map' },
-						{ label: 'Topics', collapsed: true, items: topicSidebar() },
+						// The topic map is the heading of the per-area topic groups (issue #228).
+						{
+							label: 'Topic map',
+							collapsed: true,
+							items: [{ slug: 'map', label: 'Topic map', attrs: { class: 'group-link' } }, ...topicSidebar()],
+						},
 						{ slug: 'glossary', label: 'Glossary' },
 					],
 				},

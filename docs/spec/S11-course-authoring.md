@@ -167,10 +167,15 @@ components see them, and this file is where they're written.
 
 The Foundations and Engineering sidebar groups are generated from the
 tree (`site/astro.config.mjs`): per group, per area in `groups.yaml`
-order, the course page, then the live lessons in course order with their
-`title` as the label. In a course with parts, each part becomes a sidebar
-group holding its live lessons, and a part with no live lesson yet is
-left out. The menu shows a new lesson as soon as its page is merged, with
+order, a group whose heading is the course page link, holding the live
+lessons in course order with their `title` as the label. In a course with
+parts, each part becomes a sidebar group under the course, with a plain
+label, holding its live lessons, and a part with no live lesson yet is
+left out. Starlight gives a group no link of its own, so the course link
+is the group's first item with the `group-link` class, and
+`overrides/SidebarSublist.astro` renders it as the heading. The topic map
+in the Reference group is the heading of the per-area topic groups the
+same way. The menu shows a new lesson as soon as its page is merged, with
 no edit to the config.
 
 ## Going live
