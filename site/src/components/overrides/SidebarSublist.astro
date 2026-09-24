@@ -3,26 +3,34 @@
  * The sidebar list, in place of Starlight's `SidebarSublist` (issue #228).
  * Starlight's copy renders a group as a `<details>` with a label. This one
  * adds a second kind of group: when the first entry is a link with the
- * `group-link` class (`lib/sidebar-groups.ts`), that link is the group's
- * heading, so a course page or the topic map is the parent of its children
- * and clicking the heading opens the page. The caret still toggles the group.
- * Groups under a linked group are parts (spec S01) and get a plain label
- * instead of the bold one. The rest of the markup and the styles are
- * Starlight's, kept so the persisted open state and the restore points keep
- * working. `overrides/Sidebar.astro` renders this in place of the default.
+ * `data-group-link` attribute (`lib/sidebar-groups.ts`), that link is the
+ * group's heading, so a course page or the topic map is the parent of its
+ * children and clicking the heading opens the page. The link sits next to
+ * the `<details>`, and the `<summary>` is a caret-only toggle with an
+ * `aria-label`: a link inside the summary would be nested interactive
+ * content, and Starlight's `SidebarPersistState` script stores an inverted
+ * open state for any click that lands on a summary. The `<details>` is
+ * `display: contents`, so the link and the caret share one grid row of the
+ * `<li>` and the entries fill the row below.
+ *
+ * Groups under a linked group (a course's parts, the topic map's areas) get
+ * a plain label instead of the bold one. The rest of the markup and the
+ * styles are Starlight's, kept so the persisted open state and the restore
+ * points keep working. `overrides/Sidebar.astro` renders this in place of
+ * the default.
  */
 import { Badge, Icon } from '@astrojs/starlight/components';
 import SidebarRestorePoint from '@astrojs/starlight/components/SidebarRestorePoint.astro';
-import { attrsWithoutClass, linkedGroup, type SidebarEntry, startsOpen } from '@lib/sidebar-groups';
+import { linkedGroup, type SidebarEntry, startsOpen } from '@lib/sidebar-groups';
 
 interface Props {
 	sublist: SidebarEntry[];
 	nested?: boolean;
-	/** Inside a linked group: a nested group is a part, with a plain label. */
-	part?: boolean;
+	/** Inside a linked group: a nested group's label is plain, so it reads as a child of the heading. */
+	plainLabels?: boolean;
 }
 
-const { sublist, nested, part } = Astro.props;
+const { sublist, nested, plainLabels } = Astro.props;
 ---
 
 <ul class:list={{ 'top-level': !nested }}>
@@ -35,7 +43,7 @@ const { sublist, nested, part } = Astro.props;
 							href={entry.href}
 							aria-current={entry.isCurrent ? 'page' : undefined}
 							class:list={[{ large: !nested }, entry.attrs.class]}
-							{...attrsWithoutClass(entry)}
+							{...entry.attrs}
 						>
 							<span>{entry.label}</span>
 							{entry.badge && <Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />}
@@ -44,35 +52,42 @@ const { sublist, nested, part } = Astro.props;
 				);
 			}
 			const linked = linkedGroup(entry);
+			if (linked) {
+				// A group's own badge is Starlight's; a badge on the heading link is the fallback.
+				const badge = entry.badge ?? linked.link.badge;
+				return (
+					<li class="linked">
+						<a
+							href={linked.link.href}
+							aria-current={linked.link.isCurrent ? 'page' : undefined}
+							class:list={['large', linked.link.attrs.class]}
+							{...linked.link.attrs}
+						>
+							<span>{linked.link.label}</span>
+							{badge && <Badge variant={badge.variant} class={badge.class} text={badge.text} />}
+						</a>
+						<details open={startsOpen(entry)}>
+							<summary class="caret-only" aria-label={`Toggle ${linked.link.label}`}>
+								<Icon name="right-caret" class="caret" size="1.25rem" />
+							</summary>
+							<SidebarRestorePoint />
+							<Astro.self sublist={linked.entries} nested plainLabels />
+						</details>
+					</li>
+				);
+			}
 			return (
 				<li>
 					<details open={startsOpen(entry)}>
-						{linked ? (
-							<summary class="linked" data-group-link>
-								<a
-									href={linked.link.href}
-									aria-current={linked.link.isCurrent ? 'page' : undefined}
-									class:list={['large', linked.link.attrs.class]}
-									{...attrsWithoutClass(linked.link)}
-								>
-									<span>{linked.link.label}</span>
-									{linked.link.badge && (
-										<Badge variant={linked.link.badge.variant} class={linked.link.badge.class} text={linked.link.badge.text} />
-									)}
-								</a>
-								<Icon name="right-caret" class="caret" size="1.25rem" />
-							</summary>
-						) : (
-							<summary>
-								<span class="group-label">
-									<span class:list={part ? 'part-label' : 'large'}>{entry.label}</span>
-									{entry.badge && <Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />}
-								</span>
-								<Icon name="right-caret" class="caret" size="1.25rem" />
-							</summary>
-						)}
+						<summary>
+							<span class="group-label">
+								<span class:list={plainLabels ? 'plain-label' : 'large'}>{entry.label}</span>
+								{entry.badge && <Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />}
+							</span>
+							<Icon name="right-caret" class="caret" size="1.25rem" />
+						</summary>
 						<SidebarRestorePoint />
-						<Astro.self sublist={linked ? linked.entries : entry.entries} nested part={part || Boolean(linked)} />
+						<Astro.self sublist={entry.entries} nested plainLabels={plainLabels} />
 					</details>
 				</li>
 			);
@@ -81,7 +96,7 @@ const { sublist, nested, part } = Astro.props;
 </ul>
 
 <style>
-	/* Starlight's SidebarSublist styles, plus the linked heading and part label at the end. */
+	/* Starlight's SidebarSublist styles, plus the linked heading row and the plain label at the end. */
 	@layer starlight.core {
 		ul {
 			--sl-sidebar-item-padding-inline: 0.5rem;
@@ -161,23 +176,32 @@ const { sublist, nested, part } = Astro.props;
 			margin-inline-end: 0.25em;
 		}
 
-		/* A linked heading: the link fills the row and the caret sits at the end,
-		   so the link's own padding replaces the summary's. The link keeps the
-		   browser focus ring; the summary is a second tab stop that toggles. */
-		summary.linked {
-			padding: 0;
-			gap: 0.25rem;
+		/* A linked heading: the link and the caret-only summary share the first
+		   grid row, and the group's list fills the row below. The `<details>`
+		   is `display: contents` so its summary and its content box are grid
+		   items, and the browser still hides the content while the details is
+		   closed. Browsers with `::details-content` wrap the content in that
+		   box, so it spans both columns; where the pseudo-element doesn't
+		   exist, the list itself is the grid item and spans them instead. */
+		li.linked {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			align-items: center;
 		}
-		summary.linked > a {
-			flex: 1 1 auto;
-			user-select: text;
+		li.linked > details {
+			display: contents;
 		}
-		summary.linked > .caret {
-			margin-inline-end: var(--sl-sidebar-item-padding-inline);
+		li.linked > details::details-content,
+		li.linked > details > ul {
+			grid-column: 1 / -1;
+		}
+		summary.caret-only {
+			border-radius: 0.25rem;
 		}
 
-		/* A part label reads as a child of its course: same size and weight as a lesson link. */
-		.part-label {
+		/* A group label under a linked heading (a part, or a topic-map area)
+		   reads as a child: same size and color as a lesson link. */
+		.plain-label {
 			font-size: var(--sl-text-sm);
 			color: var(--sl-color-gray-2);
 		}
@@ -190,7 +214,7 @@ const { sublist, nested, part } = Astro.props;
 				font-size: var(--sl-text-base);
 			}
 			a,
-			.part-label {
+			.plain-label {
 				font-size: var(--sl-text-sm);
 			}
 		}

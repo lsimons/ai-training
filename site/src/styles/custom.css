@@ -136,7 +136,7 @@
    labels one step up. Starlight's own rules are layered, so these win. */
 @media (min-width: 50rem) {
 	.sidebar-content a,
-	.sidebar-content .part-label {
+	.sidebar-content .plain-label {
 		font-size: var(--sl-text-xs);
 	}
 	.sidebar-content .large {

@@ -1,7 +1,8 @@
 /**
  * Renders the `SidebarSublist` override (issue #228) with Astro's Container
- * API: a group whose first link has the `group-link` class gets that link as
- * its heading, and the groups under it are parts with a plain label.
+ * API: a group whose first link has the `data-group-link` attribute gets that
+ * link as its heading next to a caret-only summary, and the groups under it
+ * get a plain label.
  */
 import SidebarSublist from '@components/overrides/SidebarSublist.astro';
 import type { SidebarEntry } from '@lib/sidebar-groups';
@@ -33,7 +34,7 @@ const course: SidebarEntry = {
 			href: '/ai-training/concepts/',
 			isCurrent: false,
 			badge: undefined,
-			attrs: { class: 'group-link' },
+			attrs: { 'data-group-link': '' },
 		},
 		{ type: 'group', label: 'How language models work', collapsed: false, badge: undefined, entries: [lesson] },
 	],
@@ -52,21 +53,26 @@ async function render(sublist: SidebarEntry[]) {
 }
 
 describe('SidebarSublist', () => {
-	it('renders the group-link as the heading of its group, and its groups as parts', async () => {
+	it('renders the group link as the heading of its group, outside a caret-only summary', async () => {
 		const html = await render([course]);
-		// The heading is the course link inside the summary, with the caret after it.
+		// The heading link comes first in the item, then the details with a labelled, text-free summary.
 		expect(html).toMatch(
-			/<summary[^>]*data-group-link[^>]*><a href="\/ai-training\/concepts\/" class="large group-link[^"]*">/,
+			/<li class="linked[^"]*"><a href="\/ai-training\/concepts\/" class="large[^"]*" data-group-link><span[^>]*>Concepts<\/span><\/a><details class[^>]*><summary class="caret-only[^"]*" aria-label="Toggle Concepts"><svg/,
 		);
-		// `class` is set once, from the class list.
-		expect(html.match(/class="[^"]*group-link/g)).toHaveLength(1);
 		expect(html).not.toMatch(/class="group-label[^"]*"><span class="large[^"]*">Concepts</);
 		// The part label is plain, and its lesson is nested under it.
-		expect(html).toMatch(/<span class="part-label[^"]*">How language models work</);
+		expect(html).toMatch(/<span class="plain-label[^"]*">How language models work</);
 		expect(html).toContain('href="/ai-training/concepts/what-a-model-is/"');
 		// The collapsed course starts closed. The part is not collapsed, so it starts open.
-		expect(html).toMatch(/^<ul[^>]*><li[^>]*><details class/);
 		expect(html).toMatch(/<details open/);
+	});
+	it('keeps a linked group’s own badge, and falls back to the heading link’s badge', async () => {
+		const badge = { text: 'New', variant: 'note' as const, class: undefined };
+		const own = await render([{ ...course, badge }]);
+		expect(own).toMatch(/<a href="\/ai-training\/concepts\/"[^>]*>.*?New.*?<\/a>/);
+		const [heading, ...rest] = course.entries;
+		const onLink = await render([{ ...course, entries: [{ ...(heading as SidebarEntry), badge }, ...rest] }]);
+		expect(onLink).toMatch(/<a href="\/ai-training\/concepts\/"[^>]*>.*?New.*?<\/a>/);
 	});
 	it('renders a plain group with Starlight’s bold label and opens it when it holds the current page', async () => {
 		const html = await render([{ ...plain, entries: [{ ...lesson, isCurrent: true }] }]);
