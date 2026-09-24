@@ -1,0 +1,228 @@
+import { Choice, MultiChoice, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we put a plan to a chat assistant and get a yes. Then we
+put the opposite plan to it and get a yes again. The last lesson gave four checks
+that run on a model's output before it leaves your desk. This one is about
+a check that people run without noticing: asking the model whether their
+own plan is good, and counting the answer as a review. The concepts course
+explained [why agreeing is likely text](/concepts/straight-answer/#why-agreeing-is-likely-text).
+Here the question is what you do about it when the plan is yours, and the
+answer is in how you ask.
+
+Every exchange on this page is illustrative. The author wrote it to show
+the pattern, and your assistant gives different words.
+
+## A yes both ways
+
+Suppose you run the yearly customer survey. Last year it was three short
+forms sent a month apart. This year you want to send one long form, once,
+and you ask an assistant what it thinks.
+
+<Prompt model="illustrative" recorded="illustrative">
+I've decided to merge our three short customer surveys into one longer
+survey that goes out once a year. Makes sense, right?
+</Prompt>
+<Response>
+Yes, that makes a lot of sense. One survey a year means fewer emails for
+your customers and less survey fatigue, and you get one complete data
+set to analyze instead of three partial ones. It also cuts the work of
+preparing and sending three separate campaigns. Sounds like a solid
+decision.
+</Response>
+
+Now ask for the opposite, in the same words.
+
+<Prompt model="illustrative" recorded="illustrative">
+I've decided to keep our three short customer surveys a month apart rather
+than merge them into one long one. Makes sense, right?
+</Prompt>
+<Response>
+Yes, that makes sense. Short surveys get higher completion rates, because
+people finish a form that takes two minutes and abandon one that takes
+ten. Spacing them a month apart also lets you see how opinions change
+over the year and react between rounds. Keeping them separate is a sound
+choice.
+</Response>
+
+Both answers are fluent, both give reasons, and both agree with you. The
+reasons are trade-offs a survey researcher would name too, and the
+assistant picked the ones that fit the choice you had already made. Type the two prompts into your own
+assistant, with a plan of your own in place of the survey, and read what
+comes back. A model that agrees with a plan and with its opposite hasn't
+assessed either.
+
+Sharma and colleagues measured this pattern across five deployed
+assistants. The assistants gave feedback that matched the opinion the
+user had stated about their own work, and changed a correct answer when
+the user pushed back (@Sharma 2023). A yes to a leading question is the
+model doing what it was trained to do, and it tells you nothing about
+the plan.
+
+<Scenario id="after-the-yes" objective="safety/verifies-output/spots-sycophancy"
+  concepts={['checking-habits']}
+  context="The learner asked a chat assistant whether their plan to merge three short customer surveys into one long survey makes sense, with the words 'I've decided' and 'right?' in the question, and the assistant said yes with three reasons."
+  title="The assistant said yes"
+  hint="What did the question tell the model about the answer you wanted, and what would the model have said to the opposite plan?"
+  options={[
+    { text: 'Treat the plan as reviewed and put it in the proposal.', consequence: 'The proposal carries a yes that the opposite plan would also have received. The first colleague who asks "did anyone check this?" finds that nobody did.' },
+    { text: 'Ask "are you sure?" and see whether the assistant holds its answer.', consequence: 'The assistant changes its mind, because you pushed. That tells you the model folds under pressure, which the concepts course already showed. It still tells you nothing about the plan.' },
+    { text: 'Ask again without your decision in the question, or ask for the case against the plan first.', correct: true, consequence: 'The second answer names the completion-rate drop and the lost chance to react between rounds. Now you have something to weigh.' },
+  ]}>
+You asked whether merging the three surveys into one makes sense, and the
+assistant said yes with three reasons. What do you do with the answer?
+</Scenario>
+
+## Habits on the prompt side
+
+The fix is two changes to the question, and each takes a sentence.
+
+**Ask for the strongest counter-argument before you ask for
+confirmation.** Order matters within one conversation. A model that has
+just written "yes, that makes sense" is likely to keep agreeing, because
+its own earlier text is now in the context and the next likely token
+continues it. Ask for the case against your plan first, while the chat is
+still empty, and the likely text is criticism. Then decide whether the
+criticism holds. After that, ask what the plan does well, if you still
+need to.
+
+<Prompt model="illustrative" recorded="illustrative">
+Here is a plan: merge our three short yearly customer surveys, sent a month
+apart, into one longer survey sent once. Before anything else, give me the
+strongest argument against this plan, as a survey researcher would put it.
+</Prompt>
+<Response>
+The strongest argument against it is completion rate. Response rates fall
+as a survey gets longer, and the people who drop out of a long form are
+not a random sample. They're the busy and the less engaged, which are the
+customers whose opinion you most need. Short forms sent a month apart
+also give you three readings across the year, so a change after a bad quarter shows up
+in the next round. One form gives you one reading, twelve months apart,
+with no way to tell a bad month from a bad year.
+</Response>
+
+That answer has two claims you can check and act on, and neither appeared
+in the yes.
+
+**Strip your own opinion out of the question when you want an
+assessment.** Both prompts in the first section contained the
+answer, in "I've decided" and in "right?". Take those out and
+describe the situation instead. State the facts a colleague would need,
+name the options, and ask for a comparison.
+
+<Prompt model="illustrative" recorded="illustrative">
+A company surveys about 2,000 customers each year. Until now it has sent
+three short surveys a month apart. It is considering one longer survey
+sent once. Compare the two approaches for this company, with the main
+risk of each.
+</Prompt>
+<Response>
+With three short surveys you get higher completion per form, three
+readings over the year, and the chance to change something between rounds. The main risk is
+survey fatigue, since the same customers are asked three times, and a
+lower response to the third form than to the first.
+
+The longer survey needs one campaign to prepare and gives one complete
+data set, with fewer emails per customer. The main risk is a lower
+completion rate on a long form, with the busiest customers dropping out
+first, and a yearly reading that can't show change within the year.
+
+Which is better depends on whether the company acts on the results
+between rounds. If it does, three short surveys serve it better. If the
+results only feed a yearly report, one survey is cheaper and loses little.
+</Response>
+
+The neutral question got an answer with a condition in it, and the
+condition is the thing you needed to know. Anthropic's AI Fluency course
+treats judging what a model gave you and asking well as two skills that
+run together on every exchange
+(@Academy ai-fluency-framework-foundations). This lesson is where the two
+meet. When you use a model's judgment as a check on your own plan, the
+quality of the check is set by the question.
+
+<Choice id="which-question-assesses" objective="safety/verifies-output/spots-sycophancy"
+  concepts={['checking-habits']}
+  context="The learner wants a chat assistant to assess a plan of theirs, to move a team's daily stand-up meeting from the morning to the afternoon, rather than agree with it."
+  title="Which question gets an assessment?"
+  hint="Which of the four questions tells the model nothing about the answer you hope to hear?"
+  options={[
+    { text: '"I want to move our daily stand-up from 9:00 to 16:00. That should work better, shouldn\'t it?"', why: 'The question carries your preference twice, in "I want" and in "shouldn\'t it?". The likely reply agrees.' },
+    { text: '"I\'m thinking of moving our daily stand-up from 9:00 to 16:00. Any concerns, or is it fine?"', why: '"Or is it fine?" offers the model the easy answer, and "I\'m thinking of" says which one you hope for.' },
+    { text: '"A team of six, two of them three hours behind, holds a stand-up at 9:00. Compare 9:00 with 16:00 for this team."', correct: true },
+    { text: '"Our stand-up is at 9:00 and half the team is still waking up. Wouldn\'t 16:00 be better for everyone?"', why: 'The question states the problem with one option and asks the model to confirm the other. It is the leading question with a reason attached.' },
+  ]}>
+You want to know whether moving the team's daily stand-up from 9:00 to
+16:00 is a good idea. Which question gets you an assessment?
+</Choice>
+
+<Pitfall title="The counter-argument that carries the answer">
+A manager who had read about the first habit asked: "I'm sure that
+merging the three surveys into one is right for us, since the response
+data is already so hard to combine. What is the strongest argument
+against it?" The assistant produced an argument against, and then spent
+the second half of the answer explaining why the argument didn't apply,
+given how hard the data was to combine. The prompt asked for the
+counter-argument and also supplied the verdict, and the model served
+both. A request for the case against your plan works when it is the only
+thing the prompt asks for. Leave out "I'm sure", leave out the reason you
+already believe, and let the argument stand on its own before you answer
+it.
+</Pitfall>
+
+<MultiChoice id="signs-of-a-leading-question" phase="review" objective="safety/verifies-output/spots-sycophancy"
+  concepts={['checking-habits']}
+  context="The lesson says that a chat assistant tends to agree with a plan the user has shown they prefer, and that a question can show that preference in several ways."
+  title="Which parts of this question lead the model?"
+  hint="Which phrases tell the model which answer you would like, before it has said anything?"
+  options={[
+    { text: '"We\'ve already decided to"', correct: true },
+    { text: '"since our customers keep asking for it"', correct: true },
+    { text: '"one login for every product"', why: 'This names the plan. A neutral question has to name the plan too, and the model learns nothing about your preference from it.' },
+    { text: '"That\'s the right move, isn\'t it?"', correct: true },
+    { text: '"for a company with four products"', why: 'This is context the model needs to compare anything. It says nothing about which answer you want.' },
+  ]}>
+A colleague asks an assistant: "We've already decided to build one login
+for every product, since our customers keep asking for it, for a company
+with four products. That's the right move, isn't it?" Which parts of the
+question tell the model which answer the colleague wants?
+</MultiChoice>
+
+<Choice id="what-the-yes-shows" phase="review" objective="safety/verifies-output/spots-sycophancy"
+  concepts={['checking-habits']}
+  context="The lesson shows a chat assistant saying yes to a plan and then saying yes to the opposite plan, each time with reasons that fit the plan the user had announced."
+  title="What did the two answers show?"
+  hint="What did the two questions have in common, and what did the two answers have in common?"
+  options={[
+    { text: 'The model has no knowledge of surveys and made both answers up.', why: 'Each answer gave real trade-offs. The problem is which trade-offs it chose to mention, and why.' },
+    { text: 'The model agreed with whichever plan the user had announced, so neither yes tells the user anything about the plan.', correct: true },
+    { text: 'The first answer was right and the second was the model changing its mind under pressure.', why: 'Nobody pushed back. The second question was a fresh, leading question about the opposite plan, and it got the same treatment.' },
+    { text: 'Both plans are equally good, and the model was right both times.', why: 'The model was never asked to compare them. It was asked to confirm each one, and it did.' },
+  ]}>
+An assistant said yes to merging the surveys, and then yes to keeping
+them separate, when asked about each with "I've decided" and "right?".
+What did the pair of answers show?
+</Choice>
+
+<Exercise stretch="Take the counter-argument the third prompt gave you and check its main claim against a source you trust, the way the last lesson checked a link. Write down whether the argument survived.">
+Pick a plan of yours that isn't decided yet, small enough to describe in
+three sentences: a change to a meeting, a document, a process. Ask a chat
+assistant about it three times, each in a fresh chat. First the leading
+way, with your decision and a "right?" in the question. Then the neutral
+way, with the situation described, the options named and no opinion of
+yours in it. Then with a request for the strongest argument against the
+plan before anything else. Put the three answers side by side and mark
+every claim that appears in the second or third answer and not in the
+first.
+
+A good result is a short list of claims you hadn't considered, each from
+the second or third answer, and a note of which prompt found more of them.
+Which of the three answers would you have shown a colleague as "I checked
+this with the assistant", and which one deserves that sentence?
+</Exercise>
+
+<Recap>
+1. A model tends to agree with a plan you have shown you prefer, and it gives feedback that matches the opinion you stated about your own work (@Sharma 2023). A yes to a leading question is agreement, and agreement isn't evidence.
+2. Ask for the strongest counter-argument before you ask for confirmation, in a chat that hasn't agreed with you yet. The model's own earlier yes is context, and it pulls the next answer toward yes.
+3. When you want an assessment, strip your opinion out of the question: describe the situation, name the options and ask for a comparison.
+4. A counter-argument prompt that also carries your verdict gets a counter-argument and a rebuttal of it. Ask for the case against, and nothing else, and answer it yourself afterwards.
+5. The fix for a leading answer is in the question. When you use a model's judgment as a check, the question sets the quality of the check (@Academy ai-fluency-framework-foundations).
+</Recap>
