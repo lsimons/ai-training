@@ -1,0 +1,241 @@
+import { Choice, MultiChoice, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In the last lesson you read the transcript of a toy agent and named each
+turn of its loop. This lesson steps back and asks a question people get
+wrong every day: is the product in front of you an assistant or an
+agent? Vendors sell both with the same words, and both often show a chat
+box. By the end you have one test that answers the question whatever
+the interface looks like, and you know which part of an agent to look at
+when it does something you didn't expect.
+
+## The model and the software around it
+
+A **model** takes text in and gives text out, once. It has no hands. It
+can't open your inbox, read a file, or send anything. When you type into a
+chat assistant and get a reply, the product made one call to the model
+and showed you the reply, and now it waits for you (@AEC-01).
+
+An **agent** is software that calls the same kind of model again and
+again. Before the first call it tells the model which tools it has. When
+a reply asks for a tool, the software runs it, puts the result back into
+the conversation, and calls the model again. It keeps going until the
+model writes an answer instead of a request, or until a stop rule ends
+the run (@AEC-01). You saw that loop turn by turn in the last lesson,
+and **model vs agent** is the name for the difference it makes: the model
+supplies the judgment, and the software supplies the tools, the memory
+and the loop.
+
+An assistant and an agent look alike from the outside because both
+start from a prompt and end with text. The difference is what happens
+between the prompt and the text. An
+assistant produces text for a person to act on. An agent acts, through
+its tools, and decides on its own what to do next (@DLAI-11).
+
+## One test: what can it do without another prompt?
+
+The interface tells you nothing. A chat window can front an agent, and a
+big button labeled "Automate" can trigger one plain model call. So ask
+the question that the interface can't hide: after you give it a task,
+what can this system do before it needs you again?
+
+- If the answer is "write text, and then wait for me", it is an
+  assistant. Everything that happens to the world afterwards happens
+  because a person did it.
+- If the answer includes "look something up", "change a file", "send
+  a message" or "run the next step because the first one worked", it is
+  an agent. Some of what happens to the world happens because the
+  software did it.
+
+Picture two products that both show a chat box. You paste a question about last
+quarter's sales into each. The first gives you a database query to run.
+The second runs the query, reads the numbers that come back, notices one
+region is missing and runs a second query for it. Same box, same kind of
+model, different answers to the test. The first is an assistant and the
+second is an agent, and the second one had a tool that reached your
+database (@Academy claude-platform-101).
+
+The test is also a habit for reading a product page. Ignore the words
+"assistant", "copilot" and "agent" in the name, because vendors use all
+three for both kinds. Look for the verbs that describe what the product
+does after your prompt. "Drafts", "suggests" and "summarizes" describe
+text. "Books", "sends", "updates", "runs" and "keeps going until"
+describe actions.
+
+<Sort id="sort-five-products" objective="concepts/recognizes-agents/tells-agent-from-assistant"
+  concepts={['model-vs-agent', 'tool']}
+  context="The lesson gives one test for telling an assistant from an agent: after one prompt, can the system only write text for a person to act on, or can it act through tools and decide the next step on its own? The learner sorts five short product descriptions with that test."
+  title="Assistant or agent?" hint="After your one prompt, does the product only write text for you, or does it do something with a tool and decide what comes next?"
+  buckets={['Assistant', 'Agent']}
+  items={[
+    { text: 'A chat window that drafts an email reply for you to copy and send', bucket: 0 },
+    { text: 'A tool that reads your inbox, drafts replies and sends them without another prompt', bucket: 1 },
+    { text: 'A button in a spreadsheet that explains the selected formula in plain words', bucket: 0 },
+    { text: 'A chat window that runs your database query, reads the result and runs a follow-up query on its own', bucket: 1 },
+    { text: 'A support product that searches your help center, tries a fix on the customer account, checks whether it worked, and closes the ticket', bucket: 1 },
+  ]} />
+
+<Choice id="same-box-different-kind" phase="review" objective="concepts/recognizes-agents/tells-agent-from-assistant"
+  concepts={['model-vs-agent']}
+  context="An assistant writes text for a person to act on. An agent acts through tools and decides the next step without another prompt. The interface, such as a chat box or a button, doesn't tell the two apart."
+  title="Which question tells them apart?" hint="Which question can't be answered by looking at the screen?"
+  options={[
+    { text: 'Does it show a chat box or a button?', why: 'A chat box can front an agent and a button can trigger one plain model call. The interface is the thing the test has to see past.' },
+    { text: 'Does the vendor call it an agent, a copilot or an assistant?', why: 'Vendors use all three names for both kinds of product. The name tells you about the marketing and nothing about what the software does after your prompt.' },
+    { text: 'After one prompt, can it act through a tool and pick its next step by itself?', correct: true },
+    { text: 'Does it use a newer or a bigger model than the other one?', why: 'The same model sits behind assistants and agents. The difference is in the software around it, and the model\'s size says nothing about that.' },
+  ]}>
+Two products look the same on screen. Which one question tells you
+whether each is an assistant or an agent?
+</Choice>
+
+## The harness
+
+The software around the model has a name: the **harness**. It is the
+part that makes a model into an agent, and it has more in it than the
+loop you watched. A harness holds (@AEC-01):
+
+- **The loop.** Call the model, read the reply, run the tool it asked
+  for, feed the result back, repeat.
+- **The tool definitions.** The text that tells the model which tools
+  exist, what each does and what parameters it takes. In the last lesson
+  this was the two-line description of `list_dir` and `read_file`.
+- **The permission checks.** The step between a tool request and the
+  tool, where the harness can ask a person, refuse, or run.
+- **The system prompt.** The standing instructions the model reads
+  before every task.
+- **Context management.** What the harness keeps in the conversation,
+  what it drops when the conversation grows, and what it saves for the
+  next run.
+- **The stop rules.** The step limit, the "model said done" check, and
+  the stop button.
+
+Two agents built on the same model can behave very differently, because
+their harnesses differ. One has a file-write tool and the other doesn't.
+One asks before every change and the other asks only before a deletion.
+One drops old tool results from the conversation to save space and the
+other keeps everything. None of this is the model's doing, and a person
+who compares "which model does it use" is comparing the one part the two
+products share.
+
+The same fact points at where to look when an agent misbehaves. An
+agent that sent an email it shouldn't have had an email tool and a
+permission check that let it through. An agent that forgot the
+instruction you gave it twenty steps ago hit its context management. An
+agent that ran for an hour and produced nothing had a step limit that was
+too high. In each case the fix is in the harness, in a tool it should
+lack, a check it should make, or a rule it should follow (@AEC-01). The
+model's judgment matters too, and a better model helps with a wrong
+decision, but the reach and the guardrails are the harness's.
+
+<MultiChoice id="harness-or-model" objective="concepts/recognizes-agents/tells-agent-from-assistant"
+  concepts={['harness', 'model-vs-agent']}
+  context="The harness is the software around the model that makes it an agent: the loop, the tool definitions, the permission checks, the system prompt, context management and the stop rules. The model supplies the judgment."
+  title="Which of these are decided in the harness?" hint="For each item, ask whether changing it means changing the software around the model or swapping the model itself."
+  options={[
+    { text: 'Whether the agent can send an email at all.', correct: true },
+    { text: 'Whether the agent asks a person before it deletes a file.', correct: true },
+    { text: 'Whether the agent reads a clear paragraph and understands it.', why: 'Reading and understanding text is the model\'s work. The harness decides what text the model sees, and the model decides what to make of it.' },
+    { text: 'The number of steps the agent gets before the run ends.', correct: true },
+    { text: 'Whether the agent gives a confident answer that turns out to be wrong.', why: 'A confident wrong answer is the model\'s judgment. The harness can check the answer with a tool, but the confidence came from the model.' },
+  ]}>
+Two agents run on the same model. Which of these differences between
+them are set in the harness?
+</MultiChoice>
+
+<Choice id="where-is-the-fix" phase="review" objective="concepts/recognizes-agents/tells-agent-from-assistant"
+  concepts={['harness', 'tool']}
+  context="The harness is the software around a model: its loop, tool definitions, permission checks, system prompt, context management and stop rules. When an agent does something it shouldn't, the fix is most often in the harness."
+  title="Where does the fix go?" hint="Which part of the system decided that the action was allowed to happen?"
+  options={[
+    { text: 'Swap in a newer model so it makes better decisions.', why: 'A newer model may decide differently on a given day. The tool and the check that let the message go out are still there, and another day brings the same result.' },
+    { text: 'Remove the send tool or add a check that asks a person before a send.', correct: true },
+    { text: 'Tell the customer that agents make mistakes sometimes.', why: 'That explains the event and changes nothing about the software. The next run has the same tool and the same missing check.' },
+  ]}>
+An agent that drafts customer replies sent a half-finished message to a
+customer. The team wants this never to happen again. Where does the fix
+go first?
+</Choice>
+
+## List the tools before you judge the reach
+
+Once you know something is an agent, the next question is what it can
+reach, and the answer is its tool list. A research agent with a web
+search tool can read the web. Give it an email tool as well and it can
+write to other people. The two are sold under the same name and have
+very different consequences when something goes wrong.
+
+So read the product page, or the settings screen, and write down the
+tools before you form an opinion. A list like "web search, file read,
+calendar write" tells you which one acts on others: calendar write is
+the one that puts something on a colleague's screen. A list like "read
+the inbox, draft, send" tells you that a wrong draft can leave the
+building. Judging an agent without its tool list is judging a car
+without knowing whether it has brakes.
+
+<Choice id="which-tool-acts-on-others" objective="concepts/recognizes-agents/tells-agent-from-assistant"
+  concepts={['tool', 'harness']}
+  context="The lesson says to list an agent's tools before judging what it can do, and to look for the tool that acts on other people rather than only on the learner's own data."
+  title="Which tool changes what others see?" hint="Which of these tools puts something in front of a person other than you?"
+  options={[
+    { text: 'Web search, because it reaches outside the company.', why: 'Search reads the web and changes nothing on it. Reaching outside is a reason to watch what comes back, and the other people never see the search.' },
+    { text: 'File read, because your files hold confidential material.', why: 'Reading files is a reason to think about what the agent may see. The read itself changes nothing that a colleague sees.' },
+    { text: 'Calendar write, because it puts an entry on a colleague\'s calendar.', correct: true },
+  ]}>
+A product page for a meeting assistant lists its tools as "web search,
+file read, calendar write". Which tool deserves the closest look before
+you turn the product on, and why?
+</Choice>
+
+<Pitfall title="A chat window with an email tool">
+A manager tries a new "AI assistant" that comes with the company's mail
+program. It opens as a chat window that looks like the drafting
+assistant she already uses, and she treats it the same way. She types "reply to the
+supplier and tell them the delivery date is fine", expecting a draft to
+read and correct. The reply appears in the chat, and under it a line she
+doesn't read: "Sent to supplier". The product had a send tool, and its
+harness had no check before a send. The window looked like the old
+assistant, and the test would have caught it in a minute: after one
+prompt, what can this do without me? The first time you meet a chat
+box, find its tool list before you type anything you don't want acted
+on.
+</Pitfall>
+
+<Exercise stretch="For each product you marked as an agent, name the one tool you would remove, or put a permission check in front of, before letting a colleague use it on real data.">
+
+Find five products or features that you or your team use or have been
+offered, each described with AI in some way. A mail program's assistant,
+a coding tool, a meeting notetaker, a search feature, and a customer
+support bot are common finds. For each one, write two lines in a note.
+The first line answers the test: after one prompt, what can it do
+without another prompt from you? The second line either says "assistant"
+or says "agent" followed by the tools you can find on the product page
+or the settings screen. Twenty minutes is enough.
+
+In a good result, the classification of each product comes from what the
+product does, never from its name. Every "agent" line has a tool list,
+even a short one. If
+you couldn't find the tool list for a product you marked as an agent,
+write that down too, because it is the most useful thing you learned
+about that product. Which of the five surprised you, and was the
+surprise about the interface or about the tools?
+
+</Exercise>
+
+<Recap>
+
+1. A model takes text in and gives text out, once. An agent is software
+   that calls the model in a loop, gives it tools, feeds the results back
+   and stops when the goal is met (@AEC-01).
+2. Tell the two apart by what the system can do without another
+   prompt, whatever its interface looks like. A chat window can front an
+   agent, and a button can trigger one plain model call.
+3. The harness is the software around the model: the loop, the tool
+   definitions, the permission checks, the system prompt, context
+   management and the stop rules. Agents on the same model differ
+   because their harnesses differ, and the fix for a misbehaving agent
+   is most often in the harness (@AEC-01).
+4. List an agent's tools before you judge what it can do. What it can
+   touch is what its tools can touch, and the tool that acts on other
+   people is the one to look at first.
+
+</Recap>
