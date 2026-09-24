@@ -20,6 +20,9 @@ This site is built with [Astro Starlight](https://starlight.astro.build/).
 
 Tools are pinned in `.mise.toml`, so run `mise install` once. Then:
 
+- `mise run setup` - Install the site and Python dependencies from their
+  lockfiles and fetch the Vale packages when one is missing. Run it once
+  per clone or worktree.
 - `mise run site-install` - Install the site dependencies (bun). Updates
   `site/bun.lock` if `site/package.json` changed. Commit the result.
   `mise run ci` and CI use `site-install-frozen`, which fails instead of
@@ -45,7 +48,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/): `type(scope
 Git hooks (formatting, linting, link checking, secret scanning, commit-message linting) are managed with [prek](https://prek.j178.dev). The markdownlint and commitlint hooks run from the site's bun install, so install that first, then the hooks, once per clone:
 
 ```bash
-mise run site-install-frozen
+mise run setup
 prek install -t pre-commit -t commit-msg -t pre-push
 ```
 

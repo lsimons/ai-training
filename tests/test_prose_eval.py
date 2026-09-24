@@ -172,7 +172,7 @@ def test_check_packages_synced_exits_naming_the_sync_command(tmp_path: pathlib.P
     assert "mise run prose-eval-sync" in message
 
 
-def test_check_packages_synced_names_prose_sync_for_the_main_configs(
+def test_check_packages_synced_names_setup_for_the_main_configs(
     tmp_path: pathlib.Path,
 ) -> None:
     styles = tmp_path / "styles"
@@ -182,7 +182,7 @@ def test_check_packages_synced_names_prose_sync_for_the_main_configs(
         ini.write_text(EVAL_INI_TEXT)
         with pytest.raises(SystemExit) as exc:
             prose_eval.check_packages_synced(ini, styles)
-        assert "mise run prose-sync" in str(exc.value)
+        assert "mise run setup" in str(exc.value)
         assert "prose-eval-sync" not in str(exc.value)
 
 
@@ -256,7 +256,7 @@ def test_main_check_packages_runs_every_named_config(
     with pytest.raises(SystemExit) as exc:
         prose_eval.main(["prose_eval.py", "--check-packages", str(good), str(bad)])
     assert "missing" in str(exc.value)
-    assert "mise run prose-sync" in str(exc.value)
+    assert "mise run setup" in str(exc.value)
 
 
 def test_main_check_packages_without_a_config_exits_with_usage() -> None:
