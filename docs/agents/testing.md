@@ -84,15 +84,15 @@ opens it. Every spec blocks requests that leave `localhost` and fails on a
 `mise run ci` always runs `site-e2e`. The CI workflow
 (`.github/workflows/ci.yml`) runs the `e2e` job on every push to `main` and
 on `workflow_dispatch`, but on a pull request only when the diff touches a
-file outside this skip set: `docs/`, any `.md` file, `.vale.ini`, `.vale/`,
-`cspell-words.txt`, `.markdownlint-cli2.jsonc`, `.lychee.toml`, the license
-files and `NOTICE.md`. The `paths` step of the `build` job computes it with
+file outside this skip set: `docs/`, any `.md` file outside `site/`,
+`.vale.ini`, `.vale/`, `cspell-words.txt`, `.markdownlint-cli2.jsonc`,
+`.lychee.toml` and the license files. An empty diff runs the job. The `paths` step of the `build` job computes it with
 `git diff --name-only` against the base branch and the `e2e` job has a
 job-level `if:` on its output, so a skipped run still reports a (skipped)
 status for the job.
 
 Lesson pages under `site/src/content/` and the data tree under
-`site/src/data/` are not in the skip set. The specs in `site/e2e/` derive
+`site/src/data/` aren't in the skip set. The specs in `site/e2e/` derive
 their live-lesson and checkpoint counts from the data tree and click
 through lesson pages, so a content change can break them, and the round
 trip through a red `main` costs more than the job does. Widen the skip set
