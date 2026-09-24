@@ -83,8 +83,6 @@ The layout is what the tree shows. The parts that aren't obvious from it:
 - `site/src/styles/lesson.css` is global on purpose: review pages clone
   checkpoint markup out of lesson pages.
 - `site/examples/` holds the runnable fixtures behind `<Predict run=...>`.
-  `site/public/presentations/` holds Quarto decks and their committed
-  HTML/PDF outputs. CI doesn't run Quarto.
 - `docs/spec/` holds numbered specs (`SNN-title.md`, each with Purpose
   and Status; `000-specs.md` is the index). S01 is the project dictionary;
   use its terms everywhere. Specs are standalone. The early plan and the
@@ -202,7 +200,6 @@ patterns below after the fact. Write so that it has nothing to say.
   thin `__main__` block. Prefer fixing the cause over a `# noqa` or a
   `# type: ignore`. Where one stays, it names the rule and the reason on
   the same line.
-- Re-render and commit a deck's HTML/PDF whenever you change its `.qmd`.
 - No unexplained rule disables in `.markdownlint-cli2.jsonc`; say which files
   and why, on the same line.
 - Never weaken a control to make a check pass. That covers unpinning an

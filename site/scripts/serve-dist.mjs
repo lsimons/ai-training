@@ -35,7 +35,6 @@ const TYPES = {
 	'.xml': 'application/xml; charset=utf-8',
 	'.txt': 'text/plain; charset=utf-8',
 	'.pdf': 'application/pdf',
-	'.qmd': 'text/plain; charset=utf-8',
 };
 
 /** The percent-decoded path, or null when an escape is malformed (`%E0%A4%A`). */

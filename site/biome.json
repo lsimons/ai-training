@@ -18,7 +18,6 @@
       "!**/node_modules",
       "!**/.astro",
       "!**/bun.lock",
-      "!**/public/presentations",
       "!**/examples"
     ]
   },

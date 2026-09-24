@@ -26,7 +26,6 @@ bun = "1.4.2"
 gitleaks = "8.30.1"
 lychee = "0.24.2"
 prek = "0.5.2"
-"aqua:quarto-dev/quarto-cli" = "1.10.18"
 # Used by `mise run audit`; must match `version:` in the workflow's zizmor
 # job. Bump them together.
 zizmor = "1.30.1"
@@ -156,13 +155,6 @@ run = "bun run test"
 description = "Build, then run the Playwright walkthrough in site/e2e/. Needs `mise run site-browser` once."
 dir = "site"
 run = ["bun run build", "bun run e2e"]
-
-[tasks.site-slides]
-description = "Render a Quarto slide deck to HTML + PDF (arg: [deck])"
-usage = '''
-arg "[deck]" help="Path to the .qmd deck" default="site/public/presentations/example.qmd"
-'''
-run = 'quarto render "$usage_deck"'
 
 [tasks.site-favicon]
 description = "Regenerate the favicon + apple-touch-icon from the palette"

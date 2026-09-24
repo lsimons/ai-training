@@ -38,14 +38,6 @@ Open a pull request against `main`. CI runs the same `mise run ci` gate plus a
 [zizmor](https://docs.zizmor.sh/) audit of the GitHub Actions workflows; both
 must be green.
 
-## Quarto slide decks
-
-The [example presentation](site/public/presentations/example.qmd) is built with [Quarto](https://quarto.org/).
-
-Render it to HTML and PDF with `mise run site-slides` (or `quarto render site/public/presentations/example.qmd`).
-
-The presentations change so rarely that we commit their rendered outputs to git. Re-render and commit the outputs whenever you change a deck.
-
 ## Commit messages
 
 Follow [Conventional Commits](https://conventionalcommits.org/): `type(scope): description`.

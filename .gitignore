@@ -73,9 +73,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Quarto render intermediates
-.quarto/
-
 # mise local overrides (the committed .mise.toml is the shared config)
 .mise.local.toml
 mise.local.toml

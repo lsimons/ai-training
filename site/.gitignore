@@ -22,11 +22,6 @@ pnpm-debug.log*
 # Playwright screenshot output (see `mise run site-screenshot`)
 out.png
 
-# Quarto render intermediates (the html/pdf outputs are committed; see
-# public/presentations/). `*_files/` holds a deck's supporting assets.
-.quarto/
-public/presentations/*_files/
-
 # Vitest coverage and Playwright output
 coverage/
 playwright-report/

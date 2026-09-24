@@ -1,6 +1,6 @@
 ---
 title: Contributing
-description: How the site and slide decks are built and how to contribute.
+description: Building the site and contributing to it.
 ---
 
 This site is built with [Astro Starlight](https://starlight.astro.build/) and
@@ -20,15 +20,6 @@ Tools are pinned in `.mise.toml`. Run `mise install` once. Then:
 - `mise run ci` - the full gate: install, lint, check, build. CI runs the same.
 
 Content is in `site/src/content/docs/`, and static assets are in `site/public/`.
-
-## Slide decks
-
-The [example presentation](/presentations/example.qmd) is built with
-[Quarto](https://quarto.org/). Render it with `mise run site-slides` (or
-`quarto render site/public/presentations/example.qmd`).
-
-The presentations change so rarely that their rendered HTML and PDF outputs are
-committed to git.
 
 ## Conventions
 

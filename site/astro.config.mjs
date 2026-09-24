@@ -128,14 +128,6 @@ export default defineConfig({
 		],
 		rehypePlugins: [rehypeBaseLinks],
 	},
-	// The Quarto slide deck is a static file at /presentations/example.html.
-	// Starlight strips the `.html` from the sidebar link (rendering
-	// /presentations/example), so redirect that extensionless URL to the real
-	// file. Works in dev, preview, and on GitHub Pages. Astro applies `base` to
-	// the redirect source but not the target, so the target carries `${base}`.
-	redirects: {
-		'/presentations/example': `${base}/presentations/example.html`,
-	},
 	integrations: [
 		starlight({
 			// Fails the build on a dead internal link. lychee cannot do this
@@ -205,21 +197,6 @@ export default defineConfig({
 					items: [
 						{ slug: 'contributing', label: 'Contributing' },
 						{ slug: 'guides/writing-pages', label: 'Writing pages' },
-						{ slug: 'guides/slides', label: 'Slide decks with Quarto' },
-						// Starlight prepends the deploy `base` to sidebar link values, so
-						// these are written without it (unlike head/content links).
-						{
-							label: 'Example slides',
-							items: [
-								{ label: 'HTML', link: '/presentations/example.html', attrs: { target: '_blank' } },
-								{ label: 'PDF', link: '/presentations/example.pdf', attrs: { target: '_blank' } },
-								{
-									label: 'Quarto source',
-									link: '/presentations/example.qmd',
-									attrs: { target: '_blank' },
-								},
-							],
-						},
 					],
 				},
 			],
