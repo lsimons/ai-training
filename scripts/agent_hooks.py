@@ -121,10 +121,18 @@ def split_segments(command: str, cwd: str) -> list[Segment]:
 
 
 def is_gh_poll_loop(segments: Sequence[Segment]) -> bool:
-    """True when the command has a shell loop and calls `gh` anywhere in it."""
-    if not any(seg.words[0] in LOOP_WORDS for seg in segments):
+    """True when the command polls GitHub: a loop that calls `gh` and waits.
+
+    A `while` or `until` loop waits by its nature. A `for` loop over a list
+    (`for n in 359 360; do gh issue view $n; done`) runs once per item and
+    polls only when it also sleeps.
+    """
+    starts = {seg.words[0] for seg in segments}
+    if not starts & LOOP_WORDS:
         return False
-    return any(calls_gh(seg.words) for seg in segments)
+    if not any(calls_gh(seg.words) for seg in segments):
+        return False
+    return bool(starts & {"while", "until"}) or "sleep" in starts
 
 
 def calls_gh(words: Sequence[str]) -> bool:
@@ -288,7 +296,7 @@ def check_command(
     segments = split_segments(command, cwd)
     if is_gh_poll_loop(segments):
         return (
-            "A shell loop that calls `gh` is a poll loop. Wait in one blocking call "
+            "A loop that calls `gh` and waits is a poll loop. Wait in one blocking call "
             "(`gh pr checks <n> --watch`, `gh run watch <id>`), or end your turn and let "
             "the notifications wake you. Reviews come back in the reviewer's hand-back, so "
             "never poll a pull request for comments."

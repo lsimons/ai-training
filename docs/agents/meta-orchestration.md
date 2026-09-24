@@ -57,7 +57,7 @@ Sleeping and polling cost the most: waves 9 to 13 spent 61 to 81% of the
 leads' wall time in `sleep`, and a sleeping lead started each reviewer 2
 to 6 minutes late. Verdicts come back in the reviewer's hand-back, and nobody polls a
 pull request for review comments. The Bash guard hook rejects a `sleep`
-over 60 seconds and a shell loop that calls `gh`.
+over 60 seconds and a loop that polls `gh`.
 
 The concurrent-agent cap (20 on this platform) is shared by every level, so
 the dispatcher runs one wave at a time. With six issues in a wave, the lead

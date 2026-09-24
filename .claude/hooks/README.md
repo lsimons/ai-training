@@ -8,7 +8,8 @@ and #342. `.claude/settings.json` registers them.
   the alternative for a force push, any push to `main`, `gh pr merge`
   outside the wave lead, the dispatcher or a coordinator, `git stash`,
   `git reset --hard` or `git checkout -- .` in the main checkout, a
-  `sleep` over 60 seconds, and a shell loop that calls `gh`. A role sets
+  `sleep` over 60 seconds, and a loop that polls `gh`
+  (`while` or `until`, or a `for` loop that sleeps). A role sets
   `AI_TRAINING_ROLE` in the environment or as a prefix on the command
   (`AI_TRAINING_ROLE=wave-lead gh pr merge`).
 - `review-bash.sh`, PreToolUse on Bash in the `code-reviewer` agent only,
