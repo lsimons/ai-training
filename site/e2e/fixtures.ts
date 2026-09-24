@@ -63,6 +63,10 @@ export interface Seed {
 			revision?: number;
 		}
 	>;
+	habits?: Record<
+		string,
+		{ since: string; next: string | null; history: { at: string; result: 'done' | 'skipped' }[] }
+	>;
 }
 
 export const test = base.extend<{
@@ -107,7 +111,9 @@ export const test = base.extend<{
 				lessons: {},
 				checkpoints: {},
 				reviews: {},
+				practice: {},
 				quizzes: {},
+				habits: {},
 				...seed,
 			});
 		});
