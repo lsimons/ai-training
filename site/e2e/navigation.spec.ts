@@ -1,9 +1,9 @@
 /** Footer, sidebar, the lesson menu and the generated reference pages. */
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attrsOf, jsxElements, parseMdx } from '../src/lib/checkpoint-tags';
-import { expect, lessonCheckpoints, liveCourseLessons, test } from './fixtures';
+import { expect, lessonCheckpoints, liveLessons, test } from './fixtures';
 
 const SITE = fileURLToPath(new URL('..', import.meta.url));
 
@@ -14,15 +14,13 @@ const SITE = fileURLToPath(new URL('..', import.meta.url));
  * (issue #242), so a new lesson changes nothing here.
  */
 function lessonWithCheckpointsAndExamples(): string {
-	for (const area of readdirSync(join(SITE, 'src/data/areas')).sort()) {
-		for (const id of liveCourseLessons(area)) {
-			if (lessonCheckpoints(id).length === 0) continue;
-			const src = readFileSync(join(SITE, 'src/content/docs', `${id}.mdx`), 'utf8');
-			const examples = jsxElements(parseMdx(src)).filter(
-				(node) => node.name === 'Predict' && !attrsOf(node, id).has('objective'),
-			);
-			if (examples.length > 0) return id;
-		}
+	for (const id of liveLessons()) {
+		if (lessonCheckpoints(id).length === 0) continue;
+		const src = readFileSync(join(SITE, 'src/content/docs', `${id}.mdx`), 'utf8');
+		const examples = jsxElements(parseMdx(src)).filter(
+			(node) => node.name === 'Predict' && !attrsOf(node, id).has('objective'),
+		);
+		if (examples.length > 0) return id;
 	}
 	throw new Error('no live lesson has both a graded checkpoint and an ungraded example');
 }
@@ -111,4 +109,31 @@ test('a Checkpoints or Examples menu entry scrolls to its section (#220, #291)',
 		await expect(page).toHaveURL((url) => url.pathname.endsWith(`/${lesson}/`) && url.hash === `#${id}`);
 		await expect(section).toBeInViewport();
 	}
+});
+
+test('on a phone, a Checkpoints entry of the "On this page" dropdown closes it and scrolls (#287)', async ({
+	page,
+}) => {
+	const lesson = lessonWithCheckpointsAndExamples();
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto(`${lesson}/`);
+	const details = page.locator('mobile-starlight-toc details');
+	const link = details
+		.locator('[data-lesson-toc-mobile] [aria-labelledby="lesson-toc-mobile-checkpoints"] li a')
+		.first();
+	// The client script moves the groups into the panel, so the entry is in the dropdown before it opens.
+	await expect(link).toBeAttached();
+	await expect(details).not.toHaveAttribute('open', /.*/);
+	await details.locator('summary').click();
+	await expect(details).toHaveAttribute('open', /.*/);
+	const href = await link.getAttribute('href');
+	expect(href, 'the first checkpoints entry links to a fragment').toMatch(/^#.+/);
+	const id = (href as string).slice(1);
+	const section = page.locator(`[id="${id}"]`);
+	await expect(section).toHaveAttribute('data-checkpoint', /.*/);
+	await expect(section).not.toBeInViewport();
+	await link.click();
+	await expect(details).not.toHaveAttribute('open', /.*/);
+	await expect(page).toHaveURL((url) => url.pathname.endsWith(`/${lesson}/`) && url.hash === `#${id}`);
+	await expect(section).toBeInViewport();
 });
