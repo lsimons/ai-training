@@ -19,6 +19,7 @@ gh issue edit <number> --add-label ready-for-agent --remove-label needs-triage
 | bug             | Something isn't working                                                  | #d73a4a |
 | content         | Adds, changes or improves content: lessons, courses, specs, docs         | #0e8a16 |
 | code            | Adds, changes or improves source code: the site's TypeScript, Python, CI | #1d76db |
+| harness         | Improves the agent harness: AGENTS.md, .claude, docs/agents, skills      | #5319e7 |
 | documentation   | Improvements or additions to documentation                               | #0075ca |
 | enhancement     | New feature or request                                                   | #a2eeef |
 | needs-triage    | Maintainer needs to evaluate this issue                                  | #e6e6fa |
@@ -30,10 +31,14 @@ gh issue edit <number> --add-label ready-for-agent --remove-label needs-triage
 GitHub's default labels (`duplicate`, `good first issue`, `help wanted`,
 `invalid`, `question`, `accessibility`) also exist and may be used.
 
-Every open issue has `content`, `code` or both, saying what kind of
-change it asks for. A lesson issue (title `Lesson: ...`) is `content`. An
-issue that touches both a lesson and the code behind it (a fixture and its
-lesson page, a schema field and the spec row) gets both.
+Every open issue has `content`, `code` or `harness`, or more than one,
+saying what kind of change it asks for. A lesson issue (title
+`Lesson: ...`) is `content`. An issue that touches both a lesson and the
+code behind it (a fixture and its lesson page, a schema field and the spec
+row) gets both. `harness` is for changes to how agents work on this repo:
+`AGENTS.md`, `.claude/`, `docs/agents/` and the orchestration skills. No
+picker selects `harness` issues, so the maintainer starts that work by
+hand, when no dispatcher run is active.
 
 ## Triage flow
 
