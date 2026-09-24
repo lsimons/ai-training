@@ -57,9 +57,10 @@ describe('pickWave', () => {
 			kind: 'lessons',
 			size: 6,
 			only: null,
+			unblockersFirst: false,
 			wave: [
-				{ issue: 2, id: 'a/two', title: 'Two', area: 'a', position: 2, afterPlanned: [] },
-				{ issue: 3, id: 'a/three', title: 'Three', area: 'a', position: 3, afterPlanned: [] },
+				{ issue: 2, id: 'a/two', title: 'Two', area: 'a', position: 2, afterPlanned: [], unblocks: 0 },
+				{ issue: 3, id: 'a/three', title: 'Three', area: 'a', position: 3, afterPlanned: [], unblocks: 0 },
 			],
 			blocked: [],
 			skipped: [],
@@ -75,6 +76,7 @@ describe('pickWave', () => {
 			kind: 'lessons',
 			size: 6,
 			only: null,
+			unblockersFirst: false,
 			wave: [],
 			blocked: [],
 			skipped: [],
@@ -329,6 +331,113 @@ describe('pickWave', () => {
 		]);
 	});
 
+	describe('unblocks', () => {
+		// Course order puts `a/first` before the two unblockers. `a/loop` serves
+		// the missing objective of three blocked lessons (one in another area),
+		// `a/memory` serves two. `b/blocked-three` also assumes an objective
+		// no lesson serves, and still counts once for `a/loop`.
+		const unblockTree = () =>
+			tree([
+				{
+					dir: 'a',
+					course: ['a/first', 'a/loop', 'a/memory', 'a/blocked-one', 'a/blocked-two', 'a/both'],
+					lessons: [
+						{ id: 'a/first', issue: 1 },
+						{ id: 'a/loop', issue: 2, serves: ['a/c/loop'] },
+						{ id: 'a/memory', issue: 3, serves: ['a/c/memory'] },
+						{ id: 'a/blocked-one', issue: 4, assumes: [{ objective: 'a/c/loop' }] },
+						{ id: 'a/blocked-two', issue: 5, assumes: [{ objective: 'a/c/loop' }, { objective: 'a/c/memory' }] },
+						{ id: 'a/both', issue: 6, assumes: [{ objective: 'a/c/memory' }] },
+					],
+				},
+				{
+					dir: 'b',
+					course: ['b/blocked-three'],
+					lessons: [{ id: 'b/blocked-three', issue: 7, assumes: [{ objective: 'a/c/loop' }, { objective: 'x/y/z' }] }],
+				},
+			]);
+		const ready = [1, 2, 3, 4, 5, 6, 7].map((n) => issue(n));
+
+		it('counts the blocked candidates each lesson serves a missing objective of, and keeps course order without the flag', () => {
+			const r = pickWave({ tree: unblockTree(), livePageIds: [], readyIssues: ready, size: 6 });
+			expect(r.unblockersFirst).toBe(false);
+			expect(r.wave.map((w) => [w.id, w.unblocks])).toEqual([
+				['a/first', 0],
+				['a/loop', 3],
+				['a/memory', 2],
+			]);
+			expect(r.blocked.map((b) => b.id)).toEqual(['a/blocked-one', 'a/blocked-two', 'a/both', 'b/blocked-three']);
+		});
+
+		it('with the flag, sorts an area by the count descending and puts the top unblocker in the area slot', () => {
+			const r = pickWave({ tree: unblockTree(), livePageIds: [], readyIssues: ready, size: 1, unblockersFirst: true });
+			expect(r.unblockersFirst).toBe(true);
+			expect(r.wave.map((w) => [w.id, w.unblocks])).toEqual([['a/loop', 3]]);
+			expect(r.waiting.map((w) => [w.area, ids(w.lessons)])).toEqual([['a', ['a/memory', 'a/first']]]);
+		});
+
+		it('does not count a blocked lesson that is skipped or outside --only, and does not count a lesson twice', () => {
+			// #4 is assigned, so `a/blocked-one` is not a blocked candidate.
+			const withSkip = [issue(1), issue(2), issue(3), issue(4, ['someone']), issue(5), issue(6), issue(7)];
+			const r = pickWave({
+				tree: unblockTree(),
+				livePageIds: [],
+				readyIssues: withSkip,
+				size: 6,
+				unblockersFirst: true,
+			});
+			expect(r.wave.map((w) => [w.id, w.unblocks])).toEqual([
+				['a/loop', 2],
+				['a/memory', 2],
+				['a/first', 0],
+			]);
+		});
+
+		it('with the flag, keeps the planned after rule ahead of the count, and breaks a tie on the count by course position', () => {
+			// `a/2` unblocks the most but its own planned `after` is not live, so
+			// it waits behind the two with none. Those two tie at one and keep
+			// course order.
+			const t = tree([
+				{
+					dir: 'a',
+					course: ['a/1', 'a/2', 'a/3', 'a/4', 'a/5'],
+					lessons: [
+						{ id: 'a/1', issue: 1, serves: ['a/c/o1'] },
+						{ id: 'a/2', issue: 2, serves: ['a/c/o1', 'a/c/o2'], after: ['a/3'] },
+						{ id: 'a/3', issue: 3, serves: ['a/c/o1'] },
+						{ id: 'a/4', issue: 4, assumes: [{ objective: 'a/c/o1' }] },
+						{ id: 'a/5', issue: 5, assumes: [{ objective: 'a/c/o2' }] },
+					],
+				},
+			]);
+			const ready = [1, 2, 3, 4, 5].map((n) => issue(n));
+			const r = pickWave({ tree: t, livePageIds: [], readyIssues: ready, unblockersFirst: true });
+			expect(r.wave.map((w) => [w.id, w.unblocks, w.afterPlanned])).toEqual([
+				['a/1', 1, []],
+				['a/3', 1, []],
+				['a/2', 2, ['a/3']],
+			]);
+		});
+
+		it('with the flag and no blocked lesson, the order is the course order', () => {
+			const t = tree([
+				{
+					dir: 'a',
+					course: ['a/1', 'a/2'],
+					lessons: [
+						{ id: 'a/1', issue: 1 },
+						{ id: 'a/2', issue: 2, serves: ['a/c/o1'] },
+					],
+				},
+			]);
+			const r = pickWave({ tree: t, livePageIds: [], readyIssues: [issue(1), issue(2)], unblockersFirst: true });
+			expect(r.wave.map((w) => [w.id, w.unblocks])).toEqual([
+				['a/1', 0],
+				['a/2', 0],
+			]);
+		});
+	});
+
 	it('without openIssues, treats the ready issues as the open set for the not-picked reasons', () => {
 		const t = tree([{ dir: 'a', course: ['a/1'], lessons: [{ id: 'a/1', issue: 1 }] }]);
 		const r = pickWave({ tree: t, livePageIds: [], readyIssues: [issue(1), issue(2)], only: [1, 2, 3] });
@@ -446,10 +555,11 @@ describe('formatWave', () => {
 			kind: 'lessons',
 			size: 6,
 			only: null,
+			unblockersFirst: false,
 			notPicked: [],
 			wave: [
-				{ issue: 1, id: 'a/1', title: 'One', area: 'a', position: 1, afterPlanned: [] },
-				{ issue: 2, id: 'a/2', title: 'Two', area: 'a', position: null, afterPlanned: ['a/3', 'a/4'] },
+				{ issue: 1, id: 'a/1', title: 'One', area: 'a', position: 1, afterPlanned: [], unblocks: 0 },
+				{ issue: 2, id: 'a/2', title: 'Two', area: 'a', position: null, afterPlanned: ['a/3', 'a/4'], unblocks: 0 },
 			],
 			blocked: [
 				{
@@ -463,12 +573,15 @@ describe('formatWave', () => {
 			],
 			skipped: [{ issue: 4, id: 'b/4', reason: 'issue is assigned to someone' }],
 			waiting: [
-				{ area: 'a', lessons: [{ issue: 5, id: 'a/5', title: 'Five', area: 'a', position: 5, afterPlanned: [] }] },
+				{
+					area: 'a',
+					lessons: [{ issue: 5, id: 'a/5', title: 'Five', area: 'a', position: 5, afterPlanned: [], unblocks: 0 }],
+				},
 				{
 					area: 'b',
 					lessons: [
-						{ issue: 6, id: 'b/6', title: 'Six', area: 'b', position: 1, afterPlanned: [] },
-						{ issue: 7, id: 'b/7', title: 'Seven', area: 'b', position: 2, afterPlanned: [] },
+						{ issue: 6, id: 'b/6', title: 'Six', area: 'b', position: 1, afterPlanned: [], unblocks: 0 },
+						{ issue: 7, id: 'b/7', title: 'Seven', area: 'b', position: 2, afterPlanned: [], unblocks: 0 },
 					],
 				},
 			],
@@ -499,11 +612,37 @@ describe('formatWave', () => {
 		);
 	});
 
+	it('adds the Unblocks column when unblockersFirst is set', () => {
+		const out = formatWave({
+			kind: 'lessons',
+			size: 6,
+			only: null,
+			unblockersFirst: true,
+			notPicked: [],
+			wave: [
+				{ issue: 1, id: 'a/1', title: 'One', area: 'a', position: 2, afterPlanned: [], unblocks: 3 },
+				{ issue: 2, id: 'a/2', title: 'Two', area: 'a', position: 1, afterPlanned: ['a/3'], unblocks: 0 },
+			],
+			blocked: [],
+			skipped: [],
+			waiting: [],
+		});
+		expect(out).toContain(
+			[
+				'| Issue | Lesson | Course position | Planned `after` | Unblocks |',
+				'| ----- | ------ | --------------- | --------------- | -------- |',
+				'| #1 | `a/1` | a 2 | - | 3 |',
+				'| #2 | `a/2` | a 1 | `a/3` | 0 |',
+			].join('\n'),
+		);
+	});
+
 	it('renders an empty result with the headings and counts only', () => {
 		const out = formatWave({
 			kind: 'lessons',
 			size: 2,
 			only: null,
+			unblockersFirst: false,
 			wave: [],
 			blocked: [],
 			skipped: [],
@@ -518,7 +657,15 @@ describe('formatWave', () => {
 	});
 
 	it('adds the not-picked section whenever only was given, even when it is empty', () => {
-		const base = { kind: 'lessons' as const, size: 2, wave: [], blocked: [], skipped: [], waiting: [] };
+		const base = {
+			kind: 'lessons' as const,
+			size: 2,
+			unblockersFirst: false,
+			wave: [],
+			blocked: [],
+			skipped: [],
+			waiting: [],
+		};
 		expect(formatWave({ ...base, only: [1], notPicked: [] })).toContain('## Not picked from --only (0)');
 		const out = formatWave({ ...base, only: [1, 999], notPicked: [{ issue: 999, reason: 'no such open issue' }] });
 		expect(out).toContain(['## Not picked from --only (1)', '', '- #999: no such open issue', ''].join('\n'));
@@ -529,6 +676,7 @@ describe('formatWave', () => {
 			kind: 'lessons',
 			size: 6,
 			only: [2],
+			unblockersFirst: false,
 			notPicked: [{ issue: 2, reason: 'assigned' }],
 			wave: [],
 			blocked: [],

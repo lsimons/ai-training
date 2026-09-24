@@ -17,6 +17,15 @@
  * whose `assumes` names a lesson without a page, so a wave that includes
  * such a lesson can't land. An `after` entry that is still planned does not
  * block. It is reported per lesson as ordering advice for the wave lead.
+ * Each candidate carries `unblocks`, the number of blocked candidates whose
+ * missing objectives it serves (direct only, no transitive closure). With
+ * `unblockersFirst`, an area's candidates sort by that count descending
+ * ahead of course position, so `concepts/agent-loop` comes before an
+ * earlier lesson that unblocks nothing. The planned `after` rule still
+ * comes first: a candidate whose own `after` is not live waits behind
+ * the ones with none, whatever its count, since that `after` names the
+ * lesson the plan wants written before it. Without the flag the count is
+ * reported and the order stays earliest-in-course.
  *
  * A `content` wave picks the ready, unassigned issues with the `content`
  * label that no plan file claims as its lesson issue, in ascending issue
@@ -42,17 +51,17 @@ export const NITS_TITLE = /^(nits|cosmetic nits)\b/i;
 
 /**
  * @typedef {{ number: number, title: string, assignees: string[], labels?: string[] }} ReadyIssue
- * @typedef {{ issue: number, id: string, title: string, area: string, position: number | null, afterPlanned: string[] }} WaveEntry
+ * @typedef {{ issue: number, id: string, title: string, area: string, position: number | null, afterPlanned: string[], unblocks: number }} WaveEntry `unblocks` counts the blocked candidates this lesson serves a missing objective of.
  * @typedef {{ objective: string, servedBy: string[] }} Blocker An assumed objective and the planned lessons that serve it.
  * @typedef {{ issue: number, id: string, blockedBy: Blocker[] }} BlockedEntry
  * @typedef {{ issue: number, id?: string, reason: string }} SkippedEntry `id` is the lesson id, and a content issue has none.
  * @typedef {{ area: string, lessons: WaveEntry[] }} WaitingArea
  * @typedef {{ issue: number, reason: string }} NotPickedEntry A number from `only` that is not in the wave, and why.
- * @typedef {{ kind: 'lessons', size: number, only: number[] | null, wave: WaveEntry[], blocked: BlockedEntry[], skipped: SkippedEntry[], waiting: WaitingArea[], notPicked: NotPickedEntry[] }} LessonsWave
+ * @typedef {{ kind: 'lessons', size: number, only: number[] | null, unblockersFirst: boolean, wave: WaveEntry[], blocked: BlockedEntry[], skipped: SkippedEntry[], waiting: WaitingArea[], notPicked: NotPickedEntry[] }} LessonsWave
  * @typedef {{ issue: number, title: string, labels: string[], mixed: boolean }} ContentEntry `mixed` is true when the issue has both `content` and `code`.
  * @typedef {{ kind: 'content', size: number, only: number[] | null, wave: ContentEntry[], skipped: SkippedEntry[], waiting: ContentEntry[], notPicked: NotPickedEntry[] }} ContentWave
  * @typedef {LessonsWave | ContentWave} Wave
- * @typedef {{ tree: import('./area-tree.mjs').AreaTree, livePageIds: Iterable<string>, readyIssues: ReadyIssue[], openIssues?: Iterable<number> | null, size?: number, kind?: 'lessons' | 'content', only?: Iterable<number> | null }} PickInput
+ * @typedef {{ tree: import('./area-tree.mjs').AreaTree, livePageIds: Iterable<string>, readyIssues: ReadyIssue[], openIssues?: Iterable<number> | null, size?: number, kind?: 'lessons' | 'content', only?: Iterable<number> | null, unblockersFirst?: boolean }} PickInput
  */
 
 /**
@@ -82,6 +91,9 @@ export function pickWave(input) {
  *
  * Within an area, candidates with no planned `after` come first, then course
  * position (a lesson no course lists has position `null` and sorts last).
+ * With `unblockersFirst`, the `unblocks` count (descending) sits between
+ * the two, so the planned `after` rule still comes first and course
+ * position breaks a tie on the count.
  * The wave takes one lesson per area in turn, in the tree's area order,
  * until `size` is reached or the areas run out, so every area gets progress.
  * Every candidate ends up in exactly one of the four lists: `wave`,
@@ -92,7 +104,15 @@ export function pickWave(input) {
  * @param {PickInput} input
  * @returns {LessonsWave}
  */
-function pickLessonsWave({ tree, livePageIds, readyIssues, openIssues = null, size = 6, only = null }) {
+function pickLessonsWave({
+	tree,
+	livePageIds,
+	readyIssues,
+	openIssues = null,
+	size = 6,
+	only = null,
+	unblockersFirst = false,
+}) {
 	const live = new Set(livePageIds);
 	const ready = new Map(readyIssues.map((i) => [i.number, i]));
 	const open = new Set(openIssues ?? ready.keys());
@@ -117,6 +137,8 @@ function pickLessonsWave({ tree, livePageIds, readyIssues, openIssues = null, si
 
 	/** @type {{ area: string, candidates: WaveEntry[] }[]} */
 	const perArea = [];
+	/** @type {Map<string, string[]>} candidate lesson id to the objectives it serves, for the `unblocks` count */
+	const candidateServes = new Map();
 	/** @type {BlockedEntry[]} */
 	const blocked = [];
 	/** @type {SkippedEntry[]} */
@@ -152,6 +174,10 @@ function pickLessonsWave({ tree, livePageIds, readyIssues, openIssues = null, si
 				continue;
 			}
 			const index = order.indexOf(l.id);
+			candidateServes.set(
+				l.id,
+				(l.serves ?? []).filter((o) => typeof o === 'string'),
+			);
 			candidates.push({
 				issue: l.issue,
 				id: l.id,
@@ -159,13 +185,22 @@ function pickLessonsWave({ tree, livePageIds, readyIssues, openIssues = null, si
 				area: a.dir,
 				position: index === -1 ? null : index + 1,
 				afterPlanned: (l.after ?? []).filter((x) => !live.has(x)),
+				unblocks: 0,
 			});
 		}
-		const rank = (c) => c.position ?? Number.POSITIVE_INFINITY;
-		candidates.sort(
-			(x, y) => Number(x.afterPlanned.length > 0) - Number(y.afterPlanned.length > 0) || rank(x) - rank(y),
-		);
 		perArea.push({ area: a.dir, candidates });
+	}
+
+	// The blocked list is complete only after every area, so the count and the sort come here.
+	const rank = (c) => c.position ?? Number.POSITIVE_INFINITY;
+	const hasAfter = (c) => Number(c.afterPlanned.length > 0);
+	const score = (x, y) => (unblockersFirst ? y.unblocks - x.unblocks : 0);
+	for (const { candidates } of perArea) {
+		for (const c of candidates) {
+			const serves = new Set(candidateServes.get(c.id));
+			c.unblocks = blocked.filter((b) => b.blockedBy.some((x) => serves.has(x.objective))).length;
+		}
+		candidates.sort((x, y) => hasAfter(x) - hasAfter(y) || score(x, y) || rank(x) - rank(y));
 	}
 
 	/** @type {WaveEntry[]} */
@@ -201,7 +236,7 @@ function pickLessonsWave({ tree, livePageIds, readyIssues, openIssues = null, si
 		else reason = 'waiting (wave full)';
 		notPicked.push({ issue: n, reason });
 	}
-	return { kind: 'lessons', size, only: onlyList, wave, blocked, skipped, waiting, notPicked };
+	return { kind: 'lessons', size, only: onlyList, unblockersFirst, wave, blocked, skipped, waiting, notPicked };
 }
 
 /** The lessons that serve a blocked lesson's missing objectives, or the objectives when no lesson does. */
@@ -286,8 +321,9 @@ function skippedLines(skipped) {
 }
 
 /**
- * The result as markdown. A lessons wave is a table, then the blocked,
- * skipped and waiting lists. A content wave is a table of issue, title and
+ * The result as markdown. A lessons wave is a table (with an `Unblocks`
+ * column under `unblockersFirst`), then the blocked, skipped and waiting
+ * lists. A content wave is a table of issue, title and
  * labels, then the skipped and waiting lists. Lesson ids are in code spans,
  * so cspell skips them.
  * @param {Wave} result
@@ -296,13 +332,15 @@ function skippedLines(skipped) {
 export function formatWave(result) {
 	if (result.kind === 'content') return formatContentWave(result);
 	const lines = [`## Wave (${result.wave.length} of ${result.size})`, ''];
+	const unblocks = result.unblockersFirst;
 	lines.push(
-		'| Issue | Lesson | Course position | Planned `after` |',
-		'| ----- | ------ | --------------- | --------------- |',
+		`| Issue | Lesson | Course position | Planned \`after\` |${unblocks ? ' Unblocks |' : ''}`,
+		`| ----- | ------ | --------------- | --------------- |${unblocks ? ' -------- |' : ''}`,
 	);
 	for (const w of result.wave) {
 		const position = w.position === null ? `${w.area} (unlisted)` : `${w.area} ${w.position}`;
-		lines.push(`| #${w.issue} | ${code(w.id)} | ${position} | ${w.afterPlanned.map(code).join(', ') || '-'} |`);
+		const after = w.afterPlanned.map(code).join(', ') || '-';
+		lines.push(`| #${w.issue} | ${code(w.id)} | ${position} | ${after} |${unblocks ? ` ${w.unblocks} |` : ''}`);
 	}
 	lines.push('', `## Blocked (${result.blocked.length})`, '');
 	for (const b of result.blocked) {
