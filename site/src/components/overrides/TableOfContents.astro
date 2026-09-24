@@ -7,6 +7,13 @@
  * column itself stays (Starlight keeps it whenever `toc` is set), so skimming
  * between pages doesn't shift the content.
  *
+ * A lesson with `covered-by` (spec S11 "Lesson file") gets a tip above the
+ * list (issue #111): the external course that covers it, linked, and a skip
+ * button with the same `data-skip-lesson` hook as the recap's, which the
+ * MarkdownContent script binds. The tip shows even when the list would be
+ * hidden. The href must be an `https://` URL under a bibliography `url`, and
+ * any other value fails the build.
+ *
  * The groups sit next to Starlight's `<starlight-toc>` element rather than in
  * it: its list and its current-heading script are internal to the package.
  * The script highlights the heading before a checkpoint while the checkpoint
@@ -14,14 +21,37 @@
  * highlight.
  */
 import Default from '@astrojs/starlight/components/TableOfContents.astro';
+import { checkExternalSourceHref } from '@lib/extends-to';
 import { lessonEntryOf } from '@lib/lesson-context';
 import { isLessonEntry, lessonTocGroups, showToc } from '@lib/lesson-toc';
+import { bibliographySources } from '@lib/links';
 
 const { toc } = Astro.locals.starlightRoute;
 const entry = lessonEntryOf(Astro);
-const groups = isLessonEntry(entry) ? lessonTocGroups(entry) : [];
+const isLesson = isLessonEntry(entry);
+const groups = isLesson ? lessonTocGroups(entry) : [];
+
+const coveredBy = isLesson
+	? (entry.data as { 'covered-by'?: { label: string; href: string } })['covered-by']
+	: undefined;
+if (coveredBy) {
+	const check = checkExternalSourceHref(coveredBy.href, await bibliographySources(), 'covered-by');
+	if (check.kind === 'invalid') throw new Error(`${entry.id}: ${check.reason}`);
+}
 ---
 
+{
+	coveredBy && (
+		<aside class="not-content covered-by" data-covered-by>
+			<p>
+				If you have followed <a href={coveredBy.href} rel="noopener">{coveredBy.label}</a>, you can skip this lesson.
+			</p>
+			<button type="button" class="recap-skip" data-skip-lesson>
+				I know this, skip it
+			</button>
+		</aside>
+	)
+}
 {
 	showToc(toc, groups) && (
 		<>

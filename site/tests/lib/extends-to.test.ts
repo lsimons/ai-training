@@ -1,4 +1,10 @@
-import { checkExtendsToHref, isExternalHref, isRootRelative, isUnderUrl } from '@lib/extends-to';
+import {
+	checkExtendsToHref,
+	checkExternalSourceHref,
+	isExternalHref,
+	isRootRelative,
+	isUnderUrl,
+} from '@lib/extends-to';
 import { describe, expect, it } from 'vitest';
 
 const sources: [string, string | null | undefined][] = [
@@ -81,5 +87,26 @@ describe('checkExtendsToHref', () => {
 	});
 	it('skips a source without a url', () => {
 		expect(checkExtendsToHref('https://nowhere.example/', sources).kind).toBe('invalid');
+	});
+});
+
+describe('checkExternalSourceHref', () => {
+	it('accepts an https:// href under a bibliography url and names the source', () => {
+		expect(checkExternalSourceHref('https://diataxis.fr/tutorials/', sources, 'covered-by')).toEqual({
+			kind: 'external',
+			source: 'Diátaxis',
+		});
+	});
+	it('rejects a root-relative path, since the field wants an external course', () => {
+		expect(checkExternalSourceHref('/safety/agent-risk/', sources, 'covered-by')).toEqual({
+			kind: 'invalid',
+			reason: 'covered-by href must be an https:// URL, got /safety/agent-risk/',
+		});
+	});
+	it('rejects an https:// href no bibliography entry covers, naming the field', () => {
+		expect(checkExternalSourceHref('https://nowhere.example/', sources, 'covered-by')).toMatchObject({
+			kind: 'invalid',
+			reason: expect.stringMatching(/^covered-by href .* bibliography\.yaml$/),
+		});
 	});
 });
