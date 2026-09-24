@@ -98,6 +98,21 @@ sentence that the lesson text may be incomplete. The bootstrap uses no
 other tool, and it doesn't read files on the learner's machine except the
 progress export the learner hands it.
 
+A Vitest test (`site/tests/lib/tutor-instructions.test.ts`, run by
+`mise run site-test`) reads `SKILL.md` and fails when its instruction URL,
+its bundle URL example or the `version` it declares no longer match the
+constants the build uses (`TUTOR_INSTRUCTIONS_PATH`, `BUNDLE_URL_TEMPLATE`
+and `BUNDLE_VERSION` in `site/src/lib/`). The route file at
+`site/src/pages/data/tutor.md.ts` is checked against the same path.
+
+Issue #285 considered a stop on a missing or lower `version` and rejected
+it. In the no-shell fallback the summarizing fetch tool can drop the
+`version` line, and a stop on a missing version would break that path. A
+lower version only happens against an old local build. The same issue
+rejected agent-side bundle verification (a checksum or a field count),
+because it adds instruction text to a bootstrap this contract keeps thin and
+it relies on the model following it.
+
 ## Published instruction file
 
 The build emits one Markdown file with a YAML frontmatter block at:
