@@ -33,6 +33,7 @@ The site's own checks, in the order `ci` runs them after the prose tasks:
 | `mise run site-test`     | Vitest unit and component tests, 80% coverage floor                           |
 | `mise run site-build`    | Build `site/dist`, with the internal link check                               |
 | `mise run checkpoints`   | Check the built `checkpoints.json` export against the lesson pages            |
+| `mise run bundles`       | Check the built lesson bundles under `data/lessons/` against the lesson pages |
 | `mise run site-e2e-only` | The Playwright walkthrough in `site/e2e/` against the built `site/dist`       |
 
 `mise run site-e2e` builds first and then runs the walkthrough, the

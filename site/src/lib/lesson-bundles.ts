@@ -64,6 +64,8 @@ export interface BundleSources {
 	competencies: { id: string; objectives: Omit<BundleObjective, 'competency_url'>[] }[];
 	/** Every item of the site-wide checkpoint export. */
 	items: CheckpointItem[];
+	/** Every lesson page's id, so an `assumes[].lesson` that names no page fails the build. */
+	lessonIds: Set<string>;
 	/** Astro's `site`, the origin the absolute URLs start with. */
 	site: string;
 }
@@ -245,14 +247,16 @@ function withoutImportBlock(body: string): string {
  */
 export function proseOf(body: string, site: string): string {
 	const aside = setAsideCode(withoutImportBlock(body));
-	const rendered = absolutizeLinks(renderComponents(aside.text, aside), site);
-	return `${aside
-		.restore(rendered)
-		.replace(/\n{3,}/g, '\n\n')
-		.trim()}\n`;
+	// Runs of blank lines are collapsed before the code comes back, so a double blank line inside a fence stays.
+	const rendered = absolutizeLinks(renderComponents(aside.text, aside), site).replace(/\n{3,}/g, '\n\n');
+	return `${aside.restore(rendered).trim()}\n`;
 }
 
-/** The bundle of one lesson. Throws when `covers` names an unknown topic or a served objective is in no competency. */
+/**
+ * The bundle of one lesson. Throws when `covers` names an unknown topic, a
+ * served objective is in no competency, or an `assumes` entry names a lesson
+ * that has no page, so its `url` would be a 404.
+ */
 export function bundleOf(lesson: Lesson, sources: BundleSources): LessonBundle {
 	const { site } = sources;
 	const { data } = lesson;
@@ -271,14 +275,16 @@ export function bundleOf(lesson: Lesson, sources: BundleSources): LessonBundle {
 			behaviors: objective.behaviors,
 		};
 	});
-	const assumes = (data.assumes ?? []).map(
-		(a): BundleAssumed => ({
+	const assumes = (data.assumes ?? []).map((a): BundleAssumed => {
+		if (a.lesson && !sources.lessonIds.has(a.lesson))
+			throw new Error(`${lesson.id}: assumes ${a.objective} from ${a.lesson}, which is not a lesson page`);
+		return {
 			objective: a.objective,
 			lesson: a.lesson ?? null,
 			section: a.section ?? null,
 			url: a.lesson ? `${lessonUrl(a.lesson, site)}${a.section ? `#${a.section}` : ''}` : null,
-		}),
-	);
+		};
+	});
 	const checkpoints = sources.items
 		.filter((i) => i.lesson === lesson.id)
 		.map(({ lesson: _lesson, ...rest }): BundleCheckpoint => rest);
@@ -317,6 +323,7 @@ export async function buildLessonBundles(site: string): Promise<LessonBundle[]> 
 		topics: topics.map((t) => t.data),
 		competencies: competencies.map((c) => c.data),
 		items,
+		lessonIds: new Set(lessons.map((l) => l.id)),
 		site,
 	};
 	return lessons.map((l) => bundleOf(l, sources));

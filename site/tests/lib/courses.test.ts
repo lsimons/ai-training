@@ -102,7 +102,7 @@ describe('dependenciesOf', () => {
 	it('reads a live entry from its page assumes, within the area, and a coming entry from after', async () => {
 		const plan = await getCoursePlan('safety');
 		expect(dependenciesOf(plan[0]!, 'safety')).toEqual([]);
-		// deeper also assumes nowhere/none, outside the area.
+		// deeper also assumes concepts/how-models-work, outside the area.
 		expect(dependenciesOf(plan[1]!, 'safety')).toEqual(['safety/agent-risk']);
 		expect(dependenciesOf(plan[2]!, 'safety')).toEqual(['safety/deeper']);
 	});
