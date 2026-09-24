@@ -135,8 +135,6 @@
 .route-title { font-weight: 700; margin: 0 0 0.25rem; }
 .route-where { color: var(--sl-color-gray-3); font-size: 0.9rem; }
 .route-card ul { margin: 0; padding-left: 1.25rem; }
-/* review line (spec S03 "Frontmatter", `review-by`): when the sources were checked and when a check is due. */
-.lesson-review { color: var(--sl-color-gray-3); font-size: 0.9rem; margin: 0 0 1rem; }
 /* skills check card (spec S04 "Skills check"): copies of checkpoint markup
    inside a route card, so the checkpoint rules above apply to the copies too. */
 .skills-check { border-left: 4px solid var(--sl-color-accent); }

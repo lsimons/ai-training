@@ -8,7 +8,6 @@
  */
 import { getCollection, render } from 'astro:content';
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
-import ReviewLine from '@components/lesson/ReviewLine.astro';
 import RouteAhead, { type AheadItem } from '@components/lesson/RouteAhead.astro';
 import TutorBlock from '@components/lesson/TutorBlock.astro';
 import { getAreas, isEngineering } from '@lib/areas';
@@ -24,8 +23,6 @@ const data = entry.data as typeof entry.data & {
 	serves?: string[];
 	assumes?: { objective: string; lesson: string; section: string }[];
 	'extends-to'?: { label: string; href: string }[];
-	'sources-checked'?: Date;
-	'review-by'?: Date;
 };
 const isLesson = Boolean(data.mode);
 const lessonId = entry.id;
@@ -120,7 +117,6 @@ if (isLesson) {
 					</ul>
 				</aside>
 			)}
-			<ReviewLine reviewBy={data['review-by']} sourcesChecked={data['sources-checked']} />
 			<Default><slot /></Default>
 			<RouteAhead items={ahead} />
 			<TutorBlock lessonUrl={absoluteUrl(`/${lessonId}/`, String(Astro.site))} />
