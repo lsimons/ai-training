@@ -50,6 +50,7 @@ mise run lint            # prek hooks over every file + actionlint
 mise run ci              # full gate: install + lint + check + build
 mise run links           # lychee broken-link check (network; not in `ci`)
 mise run audit           # zizmor audit of workflows + dependabot config
+mise run vuln            # osv-scanner scan of uv.lock + site/bun.lock (network; not in `ci`)
 mise run ci-watch        # watch GitHub Actions for the current branch
 ```
 
