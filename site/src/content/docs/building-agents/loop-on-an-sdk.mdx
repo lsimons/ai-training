@@ -104,8 +104,10 @@ the loop produces. The program above ignores every one of them except the last,
 the `ResultMessage`, which holds the final text in `result` when the run
 succeeded and a `subtype` that names what ended the run otherwise
 (@Claude Code agent loop). The `try` is there because a single-shot `query`
-raises after it has yielded an error result, so a program that wants to
-carry on after a limit wraps the loop (@Claude Code agent loop).
+raises after it has yielded an error result (@Claude Code agent loop). On a
+limit stop this program prints two lines: the `stop:` line from the `for`
+body, then the `ended:` line from the `except` with the error text the SDK
+raised. A program that wants to carry on after a limit needs that `except`.
 
 ## What moved into the library
 
@@ -145,10 +147,13 @@ A tool error still goes back to the model as a result, as in your loop.
 loop when the model replies without a tool call, when `max_turns` tool-use
 turns have run, or when the client-side cost estimate reaches
 `max_budget_usd`, and it reports which one in `ResultMessage.subtype`:
-`success`, `error_max_turns` or `error_max_budget_usd`
-(@Claude Code agent loop). Ctrl-C is `interrupt()` on a `ClaudeSDKClient`
-session, and a single-shot `query` ends with `error_during_execution` when
-something cuts it off.
+`success` for the first, `error_max_turns` and `error_max_budget_usd` for
+the limits, and `error_during_execution` when something cut the run off
+(@Claude Code agent loop). The list isn't complete. The Python reference
+adds a `terminal_reason` field next to `subtype`, with values such as
+`aborted_streaming` for an interrupted turn, so a program that branches on
+how a run ended reads both (@Claude Code agent sdk python). Ctrl-C is
+`interrupt()` on a `ClaudeSDKClient` session.
 
 **Streaming.** The hand loop's `progress(step, reply, result)` printed a
 line per round so a person could watch. The SDK's message stream is that
@@ -204,10 +209,11 @@ Both options in the SDK program above are set on purpose. Without them the
 SDK has no turn limit and no cost limit, and the loop runs until the model
 stops asking for tools (@Claude Code agent loop). That default suits a
 demo, where a person watches the run and can stop it. A production agent
-gets a prompt no one is watching, and an open-ended one ("improve this
-codebase") keeps a model busy for a long time. The SDK's own guidance is to
-set a budget for a production agent, and the hand loop taught the same
-rule the hard way when `model_never_answers` ran into `max_steps`.
+gets a prompt no one is watching, and a wide one ("make the tests in this
+repository faster") keeps a model reading and editing for a long time. The
+SDK's reference page recommends a spend cap for an agent that runs
+unattended, and the hand loop taught the same rule when
+`model_never_answers` ran into `max_steps`.
 
 `max_turns` and `max_budget_usd` count differently from your own loop's limits.
 `max_turns` counts tool-use turns, so a run that answers in text on its
@@ -215,19 +221,20 @@ first reply uses none, and `max_turns=2` in a run that needs three tool
 rounds stops before the third (@Claude Code agent loop). `max_budget_usd`
 compares a running cost estimate that the client keeps, and a subagent's
 spend counts toward it (@Claude Code agent loop). When either limit ends
-the run, the `result` field is absent. A program reads `subtype` first and
-`result` only after `success`.
+the run, `result` is `None`. A program reads `subtype` first and `result`
+only after `success`.
 
 <Predict id="predict-turn-limit" objective="building-agents/builds-agent-loop/uses-an-sdk"
   concepts={['agent-sdk', 'stop-conditions']}
-  context="The lesson's SDK program prints message.result when the ResultMessage subtype is success and otherwise prints stop: followed by the subtype. It sets max_turns=4 and max_budget_usd=0.10."
+  context="The lesson's SDK program iterates query() inside a try. The loop body prints message.result when the ResultMessage subtype is success and otherwise prints stop: followed by the subtype. After an error result the single-shot query() raises, and the except prints ended: followed by the error text. It sets max_turns=4 and max_budget_usd=0.10."
   title="Predict the stop line" hint="Which subtype does the SDK report when the turn limit ends a run, and which branch of the program prints it?"
   answer="stop: error_max_turns">
 
 Suppose a model keeps asking for one more city until the turn limit ends
-the run, and read only the line the `async for` body prints. Which line is
-it? This example doesn't run in CI, and you check it against the SDK's
-reference page yourself.
+the run. The program prints two lines, and the second is the `ended:` line
+from the `except`. Which line does the `async for` body print? This
+example doesn't run in CI, and you check it against the SDK's reference
+page yourself.
 
 </Predict>
 
@@ -267,7 +274,7 @@ request and a summary might drop an instruction from the first prompt
   context="An evaluation grades an SDK agent's trajectory by reading the tool results in the conversation after the run. In long runs the SDK compacts the conversation, replacing older messages with a summary, and the vendor documents no option that turns compaction off."
   title="The evaluation reads a summary" hint="What does your code see that the compacted history no longer holds?"
   options={[
-    { text: 'Raise max_turns so the run ends before compaction triggers.', consequence: 'Compaction triggers on context size, not on turn count. A run with large tool outputs compacts early, and a higher turn limit makes the runs longer.' },
+    { text: 'Raise max_turns so the run ends before compaction triggers.', consequence: 'Compaction triggers when the context nears its limit, whatever the turn count. A run with large tool outputs compacts early, and a higher turn limit makes the runs longer.' },
     { text: 'Record each tool result from the UserMessage stream as it arrives, and grade that log.', correct: true, consequence: 'Your log holds every result in full, whatever the SDK later summarizes, and the evaluation reads your log.' },
     { text: 'Ask the model in the prompt to keep every tool result in the conversation.', consequence: 'The model does not run compaction and cannot stop it. The instruction itself may be dropped from the summary.' },
     { text: 'Read the summary and grade what it kept.', consequence: 'The summary keeps what the compactor thought mattered, which is not the evaluation\'s rubric. Grades change from run to run with the summary.' },
