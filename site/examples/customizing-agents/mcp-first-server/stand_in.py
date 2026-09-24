@@ -5,7 +5,8 @@ JSON-RPC message per line on standard input, one per line on standard
 output, nothing else on standard output. It offers three of the reference
 file-system server's tools, scoped to the directories named on the command
 line, and refuses a path outside them. The real server has more tools,
-including ones that write. This one can't change a file.
+including ones that write, and it replaces that list with the roots a
+client sends. This one takes no roots and can't change a file.
 
 Run it by hand:  python3 stand_in.py handbook
 Then type a request such as {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
@@ -63,34 +64,40 @@ def read_text_file(path):
 
 
 def call_tool(name, arguments, roots):
-    """Run one tool. A refusal is a result with isError, as the specification says."""
+    """Run one tool. A refusal or a failed read is a result with isError set."""
     if name == "list_allowed_directories":
         return {"content": [{"type": "text", "text": "\n".join(roots)}], "isError": False}
     path = arguments.get("path", "")
     if not allowed(path, roots):
         text = f"Access denied - path outside allowed directories: {path}"
         return {"content": [{"type": "text", "text": text}], "isError": True}
-    if name == "list_directory":
-        text = list_directory(path)
-    elif name == "read_text_file":
-        text = read_text_file(path)
-    else:
-        return {"content": [{"type": "text", "text": f"Unknown tool: {name}"}], "isError": True}
+    run = list_directory if name == "list_directory" else read_text_file
+    try:
+        text = run(path)
+    except OSError as error:
+        return {"content": [{"type": "text", "text": str(error)}], "isError": True}
     return {"content": [{"type": "text", "text": text}], "isError": False}
 
 
+def error_response(request_id, code, message):
+    return {"jsonrpc": "2.0", "id": request_id, "error": {"code": code, "message": message}}
+
+
 def handle(request, roots):
-    """Answer one JSON-RPC request."""
+    """Answer one JSON-RPC request. An unknown method or tool is a protocol error."""
     method = request.get("method")
+    request_id = request.get("id")
     if method == "tools/list":
         result = {"tools": TOOLS}
     elif method == "tools/call":
         params = request.get("params", {})
-        result = call_tool(params.get("name"), params.get("arguments", {}), roots)
+        name = params.get("name")
+        if name not in {tool["name"] for tool in TOOLS}:
+            return error_response(request_id, -32602, f"Unknown tool: {name}")
+        result = call_tool(name, params.get("arguments", {}), roots)
     else:
-        error = {"code": -32601, "message": f"Method not found: {method}"}
-        return {"jsonrpc": "2.0", "id": request.get("id"), "error": error}
-    return {"jsonrpc": "2.0", "id": request.get("id"), "result": result}
+        return error_response(request_id, -32601, f"Method not found: {method}")
+    return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
 
 def serve(roots):

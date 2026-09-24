@@ -38,6 +38,8 @@ def request(server, method, params=None, request_id=1):
 def call(server, name, arguments, request_id=2):
     """Send tools/call and return the result's text and its isError flag."""
     response = request(server, "tools/call", {"name": name, "arguments": arguments}, request_id)
+    if "error" in response:
+        raise RuntimeError(response["error"]["message"])
     result = response["result"]
     return result["content"][0]["text"], result["isError"]
 
