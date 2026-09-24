@@ -82,6 +82,10 @@ adding one is adding one file.
 | `description` | One or two sentences on the group's level and what it assumes.                                      |
 | `areas`       | The group's area slugs in display order. The order of areas is written here and nowhere else.       |
 
+The `foundations` description is a rule as well as a label. A lesson in one
+of its areas may not show code or terminal work. S03 "Foundations audience"
+has the full rule and the check that enforces it.
+
 ## Area file
 
 `site/src/data/areas/<area>/area.yaml`:
@@ -126,7 +130,9 @@ when
 - an area directory is in no group;
 - an area file is missing, or its `id` isn't the directory name, or its
   `group` isn't the group that lists it;
-- `<area>/index.mdx` sets `title` or `description` in its frontmatter.
+- `<area>/index.mdx` sets `title` or `description` in its frontmatter;
+- a lesson page in the `foundations` group shows a surface that S03
+  "Foundations audience" bans, and no exemption line names it.
 
 The rest of the check, per topic, competency, course and lesson, is in
 S10 and S11.

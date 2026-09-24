@@ -24,7 +24,14 @@
  *   frontmatter field the lesson file owns, cites a source (`(@key)`, the
  *   remark citation plugin's form) that its lesson file's `sources` list
  *   lacks, or its lesson file has no `description` or an `assumes` entry
- *   without `lesson` and `section`; a course page (`<area>/index.mdx`) carries `title` or `description`.
+ *   without `lesson` and `section`; a course page (`<area>/index.mdx`) carries `title` or `description`;
+ * - a lesson page in the `foundations` group shows a surface that needs a
+ *   programmer (spec S03 "Foundations audience"): a `<Predict run=...>`, a
+ *   fenced block tagged `sh`, `bash`, `shell`, `python` or `json`, or the
+ *   words `terminal`, `python3` or `git clone` outside a code span or
+ *   fence, unless `FOUNDATIONS_EXEMPT` lists it with the issue that fixes
+ *   it; a listed lesson that shows no such surface is a stale entry and
+ *   fails too.
  *
  * It reports a warning, which doesn't fail, when a concept of one of the
  * area's topics is introduced by no lesson: a gap in the plan, which is a
@@ -36,6 +43,7 @@ import { join } from 'node:path';
 import { parse } from 'yaml';
 import { citationKeys } from '../../plugins/citation-syntax.mjs';
 import { allTopics, courseLessonIds, readAreaTree } from './area-tree.mjs';
+import { findPredictTags } from './examples.mjs';
 
 /** Every file under `dir`, recursively. */
 export function* walk(dir) {
@@ -88,11 +96,115 @@ export const LESSON_OWNED_FIELDS = [
 	'lastUpdated',
 ];
 
+/** The group whose lessons follow spec S03 "Foundations audience". */
+export const FOUNDATIONS_GROUP = 'foundations';
+
+/**
+ * Foundations lessons that still show a surface the rule bans, each with the
+ * issue that rewrites it. Remove a line when its issue lands: a listed lesson
+ * that shows no banned surface fails the check. No wildcards.
+ */
+export const FOUNDATIONS_EXEMPT = new Map([
+	['concepts/structured-output', 237], // #237: browser format-checker widget replaces the terminal
+	['concepts/context-window', 238], // #238: widget or graded checkpoint replaces each Predict
+	['concepts/same-prompt-twice', 238], // #238
+	['safety/redact-before-you-paste', 238], // #238
+	['safety/spotting-hallucination', 238], // #238
+	['safety/bias-in-patterns', 284], // #284: went live after #238 was written
+	['safety/saying-ai-helped', 284], // #284
+]);
+
+/** Fence languages a foundations page may not show. */
+const BANNED_FENCES = new Set(['sh', 'bash', 'shell', 'python', 'json']);
+/** Words a foundations page may not use outside a code span or a fence. */
+const BANNED_WORDS = /\b(terminal|python3|git clone)\b/i;
+
+/**
+ * Every surface in an MDX lesson body that needs a programmer, as
+ * `{ line, surface }` (1-based line): a `<Predict run=...>` tag, a fenced
+ * block tagged with one of `BANNED_FENCES`, or one of `BANNED_WORDS` in prose.
+ * Text inside a fence of any language and inside an inline code span is
+ * skipped, so a page may quote a command in a code span or a `text` fence
+ * without tripping the check.
+ */
+export function foundationsSurfaces(src) {
+	const out = [];
+	for (const { props, index } of findPredictTags(src)) {
+		if (props.has('run')) out.push({ line: lineOf(src, index), surface: `<Predict run="${props.get('run')}">` });
+	}
+	let fence = null; // the fence marker (``` or ~~~) while inside a fenced block
+	src.split('\n').forEach((text, i) => {
+		const open = /^\s*(`{3,}|~{3,})\s*([\w-]*)/.exec(text);
+		if (fence) {
+			if (open && open[1][0] === fence[0] && open[1].length >= fence.length && !open[2]) fence = null;
+			return;
+		}
+		if (open) {
+			fence = open[1];
+			const lang = open[2].toLowerCase();
+			if (BANNED_FENCES.has(lang)) out.push({ line: i + 1, surface: `\`\`\`${lang} fence` });
+			return;
+		}
+		const m = BANNED_WORDS.exec(text.replace(/`[^`]*`/g, ''));
+		if (m) out.push({ line: i + 1, surface: `the word "${m[1]}"` });
+	});
+	return out.sort((a, b) => a.line - b.line);
+}
+
+function lineOf(src, index) {
+	let n = 1;
+	for (let i = 0; i < index; i++) if (src[i] === '\n') n++;
+	return n;
+}
+
+/**
+ * The foundations audience rule (spec S03): every lesson page whose area is
+ * in `FOUNDATIONS_GROUP` shows none of `foundationsSurfaces`, unless `exempt`
+ * lists it, and every exempt lesson still shows at least one (or the entry
+ * is stale). `pageIds` are the lesson page ids under `contentDir`. Returns
+ * error strings in the format `checkData` uses.
+ */
+export function checkFoundationsAudience(tree, contentDir, pageIds, exempt = FOUNDATIONS_EXEMPT) {
+	const errors = [];
+	const group = tree.groups.find((g) => g?.id === FOUNDATIONS_GROUP);
+	const areas = new Set(group?.areas ?? []);
+	const seen = new Set();
+	for (const id of [...pageIds].sort()) {
+		if (!areas.has(id.split('/')[0])) continue;
+		const where = `src/content/docs/${id}.mdx`;
+		const found = foundationsSurfaces(readFileSync(join(contentDir, `${id}.mdx`), 'utf8'));
+		if (exempt.has(id)) {
+			seen.add(id);
+			if (found.length === 0) {
+				errors.push(
+					`${where}: is exempt from the foundations audience rule for #${exempt.get(id)} but shows no banned surface, so remove its FOUNDATIONS_EXEMPT line in scripts/lib/data.mjs`,
+				);
+			}
+			continue;
+		}
+		for (const { line, surface } of found) {
+			errors.push(
+				`${where}:${line}: ${surface}, which a foundations lesson may not show (spec S03 "Foundations audience")`,
+			);
+		}
+	}
+	for (const [id, issue] of exempt) {
+		if (!seen.has(id)) {
+			errors.push(
+				`scripts/lib/data.mjs: FOUNDATIONS_EXEMPT lists ${id} (#${issue}), which is not a foundations lesson page, so remove the line`,
+			);
+		}
+	}
+	return errors;
+}
+
 /**
  * Check the tree under `dataDir` against the pages under `contentDir`.
+ * `foundationsExempt` is the exemption list for `checkFoundationsAudience`
+ * and defaults to `FOUNDATIONS_EXEMPT`; tests pass their own.
  * Returns `{ errors: string[], warnings: string[], lessons: number, pages: number }`.
  */
-export function checkData(dataDir, contentDir) {
+export function checkData(dataDir, contentDir, { foundationsExempt = FOUNDATIONS_EXEMPT } = {}) {
 	const errors = [];
 	const warnings = [];
 	const fail = (msg) => errors.push(msg);
@@ -257,6 +369,7 @@ export function checkData(dataDir, contentDir) {
 			if (!sourcesOf.get(id).has(key)) fail(`${where}: cites "${key}", which its plan file's sources list lacks`);
 		}
 	}
+	for (const e of checkFoundationsAudience(tree, contentDir, pages.keys(), foundationsExempt)) fail(e);
 	for (const a of tree.areas) {
 		const index = join(contentDir, a.dir, 'index.mdx');
 		if (!existsSync(index)) continue;
