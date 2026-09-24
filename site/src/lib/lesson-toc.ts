@@ -3,9 +3,9 @@
  * group for the checkpoints and one for the ungraded examples, each entry
  * linking to the item's section id. The checkpoints come from the reader
  * `mise run checkpoints` and the export use (`checkpointTagsIn` and
- * `checkpointOf`), so the menu and the export cannot disagree. The examples are the `<Predict>` tags without an
- * `objective` (spec S03 "Examples"), which that reader skips on purpose, read
- * here from the same MDX tree.
+ * `checkpointOf`), so the menu and the export cannot disagree. The examples
+ * are the `<Predict>` tags without an `objective` (spec S03 "Examples"),
+ * which that reader skips on purpose, read here from the same MDX tree.
  */
 import type { CollectionEntry } from 'astro:content';
 import { attrsOf, checkpointTagsIn, jsxElements, type MdxNode, parseMdx, stringProp } from './checkpoint-tags';

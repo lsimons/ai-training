@@ -174,11 +174,11 @@ page, and doesn't state the output.
 ### Reverse tutoring with `critique this`
 
 Lesson *Why agent safety is different*, served objective
-`safety/judges-agent-risk/names-blast-radius`. Its behaviors: list everything the agent's tools and credentials
-can reach beyond the task, separate what can be undone from what can't,
-and name who else is affected when it goes wrong. The learner asks for
-`critique this`. The tutor picks a setup from the lesson's `prose` that no
-checkpoint grades.
+`safety/judges-agent-risk/names-blast-radius`. Its behaviors: list
+everything the agent's tools and credentials can reach beyond the task,
+separate what can be undone from what can't, and name who else is affected
+when it goes wrong. The learner asks for `critique this`. The tutor picks a
+setup from the lesson's `prose` that no checkpoint grades.
 
 > **L:** critique this
 >
