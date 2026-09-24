@@ -88,15 +88,16 @@ Every round of this log ends with the agent asking you for a fact and you
 typing it. The agent adds nothing to the fact. The only place the answer
 exists is your head, so the step is yours whether you delegate it or not.
 
-The third log is the thermocouple batch. The lab sent back a sheet with 40
-serial numbers and a pass or fail for each, and the piece is a two-line
-count for the update: how many passed, how many failed.
+The third log is the pressure gauge batch the team calibrated last month.
+The team's own calibration sheet lists 40 serial numbers with a pass or
+fail for each, and the piece is a two-line count for the update: how many
+passed, how many failed.
 
 ```text
 Log C: the pass and fail count
 
 Round 1
-  Handed over: the brief and the lab sheet, pasted in.
+  Handed over: the brief and the calibration sheet, pasted in.
   Came back: "37 passed, 3 failed."
   Check: the sheet has 40 rows. Counting the fails by hand gives 4,
     and one of the rows says "fail (recheck)" in a different column.
@@ -118,8 +119,8 @@ doubles it.
 Each log ends in a different round, and each shows one sign that it was
 time to take the piece back.
 
-**A third round on one piece.** The first result nearly always shows a
-gap in the brief, and filling the gap for a second round is the normal
+**A third round on one piece.** The first result often shows a gap in
+the brief, and filling the gap for a second round is the normal
 course of working in rounds. By the third round the second fix hasn't held
 either, and the piece has become a series of small corrections on
 something you could see the answer to from round one. In Log A that's the
@@ -159,7 +160,7 @@ Match each log to the sign it shows.
 
 <Choice id="read-the-sign" phase="review" objective="using-agents/delegates-and-checks/adjusts-mid-task"
   concepts={['when-to-stop-and-do-it-yourself']}
-  context="A learner delegates a two-line summary of a colleague's feedback that was given in a hallway conversation nobody wrote down. The agent returns a summary each round and asks in each round what the colleague said."
+  context="A learner delegates a two-line summary of a colleague's feedback that was given in a hallway conversation nobody wrote down. The agent returns a summary and asks what the colleague said."
   title="Which sign is this?" hint="What does every round of this log have in common, and where does the fact the agent needs exist?"
   options={[
     { text: 'A check that takes longer than the work, because the learner reads the summary each round.', why: 'The summary is two lines and reading it is quick. Look at what the agent asks for each time instead.' },
@@ -175,7 +176,7 @@ and it asks you what the colleague said. Which sign is this?
 
 When a sign shows, take the piece back and do the step. The reason is
 cost. A round has a price: writing the brief change, waiting for the
-result, and reading it against the done-criteria (@DLAI-11). A step done by
+result, and reading it against the done-criteria. A step done by
 hand has a price too. When the next round costs more than the step, the
 step is cheaper by hand, and that is the whole argument. Which tool you
 used, and how good it is, doesn't enter into it. Neither does how good you
@@ -199,20 +200,19 @@ about what the situation makes cheap, and the same person delegates one
 piece and takes back the next (@Academy ai-fluency-framework-foundations).
 
 <Pitfall title="Finishing the wrong thing well">
-A learner reaches a third round on a piece and feels that stopping now
-would mean the earlier rounds were wasted, so they write one more brief
-change and run it again. The fourth result is clean. The section is one
-bullet, and four results and three brief changes went into it. The earlier
-rounds cost what they cost, and a fourth round adds to that cost without
-taking any of it back. The feeling that stopping is giving up is about you,
-and the log is about the piece. Read the log. When it shows a sign, the
-cheapest next step is the one you take yourself, and the rounds already
-spent don't change that.
+A learner reaches a third round on a one-bullet section and feels that
+stopping now would waste the earlier rounds, so they change the brief once
+more and run a fourth. The fourth result is clean, and four results and
+three brief changes went into one bullet. The earlier rounds cost what they
+cost, and a fourth round adds to that cost without taking any of it back.
+The feeling that stopping is giving up is about you, and the log is about
+the piece, so read the log and take the step yourself when it shows a
+sign.
 </Pitfall>
 
 <Scenario id="the-third-round" objective="using-agents/delegates-and-checks/adjusts-mid-task"
   concepts={['when-to-stop-and-do-it-yourself', 'checking-results']}
-  context="A learner is delegating a short list for a weekly update in rounds, with a written brief and done-criteria. Round three has just returned, and like the two before it, the list has one right line and one wrong extra line."
+  context="A learner is delegating a short list for a weekly update in rounds, with a written brief whose done-criteria say every line must come from the notes. Round three has just returned, and like the two before it, the list has one right line and one wrong extra line."
   title="The third result is back" hint="Compare the cost of a fourth round with the cost of writing the list, and think about what the earlier rounds cost regardless of what you do now."
   options={[
     { text: 'Write the list yourself, check it against the done-criteria in the brief, and move on to the next piece.', correct: true, consequence: 'The list is done in the time it took to read one result. The done-criteria still applied, and the next piece goes to the agent as planned.' },
@@ -258,6 +258,7 @@ Round 1
   Brief change: added "the meeting is at 14:00".
 
 Round 2
+  Handed over: the changed brief and calendar.md.
   Came back: "Next review: Thursday 2 Oct, 14:00."
   Check: correct. A question: "Should I also note that the room
     changed? calendar.md lists room 3 and the message you mention
@@ -277,12 +278,14 @@ Round 1
     supplier".
 
 Round 2
+  Handed over: the changed brief and the six emails.
   Came back: five suppliers, six items.
   Check: correct. A seventh line lists an item with "supplier not
     named". The email for it names the supplier in the signature.
   Brief change: added "the supplier may be named in the signature".
 
 Round 3
+  Handed over: the changed brief and the six emails.
   Came back: five suppliers, six items, and a note that one email may
     be a duplicate of another.
   Check: the emails are not duplicates. The list is right apart from
@@ -293,22 +296,24 @@ Round 3
 Log 3: the serial number check
 
 Round 1
-  Handed over: the sheet of 40 serial numbers from the lab and the
-    sheet of 40 from the storeroom. Report any number on one sheet and
-    not the other.
+  Handed over: the sheet of 40 serial numbers from the calibration
+    bench and the sheet of 40 from the storeroom. Report any number on
+    one sheet and not the other.
   Came back: "All 40 numbers appear on both sheets."
   Check: read both sheets side by side, 40 rows each, and found one
-    number on the lab sheet with two digits swapped.
+    number on the bench sheet with two digits swapped.
   Brief change: added "compare digit by digit".
 
 Round 2
+  Handed over: the changed brief and both sheets.
   Came back: "One mismatch: row 23, digits 5 and 6 swapped."
   Check: read both sheets side by side again to confirm there is no
     second one.
 ```
 
-A good answer names Log 1 round 2, because the facts the piece needs
-arrive in messages to you and the agent can only ask for them. It names
+A good answer names Log 1 round 1, because the check shows that the fact
+the piece needs arrived in a message to you and is in no file the agent
+can read, and the question in round 2 shows the same thing again. It names
 Log 2 round 3, because the piece is a five-line list and the third
 result again holds one thing the brief never asked for. It names Log 3
 round 1, because trusting either result means reading both sheets side
@@ -320,7 +325,7 @@ this week reached one of these three points?
 <Recap>
 1. A round is a brief handed over, a result checked against the done-criteria, and a brief changed with what the check showed. Most pieces take one or two, and a first result with a gap is the normal shape of a round.
 2. A third round on one piece, a step that depends on knowledge only you hold, and a check that takes longer than the work are the signs that the next round costs more than the step done by hand.
-3. Taking the piece back is a judgment about cost (@DLAI-11). It says nothing about the tool, its quality, or your briefing, because none of those move where a fact is or how long a check takes.
+3. Taking the piece back is a judgment about cost. It says nothing about the tool, its quality, or your briefing, because none of those move where a fact is or how long a check takes.
 4. The piece you take back keeps the input, output and check the split gave it, and the other pieces stay delegated, so the split loses nothing.
 5. Stopping after spent rounds can feel like giving up. The spent rounds cost the same either way, and the log says whether the next step is yours, however stopping feels (@Academy ai-fluency-framework-foundations).
 </Recap>

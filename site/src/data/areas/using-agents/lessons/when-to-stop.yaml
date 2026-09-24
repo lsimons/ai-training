@@ -18,7 +18,7 @@ exercise:
   brief: >-
     Read three supplied round logs and mark, for each, the round where taking the step back would
     have been cheaper, with the sign that shows it.
-sources: [DLAI-11, Academy ai-fluency-framework-foundations]
+sources: [Academy ai-fluency-framework-foundations]
 minutes: 10
 notes: >-
   The lesson that teaches working in rounds (delegating-in-rounds) is still planned, so the page
@@ -26,5 +26,6 @@ notes: >-
   reviews-against-brief from the live delegating lesson because every log reads a result against
   its done-criteria. The logs use Brindlewick Instruments, the fictional company from the earlier
   lessons, and the people in them have no names, so no invented name can collide with a real one.
-  DLAI-11 is cited for the cost view of a round and Academy ai-fluency-framework-foundations for
-  the judgment of when to delegate, both as inspiration in our own words.
+  Academy ai-fluency-framework-foundations is cited for the judgment of when to delegate, as
+  inspiration in our own words. DLAI-11 from the plan is not cited, because its public outline has
+  nothing on rounds or stopping, so it is not in sources.
