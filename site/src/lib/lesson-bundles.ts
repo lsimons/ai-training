@@ -94,6 +94,8 @@ const CHECKPOINT_TAGS = new Set(Object.keys(KIND_OF_TAG));
  */
 interface CodeAside {
 	text: string;
+	/** Sets more text aside, so it is copied unchanged through the passes that follow. */
+	keep: (code: string) => string;
 	restore: (s: string) => string;
 }
 
@@ -113,7 +115,7 @@ export function setAsideCode(src: string): CodeAside {
 		const line = lines[i] as string;
 		const open = /^(\s*)(`{3,}|~{3,})/.exec(line);
 		if (!open) {
-			out.push(line.replace(/(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/g, (m) => keep(m)));
+			out.push(line);
 			continue;
 		}
 		const fence = open[2] as string;
@@ -125,19 +127,28 @@ export function setAsideCode(src: string): CodeAside {
 		}
 		out.push(keep(block.join('\n')));
 	}
+	// Inline spans are matched over the whole text, since a span may wrap across a line break. A blank line
+	// ends a paragraph and so a span, and the fenced blocks are placeholders by now, so no backtick is theirs.
+	// A backtick next to a brace (`={\`` and `\`}`) delimits a template literal in a component attribute, and
+	// is never a span's edge, so two such attributes on adjacent lines don't pair up as one span.
+	const text = out
+		.join('\n')
+		.replace(/(?<!\{)(`+)(?!\})([^`]|[^`][\s\S]*?[^`])(?<!\{)\1(?!`)(?!\})/g, (m) =>
+			/\n[ \t]*\n/.test(m) ? m : keep(m),
+		);
 	return {
-		text: out.join('\n'),
+		text,
+		keep,
 		restore: (s) => s.replace(PLACEHOLDER, (_, n: string) => kept[Number(n)] ?? ''),
 	};
 }
 
-/** One component, as plain Markdown. `children` is already rendered, with code set aside; `restore` puts it back where the text is fenced. */
-function renderTag(
-	name: string,
-	attrs: Map<string, { value: string }>,
-	children: string,
-	restore: CodeAside['restore'],
-): string {
+/**
+ * One component, as plain Markdown. `children` is already rendered, with code set aside. A `Prompt` or
+ * `Response` body is restored and fenced here, and the fenced block is set aside again, so the link pass
+ * that follows leaves a code span inside it alone.
+ */
+function renderTag(name: string, attrs: Map<string, { value: string }>, children: string, aside: CodeAside): string {
 	const str = (n: string) => attrs.get(n)?.value;
 	const body = children.trim();
 	const withHeading = (heading: string) => (body ? `${heading}\n\n${body}` : heading);
@@ -158,10 +169,10 @@ function renderTag(
 			const heading = illustrative
 				? 'Prompt (illustrative, not a recorded transcript)'
 				: `Prompt · ${model}, recorded ${recorded}`;
-			return `#### ${heading}\n\n${fenced(restore(body))}`;
+			return `#### ${heading}\n\n${aside.keep(fenced(aside.restore(body)))}`;
 		}
 		case 'Response':
-			return `#### Response\n\n${fenced(restore(body))}`;
+			return `#### Response\n\n${aside.keep(fenced(aside.restore(body)))}`;
 		case 'Exercise': {
 			const stretch = str('stretch');
 			return withHeading('## Exercise') + (stretch ? `\n\nStretch: ${stretch}` : '');
@@ -180,7 +191,7 @@ function renderTag(
  * closed by the first `</Name>` after it; components of one kind don't nest.
  * `src` has its code set aside, so a tag inside code is not seen.
  */
-function renderComponents(src: string, restore: CodeAside['restore']): string {
+function renderComponents(src: string, aside: CodeAside): string {
 	let out = '';
 	let pos = 0;
 	const tagStart = /<([A-Z][A-Za-z]*)\b/g;
@@ -199,11 +210,11 @@ function renderComponents(src: string, restore: CodeAside['restore']): string {
 			const close = `</${name}>`;
 			const closeAt = src.indexOf(close, openEnd);
 			if (closeAt === -1) throw new Error(`unclosed <${name}> at offset ${start}`);
-			children = renderComponents(src.slice(openEnd, closeAt), restore);
+			children = renderComponents(src.slice(openEnd, closeAt), aside);
 			end = closeAt + close.length;
 		}
 		// A component is a block of its own, so blank lines set it off from its neighbors.
-		const rendered = renderTag(name, attrs, children, restore);
+		const rendered = renderTag(name, attrs, children, aside);
 		out += src.slice(pos, start) + (rendered ? `\n\n${rendered}\n\n` : '');
 		pos = end;
 	}
@@ -232,9 +243,10 @@ function withoutImportBlock(body: string): string {
  * links absolute. Fenced blocks and inline code are copied unchanged.
  */
 export function proseOf(body: string, site: string): string {
-	const { text, restore } = setAsideCode(withoutImportBlock(body));
-	const rendered = absolutizeLinks(renderComponents(text, restore), site);
-	return `${restore(rendered)
+	const aside = setAsideCode(withoutImportBlock(body));
+	const rendered = absolutizeLinks(renderComponents(aside.text, aside), site);
+	return `${aside
+		.restore(rendered)
 		.replace(/\n{3,}/g, '\n\n')
 		.trim()}\n`;
 }

@@ -198,6 +198,17 @@ const { sublist, nested, plainLabels } = Astro.props;
 		summary.caret-only {
 			border-radius: 0.25rem;
 		}
+		/* The current-page accent paints the whole heading row: the link cell and the caret cell. */
+		li.linked > a[aria-current='page'] {
+			border-start-end-radius: 0;
+			border-end-end-radius: 0;
+		}
+		li.linked > a[aria-current='page'] + details > summary.caret-only {
+			border-start-start-radius: 0;
+			border-end-start-radius: 0;
+			color: var(--sl-color-text-invert);
+			background-color: var(--sl-color-text-accent);
+		}
 
 		/* A group label under a linked heading (a part, or a topic-map area)
 		   reads as a child: same size and color as a lesson link. */

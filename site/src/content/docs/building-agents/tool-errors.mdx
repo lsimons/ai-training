@@ -15,6 +15,8 @@ The tool table is a parameter, and the return value is a dict with the
 stop reason, the answer and the message list instead of a bare string.
 The assistant message stores the model's request as the dict itself
 rather than as text, because the fake model reads it back when it retries.
+The loop reads `reply["args"]` directly and stores the tool result as it
+is, where the first lesson used `reply.get("args", {})` and `str(result)`.
 The `TOOLS.get` and the `try` around the tool call from the last lesson
 are gone on purpose. You need to see the raw failure first.
 The error flag on tool messages and the `max_errors` policy are the two
