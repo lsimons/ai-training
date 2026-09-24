@@ -281,3 +281,9 @@
 .lesson-toc { margin-top: 1rem; }
 .lesson-toc ul { list-style: none; padding: 0; margin: 0; }
 .lesson-toc a { display: block; padding: 0.25rem 0.5rem; border-radius: 0.25rem; line-height: 1.25; }
+
+/* The same groups in the mobile dropdown (overrides/MobileTableOfContents.astro), styled like Starlight's mobile headings list, which sits above them in the same panel. */
+.lesson-toc-mobile h2 { margin: 0; padding: 0.5rem 1rem 0.25rem; border-top: 1px solid var(--sl-color-gray-6); color: var(--sl-color-white); font-size: var(--sl-text-xs); font-weight: 600; line-height: var(--sl-line-height-headings); }
+.lesson-toc-mobile ul { list-style: none; padding: 0; margin: 0; }
+.lesson-toc-mobile a { display: block; padding: 0.5rem 1rem; border-top: 1px solid var(--sl-color-gray-6); color: var(--sl-color-text); font-size: var(--sl-text-sm); line-height: 1.25; text-decoration: none; outline-offset: var(--sl-outline-offset-inside); }
+.lesson-toc-mobile a:hover { color: var(--sl-color-white); }
