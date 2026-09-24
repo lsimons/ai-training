@@ -314,9 +314,14 @@ fails a foundations lesson page that contains any of these, and reports
 the file, the line and what it matched:
 
 - a `<Predict run=...>` tag;
-- a fenced block tagged `sh`, `bash`, `shell`, `python` or `json`;
+- a fenced block tagged `sh`, `bash`, `shell`, `python` or `json`, or an
+  alias a highlighter accepts for the same language (`zsh`, `console`,
+  `py`);
 - the words `terminal`, `python3` or `git clone`, in any casing, outside
   an inline code span or a fence.
+
+A `<Predict run=...>` inside a `text` fence or an MDX comment is quoted,
+not run, and passes.
 
 `FOUNDATIONS_EXEMPT` in `data.mjs` lists the lessons written before the
 rule, one line each with the issue that rewrites it (#237, #238 and #284
