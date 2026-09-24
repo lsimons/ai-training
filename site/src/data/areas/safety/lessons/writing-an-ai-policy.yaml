@@ -1,10 +1,19 @@
 id: safety/writing-an-ai-policy
 title: Writing an AI policy a team can apply
+description: >-
+  Turn "use AI responsibly" into a one-page policy with allowed tasks, data, approvals, logging and an
+  escalation route with names, using read and write access as two levels of sign-off.
 mode: tutorial
 covers: safety/governance
 serves: [safety/judges-agent-risk/sets-oversight]
 introduces: [policy, escalation]
-assumes: []
+assumes:
+  - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: permissions-and-least-privilege
+  - objective: safety/judges-agent-risk/chooses-human-in-loop
+    lesson: safety/agent-risk
+    section: human-in-the-loop
 after: [safety/agent-risk]
 shorts: [Enterprise tiers sell governance, The eight questions for a vendor]
 exercise:
@@ -12,11 +21,18 @@ exercise:
   brief: >-
     Fill in the one-page policy template for your own team: allowed tasks, data, approvals, and the
     escalation route with names.
-sources: [Academy deploying-claude-enterprise-with-confidence]
+sources: [Academy deploying-claude-enterprise-with-confidence, AEC-11]
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 issue: 135
 minutes: 15
 notes: >-
-  Paraphrase, in our own words, the framing from Academy deploying-claude-enterprise-with-confidence
+  Paraphrases, in our own words, the framing from Academy deploying-claude-enterprise-with-confidence
   noted on issue #31: read access and write access as two levels of sign-off (start read-only, grant
-  write per workflow with the risk owner's approval), and an agent inheriting the user's own
-  permissions through a connector.
+  write per workflow with the risk owner's approval), an agent inheriting the user's own permissions
+  through a connector, and an agent without an audit trail being the wrong tool for a regulated
+  workflow. The "Enterprise tiers sell governance" short is a section of the page and quotes no plan
+  feature, limit or price. The "eight questions for a vendor" short is a link to the section of
+  responsible-use that already lists them. The claims team is invented and the page holds no person
+  names. Both assumes entries point at agent-risk, whose sections the page calls "the previous
+  lesson" material.
