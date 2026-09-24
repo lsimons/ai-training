@@ -1,0 +1,400 @@
+import { Choice, MultiChoice, Predict, Order, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we add a feature to a small program with a coding agent,
+and the agent works from a written specification instead of from a chat
+message. The spec comes first: one page with the commands, the limits and
+a numbered list of success criteria. Then the agent splits the work into
+increments that each leave the program working. The increment we're
+least sure about goes first, and we land it. While the agent works, the
+spec stays the document it reads and the one we check the result against.
+When code and spec disagree, we decide which one changes.
+
+Where a bug fix has one assertion that says what "fixed" means, a feature
+has decisions in it: a new command, a new field in the data file, a new
+line in the output. The spec holds those decisions in one place, where
+the agent can read them and you can check against them, and the
+playbook Anthropic publishes for engineering teams describes the same
+practice, the spec as the source of truth the agent iterates against
+(@Academy ai-native-sdlc-playbook).
+
+## The fixture
+
+The fixture is the to-do program from the previous lessons, after its
+`clear` bug was fixed. It has three modules, `todo.py` with the commands,
+`store.py` for the JSON file, and `render.py` for the output, and its
+tests pass. It is in the course repository under
+`site/examples/coding-with-agents/spec-driven-increments/fixture-repo/`.
+Copy that directory to a place of its own and change into it. A copy has
+no git history, so the reset is to delete the copy and copy again.
+
+Run the program once before you change anything, so you know what the
+output looks like today.
+
+<Predict id="run-list" title="Show the list"
+  answer={`1. [ ] Buy milk
+2. [x] Call the plumber
+3. [x] Renew the passport
+4. [ ] Water the plants
+2 open, 2 done`} run="coding-with-agents/spec-driven-increments/list.py">
+Run this, and compare what you see with the output below.
+
+```sh
+python3 todo.py list
+```
+</Predict>
+
+<Predict id="run-tests" title="Run the tests"
+  answer="OK" run="coding-with-agents/spec-driven-increments/tests.py">
+Run the tests and keep only the last line of the output.
+
+```sh
+python3 -m unittest -q 2>&1 | tail -1
+```
+</Predict>
+
+The examples in this lesson aren't graded. Each one is a command you run
+in the fixture, with the output the course itself checks on every build.
+The checkpoints ask about the spec and the increments, because writing
+those is what this lesson teaches.
+
+## Write the spec
+
+The feature is due dates. An item gets an optional date, `list` shows it,
+and a new `overdue` command lists the items whose date has passed. Before the
+agent sees any of that, write it down. A spec for a change this size fits
+on one page: a goal in one or two sentences, the commands with what each
+one prints, the limits, and success criteria you can check one by one.
+The limits say what must keep working and what the change may not do. Save it as
+`SPEC.md` in the fixture. The course keeps its copy next to the fixture
+scripts as `SPEC.md`, and this is the whole of it.
+
+```md
+# Due dates
+
+## Goal
+
+An item can carry a due date, and a new command lists the items whose
+date has passed.
+
+## Commands
+
+- `due N YYYY-MM-DD` sets the date on item N and prints
+  `due #N: <text> by YYYY-MM-DD`.
+- `list` shows the date after the text: `1. [ ] Buy milk (due 2026-10-01)`.
+  An item without a date is shown as it is today.
+- `overdue` prints the open items whose date is before today, numbered as
+  in `list`, or `nothing overdue`. `TODO_TODAY=YYYY-MM-DD` overrides today,
+  so a test can pick the day.
+
+## Limits
+
+- `add`, `list`, `done` and `clear` keep working as they do.
+- An item in `todos.json` without a `due` field stays valid. No migration.
+- A malformed date is refused with `bad date: <input>` and changes nothing.
+- Standard library only.
+
+## Success criteria
+
+1. `due 1 2026-10-01` then `list` shows `1. [ ] Buy milk (due 2026-10-01)`,
+   and the other lines are unchanged.
+2. The committed `todos.json` lists as before, with no date shown.
+3. With `TODO_TODAY=2026-10-02`, `overdue` prints item 1 and nothing else.
+   With `TODO_TODAY=2026-09-30` it prints `nothing overdue`.
+4. `due 1 tomorrow` prints `bad date: tomorrow`, exits with status 2, and
+   the file is unchanged.
+5. `python3 -m unittest -q` passes after every increment.
+```
+
+Every line under success criteria is something you can run and tick. The
+line about `TODO_TODAY` is there because "before today" depends on the
+day you run it, and a criterion you can only check on one date isn't a
+criterion. Writing the spec made that decision visible before any code
+existed.
+
+The spec is the source of truth for the change while the agent works. The
+agent reads it and you review against it, and the agent's opinion of what
+the feature should do doesn't change it by itself. Code and
+spec disagree at some point, because the agent has a good idea, or
+because the spec turns out to be wrong. When that happens, one of the two
+is updated on purpose. Either you change the spec first and then the code
+follows, or the code is brought back to the spec. What never happens is
+that the code drifts and the spec stays as a record of what you once
+meant.
+
+<Choice id="code-and-spec-disagree" objective="coding-with-agents/ships-with-agent/works-in-increments"
+  concepts={['spec-driven-change']}
+  context="A learner has written a one-page spec with success criteria for a feature, and a coding agent is implementing it. The spec is meant to stay the document the agent works from and the reviewer checks against."
+  title="The diff and the spec disagree" hint="Which document does the reviewer check the next increment against, and does it still say what you want?"
+  options={[
+    { text: 'Accept the diff. The agent read the code more closely than you did when you wrote the spec.', why: 'The spec now says one thing and the program does another, and the next increment is checked against a document that is already wrong.' },
+    { text: 'Decide which one is right. Then either change the spec first, or have the agent bring the code back to it.', correct: true },
+    { text: 'Accept the diff and add a comment in the code that explains the difference.', why: 'A comment in the code is where nobody checking the criteria will look. The spec is the document you review against.' },
+    { text: 'Reject the diff without comment, because the spec is fixed once the work starts.', why: 'A spec that can never change turns every good idea into a workaround. It changes on purpose, and it can change.' },
+  ]}>
+The agent's diff prints the date before the text, and the spec says
+after. Both would work. What do you do?
+</Choice>
+
+## Ask for increments in the brief
+
+An agent given the whole spec at once builds the whole spec at once, and
+hands you one diff with two new commands, a changed output line, input
+validation and their tests. Reviewing that diff means holding
+four changes in your head while you read. So
+the brief asks for increments, and it says what an increment is: a step
+that leaves the program working and its tests passing, and that adds one
+thing you can show. Asking for increments is part of the brief, because
+the agent's default is the big diff (@Brilliant INC).
+
+Start your coding agent from inside the fixture copy and brief it. The
+brief points at the spec instead of repeating it.
+
+<Prompt model="illustrative" recorded="illustrative">
+Read `SPEC.md`, `AGENTS.md` and the three modules. I want to land the
+due-dates feature in increments. Each increment must leave every existing
+command working and the tests passing, and add one thing I can run and
+see. Propose the increments and say which success criteria each one
+ticks. Don't change anything yet.
+</Prompt>
+<Response>
+I read the spec and the code. The spec already lists three increments,
+and I would keep them, with one note on each.
+
+```text
+1. `due` sets the field and `list` shows it. Touches todo.py and render.py,
+   adds test_due.py. Ticks criteria 1, 2 and 5. store.py needs no change,
+   because json.dump writes whatever keys an item has.
+2. `overdue`, reading today from TODO_TODAY or the clock. Touches todo.py,
+   adds a test with the two dates from criterion 3. Ticks criterion 3.
+3. Refuse a malformed date with the standard library's date parser. Touches the
+   `due` function, adds a test. Ticks criterion 4.
+```
+
+One question before I start. In `list`, would you like items with a date
+sorted to the top? The spec doesn't say.
+</Response>
+
+The transcripts in this lesson are illustrative. They show what a good
+exchange looks like and don't record a specific model's words. Your
+agent's list may put the details differently.
+
+The agent's question is a spec question, and the spec answers it: the
+`list` line says "numbered as in `list`" for `overdue` and says nothing
+about sorting, and the limits say `list` keeps working as it does. The
+answer is no, and if you did want sorting, you would add it to the spec
+before anyone wrote it.
+
+<Pitfall title="The review that never finished">
+An engineer briefs the agent with the whole spec and no word about
+increments. Forty minutes later the agent reports done: two new commands,
+a changed output format, date validation, four new tests, and every
+criterion ticked. The diff is long, and the review starts on a Friday
+afternoon. On Monday it is still open. Nobody wanted to approve a change they
+hadn't read to the end, and the two people who started reading each got
+halfway. When a bug turns up in `overdue` the following week,
+the only way back is to revert the whole feature. Ask for the work in
+steps that each leave the program working, and review each one while it
+is small.
+</Pitfall>
+
+<MultiChoice id="what-is-an-increment" objective="coding-with-agents/ships-with-agent/works-in-increments"
+  concepts={['working-increments']}
+  context="A learner is asking a coding agent to land a feature as increments, where each increment leaves the program working and tested and adds one thing that can be shown."
+  title="Which of these are working increments?" hint="After each step, can you run the program and the tests, and see one new thing?"
+  options={[
+    { text: 'The `due` command stores the date, and `list` shows it. Tests pass.', correct: true },
+    { text: 'A `due` function with no command wired to it, so nothing new can be run yet. Tests pass.', why: 'Nothing can be shown after this step. The tests pass, and you have to take the agent\'s word that the function is right.' },
+    { text: 'The `overdue` command works, but `list` is broken until the next step fixes the output.', why: 'A step that leaves a command broken isn\'t a working state. The next step has to fix it before anything can be reviewed.' },
+    { text: 'The `overdue` command reads today from `TODO_TODAY` and the clock, with a test for each date in the spec. Tests pass.', correct: true },
+  ]}>
+Which of these steps are increments in the sense the brief asked for?
+</MultiChoice>
+
+## The increment you are least sure of goes first
+
+The spec lists three increments, and the order matters. Put first the one
+whose assumption you are least sure of, so that if it is wrong you find
+out while the change is small. Here the uncertain part is the data: every
+module today assumes an item has exactly a text and a done flag, and the
+first increment adds a field that some items have and some don't, and
+carries it through all three modules and the existing tests. If that
+assumption fails, the data format and every module change, and you would
+rather know before `overdue` is written on top of it. The `overdue`
+command is arithmetic on a format that already works by then, and date
+validation is polish.
+
+That first increment is also the thin end-to-end path: one command in and
+one line out, through every module the feature touches and nothing more. It proves that the modules pass the new field to each other before any
+detail is built on them. Early feedback turns a possible rewrite into a
+small correction (@Brilliant INC).
+
+<Order id="order-the-increments" objective="coding-with-agents/ships-with-agent/works-in-increments"
+  concepts={['sequencing-for-early-feedback']}
+  context="A team is adding a feature to a program with a coding agent, in increments. The ordering rule is that the increment whose assumption is least certain comes first, and the thin end-to-end path comes before the details."
+  title="Order the increments" hint="Which step would force a rewrite of the others if its assumption turned out wrong? Which one can only be polish?"
+  steps={[
+    'Store the new field and show it in the output, through every module',
+    'Add the command that computes something from the new field',
+    'Refuse malformed input to the new command',
+    'Tidy the wording of the messages the new commands print',
+  ]} />
+
+<Scenario id="riskiest-first" objective="coding-with-agents/ships-with-agent/works-in-increments"
+  concepts={['sequencing-for-early-feedback']}
+  context="A learner is ordering the increments of a feature for a coding agent. One increment depends on an outside service whose response format the team has never seen. The others are changes inside the program."
+  title="An increment nobody is sure about" hint="On which day is it cheapest to learn that the outside service doesn't return what you expected?"
+  options={[
+    { text: 'Put the outside-service increment last, so the rest of the feature is done and reviewed before the hard part.', consequence: 'Four increments land on top of a guess about the response format. When the guess is wrong, the field names and the tests of every one of them change.' },
+    { text: 'Put the outside-service increment first, as the thin path from a real response to one line of output.', correct: true, consequence: 'The first increment shows what the service returns. Two field names in the spec were wrong, and the fix is a line in the spec and a line in the code.' },
+    { text: 'Build the outside-service increment in a separate branch alongside the others, and merge it when both are done.', consequence: 'Both branches are done in a week. The merge shows that the other branch assumed a response format the service doesn\'t have, and half of it is rewritten.' },
+    { text: 'Skip the outside service for now and hard-code its response, so the ordering question goes away.', consequence: 'Every increment passes against the hard-coded response. The first real call, after the review, returns something else.' },
+  ]}>
+One of the five increments talks to a service nobody on the team has
+called before. Where does it go in the order?
+</Scenario>
+
+## Land the first increment
+
+Ask the agent for the first increment and nothing else. Its own list said
+which files it touches and which criteria it ticks, so the brief can hold
+it to that.
+
+<Prompt model="illustrative" recorded="illustrative">
+No sorting. `list` keeps its order, as the spec says. Land increment 1
+only: `due` and the date in `list`, with `test_due.py`. Touch `todo.py`,
+`render.py` and the new test file, and stop when criteria 1, 2 and 5 pass.
+Report which criteria you checked.
+</Prompt>
+<Response>
+Done. `todo.py` has a `due` function and a `due` branch in `main`, and
+`render.list_items` appends ` (due DATE)` when an item has the field. I
+ran the suite, then `due 1 2026-10-01` and `list` on a copy of the list,
+and checked criteria 1, 2 and 5. Criteria 3 and 4 wait for increments 2
+and 3. `store.py` and `todos.json` are unchanged.
+</Response>
+
+The report is a claim. Run the suite yourself.
+
+<Predict id="run-tests-after-increment" title="Run the suite after the first increment"
+  answer="OK" run="coding-with-agents/spec-driven-increments/increment_one_tests.py">
+Run the tests and keep the last line. The course applies the same
+increment to its own copy and checks this output against it.
+
+```sh
+python3 -m unittest -q 2>&1 | tail -1
+```
+</Predict>
+
+Then run the one thing this increment lets you show, against a copy of
+the list so the committed file doesn't change.
+
+<Predict id="run-due-then-list" title="Set a date and list"
+  answer={`due #1: Buy milk by 2026-10-01
+1. [ ] Buy milk (due 2026-10-01)
+2. [x] Call the plumber
+3. [x] Renew the passport
+4. [ ] Water the plants
+2 open, 2 done`} run="coding-with-agents/spec-driven-increments/increment_one_due.py">
+Set a date on the first item and show the list.
+
+```sh
+cp todos.json /tmp/todos.json
+TODO_FILE=/tmp/todos.json python3 todo.py due 1 2026-10-01
+TODO_FILE=/tmp/todos.json python3 todo.py list
+```
+</Predict>
+
+The first line is criterion 1 word for word, and the three items without
+a date print as they did before, which is criterion 2. The agent's diff
+is two functions and a test file. The change to `render.py` is one `if`:
+
+```python
+        line = f"{number}. [{mark}] {item['text']}"
+        if item.get("due"):
+            line += f" (due {item['due']})"
+        lines.append(line)
+```
+
+`item.get("due")` is the whole answer to the question the increment was
+placed first to ask. An item without the field prints as before, and no
+migration of `todos.json` is needed. Had the answer been different, you
+would know now, with one increment landed instead of three.
+
+The last check is the spec itself. The course keeps a script that runs
+every success criterion against its copy after the first increment and
+prints one line per criterion.
+
+<Predict id="run-criteria" title="Check the criteria"
+  answer={`criterion 1: pass
+criterion 2: pass
+criterion 3: not yet
+criterion 4: not yet
+criterion 5: pass
+3 of 5 criteria pass`} run="coding-with-agents/spec-driven-increments/criteria.py">
+In a clone of the course repository, from
+`site/examples/coding-with-agents/spec-driven-increments/`, run the
+criteria check. It copies the fixture, lands the first increment and runs
+each criterion of `SPEC.md`.
+
+```sh
+python3 criteria.py
+```
+</Predict>
+
+Three criteria pass and two say not yet, and those two are the ones the
+agent said belong to increments 2 and 3. That line is what an increment
+looks like from the spec's side: the criteria it claimed, and no others.
+Commit the increment now, before the next one starts, so there is a
+point to return to and a diff a reviewer can read in one sitting. Then
+brief the agent for increment 2 the same way, one increment, its files
+and its criterion.
+
+<Sort id="spec-or-code-changes" phase="review" objective="coding-with-agents/ships-with-agent/works-in-increments"
+  concepts={['spec-driven-change']}
+  context="A learner works with a coding agent from a one-page spec with success criteria. The spec is the source of truth: when the code and the spec disagree, one of them is updated deliberately, and the code never drifts from the spec without a decision."
+  title="Which document changes?" hint="Is the disagreement a better idea about what the feature should do, or a mistake in doing what it says?"
+  buckets={['Change the spec first, then the code', 'Bring the code back to the spec']}
+  items={[
+    { text: 'The agent prints the date before the text, and the spec says after. Either would do, and the spec was written first.', bucket: 1 },
+    { text: 'While writing the overdue test you find the spec never says what happens to a done item with a past date, and you want it left out.', bucket: 0 },
+    { text: 'The agent adds a sort by date to list, which the spec\'s limits rule out.', bucket: 1 },
+    { text: 'A user of the program asks for the date in a different format, and you agree.', bucket: 0 },
+  ]} />
+
+<Choice id="what-first-increment-proves" phase="review" objective="coding-with-agents/ships-with-agent/works-in-increments"
+  concepts={['sequencing-for-early-feedback', 'working-increments']}
+  context="A team lands a feature with a coding agent in increments. The ordering rule is that the increment with the least certain assumption goes first, as a thin path through every module the feature touches."
+  title="Why this one first?" hint="What would the team have to redo if the first increment's assumption turned out wrong after the others were built?"
+  options={[
+    { text: 'It is the smallest increment, so it gives the fastest sense of progress.', why: 'Size is a side effect. A small increment that tests nothing uncertain teaches you nothing about the rest.' },
+    { text: 'If its assumption is wrong, every later increment changes with it.', correct: true },
+    { text: 'It is the one users will notice first, so it is the most valuable to ship.', why: 'Visible value is a fine second rule. The first rule is the assumption that could force a rewrite.' },
+    { text: 'It touches the fewest files, so its diff is the easiest to review.', why: 'The thin path often touches every module the feature does. It is thin in depth, and it is wide across the seams.' },
+  ]}>
+A team puts the increment that stores a new field and shows it in the
+output first, before the command that computes from the field. Why?
+</Choice>
+
+<Exercise stretch="Now do the same for a feature you choose, for example tags on items with a `tag` command and a `list` filter. Write the spec first, and say in one line which increment is the least certain and why.">
+In a fresh copy of the fixture, land increment 2 from the spec with your
+coding agent: write nothing new in the spec, brief the agent for `overdue`
+only, with its files and criterion 3, and let it write the test with the
+two `TODO_TODAY` dates before the code. Run `python3 -m unittest -q`
+yourself and then the two `overdue` commands from criterion 3 on a copy of
+the list. Plan on ten minutes. This is the loop you use for any change
+whose design has more than one decision in it.
+
+A good result: the suite passes, `TODO_TODAY=2026-10-02` shows item 1 and
+nothing else, `TODO_TODAY=2026-09-30` prints `nothing overdue`, and the
+diff touches `todo.py` and one new test file. Criterion 4 is still not
+yet, and that is right. Finish by deleting your copy and copying the
+fixture again. Then answer one question: did the agent ask a question
+the spec should have answered, and what line would you add to it?
+</Exercise>
+
+<Recap>
+1. A feature starts from a one-page spec with a goal, the commands, the limits and success criteria you can tick one by one. The spec is the source of truth while the agent works (@Academy ai-native-sdlc-playbook). When code and spec disagree, one of them changes on purpose.
+2. Ask for increments in the brief. Each one leaves the program working and tested and adds one thing you can run, and the agent's default without that ask is one large diff (@Brilliant INC).
+3. Order the increments with the least certain assumption first, as the thin end-to-end path through every module before any detail is built on it.
+4. After each increment, run the tests and the criteria yourself, commit, and only then brief the next one.
+</Recap>
