@@ -132,11 +132,10 @@ export function setAsideCode(src: string): CodeAside {
 	// line pairs with nothing. The fenced blocks are placeholders by now, so no backtick is theirs.
 	// A backtick next to a brace (`={\`` and `\`}`) delimits a template literal in a component attribute, and
 	// is never a span's edge, so two such attributes on adjacent lines don't pair up as one span.
-	const notBlank = '(?:[^`\\n]|\\n(?![ \\t]*\\n))';
-	const span = new RegExp(
-		`(?<!\\{)(\`+)(?!\\})(${notBlank}|${notBlank}${notBlank}*?${notBlank})(?<!\\{)\\1(?!\`)(?!\\})`,
-		'g',
-	);
+	// The body's edges are not backticks, and its middle may hold one, so ``a ` b`` is one span.
+	const edge = '(?:[^`\\n]|\\n(?![ \\t]*\\n))';
+	const middle = '(?:[^\\n]|\\n(?![ \\t]*\\n))';
+	const span = new RegExp(`(?<!\\{)(\`+)(?!\\})(${edge}|${edge}${middle}*?${edge})(?<!\\{)\\1(?!\`)(?!\\})`, 'g');
 	const text = out.join('\n').replace(span, (m) => keep(m));
 	return {
 		text,

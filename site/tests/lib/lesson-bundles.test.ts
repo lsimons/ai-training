@@ -38,6 +38,12 @@ describe('setAsideCode', () => {
 		const paragraphs = 'Odd ` tick.\n\nAnother ` tick.';
 		expect(setAsideCode(paragraphs).text).toBe(paragraphs);
 	});
+	it('sets a double-backtick span with a backtick inside aside', () => {
+		const src = 'Use ``a ` <Tag>`` here.';
+		const { text, restore } = setAsideCode(src);
+		expect(text).not.toContain('<Tag>');
+		expect(restore(text)).toBe(src);
+	});
 	it('a stray backtick before a blank line does not shift the spans of the next paragraph', () => {
 		const src = 'Stray ` here.\n\nA `<Tag>` span, and <Real /> after.';
 		const { text, restore } = setAsideCode(src);
