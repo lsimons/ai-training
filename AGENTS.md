@@ -235,9 +235,11 @@ patterns below after the fact. Write so that it has nothing to say.
   Dependabot does not see any of them. To refresh: pick a release at
   least seven days old, download its `mise-v<version>-linux-x64.tar.gz`
   and check it against the release's `SHASUMS256.txt`, extract it and
-  hash the extracted `mise/bin/mise` with `shasum -a 256` (the action
-  checks that binary against `sha256`), then update the workflows and
-  `.mise.toml` in one commit.
+  hash the extracted `mise/bin/mise` with `shasum -a 256`, then update
+  the workflows and `.mise.toml` in one commit. The action checks that
+  binary against `sha256`, so it doesn't matter that it fetches the
+  `.tar.zst` archive on runners that have zstd: both archives hold the
+  same binary.
 - `prek.toml` hook repos are pinned by commit SHA (tag in the comment),
   and each Python hook lists its full transitive tree in
   `additional_dependencies`, exact-pinned. Both are invisible to
