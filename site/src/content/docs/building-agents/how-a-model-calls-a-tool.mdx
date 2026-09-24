@@ -15,7 +15,8 @@ Every example runs against a fixture: `fake_api`, a function that answers
 the way the Claude API is documented to answer, so the output is the same
 every time. The complete program is
 `site/examples/building-agents/how-a-model-calls-a-tool/wire.py` in the
-repository, and each step below is `python3 wire.py <step>`. The messages
+repository. Copy it to a folder of your own, and each step below is
+`python3 wire.py <step>` in that folder. The messages
 follow the Claude API. Other vendors use different field names for the
 same four parts, and the mapping at the end of the lesson carries over.
 
@@ -24,9 +25,11 @@ same four parts, and the mapping at the end of the lesson carries over.
 A request to a stateless model API contains everything the model gets to
 know (@Claude docs messages). For a tool-using agent that's a system
 prompt, a list of tool definitions, and the message list so far. A tool
-definition has three required fields: a `name`, a `description`, and an
-`input_schema`, which is a JSON Schema object that names each parameter and
-its type (@Claude docs define-tools).
+definition has a `name`, an `input_schema`, which is a JSON Schema object
+that names each parameter and its type, and a `description`. The first two
+are required. The description is optional, and it is the text the model
+reads to decide when to call the tool, so leave it out only for a tool
+whose name says everything (@Claude docs define-tools).
 
 ```python
 TOOLS = [
@@ -54,12 +57,12 @@ def first_request(question):
     }
 ```
 
-Compare this with the `TOOLS` dict of the fake model, which had a function
-and a one-line description per tool. The function isn't in the request.
-The model gets the name, the description and the schema, and the function
-stays on your side of the wire. The schema is the part the fake model
-skipped. It tells the model that `city` is a required string, and the API
-rejects a definition without one.
+The function itself isn't in the request. The model gets the
+name, the description and the schema, and the function stays on your side
+of the wire. The next lesson's fake model keeps the function and a one-line
+description per tool and skips the schema. Here the schema tells the model
+that `city` is a required string, and the API rejects a definition without
+one.
 
 ## The reply that asks for a tool
 
@@ -100,7 +103,8 @@ python3 wire.py first_reply
 </Predict>
 
 The fixture's ids are short so you can read them. A real reply has a
-longer id such as `toolu_01A09q90qw90lq917835lq9` (@Claude docs handle-tool-calls).
+longer id, a `toolu_` prefix followed by a run of letters and digits such
+as `toolu_01Kx7mQp2rVdN8sLwe4Tzb9c` (@Claude docs handle-tool-calls).
 Your loop never makes one up. It copies the id it was given.
 
 Put the fake reply next to this one. `"tool": "get_weather"` is the `name`
@@ -164,22 +168,22 @@ python3 wire.py tool_result
 
 </Predict>
 
-The fake loop appended `{"role": "tool", "content": "27°C, sun"}`. The real
-message says the same thing in three more fields, and the one that matters
-is `tool_use_id`. When the model asks for two tools in one reply, the ids
+The next lesson's fake loop stores the same result as
+`{"role": "tool", "content": "27°C, sun"}`. The real message says the same
+thing in three more fields, and the one that matters is `tool_use_id`. When the model asks for two tools in one reply, the ids
 are how it matches each result to the request it made. A tool that fails
 sends the error text in `content` and sets `is_error` to `true`, and the
-model reads that the way the fake model read a result that started with
-`error:` (@Claude docs handle-tool-calls).
+model reads the error and answers with it in mind
+(@Claude docs handle-tool-calls).
 
 <Choice id="where-the-result-goes" objective="building-agents/builds-agent-loop/defines-a-tool"
   concepts={['function-calling']}
   context="The lesson shows the message a loop sends back to the Claude API after running a tool the model asked for."
   title="Where does the tool result go?" hint="Which roles does the Claude API accept in a message list, and what links a result to the request it answers?"
   options={[
-    { text: 'In a message with role `tool`, with the result text as its content.', why: 'The fake loop used that role. Which two roles does the real API accept?' },
+    { text: 'In a message with role `tool`, with the result text as its content.', why: 'Which two roles does the messages list of the real API accept?' },
     { text: 'In a message with role `user`, as a `tool_result` block that names the `tool_use_id`.', correct: true },
-    { text: 'In the `system` field of the next request, so the model sees it first.', why: 'The system prompt is instructions for the whole conversation. Where do results of one call go?' },
+    { text: 'In the `system` field of the next request, so the model sees it first.', why: 'The system prompt is a separate parameter with instructions for the whole conversation. Where do results of one call go?' },
   ]}>
 The model asked for `get_weather` in a `tool_use` block with id `toolu_01`. Your loop ran the function and got `27°C, sun`. How does the result travel back?
 </Choice>
@@ -230,7 +234,7 @@ python3 wire.py final_reply
 
 </Predict>
 
-Three messages, two requests, one tool call. Each round of the loop sends
+One tool call took two requests and left three messages in the list. Each round of the loop sends
 the list again with two more messages on the end, and the model's answer
 reads as if it remembered, because you sent it the memory.
 
@@ -249,43 +253,43 @@ Your loop has sent the second request and received a reply. Which check tells it
 <MultiChoice id="fields-that-must-match" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
   concepts={['function-calling', 'tool']}
   context="The Claude API answers a tool request with a tool_use block (id, name, input) and expects the result back as a tool_result block in a user message."
-  title="Which fields must agree across the two messages?" hint="Which value does the loop copy from the reply into the message it sends back, and which value must fit a definition it sent earlier?"
+  title="Which rules does the second request follow?" hint="Which value does the loop copy from the reply into the message it sends back, and where in the list does that message have to sit?"
   options={[
     { text: 'The `tool_use_id` of the result equals the `id` of the `tool_use` block.', correct: true },
-    { text: 'The `input` of the `tool_use` block fits the tool\'s `input_schema`.', correct: true },
-    { text: 'The `content` of the result repeats the `text` block the model wrote.', why: 'The model\'s own words are already in the history. What new information does the result carry?' },
+    { text: 'The `tool_result` message comes right after the assistant message with the `tool_use` block.', correct: true },
+    { text: 'The `content` of the result message repeats the `text` block the model wrote.', why: 'The model\'s own words are already in the history. What new information does the result carry?' },
     { text: 'The `stop_reason` of the result message is set to `end_turn`.', why: 'Which side of the conversation writes a stop reason?' },
   ]}>
-Which of these must hold for the API to accept the second request?
+The loop has run the function and builds the next request. Which of these does the vendor page require?
 </MultiChoice>
 
 <Choice id="one-tool-two-fields" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
   concepts={['function-calling', 'tool']}
-  context="A tool definition sent to the Claude API has a name, a description and an input_schema. The function that does the work runs in the developer's own code."
+  context="A tool definition sent to the Claude API has a name, a description, and an input_schema. The function runs in the developer's own code."
   title="What reaches the model?" hint="Which parts of the fake model's TOOLS dict were text, and which part was code?"
   options={[
     { text: 'The function body, so the model can check what it does before calling it.', why: 'The model can\'t run code. What does it read instead to decide when to call the tool?' },
     { text: 'The name, the description and the input schema, and nothing that runs.', correct: true },
     { text: 'Only the name, because the model learns the arguments from the conversation.', why: 'How would the model know that city is required and is a string?' },
   ]}>
-You define `get_weather` for a real model API. Which part of the tool travels in the request?
+You define `get_weather` for a real model API. Which part of the tool is sent in the request?
 </Choice>
 
 <Pitfall title="Dropping the assistant message from the history">
 A first loop often stores only the user's question and the tool result,
 because those are the two things it wrote itself. The API then sees a
-`tool_result` with no `tool_use` before it and rejects the request with
-an error that says a `tool_use_id` has no matching block
-(@Claude docs handle-tool-calls). Rule: append the assistant reply as it
+`tool_result` that doesn't follow the `tool_use` block it answers, and the
+vendor page says a result block must come right after its request block,
+so the request is rejected (@Claude docs handle-tool-calls). Rule: append the assistant reply as it
 came, `content` list and all, before you append the result. The history
 must show the request that the result answers.
 </Pitfall>
 
 ## From one tool to many systems
 
-The four messages above are the whole mechanism, and for one tool and one
-agent they are enough. The cost shows up when you have several agents and
-several tools. Each agent has its own loop that turns a `tool_use` block
+The messages above are the whole mechanism, and for one tool and one
+agent they're enough. The cost shows up when you have many agents and
+many tools. Each agent has its own loop that turns a `tool_use` block
 into a function call, and each tool (a calendar, a ticket system, a
 database) has its own way of being called. With N agents and M tools you
 write N x M adapters, and a change to one tool means a change in every
@@ -298,7 +302,7 @@ the `tool_use` and `tool_result` blocks are already a small protocol
 between one model and your loop, and the rest of the course builds on
 them.
 
-<Exercise stretch="Change first_request so the tool result reports an error with is_error set to true, and write the final reply the model would give. Check the field names against the vendor page on handling tool calls.">
+<Exercise stretch="Change tool_result_message so the tool result reports an error with is_error set to true, and write the final reply the model would give. Check the field names against the vendor page on handling tool calls.">
 
 Take the fake model's reply `{"tool": "get_weather", "args": {"city": "Lisbon"}}`
 from the lesson "Building your first agent" and the tool's result
@@ -320,7 +324,7 @@ which did it receive?
 
 <Recap>
 
-1. A tool definition sends the model a name, a description and an input
+1. A tool definition sends the model a name, a description, and an input
    schema, and the function stays in your code (@Claude docs define-tools).
 2. A model asks for a tool with a `tool_use` block that has an id, a name
    and an input, and a `stop_reason` of `tool_use`. Your loop sends the

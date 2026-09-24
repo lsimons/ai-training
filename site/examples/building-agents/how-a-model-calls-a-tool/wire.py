@@ -29,6 +29,8 @@ WEATHER = {"Amsterdam": "14°C, rain", "Lisbon": "27°C, sun"}
 
 
 def get_weather(city: str) -> str:
+    if city not in WEATHER:
+        raise LookupError(f"no data for {city}")
     return WEATHER[city]
 
 
