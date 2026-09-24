@@ -20,7 +20,10 @@ leave an issue "for later" without saying what later means.
    few sentences what it is and where it came from, then give one
    recommended outcome with a reason and one or two alternatives. Ask,
    wait, then act before moving to the next. When the maintainer asks
-   what the issue is, explain it in full before asking again.
+   what the issue is, explain it in full before asking again. The general
+   rules for a question to the maintainer, including which triage
+   decisions you make yourself, are in `AGENTS.md`, "Asking the
+   maintainer".
 
 3. **Record the decision on the issue**, in a comment that starts with
    `Decision (YYYY-MM-DD):` or `Triage (YYYY-MM-DD):`, then change the
