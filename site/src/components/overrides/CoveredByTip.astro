@@ -10,7 +10,9 @@
  *
  * Renders nothing for a page that is not a lesson or a lesson without the
  * field. The href must be an `https://` URL under a bibliography `url`, and
- * any other value fails the build.
+ * any other value fails the build. The tip is a `role="note"` div, since an
+ * `<aside>` would be a complementary landmark nested in Starlight's own
+ * sidebar `<aside>`.
  */
 import type { CollectionEntry } from 'astro:content';
 import { checkExternalSourceHref } from '@lib/extends-to';
@@ -19,7 +21,7 @@ import { bibliographySources } from '@lib/links';
 
 interface Props {
 	entry: CollectionEntry<'docs'>;
-	/** An extra class on the `<aside>`, so each override can place the tip. */
+	/** An extra class on the tip element, so each override can place the tip. */
 	class?: string;
 }
 
@@ -35,13 +37,13 @@ if (coveredBy) {
 
 {
 	coveredBy && (
-		<aside class:list={['not-content covered-by', extra]} data-covered-by>
+		<div role="note" class:list={['not-content covered-by', extra]} data-covered-by>
 			<p>
 				If you have followed <a href={coveredBy.href} rel="noopener">{coveredBy.label}</a>, you can skip this lesson.
 			</p>
 			<button type="button" class="recap-skip" data-skip-lesson>
 				I know this, skip it
 			</button>
-		</aside>
+		</div>
 	)
 }
