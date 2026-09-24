@@ -62,6 +62,10 @@ describe('fencedBlocks', () => {
 		]);
 		expect(fencedBlocks('no `inline` code')).toEqual([]);
 	});
+	it('does not close on a shorter fence, a fence of the other character, or a fence line with text after it', () => {
+		expect(fencedBlocks('````\n```\n~~~~\n``` x\n````  \nafter')).toEqual(['````\n```\n~~~~\n``` x\n````  ']);
+		expect(fencedBlocks('\t~~~\nx\n  ~~~~\ny')).toEqual(['\t~~~\nx\n  ~~~~']);
+	});
 });
 
 describe('checkBundles', () => {
