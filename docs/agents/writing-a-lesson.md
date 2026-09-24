@@ -589,8 +589,35 @@ to `/glossary/#<id>` must name a real concept id, or the build fails.
   semicolon clause, no count-then-list, no rule of three, no clipped
   motto, no "not X but Y", no sentence-initial transition word.
   `mise run prose` reports every hit, and a lesson should read clean before
-  it is committed. In a fresh worktree run `mise run prose-sync` first,
-  because without the packages `prose` stops and names that task.
+  it is committed. In a fresh worktree run `mise run setup` first,
+  because without the Vale packages `prose` stops and names that task.
+
+- **Numbers from fixtures.** Every number in prose that a fixture can
+  produce is pasted from the fixture's output, never worked out by hand.
+  Three of six branches in wave 7 had an arithmetic claim that the fixture
+  contradicted.
+
+- **Invented names.** Check every invented person, company or product
+  name for existence, and for what it signals about a group (ethnicity,
+  gender). A fictional freight company in wave 4 turned out to be real.
+
+- **Markdown inside `<Response>`.** Headings and lists inside a
+  `<Response>` go in a fenced code block with the `text` language, or they
+  render as page structure and sidebar entries.
+
+- **`after` and `assumes` when a lesson goes live.** Keep `after` as the
+  plan had it (spec S11 step 3), and change only `assumes`. Each
+  `assumes` entry names the `lesson` and `section` that teach the
+  objective, and that lesson must be live on `main`. A page that says "as
+  the last lesson taught" needs an `assumes` entry for that lesson, even
+  when the plan arrived with `assumes: []`.
+
+- **Vendor claims.** A sentence about vendor behavior (a CLI flag, a
+  GitHub notification, how an agent product loads skills, MCP tools or
+  memory files) names the vendor page that states it and matches today's
+  default behavior. Drop what no page states. Quote a vendor limit (a
+  context size, a file cap, a rate) only where two vendor pages agree, and
+  record `sources-checked` and `review-by` in the plan file.
 
 - **Foundations audience.** In `concepts`, `safety` and `using-agents`,
   `mise run data` fails on a `<Predict run=`, an `sh`, `bash`, `shell`,
