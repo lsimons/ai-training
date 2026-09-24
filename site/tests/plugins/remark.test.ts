@@ -2,7 +2,13 @@ import remarkMdx from 'remark-mdx';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { describe, expect, it } from 'vitest';
-import { citationKeys, splitCitations } from '../../plugins/citation-syntax.mjs';
+import {
+	citationKeys,
+	createNumbering,
+	referenceParts,
+	splitCitations,
+	unknownKeyMessage,
+} from '../../plugins/citation-syntax.mjs';
 import { CODE_AND_COMPONENTS, CODE_ONLY, walkText } from '../../plugins/mdast-walk.mjs';
 import { remarkCheckpoints } from '../../plugins/remark-checkpoints.mjs';
 import { remarkCitations } from '../../plugins/remark-citations.mjs';
@@ -187,6 +193,33 @@ describe('remarkCitations', () => {
 		]);
 		expect(splitCitations('plain')).toEqual([{ type: 'text', value: 'plain' }]);
 		expect(splitCitations('')).toEqual([{ type: 'text', value: '' }]);
+	});
+	it('createNumbering numbers keys by first appearance and throws unknownKeyMessage on a key the bibliography lacks', () => {
+		const { numberOf, order } = createNumbering({ 'K-1': {}, 'K-2': {} }, 'here');
+		expect([numberOf('K-2'), numberOf('K-1'), numberOf('K-2')]).toEqual([1, 2, 1]);
+		expect(order).toEqual(['K-2', 'K-1']);
+		expect(() => numberOf('Nope')).toThrow(unknownKeyMessage('here', 'Nope'));
+		expect(unknownKeyMessage('here', 'Nope')).toBe(
+			'here: unknown citation key "Nope". Keys are defined in site/src/data/bibliography.yaml.',
+		);
+		expect(order).toEqual(['K-2', 'K-1']);
+	});
+	it('referenceParts gives author, title with url, container unless it repeats the title, type and key', () => {
+		expect(referenceParts('K', { type: 'course', title: 'T', container: 'C', author: 'A', url: 'https://x' })).toEqual([
+			{ type: 'text', value: 'A. ' },
+			{ type: 'title', value: 'T', url: 'https://x' },
+			{ type: 'text', value: '.' },
+			{ type: 'text', value: ' C.' },
+			{ type: 'text', value: ' Course.' },
+			{ type: 'text', value: ' ' },
+			{ type: 'code', value: 'K' },
+		]);
+		expect(referenceParts('K', { title: 'T', container: 'T' })).toEqual([
+			{ type: 'title', value: 'T', url: null },
+			{ type: 'text', value: '.' },
+			{ type: 'text', value: ' ' },
+			{ type: 'code', value: 'K' },
+		]);
 	});
 	it('numbers citations by first appearance, links them page-absolute, and appends a References section', async () => {
 		const tree = await run('One (@AEC-02). Two (@Brilliant TAS). One again (@AEC-02).\n');

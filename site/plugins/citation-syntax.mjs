@@ -49,3 +49,68 @@ export function citationKeys(source) {
 	}
 	return keys;
 }
+
+/**
+ * The error for a `(@key)` whose key the bibliography lacks. `where` names
+ * the page or the competency, the way its renderer reports it.
+ * @param {string} where
+ * @param {string} key
+ */
+export function unknownKeyMessage(where, key) {
+	return `${where}: unknown citation key "${key}". Keys are defined in site/src/data/bibliography.yaml.`;
+}
+
+/**
+ * Reference numbering for one page: `numberOf(key)` is the 1-based number of
+ * `key` by first appearance, and `order` holds the keys in that order. An
+ * unknown key throws `unknownKeyMessage`, so a typo fails the build.
+ * @param {Record<string, unknown>} bibliography
+ * @param {string} where
+ * @returns {{ numberOf: (key: string) => number, order: string[] }}
+ */
+export function createNumbering(bibliography, where) {
+	/** @type {string[]} */
+	const order = [];
+	return {
+		order,
+		numberOf(key) {
+			let n = order.indexOf(key);
+			if (n === -1) {
+				if (!(key in bibliography)) throw new Error(unknownKeyMessage(where, key));
+				order.push(key);
+				n = order.length - 1;
+			}
+			return n + 1;
+		},
+	};
+}
+
+/**
+ * @typedef {{ type: 'text', value: string } | { type: 'title', value: string, url: string | null } | { type: 'code', value: string }} ReferencePart
+ */
+
+/**
+ * One reference entry as format-free parts, so the lesson page (mdast) and
+ * the competency page (HTML) show the same text: author, title (linked when
+ * the entry has a public url), container when it differs from the title,
+ * type, and the key as code.
+ * @param {string} key
+ * @param {{ type?: string, title: string, container?: string | null, author?: string | null, url?: string | null }} entry
+ * @returns {ReferencePart[]}
+ */
+export function referenceParts(key, entry) {
+	/** @type {ReferencePart[]} */
+	const parts = [];
+	if (entry.author) parts.push({ type: 'text', value: `${entry.author}. ` });
+	parts.push({ type: 'title', value: entry.title, url: entry.url ?? null });
+	parts.push({ type: 'text', value: '.' });
+	if (entry.container && entry.container !== entry.title) parts.push({ type: 'text', value: ` ${entry.container}.` });
+	if (entry.type) parts.push({ type: 'text', value: ` ${capitalize(entry.type)}.` });
+	parts.push({ type: 'text', value: ' ' }, { type: 'code', value: key });
+	return parts;
+}
+
+/** @param {string} s */
+function capitalize(s) {
+	return s.charAt(0).toUpperCase() + s.slice(1);
+}

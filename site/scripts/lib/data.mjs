@@ -12,7 +12,8 @@
  *   (a course's `<stem>`), or its `area` isn't its directory; a concept id
  *   is defined twice across topics;
  * - a competency draws on an unknown topic, or an objective id isn't under
- *   its competency; an alignment row names an unknown objective;
+ *   its competency, or a behavior cites (`(@key)`) a key the bibliography
+ *   lacks; an alignment row names an unknown objective;
  * - a course's id isn't its area's (spec S01: one course per area), a
  *   course lists a lesson the area has no file for, a lesson is in two
  *   courses or in none, or an area has no course;
@@ -236,6 +237,37 @@ export function reviewDatePairError(lesson) {
 }
 
 /**
+ * The `(@key)` citations in competency behaviors (spec S10) whose key the
+ * bibliography lacks, as error strings in the format `checkData` uses. The
+ * competency page renders these tokens as references, so a typo would fail
+ * the build; this fails the data check first. Like `citationKeys` on a
+ * lesson page, this scans raw text, so a token inside a code span counts too.
+ * @param {ReturnType<typeof readAreaTree>} tree
+ * @param {(file: string) => string} rel
+ */
+export function checkBehaviorCitations(tree, rel) {
+	const errors = [];
+	for (const a of tree.areas) {
+		for (const { data: c, file } of a.competencies) {
+			for (const o of c?.objectives ?? []) {
+				(o.behaviors ?? []).forEach((b, i) => {
+					for (const field of ['claim', 'why', 'example']) {
+						for (const key of citationKeys(String(b?.[field] ?? ''))) {
+							if (!tree.bibliographyKeys.has(key)) {
+								errors.push(
+									`${rel(file)}: objective ${o.id} behavior ${i + 1} ${field} cites "${key}", which is not a bibliography key`,
+								);
+							}
+						}
+					}
+				});
+			}
+		}
+	}
+	return errors;
+}
+
+/**
  * Check the tree under `dataDir` against the pages under `contentDir`.
  * `foundationsExempt` is the exemption list for `checkFoundationsAudience`
  * and defaults to `FOUNDATIONS_EXEMPT`; tests pass their own.
@@ -408,6 +440,7 @@ export function checkData(dataDir, contentDir, { foundationsExempt = FOUNDATIONS
 			if (!sourcesOf.get(id).has(key)) fail(`${where}: cites "${key}", which its plan file's sources list lacks`);
 		}
 	}
+	for (const e of checkBehaviorCitations(tree, rel)) fail(e);
 	for (const e of checkFoundationsAudience(tree, contentDir, pages.keys(), foundationsExempt)) fail(e);
 	for (const a of tree.areas) {
 		const index = join(contentDir, a.dir, 'index.mdx');
