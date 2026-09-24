@@ -1,5 +1,9 @@
 id: coding-with-agents/spec-driven-increments
 title: Working from a spec in small increments
+description: >-
+  Write a one-page spec for a due-dates feature in the to-do fixture, have a coding agent split it
+  into increments that each leave the program working, order them with the least certain one first,
+  and land the first one against the spec's own success criteria.
 mode: tutorial
 covers: coding-with-agents/workflow
 serves: [coding-with-agents/ships-with-agent/works-in-increments]
@@ -16,4 +20,13 @@ sources: [Academy ai-native-sdlc-playbook, Brilliant INC]
 issue: 155
 minutes: 15
 notes: >-
-  Sources: Brilliant INC, Academy ai-native-sdlc-playbook (spec as the source of truth, paraphrased).
+  Sources: Brilliant INC, Academy ai-native-sdlc-playbook (spec as the source of truth, paraphrased
+  in our own words, no text or example copied). The fixture is the plan-then-test to-do program
+  after that lesson's fix landed, copied to its own directory with test_clear.py in the repo. The
+  feature is due dates: a due command, a date in list, an overdue command with a TODO_TODAY override
+  and date validation. The spec is SPEC.md next to the fixture scripts, and the fixtures copy it
+  and the first increment (todo.py due command, render.py date suffix, test_due.py) into a copy of
+  the repository. criteria.py runs every success criterion of the spec against the copy after the
+  first increment, so the page's "3 of 5" comes from a fixture. The lesson doesn't lean on
+  plan-then-test's teaching (plan mode, failing test first), so assumes stays empty. Decomposition
+  into components is a separate planned lesson and isn't taught here.
