@@ -1,18 +1,67 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mise run site-install)",
-      "Bash(mise run site-build)",
-      "Bash(mise run site-check)",
-      "Bash(mise run site-clean)",
-      "Bash(mise run site-favicon)",
-      "Bash(mise run lint)",
-      "Bash(mise run prose)",
-      "Bash(mise run prose-sync)",
-      "Bash(mise run links)",
+      "Bash(mise run setup)",
+      "Bash(mise run fast)",
       "Bash(mise run ci)",
+      "Bash(mise run ci-watch)",
+      "Bash(mise run site-install-frozen)",
+      "Bash(mise run py-install-frozen)",
+      "Bash(mise run prose-sync)",
+      "Bash(mise run lint)",
+      "Bash(mise run spell)",
+      "Bash(mise run prose)",
+      "Bash(mise run prose-extended)",
+      "Bash(mise run examples)",
+      "Bash(mise run data)",
+      "Bash(mise run site-check)",
+      "Bash(mise run site-lint)",
+      "Bash(mise run site-format)",
+      "Bash(mise run site-test)",
+      "Bash(mise run site-build)",
+      "Bash(mise run checkpoints)",
+      "Bash(mise run bundles)",
+      "Bash(mise run site-e2e-only)",
+      "Bash(mise run site-favicon)",
+      "Bash(mise run py-lint)",
+      "Bash(mise run py-format)",
+      "Bash(mise run py-typecheck)",
+      "Bash(mise run py-test)",
       "Bash(mise run audit)",
-      "Bash(mise run ci-watch)"
+      "Bash(mise run next-wave *)",
+      "Bash(mise run wave-status *)",
+      "Bash(mise run run-name *)",
+      "Bash(mise run harness-metrics *)",
+      "Bash(mise tasks)",
+      "Bash(rm -rf .scratch)",
+      "Bash(rm -rf .scratch/*)"
+    ],
+    "deny": ["Edit(./.claude/settings.json)", "Bash(gh repo delete*)", "Bash(gh api -X DELETE*)"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-bash.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format-file.sh",
+            "timeout": 30
+          }
+        ]
+      }
     ]
   }
 }
