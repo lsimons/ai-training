@@ -102,9 +102,10 @@ file and never the dispatcher's context. One tick:
    line in the meta record with no report after it. The dispatcher then
    spawns a lead for that wave number and branch with the resuming line
    filled in, and the lead follows "Resuming a half-done wave" in the
-   template: fetch, read each issue's last review verdict, reuse the
-   worktrees that exist, spawn only what is missing, and never redo a
-   branch with an approve verdict. Only the issues on the `In flight` line
+   template: run `mise run wave-status`, which reads each issue's last
+   review verdict from the trusted accounts only, reuse the worktrees
+   that exist, spawn only what is missing, and never redo a branch with
+   an approve verdict. Only the issues on the `In flight` line
    count for `origin/feat/<issue>-*` branches, so a stale branch from an
    earlier run starts nothing. The wave branch is `wave/<n>-<kind>`,
    without a date, so a next-day resume finds it.
