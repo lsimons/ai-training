@@ -6,7 +6,7 @@ have the lesson bundle for that page, a JSON file with the lesson's `prose`,
 its `topics`, `objectives`, `assumes`, `checkpoints` and `extends_to`, and
 the learner reads the same page the bundle was built from. Where this file
 writes `{site}`, read the `site` field of its frontmatter (the site's base
-URL, with a trailing slash).
+URL, without a trailing slash).
 
 ## Ground rules
 
