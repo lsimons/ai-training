@@ -22,11 +22,11 @@ the increments to land (@Brilliant INC).
 ## Where understanding leaks
 
 Reading code and writing code build understanding in different ways, and
-an agent removes the second one entirely. When you wrote the `overdue`
-command yourself, you decided where today's date comes from. Your first
-try failed the test with the two `TODO_TODAY` dates, and you fixed it.
-The decision stayed with you because you made it. When the agent merges
-the same increment, the code arrives finished. The tests pass. The diff is
+an agent removes the second one entirely. Suppose you had written the
+`overdue` command yourself instead of briefing the agent for it. You would
+have decided where today's date comes from, seen a first try fail the test
+with the two `TODO_TODAY` dates, and fixed it. The decision would stay
+with you because you made it. When the agent merges the same increment, the code arrives finished. The tests pass. The diff is
 small and the report is confident. Every reason to slow down and read it
 is gone, and so is the moment where the decision would have become yours.
 
@@ -63,12 +63,12 @@ than most engineers hold agent output to. A colleague's PR doesn't arrive
 with its tests already green and a paragraph saying it is done.
 
 Reading means the whole diff, at the speed it takes to follow it. You stop
-at anything you can't explain. A regular expression you can't parse, a
-`try` block whose exception you don't know, a helper whose name doesn't
-say what it does. At each stop, you have two moves. Ask the agent to
+at anything you can't explain, such as a regular expression you can't
+parse or a helper whose name doesn't say what it does. At each stop, you have two moves. Ask the agent to
 explain the line in plain language, and ask it for a test that documents
-the behavior you couldn't see. The test stays in the suite after the explanation is forgotten, and it
-turns a line you took on faith into one the suite checks.
+the behavior you couldn't see. The test stays in the suite after the
+explanation is forgotten, and it turns a line you took on faith into one
+the suite checks.
 
 <Prompt model="illustrative" recorded="illustrative">
 In `todo.py`, the `due` command validates the date with
@@ -79,18 +79,25 @@ one accepted and two refused inputs.
 <Response>
 `fromisoformat` accepts a date written as four digits, a dash, two digits,
 a dash and two digits, such as `2026-10-01`, and raises `ValueError` for
-the rest. So `tomorrow` is refused, and so is `2026-10-1`, because the day
-has one digit. The `due` command catches that error and prints
-`bad date: <input>`, as the spec says. I added `test_due_date_formats` in
-`test_due.py` with `2026-10-01` accepted and `tomorrow` and `2026-10-1`
-refused.
+`tomorrow` and for `2026-10-1`, where the day has one digit. Which other
+forms it accepts depends on the Python version. On 3.9 and 3.10 the
+dashed form is the only one. From 3.11 it also accepts other ISO 8601
+forms, such as `20261001` without dashes and the week form `2026-W40-4`.
+The spec's `bad date` criterion names `tomorrow`, and the `due` command
+catches the error and prints `bad date: <input>` for it on every version.
+I added `test_due_date_formats` in `test_due.py` with `2026-10-01`
+accepted and `tomorrow` and `2026-10-1` refused, which holds on 3.9 and
+on 3.11. If you want `20261001` refused too, the check needs to be
+stricter than `fromisoformat` alone, and that is a spec decision.
 </Response>
 
 This exchange is illustrative and shows the form of the question. The
-one-digit day is the kind of case you only learn by asking. Had you
-skimmed past the line, you would know that the command refuses `tomorrow`
-and nothing about what else it refuses, and the first user who types
-`2026-10-1` would find out for you.
+version difference is the kind of fact you only learn by asking. Had you
+skimmed past the line, the program would accept `20261001` on a
+colleague's newer Python and refuse it on your own older one, and nobody
+would know why. The answer also surfaced a spec question, which forms
+count as a bad date, and that question goes back to the spec before
+anyone writes more code.
 
 The habit costs minutes per increment, and small increments are what
 make it possible. A diff you can read in one sitting is a diff you can
@@ -127,7 +134,7 @@ Then open the code and check your explanation against it. Where the code
 does something your explanation didn't predict, you have found a gap in
 your model, and the increment isn't done until you close it. Either the
 code is right and you ask the agent why, or the code is wrong and it
-comes back to the spec. Both are the review working.
+comes back to the spec. Either way, the review did its job.
 
 This is also the point to notice when the answer to "why" is a guess.
 "The date is a string because that's what JSON has" is an explanation.
@@ -153,11 +160,14 @@ sentences show the understanding this lesson asks for?
 
 The third habit is about the team, and about the next session. An
 architecture decision that lives in your head is safe until the next
-person, or the next agent session, makes a different one. Agents start
-every session from the files in the repository. What they don't find
-there, they don't know, and a decision they don't know about is one they
-will cheerfully reverse when it gets in the way of the task in front of
-them.
+person, or the next agent session, makes a different one. A fresh agent
+session starts from the files in the repository and, for some tools, a
+private memory the agent keeps for itself. Claude Code, for example, loads
+`CLAUDE.md` and its auto memory at the start of every conversation
+(@Claude Code memory). The chat transcript of the last session is in
+neither. A decision the session doesn't find in what it loads is one it
+doesn't know about, and one it will reverse when the decision gets in the
+way of the task in front of it.
 
 So the reasons go in the repository, in two places that point at each
 other. A decisions folder, often `docs/decisions/`, holds one short file
@@ -227,7 +237,7 @@ line.
 
 <Sort id="where-the-reason-lives" objective="coding-with-agents/ships-with-agent/keeps-understanding"
   concepts={['project-instructions', 'commits-and-prs']}
-  context="A team records why its system is built the way it is. A coding agent starts each session by reading the files in the repository and the project instructions file, and knows nothing else about past sessions."
+  context="A team records why its system is built the way it is. A fresh coding agent session reads the files in the repository, the project instructions file and, for some tools, a private memory the agent keeps, and it never reads the transcript of an earlier session."
   title="Will the next session see it?" hint="At the start of a fresh session, which of these does the agent read without being told?"
   buckets={['The next agent session reads it', 'The next agent session never sees it']}
   items={[

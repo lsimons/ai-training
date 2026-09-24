@@ -489,6 +489,13 @@ EC AI Office:
   author: European Commission
   license: EU reuse policy (reuse authorized, source acknowledged)
   url: https://digital-strategy.ec.europa.eu/en/policies/ai-office
+Claude Code memory:
+  type: reference
+  title: How Claude remembers your project
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/memory
 Claude Code permission modes:
   type: reference
   title: Choose a permission mode
