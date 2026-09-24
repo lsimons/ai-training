@@ -158,6 +158,8 @@ def test_gh_poll_loops_are_rejected() -> None:
 
 def test_loops_without_gh_and_gh_without_loops_pass() -> None:
     assert check("for f in a b; do echo $f; done") is None
+    assert check("for n in 359 360; do gh issue view $n --json state; done") is None
+    assert check("for n in 1 2; do gh issue view $n; done; sleep 5") is not None
     assert check("gh pr checks 3 --watch") is None
     assert check("gh run watch 12") is None
 
