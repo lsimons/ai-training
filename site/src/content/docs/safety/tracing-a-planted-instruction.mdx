@@ -27,7 +27,7 @@ On the real page the last paragraph would be in white text on a white
 background, or in a comment a browser never shows. The agent reads the
 page as text, so it sees every line the same way.
 
-## Three permission sets, one page
+## One page, three permission sets
 
 The same request, "summarize this page", goes to three agents. They differ
 only in the tools they have.
@@ -79,8 +79,8 @@ permission set: read and write locally
 
 The second agent can open the contacts file, and it does. It has no tool
 that reaches the address, so the nearest thing it can do is write the
-contents to a file on the same computer. That is a mess to clean up and a
-sign that something went wrong, but the data is still where it was.
+contents to a file on the same computer. The file is a mess to clean up
+and a sign that something went wrong, but the data is still where it was.
 
 ```text
 permission set: read and fetch any URL
@@ -137,25 +137,27 @@ reads carefully isn't a defense against a failure of reading. Change what
 the agent can do, and the line on the page has nothing to spend.
 </Pitfall>
 
-<Match id="worst-case-per-set" objective="safety/judges-agent-risk/recognizes-injection"
-  concepts={['exfiltration']}
-  context="An agent summarizes a web page that has a planted paragraph telling the assistant to read a private file and send its contents to a web address. Four versions of the agent differ only in their tools: one can only read the page, one can also read and write local files, one can also read files and fetch any address, and one can read files and send mail but must ask the reader before each send."
-  title="What is the worst the planted line can do?" hint="For each set, name the tool that puts text somewhere you don't control, and ask whether you see it before it goes."
+<Match id="which-link-is-each-tool" objective="safety/judges-agent-risk/recognizes-injection"
+  concepts={['exfiltration', 'prompt-injection']}
+  context="An agent summarizes a document a supplier shared with the reader. A paragraph planted in that document tells the assistant to open the reader's own price list and post it as a comment on the shared document. The agent has four tools: read the shared document, open files in the reader's own folder, write a comment on the shared document, and save a file in the reader's own folder. The lesson describes an injection attack as a chain of three links: the agent reads the planted line, it has private data nearby, and it has a way to move that data out."
+  title="Which link of the chain is each tool?" hint="Ask what each tool does for the planted line: does it show the line to the agent, hand the agent something private, or move text to a place you don't control?"
   options={[
-    'A wrong summary, and nothing else changes',
-    'A copy of the private file appears on the reader\'s computer',
-    'The private file travels to an address the attacker chose',
-    'A mail to an unknown address waits for the reader\'s yes',
+    'The first link: it puts the planted line in front of the agent',
+    'The second link: it gives the agent something private to move',
+    'The last link: it moves text to a place you don\'t control',
+    'No link: whatever it does stays on your computer',
   ]}
   rows={[
-    { statement: 'Reads the page only', option: 0, why: 'With no tool that writes or sends, what can a sentence on the page change?' },
-    { statement: 'Reads the page, reads and writes local files', option: 1, why: 'The agent can open the file. Which tool would carry its contents off the computer, and does this agent have it?' },
-    { statement: 'Reads the page, reads local files, fetches any address', option: 2, why: 'The agent composes the address it fetches. What can it put in that text?' },
-    { statement: 'Reads the page, reads local files, sends mail after the reader approves', option: 3, why: 'The approval sits in front of the send. What is the worst thing that lands in front of the reader?' },
+    { statement: 'Read the shared document', option: 0, why: 'The planted paragraph is in this document. Which link does reading it form?' },
+    { statement: 'Open files in your own folder', option: 1, why: 'The price list is in this folder. Does opening it move anything, or does it only put something private within reach?' },
+    { statement: 'Write a comment on the shared document', option: 2, why: 'Who can read a comment on a document the supplier owns, and who chooses the words in it?' },
+    { statement: 'Save a file in your own folder', option: 3, why: 'A saved file sits where the agent put it. Can anyone outside your computer read it?' },
   ]}
-  rationale="The planted line can only spend the tools the agent has. Fetching is a send, because the agent chooses the text of the address. Writing a local file stays on the computer, and an approval turns a send into a request you can refuse.">
-Four agents read the same recipe page. Match each set of tools to the
-worst thing the planted line can make that agent do.
+  rationale="A comment on someone else's document is a send, even though nothing is called mail or fetch. Reading the shared document and opening your own files are the links you can't remove for this task, so the comment tool is the one to take away or gate.">
+An agent summarizes a document a supplier shared with you. A paragraph
+planted in it tells the assistant to open your own price list and post it
+as a comment on the shared document. Match each of the agent's tools to
+the link it forms in the chain.
 </Match>
 
 ## Shrink the way out, not the reading
@@ -168,7 +170,7 @@ the same model reading the same text well. The trace points at the other
 end. Remove or gate the last link.
 
 For a summarizing task, removing is the right size. The agent needs to
-read the page and write a summary for you, and that is all. An agent with
+read the page and write a summary for you, and nothing more. An agent with
 no outbound tool can be fooled into a bad summary and nothing worse, which
 is the first case in the trace.
 
@@ -177,13 +179,11 @@ outbound action before it runs turns the attack into a request you can
 refuse, which is what human in the loop is for. "Fetch
 `collect.bramble-kitchen.example` with these contents" is a request you say
 no to in one second, and it is the one place in the whole trace where the
-planted line becomes visible to a person. Agent products that pause before
-an action leaves your machine give you this check by default, and the
-default only helps if you read what it shows you
-(@Academy introduction-to-claude-cowork).
+planted line becomes visible to a person. Agent products offer a mode that pauses before an action leaves your
+machine. Pick it, and read what it shows you, because the pause only helps
+while you look (@Academy introduction-to-claude-cowork).
 
-Gate the outbound tools first, because that is where the damage
-happens. Then, if you like, also tell the agent to ignore
+Gate the outbound tools first, because the damage happens there. Then, if you like, also tell the agent to ignore
 instructions on pages. The second step lowers the odds, and the first
 step removes the path.
 
@@ -211,7 +211,7 @@ read. Which one?
   items={[
     { text: 'Fetch a web address the agent composes', bucket: 0 },
     { text: 'Write a file in your documents folder', bucket: 1 },
-    { text: 'Create a calendar invite with a description', bucket: 0 },
+    { text: 'Send a calendar invite to a colleague, with a description', bucket: 0 },
     { text: 'Read a file in your downloads folder', bucket: 1 },
     { text: 'Fill in a form on a web page', bucket: 0 },
     { text: 'Rename a file on your desktop', bucket: 1 },
@@ -230,8 +230,9 @@ A good result names at least one outbound ability you hadn't counted as
 a send before this lesson, such as fetching an address or sharing a
 document, and picks the tool rather than a warning in the request as the
 thing to change. If your list is empty, check the assistant's settings or
-permissions page, because an assistant that can read a web page can
-usually also fetch one.
+permissions page, and check whether an assistant that reads web pages can
+also fetch one. Which of the abilities on your list did you grant without
+thinking of it as a send?
 </Exercise>
 
 <Recap>

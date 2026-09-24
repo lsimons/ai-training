@@ -41,7 +41,7 @@ PERMISSION_SETS = [
 OUTBOUND_TOOLS = {"fetch_url", "send_mail"}
 
 
-def planted_lines(page: str) -> "list[str]":
+def planted_lines(page: str) -> list[str]:
     """Return the paragraphs of the page that address the assistant, each as one line."""
     paragraphs = [" ".join(block.split()) for block in page.split("\n\n")]
     return [text for text in paragraphs if text.startswith("Assistant:")]
@@ -59,7 +59,7 @@ def requested_tool(line: str) -> str:
     return "none"
 
 
-def trace(name: str, tools: "list[str]", page: str) -> "list[str]":
+def trace(name: str, tools: list[str], page: str) -> list[str]:
     """Return the report lines for one permission set."""
     lines = [f"permission set: {name}", f"  tools: {', '.join(tools)}"]
     planted = planted_lines(page)
@@ -74,6 +74,8 @@ def trace(name: str, tools: "list[str]", page: str) -> "list[str]":
         lines.append(f"  the agent runs: read_file(contacts.txt), then {wanted}(...)")
         leaves = wanted in OUTBOUND_TOOLS
     elif wanted in tools:
+        # None of the three sets above reaches this branch: a set with an
+        # outbound tool and no file access. A reader who adds one does.
         lines.append(f"  the agent runs: {wanted}(...), with nothing private to put in it")
         leaves = False
     elif can_read and "write_file" in tools:
@@ -92,11 +94,10 @@ def trace(name: str, tools: "list[str]", page: str) -> "list[str]":
 
 def report(page: str = PAGE) -> str:
     """Return the full report the lesson shows, one block per permission set."""
-    blocks = ["\n".join(trace(name, tools, page)) for name, tools in PERMISSION_SETS]
+    traces = [trace(name, tools, page) for name, tools in PERMISSION_SETS]
+    blocks = ["\n".join(lines) for lines in traces]
     leaking = [
-        name
-        for name, tools in PERMISSION_SETS
-        if any(line.startswith("  data leaves: yes") for line in trace(name, tools, page))
+        name for (name, _), lines in zip(PERMISSION_SETS, traces) if "  data leaves: yes" in lines
     ]
     summary = f"data left under {len(leaking)} of {len(PERMISSION_SETS)} permission sets"
     if leaking:
