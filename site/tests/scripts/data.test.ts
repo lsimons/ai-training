@@ -3,7 +3,14 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { allLessons, allTopics, courseLessonIds, readAreaTree, yamlFilesIn } from '../../scripts/lib/area-tree.mjs';
-import { checkData, frontmatter, knownIds, lessonPages } from '../../scripts/lib/data.mjs';
+import {
+	checkData,
+	FOUNDATIONS_EXEMPT,
+	foundationsSurfaces,
+	frontmatter,
+	knownIds,
+	lessonPages,
+} from '../../scripts/lib/data.mjs';
 
 const roots: string[] = [];
 afterAll(() => {
@@ -52,7 +59,9 @@ function tree(files: Record<string, string | null> = {}) {
 	return root;
 }
 
-const check = (root: string) => checkData(join(root, 'data'), join(root, 'content'));
+/** The repo's exemption list names real lessons, so the fixture tree runs with its own (empty by default). */
+const check = (root: string, foundationsExempt = new Map<string, number>()) =>
+	checkData(join(root, 'data'), join(root, 'content'), { foundationsExempt });
 
 describe('checkData', () => {
 	it('passes a consistent tree and counts lessons and pages', () => {
@@ -192,6 +201,81 @@ describe('checkData', () => {
 			'src/content/docs/a/y.mdx: lesson page without a lesson file at src/data/areas/a/lessons/y.yaml',
 			'src/content/docs/a/index.mdx: frontmatter sets title, which area.yaml owns',
 		]);
+	});
+});
+
+describe('foundations audience', () => {
+	const FOUNDATIONS = GROUPS.replace('id: g', 'id: foundations');
+	const AREA_F = AREA.replace('group: g', 'group: foundations');
+	const RULE = 'which a foundations lesson may not show (spec S03 "Foundations audience")';
+	it('lists every banned surface with its line, and skips code spans and fences of other languages', () => {
+		const src = [
+			'Open a terminal and run `python3 x.py`.', // 1: the word, but the code span is skipped
+			'', // 2
+			'```text', // 3: a text fence hides its body
+			'python3 x.py', // 4
+			'git clone foo', // 5
+			'```', // 6
+			'', // 7
+			'```sh', // 8
+			'ls', // 9
+			'```', // 10
+			'', // 11
+			'<Predict run="a/b.py" answer="1">', // 12
+			'', // 13
+			'</Predict>', // 14
+			'', // 15
+			'<Predict answer="one">', // 16: no run, so an example that says it cannot run
+			'', // 17
+			'</Predict>', // 18
+			'', // 19
+			'~~~json', // 20
+			'{}', // 21
+			'~~~', // 22
+			'Then `git clone` it, or Git Clone it. A terminal-like pane is fine, a Terminal is not.', // 23
+		].join('\n');
+		expect(foundationsSurfaces(src)).toEqual([
+			{ line: 1, surface: 'the word "terminal"' },
+			{ line: 8, surface: '```sh fence' },
+			{ line: 12, surface: '<Predict run="a/b.py">' },
+			{ line: 20, surface: '```json fence' },
+			{ line: 23, surface: 'the word "Git Clone"' },
+		]);
+		expect(foundationsSurfaces('A JSON reply in a `json` span, a Python fan, and a bus terminal.\n')).toEqual([
+			{ line: 1, surface: 'the word "terminal"' },
+		]);
+		expect(foundationsSurfaces('```Python\nprint(1)\n```\n```BASH\nls\n```\n```shell\nls\n```\n')).toEqual([
+			{ line: 1, surface: '```python fence' },
+			{ line: 4, surface: '```bash fence' },
+			{ line: 7, surface: '```shell fence' },
+		]);
+	});
+	it('fails a foundations lesson page that shows one, and passes the same page in another group', () => {
+		const page = 'Body.\n\n```sh\nls\n```\n';
+		const root = tree({ 'data/groups.yaml': FOUNDATIONS, 'data/areas/a/area.yaml': AREA_F, 'content/a/x.mdx': page });
+		expect(check(root).errors).toEqual([`src/content/docs/a/x.mdx:3: \`\`\`sh fence, ${RULE}`]);
+		expect(check(tree({ 'content/a/x.mdx': page })).errors).toEqual([]);
+	});
+	it('passes an exempt lesson that still shows one, and fails a stale or unknown exemption', () => {
+		const shown = tree({
+			'data/groups.yaml': FOUNDATIONS,
+			'data/areas/a/area.yaml': AREA_F,
+			'content/a/x.mdx': 'Body.\n\n```sh\nls\n```\n',
+		});
+		expect(check(shown, new Map([['a/x', 999]])).errors).toEqual([]);
+		const clean = tree({ 'data/groups.yaml': FOUNDATIONS, 'data/areas/a/area.yaml': AREA_F });
+		expect(check(clean, new Map([['a/x', 999]])).errors).toEqual([
+			'src/content/docs/a/x.mdx: is exempt from the foundations audience rule for #999 but shows no banned surface, so remove its FOUNDATIONS_EXEMPT line in scripts/lib/data.mjs',
+		]);
+		expect(check(clean, new Map([['a/gone', 998]])).errors).toEqual([
+			'scripts/lib/data.mjs: FOUNDATIONS_EXEMPT lists a/gone (#998), which is not a foundations lesson page, so remove the line',
+		]);
+	});
+	it('names an issue for every exemption in the repo list', () => {
+		for (const [id, issue] of FOUNDATIONS_EXEMPT) {
+			expect(id).toMatch(/^(concepts|safety|using-agents)\/[a-z-]+$/);
+			expect(issue).toBeGreaterThan(0);
+		}
 	});
 });
 

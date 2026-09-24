@@ -20,7 +20,9 @@ the build writes every checkpoint to one `checkpoints.json` that CI checks
 (2026-09-20, see "Checkpoints" and "Checkpoint export"). A `predict` is a
 checkpoint only when predicting the output demonstrates a served objective;
 a `Predict` without `objective` is an ungraded example whose output CI
-still asserts (2026-09-20, see "Examples").
+still asserts (2026-09-20, see "Examples"). A lesson in the `foundations`
+group keeps code fences, `Predict run` and terminal instructions off the
+page, and `mise run data` checks it (2026-09-24, see "Foundations audience").
 
 ## Introduction
 
@@ -290,6 +292,37 @@ reads it to ask a checkpoint as a standalone item.
   (compare, measure, assess, red-team). Both are the one `Exercise` kind.
   The distinction is authoring guidance, so a course doesn't end up with
   only one flavor by accident.
+
+## Foundations audience
+
+The `foundations` group (S09 "Groups": the `concepts`, `safety` and
+`using-agents` areas) is written for every knowledge worker, and a
+lesson in it must be one a reader can follow without programming and without
+a terminal, git or a developer tool (decided 2026-09-24, #236).
+Any hands-on step is a browser widget on the page or a plain-language
+prompt the learner pastes into a chat assistant. Engineering areas keep
+the freedom the rest of this spec gives them.
+
+A runnable fixture under `site/examples/` may still back a claim as CI
+proof (see "Examples"). The foundations page keeps it out of sight: the
+learner never sees its name and is never asked to run it. The page may
+quote a command or a file name in an inline code span, and may show
+output in a `text` fence.
+
+`mise run data` (`site/scripts/lib/data.mjs`, `checkFoundationsAudience`)
+fails a foundations lesson page that contains any of these, and reports
+the file, the line and what it matched:
+
+- a `<Predict run=...>` tag;
+- a fenced block tagged `sh`, `bash`, `shell`, `python` or `json`;
+- the words `terminal`, `python3` or `git clone`, in any casing, outside
+  an inline code span or a fence.
+
+`FOUNDATIONS_EXEMPT` in `data.mjs` lists the lessons written before the
+rule, one line each with the issue that rewrites it (#237, #238 and #284
+as of 2026-09-24). Every entry is one full lesson id. The list shrinks to
+zero as those land: a listed lesson that the check would pass is a stale
+entry, and the check fails on it until the line is removed.
 
 ## Widgets
 
