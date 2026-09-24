@@ -172,10 +172,11 @@ lessons in course order with their `title` as the label. In a course with
 parts, each part becomes a sidebar group under the course, with a plain
 label, holding its live lessons, and a part with no live lesson yet is
 left out. Starlight gives a group no link of its own, so the course link
-is the group's first item with the `group-link` class, and
-`overrides/SidebarSublist.astro` renders it as the heading. The topic map
-in the Reference group is the heading of the per-area topic groups the
-same way. The menu shows a new lesson as soon as its page is merged, with
+is the group's first item with a `data-group-link` attribute, and
+`overrides/SidebarSublist.astro` renders it as the heading, next to a
+caret that only toggles the group. The topic map in the Reference group
+is the heading of the per-area topic groups the same way, and those area
+groups get the same plain label as a part. The menu shows a new lesson as soon as its page is merged, with
 no edit to the config.
 
 ## Going live

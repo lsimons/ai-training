@@ -76,7 +76,7 @@ function topicSidebar() {
  * "Sidebar"). A course with parts nests each part as a group. A lesson is live
  * when its page exists, so a new lesson appears in the menu the moment its
  * page lands. Lesson labels come from the lesson YAML, the same source as the
- * page title. The `group-link` class on the first link is what makes
+ * page title. The `data-group-link` attribute on the first link is what makes
  * overrides/SidebarSublist.astro render it as the heading (lib/sidebar-groups.ts).
  */
 function courseSidebar() {
@@ -87,6 +87,7 @@ function courseSidebar() {
 			if (!a) throw new Error(`groups.yaml names area ${slug}, but src/data/areas/${slug}/ does not exist`);
 			const course = a.courses.find((c) => c.data.id === slug)?.data;
 			if (!course) throw new Error(`src/data/areas/${slug}/courses/${slug}.yaml is missing`);
+			const name = a.area?.name ?? slug;
 			const byId = new Map(a.lessons.map((l) => [l.data.id, l.data]));
 			const lessonItem = (/** @type {string} */ id) => {
 				const l = byId.get(id);
@@ -101,9 +102,9 @@ function courseSidebar() {
 					})
 				: courseLessonIds(course).flatMap(lessonItem);
 			return {
-				label: a.area?.name ?? slug,
+				label: name,
 				collapsed: false,
-				items: [{ slug, label: a.area?.name ?? slug, attrs: { class: 'group-link' } }, ...items],
+				items: [{ slug, label: name, attrs: { 'data-group-link': '' } }, ...items],
 			};
 		}),
 	}));
@@ -194,7 +195,7 @@ export default defineConfig({
 						{
 							label: 'Topic map',
 							collapsed: true,
-							items: [{ slug: 'map', label: 'Topic map', attrs: { class: 'group-link' } }, ...topicSidebar()],
+							items: [{ slug: 'map', label: 'Topic map', attrs: { 'data-group-link': '' } }, ...topicSidebar()],
 						},
 						{ slug: 'glossary', label: 'Glossary' },
 					],
