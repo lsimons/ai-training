@@ -19,8 +19,8 @@ problem.
 The basic material (AI concepts, AI safety, using AI agents) is written for
 anyone doing knowledge work. The rest is written for software engineers. The
 site is static HTML with interactive lessons that keep your progress in your
-browser, and you can also run it locally from a Claude Code session with
-Claude acting as a tutor.
+browser, and you can also study a lesson from a Claude Code or opencode
+session with Claude acting as a tutor.
 
 **Status: release 1 is live, with three to eight lessons per area and twenty-five in total.** The
 design is in [`docs/spec/`](./docs/spec/) and the open work is in the
