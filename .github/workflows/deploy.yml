@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    # The site renders nothing under docs/agents/ (process docs and session
+    # records), so a push that only changes those files doesn't deploy.
+    paths-ignore: ["docs/agents/**"]
   workflow_dispatch:
 
 permissions:
