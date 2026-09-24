@@ -32,7 +32,7 @@ This is a rebuild of
 [agent-engineer-course](https://github.com/lsimons/agent-engineer-course), a
 fork of Addy Osmani's [agent-engineer](https://github.com/addyosmani/agent-engineer)
 course with a Starlight setup from Ivar Soares Urdalen. It adopts the
-pedagogy of Harvard's [CS50](https://cs50.harvard.edu/) and references the
+pedagogy of Harvard's [CS50](https://cs50.harvard.edu/x/) and references the
 public courses on [Claude Academy](https://academy.claude.com/). See
 [`NOTICE.md`](./NOTICE.md) and spec [S02](./docs/spec/S02-topic-map.md) for
 what's reused from where and under which terms.

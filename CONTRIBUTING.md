@@ -40,7 +40,7 @@ must be green.
 
 ## Commit messages
 
-Follow [Conventional Commits](https://conventionalcommits.org/): `type(scope): description`.
+Follow [Conventional Commits](https://www.conventionalcommits.org/): `type(scope): description`.
 
 Git hooks (formatting, linting, link checking, secret scanning, commit-message linting) are managed with [prek](https://prek.j178.dev). The markdownlint and commitlint hooks run from the site's bun install, so install that first, then the hooks, once per clone:
 
