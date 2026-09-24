@@ -1,11 +1,10 @@
 import {
-	absoluteUrl,
+	type BundleSources,
 	buildLessonBundles,
 	bundleOf,
-	type BundleSources,
 	lessonUrl,
 	proseOf,
-	type SiteInfo,
+	setAsideCode,
 } from '@lib/lesson-bundles';
 import type { Lesson } from '@lib/lessons';
 import { describe, expect, it, vi } from 'vitest';
@@ -13,23 +12,33 @@ import { competencies, docs, topics } from './content';
 
 vi.mock('astro:content', async () => (await import('./content')).mockContent());
 
-const site: SiteInfo = { site: 'https://lsimons.github.io', base: '/ai-training' };
+const site = 'https://lsimons.github.io';
 const ROOT = 'https://lsimons.github.io/ai-training';
 
-describe('absoluteUrl and lessonUrl', () => {
-	it('prepends site and base once, and leaves a URL with a scheme alone', () => {
-		expect(absoluteUrl('/guides/tutor/', site)).toBe(`${ROOT}/guides/tutor/`);
-		expect(absoluteUrl('/ai-training/guides/tutor/', site)).toBe(`${ROOT}/guides/tutor/`);
-		expect(absoluteUrl('/ai-training', site)).toBe(ROOT);
-		expect(absoluteUrl('https://example.com/x', site)).toBe('https://example.com/x');
-		expect(absoluteUrl('mailto:a@b.c', site)).toBe('mailto:a@b.c');
-		expect(() => absoluteUrl('guides/', site)).toThrow(/root-relative/);
+describe('lessonUrl', () => {
+	it('is the lesson page under site and base', () => {
 		expect(lessonUrl('safety/agent-risk', site)).toBe(`${ROOT}/safety/agent-risk/`);
 	});
 });
 
+describe('setAsideCode', () => {
+	it('sets fenced blocks and inline code aside and restores them byte for byte', () => {
+		const src = 'A `<Tool>` here.\n\n````md\n```\ninner\n```\n````\n\n~~~ts\nPromise<X[]>\n~~~\nEnd.';
+		const { text, restore } = setAsideCode(src);
+		expect(text).not.toContain('<Tool>');
+		expect(text).not.toContain('Promise');
+		expect(text).not.toContain('inner');
+		expect(restore(text)).toBe(src);
+	});
+	it('leaves an unclosed fence as code to the end', () => {
+		const { text, restore } = setAsideCode('```\nopen\n<Tag>');
+		expect(text).toMatch(/^\uE000\d+\uE001$/);
+		expect(restore(text)).toBe('```\nopen\n<Tag>');
+	});
+});
+
 describe('proseOf', () => {
-	it('drops imports, omits widgets, and renders components to Markdown', () => {
+	it('drops the import block, omits widgets, and renders components to Markdown', () => {
 		const md = proseOf(
 			[
 				"import { Choice, Pitfall, Exercise, Recap } from '@components/lesson';",
@@ -96,13 +105,74 @@ describe('proseOf', () => {
 			].join('\n'),
 		);
 	});
-	it('fences Prompt and Response with a fence longer than any inside them', () => {
+	it('fences Prompt and Response with a fence longer than any inside, and keeps the illustrative caption', () => {
 		const md = proseOf(
-			'<Prompt model="illustrative">\nSay:\n\n```python\nprint(1)\n```\n</Prompt>\n<Response>\nOk.\n</Response>\n',
+			'<Prompt model="illustrative" recorded="illustrative">\nSay:\n\n```python\nprint(1)\n```\n</Prompt>\n<Response>\nOk.\n</Response>\n',
 			site,
 		);
 		expect(md).toBe(
-			'#### Prompt\n\n````text\nSay:\n\n```python\nprint(1)\n```\n````\n\n#### Response\n\n```text\nOk.\n```\n',
+			'#### Prompt (illustrative, not a recorded transcript)\n\n````text\nSay:\n\n```python\nprint(1)\n```\n````\n\n#### Response\n\n```text\nOk.\n```\n',
+		);
+		expect(proseOf('<Prompt model="claude-x" recorded="2026-09">\nHi.\n</Prompt>\n', site)).toBe(
+			'#### Prompt · claude-x, recorded 2026-09\n\n```text\nHi.\n```\n',
+		);
+	});
+	it('copies code unchanged: imports, tags, XML and links inside fences or code spans', () => {
+		const src = [
+			"import { Pitfall } from '@components/lesson';",
+			'',
+			'Use `<Tool>` and `[b](/guides/y/)` as written.',
+			'',
+			'```python',
+			'import fnmatch',
+			'',
+			'def f(): return fnmatch.fnmatchcase("a", "a")',
+			'```',
+			'',
+			'```ts',
+			'const p: Promise<LessonBundle[]> = build();',
+			'```',
+			'',
+			'```xml',
+			'<Doc><Title>x</Title></Doc>',
+			'```',
+			'',
+			'```md',
+			'[see](/guides/z/)',
+			'```',
+			'',
+			'<Pitfall title="Real">',
+			'Text with `<API>` and a [link](/guides/x/).',
+			'</Pitfall>',
+		].join('\n');
+		const md = proseOf(src, site);
+		expect(md).toBe(
+			[
+				'Use `<Tool>` and `[b](/guides/y/)` as written.',
+				'',
+				'```python',
+				'import fnmatch',
+				'',
+				'def f(): return fnmatch.fnmatchcase("a", "a")',
+				'```',
+				'',
+				'```ts',
+				'const p: Promise<LessonBundle[]> = build();',
+				'```',
+				'',
+				'```xml',
+				'<Doc><Title>x</Title></Doc>',
+				'```',
+				'',
+				'```md',
+				'[see](/guides/z/)',
+				'```',
+				'',
+				'#### Pitfall: Real',
+				'',
+				`Text with \`<API>\` and a [link](${ROOT}/guides/x/).`,
+				'',
+			].join('\n'),
 		);
 	});
 	it('keeps the children of an unknown component and rejects an unclosed one', () => {
@@ -148,18 +218,21 @@ describe('bundleOf and buildLessonBundles', () => {
 		expect(risk?.assumes).toEqual([
 			{ objective: 'o1', lesson: 'concepts/how-models-work', section: 's', url: `${ROOT}/concepts/how-models-work/#s` },
 		]);
-		expect(risk?.prose).toContain('#### Prompt\n\n```text\nSummarize the memo.\n\n- Keep every date.');
+		expect(risk?.prose).toContain(
+			'#### Prompt (illustrative, not a recorded transcript)\n\n```text\nSummarize the memo.\n\n- Keep every date.',
+		);
 		expect(deeper?.checkpoints).toEqual([]);
+		expect(deeper?.topics.map((t) => t.id)).toEqual(['safety/depth']);
 	});
 	it('rejects a lesson whose topic or objective is unknown, and handles a bare assumes entry', () => {
-		const sources = {
+		const sources: BundleSources = {
 			topics: topics.map((t) => ({ ...t.data, definition: 'd' })),
 			competencies: competencies.map((c) => c.data) as BundleSources['competencies'],
 			items: [],
 			site,
 		};
 		const base = docs.find((d) => d.id === 'safety/agent-risk') as unknown as Lesson;
-		const lesson = (data: object): Lesson => ({ ...base, data: { ...base.data, serves: [], ...data } }) as Lesson;
+		const lesson = (data: object): Lesson => ({ ...base, data: { ...base.data, ...data } }) as Lesson;
 		expect(() => bundleOf(lesson({ covers: 'nowhere/none' }), sources)).toThrow(/covers nowhere\/none/);
 		expect(() => bundleOf(lesson({ serves: ['o9'] }), sources)).toThrow(/serves o9/);
 		const bare = bundleOf(

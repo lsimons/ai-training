@@ -3,6 +3,7 @@ import { buildCheckpointExport, type CheckpointItem } from './checkpoint-items';
 import { KIND_OF_TAG } from './checkpoint-rules';
 import { openingTagEnd, parseAttrs } from './checkpoint-source';
 import { getLessons, type Lesson } from './lessons';
+import { absoluteUrl } from './url';
 
 /**
  * Lesson bundles (spec S08 "Lesson bundles"): one JSON file per live lesson,
@@ -15,12 +16,6 @@ import { getLessons, type Lesson } from './lessons';
 
 /** Bumped when a field changes meaning; equal to the tutor instruction file's `version` (S08). */
 export const BUNDLE_VERSION = 1;
-
-/** Astro's `site` (an origin such as `https://lsimons.github.io`) and `base` (`/ai-training`, no trailing slash). */
-export interface SiteInfo {
-	site: string;
-	base: string;
-}
 
 export interface BundleTopic {
 	id: string;
@@ -69,19 +64,12 @@ export interface BundleSources {
 	competencies: { id: string; objectives: Omit<BundleObjective, 'competency_url'>[] }[];
 	/** Every item of the site-wide checkpoint export. */
 	items: CheckpointItem[];
-	site: SiteInfo;
-}
-
-/** A root-relative path (`/guides/foo/`) as an absolute URL. A path that already has the base keeps it; an absolute URL is returned as is. */
-export function absoluteUrl(path: string, { site, base }: SiteInfo): string {
-	if (/^[a-z][a-z0-9+.-]*:/i.test(path)) return path;
-	if (!path.startsWith('/')) throw new Error(`absoluteUrl() takes a root-relative path or a URL, got ${path}`);
-	const origin = site.replace(/\/$/, '');
-	return path === base || path.startsWith(`${base}/`) ? `${origin}${path}` : `${origin}${base}${path}`;
+	/** Astro's `site`, the origin the absolute URLs start with. */
+	site: string;
 }
 
 /** The lesson page URL for a lesson id, `<site><base>/<area>/<lesson>/`. */
-export function lessonUrl(id: string, site: SiteInfo): string {
+export function lessonUrl(id: string, site: string): string {
 	return absoluteUrl(`/${id}/`, site);
 }
 
@@ -98,26 +86,61 @@ function fenced(text: string, lang = 'text'): string {
 
 const CHECKPOINT_TAGS = new Set(Object.keys(KIND_OF_TAG));
 
-/** The component names imported from `@components/widgets/`; their tags leave nothing in the prose. */
-function widgetNames(src: string): Set<string> {
-	const names = new Set<string>();
-	for (const m of src.matchAll(/^import\s+(\w+)\s+from\s+['"]@components\/widgets\/[^'"]+['"];?\s*$/gm)) {
-		names.add(m[1] as string);
-	}
-	return names;
+/**
+ * Code set aside while the prose passes run. A fenced block or an inline
+ * code span is swapped for a placeholder no lesson text contains, and `restore`
+ * puts the code back, so a `<Tag>` or a `](/path)` inside code is never read
+ * as a component or a link.
+ */
+interface CodeAside {
+	text: string;
+	restore: (s: string) => string;
 }
 
-/** One component, as plain Markdown. `children` is already rendered. */
+// Private-use characters, which no lesson text contains.
+const PLACEHOLDER = /\uE000(\d+)\uE001/g;
+
+/** The fenced blocks (```` ``` ```` or `~~~`, three or more, closed by a fence of the same character at least as long) and inline code spans of `src`, set aside. */
+export function setAsideCode(src: string): CodeAside {
+	const kept: string[] = [];
+	const keep = (code: string) => {
+		kept.push(code);
+		return `\uE000${kept.length - 1}\uE001`;
+	};
+	const lines = src.split('\n');
+	const out: string[] = [];
+	for (let i = 0; i < lines.length; i++) {
+		const line = lines[i] as string;
+		const open = /^(\s*)(`{3,}|~{3,})/.exec(line);
+		if (!open) {
+			out.push(line.replace(/(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/g, (m) => keep(m)));
+			continue;
+		}
+		const fence = open[2] as string;
+		const block = [line];
+		for (i++; i < lines.length; i++) {
+			block.push(lines[i] as string);
+			const close = /^\s*(`{3,}|~{3,})\s*$/.exec(lines[i] as string);
+			if (close && close[1]?.[0] === fence[0] && (close[1]?.length ?? 0) >= fence.length) break;
+		}
+		out.push(keep(block.join('\n')));
+	}
+	return {
+		text: out.join('\n'),
+		restore: (s) => s.replace(PLACEHOLDER, (_, n: string) => kept[Number(n)] ?? ''),
+	};
+}
+
+/** One component, as plain Markdown. `children` is already rendered, with code set aside; `restore` puts it back where the text is fenced. */
 function renderTag(
 	name: string,
 	attrs: Map<string, { value: string }>,
 	children: string,
-	widgets: Set<string>,
+	restore: CodeAside['restore'],
 ): string {
 	const str = (n: string) => attrs.get(n)?.value;
 	const body = children.trim();
 	const withHeading = (heading: string) => (body ? `${heading}\n\n${body}` : heading);
-	if (widgets.has(name)) return '';
 	if (CHECKPOINT_TAGS.has(name)) {
 		// A <Predict> without an objective is a worked example, not a checkpoint (S03 "Examples").
 		const label = attrs.has('objective') ? 'Checkpoint' : 'Example';
@@ -127,10 +150,18 @@ function renderTag(
 	switch (name) {
 		case 'Pitfall':
 			return withHeading(`#### Pitfall: ${str('title') ?? ''}`.trimEnd());
-		case 'Prompt':
-			return `#### Prompt\n\n${fenced(body)}`;
+		case 'Prompt': {
+			// The same caption `Prompt.astro` shows, so an invented transcript is marked as one here too.
+			const model = str('model') ?? '';
+			const recorded = str('recorded') ?? '';
+			const illustrative = model === 'illustrative' || recorded === 'illustrative';
+			const heading = illustrative
+				? 'Prompt (illustrative, not a recorded transcript)'
+				: `Prompt · ${model}, recorded ${recorded}`;
+			return `#### ${heading}\n\n${fenced(restore(body))}`;
+		}
 		case 'Response':
-			return `#### Response\n\n${fenced(body)}`;
+			return `#### Response\n\n${fenced(restore(body))}`;
 		case 'Exercise': {
 			const stretch = str('stretch');
 			return withHeading('## Exercise') + (stretch ? `\n\nStretch: ${stretch}` : '');
@@ -138,6 +169,7 @@ function renderTag(
 		case 'Recap':
 			return withHeading('## Recap');
 		default:
+			// Any other component, a widget included, is its children. A self-closing widget leaves nothing.
 			return body;
 	}
 }
@@ -146,8 +178,9 @@ function renderTag(
  * The component tags in `src`, rendered to Markdown (`renderTag`), children
  * first. A tag is `<Name ...>` with a capitalized name, self-closing or
  * closed by the first `</Name>` after it; components of one kind don't nest.
+ * `src` has its code set aside, so a tag inside code is not seen.
  */
-function renderComponents(src: string, widgets: Set<string>): string {
+function renderComponents(src: string, restore: CodeAside['restore']): string {
 	let out = '';
 	let pos = 0;
 	const tagStart = /<([A-Z][A-Za-z]*)\b/g;
@@ -166,11 +199,11 @@ function renderComponents(src: string, widgets: Set<string>): string {
 			const close = `</${name}>`;
 			const closeAt = src.indexOf(close, openEnd);
 			if (closeAt === -1) throw new Error(`unclosed <${name}> at offset ${start}`);
-			children = renderComponents(src.slice(openEnd, closeAt), widgets);
+			children = renderComponents(src.slice(openEnd, closeAt), restore);
 			end = closeAt + close.length;
 		}
 		// A component is a block of its own, so blank lines set it off from its neighbors.
-		const rendered = renderTag(name, attrs, children, widgets);
+		const rendered = renderTag(name, attrs, children, restore);
 		out += src.slice(pos, start) + (rendered ? `\n\n${rendered}\n\n` : '');
 		pos = end;
 	}
@@ -178,22 +211,30 @@ function renderComponents(src: string, widgets: Set<string>): string {
 }
 
 /** Every root-relative link and image in Markdown and raw HTML, made absolute. Links with a scheme, `#` and `mailto:` are left alone. */
-function absolutizeLinks(md: string, site: SiteInfo): string {
+function absolutizeLinks(md: string, site: string): string {
 	return md
 		.replace(/(!?\[[^\]]*\]\()(\/(?!\/)[^)\s]*)/g, (_, pre: string, path: string) => pre + absoluteUrl(path, site))
 		.replace(/((?:href|src)=")(\/(?!\/)[^"]*)/g, (_, pre: string, path: string) => pre + absoluteUrl(path, site));
 }
 
+/** The MDX import block: the `import` lines (and blank lines between them) before the first line of content. */
+function withoutImportBlock(body: string): string {
+	const lines = body.split('\n');
+	let i = 0;
+	while (i < lines.length && (/^import\s/.test(lines[i] as string) || (lines[i] as string).trim() === '')) i++;
+	return lines.slice(i).join('\n');
+}
+
 /**
- * The lesson body as Markdown for a reader without the components: imports
- * dropped, components rendered to plain text (a `Pitfall` becomes a titled
- * paragraph, a `Prompt` a fenced block), widgets omitted, links absolute.
+ * The lesson body as Markdown for a reader without the components: the
+ * import block dropped, components rendered to plain text (a `Pitfall`
+ * becomes a titled paragraph, a `Prompt` a fenced block), widgets omitted,
+ * links absolute. Fenced blocks and inline code are copied unchanged.
  */
-export function proseOf(body: string, site: SiteInfo): string {
-	const widgets = widgetNames(body);
-	const withoutImports = body.replace(/^import\s[^\n]*\n/gm, '');
-	const rendered = renderComponents(withoutImports, widgets);
-	return `${absolutizeLinks(rendered, site)
+export function proseOf(body: string, site: string): string {
+	const { text, restore } = setAsideCode(withoutImportBlock(body));
+	const rendered = absolutizeLinks(renderComponents(text, restore), site);
+	return `${restore(rendered)
 		.replace(/\n{3,}/g, '\n\n')
 		.trim()}\n`;
 }
@@ -203,8 +244,8 @@ export function bundleOf(lesson: Lesson, sources: BundleSources): LessonBundle {
 	const { site } = sources;
 	const { data } = lesson;
 	const topic = sources.topics.find((t) => t.id === data.covers);
-	if (data.covers && !topic) throw new Error(`${lesson.id}: covers ${data.covers}, which is not a topic`);
-	const objectives = (data.serves ?? []).map((id): BundleObjective => {
+	if (!topic) throw new Error(`${lesson.id}: covers ${data.covers}, which is not a topic`);
+	const objectives = data.serves.map((id): BundleObjective => {
 		const owner = sources.competencies.find((c) => c.objectives.some((o) => o.id === id));
 		const objective = owner?.objectives.find((o) => o.id === id);
 		if (!owner || !objective) throw new Error(`${lesson.id}: serves ${id}, which is in no competency`);
@@ -235,17 +276,15 @@ export function bundleOf(lesson: Lesson, sources: BundleSources): LessonBundle {
 		title: data.title,
 		mode: data.mode,
 		prose: proseOf(lesson.body ?? '', site),
-		topics: topic
-			? [
-					{
-						id: topic.id,
-						name: topic.name,
-						definition: topic.definition,
-						url: absoluteUrl(`/topics/${topic.id}/`, site),
-						concepts: topic.concepts.map((c) => ({ id: c.id, name: c.name, definition: c.definition })),
-					},
-				]
-			: [],
+		topics: [
+			{
+				id: topic.id,
+				name: topic.name,
+				definition: topic.definition,
+				url: absoluteUrl(`/topics/${topic.id}/`, site),
+				concepts: topic.concepts.map((c) => ({ id: c.id, name: c.name, definition: c.definition })),
+			},
+		],
 		objectives,
 		assumes,
 		checkpoints,
@@ -254,7 +293,7 @@ export function bundleOf(lesson: Lesson, sources: BundleSources): LessonBundle {
 }
 
 /** One bundle per live lesson (every lesson page), in lesson id order, so the output is the same on every build. */
-export async function buildLessonBundles(site: SiteInfo): Promise<LessonBundle[]> {
+export async function buildLessonBundles(site: string): Promise<LessonBundle[]> {
 	const [topics, competencies, lessons, { items }] = await Promise.all([
 		getCollection('topics'),
 		getCollection('competencies'),

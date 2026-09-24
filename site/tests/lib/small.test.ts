@@ -1,6 +1,6 @@
 import { DEFAULT_REVISION, isReviewable, KIND_OF_TAG } from '@lib/checkpoint-rules';
 import { jsonForScript } from '@lib/json';
-import { href } from '@lib/url';
+import { absoluteUrl, href } from '@lib/url';
 import { describe, expect, it } from 'vitest';
 
 describe('checkpoint rules', () => {
@@ -34,5 +34,15 @@ describe('href', () => {
 	it('prefixes the deploy base and refuses relative paths', () => {
 		expect(href('/progress/')).toBe('/ai-training/progress/');
 		expect(() => href('progress/')).toThrow(/root-relative/);
+		expect(absoluteUrl('/guides/tutor/', 'https://lsimons.github.io')).toBe(
+			'https://lsimons.github.io/ai-training/guides/tutor/',
+		);
+		expect(absoluteUrl('/ai-training/guides/', 'https://lsimons.github.io/')).toBe(
+			'https://lsimons.github.io/ai-training/guides/',
+		);
+		expect(absoluteUrl('/ai-training', 'https://lsimons.github.io')).toBe('https://lsimons.github.io/ai-training');
+		expect(absoluteUrl('https://example.com/x', 'https://lsimons.github.io')).toBe('https://example.com/x');
+		expect(absoluteUrl('mailto:a@b.c', 'https://lsimons.github.io')).toBe('mailto:a@b.c');
+		expect(() => absoluteUrl('guides/', 'https://lsimons.github.io')).toThrow(/root-relative/);
 	});
 });
