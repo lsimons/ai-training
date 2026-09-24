@@ -40,6 +40,11 @@ def test_parse_ini_reads_sections_comments_and_continuations() -> None:
     assert config["[*.{yaml,yml}]"] == {"BasedOnStyles": "Vale", "TokenIgnores": "(https?://\\S+)"}
 
 
+def test_parse_ini_keeps_a_comment_line_inside_a_continued_value() -> None:
+    text = "Packages = a.zip, \\\n; b.zip, \\\n  c.zip\nVocab = v\n"
+    assert vale_configs.parse_ini(text)[""] == {"Packages": "a.zip, ; b.zip, c.zip", "Vocab": "v"}
+
+
 def test_parse_ini_rejects_a_repeated_key_in_one_section() -> None:
     with pytest.raises(ValueError, match=r"key k is set twice in section \[s\]"):
         vale_configs.parse_ini("[s]\nk = one\nk = two\n")
