@@ -264,10 +264,12 @@ description = "Fail when .vale.ini and .vale-extended.ini disagree on a shared s
 hide = true
 run = "scripts/vale_configs.py"
 
-# Which files: every tracked Markdown/MDX file plus the topic, competency
-# and bibliography YAML under site/src/data (Vale reads YAML as plain text,
-# keys included). Going through `git ls-files` is what excludes site/dist,
-# node_modules and the synced style package without a second ignore list.
+# Which files: every Markdown/MDX file plus the topic, competency and
+# bibliography YAML under site/src/data (Vale reads YAML as plain text,
+# keys included), tracked or not yet added. `--others --exclude-standard`
+# takes in a new page before its `git add`, so it is checked too (#345).
+# Going through `git ls-files` is what excludes site/dist, node_modules
+# and the synced style package without a second ignore list.
 # site/examples is left out: the fixture repos there are test inputs, not
 # prose. docs/prose/reports quotes flagged sentences on purpose and would
 # flag again. CLAUDE.md is a symlink to AGENTS.md and would count twice.
@@ -287,8 +289,8 @@ description = "Vale prose lint over Markdown, MDX and the site data YAML. Errors
 depends = ["prose-check-packages", "prose-check-configs"]
 run = """
 set -e
-files=$(git ls-files -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
-yaml=$(git ls-files -- 'site/src/data/**/*.yaml' 'site/src/data/*.yaml')
+files=$(git ls-files --cached --others --exclude-standard -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
+yaml=$(git ls-files --cached --others --exclude-standard -- 'site/src/data/**/*.yaml' 'site/src/data/*.yaml')
 # shellcheck disable=SC2086
 vale --no-exit $files
 # shellcheck disable=SC2086
@@ -307,8 +309,8 @@ description = "Vale prose lint with the extended (passive-voice) rules; advisory
 depends = ["prose-check-packages", "prose-check-configs"]
 run = """
 set -e
-files=$(git ls-files -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
-yaml=$(git ls-files -- 'site/src/data/**/*.yaml' 'site/src/data/*.yaml')
+files=$(git ls-files --cached --others --exclude-standard -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
+yaml=$(git ls-files --cached --others --exclude-standard -- 'site/src/data/**/*.yaml' 'site/src/data/*.yaml')
 # shellcheck disable=SC2086
 vale --no-exit --config .vale-extended.ini $files
 # shellcheck disable=SC2086
@@ -380,7 +382,7 @@ run = "uv run --locked pytest"
 description = "cspell (American English) over Markdown, MDX and the site data YAML"
 run = """
 set -e
-files=$(git ls-files -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md')
+files=$(git ls-files --cached --others --exclude-standard -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md')
 # shellcheck disable=SC2086
 bun site/node_modules/.bin/cspell --no-progress $files
 """
