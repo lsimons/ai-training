@@ -1,10 +1,20 @@
 id: building-agents/loop-on-an-sdk
 title: Rebuilding the loop on an agent SDK
+description: >-
+  Put the weather agent on the Claude Agent SDK, name the five parts of the hand-written loop the
+  SDK took over, set the turn and cost limits the defaults leave open, and see where the SDK's
+  compaction gets in the way of an evaluation.
 mode: explanation
 covers: building-agents/agent-loop
 serves: [building-agents/builds-agent-loop/uses-an-sdk]
 introduces: [agent-sdk]
-assumes: []
+assumes:
+  - objective: building-agents/builds-agent-loop/implements-the-loop
+    lesson: building-agents/stopping-the-loop
+    section: the-rules-that-end-a-run
+  - objective: building-agents/builds-agent-loop/implements-the-loop
+    lesson: building-agents/parallel-tool-calls
+    section: all-three-in-one-reply
 after: [building-agents/stopping-the-loop, building-agents/parallel-tool-calls]
 shorts: [When to drop to the raw API]
 exercise:
@@ -14,11 +24,28 @@ exercise:
     dispatch, retries, stopping, streaming) and the line in the live lesson's loop where each one
     lived. Stretch: rebuild the weather agent on an agent SDK with the maximum turns and a cost cap
     set explicitly, and test that both stop it.
-sources: [Academy building-with-the-claude-api, Academy claude-platform-101]
+sources:
+  - AEC-13
+  - Academy building-with-the-claude-api
+  - Academy claude-platform-101
+  - Claude Code agent loop
+  - Claude Code agent sdk python
+  - Claude Code custom tools
+  - Claude docs tool-runner
+  - Claude docs handle-tool-calls
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 issue: 196
 minutes: 15
 notes: >-
   Explanation mode because SDK code needs a real model and cannot run against the fixture in CI. The
-  SDK code blocks are shown as non-runnable and a match checkpoint pairs hand-loop parts with SDK
-  features. Expert-level objective. The Academy's loop against the real API is the reference
-  (Academy claude-platform-101, Academy building-with-the-claude-api).
+  SDK code blocks are shown as non-runnable (a graded Predict without `run`, which the component
+  marks as checked by hand) and a match checkpoint pairs hand-loop parts with SDK features.
+  Expert-level objective. The Academy's loop against the real API is the reference (Academy
+  claude-platform-101, Academy building-with-the-claude-api). The SDK shown is the Claude Agent SDK
+  for Python, and every identifier (package, `query`, `ClaudeAgentOptions`, `max_turns`,
+  `max_budget_usd`, `include_partial_messages`, the message classes, the result subtypes, the
+  `@tool` decorator and `create_sdk_mcp_server`) is on the two Claude Code pages cited. The vendor
+  docs give no option that turns compaction off, so the scenario answer records tool results as
+  they arrive instead of claiming a switch. The retry count is the CLI's `CLAUDE_CODE_MAX_RETRIES`
+  environment variable, on the Python reference page, and its default is quoted from there.

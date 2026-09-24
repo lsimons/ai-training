@@ -1,0 +1,366 @@
+import { Choice, MultiChoice, Match, Predict, Scenario, Pitfall, Exercise, Recap, MorePractice } from '@components/lesson';
+
+In this lesson we take the weather agent from [The agent loop](/building-agents/agent-loop/)
+and rebuild it on an agent SDK (software development kit), the Claude Agent
+SDK for Python. The loop we wrote by hand across the last four lessons is
+still there. It runs inside the library now. This lesson names what moved
+and what the SDK decides for you unless you say otherwise. The last section
+shows where the library gets in the way of an evaluation.
+
+The code on this page needs a real model and an API key, so it doesn't
+run in CI, and the one prediction on the page is marked as checked by hand.
+Every identifier on this page (the package, the classes, the option names,
+the result codes) is on the SDK's reference pages
+(@Claude Code agent sdk python) (@Claude Code agent loop), and the plan for
+this lesson records the date they were checked.
+
+## The same agent, twice
+
+The hand-written version from the live lessons is this loop, here in the
+form [Stopping the loop on purpose](/building-agents/stopping-the-loop/)
+left it. The tool is looked up by name, and the request and the result are
+appended to the message list. The harness checks run after every round, and
+the step limit is the last line.
+
+```python
+def run(question, model, tools=TOOLS, max_steps=4, max_errors=2, budget=5000, progress=None):
+    messages = [{"role": "user", "content": question}]
+    spent = 0
+    try:
+        for step in range(1, max_steps + 1):
+            reply = model(messages)
+            if "answer" in reply:
+                return outcome("end_turn", reply["answer"], messages)
+            tool = tools[reply["tool"]]
+            result = tool["fn"](**reply["args"])
+            messages.append({"role": "assistant", "content": reply})
+            messages.append({"role": "tool", "content": result, "is_error": is_error(result)})
+            if progress is not None:
+                progress(step, reply, result)
+            spent += len(str(messages))
+            reason = check(messages, spent, max_errors, budget)
+            if reason is not None:
+                return outcome(reason, None, messages)
+    except KeyboardInterrupt:
+        return outcome("interrupted", None, messages)
+    return outcome("max_steps", None, messages)
+```
+
+The SDK version of the same agent has no loop in it. The package is
+`claude-agent-sdk`, installed with `pip`, and it bundles the Claude Code
+binary that runs the loop (@Claude Code agent loop). The tool keeps its
+description and its function. The `@tool` decorator takes the name, the
+description and the argument types, and `create_sdk_mcp_server` groups the
+decorated functions into an in-process tool server that the options refer
+to by name (@Claude Code agent sdk python). The handler returns a `content`
+list, and `"is_error": True` marks a failed call so the model reads it as
+one (@Claude Code custom tools). The tool itself is the one from the first
+lesson, a function plus a description written for the caller (@AEC-13). A tool from a server called
+`weather` is named `mcp__weather__get_weather` in the model's view, and
+listing it in `allowed_tools` lets it run without a permission prompt.
+
+```python
+import asyncio
+
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, create_sdk_mcp_server, query, tool
+
+WEATHER = {"Amsterdam": "14°C, rain", "Lisbon": "27°C, sun"}
+
+
+@tool("get_weather", "Current weather for a city. Args: city (str).", {"city": str})
+async def get_weather(args):
+    city = args["city"]
+    if city not in WEATHER:
+        return {"content": [{"type": "text", "text": f"error: no data for {city}"}], "is_error": True}
+    return {"content": [{"type": "text", "text": WEATHER[city]}]}
+
+
+weather_server = create_sdk_mcp_server(name="weather", tools=[get_weather])
+
+
+async def main():
+    options = ClaudeAgentOptions(
+        mcp_servers={"weather": weather_server},
+        allowed_tools=["mcp__weather__get_weather"],
+        max_turns=4,
+        max_budget_usd=0.10,
+    )
+    try:
+        async for message in query(prompt="What is the weather in Amsterdam?", options=options):
+            if isinstance(message, ResultMessage):
+                if message.subtype == "success":
+                    print(message.result)
+                else:
+                    print(f"stop: {message.subtype}")
+    except Exception as error:
+        print(f"ended: {error}")
+
+
+asyncio.run(main())
+```
+
+`query` returns an async iterator, and the `for` body sees every message
+the loop produces. The program above ignores every one of them except the last,
+the `ResultMessage`, which holds the final text in `result` when the run
+succeeded and a `subtype` that names what ended the run otherwise
+(@Claude Code agent loop). The `try` is there because a single-shot `query`
+raises after it has yielded an error result, so a program that wants to
+carry on after a limit wraps the loop (@Claude Code agent loop).
+
+## What moved into the library
+
+Read the two programs side by side and five parts of the hand-written loop
+have no counterpart in the SDK version. Each one is still running, inside
+the SDK, with a name you can look up.
+
+**Messages.** The hand loop appended two entries per round,
+`messages.append({"role": "assistant", "content": reply})` and the tool
+message after it. The SDK keeps the conversation itself and yields each
+entry as it is made: an `AssistantMessage` per content block of the
+model's reply, and a `UserMessage` with the tool result after each tool
+runs (@Claude Code agent loop). Your code reads them as they pass and
+never edits the list.
+
+**Dispatch.** The hand loop looked the tool up and called it,
+`result = tool["fn"](**reply["args"])`, and the parallel lesson's
+`results = execute(reply["calls"])` ran a whole list. The SDK runs each
+requested tool and, when the model asks for more than one in one turn, runs the
+read-only ones together and the state-changing ones one after another. A
+custom tool runs one at a time unless its annotations mark it read-only
+with `readOnlyHint` (@Claude Code agent loop). The permission check runs
+before dispatch: a tool that isn't allowed gets a rejection message
+as its result, which is the same path the hand loop's `error:` string took
+back to the model.
+
+**Retries.** The hand loop had one kind of retry, the model's own: a tool
+error went back as a result, `result = f"error: {exc}"`, and the model
+could ask again. It had no retry for the model call itself, because the
+fake model never failed. The SDK adds that one. The Claude Code binary
+retries a failed API call, up to the count in the `CLAUDE_CODE_MAX_RETRIES`
+environment variable, which defaults to 10 (@Claude Code agent sdk python).
+A tool error still goes back to the model as a result, as in your loop.
+
+**Stopping.** The hand loop had `for step in range(1, max_steps + 1):`,
+`if spent > budget:` and the `KeyboardInterrupt` handler. The SDK ends the
+loop when the model replies without a tool call, when `max_turns` tool-use
+turns have run, or when the client-side cost estimate reaches
+`max_budget_usd`, and it reports which one in `ResultMessage.subtype`:
+`success`, `error_max_turns` or `error_max_budget_usd`
+(@Claude Code agent loop). Ctrl-C is `interrupt()` on a `ClaudeSDKClient`
+session, and a single-shot `query` ends with `error_during_execution` when
+something cuts it off.
+
+**Streaming.** The hand loop's `progress(step, reply, result)` printed a
+line per round so a person could watch. The SDK's message stream is that
+hook, made permanent: handle `AssistantMessage` for a line per tool call,
+and set `include_partial_messages=True` in the options to get
+`StreamEvent` messages with the text as it is generated
+(@Claude Code agent loop).
+
+<Match id="match-loop-parts" objective="building-agents/builds-agent-loop/uses-an-sdk"
+  concepts={['agent-sdk']}
+  context="The lesson shows a hand-written agent loop (a message list, a tool lookup and call, tool errors returned as results, a step limit and a character budget, and a progress callback) next to the same agent on the Claude Agent SDK, where each of those parts is a library feature."
+  title="Where did each part go?" hint="For each line of the hand loop, ask which SDK message, option or behavior does the same job now."
+  options={[
+    'AssistantMessage and UserMessage yielded per block and per tool result',
+    'The SDK runs the requested tools, read-only ones together',
+    'CLAUDE_CODE_MAX_RETRIES on the API call, and a tool error still returns as a result',
+    'max_turns and max_budget_usd, reported in ResultMessage.subtype',
+    'include_partial_messages and StreamEvent',
+  ]}
+  rows={[
+    { statement: 'messages.append({"role": "tool", "content": result, "is_error": is_error(result)})', option: 0, why: 'Which SDK message carries a tool result back, and who appends it?' },
+    { statement: 'result = tool["fn"](**reply["args"])', option: 1, why: 'Which part of the SDK calls the function the model asked for?' },
+    { statement: 'result = f"error: {exc}" if str(exc) else f"error: {type(exc).__name__}"', option: 2, why: 'A tool error went back to the model as a result. What does the SDK add on the model-call side?' },
+    { statement: 'for step in range(1, max_steps + 1):', option: 3, why: 'Which option counts tool-use turns, and where is the count reported when it runs out?' },
+    { statement: 'progress(step, reply, result)', option: 4, why: 'Which option turns on the per-token events a watcher reads?' },
+  ]}
+  rationale="Each line of the hand loop became a message type, an option or a documented behavior. Knowing the pairing is what lets you find the SDK's version of a bug you would have fixed in your own loop.">
+
+Match each line of the hand-written loop with the SDK feature that does
+its job now.
+
+</Match>
+
+<MultiChoice id="review-what-moved" phase="review"
+  objective="building-agents/builds-agent-loop/uses-an-sdk"
+  concepts={['agent-sdk']}
+  context="A developer moves a hand-written agent loop, with its own message list, tool dispatch, error handling, stop rules and progress printing, onto an agent SDK that runs the loop inside the library."
+  title="What does the SDK take over?" hint="Which of these were lines in the hand loop, and which were never the loop's job?"
+  options={[
+    { text: 'Appending the tool result to the conversation after each tool runs.', correct: true },
+    { text: 'Deciding which tool the model asks for.', why: 'The model decides that in both versions. The loop and the SDK only run what it asked for.' },
+    { text: 'Ending the run when the turn count or the cost cap is reached.', correct: true },
+    { text: 'Writing the description the model reads to choose the tool.', why: 'The description stays yours. The decorator carries it to the model but does not write it.' },
+  ]}>
+
+Which of these jobs move from your code into the SDK?
+
+</MultiChoice>
+
+## The limits the defaults leave open
+
+Both options in the SDK program above are set on purpose. Without them the
+SDK has no turn limit and no cost limit, and the loop runs until the model
+stops asking for tools (@Claude Code agent loop). That default suits a
+demo, where a person watches the run and can stop it. A production agent
+gets a prompt no one is watching, and an open-ended one ("improve this
+codebase") keeps a model busy for a long time. The SDK's own guidance is to
+set a budget for a production agent, and the hand loop taught the same
+rule the hard way when `model_never_answers` ran into `max_steps`.
+
+`max_turns` and `max_budget_usd` count differently from your own loop's limits.
+`max_turns` counts tool-use turns, so a run that answers in text on its
+first reply uses none, and `max_turns=2` in a run that needs three tool
+rounds stops before the third (@Claude Code agent loop). `max_budget_usd`
+compares a running cost estimate that the client keeps, and a subagent's
+spend counts toward it (@Claude Code agent loop). When either limit ends
+the run, the `result` field is absent. A program reads `subtype` first and
+`result` only after `success`.
+
+<Predict id="predict-turn-limit" objective="building-agents/builds-agent-loop/uses-an-sdk"
+  concepts={['agent-sdk', 'stop-conditions']}
+  context="The lesson's SDK program prints message.result when the ResultMessage subtype is success and otherwise prints stop: followed by the subtype. It sets max_turns=4 and max_budget_usd=0.10."
+  title="Predict the stop line" hint="Which subtype does the SDK report when the turn limit ends a run, and which branch of the program prints it?"
+  answer="stop: error_max_turns">
+
+Suppose a model keeps asking for one more city until the turn limit ends
+the run, and read only the line the `async for` body prints. Which line is
+it? This example doesn't run in CI, and you check it against the SDK's
+reference page yourself.
+
+</Predict>
+
+<Pitfall title="Trusting the defaults in production">
+A team ships an SDK agent that worked in every demo. In production one
+prompt sends the model reading files for an hour, and the bill arrives
+before anyone sees the run. The SDK had no turn limit and no cost limit
+because nobody set one, and the defaults were chosen for a run that a
+person watches. The rule: every limit your hand loop had, set explicitly in
+the SDK options, and test that each one stops the agent before you deploy.
+</Pitfall>
+
+## What the SDK makes harder
+
+An SDK is a set of decisions someone else made, and most of them are the
+ones you would have made. Some aren't, and the one that surprises
+evaluation work is context management. When the conversation nears the
+context window's limit, the SDK compacts it: older history is replaced with
+a summary, and a `SystemMessage` with subtype `compact_boundary` marks
+where that happened (@Claude Code agent loop). For a long run this is what
+keeps the agent going. For an evaluation that grades the trajectory, the
+tool results it wanted to read are now a summary, and the SDK's reference
+pages don't document an option that turns compaction off.
+
+The way around it is the message stream. Every tool result passes your
+code as a `UserMessage` before compaction can touch it, and a `PostToolUse`
+hook sees it as well. An evaluation harness that records the results as
+they arrive grades its own log. A `PreCompact` hook runs before each
+compaction and is the documented place to archive the full transcript
+(@Claude Code agent loop). Persistent instructions go in `CLAUDE.md`,
+loaded through `setting_sources`, because that file is sent on every
+request and a summary might drop an instruction from the first prompt
+(@Claude Code agent loop).
+
+<Scenario id="compaction-drops-results" objective="building-agents/builds-agent-loop/uses-an-sdk"
+  concepts={['agent-sdk', 'stop-conditions']}
+  context="An evaluation grades an SDK agent's trajectory by reading the tool results in the conversation after the run. In long runs the SDK compacts the conversation, replacing older messages with a summary, and the vendor documents no option that turns compaction off."
+  title="The evaluation reads a summary" hint="What does your code see that the compacted history no longer holds?"
+  options={[
+    { text: 'Raise max_turns so the run ends before compaction triggers.', consequence: 'Compaction triggers on context size, not on turn count. A run with large tool outputs compacts early, and a higher turn limit makes the runs longer.' },
+    { text: 'Record each tool result from the UserMessage stream as it arrives, and grade that log.', correct: true, consequence: 'Your log holds every result in full, whatever the SDK later summarizes, and the evaluation reads your log.' },
+    { text: 'Ask the model in the prompt to keep every tool result in the conversation.', consequence: 'The model does not run compaction and cannot stop it. The instruction itself may be dropped from the summary.' },
+    { text: 'Read the summary and grade what it kept.', consequence: 'The summary keeps what the compactor thought mattered, which is not the evaluation\'s rubric. Grades change from run to run with the summary.' },
+  ]}>
+
+Your evaluation grades the tool results of each run. In the longer runs
+the results it needs are gone from the history, and a `compact_boundary`
+message sits where they were. What do you change?
+
+</Scenario>
+
+<Choice id="review-defaults" phase="review"
+  objective="building-agents/builds-agent-loop/uses-an-sdk"
+  concepts={['agent-sdk', 'stop-conditions']}
+  context="An agent SDK runs the loop inside the library and exposes options for a maximum number of turns and a maximum cost. Neither is set unless the developer sets it."
+  title="Which limit applies?" hint="What ends the run when neither option is set, and who decides?"
+  options={[
+    { text: 'The SDK applies a default turn limit that is high enough for most tasks.', why: 'The reference gives no default turn limit. Unset means no limit.' },
+    { text: 'The run ends when the model stops asking for tools, and nothing else ends it.', correct: true },
+    { text: 'The cost limit falls back to the account\'s monthly budget.', why: 'The option compares against a client-side estimate for this run. It has no link to billing settings.' },
+  ]}>
+
+A developer ships an SDK agent without setting `max_turns` or
+`max_budget_usd`. What ends a run?
+
+</Choice>
+
+### When to drop to the raw API
+
+The SDK is the top of a stack of layers. Below it, the client library for the
+Claude API has a tool runner that loops over your functions with
+`client.beta.messages.tool_runner`, bounds the loop with `max_iterations`,
+and hands back the message history when you take it over for one
+iteration (@Claude docs tool-runner). Below that runs the manual loop
+against the Messages API, where you build the `tool_result` block yourself
+(@Claude docs handle-tool-calls). Drop a layer when the layer above makes
+a decision you need to make yourself. A message list you must edit between
+rounds is the usual case. The Academy's platform course walks
+that manual loop against the real API, and it is the loop you wrote in
+this course with the field names changed
+(@Academy claude-platform-101) (@Academy building-with-the-claude-api).
+
+<Exercise stretch="Rebuild the weather agent on the SDK with max_turns=1 and a small max_budget_usd, run it twice with a prompt that needs two tool rounds and once with a long prompt, and record which subtype ends each run. Both limits must stop it at least once.">
+
+From the two programs on this page, write a five-row table. The rows are
+messages, dispatch, retries, stopping, and streaming. The first column is
+the line of the hand-written loop where that part lived, copied from the
+`agent.py` of the lesson that had it. The second is the SDK message type,
+option or documented behavior that does the job now, and the third is the
+page of the SDK reference where you found it. Doing this once gives you the
+map you need when the SDK's version behaves differently from yours.
+
+A good result: every row quotes a real line from `agent-loop`,
+`stopping-the-loop` or `parallel-tool-calls`, and every SDK entry is a
+name you can search for on the reference page. Which row was hardest to
+fill, and is that because the SDK hides it or because your loop never had
+it?
+
+</Exercise>
+
+<MorePractice>
+
+<Choice id="practice-tool-error" phase="practice"
+  objective="building-agents/builds-agent-loop/uses-an-sdk"
+  concepts={['agent-sdk']}
+  title="A tool the agent may not use" hint="What did the hand loop do with an unknown tool name, and what does the SDK do with a denied one?"
+  options={[
+    { text: 'The SDK raises on the tool call and the run ends with error_during_execution.', why: 'A denial is not a crash. The loop goes on.' },
+    { text: 'The SDK waits for a person to approve it.', why: 'Only when the permission mode and a callback ask for that. With no callback in default mode, the call is denied.' },
+    { text: 'The model receives a rejection as the tool result and tries another approach.', correct: true },
+  ]}>
+
+The model asks for a tool that isn't in `allowed_tools`, and no
+permission callback is set. What happens next?
+
+</Choice>
+
+</MorePractice>
+
+<Recap>
+
+1. An agent SDK runs the loop you wrote inside the library: messages,
+   dispatch, retries, stopping and streaming each have a name in the
+   reference, and the pairing is your map for debugging it
+   (@Claude Code agent loop).
+2. `max_turns` and `max_budget_usd` are unset by default, and the run
+   ends when the model stops asking for tools. Set both for a production
+   agent and read `subtype` before `result` (@Claude Code agent loop).
+3. Compaction replaces older history with a summary, so an evaluation
+   records tool results from the message stream or a hook instead of
+   reading them back from the conversation (@Claude Code agent loop).
+4. Below the agent SDK are the client library's tool runner and the manual
+   loop. Drop a layer when the layer above makes a decision you need to
+   make yourself (@Claude docs tool-runner) (@Claude docs handle-tool-calls).
+
+</Recap>
