@@ -699,3 +699,10 @@ Claude Code mcp:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/mcp
+Agent Skills spec:
+  type: reference
+  title: Agent Skills specification
+  container: agentskills.io
+  author: Anthropic and the Agent Skills contributors
+  license: Proprietary
+  url: https://agentskills.io/specification

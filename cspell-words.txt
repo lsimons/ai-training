@@ -66,6 +66,7 @@ microroute
 schubergphilis
 opencode
 ICMJE
+agentskills
 
 # Course and certification codes
 CCAO
