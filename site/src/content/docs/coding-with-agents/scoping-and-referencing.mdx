@@ -1,0 +1,361 @@
+import { Choice, Match, MultiChoice, Predict, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we give a coding agent the same small task twice. The first
+brief is one sentence, and we watch which files the agent reads to make
+sense of it. The second brief says where the task is and where it stops:
+which files are in play, which are off limits, which function to imitate,
+which test to extend and which command proves it done. Then we compare the
+two sessions on the files they read and the diff they produce.
+
+The brief is the agent's context, and the agent grounds its work in what it
+reads, as [the retrieval lesson](/concepts/retrieval/) showed for a chat model: an answer rests on
+the passage it was given, and the passage can be the wrong one. A coding
+agent that picks its own files can pick the wrong ones too. The vendor of
+Claude Code gives the same advice for its tool: name the files, mention the
+constraints and point at the pattern to follow (@Claude Code best
+practices), and its short course has a module on managing context
+(@Academy claude-code-101). Where this lesson names a Claude Code feature it
+says so, and the source is checked on the date shown above the lesson.
+
+## The fixture
+
+The fixture is the to-do program from *Plan first, then drive the change
+from a failing test*, with the `clear` bug fixed and a few weeks of growth.
+It has grown an `export.py` that writes the list as CSV and a
+`docs/SPEC.md` that specifies every command. A `legacy/` directory holds
+the first version of the program, one file, kept for reference. It is in the course
+repository under
+`site/examples/coding-with-agents/scoping-and-referencing/fixture-repo/`.
+Copy that directory to a place of its own and change into it, as in the
+last lesson. Delete the copy and copy again to reset.
+
+Look at what is there before the agent does.
+
+<Predict id="run-files" title="Count the lines per file"
+  answer={`    8 AGENTS.md
+     23 README.md
+     16 docs/SPEC.md
+     28 export.py
+     57 legacy/todo_v1.py
+     13 render.py
+     27 store.py
+     45 test_todo.py
+     55 todo.py
+     18 todos.json
+    290 total`} run="coding-with-agents/scoping-and-referencing/files.py">
+Run this from inside the copy. The course prints the same table from its
+own copy of the fixture, and your `wc` may pad the numbers differently.
+
+```sh
+find . -type f | LC_ALL=C sort | xargs wc -l
+```
+</Predict>
+
+Ten files, 290 lines. An agent can read the whole repository. Even here, a
+vague brief makes it read files it doesn't need, and one of those files is
+a trap.
+
+<Predict id="run-tests" title="Run the tests"
+  answer="OK" run="coding-with-agents/scoping-and-referencing/tests.py">
+Run the tests and keep the last line.
+
+```sh
+python3 -m unittest -q 2>&1 | tail -1
+```
+</Predict>
+
+The task for this lesson is one `docs/SPEC.md` already specifies and nobody
+has built: an `undo` command that marks a done item as open again. The
+spec says it prints `open #<n>: <text>`, and `no item #<n>` when there is
+no such item.
+
+## What a vague brief makes the agent read
+
+Start your coding agent in the copy and give it the brief an engineer types
+when in a hurry.
+
+<Prompt model="illustrative" recorded="illustrative">
+Let me un-mark a done item.
+</Prompt>
+<Response>
+I searched the repository for how items are marked and unmarked, and read
+`todo.py`, `store.py`, `render.py`, `export.py`, `legacy/todo_v1.py` and
+`test_todo.py`.
+
+`legacy/todo_v1.py` already has an `undone` command that does this, with a
+`mark(items, number, done)` helper the `done` command shares. I'll port that
+design into `todo.py` with a `mark` helper and a rewritten `done`, and add
+an `undone` command that prints `reopened: <text>`. `export.py` gets a
+`state` value for reopened items so the CSV shows them. Go ahead?
+</Response>
+
+The transcripts in this lesson are illustrative: they show what such an
+exchange looks like and don't record a specific model's words. Your agent
+phrases it differently, and it may read a different set of files.
+
+Read the response as a list of what the agent did with the room the brief
+gave it. It read six of the ten files. It found the nearest plausible
+answer in `legacy/`, a file the project keeps for reference and nobody
+imports. The old command name and the old message come from there. It
+proposed to rewrite `done`, which works and which nobody asked about, and
+to change `export.py`, which the task doesn't touch. None of that is a
+model failure. The brief said nothing about where the task is or where it
+stops, and the agent filled the gap from what its search found.
+
+You can see why the search led there. The words of the brief are the words
+the agent greps for first.
+
+<Predict id="run-search" title="Search for the words of the brief"
+  answer={`done: 9 files
+    README.md
+    docs/SPEC.md
+    export.py
+    legacy/todo_v1.py
+    render.py
+    store.py
+    test_todo.py
+    todo.py
+    todos.json
+  undo: 2 files
+    docs/SPEC.md
+    legacy/todo_v1.py`} run="coding-with-agents/scoping-and-referencing/search.py">
+List the files that contain each word, ignoring case. The course runs the
+same search over its copy of the fixture and prints a count above each
+list.
+
+```sh
+for word in done undo; do
+  grep -ril "$word" . | sort
+done
+```
+</Predict>
+
+`done` is in nine of the ten files, so it narrows nothing. `undo` is in
+two, and one of them is the legacy file, where it is part of `undone`. An
+agent that starts from a grep opens `legacy/todo_v1.py` and reads it with
+the same attention as `todo.py`. The spec, the file that says what
+`undo` should do, is the other hit, and the agent in the transcript didn't
+open it.
+
+**Scoping a task** is telling the agent where the task is and where it
+stops: which module, which files are in play and which are off limits. It
+has two effects you can see. The agent reads less, so more of its context
+window is left for the work, and the vendor's own guidance names an
+unscoped investigation that reads hundreds of files as a common failure
+(@Claude Code best practices). And the change stays where you put it. A
+well-meaning refactor of `done`, or a column in the CSV, is a change that
+spreads because nothing told the agent to stop.
+
+<Choice id="why-scope" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['scoping-a-task']}
+  context="A learner briefed a coding agent with one sentence on a small repository. The agent read most of the files, found an old command in a legacy directory that nobody imports, and proposed to port its design and to change an export module the task doesn't concern."
+  title="What did the vague brief cost?" hint="Which of these follows from the brief saying nothing about where the task stops?"
+  options={[
+    { text: 'The agent read files the task does not need and proposed changes in a module the task does not concern.', correct: true },
+    { text: 'The agent could not find the code that marks an item done, because the brief did not name the function.', why: 'It found that code at once. The problem is what else it found and treated as equally relevant.' },
+    { text: 'The agent refused the task until the learner named a file.', why: 'A coding agent fills a gap in the brief from what its search finds. It rarely stops to ask.' },
+    { text: 'The agent ran the tests before it had a plan, which wasted a turn.', why: 'Running the tests first is cheap and often right. The waste was in the files it read and the scope it chose.' },
+  ]}>
+Look at the illustrative response once more. What did the missing scope cost?
+</Choice>
+
+## Point at the file instead of describing it
+
+The second half of the fix is **referencing files**: naming the exact file,
+function or document the agent should read, so it loads the right context
+on the first try. "The function that marks an item done" is a description,
+and the agent has to search for what matches it, which is how it reached
+`legacy/`. A path and a line range are an address, and there is only one
+thing at an address.
+
+<Predict id="run-reference" title="Read what the reference points at"
+  answer={`16	def done(items, number):
+  17	    index = number - 1
+  18	    if index < 0 or index >= len(items):
+  19	        return f"no item #{number}"
+  20	    items[index]["done"] = True
+  21	    return f"done #{number}: {items[index]['text']}"`} run="coding-with-agents/scoping-and-referencing/reference.py">
+Print lines 16 to 21 of `todo.py` with their line numbers. This is what the
+brief in the next section will point at.
+
+```sh
+awk 'NR >= 16 && NR <= 21 { print NR "\t" $0 }' todo.py
+```
+</Predict>
+
+That is the example to imitate. A brief that says "add `undo` next to
+`done` in `todo.py` lines 16 to 21, with the same arguments and the same
+checks" leaves the agent one thing to read and one pattern to follow. The vendor's guidance for
+Claude Code says the same in its own words: point the agent at an existing
+pattern in the codebase and name a file that is a good example of it
+(@Claude Code best practices).
+
+A brief most often needs the same references. The **example to imitate**
+is the code the new code should look like, here `done` at `todo.py` lines
+16 to 21. The **test to extend** is the test the new one should sit next
+to, here `test_done_marks_the_numbered_item` at `test_todo.py` line 21.
+The **spec to follow** is the document that says what the result should
+do, here the `undo` row of `docs/SPEC.md`. Each one replaces a search with
+a read.
+
+In Claude Code, an `@` before a path in the prompt makes the agent read
+that file before it responds, so `@todo.py` is a reference the tool acts on
+as well as a hint to the model (@Claude Code best practices). In another
+agent, write the path. The agent reads it, and a path it can open is exact where
+a description it has to match is a guess.
+
+<Pitfall title="The nearest plausible file">
+An engineer asks an agent to "add an undo command, like the old one had".
+The agent greps for `undo`, finds `undone` in `legacy/todo_v1.py`, and
+builds the new command on that file: the old name, the old `reopened:`
+message, and a `mark` helper the current `todo.py` doesn't have. The tests
+pass, because nothing tests the message, and the spec that says
+`open #<n>: <text>` was never read. The rule: when there is a file the
+agent should imitate, name it, because otherwise the agent imitates the
+first file that looks similar, and the first one is often the wrong one.
+</Pitfall>
+
+<Match id="which-reference" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['referencing-files']}
+  context="A brief for a coding agent can point at three kinds of file: the code the new code should look like, the test file the new test should join, and the document that says what the result should do."
+  title="Which reference does each line of the brief need?" hint="For each line, ask what the agent would otherwise have to search for."
+  options={['The example to imitate', 'The test to extend', 'The spec to follow']}
+  rows={[
+    { statement: 'The new command should print the message the project agreed on', option: 2, why: 'Where is the agreed message written down?' },
+    { statement: 'The new function should handle a bad item number the way the existing one does', option: 0, why: 'Which existing code shows that handling?' },
+    { statement: 'The new behavior should be checked by the same suite as the rest', option: 1, why: 'Which file does the suite live in, and which test is closest?' },
+  ]}
+  rationale="Each line names a search the agent would otherwise run, and a path turns the search into a read.">
+Match each need in the brief to the reference that meets it.
+</Match>
+
+## Add what the code can't show, then run it again
+
+What is left is what no file in the repository says. The task-level
+boundary comes first: `store.py`, `render.py` and `export.py` are not part
+of this change, and `legacy/` is never part of any change. The project's
+instruction file, `AGENTS.md`, already contains the standing rule about
+`legacy/`, which is where a boundary that holds for every task belongs
+(@AEC-15). The boundary for this task goes in the brief. Then the check:
+the command that says the task is done, here the test suite.
+
+Reset the copy, start a fresh session, and hand over the scoped brief.
+
+<Prompt model="illustrative" recorded="illustrative">
+Add an `undo` command to `todo.py`. Imitate `done` at `todo.py` lines 16 to
+21: same arguments, same `no item #<n>` handling, and it sets `done` to
+`False`. The message is `open #<n>: <text>`, as the `undo` row of
+`docs/SPEC.md` says. Add the `undo` branch in `main` next to the `done`
+branch. Add a test next to `test_done_marks_the_numbered_item` in
+`test_todo.py` (line 21), or in a new `test_undo.py`. Change nothing in
+`store.py`, `render.py`, `export.py` or `legacy/`, and leave `todos.json`
+as it is. Done when `python3 -m unittest -q` prints `OK`.
+</Prompt>
+<Response>
+I read `todo.py`, `test_todo.py` and the `undo` row of `docs/SPEC.md`.
+
+Added `undo(items, number)` to `todo.py` after `done`, with the same index
+check, setting `done` to `False` and returning `open #<n>: <text>`. Added
+an `undo` branch in `main` after the `done` branch. Added `test_undo.py`
+with a test for the normal case and one for a bad number.
+
+`python3 -m unittest -q` prints `OK`. Files changed: `todo.py`,
+`test_undo.py` (new).
+</Response>
+
+The agent read `todo.py`, `test_todo.py` and the spec, where the vague
+brief made it read six files, and it never opened `legacy/`. The agent didn't rewrite `done`, and `export.py` isn't in the
+list, because the brief said where the task stops. Run the check yourself.
+
+<Predict id="run-tests-after" title="Run the suite after the change"
+  answer="OK" run="coding-with-agents/scoping-and-referencing/tests_after.py">
+Run the tests and keep the last line. The course applies the change the
+response describes to its own copy and checks this output against it.
+
+```sh
+python3 -m unittest -q 2>&1 | tail -1
+```
+</Predict>
+
+Then read the diff and prove the command against the list, on a copy.
+
+```sh
+git status --short
+```
+
+`git status` names two files, `todo.py` modified and `test_undo.py` new.
+The undo command itself:
+
+<Predict id="run-undo" title="Reopen a done item"
+  answer={`open #2: Call the plumber
+  1. [ ] Buy milk
+  2. [ ] Call the plumber
+  3. [x] Renew the passport
+  4. [ ] Water the plants
+  3 open, 1 done`} run="coding-with-agents/scoping-and-referencing/undo_after.py">
+Run `undo` and then `list` against a copy, so the committed file doesn't
+change.
+
+```sh
+cp todos.json /tmp/todos.json
+TODO_FILE=/tmp/todos.json python3 todo.py undo 2
+TODO_FILE=/tmp/todos.json python3 todo.py list
+```
+</Predict>
+
+The message is the one the spec asked for, because the brief named the
+spec. Compare the two sessions once more. The first read six files and
+proposed changes to three, one of them a rewrite nobody asked for. The
+second read three files and changed one, plus a new test. The diff a
+reviewer gets from the second session is one they can read in a minute.
+Scoping buys a smaller read for the agent now and a smaller read for the
+reviewer later.
+
+<Repair id="repair-the-scope" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['scoping-a-task', 'referencing-files']}
+  title="Fix the brief" hint="Which file would the agent have to search for, and which file should it never open?"
+  broken={`The CSV export should say "reopened" for items that were undone. Can you make that work?`}
+  model={`In export.py, the rows() function (lines 13 to 16) sets the state column to "done" or "open". Nothing records that an item was reopened, and docs/SPEC.md has no such state, so don't add one. Leave the export as it is and close the task. If you disagree, say why before changing anything. Do not touch todo.py, store.py, render.py or legacy/. Done when python3 -m unittest -q still prints OK.`}>
+A colleague hands this brief to the agent right after the `undo` change.
+Rewrite it so it names the file and lines in play, the files off limits,
+the spec that decides, and the check. Notice first whether the task should
+be done at all.
+</Repair>
+
+<MultiChoice id="which-lines-scope" phase="review" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['scoping-a-task', 'referencing-files']}
+  context="A brief for a coding agent can name where a task is and where it stops, and can point at files by path instead of describing them. Some lines in a brief do that work and some don't."
+  title="Which lines scope the task or reference a file?" hint="Which lines would change what the agent reads, or where it stops?"
+  options={[
+    { text: 'Add the command in `todo.py` next to `done` (lines 16 to 21), with the same checks.', correct: true },
+    { text: 'Please be careful and write clean code.', why: 'This changes nothing about what the agent reads or where it stops. It is a wish, and the agent already tries.' },
+    { text: 'Change nothing in `store.py`, `render.py`, `export.py` or `legacy/`.', correct: true },
+    { text: 'Use your best judgment about which files are involved.', why: 'This hands the scoping to the agent, which is what the vague brief did. The agent then reads whatever its search finds.' },
+    { text: 'The message format is in the `undo` row of `docs/SPEC.md`.', correct: true },
+  ]}>
+Which of these do the work of a scoped brief?
+</MultiChoice>
+
+<Exercise stretch="Do the same for a task you choose in a repository of your own. Write the vague brief first, then the scoped one, and count the files the agent reads for each.">
+Reset the copy of the fixture and run both sessions yourself with your
+coding agent. Give it the one-sentence brief first and write down every
+file it reads, from its own report or from the tool calls it shows. Reset
+the copy, start a fresh session, and give it the scoped brief from this
+lesson. Write down the files it reads again, run `python3 -m unittest -q`,
+and read `git status --short`. Plan on ten minutes.
+
+A good result: the second session read fewer files than the first and
+didn't open `legacy/`, the diff touches `todo.py` and one test file, and
+the message matches the `undo` row of `docs/SPEC.md`. Finish by deleting
+the copy. Then answer one question: which line of the scoped brief kept
+the agent out of `legacy/`, and would the `AGENTS.md` rule alone have done
+it?
+</Exercise>
+
+<Recap>
+1. Scope a task by saying which files are in play and which are off limits. The agent reads less, and the change stays where you put it (@Claude Code best practices).
+2. Reference files by path instead of describing them. Name the example to imitate, the test to extend and the spec to follow, or the agent imitates the first file that looks similar.
+3. A boundary that holds for every task belongs in the project's instruction file, and the boundary for this task belongs in the brief (@AEC-15).
+4. End the brief with the check that proves the task done, and run it yourself.
+5. A scoped brief gives the reviewer a small diff, and a small diff is the one that gets read.
+</Recap>

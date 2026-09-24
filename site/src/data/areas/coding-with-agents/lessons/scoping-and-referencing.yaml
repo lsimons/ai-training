@@ -1,11 +1,19 @@
 id: coding-with-agents/scoping-and-referencing
 title: Telling the agent where the task is and where it stops
+description: >-
+  Rewrite a vague brief for a small repository so it names the files in play, the files off limits,
+  the example to imitate, the test to extend and the check to run, and compare which files the agent
+  reads before and after.
 mode: tutorial
 covers: coding-with-agents/context
 serves: [coding-with-agents/ships-with-agent/gives-the-right-context]
 introduces: [scoping-a-task, referencing-files]
 assumes:
   - objective: concepts/explains-models/explains-grounding
+    lesson: concepts/retrieval
+    section: grounding-and-what-it-doesnt-fix
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 after: [coding-with-agents/plan-then-test]
 shorts: [why a path and a line number work better than a description of the code]
 exercise:
@@ -13,10 +21,20 @@ exercise:
   brief: >-
     Rewrite a vague brief for the fixture with the files in play, the files off limits, the example
     to imitate and the verification command, then compare which files the agent reads in both runs.
-sources: [AEC-15, Academy claude-code-101]
+sources: [AEC-15, Academy claude-code-101, Claude Code best practices]
 issue: 160
 minutes: 10
 notes: >-
   The plan named the topic concepts/grounding as assumed; taken as the objective
-  concepts/explains-models/explains-grounding. Sources: AEC-15 (Apache-2.0, adapted with
-  attribution), Academy claude-code-101.
+  concepts/explains-models/explains-grounding, taught by the live lesson concepts/retrieval in its
+  section "Grounding, and what it doesn't fix". The fixture is the plan-then-test to-do program
+  after its fix, grown with export.py (CSV), legacy/todo_v1.py (the old one-file version, which has
+  an `undone` function) and docs/SPEC.md (which specifies an `undo` command that isn't built). The
+  task is to add `undo` to todo.py next to `done`. A search for "undo" hits legacy/todo_v1.py and
+  the spec, so the vague brief sends the agent to the legacy file; the scoped brief names todo.py
+  lines 16-21 to imitate, test_todo.py line 21 to extend and docs/SPEC.md to follow. Vendor facts
+  (the `@` file reference, "scope the task" and "reference existing patterns" in the prompt table,
+  and the "infinite exploration" failure pattern) come from code.claude.com/docs/en/best-practices
+  and must be re-checked by review-by. AEC-15 backs the "do not modify" boundaries section of an
+  instruction file. Academy claude-code-101 is linked for its context-management module and nothing
+  is copied from it.
