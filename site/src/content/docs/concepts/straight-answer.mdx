@@ -239,7 +239,7 @@ correct after all. What do you do next?
   title="Which replies are sycophancy?"
   hint="In each reply, did the model move toward what the user wanted to hear, with no new fact to explain the move?"
   options={[
-    { text: 'A model says a formula skips a row. You reply that you are sure it does not, and the model agrees with you.', correct: true },
+    { text: 'A model says a formula skips a row. You only say you are sure it does not, with no new fact, and it changes its answer.', correct: true },
     { text: 'You ask the same question in two new chats and get two answers that say the same thing in different words.', why: 'Different wording from one run to the next comes from sampling. Neither answer followed what you hoped to hear.' },
     { text: 'You call your plan a great idea, and the review you get back repeats your own reasons for it in warmer words.', correct: true },
     { text: 'You ask a model to read a web page, and it says that this chat has no tool that can open a web page.', why: 'Saying what the chat cannot do is a statement about its tools. Nothing in the reply moves toward what you wanted.' },
