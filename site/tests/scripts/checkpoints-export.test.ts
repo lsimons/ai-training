@@ -54,12 +54,27 @@ const check = (root: string) =>
 
 describe('checkCheckpoints', () => {
 	it('passes a consistent export and counts the items', () => {
-		expect(check(tree(GOOD))).toEqual({ errors: [], items: 2 });
+		expect(check(tree(GOOD))).toEqual({ errors: [], items: 2, exemptions: [] });
 	});
 	it('reports a missing file, a file that is not JSON, a wrong version and a missing items list', () => {
 		expect(check(tree(null)).errors[0]).toMatch(/does not exist; run site-build first/);
 		expect(check(tree('{nope')).errors[0]).toMatch(/not JSON/);
 		expect(check(tree({ version: 2 })).errors).toEqual(['version is 2, expected 1', 'no items list']);
+	});
+	it('runs the surface-cue check over the items and passes exemptions through', () => {
+		const guessable = item('one', {
+			options: ['No', 'Yes', 'Only when the check is a question the reviewer can answer'],
+			answer: 'Only when the check is a question the reviewer can answer',
+		});
+		expect(check(tree({ version: 1, items: [guessable, item('two', { kind: 'sort', stem: '' })] })).errors).toEqual([
+			expect.stringMatching(/^a\/x#one: longest: /),
+		]);
+		const exempt = { ...guessable, guessable: 'the key is a rule the lesson states in full' };
+		expect(check(tree({ version: 1, items: [exempt, item('two', { kind: 'sort', stem: '' })] }))).toEqual({
+			errors: [],
+			items: 2,
+			exemptions: ['a/x#one: guessable (longest): the key is a rule the lesson states in full'],
+		});
 	});
 	it('reports a checkpoint missing from the export and an item no page has', () => {
 		const { errors } = check(tree({ version: 1, items: [item('one'), item('three')] }));

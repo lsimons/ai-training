@@ -83,6 +83,9 @@ psets
 arent
 
 # Jargon
+distractor
+distractors
+guessability
 anonymization
 automator
 deployers

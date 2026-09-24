@@ -197,6 +197,19 @@ pitfall and the exercise.
   concepts it exercises, and where its stem depends on the page it has a
   one-paragraph context. A review page or a tutor can then ask it outside
   the lesson.
+- A `choice`, `scenario` or `multi-choice` item is not answerable from the
+  look of its options. The options are of similar length and specificity,
+  every distractor is a plausible misconception with its own `why` or
+  `consequence`, no option is "all of the above" or "none of the above",
+  a hedge (`usually`, `may`, `depends`) never appears in the key alone,
+  and the key's position varies across a lesson. CI (`mise run checkpoints`) fails an item on four cues: `longest` (the key is more
+  than 40 percent longer than the longest distractor, or for `multi-choice` the
+  mean key is that much longer than the mean distractor), `hedge` (only the
+  key hedges), `echo` (only the key repeats a content word of the stem)
+  and `fixed-position` (three or more `choice`/`scenario` items in one
+  lesson with the key at one index). `guessable="reason"` exempts an item.
+  The check prints every reason and fails on an exemption that no cue
+  needs, so a stale one is removed.
 
 ### Checkpoint props
 
@@ -214,6 +227,7 @@ guide.
 | `context`   | no       | One plain paragraph that makes the item readable outside its lesson. Hidden on the lesson page, shown above the stem on the review page, included in the export. |
 | `review`    | no       | `false` opts the checkpoint out of review (spec S05). Default `true`.                                                                                            |
 | `revision`  | no       | Bumped when the answer changes, which resets outdated review items (spec S05). Default 1.                                                                        |
+| `guessable` | no       | The reason a `choice`, `scenario` or `multi-choice` item may fail the guessability check. The check prints it and fails when no cue trips. It is not rendered.   |
 
 Difficulty has no tag. The `objective` has a level in S02, so difficulty
 is derivable.
@@ -229,7 +243,8 @@ reads it to ask a checkpoint as a standalone item.
   then page order. `version` changes when a field changes meaning.
 - Each item has `id`, `lesson`, `kind`, `objective`, `concepts`, `context`
   (`null` when absent), `stem` (the children as Markdown source),
-  `options`, `answer`, `hint`, `reviewable` and `revision`.
+  `options`, `answer`, `hint`, `reviewable`, `revision` and `guessable`
+  (the exemption reason, `null` when absent).
 - `options` is what the learner is shown and `answer` the correct response,
   in the form of the kind: `choice` and `scenario` list the option texts
   and the correct text; `multi-choice` lists the option texts and the
@@ -242,7 +257,9 @@ reads it to ask a checkpoint as a standalone item.
   model answer as answer.
 - CI checks the built file: it parses, every checkpoint in every lesson
   page appears once, no item lacks a page, every field is present with its
-  type, and every concept id is a concept in the topic YAML.
+  type, and every concept id is a concept in the topic YAML. The same
+  check runs the guessability heuristics of "Checkpoints" over the `choice`,
+  `scenario` and `multi-choice` items.
 
 ## Exercises
 
