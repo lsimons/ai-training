@@ -119,7 +119,7 @@ run = "bun scripts/next-wave.mjs"
 # YAML, so it runs after `site-build`.
 # site/scripts/lib/checkpoints.mjs lists what it rejects in its header comment.
 [tasks.checkpoints]
-description = "Check the built checkpoints.json export against the lesson pages and the topic concepts (after site-build)"
+description = "Check the built checkpoints.json export against the lesson pages and the topic concepts, and choice items for surface cues (after site-build)"
 dir = "site"
 run = "bun scripts/check-checkpoints.mjs"
 
