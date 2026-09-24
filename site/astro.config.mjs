@@ -148,6 +148,9 @@ export default defineConfig({
 				}),
 			],
 			title: 'AI Training',
+			// The footer's "Last updated" date is the file's last git commit, so it moves
+			// on every edit. `sources-checked` in the lesson file is a separate date.
+			lastUpdated: true,
 			description:
 				'An open training suite for getting started with AI: concepts, safety, using agents, AI-assisted software engineering, customizing and building agents.',
 			favicon: '/favicon.svg',

@@ -70,7 +70,11 @@ export function lessonPages(contentDir, areaIds) {
 	return out;
 }
 
-/** The fields a lesson page gets from its lesson file; a page's own frontmatter may not set them. */
+/**
+ * The fields a lesson page gets from its lesson file; a page's own frontmatter
+ * may not set them. `lastUpdated` is on the list too: the page date comes from
+ * git (Starlight's `lastUpdated: true`), and a frontmatter date would override it.
+ */
 export const LESSON_OWNED_FIELDS = [
 	'title',
 	'description',
@@ -81,6 +85,7 @@ export const LESSON_OWNED_FIELDS = [
 	'extends-to',
 	'sources-checked',
 	'review-by',
+	'lastUpdated',
 ];
 
 /**

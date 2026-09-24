@@ -182,12 +182,13 @@ describe('checkData', () => {
 		const { errors } = check(
 			tree({
 				'content/a/y.mdx': PAGE,
-				'content/a/x.mdx': '---\ntitle: X\nmode: tutorial\nsidebar:\n  order: 1\n---\n\nBody.\n',
+				'content/a/x.mdx':
+					'---\ntitle: X\nmode: tutorial\nsources-checked: 2026-09-20\nlastUpdated: 2026-10-01\nsidebar:\n  order: 1\n---\n\nBody.\n',
 				'content/a/index.mdx': '---\ntitle: Course\n---\n',
 			}),
 		);
 		expect(errors).toEqual([
-			'src/content/docs/a/x.mdx: frontmatter sets title, mode, which the lesson file owns',
+			'src/content/docs/a/x.mdx: frontmatter sets title, mode, sources-checked, lastUpdated, which the lesson file owns',
 			'src/content/docs/a/y.mdx: lesson page without a lesson file at src/data/areas/a/lessons/y.yaml',
 			'src/content/docs/a/index.mdx: frontmatter sets title, which area.yaml owns',
 		]);
