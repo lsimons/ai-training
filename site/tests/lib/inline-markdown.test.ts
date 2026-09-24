@@ -16,5 +16,10 @@ describe('unsupportedInline', () => {
 		expect(unsupportedInline('https://example.com/a_b_c?x_y=1')).toEqual([]);
 		expect(unsupportedInline('a lone _ here, and snake_case_name')).toEqual([]);
 		expect(unsupportedInline('*a* (@K) *b*')).toEqual([]);
+		expect(unsupportedInline('`__init__.py` and `/x/_y_/`')).toEqual([]);
+	});
+	it('flags a dunder name or an underscored path segment outside a code span, as CommonMark renders them', () => {
+		expect(unsupportedInline('__init__.py')).toEqual(['underscore emphasis']);
+		expect(unsupportedInline('/x/_y_/')).toEqual(['underscore emphasis']);
 	});
 });
