@@ -1,10 +1,17 @@
 id: concepts/assistant-or-agent
 title: Assistant or agent?
+description: >-
+  Separate the model from the software around it, apply one test that tells an assistant from an
+  agent whatever the interface looks like, name the parts of the harness, and list an agent's tools
+  before judging its reach.
 mode: explanation
 covers: concepts/what-is-an-agent
 serves: [concepts/recognizes-agents/tells-agent-from-assistant]
 introduces: [model-vs-agent, harness]
-assumes: []
+assumes:
+  - objective: concepts/recognizes-agents/names-the-loop
+    lesson: concepts/agent-loop
+    section: a-model-in-a-loop-with-two-tools
 after: [concepts/agent-loop]
 shorts: []
 exercise:
@@ -12,6 +19,12 @@ exercise:
   brief: >-
     Classify five product descriptions by what each can do without another prompt, and list the
     tools of the ones that are agents.
-sources: []
+sources: [AEC-01, DLAI-11, Academy claude-platform-101]
 issue: 143
 minutes: 12
+notes: >-
+  Foundations page with no fixture: every example is prose about products, and the checkpoints
+  classify product descriptions. The page opens with "In the last lesson" about concepts/agent-loop,
+  which is live, so assumes names its first section. AEC-01 is cited for ideas in our own words, so
+  NOTICE.md gets no new entry. DLAI-11 and Academy claude-platform-101 are linked and paraphrased
+  only.
