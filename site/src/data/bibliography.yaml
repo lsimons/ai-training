@@ -699,3 +699,10 @@ Claude Code mcp:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/mcp
+AI Index 2025:
+  type: reference
+  title: The 2025 AI Index Report
+  container: Stanford Institute for Human-Centered Artificial Intelligence (Stanford HAI)
+  author: AI Index Steering Committee
+  license: Proprietary
+  url: https://hai.stanford.edu/ai-index/2025-ai-index-report

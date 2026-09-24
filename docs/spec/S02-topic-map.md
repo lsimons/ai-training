@@ -205,6 +205,7 @@ The topic tables below name the material each topic can start from. Keys:
 | `Bainbridge 1983`              | Bainbridge, "Ironies of automation" (Automatica 19, 1983), on skill decay and monitoring in operators of automated systems                                          | Copyright IFAC              | Argument cited as fact, in our own words; no text adapted                                             |
 | `NTSB Asiana 214`              | NTSB accident report AAR-14/01 on Asiana Airlines flight 214 (San Francisco, 2013), whose findings name the crew's reliance on the autothrottle                     | Public domain (US)          | Probable cause and findings cited as facts, in our own words; no text adapted                         |
 | new                            | No usable source; written from scratch                                                                                                                              | -                           | -                                                                                                     |
+| `AI Index 2025`                | Stanford HAI's "The 2025 AI Index Report" at `hai.stanford.edu/ai-index/2025-ai-index-report`, the real report the source-checking lesson cites                     | Proprietary                 | Linked, and one adoption figure from its public page quoted as a fact; no text adapted                |
 
 The `Academy <slug>` license is Proprietary, except the AI Fluency courses
 and *AI capabilities and limitations*, whose lesson pages end with a

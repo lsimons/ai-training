@@ -1,0 +1,193 @@
+import { Choice, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we take a paragraph a chat assistant wrote for a briefing,
+with two references after its claims, and walk each reference back to the
+report it names. One of the two reports turns out not to exist, and the
+other says something different from what the paragraph says it says. The
+previous lesson's routine has "open one link" as its third check. This
+lesson is what you do once the link is open, and what you do with a claim
+you cannot open at all.
+
+## References that look right
+
+A colleague asks a chat assistant for "a paragraph on AI adoption at work
+for the intro of the briefing, with sources". The paragraph and both of its
+references were written for this lesson, and the assistant's paragraph is
+the author's.
+
+> Adoption is now the norm rather than the exception. The Stanford AI Index
+> found that 78% of organizations that used AI in 2024 reported a
+> measurable productivity gain (Stanford HAI, *The 2025 AI Index Report*).
+> The effect reaches the desk: workers who use AI daily save an average of
+> 5.4 hours a week (Nordholm Institute, *Desk Work and AI Survey 2024*).
+
+The paragraph has everything a careful writer would put in. Every claim comes
+with a number, and every number comes with a report, a publisher and a
+year. One of the two reports is real and one is not. Before reading on,
+decide which is which, and write down what you would do to find out.
+
+<Choice id="which-citation-is-which" objective="safety/verifies-output/checks-claims"
+  concepts={['source-checking']}
+  context="A chat assistant wrote a paragraph with two cited claims. The first says the Stanford AI Index found that 78% of organizations that used AI in 2024 reported a measurable productivity gain. The second says the Nordholm Institute's Desk Work and AI Survey 2024 found that daily AI users save 5.4 hours a week. A program then looked both reports up in a bibliography."
+  title="Which citation is which?"
+  hint="A reference can fail in two ways. Which is the case where the report is on the shelf and the page is not, and which is the case where there is no shelf?"
+  options={[
+    { text: 'Both reports exist, and both findings are in them.', why: 'Read the paragraph again with the question "would I bet on this?" for each report. One publisher has a public web page and one has none.' },
+    { text: 'The AI Index exists and states the finding. The Nordholm survey does not exist.', why: 'Half right. Open the AI Index page and read what its 78% figure counts. It is a real number, used for something else.' },
+    { text: 'The AI Index exists with a different finding. The Nordholm survey does not exist.', correct: true },
+    { text: 'The AI Index does not exist. The Nordholm survey exists with a different finding.', why: 'Search for each publisher by name. One of them has an institute, a report page and a PDF, and it is not the Nordholm Institute.' },
+  ]}>
+Which statement about the two references is true?
+</Choice>
+
+A short program written for this lesson looks each citation up in a small
+list of reports, and for the ones it finds, prints what the report states
+next to what the paragraph says it states. This is what it prints.
+
+```text
+FOUND       Stanford HAI, The 2025 AI Index Report
+            text says:   78% of organizations that used AI in 2024 reported a measurable productivity gain
+            report says: 78% of organizations reported using AI in 2024, up from 55% the year before
+NOT FOUND   Nordholm Institute, Desk Work and AI Survey 2024
+            text says:   desk workers who use AI daily save an average of 5.4 hours a week
+citations: 2  reports found: 1  claims that match the report: 0
+```
+
+The Nordholm Institute and its survey do not exist. The name was invented
+for this lesson, and a web search for it finds nothing. The 2025 AI Index
+Report by Stanford HAI (the Stanford Institute for Human-Centered Artificial
+Intelligence) is real, and you can open it (@AI Index 2025). Its public page says
+that 78% of organizations reported using AI in 2024, up from 55% the year
+before. That is an adoption figure. The paragraph turned it into a
+productivity figure, "78% of organizations that used AI reported a
+measurable productivity gain", which the report's page does not say. The
+finding in the paragraph is invented, and the number in it is real. This
+is the harder case of the two, because the number checks out if you only
+search for it.
+
+The lesson [What an invented fact looks like](/safety/spotting-hallucination/#specificity-is-the-tell)
+showed that a specific without a source is the tell. Here every specific
+has a source, and the question moves from "is there a source?" to "does
+the source say this?". The first question a search answers. The second
+takes the walk in the next section.
+
+## The walk
+
+**Source checking** is the walk from a claim to the passage that is
+supposed to support it, and back. It has four steps, and each one can end
+the walk.
+
+1. **Open the source itself.** Not a page that mentions it, and not the
+   assistant's summary of it, but the report or the law or the article as
+   published. If you cannot find it by its title and publisher, the walk ends here,
+   and the claim is unverified.
+2. **Find the passage.** Search the source for the number, the name or the
+   quoted words. A 300-page report has a summary page and a search box,
+   and the specific in the claim is what you search for. If the specific
+   is nowhere in the source, the walk ends here too.
+3. **Read what the passage says.** Read the sentence around the number and
+   the sentence before it. What does the number count? Who was asked, and
+   when? The 78% in the AI Index counts organizations that use AI. The
+   paragraph made it count organizations that gained from AI.
+4. **Compare the two sentences.** Write down what the source says and what
+   the text says it says, one sentence each. If they match, the claim
+   stands. If they differ, the text changes to match the source, or the
+   claim comes out.
+
+The previous lesson, [Checking habits that run when you are in a
+hurry](/safety/checking-habits/#the-routine), said to open one link. That
+was to find out whether the rest deserve the same treatment. Both references failed here, so
+every other reference in that text would get the same walk before it went
+out. Anthropic's AI Fluency course puts this
+kind of judgment under discernment, the skill of evaluating what a model
+produced rather than accepting it (@Academy ai-fluency-framework-foundations).
+The walk is discernment applied to one reference at a time.
+
+<Pitfall title="Stopping at the title match">
+Your colleague searched for "2025 AI Index Report", found the Stanford page
+in the first result, saw "78%" in its summary, and marked the reference as
+checked. The report exists, the number is in it, and the claim is still
+wrong, because the number counts a different thing. A title match tells
+you the shelf is real. A number match tells you the book is on it. Only
+reading the passage tells you the book says what the text says it says.
+When you find the source, keep going until you have the sentence, and
+compare it with yours.
+</Pitfall>
+
+## When the walk cannot finish
+
+Sometimes the walk stops before the comparison. The report is behind a
+paywall your team does not have. The source is a book with no page number
+and no search. The publisher exists but the report is not on its site. The
+briefing goes out in an hour. In each case the claim is one you have not
+checked, and the text should say so or stop making it.
+
+The choice is between two honest states. **Mark it unverified.** Leave the
+claim in with a note that names what you could not do: "cited to the AI
+Index, not confirmed against the report". The reader then knows what
+weight to give it, and the note is a task for whoever picks the text up
+next. Or **take it out.** If the text stands without the claim, remove the
+claim and its reference. A briefing with one fewer statistic loses less
+than a briefing with one wrong statistic that a reader repeats in a
+meeting.
+
+What you never do is leave the reference in as it stands. A reference that
+nobody has opened looks the same as one that has been checked, and the
+reader cannot tell them apart. Harvard's CS50 course has staff mark the
+answers of its AI helper that they have checked, so that students can see
+which ones a person stands behind (@CS50x). Your text needs the same
+distinction, and "unverified" is how you make it when you have no time to
+check.
+
+<Scenario id="claim-before-the-deadline" objective="safety/verifies-output/checks-claims"
+  concepts={['source-checking']}
+  context="A briefing written with a chat assistant goes out in an hour. One of its claims cites a consultancy report that the learner cannot open in time: the publisher exists, but the report is not on its website and the learner has no copy."
+  title="The report you cannot open"
+  hint="Which option lets the reader tell a checked claim from one that is not?"
+  options={[
+    { text: 'Leave the claim and the reference as they are. The publisher exists, so the report probably does too.', consequence: 'The reader sees a reference that looks like every checked one, and repeats the number in the next meeting. If it is wrong, it is wrong under your name.' },
+    { text: 'Replace the reference with a link to a news article that quotes the same number.', consequence: 'The article is a page that mentions the report, not the report. You have moved the claim one step further from its source and made it look better checked.' },
+    { text: 'Keep the claim and add a note that says the report could not be confirmed before sending.', correct: true, consequence: 'The reader knows the weight to give the number, and the note is a task for whoever picks the briefing up next.' },
+    { text: 'Ask the assistant to confirm the report exists and paste its answer as the check.', consequence: 'The assistant produced the reference, and it will describe the report as fluently as it invented it. That is a second claim, not a check.' },
+  ]}>
+The briefing goes out in an hour. One claim cites a consultancy report. The
+consultancy exists, the report is not on its website, and nobody on your
+team has a copy. What do you do with the claim?
+</Scenario>
+
+<Choice id="what-the-note-does" phase="review" objective="safety/verifies-output/checks-claims"
+  concepts={['source-checking']}
+  context="The lesson teaches a four-step walk from a cited claim to the passage in its source, and says that a claim whose source cannot be opened in time is either marked unverified or removed."
+  title="What does the walk end with?"
+  hint="Which step is the one a title match and a number match both skip?"
+  options={[
+    { text: 'Confirming that a report with that title exists.', why: 'That is the first step, and a real title can carry an invented finding. What did the paragraph in the lesson do with a real report?' },
+    { text: 'Finding the number from the claim somewhere in the source.', why: 'A number can be in the source and count something else. What is left to do once you have found it?' },
+    { text: 'Reading the passage and comparing it, sentence for sentence, with the claim.', correct: true },
+    { text: 'Asking the assistant to confirm that the reference is correct.', why: 'The assistant wrote the reference. Its confirmation is one more piece of model output to check.' },
+  ]}>
+A reference in a model-written text names a real report. What does
+checking it end with?
+</Choice>
+
+<Exercise stretch="Do the same walk for one reference in a document you or a colleague wrote with an assistant this month, and write the same two sentences.">
+Open the 2025 AI Index Report's public page (the References section below
+links it) and find the passage the paragraph in this lesson relies on.
+Write one sentence with what the report says, and one sentence with what
+the paragraph says it says. Then write one line that names the gap
+between them. Ten minutes is enough.
+
+A good result is three lines. The first says what the 78% counts in the
+report. The second says what the paragraph made it count. The third names
+the change, in the words you would use to tell the colleague who wrote the
+briefing. If you had only searched the page for "78%", would you have
+found the gap?
+</Exercise>
+
+<Recap>
+1. A reference can fail in two ways. The source does not exist, or the source exists and says something else. The second is harder to catch, because the title and the number both check out.
+2. Source checking is a walk: open the source itself, find the passage, read what it says, and compare it with what the text says it says, one sentence each.
+3. Stopping at a title match or a number match is the pitfall. Only the sentence around the number tells you what it counts.
+4. A claim you cannot check before the deadline is marked unverified or taken out. It never stays in looking like a checked one (@CS50x).
+5. Anything with a page number, URL, statute or study behind it gets opened before it goes to anyone else (@Academy ai-fluency-framework-foundations).
+</Recap>
