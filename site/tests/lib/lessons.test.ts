@@ -1,5 +1,5 @@
 import { buildCatalog } from '@lib/catalog';
-import { checkpointsOf, checkpointTagsOf, firstCheckpointsOf, getLessons, type Lesson } from '@lib/lessons';
+import { checkpointsOf, checkpointTagsOf, getLessons, type Lesson } from '@lib/lessons';
 import { knownPagePaths } from '@lib/links';
 import { describe, expect, it, vi } from 'vitest';
 import { type DocFixture, docs } from './content';
@@ -174,13 +174,13 @@ describe('checkpointsOf', () => {
 			'<Exercise>\nDo.\n</Exercise>',
 			'<MorePractice>\n<Choice id="c" phase="practice" objective="o" concepts={["c"]} options={[]}>\n</Choice>\n</MorePractice>',
 		].join('\n\n');
-		const all = checkpointsOf(body(src));
+		const all = checkpointsOf(body(src), { alternates: true });
 		expect(all.map((c) => [c.id, c.phase, c.reviewable])).toEqual([
 			['a', 'first', true],
 			['b', 'review', true],
 			['c', 'practice', false],
 		]);
-		expect(firstCheckpointsOf(body(src)).map((c) => c.id)).toEqual(['a']);
+		expect(checkpointsOf(body(src)).map((c) => c.id)).toEqual(['a']);
 		expect(() => checkpointsOf(body('<Choice id="a" phase="later" concepts={["c"]}>\n</Choice>'))).toThrow(
 			/x\/y#a: phase must be one of first, review, practice, got "later"/,
 		);

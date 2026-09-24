@@ -47,7 +47,7 @@ export async function buildCatalog(): Promise<CatalogCourse[]> {
 				lessons.filter((l) => l.id.startsWith(`${a.slug}/`)),
 				planIds,
 			).map((l) => {
-				const all = checkpointsOf(l);
+				const all = checkpointsOf(l, { alternates: true });
 				return {
 					id: l.id,
 					title: l.data.title,

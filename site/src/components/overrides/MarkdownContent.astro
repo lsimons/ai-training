@@ -13,7 +13,7 @@ import RouteAhead, { type AheadItem } from '@components/lesson/RouteAhead.astro'
 import TutorBlock from '@components/lesson/TutorBlock.astro';
 import { getAreas, isEngineering } from '@lib/areas';
 import { checkExtendsToHref } from '@lib/extends-to';
-import { firstCheckpointsOf, type Lesson } from '@lib/lessons';
+import { checkpointsOf, type Lesson } from '@lib/lessons';
 import { bibliographySources, knownPagePaths } from '@lib/links';
 import { chooseSkillsCheck } from '@lib/skills-check';
 import { absoluteUrl, href } from '@lib/url';
@@ -40,7 +40,7 @@ let ahead: AheadItem[] = [];
 let skillsCheck: string[] = [];
 if (isLesson) {
 	// Only `first` checkpoints are asked: an alternate never stands in for the lesson's own (spec S04).
-	if (engineering) skillsCheck = chooseSkillsCheck(data.serves ?? [], firstCheckpointsOf(entry as Lesson));
+	if (engineering) skillsCheck = chooseSkillsCheck(data.serves ?? [], checkpointsOf(entry as Lesson));
 	const docs = await getCollection('docs');
 	const competencies = await getCollection('competencies');
 	const statements = new Map<string, string>();
