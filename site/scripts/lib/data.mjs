@@ -47,6 +47,7 @@ import { parse } from 'yaml';
 import { citationKeys } from '../../plugins/citation-syntax.mjs';
 import { propValue } from '../../src/lib/checkpoint-tags.ts';
 import { checkExtendsToHref, checkExternalSourceHref } from '../../src/lib/extends-to.ts';
+import { unsupportedInline } from '../../src/lib/inline-markdown.ts';
 import { allTopics, courseLessonIds, readAreaTree } from './area-tree.mjs';
 import { predictTags } from './examples.mjs';
 
@@ -299,6 +300,35 @@ export function checkSourceHrefs(tree, rel) {
 }
 
 /**
+ * The competency behaviors (spec S10) whose text uses a Markdown form the
+ * competency page renderer does not support (`unsupportedInline` in
+ * `lib/inline-markdown.ts`), as error strings in the format `checkData` uses. The
+ * page would show the form as literal text, so this fails the data check
+ * first. Code spans are skipped, so `snake_case` in one is fine.
+ * @param {ReturnType<typeof readAreaTree>} tree
+ * @param {(file: string) => string} rel
+ */
+export function checkBehaviorMarkdown(tree, rel) {
+	const errors = [];
+	for (const a of tree.areas) {
+		for (const { data: c, file } of a.competencies) {
+			for (const o of c?.objectives ?? []) {
+				(o.behaviors ?? []).forEach((b, i) => {
+					for (const field of ['claim', 'why', 'example']) {
+						for (const form of unsupportedInline(String(b?.[field] ?? ''))) {
+							errors.push(
+								`${rel(file)}: objective ${o.id} behavior ${i + 1} ${field} uses ${form}, which the competency page does not render`,
+							);
+						}
+					}
+				});
+			}
+		}
+	}
+	return errors;
+}
+
+/**
  * Check the tree under `dataDir` against the pages under `contentDir`.
  * `foundationsExempt` is the exemption list for `checkFoundationsAudience`
  * and defaults to `FOUNDATIONS_EXEMPT`; tests pass their own.
@@ -471,6 +501,7 @@ export function checkData(dataDir, contentDir, { foundationsExempt = FOUNDATIONS
 			if (!sourcesOf.get(id).has(key)) fail(`${where}: cites "${key}", which its plan file's sources list lacks`);
 		}
 	}
+	for (const e of checkBehaviorMarkdown(tree, rel)) fail(e);
 	for (const e of checkBehaviorCitations(tree, rel)) fail(e);
 	for (const e of checkSourceHrefs(tree, rel)) fail(e);
 	for (const e of checkFoundationsAudience(tree, contentDir, pages.keys(), foundationsExempt)) fail(e);
