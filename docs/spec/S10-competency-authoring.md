@@ -66,12 +66,13 @@ The schema is strict at every level. A misspelled key fails the build.
 A behavior's text is inline Markdown in the subset the competency page
 renders (`renderInline` in `site/src/lib/reference.ts`, patterns in
 `site/src/lib/inline-markdown.ts`): code spans,
-`**strong**`, `*emphasis*`, `[text](url)` links and `(@key)` citations. The
-page splits the text at each citation before rendering, so a strong or
-emphasis span that contains a citation stays literal, as do `_underscore_`
-emphasis and a link with a title. `mise run data` rejects those three forms
-and names the objective, the behavior and the form. An underscore inside a
-code span, in a URL or on its own is fine.
+`**strong**`, `*emphasis*`, `[text](url)` links and `(@key)` citations.
+`_underscore_` emphasis and a link with a title are never rendered and
+show as literal text. The page also splits the text at each citation before
+rendering, so a strong or emphasis span that contains a citation breaks
+there. `mise run data` rejects those three forms and names the objective,
+the behavior and the form. An underscore inside a code span, in a URL or on
+its own is fine.
 
 ## Alignment
 

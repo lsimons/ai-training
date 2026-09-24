@@ -22,10 +22,12 @@ const UNDERSCORE_EMPHASIS = /(?:^|[^\w])(_{1,2})\S(?:[^_]*?\S)?\1(?!\w)/;
 const LINK_WITH_TITLE = /\[[^\]]+\]\([^)\s]+\s+[^)]+\)/;
 
 /**
- * The names of the Markdown forms in `md`, outside code spans, that
- * `renderInline` accepts on a lesson recap but the competency page renderer
- * does not, because it splits the text at each `(@key)` citation before
- * calling `renderInline`. Empty when every form in `md` is supported.
+ * The names of the Markdown forms in `md`, outside code spans, that the
+ * competency page renderer leaves literal. Underscore emphasis and a link
+ * with a title are forms `renderInline` never renders. Strong or emphasis
+ * around a `(@key)` citation renders on a lesson recap, but the competency
+ * page splits the text at each citation before calling `renderInline`, so
+ * the span breaks there. Empty when every form in `md` is supported.
  * `mise run data` fails a behavior that uses one (spec S10).
  */
 export function unsupportedInline(md: string): string[] {
