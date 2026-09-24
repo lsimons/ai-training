@@ -42,6 +42,36 @@ test('the last lesson of a course links to the next course, and the footer carri
 	await expect(page.locator('.ai-notice')).toHaveText('Content co-authored by AI.');
 });
 
+/**
+ * The first live lesson whose plan file sets `review-by`, read from the data
+ * tree so a new lesson changes nothing here. Its page shows the review line
+ * in the footer in place of "Last updated" (issue #274).
+ */
+function lessonWithReviewBy(): string {
+	for (const id of liveLessons()) {
+		const [area, lesson] = id.split('/');
+		const plan = readFileSync(join(SITE, 'src/data/areas', area ?? '', 'lessons', `${lesson}.yaml`), 'utf8');
+		if (/^review-by:/m.test(plan)) return id;
+	}
+	throw new Error('no live lesson sets review-by');
+}
+
+test('a lesson with review-by shows the review line once, in the footer, and no "Last updated"', async ({ page }) => {
+	await page.goto(`${lessonWithReviewBy()}/`);
+	const footerLine = page.locator('.site-footer-meta .lesson-review[data-review-by]');
+	await expect(footerLine).toHaveCount(1);
+	await expect(footerLine).toContainText('Sources checked on');
+	await expect(footerLine).toContainText('Review due by');
+	await expect(page.locator('.lesson .lesson-review')).toHaveCount(0);
+	await expect(page.locator('.site-footer-meta time')).toHaveCount(0);
+});
+
+test('a page without review-by shows "Last updated" in the footer and no review line', async ({ page }) => {
+	await page.goto('settings/');
+	await expect(page.locator('.site-footer-meta time')).toHaveCount(1);
+	await expect(page.locator('.lesson-review')).toHaveCount(0);
+});
+
 test('a page without headings keeps the right column but drops "On this page"', async ({ page }) => {
 	await page.goto('settings/');
 	await expect(page.locator('.right-sidebar-container')).toHaveCount(1);
