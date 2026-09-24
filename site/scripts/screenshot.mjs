@@ -8,7 +8,7 @@
  */
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
-import { chromium } from 'playwright';
+import { chromium } from '@playwright/test';
 
 const BASE = '/ai-training/';
 const [out = 'out.png', path = BASE] = process.argv.slice(2);
