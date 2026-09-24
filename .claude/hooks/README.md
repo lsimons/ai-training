@@ -5,12 +5,12 @@ The scripts here are thin wrappers. The rules and their tests are in
 and #342. `.claude/settings.json` registers them.
 
 - `guard-bash.sh`, PreToolUse on Bash. It exits 2 with a reason that names
-  the alternative for a force push, a push to `main` outside the
-  dispatcher, `gh pr merge` outside the wave lead, the dispatcher or a
-  coordinator, `git stash`, `git reset --hard` or `git checkout -- .` in
-  the main checkout, a `sleep` over 60 seconds, and a shell loop that
-  calls `gh`. A role sets `AI_TRAINING_ROLE` in the environment or as a
-  prefix on the command (`AI_TRAINING_ROLE=dispatcher git push`).
+  the alternative for a force push, any push to `main`, `gh pr merge`
+  outside the wave lead, the dispatcher or a coordinator, `git stash`,
+  `git reset --hard` or `git checkout -- .` in the main checkout, a
+  `sleep` over 60 seconds, and a shell loop that calls `gh`. A role sets
+  `AI_TRAINING_ROLE` in the environment or as a prefix on the command
+  (`AI_TRAINING_ROLE=wave-lead gh pr merge`).
 - `format-file.sh`, PostToolUse on Edit and Write. It runs Biome on an
   edited file under `site/` and ruff on an edited `.py` file, in the
   worktree that holds the file, and never fails the tool call.
