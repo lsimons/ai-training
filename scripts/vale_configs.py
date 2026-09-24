@@ -18,9 +18,13 @@ Rules, per section (the top-level settings count as the section ""):
 The parser is the small subset of Vale's ini this repository uses: `#` and
 `;` comment lines, `[section]` headers taken verbatim (Vale's globs such
 as `[*.{md,mdx}]` are just names here), `key = value` pairs, and a value
-continued over lines that end in a backslash. A key repeated in one section
-keeps its last value, as Vale does. Values are compared after trimming
-the whitespace around each line of a continuation.
+continued over lines that end in a backslash. Vale unions the list keys
+(`TokenIgnores`, `BasedOnStyles`, `Vocab`) across repeats in one section,
+which this parser does not model, so a repeated key is a parse error that
+names the section and key. An inline comment after a value (Vale's
+`SpaceBeforeInlineComment`) is not supported either and would become part of
+the value. Values are compared after trimming the whitespace around each
+line of a continuation.
 
 Usage: scripts/vale_configs.py [base-ini] [extended-ini]
 """
@@ -87,6 +91,9 @@ def parse_ini(text: str) -> Config:
             raise ValueError(msg)
         name = name.strip()
         value = value.strip()
+        if name in config[section]:
+            msg = f"key {name} is set twice in section {section or 'the top-level settings'}"
+            raise ValueError(msg)
         if value.endswith("\\"):
             key = name
             value = value[:-1].strip()
@@ -158,8 +165,14 @@ def compare(
 
 def check(base_path: pathlib.Path, extended_path: pathlib.Path) -> list[str]:
     """Read both files and return the drift messages."""
-    base = parse_ini(base_path.read_text(encoding="utf-8"))
-    extended = parse_ini(extended_path.read_text(encoding="utf-8"))
+    try:
+        base = parse_ini(base_path.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        return [f"{base_path}: {exc}"]
+    try:
+        extended = parse_ini(extended_path.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        return [f"{extended_path}: {exc}"]
     return compare(base, extended, str(base_path), str(extended_path))
 
 

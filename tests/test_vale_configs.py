@@ -40,9 +40,24 @@ def test_parse_ini_reads_sections_comments_and_continuations() -> None:
     assert config["[*.{yaml,yml}]"] == {"BasedOnStyles": "Vale", "TokenIgnores": "(https?://\\S+)"}
 
 
-def test_parse_ini_keeps_the_last_value_of_a_repeated_key() -> None:
-    config = vale_configs.parse_ini("[s]\nk = one\nk = two\n")
-    assert config["[s]"] == {"k": "two"}
+def test_parse_ini_rejects_a_repeated_key_in_one_section() -> None:
+    with pytest.raises(ValueError, match=r"key k is set twice in section \[s\]"):
+        vale_configs.parse_ini("[s]\nk = one\nk = two\n")
+    with pytest.raises(ValueError, match="twice in section the top-level settings"):
+        vale_configs.parse_ini("Vocab = a\nVocab = b\n")
+
+
+def test_check_reports_a_repeated_key_with_the_file_name(tmp_path: pathlib.Path) -> None:
+    base = tmp_path / "base.ini"
+    base.write_text("[s]\nTokenIgnores = a\nTokenIgnores = b\n", encoding="utf-8")
+    ext = tmp_path / "ext.ini"
+    ext.write_text("[s]\nTokenIgnores = a\n", encoding="utf-8")
+    assert vale_configs.check(base, ext) == [
+        f"{base}: key TokenIgnores is set twice in section [s]"
+    ]
+    assert vale_configs.check(ext, base) == [
+        f"{base}: key TokenIgnores is set twice in section [s]"
+    ]
 
 
 def test_parse_ini_rejects_a_bare_word() -> None:
@@ -126,11 +141,12 @@ def test_main_reports_drift_on_stderr(
     ext = tmp_path / "ext.ini"
     base.write_text((REPO_ROOT / ".vale.ini").read_text(encoding="utf-8"), encoding="utf-8")
     real_ext = (REPO_ROOT / ".vale-extended.ini").read_text(encoding="utf-8")
-    assert real_ext.count("Vale.Spelling = NO\n") == 2
-    ext.write_text(real_ext.replace("Vale.Spelling = NO\n", "", 1), encoding="utf-8")
+    dropped = "TokenIgnores = (https?://\\S+), (Academy [a-z0-9-]+)\n"
+    assert real_ext.count(dropped) == 1
+    ext.write_text(real_ext.replace(dropped, ""), encoding="utf-8")
     assert vale_configs.main(["vale_configs.py", str(base), str(ext)]) == 1
     err = capsys.readouterr().err
-    assert "key Vale.Spelling is in" in err
+    assert f"{ext}: [*.{{yaml,yml}}]: key TokenIgnores is in {base} but missing here" in err
     assert "drifted apart (1 finding(s))" in err
 
 
