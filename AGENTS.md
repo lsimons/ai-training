@@ -287,8 +287,11 @@ patterns below after the fact. Write so that it has nothing to say.
 - Running wave after wave from one long session, with a dispatcher that
   spawns a wave lead per wave: `docs/agents/meta-orchestration.md`. The
   `/wave` skill (`.claude/skills/wave/SKILL.md`) is that dispatcher.
-- Tutor mode: `.claude/skills/tutor/SKILL.md`. Run the site locally and
-  invoke `/tutor`.
+- Tutor mode (spec S08): `.claude/skills/tutor/SKILL.md` is a bootstrap
+  that fetches `/data/tutor.md` (source `site/src/tutor/instructions.md`)
+  and a lesson bundle from the published site. Install it with
+  `npx skills add lsimons/ai-training --skill tutor -g` and invoke
+  `/tutor <lesson URL>`.
 - A nit left open on a merged pull request, a follow-up a review or a
   wave report names, and an improvement the maintainer defers all become
   GitHub issues before the session ends, filed and triaged as
