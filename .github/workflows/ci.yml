@@ -35,9 +35,9 @@ jobs:
 
       # On a pull request the browser walkthrough (the `e2e` job) runs only
       # when the diff touches a file outside the skip set below. The skip
-      # set is prose and its tooling: `docs/`, Markdown files anywhere, the
-      # Vale, cspell, markdownlint and lychee configs, and the license and
-      # notice files. Lesson pages (`site/src/content/`) and the data tree
+      # set is prose and its tooling: `docs/`, Markdown files outside
+      # `site/`, the Vale, cspell, markdownlint and lychee configs, and the
+      # license files. Lesson pages (`site/src/content/`) and the data tree
       # (`site/src/data/`) are deliberately NOT in it: the e2e specs derive
       # their lesson and checkpoint counts from the data tree and click
       # through lesson pages, so a content change can break them. A push to
@@ -55,8 +55,15 @@ jobs:
             exit 0
           fi
           changed="$(git diff --name-only "origin/${BASE_REF}...HEAD")"
-          skip_set='^(docs/|.*\.md$|\.vale\.ini$|\.vale/|cspell-words\.txt$|\.markdownlint-cli2\.jsonc$|\.lychee\.toml$|LICENSE(-CODE)?$|NOTICE\.md$)'
-          outside="$(printf '%s\n' "$changed" | grep -Ev "$skip_set" || true)"
+          if [ -z "$changed" ]; then
+            echo "The diff is empty, which is unexpected: the walkthrough runs."
+            echo "e2e=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          skip_set='^(docs/|.*\.md$|\.vale\.ini$|\.vale/|cspell-words\.txt$|\.markdownlint-cli2\.jsonc$|\.lychee\.toml$|LICENSE(-CODE)?$)'
+          # A `.md` file under `site/` never skips: `site/src/content/docs/`
+          # has rendered pages and `site/examples/` has fixture READMEs.
+          outside="$(printf '%s\n' "$changed" | grep -Ev "$skip_set" || true; printf '%s\n' "$changed" | grep -E '^site/.*\.md$' || true)"
           if [ -z "$outside" ]; then
             echo "Every changed file is in the skip set: the walkthrough is skipped."
             printf '%s\n' "$changed"
