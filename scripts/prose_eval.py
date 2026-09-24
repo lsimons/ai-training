@@ -81,13 +81,13 @@ def pinned_packages(ini: pathlib.Path) -> list[str]:
     return names
 
 
-def missing_packages(ini: pathlib.Path, styles: pathlib.Path) -> list[str]:
+def missing_packages(names: Sequence[str], styles: pathlib.Path) -> list[str]:
     """The pinned packages with no directory under the styles path.
 
     The synced styles are gitignored, so in a fresh clone or worktree Vale
     would otherwise run a smaller rule set and report fewer hits (#276).
     """
-    return [name for name in pinned_packages(ini) if not (styles / name).is_dir()]
+    return [name for name in names if not (styles / name).is_dir()]
 
 
 def check_packages_synced(ini: pathlib.Path, styles: pathlib.Path) -> None:
@@ -95,7 +95,7 @@ def check_packages_synced(ini: pathlib.Path, styles: pathlib.Path) -> None:
     names = pinned_packages(ini)
     if not names:
         sys.exit(f"prose: no .zip packages found on the Packages lines of {ini}")
-    missing = missing_packages(ini, styles)
+    missing = missing_packages(names, styles)
     if missing:
         sys.exit(
             f"prose: Vale packages from {ini} not synced under {styles}/: "
