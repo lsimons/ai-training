@@ -134,9 +134,10 @@ const BANNED_WORDS = /\b(terminal|python3|git clone)\b/i;
  * Text inside a fence of any language, inside an inline code span and inside
  * an MDX comment (an expression holding a block comment) is skipped, so a page
  * may quote a command or a `<Predict run=...>` tag in a code span, a `text`
- * fence or a comment without tripping the check.
+ * fence or a comment without tripping the check. `where` names the page in
+ * the error for a page that does not parse.
  */
-export function foundationsSurfaces(src) {
+export function foundationsSurfaces(src, where = 'lesson') {
 	const out = [];
 	const lines = src.split('\n');
 	const inFence = new Array(lines.length).fill(false); // true for the body lines and the closing line of a fenced block
@@ -159,7 +160,7 @@ export function foundationsSurfaces(src) {
 	});
 	// The tags come from the MDX tree (`predictTags`), which puts a fence body and a comment in nodes
 	// of their own, so a tag quoted in either is not a JSX element and is skipped.
-	for (const { attrs, line } of predictTags(src, 'lesson')) {
+	for (const { attrs, line } of predictTags(src, where)) {
 		const run = propValue(attrs, 'run');
 		if (run !== undefined) out.push({ line, surface: `<Predict run="${run}">` });
 	}
@@ -181,7 +182,7 @@ export function checkFoundationsAudience(tree, contentDir, pageIds, exempt = FOU
 	for (const id of [...pageIds].sort()) {
 		if (!areas.has(id.split('/')[0])) continue;
 		const where = `src/content/docs/${id}.mdx`;
-		const found = foundationsSurfaces(readFileSync(join(contentDir, `${id}.mdx`), 'utf8'));
+		const found = foundationsSurfaces(readFileSync(join(contentDir, `${id}.mdx`), 'utf8'), where);
 		if (exempt.has(id)) {
 			seen.add(id);
 			if (found.length === 0) {

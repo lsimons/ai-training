@@ -172,7 +172,8 @@ export function checkSource(file, src, run, interps = DEFAULT_INTERPRETERS) {
 		const id = propValue(attrs, 'id') ?? '?';
 		const name = propValue(attrs, 'run');
 		const answer = propValue(attrs, 'answer');
-		if (!name) continue;
+		// `run=""` is a mistake, not an honor-system Predict: it falls through and fails as an unsupported fixture type.
+		if (name === undefined) continue;
 		found++;
 		if (answer === undefined) {
 			failures.push(`${file} #${id}: has run="${name}" but no answer`);
