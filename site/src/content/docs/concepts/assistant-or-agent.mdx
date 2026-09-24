@@ -12,8 +12,9 @@ when it does something you didn't expect.
 
 A **model** takes text in and gives text out, once. It has no hands. It
 can't open your inbox, read a file, or send anything. When you type into a
-chat assistant and get a reply, the product made one call to the model
-and showed you the reply, and now it waits for you (@AEC-01).
+plain chat assistant with no tools and get a reply, the product made one
+call to the model and showed you the reply, and now it waits for you
+(@AEC-01).
 
 An **agent** is software that calls the same kind of model again and
 again. Before the first call it tells the model which tools it has. When
@@ -34,7 +35,9 @@ its tools, and decides on its own what to do next (@DLAI-11).
 ## One test: what can it do without another prompt?
 
 The interface tells you nothing. A chat window can front an agent, and a
-big button labeled "Automate" can trigger one plain model call. So ask
+big button labeled "Automate" can trigger one plain model call. Many
+chat products now have tools such as web search, so the window you type
+into says nothing about which kind you have. So ask
 the question that the interface can't hide: after you give it a task,
 what can this system do before it needs you again?
 
@@ -111,9 +114,9 @@ loop you watched. A harness holds (@AEC-01):
 
 Two agents built on the same model can behave very differently, because
 their harnesses differ. One has a file-write tool and the other doesn't.
-One asks before every change and the other asks only before a deletion.
-One drops old tool results from the conversation to save space and the
-other keeps everything. None of this is the model's doing, and a person
+The first asks before every change, where the second asks only before a
+deletion. To save space, the first drops old tool results from the
+conversation, and the second keeps everything. None of this is the model's doing, and a person
 who compares "which model does it use" is comparing the one part the two
 products share.
 
@@ -121,9 +124,9 @@ The same fact points at where to look when an agent misbehaves. An
 agent that sent an email it shouldn't have had an email tool and a
 permission check that let it through. An agent that forgot the
 instruction you gave it twenty steps ago hit its context management. An
-agent that ran for an hour and produced nothing had a step limit that was
-too high. In each case the fix is in the harness, in a tool it should
-lack, a check it should make, or a rule it should follow (@AEC-01). The
+agent that ran for an hour and produced nothing had no limit low enough
+to stop it. In each case the fix is in the harness: take a tool away, or
+add a check or a stop rule (@AEC-01). The
 model's judgment matters too, and a better model helps with a wrong
 decision, but the reach and the guardrails are the harness's.
 
@@ -168,8 +171,8 @@ So read the product page, or the settings screen, and write down the
 tools before you form an opinion. A list like "web search, file read,
 calendar write" tells you which one acts on others: calendar write is
 the one that puts something on a colleague's screen. A list like "read
-the inbox, draft, send" tells you that a wrong draft can leave the
-building. Judging an agent without its tool list is judging a car
+the inbox, draft, send" tells you that a wrong draft can reach a
+customer. Judging an agent without its tool list is judging a car
 without knowing whether it has brakes.
 
 <Choice id="which-tool-acts-on-others" objective="concepts/recognizes-agents/tells-agent-from-assistant"
@@ -177,7 +180,7 @@ without knowing whether it has brakes.
   context="The lesson says to list an agent's tools before judging what it can do, and to look for the tool that acts on other people rather than only on the learner's own data."
   title="Which tool changes what others see?" hint="Which of these tools puts something in front of a person other than you?"
   options={[
-    { text: 'Web search, because it reaches outside the company.', why: 'Search reads the web and changes nothing on it. Reaching outside is a reason to watch what comes back, and the other people never see the search.' },
+    { text: 'Web search, because it reaches outside the company.', why: 'The query does leave the company, and that is a reason to watch what goes into it and what comes back. Nothing a colleague sees changes because of a search.' },
     { text: 'File read, because your files hold confidential material.', why: 'Reading files is a reason to think about what the agent may see. The read itself changes nothing that a colleague sees.' },
     { text: 'Calendar write, because it puts an entry on a colleague\'s calendar.', correct: true },
   ]}>
