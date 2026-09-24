@@ -6,10 +6,14 @@ per thousand words. This script makes no judgment. The per-rule reports and
 the decisions are in docs/prose/.
 
 Usage: scripts/prose_eval.py <package> [out-dir]
-Writes <out-dir>/<package>.json and <out-dir>/wordcount.tsv
+       scripts/prose_eval.py --check-packages <ini> [<ini> ...]
+The first form writes <out-dir>/<package>.json and <out-dir>/wordcount.tsv
 (default out-dir: docs/prose/reports/<package>).
 Every package pinned in .vale-eval.ini must already be synced into
-.vale/styles (`vale sync --config .vale-eval.ini`), or the script stops.
+.vale/styles (`mise run prose-eval-sync`), or the script stops.
+The second form only runs that check, for the named configs, and is what
+the `prose-check-packages` task in .mise.toml runs before `prose` and
+`prose-extended`, so one parser reads every Vale config here.
 """
 
 import collections
@@ -28,13 +32,17 @@ Hits = dict[str, list[Alert]]
 
 # The eval config and the directory its packages unpack into. `mise run
 # prose-sync` reads .vale.ini only, so the eval packages have their own
-# sync command.
+# sync task, `prose-eval-sync` (`vale sync --config .vale-eval.ini`).
 EVAL_INI = pathlib.Path(".vale-eval.ini")
 STYLES = pathlib.Path(".vale/styles")
-EVAL_SYNC = f"vale sync --config {EVAL_INI}"
+EVAL_SYNC = "mise run prose-eval-sync"
+MAIN_SYNC = "mise run prose-sync"
+CHECK_FLAG = "--check-packages"
 
 # A package URL on a `Packages` line ends in `<name>.zip`, and Vale unpacks
-# it to `<StylesPath>/<name>/`.
+# it to `<StylesPath>/<name>/`. A bare package name (`Packages = Google`,
+# which Vale fetches from its own library) has no `.zip` and is not
+# supported here: the check would not know the directory to look for.
 PACKAGE_ZIP = re.compile(r"([^/\s,]+)\.zip")
 
 # Same file set as `mise run prose`, minus the reports themselves, which
@@ -70,8 +78,9 @@ def area(path: str) -> str:
 def pinned_packages(ini: pathlib.Path) -> list[str]:
     """The package names on the `Packages` lines of a Vale config.
 
-    Comment lines (`;` or `#`) are skipped. Same reading as the
-    `prose-check-packages` task in .mise.toml.
+    Comment lines (`;` or `#`) are skipped. The `prose-check-packages`
+    task in .mise.toml reads .vale.ini and .vale-extended.ini through this
+    same function.
     """
     names: list[str] = []
     for line in ini.read_text().splitlines():
@@ -90,17 +99,37 @@ def missing_packages(names: Sequence[str], styles: pathlib.Path) -> list[str]:
     return [name for name in names if not (styles / name).is_dir()]
 
 
+def sync_command(ini: pathlib.Path) -> str:
+    """The mise task that fetches the packages of a config.
+
+    `prose-sync` runs plain `vale sync`, which reads .vale.ini, and the
+    extended config pins the same packages. The eval config has its own.
+    """
+    return EVAL_SYNC if ini.name == EVAL_INI.name else MAIN_SYNC
+
+
 def check_packages_synced(ini: pathlib.Path, styles: pathlib.Path) -> None:
     """Exit with a message naming the sync command when a package is missing."""
     names = pinned_packages(ini)
     if not names:
-        sys.exit(f"prose: no .zip packages found on the Packages lines of {ini}")
+        sys.exit(
+            f"prose: no .zip packages found on the Packages lines of {ini}. "
+            "Pin each package by its release .zip URL: a bare package name is not supported."
+        )
     missing = missing_packages(names, styles)
     if missing:
         sys.exit(
             f"prose: Vale packages from {ini} not synced under {styles}/: "
-            f"{', '.join(missing)}. Run '{EVAL_SYNC}' first."
+            f"{', '.join(missing)}. Run '{sync_command(ini)}' first."
         )
+
+
+def check_configs(inis: Sequence[str]) -> None:
+    """The `--check-packages` entry: every named config, in order, first failure stops."""
+    if not inis:
+        sys.exit(__doc__)
+    for ini in inis:
+        check_packages_synced(pathlib.Path(ini), STYLES)
 
 
 def tracked_files() -> list[str]:
@@ -171,6 +200,9 @@ def summary(hits: Hits, totals: collections.Counter[str]) -> str:
 def main(argv: Sequence[str]) -> None:
     if len(argv) < 2:
         sys.exit(__doc__)
+    if argv[1] == CHECK_FLAG:
+        check_configs(argv[2:])
+        return
     package = argv[1]
     out_dir = pathlib.Path(argv[2] if len(argv) > 2 else f"docs/prose/reports/{package}")
     check_packages_synced(EVAL_INI, STYLES)
