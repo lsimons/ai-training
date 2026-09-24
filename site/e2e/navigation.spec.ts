@@ -123,9 +123,9 @@ test('on a phone, a Checkpoints entry of the "On this page" dropdown closes it a
 		.first();
 	// The client script moves the groups into the panel, so the entry is in the dropdown before it opens.
 	await expect(link).toBeAttached();
-	await expect(details).not.toHaveAttribute('open', /.*/);
+	await expect(details).toHaveJSProperty('open', false);
 	await details.locator('summary').click();
-	await expect(details).toHaveAttribute('open', /.*/);
+	await expect(details).toHaveJSProperty('open', true);
 	const href = await link.getAttribute('href');
 	expect(href, 'the first checkpoints entry links to a fragment').toMatch(/^#.+/);
 	const id = (href as string).slice(1);
@@ -133,7 +133,7 @@ test('on a phone, a Checkpoints entry of the "On this page" dropdown closes it a
 	await expect(section).toHaveAttribute('data-checkpoint', /.*/);
 	await expect(section).not.toBeInViewport();
 	await link.click();
-	await expect(details).not.toHaveAttribute('open', /.*/);
+	await expect(details).toHaveJSProperty('open', false);
 	await expect(page).toHaveURL((url) => url.pathname.endsWith(`/${lesson}/`) && url.hash === `#${id}`);
 	await expect(section).toBeInViewport();
 });
