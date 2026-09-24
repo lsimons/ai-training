@@ -199,8 +199,8 @@ describe('wrappers write through storage', () => {
 	it('prunes orphans and resets outdated reviews only when something changes', () => {
 		progress.finishLesson('a/x', [{ id: 'a/x#c', revision: 1 }]);
 		progress.markLessonRead('gone/y');
-		expect(progress.pruneOrphans(['a/x'], ['a/x#c'], [])).toBe(1);
-		expect(progress.pruneOrphans(['a/x'], ['a/x#c'], [])).toBe(0);
+		expect(progress.pruneOrphans(['a/x'], ['a/x#c'], [], [])).toBe(1);
+		expect(progress.pruneOrphans(['a/x'], ['a/x#c'], [], [])).toBe(0);
 		expect(progress.resetOutdatedReviews([{ id: 'a/x#c', revision: 1 }])).toBe(0);
 		expect(progress.resetOutdatedReviews([{ id: 'a/x#c', revision: 2 }])).toBe(1);
 		expect(stored().reviews['a/x#c']).toMatchObject({ stage: 1, revision: 2, due: progress.today() });

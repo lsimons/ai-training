@@ -21,7 +21,7 @@ describe('Habit', () => {
 			slots: { default: '<p>Say what it can reach.</p>' },
 		});
 		expect(html).toMatch(
-			/<aside class="habit not-content" id="name-the-blast-radius" data-habit(="")? data-progress-id="safety\/agent-risk#name-the-blast-radius" data-state="unfinished"/,
+			/<aside class="habit not-content" id="name-the-blast-radius" data-habit(="")? data-progress-id="safety\/agent-risk#name-the-blast-radius" data-state="unfinished">/,
 		);
 		expect(html).toContain('<p class="habit-title">Habit</p>');
 		expect(html).toContain('<div class="habit-text"><p>Say what it can reach.</p></div>');

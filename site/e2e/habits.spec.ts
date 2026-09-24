@@ -55,8 +55,10 @@ test('finishing the lesson enters its habits, and Done on a due habit moves it o
 	const first = block.locator(`[data-habit][data-progress-id="${HABITS[0]}"]`);
 	await expect(first.locator('.habit-text')).toContainText('The next time you hand an agent a task');
 	await first.locator('[data-habit-skip]').click();
-	await expect(first).toHaveAttribute('data-state', 'waiting');
-	await expect(first.locator('[data-habit-results] li')).toHaveText(`${TODAY}: skipped`);
+	// The card goes once the habit is no longer due; the other stays, so the block stays.
+	await expect(first).toHaveCount(0);
+	await expect(block.locator('[data-habit]')).toHaveCount(1);
+	await expect(block).toBeVisible();
 
 	// Done on the other one from the lesson card.
 	await page.goto(`${LESSON}/`);

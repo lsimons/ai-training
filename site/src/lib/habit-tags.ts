@@ -7,6 +7,7 @@
  * the component checks its own `id` the same way. No Astro import, so every
  * caller can load it.
  */
+import { KIND_OF_TAG } from './checkpoint-rules';
 import { attrsOf, childrenSource, jsxElements, type MdxNode, parseMdx, stringProp } from './checkpoint-tags';
 
 export const HABIT_TAG = 'Habit';
@@ -35,11 +36,15 @@ export function slugOf(heading: string): string {
 		.replace(/\s+/g, '-');
 }
 
-/** The slugs of the `## ` headings in `tree`, read from `src` (a heading node's children are its text). */
+/**
+ * The slugs of every heading in `tree`, at any depth, read from `src` (a
+ * heading node's children are its text). Each one is a DOM id on the page,
+ * so a habit id must differ from all of them.
+ */
 export function sectionSlugsIn(tree: MdxNode, src: string): string[] {
 	const out: string[] = [];
 	const walk = (node: MdxNode) => {
-		if (node.type === 'heading' && (node as MdxNode & { depth?: number }).depth === 2) {
+		if (node.type === 'heading') {
 			const start = node.children?.[0]?.position?.start.offset;
 			const end = node.children?.at(-1)?.position?.end.offset;
 			if (start !== undefined && end !== undefined) out.push(slugOf(src.slice(start, end)));
@@ -61,7 +66,8 @@ export function assertHabitId(where: string, id: string | undefined): string {
 /**
  * The habits in `tree`, parsed from `src`, in source order, after the rules:
  * at most `MAX_HABITS`, each with a kebab-case `id` unique in the lesson that
- * is not a `## ` heading slug, each after the `<Recap>`, and each with text.
+ * is not a heading slug or a checkpoint id, each after the `<Recap>`, and
+ * each with text.
  * Throws on the first break, naming `where`.
  */
 export function habitTagsIn(tree: MdxNode, src: string, where: string): HabitInfo[] {
@@ -71,13 +77,21 @@ export function habitTagsIn(tree: MdxNode, src: string, where: string): HabitInf
 		throw new Error(`${where}: ${habits.length} <${HABIT_TAG}> tags; a lesson has at most ${MAX_HABITS}`);
 	const recapEnd = Math.max(-1, ...elements.filter((n) => n.name === 'Recap').map((n) => n.position?.end.offset ?? -1));
 	const slugs = new Set(sectionSlugsIn(tree, src));
+	// A checkpoint's section id is its `id` too (`CheckpointShell.astro`), so a habit id must differ from those as well.
+	const checkpointIds = new Set(
+		elements
+			.filter((n) => n.name !== null && n.name in KIND_OF_TAG)
+			.map((n) => attrsOf(n, where).get('id')?.value)
+			.filter((v): v is string => typeof v === 'string'),
+	);
 	const ids = new Set<string>();
 	return habits.map((node) => {
 		const attrs = attrsOf(node, where);
 		const id = assertHabitId(where, stringProp(`${where} <${HABIT_TAG}>`, attrs, 'id'));
 		if (ids.has(id)) throw new Error(`${where}: habit id "${id}" is used twice`);
 		ids.add(id);
-		if (slugs.has(id)) throw new Error(`${where}: habit id "${id}" is also a section slug; pick another id`);
+		if (slugs.has(id)) throw new Error(`${where}: habit id "${id}" is also a heading slug; pick another id`);
+		if (checkpointIds.has(id)) throw new Error(`${where}: habit id "${id}" is also a checkpoint id; pick another id`);
 		const start = node.position?.start.offset ?? -1;
 		if (recapEnd < 0 || start < recapEnd) throw new Error(`${where}#${id}: <${HABIT_TAG}> must come after the <Recap>`);
 		const text = childrenSource(node, src);

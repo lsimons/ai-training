@@ -8,17 +8,19 @@
  */
 
 import * as progress from './progress';
-import type { HabitEntry, HabitResult } from './progress-model';
+import type { HabitEntry, HabitResult, LessonEntry } from './progress-model';
 
 export interface HabitBindOptions {
 	onResult?: (el: HTMLElement, result: HabitResult) => void;
 }
 
 /** The state line under the habit text, per card state. */
-export function habitStatusText(entry: HabitEntry | undefined, day: string): string {
-	switch (progress.habitCardState(entry, day)) {
+export function habitStatusText(entry: HabitEntry | undefined, day: string, lesson?: LessonEntry): string {
+	switch (progress.habitCardState(entry, day, lesson)) {
 		case 'unfinished':
 			return 'Offered once you finish the lesson.';
+		case 'hidden':
+			return '';
 		case 'waiting':
 			return `Next on ${entry?.next ?? ''}.`;
 		case 'due':
@@ -30,11 +32,16 @@ export function habitStatusText(entry: HabitEntry | undefined, day: string): str
 
 /** Redraw one card from the record: state attribute, status line, buttons and results. */
 export function drawHabit(el: HTMLElement): void {
-	const entry = progress.load().habits[el.dataset.progressId ?? ''];
-	const state = progress.habitCardState(entry, progress.today());
+	const rec = progress.load();
+	const id = el.dataset.progressId ?? '';
+	const entry = rec.habits[id];
+	const lesson = rec.lessons[id.split('#')[0] ?? ''];
+	const state = progress.habitCardState(entry, progress.today(), lesson);
 	el.dataset.state = state;
+	// A finished lesson without an entry: the card never shows (spec S07 "Content changes").
+	el.hidden = state === 'hidden';
 	const status = el.querySelector<HTMLElement>('[data-habit-status]');
-	if (status) status.textContent = habitStatusText(entry, progress.today());
+	if (status) status.textContent = habitStatusText(entry, progress.today(), lesson);
 	const actions = el.querySelector<HTMLElement>('[data-habit-actions]');
 	if (actions) actions.hidden = state !== 'due';
 	const results = el.querySelector<HTMLElement>('[data-habit-results]');

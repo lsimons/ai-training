@@ -21,7 +21,7 @@ const lessonId = lessonIdOf(Astro);
 const id = assertHabitId(lessonId, Astro.props.id);
 ---
 
-<aside class="habit not-content" id={id} data-habit data-progress-id={`${lessonId}#${id}`} data-state="unfinished" aria-label="Habit">
+<aside class="habit not-content" id={id} data-habit data-progress-id={`${lessonId}#${id}`} data-state="unfinished">
 	<p class="habit-title">Habit</p>
 	<div class="habit-text"><slot /></div>
 	<p class="habit-status" data-habit-status role="status"></p>

@@ -343,7 +343,7 @@ export function pruneOrphanEntries(
 	knownLessonIds: Iterable<string>,
 	knownCheckpointIds: Iterable<string>,
 	knownPracticeIds: Iterable<string>,
-	knownHabitIds: Iterable<string> = [],
+	knownHabitIds: Iterable<string>,
 ): number {
 	const lessons = new Set(knownLessonIds);
 	const checkpoints = new Set(knownCheckpointIds);
@@ -664,15 +664,21 @@ export function dueHabits(r: ProgressRecord, day: string, prefix = ''): string[]
 		.sort();
 }
 
-export type HabitCardState = 'unfinished' | 'waiting' | 'due' | 'retired';
+export type HabitCardState = 'unfinished' | 'hidden' | 'waiting' | 'due' | 'retired';
 
 /**
  * What the habit card shows (spec S07 "Where habits surface"): the text only
  * while the lesson is unfinished (no entry), the next date while waiting, Done
- * and Skip when due, and the results once retired.
+ * and Skip when due, and the results once retired. `hidden` is a finished
+ * lesson without an entry: the learner finished it before the habit existed
+ * (or on an older record), and never sees the card (S07 "Content changes").
  */
-export function habitCardState(entry: HabitEntry | undefined, day: string): HabitCardState {
-	if (!entry) return 'unfinished';
+export function habitCardState(
+	entry: HabitEntry | undefined,
+	day: string,
+	lesson?: LessonEntry | undefined,
+): HabitCardState {
+	if (!entry) return lesson?.state === 'finished' ? 'hidden' : 'unfinished';
 	if (entry.next === null) return 'retired';
 	return entry.next <= day ? 'due' : 'waiting';
 }
