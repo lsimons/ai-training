@@ -1,6 +1,4 @@
 ---
-// The virtual module, as in Starlight's own Sidebar, so a `components.MobileMenuFooter` override still applies.
-import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
 /**
  * Starlight `Sidebar` override. Renders Starlight's sidebar with our
  * `SidebarSublist` in place of the default one, so a course page and the topic
@@ -11,6 +9,8 @@ import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
  * event. A course with nothing due has no count element. The style is in
  * `styles/custom.css` with the other sidebar rules.
  */
+// The virtual module, as in Starlight's own Sidebar, so a `components.MobileMenuFooter` override still applies.
+import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
 import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
 import { getAreas } from '@lib/areas';
 import SidebarSublist from './SidebarSublist.astro';

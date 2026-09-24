@@ -24,19 +24,20 @@ version fails the pull request.
 
 The site's own checks, in the order `ci` runs them after the prose tasks:
 
-| Task                   | What it does                                                                  |
-| ---------------------- | ----------------------------------------------------------------------------- |
-| `mise run examples`    | Run every `<Predict run=...>` fixture and compare with the lesson             |
-| `mise run data`        | Check the data tree under `site/src/data` against itself and the lesson pages |
-| `mise run site-check`  | `astro check`: types, templates, content schemas                              |
-| `mise run site-lint`   | Biome lint and format check (`mise run site-format` rewrites)                 |
-| `mise run site-test`   | Vitest unit and component tests, 80% coverage floor                           |
-| `mise run site-build`  | Build `site/dist`, with the internal link check                               |
-| `mise run checkpoints` | Check the built `checkpoints.json` export against the lesson pages            |
-| `mise run site-e2e`    | Build, then the Playwright walkthrough in `site/e2e/`                         |
+| Task                     | What it does                                                                  |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `mise run examples`      | Run every `<Predict run=...>` fixture and compare with the lesson             |
+| `mise run data`          | Check the data tree under `site/src/data` against itself and the lesson pages |
+| `mise run site-check`    | `astro check`: types, templates, content schemas                              |
+| `mise run site-lint`     | Biome lint and format check (`mise run site-format` rewrites)                 |
+| `mise run site-test`     | Vitest unit and component tests, 80% coverage floor                           |
+| `mise run site-build`    | Build `site/dist`, with the internal link check                               |
+| `mise run checkpoints`   | Check the built `checkpoints.json` export against the lesson pages            |
+| `mise run site-e2e-only` | The Playwright walkthrough in `site/e2e/` against the built `site/dist`       |
 
-`ci` runs `site-e2e-only` (the walkthrough alone) after `site-build`, so
-the site is built once. `site-e2e` is the one-command form for local use.
+`mise run site-e2e` builds first and then runs the walkthrough, the
+one-command form for local use. `ci` runs `site-e2e-only` after
+`site-build`, so the site is built once.
 
 `site-e2e` and `site-screenshot` need `mise run site-browser` once per
 machine. `docs/agents/testing.md` says which layer a new assertion belongs
