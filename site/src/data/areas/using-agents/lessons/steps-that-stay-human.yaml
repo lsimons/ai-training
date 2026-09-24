@@ -25,6 +25,7 @@ exercise:
 sources:
   - Academy building-effective-human-agent-teams
   - Academy ai-fluency-for-builders
+  - AI Act
 issue: 164
 minutes: 10
 notes: >-
@@ -35,5 +36,7 @@ notes: >-
   The process uses Brindlewick Instruments, the fictional company from the earlier lessons, and no
   person in it has a name. Academy building-effective-human-agent-teams is cited for accountability
   staying with people, and Academy ai-fluency-for-builders for deciding the human steps by design,
-  both as paraphrased ideas in our own words. AEC-12 and Brilliant ABS from the plan are not cited,
+  both as paraphrased ideas in our own words. AI Act is cited for Annex III point 4(a) (screening
+  or ranking applicants is high-risk) and Article 26 (deployer human oversight), because the
+  hiring process hands screening to the agent. AEC-12 and Brilliant ABS from the plan are not cited,
   because the page is a foundations lesson with no coding tool in it, so they are not in sources.

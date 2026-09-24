@@ -5,8 +5,7 @@ contractor, twice. The first reading asks which steps an agent could do,
 and the answer is most of them. The second reading asks which steps stay with
 a person anyway, and gives the reason per step. The second list is much
 shorter than the first, and the gap between them is the subject of the
-lesson. You
-don't run anything here. The process is supplied, and the work is reading
+lesson. You don't run anything here. The process is supplied, and the work is reading
 it and deciding.
 
 The safety course showed where to put the approval before an irreversible
@@ -31,7 +30,7 @@ Hiring a contractor, in eight steps
 4. Interview the shortlisted candidates.
 5. Check the references of the two finalists.
 6. Choose the contractor.
-7. Agree the rate and sign the contract.
+7. Agree on the rate and sign the contract.
 8. Set up accounts, access and a first-week plan.
 ```
 
@@ -56,14 +55,17 @@ about the difference.
 ## Why a person keeps a step anyway
 
 Set the process aside for a moment, because the reasons are easier to see
-in smaller examples. A step stays with a person for one of three reasons.
+in smaller examples. A step stays with a person because someone has to
+answer for it, because its information is in no system the agent can
+reach, or because doing it keeps the person able to judge the agent's
+work.
 
 **Someone has to answer for it.** A manager's performance review has a
 rating in it, and an agent can draft a fair rating from the year's notes.
-The rating stays with the manager, because the person who has to explain
-it to the employee later is the one who must have decided it. When a colleague asks "why a three?", the answer
-"the tool said so" ends the manager's part in the process, and the
-process was there to have a manager in it. An agent can prepare a step it
+The rating stays with the manager. The person who has to explain it to
+the employee later is the one who must have decided it. When a colleague asks "why a three?", the answer
+"the tool said so" ends the manager's part in the process. The process
+was there to have a manager in it. An agent can prepare a step it
 can't be accountable for, and accountability is the reason the step
 stays with the person who holds it
 (@Academy building-effective-human-agent-teams).
@@ -83,8 +85,7 @@ first few applications yourself is slower than reading a shortlist. It is
 also how you learn what this year's applications look like and
 whether the shortlist the agent made left the right people out. A person
 who has read none of the applications for two years can approve any
-shortlist and reject none, because they no longer have a sense of what a
-good one contains. A person keeps some steps as the price of being
+shortlist and reject none. They no longer know what a good one contains. A person keeps some steps as the price of being
 qualified to check the rest, in the same way a pilot flies some landings by hand to stay
 able to take over from the autopilot.
 
@@ -115,7 +116,7 @@ Match each step to the reason it stays with a person.
   options={[
     { text: 'The rating moves to the agent once its drafts match the managers\' ratings often enough.', why: 'The rating stayed with the manager because the manager has to answer for it. A more accurate draft does not change who answers.' },
     { text: 'The rating stays with the manager, and the better agent changes the quality of the draft the manager starts from.', correct: true },
-    { text: 'The rating moves to the agent, and the manager keeps an approval before the review is sent.', why: 'An approval at the end is a check on the text. The reason the step stayed human was accountability for the decision, and an approval is not a decision.' },
+    { text: 'The rating moves to the agent, and the manager keeps an approval before the review is sent.', why: 'An approval at the end is a check on the text. The reason the step stayed human was accountability for the decision, and an approval checks a text after the decision was made elsewhere.' },
   ]}>
 A team's rule is that the agent drafts each performance review and the
 manager decides the rating. A year later the agent's drafts are much
@@ -142,15 +143,20 @@ to say that the recommendation is input and the choice is still a
 person's. A team that writes an AI policy names these steps in it as the
 approvals a task needs, which is the same list seen from the
 organization's side. The rule about which step a person keeps and who
-oversees it is written down in both places, and the lesson on the EU AI
-Act shows the same idea as a duty on the organization that deploys an AI
-system.
+oversees it is written down in both places, and for some steps the law
+writes it down as well. Under the EU AI Act, an AI system that screens
+or ranks job applicants is a high-risk use (Annex III, point 4(a)). The
+organization that deploys it must give human oversight to named people
+who have the competence and the authority to act (Article 26) (@AI Act).
+So step 3 of the hiring process, the screening, has a person in it in
+any case. That person reads a sample, owns the shortlist, and is named in
+the process description.
 
 Naming the human steps has a second effect. A process with named human
 steps keeps working when the tool is down, because the person who owns a
 step knows how to do it, has done it recently, and can do the neighboring
 steps by hand for a day. A process where every step was handed over as
-soon as it could be has nobody who remembers how step 3 was done, and the
+soon as it could be has nobody who remembers how step 3 was done. The
 outage of a tool becomes the outage of the process. The human path is the
 one you keep on purpose, the same way an office keeps a paper form for
 the day the system is unavailable.
@@ -204,13 +210,15 @@ keeps you able to judge the agent's work. Ten minutes is enough, and the
 answer is a list of eight lines.
 
 A good answer keeps step 6, the choice, because the hiring manager has to
-answer for it. It keeps the decision in step 7, agreeing the rate and
-signing, for the same reason, and it may let the agent fill in the
+answer for it. It keeps the decision in step 7, agreeing on the rate
+and signing, for the same reason, and it may let the agent fill in the
 contract template. It keeps step 4, the interviews, because what the
 candidate is like in the room is in no system the agent can reach, even
 if the agent books the rooms and writes the notes. It keeps part of step
-3, reading a sample of the applications, as the step that keeps the
-manager able to judge the shortlist. Steps 1, 2, 5 and 8 go to the agent,
+3, reading a sample of the applications and owning the shortlist, as the
+step that keeps the manager able to judge the agent's screening, and
+because screening applicants is a high-risk use under the EU AI Act that
+needs named human oversight. Steps 1, 2, 5 and 8 go to the agent,
 with the manager reading the results. Where your answer differs, write
 down the reason you weighed differently, because a different reason is a
 fine answer and a missing one is the thing to fix. Which step in your
@@ -219,7 +227,7 @@ list would be automated by default if nobody wrote it down?
 
 <Recap>
 1. An agent could take part in almost every step of an everyday process, and "could do" is a different question from "should do".
-2. A step stays with a person for one of three reasons: someone has to answer for it, the information is in no system the agent can reach, or doing it keeps the person able to judge the agent's work (@Academy building-effective-human-agent-teams).
+2. A step stays with a person because someone has to answer for it (@Academy building-effective-human-agent-teams), because the information is in no system the agent can reach, or because doing it keeps the person able to judge the agent's work.
 3. The reasons are about the person and the process, so a better agent changes the draft the person starts from and leaves the list of human steps as it was.
 4. A step nobody named is automated by default, one busy week at a time, so the list is written when the process is set up (@Academy ai-fluency-for-builders).
 5. Named human steps keep the process running when the tool is down, because someone still knows how to do them.
