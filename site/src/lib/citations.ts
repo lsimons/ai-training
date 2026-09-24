@@ -71,3 +71,46 @@ export function createCitations(bibliography: Record<string, BibliographyEntry>,
 		},
 	};
 }
+
+export interface Behavior {
+	claim: string;
+	why: string;
+	example: string;
+}
+export interface Objective {
+	id: string;
+	statement: string;
+	level: string;
+	behaviors: Behavior[];
+}
+
+/** The objectives with every behavior cell rendered through `citations`, in page order, so numbering follows the page. */
+export function renderObjectives(objectives: Objective[], citations: Citations): Objective[] {
+	return objectives.map((o) => ({
+		...o,
+		behaviors: o.behaviors.map((b) => ({
+			claim: citations.render(b.claim),
+			why: citations.render(b.why),
+			example: citations.render(b.example),
+		})),
+	}));
+}
+
+export interface Heading {
+	depth: number;
+	slug: string;
+	text: string;
+}
+
+/**
+ * The competency page outline, in the order the page renders its sections:
+ * objectives, then alignment when there are rows, then references when a
+ * rendered behavior cited (a token inside a code span does not count).
+ */
+export function competencyHeadings(alignmentRows: number, references: number): Heading[] {
+	return [
+		{ depth: 2, slug: 'objectives', text: 'Learning objectives' },
+		...(alignmentRows > 0 ? [{ depth: 2, slug: 'alignment', text: 'Alignment' }] : []),
+		...(references > 0 ? [{ depth: 2, slug: 'references', text: 'References' }] : []),
+	];
+}

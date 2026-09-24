@@ -1,46 +1,21 @@
 ---
 /**
  * The objectives of one competency page (spec S02 "Stable URLs"): each
- * objective's behaviors table, the lessons serving it, and a References list
- * for the `(@key)` citations in the behaviors, rendered by lib/citations.
+ * objective's behaviors table (cells already rendered as HTML by
+ * lib/citations `renderObjectives`) and the lessons serving it. The page
+ * owns the citation numbering and renders the References list last.
  */
-import { getCollection } from 'astro:content';
-import { type BibliographyEntry, createCitations } from '@lib/citations';
+import type { Objective } from '@lib/citations';
 import { getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
 
-interface Behavior {
-	claim: string;
-	why: string;
-	example: string;
-}
-interface Objective {
-	id: string;
-	statement: string;
-	level: string;
-	behaviors: Behavior[];
-}
 interface Props {
-	competency: { id: string; objectives: Objective[] };
+	objectives: Objective[];
 }
 
-const { competency } = Astro.props;
+const { objectives } = Astro.props;
 const lessons = await getLessons();
 const serving = (objectiveId: string) => lessons.filter((l) => l.data.serves.includes(objectiveId));
-const bibliography: Record<string, BibliographyEntry> = Object.fromEntries(
-	(await getCollection('bibliography')).map((e) => [e.id, e.data]),
-);
-const citations = createCitations(bibliography, `competency ${competency.id}`);
-const objectives = competency.objectives.map((o) => ({
-	...o,
-	behaviors: o.behaviors.map((b) => ({
-		claim: citations.render(b.claim),
-		why: citations.render(b.why),
-		example: citations.render(b.example),
-	})),
-}));
-const references = citations.references();
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 ---
 
 {
@@ -62,23 +37,4 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 			)}
 		</section>
 	))
-}
-
-{
-	references.length > 0 && (
-		<>
-			<h2 id="references">References</h2>
-			<ol class="references">
-				{references.map(({ n, key, entry }) => (
-					<li id={`ref-${n}`}>
-						{entry.author && `${entry.author}. `}
-						{entry.url ? <a href={entry.url}><em>{entry.title}</em></a> : <em>{entry.title}</em>}.
-						{entry.container && entry.container !== entry.title && ` ${entry.container}.`}
-						{` ${capitalize(entry.type)}. `}
-						<code>{key}</code>
-					</li>
-				))}
-			</ol>
-		</>
-	)
 }
