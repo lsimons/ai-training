@@ -12,11 +12,16 @@
  * pin or a wrong `python3` on PATH fails loudly instead of testing one
  * interpreter twice.
  *
+ * The tags come from the MDX tree, through the reader in
+ * `src/lib/checkpoint-tags.ts`, so the answer compared is the one the page
+ * shows (#286).
+ *
  * `scripts/check-examples.mjs` is the command-line entry; tests import this.
  */
 import { spawnSync } from 'node:child_process';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { extname, join } from 'node:path';
+import { attrsOf, jsxElements, parseMdx, propValue, stringProp } from '../../src/lib/checkpoint-tags.ts';
 
 /** Every `.mdx` file under `dir`, recursively. */
 export function* walkMdx(dir) {
@@ -28,52 +33,33 @@ export function* walkMdx(dir) {
 }
 
 /**
- * Find every `<Predict ...>` opening tag in `src` and parse its props.
- * Returns `{ attrs: string, props: Map<string,string>, index: number }[]`.
- *
- * A regex like `/<Predict\b([^>]*?)>/` stops at the first `>` even when it
- * sits inside `answer="a > b"`, which drops the props after it (`run=`) and
- * silently skips the example. So the tag end is found by walking characters
- * and tracking whether we are inside `"..."`, a `{...}` expression, or a
- * backtick template literal inside that expression.
+ * Every `<Predict ...>` tag in a lesson source, in source order, as
+ * `{ attrs: Map<string, CheckpointAttr>, line }` (1-based line of the tag),
+ * read from the MDX tree the page build parses (`src/lib/checkpoint-tags.ts`).
+ * The tree is the truth for the `answer` the learner sees: the MDX compiler
+ * strips the indentation of continuation lines in an `answer={`...`}`
+ * template literal, and a reader of the source text would miss that (#286).
+ * A parse error, a spread prop, a non-literal expression prop
+ * (`run={name}`) or a non-string `id`, `run` or `answer` throws, with
+ * `where` in the message.
  */
-export function findPredictTags(src) {
+export function predictTags(src, where) {
+	let tree;
+	try {
+		tree = parseMdx(src);
+	} catch (e) {
+		throw new Error(`${where}: ${e.message}`);
+	}
 	const out = [];
-	const OPEN = /<Predict\b/g;
-	for (const m of src.matchAll(OPEN)) {
-		let i = m.index + m[0].length;
-		let quote = null; // '"' | "'" | '`' when inside a string
-		let braces = 0;
-		let end = -1;
-		for (; i < src.length; i++) {
-			const c = src[i];
-			if (quote) {
-				if (c === '\\' && quote !== '"')
-					i++; // JS-style escape in expressions
-				else if (c === quote) quote = null;
-				continue;
-			}
-			if (c === '"' || c === "'" || (braces > 0 && c === '`')) quote = c;
-			else if (c === '{') braces++;
-			else if (c === '}') braces = Math.max(0, braces - 1);
-			else if (c === '>' && braces === 0) {
-				end = i;
-				break;
-			}
-		}
-		if (end === -1) throw new Error(`unterminated <Predict tag at offset ${m.index}`);
-		const attrs = src.slice(m.index + m[0].length, end).replace(/\/\s*$/, '');
-		out.push({ attrs, props: parseProps(attrs), index: m.index });
+	for (const node of jsxElements(tree)) {
+		if (node.name !== 'Predict') continue;
+		const attrs = attrsOf(node, where);
+		const id = stringProp(where, attrs, 'id') ?? '?';
+		stringProp(`${where} #${id}`, attrs, 'run');
+		stringProp(`${where} #${id}`, attrs, 'answer');
+		out.push({ attrs, line: node.position?.start.line ?? 0 });
 	}
 	return out;
-}
-
-/** Parse `name="..."`, `name='...'` and `name={`...`}` props. */
-export function parseProps(attrs) {
-	const props = new Map();
-	const RE = /([A-Za-z_][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|\{`((?:[^`\\]|\\.)*)`\})/g;
-	for (const m of attrs.matchAll(RE)) props.set(m[1], m[2] ?? m[3] ?? m[4]);
-	return props;
 }
 
 /** The Python floor for fixtures, as `major.minor` (spec S03 "Examples"). */
@@ -164,7 +150,7 @@ export function runFixture(examplesDir, run, interp = { label: 'python3', cmd: '
 const DEFAULT_INTERPRETERS = [{ label: 'python3', cmd: 'python3' }];
 
 /**
- * Check the `<Predict>` tags of one lesson source. `run(name, interp)`
+ * Check the `<Predict>` tags of one lesson source (`predictTags`). `run(name, interp)`
  * executes a fixture (injectable for tests), once per entry in `interps`.
  * Returns `{ found, checked, failures }`: how many tags name a fixture, how
  * many runs happened, and one message per problem.
@@ -173,16 +159,20 @@ export function checkSource(file, src, run, interps = DEFAULT_INTERPRETERS) {
 	let checked = 0;
 	let found = 0;
 	const failures = [];
-	for (const { attrs, props } of findPredictTags(src)) {
-		const name = props.get('run');
-		const answer = props.get('answer');
-		const id = props.get('id') ?? '?';
-		if (!name) {
-			// A tag that mentions `run` but did not parse into a run prop is a
-			// parser gap, not an honor-system Predict; fail rather than skip.
-			if (/\brun\b/.test(attrs)) failures.push(`${file} #${id}: tag mentions "run" but no run= prop parsed:\n${attrs}`);
-			continue;
-		}
+	let tags;
+	try {
+		tags = predictTags(src, file);
+	} catch (e) {
+		// A page that does not parse, or a prop the reader cannot read
+		// (`run={name}`), is a broken lesson, not an honor-system Predict, so
+		// it fails rather than skips.
+		return { found: 0, checked: 0, failures: [e.message] };
+	}
+	for (const { attrs } of tags) {
+		const id = propValue(attrs, 'id') ?? '?';
+		const name = propValue(attrs, 'run');
+		const answer = propValue(attrs, 'answer');
+		if (!name) continue;
 		found++;
 		if (answer === undefined) {
 			failures.push(`${file} #${id}: has run="${name}" but no answer`);
