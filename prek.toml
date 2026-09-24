@@ -108,7 +108,7 @@ hooks = [
     name = "lychee (broken link check)",
     entry = "bash -c 'lychee --no-progress --config .lychee.toml \"$@\"' --",
     language = "system",
-    types_or = ["markdown", "mdx"],
+    types_or = ["markdown", "mdx", "yaml"],
   }
 ]
 
