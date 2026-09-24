@@ -225,8 +225,7 @@ describe('runFixture and checkExamples', () => {
 		const res = checkExamples(empty, examples);
 		expect(res.failures[0]).toContain('no <Predict run=...> examples found');
 	});
-	// This sweep runs every fixture under site/examples/ twice (both interpreters), so it gets a per-test
-	// budget far above the default 5000 ms, which a loaded machine or a slow CI runner exceeds (#255).
+	// Runs every <Predict run=...> fixture the lessons reference on both interpreters (about 5 s idle), so it needs more than the 5000 ms default under load or on a slow CI runner (#255).
 	it('the real lesson tree has examples that pass on both interpreters', () => {
 		const root = new URL('../..', import.meta.url).pathname;
 		const res = checkExamples(join(root, 'src/content/docs'), join(root, 'examples'));
