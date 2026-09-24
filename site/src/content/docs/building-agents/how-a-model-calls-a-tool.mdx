@@ -181,7 +181,7 @@ model reads the error and answers with it in mind
   context="The lesson shows the message a loop sends back to the Claude API after running a tool the model asked for."
   title="Where does the tool result go?" hint="Which roles does the Claude API accept in a message list, and what links a result to the request it answers?"
   options={[
-    { text: 'In a message with role `tool`, with the result text as its content.', why: 'Which two roles does the messages list of the real API accept?' },
+    { text: 'In a message with role `tool`, with the result text as its content.', why: 'Which roles does the messages list of the real API accept?' },
     { text: 'In a message with role `user`, as a `tool_result` block that names the `tool_use_id`.', correct: true },
     { text: 'In the `system` field of the next request, so the model sees it first.', why: 'The system prompt is a separate parameter with instructions for the whole conversation. Where do results of one call go?' },
   ]}>
