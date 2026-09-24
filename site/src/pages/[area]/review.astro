@@ -11,7 +11,8 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { getAreas } from '@lib/areas';
 import { reviewAlternatesOf } from '@lib/checkpoint-rules';
-import { checkpointsOf, getLessons } from '@lib/lessons';
+import { checkpointsOf, getLessons, habitsOf } from '@lib/lessons';
+import { renderInline } from '@lib/reference';
 import { href } from '@lib/url';
 
 export async function getStaticPaths() {
@@ -29,6 +30,8 @@ const catalog = lessons.map((l) => {
 		checkpoints: all
 			.filter((c) => c.phase === 'first' && c.reviewable)
 			.map((c) => ({ id: c.id, revision: c.revision, alternates: reviewAlternatesOf(c, all) })),
+		// The lesson's habits (spec S07 "Where habits surface"): the text as inline HTML, so the due card reads as on the lesson page.
+		habits: habitsOf(l).map((h) => ({ id: h.id, html: renderInline(h.text) })),
 	};
 });
 // Every kind the page may ask: the reviewable `first` checkpoints and their `review` alternates.
@@ -50,6 +53,7 @@ const formats = [
 			{formats.length ? formats.map((f) => <code>{f}</code>) : 'none yet'}. <strong>Hint</strong> nudges; <strong>Give up</strong>
 			shows the answer after one attempt and counts as a fail.
 		</p>
+		<div class="review-habits" data-habits hidden></div>
 		<div class="review-progress" aria-label="Items in this session"><div data-bar></div></div>
 		<p data-status role="status"></p>
 		<div data-items></div>
@@ -62,6 +66,7 @@ const formats = [
 <script>
 	import * as progress from '@scripts/progress';
 	import { bindCheckpoint } from '@scripts/checkpoints';
+	import { bindHabit } from '@scripts/habits';
 
 	interface CatalogLesson {
 		id: string;
@@ -69,6 +74,8 @@ const formats = [
 		href: string;
 		/** `alternates`: the ids of the item's `review` alternates, in page order. */
 		checkpoints: { id: string; revision: number; alternates: string[] }[];
+		/** The lesson's habits, text as inline HTML (spec S07). */
+		habits: { id: string; html: string }[];
 	}
 
 	const root = document.querySelector<HTMLElement>('.review[data-review]');
@@ -78,6 +85,60 @@ const formats = [
 		const items = root.querySelector<HTMLElement>('[data-items]')!;
 		const status = root.querySelector<HTMLElement>('[data-status]')!;
 		const bar = root.querySelector<HTMLElement>('[data-bar]')!;
+		const habitsBlock = root.querySelector<HTMLElement>('[data-habits]')!;
+
+		/**
+		 * Today's due habits of this course, above the review items, each with Done and Skip (spec S07 "Where
+		 * habits surface"). The card is the lesson page's markup, built here from the catalog text, and bound by
+		 * the same script, so a result moves the habit on and the card shows its next date. With nothing due
+		 * the block stays hidden.
+		 */
+		function drawHabits() {
+			const due = progress.dueHabits(progress.load(), `${area}/`);
+			const cards = due.flatMap((progressId) => {
+				const [lessonId, habitId] = progressId.split('#');
+				const lesson = catalog.find((l) => l.id === lessonId);
+				const habit = lesson?.habits.find((h) => h.id === habitId);
+				if (!lesson || !habit) return [];
+				const card = document.createElement('aside');
+				card.className = 'habit';
+				card.dataset.habit = '';
+				card.dataset.progressId = progressId;
+				card.setAttribute('aria-label', 'Habit');
+				const title = document.createElement('p');
+				title.className = 'habit-title';
+				title.textContent = `Habit from ${lesson.title}`;
+				const text = document.createElement('div');
+				text.className = 'habit-text';
+				text.innerHTML = habit.html;
+				const state = document.createElement('p');
+				state.className = 'habit-status';
+				state.dataset.habitStatus = '';
+				state.setAttribute('role', 'status');
+				const actions = document.createElement('div');
+				actions.className = 'habit-actions';
+				actions.dataset.habitActions = '';
+				actions.hidden = true;
+				for (const [cls, key, label] of [['habit-done', 'habitDone', 'Done'], ['habit-skip', 'habitSkip', 'Skip']] as const) {
+					const btn = document.createElement('button');
+					btn.type = 'button';
+					btn.className = cls;
+					btn.dataset[key] = '';
+					btn.textContent = label;
+					actions.appendChild(btn);
+				}
+				const results = document.createElement('ol');
+				results.className = 'habit-results';
+				results.dataset.habitResults = '';
+				results.hidden = true;
+				card.append(title, text, state, actions, results);
+				return [card];
+			});
+			habitsBlock.replaceChildren(...cards);
+			habitsBlock.hidden = cards.length === 0;
+			for (const card of cards) bindHabit(card);
+		}
+		drawHabits();
 
 		// Items whose answer changed since they were scheduled restart at stage 1 (spec S05 "Content changes").
 		progress.resetOutdatedReviews(catalog.flatMap((l) => l.checkpoints.map((c) => ({ id: `${l.id}#${c.id}`, revision: c.revision }))));
