@@ -34,13 +34,16 @@ Hits = dict[str, list[Alert]]
 
 # The eval config and the directory its packages unpack into. `mise run
 # prose-sync` reads .vale.ini only, so the eval packages have their own
-# sync task, `prose-eval-sync` (`vale sync --config .vale-eval.ini`).
+# sync task, `prose-eval-sync` (`vale sync --config .vale-eval.ini`). For
+# the main configs the message names `mise run setup`, which runs
+# `prose-sync` when a package is missing and installs everything else a
+# fresh worktree lacks (#345).
 # STYLES is resolved from this file, so the check finds the synced packages
 # from any working directory (#300).
 EVAL_INI = pathlib.Path(".vale-eval.ini")
 STYLES = pathlib.Path(__file__).resolve().parent.parent / ".vale" / "styles"
 EVAL_SYNC = "mise run prose-eval-sync"
-MAIN_SYNC = "mise run prose-sync"
+MAIN_SYNC = "mise run setup"
 CHECK_FLAG = "--check-packages"
 
 # A package URL on a `Packages` line ends in `<name>.zip`, and Vale unpacks
@@ -133,8 +136,8 @@ def missing_packages(names: Sequence[str], styles: pathlib.Path) -> list[str]:
 def sync_command(ini: pathlib.Path) -> str:
     """The mise task that fetches the packages of a config.
 
-    `prose-sync` runs plain `vale sync`, which reads .vale.ini, and the
-    extended config pins the same packages. The eval config has its own.
+    `setup` runs `prose-sync`, plain `vale sync`, which reads .vale.ini, and
+    the extended config pins the same packages. The eval config has its own.
     """
     return EVAL_SYNC if ini.name == EVAL_INI.name else MAIN_SYNC
 

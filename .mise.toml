@@ -58,6 +58,41 @@ osv-scanner = "2.6.0"
 # instead, where bun.lock pins the whole tree, and `mise run spell` runs it
 # from site/node_modules/.bin.
 
+# One task for a fresh clone or worktree, safe to run again (#345). It
+# installs the site and Python dependencies from their lockfiles and
+# fetches the Vale packages only when one is missing, and it prints each
+# step. The tasks that need an install fail fast and name this task
+# (`require-setup` below and the `prose-check-packages` message).
+[tasks.setup]
+description = "Set up a fresh clone or worktree: frozen installs, and the Vale packages when missing"
+run = """
+set -e
+echo "setup: installing the site dependencies from site/bun.lock"
+mise run site-install-frozen
+echo "setup: installing the Python dev tools from uv.lock"
+mise run py-install-frozen
+if scripts/prose_eval.py --check-packages .vale.ini .vale-extended.ini >/dev/null 2>&1; then
+  echo "setup: the Vale packages are already under .vale/styles/, no sync needed"
+else
+  echo "setup: a Vale package is missing, fetching them"
+  mise run prose-sync
+fi
+echo "setup: done"
+"""
+
+# A `depends` of every task that runs a tool from site/node_modules. In a
+# fresh worktree it stops with the task to run instead of "Script not
+# found" from bun. Checks one binary, so it costs nothing.
+[tasks.require-setup]
+description = "Fail with a pointer to `mise run setup` when site/node_modules is missing"
+hide = true
+run = """
+if [ ! -x site/node_modules/.bin/astro ] || [ ! -x site/node_modules/.bin/cspell ]; then
+  echo "site/node_modules is missing or incomplete. Run 'mise run setup' first." >&2
+  exit 1
+fi
+"""
+
 # Deliberately NOT --frozen-lockfile: this is the task you run while
 # actually changing dependencies, and it is allowed to update bun.lock.
 # `site-install-frozen` is the one the gate uses.
@@ -79,16 +114,19 @@ run = "bun install --frozen-lockfile"
 
 [tasks.site-dev]
 description = "Start the live-reloading dev server"
+depends = ["require-setup"]
 dir = "site"
 run = "bun run dev"
 
 [tasks.site-build]
 description = "Build the static site into site/dist"
+depends = ["require-setup"]
 dir = "site"
 run = "bun run build"
 
 [tasks.site-preview]
 description = "Preview the production build"
+depends = ["require-setup"]
 dir = "site"
 run = "bun run preview"
 
@@ -96,6 +134,7 @@ run = "bun run preview"
 # `python3.9`, see [tools]); the runner fails if either is missing.
 [tasks.examples]
 description = "Run every lesson example fixture on the current Python and the 3.9 floor, asserting the output the lesson shows"
+depends = ["require-setup"]
 dir = "site"
 run = "bun scripts/check-examples.mjs"
 
@@ -105,11 +144,13 @@ run = "bun scripts/check-examples.mjs"
 # its header comment.
 [tasks.data]
 description = "Check the data tree (areas, topics, competencies, courses, lessons) against itself and the lesson pages"
+depends = ["require-setup"]
 dir = "site"
 run = "bun scripts/check-data.mjs"
 
 [tasks.next-wave]
 description = "Pick the next wave of issues for meta-orchestration (docs/agents/meta-orchestration.md), with -- --size N, --kind lessons|content, --only N,N,..., --unblockers-first and --json"
+depends = ["require-setup"]
 dir = "site"
 run = "bun scripts/next-wave.mjs"
 
@@ -120,6 +161,7 @@ run = "bun scripts/next-wave.mjs"
 # site/scripts/lib/checkpoints.mjs lists what it rejects in its header comment.
 [tasks.checkpoints]
 description = "Check the built checkpoints.json export against the lesson pages and the topic concepts, and choice items for surface cues (after site-build)"
+depends = ["require-setup"]
 dir = "site"
 run = "bun scripts/check-checkpoints.mjs"
 
@@ -129,11 +171,13 @@ run = "bun scripts/check-checkpoints.mjs"
 # site/scripts/lib/bundles.mjs lists what it rejects in its header comment.
 [tasks.bundles]
 description = "Check the built lesson bundles under dist/data/lessons against the lesson pages: one per page, every S08 field, fenced code unchanged (after site-build)"
+depends = ["require-setup"]
 dir = "site"
 run = "bun scripts/check-bundles.mjs"
 
 [tasks.site-check]
 description = "Astro type/content check"
+depends = ["require-setup"]
 dir = "site"
 run = "bunx astro check"
 
@@ -143,11 +187,13 @@ run = "bunx astro check"
 # lint or a unit test goes in site/src/scripts). One config: site/biome.json.
 [tasks.site-lint]
 description = "Biome lint + format check over site/ (config: site/biome.json)"
+depends = ["require-setup"]
 dir = "site"
 run = "bun run lint"
 
 [tasks.site-format]
 description = "Biome: rewrite site/ files in the house format"
+depends = ["require-setup"]
 dir = "site"
 run = "bun run format"
 
@@ -157,6 +203,7 @@ run = "bun run format"
 # what.
 [tasks.site-test]
 description = "Vitest unit and component tests with the coverage floor"
+depends = ["require-setup"]
 dir = "site"
 run = "bun run test"
 
@@ -166,6 +213,7 @@ run = "bun run test"
 # e2e/review.spec.ts` runs one spec.
 [tasks.site-e2e]
 description = "Build, then run the Playwright walkthrough in site/e2e/. Needs `mise run site-browser` once."
+depends = ["require-setup"]
 dir = "site"
 run = ["bun run build", "bun run e2e"]
 
@@ -173,11 +221,13 @@ run = ["bun run build", "bun run e2e"]
 # `site-e2e` above stays the one-command form for local use.
 [tasks.site-e2e-only]
 description = "Run the Playwright walkthrough against an existing site/dist (after site-build). Needs `mise run site-browser` once."
+depends = ["require-setup"]
 dir = "site"
 run = "bun run e2e"
 
 [tasks.site-favicon]
 description = "Regenerate the favicon + apple-touch-icon from the palette"
+depends = ["require-setup"]
 dir = "site"
 run = "bun run scripts/gen-favicon.mjs"
 
@@ -198,11 +248,13 @@ run = "rm -rf site/dist site/.astro"
 # runner; on macOS it is a no-op.
 [tasks.site-browser]
 description = "Install the Chromium browser Playwright uses for site-e2e and site-screenshot"
+depends = ["require-setup"]
 dir = "site"
 run = "bunx playwright install --with-deps chromium"
 
 [tasks.site-screenshot]
 description = "Build, serve, and screenshot a page (args: [out] [path]). Needs `mise run site-browser` once."
+depends = ["require-setup"]
 dir = "site"
 usage = '''
 arg "[out]" help="Output PNG path" default="out.png"
@@ -226,6 +278,7 @@ bun scripts/screenshot.mjs "$usage_out" "$usage_path"
 # TLS handshakes, so it lives in `mise run links` instead of the gate.
 [tasks.lint]
 description = "prek hooks (mdformat, markdownlint, gitleaks) + actionlint"
+depends = ["require-setup"]
 run = ["prek run --all-files --skip lychee", "actionlint"]
 
 [tasks.links]
@@ -380,6 +433,7 @@ run = "uv run --locked pytest"
 # to have run first. `ci` and ci.yml both do.
 [tasks.spell]
 description = "cspell (American English) over Markdown, MDX and the site data YAML"
+depends = ["require-setup"]
 run = """
 set -e
 files=$(git ls-files --cached --others --exclude-standard -- '*.md' '*.mdx' 'site/src/data/**/*.yaml' 'site/src/data/*.yaml' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md')
