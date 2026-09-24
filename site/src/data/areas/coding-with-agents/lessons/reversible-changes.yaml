@@ -1,10 +1,17 @@
 id: coding-with-agents/reversible-changes
 title: Keeping every agent change easy to undo
+description: >-
+  Have a coding agent land the three increments of the due-dates spec as one commit each on a
+  branch, revert the middle one to see why the boundaries matter, design data changes with the way
+  back written down, and write the commit messages and pull request description a reviewer needs.
 mode: tutorial
 covers: coding-with-agents/workflow
 serves: [coding-with-agents/ships-with-agent/keeps-change-reversible]
 introduces: [reversibility, commits-and-prs]
-assumes: []
+assumes:
+  - objective: coding-with-agents/ships-with-agent/works-in-increments
+    lesson: coding-with-agents/spec-driven-increments
+    section: land-the-first-increment
 after: [coding-with-agents/spec-driven-increments]
 shorts:
   - migrations with the way back written down, feature flags as the cheaper revert
@@ -16,4 +23,13 @@ exercise:
 sources: [Brilliant INC, DLAI-5]
 issue: 157
 minutes: 15
-notes: "Sources: Brilliant INC-5, DLAI-5 as inspiration."
+notes: >-
+  Sources: Brilliant INC (small committed steps), DLAI-5 as inspiration for having the agent
+  commit and draft the PR. The fixtures under site/examples/coding-with-agents/reversible-changes/
+  read the spec-driven-increments fixture-repo, SPEC.md and test_due.py by path and never change
+  them. Each fixture copies the repo, runs git init, commits the program and the spec on main,
+  branches due-dates, lands the three increments of SPEC.md as one commit each (increments 2 and 3
+  are this lesson's own text, with their tests test_overdue.py and test_bad_date.py next to the
+  scripts), and revert.py reverts HEAD~1. The increments keep their hunks apart in todo.py so the
+  revert applies without conflict. The page leans on the spec and the first increment from
+  spec-driven-increments, so that lesson is the one assumes entry.
