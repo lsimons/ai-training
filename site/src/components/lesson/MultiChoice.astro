@@ -4,6 +4,7 @@
  * `multi-choice`). Wrong picks show their own `why`; a missed correct item is
  * only counted, never named.
  */
+import type { CheckpointPhase } from '@lib/checkpoint-rules';
 import CheckpointShell from './CheckpointShell.astro';
 
 interface Option {
@@ -22,18 +23,20 @@ interface Props {
 	context?: string;
 	review?: boolean;
 	revision?: number;
+	/** `first` (default), `review` or `practice` (spec S03 "Checkpoint props"). */
+	phase?: CheckpointPhase;
 	/** Opt-out from the guessability check, `"<cue>: reason"` (spec S03 "Checkpoints"). */
 	guessable?: string;
 	options: Option[];
 }
-const { id, objective, title, hint, concepts, context, review, revision, guessable, options } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, guessable, options, phase } = Astro.props;
 const correct = options.filter((o) => o.correct).length;
 if (correct < 2)
 	throw new Error(`MultiChoice "${id}" needs at least two correct options, has ${correct}. Use Choice for one.`);
 if (correct === options.length) throw new Error(`MultiChoice "${id}" needs at least one wrong option`);
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} {guessable} kind="multi-choice">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} {phase} {guessable} kind="multi-choice">
 	<slot />
 	<Fragment slot="body">
 		<fieldset class="cp-options cp-multi" data-count={correct}>

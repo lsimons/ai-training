@@ -12,6 +12,7 @@ import {
 	isJsxElement,
 	type MdxNode,
 	parseMdx,
+	propValue,
 	stringProp,
 } from './checkpoint-tags';
 import { CODE_SPAN, EMPHASIS, LINK, STRONG } from './inline-markdown';
@@ -206,11 +207,15 @@ function promptOf(lesson: Lesson, block: Block, blocks: Block[]): PromptExample 
 /**
  * The canonical example (spec S03 "Examples"): the `Predict` or `Prompt`
  * block marked `canonical`, or the first of either in source order. Two
- * marked blocks are an authoring error.
+ * marked blocks are an authoring error. A `Predict` alternate (a `phase`
+ * other than `first`, spec S03 "Checkpoints") is never the example: a
+ * `review` one is hidden on the page and a `practice` one is extra.
  */
 export function canonicalExampleOf(lesson: Lesson): CanonicalExample | undefined {
 	const blocks = blocksOf(lesson);
-	const examples = blocks.filter((b) => b.name === 'Predict' || b.name === 'Prompt');
+	const examples = blocks.filter(
+		(b) => (b.name === 'Predict' && (propValue(b.attrs, 'phase') ?? 'first') === 'first') || b.name === 'Prompt',
+	);
 	const marked = examples.filter((b) => isCanonical(b.attrs));
 	if (marked.length > 1) throw new Error(`${lesson.id}: more than one block is marked canonical`);
 	const pick = marked[0] ?? examples[0];

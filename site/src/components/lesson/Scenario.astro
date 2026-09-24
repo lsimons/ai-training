@@ -1,5 +1,6 @@
 ---
 /** A situation plus a decision as `choice`, with a consequence shown per option (spec S01 `scenario`). */
+import type { CheckpointPhase } from '@lib/checkpoint-rules';
 import CheckpointShell from './CheckpointShell.astro';
 
 interface Option {
@@ -18,16 +19,18 @@ interface Props {
 	context?: string;
 	review?: boolean;
 	revision?: number;
+	/** `first` (default), `review` or `practice` (spec S03 "Checkpoint props"). */
+	phase?: CheckpointPhase;
 	/** Opt-out from the guessability check, `"<cue>: reason"` (spec S03 "Checkpoints"). */
 	guessable?: string;
 	options: Option[];
 }
-const { id, objective, title, hint, concepts, context, review, revision, guessable, options } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, guessable, options, phase } = Astro.props;
 const correct = options.filter((o) => o.correct).length;
 if (correct !== 1) throw new Error(`Scenario "${id}" needs exactly one correct option, has ${correct}`);
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} {guessable} kind="scenario" checkLabel="Decide">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} {phase} {guessable} kind="scenario" checkLabel="Decide">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-options" role="radiogroup" aria-label={title}>

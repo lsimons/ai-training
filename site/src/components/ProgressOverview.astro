@@ -37,6 +37,7 @@ const catalog = await buildCatalog();
 		id: string;
 		title: string;
 		checkpoints: CatalogCheckpoint[];
+		practice: string[];
 	}
 	interface CatalogCourse {
 		area: string;
@@ -58,7 +59,7 @@ const catalog = await buildCatalog();
 		function pruneOrphans() {
 			progress.pruneOrphans(
 				allLessons.map((l) => l.id),
-				allLessons.flatMap((l) => l.checkpoints.map((c) => `${l.id}#${c.id}`))
+				allLessons.flatMap((l) => [...l.checkpoints.map((c) => c.id), ...l.practice].map((id) => `${l.id}#${id}`))
 			);
 		}
 		pruneOrphans();

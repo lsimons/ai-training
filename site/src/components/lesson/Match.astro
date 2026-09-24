@@ -6,6 +6,7 @@
  * shared `.cp-feedback` region does the announcing); `rationale` shows on
  * a full pass.
  */
+import type { CheckpointPhase } from '@lib/checkpoint-rules';
 import CheckpointShell from './CheckpointShell.astro';
 
 interface Row {
@@ -26,12 +27,15 @@ interface Props {
 	context?: string;
 	review?: boolean;
 	revision?: number;
+	/** `first` (default), `review` or `practice` (spec S03 "Checkpoint props"). */
+	phase?: CheckpointPhase;
 	options: string[];
 	rows: Row[];
 	/** Shown once every row is right. */
 	rationale: string;
 }
-const { id, objective, title, hint, concepts, context, review, revision, options, rows, rationale } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, options, rows, rationale, phase } =
+	Astro.props;
 if (rows.length < 2) throw new Error(`Match "${id}" needs at least two rows`);
 for (const r of rows) {
 	if (r.option < 0 || r.option >= options.length)
@@ -39,7 +43,7 @@ for (const r of rows) {
 }
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} kind="match">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} {phase} kind="match">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-match" data-rationale={rationale}>

@@ -75,6 +75,12 @@ describe('canonicalExampleOf', () => {
 			run: 'a/b.py',
 		});
 	});
+	it('skips a Predict alternate, which is hidden or extra on the page', () => {
+		const alternate = predict.replace('<Predict id="p1"', '<Predict phase="review" id="p1"');
+		expect(canonicalExampleOf(lesson(`${alternate}\n${prompt}`))?.kind).toBe('prompt');
+		const extra = predict.replace('<Predict id="p1"', '<Predict phase="practice" id="p1"');
+		expect(canonicalExampleOf(lesson(extra))).toBeUndefined();
+	});
 	it('prefers the block marked canonical, bare or as {true}', () => {
 		const marked = predict.replace('<Predict id="p1"', '<Predict canonical id="p1"');
 		expect(canonicalExampleOf(lesson(`${honor}\n${marked}`))?.kind === 'predict' && 'p1').toBe('p1');

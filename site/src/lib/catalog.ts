@@ -12,7 +12,10 @@ export interface CatalogCheckpoint {
 export interface CatalogLesson {
 	id: string;
 	title: string;
+	/** The lesson's `first` checkpoints, the ones every progress figure counts (spec S04 "Progress display"). */
 	checkpoints: CatalogCheckpoint[];
+	/** The ids of its `practice` checkpoints, which count nowhere; the progress page needs them to keep their entries. */
+	practice: string[];
 }
 export interface CatalogCourse {
 	area: string;
@@ -43,16 +46,17 @@ export async function buildCatalog(): Promise<CatalogCourse[]> {
 			lessons: orderByPlan(
 				lessons.filter((l) => l.id.startsWith(`${a.slug}/`)),
 				planIds,
-			).map((l) => ({
-				id: l.id,
-				title: l.data.title,
-				checkpoints: checkpointsOf(l).map((c) => ({
-					id: c.id,
-					title: c.title,
-					reviewable: c.reviewable,
-					revision: c.revision,
-				})),
-			})),
+			).map((l) => {
+				const all = checkpointsOf(l);
+				return {
+					id: l.id,
+					title: l.data.title,
+					checkpoints: all
+						.filter((c) => c.phase === 'first')
+						.map((c) => ({ id: c.id, title: c.title, reviewable: c.reviewable, revision: c.revision })),
+					practice: all.filter((c) => c.phase === 'practice').map((c) => c.id),
+				};
+			}),
 		};
 	});
 }

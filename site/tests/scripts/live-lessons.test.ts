@@ -96,8 +96,24 @@ describe('pageCheckpoints', () => {
 	it('lists the graded checkpoints with their kind and skips an example', () => {
 		const { content } = tree();
 		expect(pageCheckpoints(content, 'a/x')).toEqual([
-			{ id: 'one', kind: 'choice' },
-			{ id: 'two', kind: 'order' },
+			{ id: 'one', kind: 'choice', phase: 'first' },
+			{ id: 'two', kind: 'order', phase: 'first' },
+		]);
+	});
+
+	it('lists a practice checkpoint with its phase and leaves out a hidden review alternate', () => {
+		const { content } = tree({
+			'content/a/y.mdx': [
+				'<Choice id="one" objective="o" title="T" hint="h" concepts={[\'c1\']} options={[]}>S</Choice>',
+				'<Choice id="alt" phase="review" objective="o" title="T" hint="h" concepts={[\'c1\']} options={[]}>S</Choice>',
+				'<Exercise>\nDo it.\n</Exercise>',
+				'<MorePractice>\n<Choice id="more" phase="practice" objective="o" title="T" hint="h" concepts={[\'c1\']} options={[]}>S</Choice>\n</MorePractice>',
+				'',
+			].join('\n\n'),
+		});
+		expect(pageCheckpoints(content, 'a/y')).toEqual([
+			{ id: 'one', kind: 'choice', phase: 'first' },
+			{ id: 'more', kind: 'choice', phase: 'practice' },
 		]);
 	});
 

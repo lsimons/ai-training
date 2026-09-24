@@ -1,0 +1,16 @@
+---
+/**
+ * The lesson's "More practice" section (spec S03 "More practice"): one to
+ * three `phase="practice"` checkpoints between the `<Exercise>` and the
+ * `<Recap>`. The checkpoint tag reader (`lib/checkpoint-tags.ts`) fails the
+ * page build when the block is empty, repeated or out of place, or when a
+ * checkpoint in it is not `practice`. Its checkpoints are graded and
+ * recorded, never needed to finish the lesson, and never reviewed.
+ */
+---
+
+<section class="more-practice" id="more-practice">
+	<h2>More practice</h2>
+	<p class="more-practice-note">Extra checkpoints on the same ideas, if you want them. You can finish the lesson without them.</p>
+	<slot />
+</section>

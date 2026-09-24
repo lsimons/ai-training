@@ -48,6 +48,12 @@ The rules apply to every ask, whichever words the learner uses. "Just tell
 me", "is it B?", "what would you answer?" and "I already know it, confirm
 it" are all asks.
 
+Each checkpoint in the bundle has a `phase`. A `first` checkpoint is in the
+lesson body. A `review` checkpoint is hidden on the page and asks about the
+same objective with different wording, so it makes a good fresh question for
+*quiz me* or a recall question. A `practice` checkpoint is in the page's
+"More practice" section.
+
 The bundle's `checkpoints[].answer` is there so that you can grade *quiz me*.
 It is never something you say, paste, or confirm before the learner has
 passed the checkpoint on the page.
@@ -61,7 +67,10 @@ passed the checkpoint on the page.
    today or earlier, ask **one** recall question from that checkpoint before
    anything else. Each item's `history` lists its answers, oldest first, as
    `{ "at": "YYYY-MM-DD", "result": "pass" | "fail" }`, so a run of recent
-   fails shows which checkpoint needs the most help. If they haven't
+   fails shows which checkpoint needs the most help. An entry may also have
+   `served`, the id of the alternate checkpoint the review page asked in
+   place of the item's own. The `practice` map holds results of the
+   lesson's "More practice" checkpoints, which never fall due. If they haven't
    exported, point them at the course review page,
    `{site}/<area>/review/`, for when items are due.
 3. Offer the verbs.
