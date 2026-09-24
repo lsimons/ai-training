@@ -279,12 +279,18 @@ export function checkSourceHrefs(tree, rel) {
 	for (const a of tree.areas) {
 		for (const { data: l, file } of a.lessons) {
 			for (const x of l?.['extends-to'] ?? []) {
-				const check = checkExtendsToHref(String(x?.href ?? ''), sources);
+				if (typeof x?.href !== 'string') {
+					errors.push(`${rel(file)}: extends-to entry ${JSON.stringify(x?.label ?? x)} has no href`);
+					continue;
+				}
+				const check = checkExtendsToHref(x.href, sources);
 				if (check.kind === 'invalid') errors.push(`${rel(file)}: ${check.reason}`);
 			}
 			const coveredBy = l?.['covered-by'];
-			if (coveredBy) {
-				const check = checkExternalSourceHref(String(coveredBy.href ?? ''), sources, 'covered-by');
+			if (coveredBy && typeof coveredBy.href !== 'string') {
+				errors.push(`${rel(file)}: covered-by has no href`);
+			} else if (coveredBy) {
+				const check = checkExternalSourceHref(coveredBy.href, sources, 'covered-by');
 				if (check.kind === 'invalid') errors.push(`${rel(file)}: ${check.reason}`);
 			}
 		}
