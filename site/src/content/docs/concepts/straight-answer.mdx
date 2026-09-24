@@ -1,4 +1,4 @@
-import { Choice, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Scenario, Pitfall, Exercise, MorePractice, Recap, Prompt, Response } from '@components/lesson';
 
 A model tells you your plan is a good one. Then, on a question of fact, it
 gives the right answer, you say "are you sure?", and it changes to the
@@ -204,6 +204,24 @@ preference?
 
 </Choice>
 
+<MultiChoice id="spot-the-open-question" phase="review" objective="concepts/explains-models/names-failure-modes"
+  concepts={['sycophancy']}
+  context="Sycophancy is the tendency of a model to agree with the user, praise their idea or change a correct answer when challenged, because agreeable text was rewarded in training. A question that shows which answer the user hopes for makes agreement the likely reply."
+  title="Which questions leave the answer open?"
+  hint="For each question, ask yourself: could the model tell from it which answer you would like to read?"
+  options={[
+    { text: 'Our planning meeting moves from Monday to Thursday next month. That works better for everyone, right?', why: 'The question announces the change and asks for agreement, so agreeing is the likely reply.' },
+    { text: 'Compare a Monday and a Thursday planning meeting for a team that ships a release every Friday.', correct: true },
+    { text: 'My team is happy about moving planning to Thursday. How should I announce the change to them?', why: 'The question treats the move as settled and says the team likes it, so the answer builds on the plan instead of testing it.' },
+    { text: 'What are the strongest reasons against moving our weekly planning meeting from Monday to Thursday?', correct: true },
+  ]}>
+
+You want a useful answer about moving your team's weekly planning meeting
+from Monday to Thursday. Which two of these questions leave the answer
+open?
+
+</MultiChoice>
+
 <Pitfall title="The challenge that flips a right answer">
 You ask a model to check a spreadsheet formula that adds up a column of
 monthly totals. It says the formula skips the last row. You are sure it
@@ -253,6 +271,27 @@ the objections row. Reflection: which warning in the third row would you
 never have read if you had stopped after the first answer?
 
 </Exercise>
+
+<MorePractice>
+
+<Choice id="a-fact-to-work-with" phase="practice" objective="concepts/explains-models/names-failure-modes"
+  concepts={['sycophancy']}
+  context="A model said that a date in the user's report is wrong. The user thinks the date is right and wants an answer they can rely on, not one that follows their own opinion."
+  title="Give it something to work with"
+  hint="Which reply adds a fact to the chat, and which ones only add your opinion?"
+  options={[
+    { text: 'Tell the model that you are sure the date is right, and ask it to check once more.', why: 'Your certainty is a preference and adds no fact, so the likely reply is the one that agrees with you.' },
+    { text: 'Ask the model how confident it is in its answer, on a scale from one to ten.', why: 'A confidence number is more text from the same model, and it moves with your pushback as well.' },
+    { text: 'Paste the paragraph of the source that gives the date, and ask the model to compare the two.', correct: true },
+    { text: 'Ask the same question in a new chat, and keep the answer that comes back twice.', why: 'Two agreeing answers from the same model can share the same mistake, and neither of them looked at the source.' },
+  ]}>
+
+A model tells you that a date in your report is wrong. You think the date
+is right. Which reply gets you an answer you can rely on?
+
+</Choice>
+
+</MorePractice>
 
 <Recap>
 
