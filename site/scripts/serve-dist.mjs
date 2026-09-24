@@ -9,7 +9,9 @@
  * the foreground and dies with its parent. It serves the same files under
  * the same `/ai-training` base path the built site expects.
  *
- * Usage: `bun scripts/serve-dist.mjs [port]` (default 4400).
+ * Usage: `bun scripts/serve-dist.mjs [port]`. Without the argument the port is
+ * `E2E_PORT`, and without that 4400. The e2e run passes a free port
+ * (playwright.config.ts), so 4400 is only the default for a run by hand.
  */
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
@@ -18,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 const BASE = '/ai-training';
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
-const port = Number(process.argv[2] ?? 4400);
+const port = Number(process.argv[2] ?? process.env.E2E_PORT ?? 4400);
 
 const TYPES = {
 	'.html': 'text/html; charset=utf-8',
