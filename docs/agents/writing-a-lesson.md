@@ -536,8 +536,9 @@ slug, and never changes once published. The text is one or two sentences in
 the imperative that name a moment in the learner's own work, not a task to
 do in the lesson. The site brings the habit back 1, 3 and 7 days after the
 lesson is finished, so write something that recurs at work within a week.
-The component is specified in S07 and has no implementation yet, so leave
-habits out of a lesson until it does.
+Import `Habit` from `@components/lesson` with the rest. The build fails on
+a third habit, a repeated id, an id that is also a section slug, or a habit
+before the recap.
 
 ## Citations and terms
 
