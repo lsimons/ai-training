@@ -23,7 +23,7 @@ import { parse } from 'yaml';
 /**
  * @typedef {{ file: string, stem: string, data: any }} YamlFile One parsed file, with its path and file stem.
  * @typedef {{ dir: string, area: any, topics: YamlFile[], competencies: YamlFile[], courses: YamlFile[], lessons: YamlFile[] }} AreaDir
- * @typedef {{ groups: any[], areas: AreaDir[], alignment: YamlFile[], bibliographyKeys: Set<string> }} AreaTree
+ * @typedef {{ groups: any[], areas: AreaDir[], alignment: YamlFile[], bibliographyKeys: Set<string>, bibliographySources: Map<string, string | null | undefined> }} AreaTree
  */
 
 /**
@@ -89,6 +89,8 @@ export function readAreaTree(dataDir) {
 		areas,
 		alignment: yamlFilesIn(join(dataDir, 'alignment')).map(readYaml),
 		bibliographyKeys: new Set(Object.keys(bibliography ?? {})),
+		// Key -> `url`, the form `checkExtendsToHref` takes. `url` is missing for a source without one.
+		bibliographySources: new Map(Object.entries(bibliography ?? {}).map(([k, v]) => [k, v?.url])),
 	};
 }
 

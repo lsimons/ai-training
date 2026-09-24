@@ -6,6 +6,7 @@ import { allLessons, allTopics, courseLessonIds, readAreaTree, yamlFilesIn } fro
 import {
 	checkBehaviorCitations,
 	checkData,
+	checkSourceHrefs,
 	FOUNDATIONS_EXEMPT,
 	foundationsSurfaces,
 	frontmatter,
@@ -237,6 +238,46 @@ describe('competency behavior citations', () => {
 	});
 });
 
+describe('extends-to and covered-by hrefs', () => {
+	const bib = `${BIB}  url: https://example.com/course/\n`;
+	const withHrefs = (extendsTo: string, coveredBy?: string) =>
+		`${LIVE}extends-to:\n  - {label: Next, href: ${JSON.stringify(extendsTo)}}\n${
+			coveredBy ? `covered-by: {label: Course, href: ${JSON.stringify(coveredBy)}}\n` : ''
+		}`;
+	it('passes a page path, and an https URL under a bibliography url, in both fields', () => {
+		const root = tree({
+			'data/bibliography.yaml': bib,
+			'data/areas/a/lessons/x.yaml': withHrefs('/a/p/', 'https://example.com/course/week-1'),
+		});
+		expect(check(root).errors).toEqual([]);
+		expect(
+			check(
+				tree({ 'data/bibliography.yaml': bib, 'data/areas/a/lessons/x.yaml': withHrefs('https://example.com/course') }),
+			).errors,
+		).toEqual([]);
+	});
+	it('fails an external href that no bibliography entry covers, naming the file, field and href', () => {
+		const { errors } = check(
+			tree({
+				'data/bibliography.yaml': bib,
+				'data/areas/a/lessons/x.yaml': withHrefs('https://other.example/page', 'https://example.com.evil/x'),
+			}),
+		);
+		expect(errors).toEqual([
+			'src/data/areas/a/lessons/x.yaml: extends-to href https://other.example/page does not start with the url of any entry in bibliography.yaml',
+			'src/data/areas/a/lessons/x.yaml: covered-by href https://example.com.evil/x does not start with the url of any entry in bibliography.yaml',
+		]);
+	});
+	it('fails a covered-by page path and an extends-to href that is neither form', () => {
+		const { errors } = check(tree({ 'data/areas/a/lessons/x.yaml': withHrefs('http://example.com/', '/a/p/') }));
+		expect(errors).toEqual([
+			'src/data/areas/a/lessons/x.yaml: extends-to href must be a root-relative path or an https:// URL, got http://example.com/',
+			'src/data/areas/a/lessons/x.yaml: covered-by href must be an https:// URL, got /a/p/',
+		]);
+		expect(checkSourceHrefs(readAreaTree(join(tree(), 'data')), (f) => f)).toEqual([]);
+	});
+});
+
 describe('foundations audience', () => {
 	const FOUNDATIONS = GROUPS.replace('id: g', 'id: foundations');
 	const AREA_F = AREA.replace('group: g', 'group: foundations');
@@ -366,7 +407,13 @@ describe('helpers', () => {
 		expect(allLessons(t).map((x) => x.id)).toEqual(['a/p', 'a/x']);
 		expect([...t.bibliographyKeys]).toEqual(['AEC-01']);
 		const bare = readAreaTree(join(root, 'nowhere'));
-		expect(bare).toEqual({ groups: [], areas: [], alignment: [], bibliographyKeys: new Set() });
+		expect(bare).toEqual({
+			groups: [],
+			areas: [],
+			alignment: [],
+			bibliographyKeys: new Set(),
+			bibliographySources: new Map(),
+		});
 		expect(yamlFilesIn(join(root, 'nowhere'))).toEqual([]);
 	});
 	it('courseLessonIds reads the flat list or the parts, and nothing from neither', () => {
