@@ -138,7 +138,8 @@ notes: >-
 
 The schema is strict. A fact with no field gets a field, and a comment in
 a lesson file is a defect to fix by adding the fact to `notes` or to the
-field it belongs in.
+field it belongs in. `sources-checked` and `review-by` come as a pair, and
+`mise run data` rejects a lesson file that sets one without the other.
 
 ### Status is derived
 

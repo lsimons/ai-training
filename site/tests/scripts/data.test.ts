@@ -10,6 +10,7 @@ import {
 	frontmatter,
 	knownIds,
 	lessonPages,
+	reviewDatePairError,
 } from '../../scripts/lib/data.mjs';
 
 const roots: string[] = [];
@@ -187,6 +188,16 @@ describe('checkData', () => {
 			'src/data/areas/a/lessons/x.yaml: assumes a/c/o without the lesson and section that teach it, which a live lesson needs',
 		]);
 	});
+	it('reports a lesson that sets sources-checked or review-by without the other, and passes both or neither', () => {
+		const both = `${LIVE}sources-checked: 2026-09-20\nreview-by: 2027-03-20\n`;
+		expect(check(tree({ 'data/areas/a/lessons/x.yaml': both })).errors).toEqual([]);
+		expect(check(tree({ 'data/areas/a/lessons/x.yaml': `${LIVE}sources-checked: 2026-09-20\n` })).errors).toEqual([
+			'src/data/areas/a/lessons/x.yaml: sets sources-checked without review-by, which spec S11 pairs with it',
+		]);
+		expect(check(tree({ 'data/areas/a/lessons/p.yaml': `${PLANNED}review-by: 2027-03-20\n` })).errors).toEqual([
+			'src/data/areas/a/lessons/p.yaml: sets review-by without sources-checked, which spec S11 pairs with it',
+		]);
+	});
 	it('reports a lesson page without a lesson file, and frontmatter that the data owns', () => {
 		const { errors } = check(
 			tree({
@@ -295,6 +306,13 @@ describe('foundations audience', () => {
 });
 
 describe('helpers', () => {
+	it('reviewDatePairError is null for both or neither date and names the missing one otherwise', () => {
+		expect(reviewDatePairError({})).toBeNull();
+		expect(reviewDatePairError(undefined)).toBeNull();
+		expect(reviewDatePairError({ 'sources-checked': '2026-09-20', 'review-by': '2027-03-20' })).toBeNull();
+		expect(reviewDatePairError({ 'sources-checked': '2026-09-20' })).toMatch(/without review-by/);
+		expect(reviewDatePairError({ 'review-by': '2027-03-20' })).toMatch(/without sources-checked/);
+	});
 	it('frontmatter parses the YAML block and returns {} without one', () => {
 		expect(frontmatter('---\ntitle: X\n---\n\nBody.\n')).toEqual({ title: 'X' });
 		expect(frontmatter('# no frontmatter\n')).toEqual({});

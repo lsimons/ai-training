@@ -18,8 +18,9 @@
  *   courses or in none, or an area has no course;
  * - a lesson covers an unknown topic or one from another area, serves or
  *   assumes an unknown objective, comes `after` a lesson not in its area,
- *   introduces an unknown concept or one another lesson introduces, or cites
- *   a source key the bibliography lacks;
+ *   introduces an unknown concept or one another lesson introduces, cites
+ *   a source key the bibliography lacks, or sets one of `sources-checked`
+ *   and `review-by` without the other (spec S11 pairs them);
  * - a lesson page (`<area>/<lesson>.mdx`) has no lesson file, carries a
  *   frontmatter field the lesson file owns, cites a source (`(@key)`, the
  *   remark citation plugin's form) that its lesson file's `sources` list
@@ -214,6 +215,21 @@ export function checkFoundationsAudience(tree, contentDir, pageIds, exempt = FOU
 }
 
 /**
+ * The error for a lesson that sets one of `sources-checked` and `review-by`
+ * without the other, or `null` when it sets both or neither. Spec S11
+ * "Lesson file" pairs the two: the check date means nothing without the date
+ * the sources are due again, and the reverse.
+ */
+export function reviewDatePairError(lesson) {
+	const checked = lesson?.['sources-checked'] != null;
+	const due = lesson?.['review-by'] != null;
+	if (checked === due) return null;
+	return checked
+		? 'sets sources-checked without review-by, which spec S11 pairs with it'
+		: 'sets review-by without sources-checked, which spec S11 pairs with it';
+}
+
+/**
  * Check the tree under `dataDir` against the pages under `contentDir`.
  * `foundationsExempt` is the exemption list for `checkFoundationsAudience`
  * and defaults to `FOUNDATIONS_EXEMPT`; tests pass their own.
@@ -350,6 +366,8 @@ export function checkData(dataDir, contentDir, { foundationsExempt = FOUNDATIONS
 			for (const s of l?.sources ?? []) {
 				if (!tree.bibliographyKeys.has(s)) fail(`${where}: sources ${JSON.stringify(s)} is not a bibliography key`);
 			}
+			const pairError = reviewDatePairError(l);
+			if (pairError) fail(`${where}: ${pairError}`);
 			const page = pages.get(l?.id);
 			if (page) {
 				if (!l?.description) fail(`${where}: the lesson is live, so it needs a description`);
