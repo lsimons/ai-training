@@ -19,6 +19,7 @@ function tree(areas: Area[]): AreaTree {
 		groups: [],
 		alignment: [],
 		bibliographyKeys: new Set<string>(),
+		bibliographySources: new Map<string, string | null | undefined>(),
 		areas: areas.map((a) => ({
 			dir: a.dir,
 			area: { id: a.dir },

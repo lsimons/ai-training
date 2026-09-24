@@ -125,7 +125,9 @@ notes: >-
 | `introduces`      | yes       | The concept ids first taught in this lesson. Every concept of the area's topics is introduced by exactly one lesson, or the check warns. May be empty.        |
 | `assumes`         | yes       | The objectives the lesson relies on, from any area, as `{objective, lesson?, section?}`. Once live, each names the lesson and the `##` section that teach it. |
 | `extends-to`      | yes       | Where a confident learner goes next, as `{label, href}` (S03 "Frontmatter"): a page path or an `https://` URL under a bibliography `url`. May be empty.       |
+|                   |           | `mise run data` and the build apply the rule in `src/lib/extends-to.ts`, so a bad href fails the data check before the build (#288).                          |
 | `covered-by`      | no        | One external course that covers each objective the lesson `serves`, as `{label, href}`, an `https://` URL under a bibliography `url`. Shows a skip tip.       |
+|                   |           | `mise run data` and the build check the href the same way as `extends-to`, with the URL form only.                                                            |
 | `after`           | yes       | Lesson ids of this area the lesson comes after, for its place in the lesson graph while it is coming. A live lesson takes its place from `assumes`.           |
 | `shorts`          | yes       | Titles of the shorts the lesson would link to for depth (S01 "Short"), or an empty list. The short pages are still to be written.                             |
 | `exercise`        | one of    | The lesson's hands-on task: `{kind, brief}` with `kind` `do` or `judge` (S03 "Exercises") and a one-sentence brief.                                           |

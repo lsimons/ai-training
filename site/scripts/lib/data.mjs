@@ -46,6 +46,7 @@ import { join } from 'node:path';
 import { parse } from 'yaml';
 import { citationKeys } from '../../plugins/citation-syntax.mjs';
 import { propValue } from '../../src/lib/checkpoint-tags.ts';
+import { checkExtendsToHref, checkExternalSourceHref } from '../../src/lib/extends-to.ts';
 import { allTopics, courseLessonIds, readAreaTree } from './area-tree.mjs';
 import { predictTags } from './examples.mjs';
 
@@ -262,6 +263,36 @@ export function checkBehaviorCitations(tree, rel) {
 }
 
 /**
+ * The `extends-to` and `covered-by` hrefs that break the rule in
+ * `src/lib/extends-to.ts` (spec S11 "Lesson file"), as error strings in the
+ * format `checkData` uses. An `extends-to` href is a root-relative page path
+ * or an `https://` URL under a bibliography `url`, and a `covered-by` href
+ * is the URL form only. The build applies the same rule from
+ * `MarkdownContent.astro` and `TableOfContents.astro`, so this fails the
+ * data check first, with the same message.
+ * @param {ReturnType<typeof readAreaTree>} tree
+ * @param {(file: string) => string} rel
+ */
+export function checkSourceHrefs(tree, rel) {
+	const errors = [];
+	const sources = tree.bibliographySources;
+	for (const a of tree.areas) {
+		for (const { data: l, file } of a.lessons) {
+			for (const x of l?.['extends-to'] ?? []) {
+				const check = checkExtendsToHref(String(x?.href ?? ''), sources);
+				if (check.kind === 'invalid') errors.push(`${rel(file)}: ${check.reason}`);
+			}
+			const coveredBy = l?.['covered-by'];
+			if (coveredBy) {
+				const check = checkExternalSourceHref(String(coveredBy.href ?? ''), sources, 'covered-by');
+				if (check.kind === 'invalid') errors.push(`${rel(file)}: ${check.reason}`);
+			}
+		}
+	}
+	return errors;
+}
+
+/**
  * Check the tree under `dataDir` against the pages under `contentDir`.
  * `foundationsExempt` is the exemption list for `checkFoundationsAudience`
  * and defaults to `FOUNDATIONS_EXEMPT`; tests pass their own.
@@ -435,6 +466,7 @@ export function checkData(dataDir, contentDir, { foundationsExempt = FOUNDATIONS
 		}
 	}
 	for (const e of checkBehaviorCitations(tree, rel)) fail(e);
+	for (const e of checkSourceHrefs(tree, rel)) fail(e);
 	for (const e of checkFoundationsAudience(tree, contentDir, pages.keys(), foundationsExempt)) fail(e);
 	for (const a of tree.areas) {
 		const index = join(contentDir, a.dir, 'index.mdx');
