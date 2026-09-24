@@ -10,7 +10,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { nameTakenBy, nextRunName, parseArgs, RUN_LABEL, runNameSequence, runOf } from './lib/run-names.mjs';
+import { nameTakenBy, nextRunName, parseArgs, RUN_LABEL, runNameSequence, runOf, withIssue } from './lib/run-names.mjs';
 
 const REPO = 'lsimons/ai-training';
 const NAMES = new URL('../../.claude/skills/wave/run-names.yaml', import.meta.url);
@@ -22,18 +22,22 @@ if ('error' in args) {
 	process.exit(2);
 }
 
-let out;
-try {
-	out = execFileSync(
-		'gh',
-		['issue', 'list', '-R', REPO, '-l', RUN_LABEL, '-s', 'all', '-L', '1000', '--json', 'number,title,state,createdAt'],
-		{ encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] },
-	);
-} catch (e) {
-	console.error(`run-name: gh issue list failed: ${e instanceof Error ? e.message : String(e)}`);
-	process.exit(1);
+const FIELDS = 'number,title,state,createdAt';
+
+/** @param {string[]} args */
+function gh(args) {
+	try {
+		return JSON.parse(execFileSync('gh', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }));
+	} catch (e) {
+		console.error(`run-name: gh ${args.slice(0, 2).join(' ')} failed: ${e instanceof Error ? e.message : String(e)}`);
+		process.exit(1);
+	}
 }
-const runs = JSON.parse(out).flatMap((issue) => runOf(issue) ?? []);
+
+let issues = gh(['issue', 'list', '-R', REPO, '-l', RUN_LABEL, '-s', 'all', '-L', '1000', '--json', FIELDS]);
+if (args.check !== null)
+	issues = withIssue(issues, gh(['issue', 'view', String(args.check), '-R', REPO, '--json', FIELDS]));
+const runs = issues.flatMap((issue) => runOf(issue) ?? []);
 const sequence = runNameSequence(readFileSync(NAMES, 'utf8'));
 const report = {
 	open: runs.filter((r) => r.open).sort((a, b) => a.number - b.number),

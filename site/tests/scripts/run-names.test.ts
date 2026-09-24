@@ -9,6 +9,7 @@ import {
 	parseArgs,
 	runNameSequence,
 	runOf,
+	withIssue,
 } from '../../scripts/lib/run-names.mjs';
 
 const NAMES_TEXT = readFileSync(new URL('../../../.claude/skills/wave/run-names.yaml', import.meta.url), 'utf8');
@@ -153,5 +154,28 @@ describe('parseArgs', () => {
 		expect(parseArgs(['--check', 'x'])).toHaveProperty('error');
 		expect(parseArgs(['--resume', 'Capybara'])).toHaveProperty('error');
 		expect(parseArgs(['--check', '1', '2'])).toHaveProperty('error');
+	});
+});
+
+describe('withIssue', () => {
+	const listed = {
+		number: 10,
+		title: 'Run: Axolotl (lessons)',
+		state: 'OPEN' as const,
+		createdAt: '2026-09-25T08:00:00Z',
+	};
+	const fresh = {
+		number: 11,
+		title: 'Run: Badger (lessons)',
+		state: 'OPEN' as const,
+		createdAt: '2026-09-25T08:00:05Z',
+	};
+
+	it('adds an issue the label listing has not shown yet', () => {
+		expect(withIssue([listed], fresh)).toEqual([listed, fresh]);
+	});
+
+	it('keeps the list as it is when the issue is in it', () => {
+		expect(withIssue([listed, fresh], fresh)).toEqual([listed, fresh]);
 	});
 });
