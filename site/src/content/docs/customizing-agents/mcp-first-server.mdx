@@ -1,0 +1,350 @@
+import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we connect one tool server to a coding agent and read what
+happened. The server is the reference file-system server from the Model
+Context Protocol (MCP) project, scoped to a copy of a four-file directory.
+The task we give the agent is small on purpose: list the files and
+summarize each one. That task exists to produce a transcript, and the
+transcript is what we read.
+
+The last lesson took the operator's view of a remote server and asked what
+it may do and under whose name. This one is the first connection, on your
+machine, with a server that can't reach anything you didn't hand it. We
+run through the exchange between client and server in a stand-in first,
+so you know what to look for, and then you make the real connection in the
+exercise.
+
+## What the client asks the server
+
+An MCP client talks to a local server over the *stdio* transport: it
+starts the server as a child process and exchanges one message per line
+over the process's standard input and output, in JSON-RPC (a remote
+procedure call format in JSON). The server may log to standard error,
+and it may write nothing else to standard output (@MCP specification). Almost all the traffic is two messages. The
+client sends `tools/list` once and gets back each tool's `name`,
+`description` and `inputSchema`. When the model asks for a tool, the
+client sends `tools/call` with the tool's `name` and its `arguments`, and
+the server answers with a `content` list and an `isError` flag
+(@MCP specification).
+
+The lesson ships a stand-in for that server, in about a hundred lines of
+Python, at `site/examples/customizing-agents/mcp-first-server/stand_in.py`.
+It speaks stdio the same way and offers three of the reference server's
+tools. A path outside the directories named on its command line is
+refused. It can't write anything. Next to it, `client.py` starts the stand-in
+and sends one request at a time, and `handbook/` is the directory we scope
+it to: `README.md`, `deploy.md`, `on-call.md` and `onboarding.md`. Here is
+the client side of `tools/list`.
+
+<Predict id="list-the-tools" title="List the tools"
+  answer={`list_allowed_directories
+  list_directory
+  read_text_file`} run="customizing-agents/mcp-first-server/list_tools.py">
+Run `list_tools.py` in the fixture directory, and compare with the output
+below.
+
+```python
+server = client.start(client.HANDBOOK)
+response = client.request(server, "tools/list")
+for tool in response["result"]["tools"]:
+    print(tool["name"])
+```
+
+</Predict>
+
+The client passes those names and their descriptions to the model.
+Claude Code turns tool search on by default, and the model then looks a
+description up when it needs one instead of reading every description on
+every turn (@Claude Code mcp). The list is still the whole of what the
+model can do with the server.
+
+Now a call. The client sends `tools/call` with `list_directory` and the
+handbook's path, and prints the text of the result and the error flag.
+
+<Predict id="predict-the-listing" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['server', 'client']}
+  context="The lesson's stand-in file-system server offers list_directory, which prefixes each entry with [FILE] or [DIR], and is scoped to a handbook directory that holds README.md, deploy.md, on-call.md and onboarding.md. The client prints the result text and then the isError flag."
+  title="Predict the listing" hint="Which four files are in the handbook, in what order does a sorted listing put them, and is a successful call an error?"
+  answer={`[FILE] README.md
+  [FILE] deploy.md
+  [FILE] on-call.md
+  [FILE] onboarding.md
+  isError: False`} run="customizing-agents/mcp-first-server/list_directory.py">
+What does this print? `client.call` returns the result's text and its
+`isError` flag.
+
+```python
+server = client.start(client.HANDBOOK)
+text, is_error = client.call(server, "list_directory", {"path": client.HANDBOOK})
+print(text)
+print(f"isError: {is_error}")
+```
+
+</Predict>
+
+The `[FILE]` prefix is the reference server's format, and the stand-in
+copies it (@MCP filesystem server). A listing in a real transcript has
+this form when it comes back from the server.
+
+## Scope the server to one directory
+
+The reference server takes its allowed directories from its command-line
+arguments, and a client may also send it *roots*, which replace that
+list (@MCP filesystem server). A call whose path is outside the list
+fails. The stand-in does the same, and the refusal is a normal result
+with `isError` set, which is how the specification says a tool reports a
+failure the model should read (@MCP specification).
+
+<Predict id="predict-the-refusal" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['server', 'mcp-security']}
+  context="The lesson's stand-in file-system server is scoped to one handbook directory and refuses a path outside it with a result whose text starts with Access denied and whose isError flag is set. The client prints the part of the text before the first colon, then the flag."
+  title="Predict the refusal" hint="The path is the handbook's parent directory. Is that inside the allowed list, and how does a tool report a failure?"
+  answer={`Access denied - path outside allowed directories
+  isError: True`} run="customizing-agents/mcp-first-server/outside_scope.py">
+The client asks for the parent of the handbook directory, and prints the
+result text up to its first colon, then the flag.
+
+```python
+server = client.start(client.HANDBOOK)
+parent = os.path.dirname(client.HANDBOOK)
+text, is_error = client.call(server, "list_directory", {"path": parent})
+print(text.split(":")[0])
+print(f"isError: {is_error}")
+```
+
+</Predict>
+
+The scope is the one control you set before the server runs, and it
+holds when the model forgets an instruction. A model
+told "only look in the handbook" can forget. A server that was
+started with one directory has nothing else to list.
+
+## Connect the real server
+
+Now the real thing. The reference server is an npm package,
+`@modelcontextprotocol/server-filesystem`, and its README shows it
+started with `npx -y` and the allowed directories as arguments
+(@MCP filesystem server). It has thirteen tools, and four of them change
+things: `write_file`, `edit_file`, `create_directory` and `move_file`
+(@MCP filesystem server). So the directory you give it is a directory it
+can rewrite, and the copy below is where it does that.
+
+Copy the handbook somewhere disposable, start your agent from that
+directory, and add the server. In Claude Code the command is
+`claude mcp add`, with `--` between Claude's own options and the command
+that runs the server (@Claude Code mcp):
+
+```sh
+cp -r site/examples/customizing-agents/mcp-first-server/handbook /tmp/handbook
+cd /tmp/handbook
+claude mcp add handbook -- npx -y @modelcontextprotocol/server-filesystem /tmp/handbook
+```
+
+The name `handbook` is yours, and the server's tools appear to the model
+as `mcp__handbook__<tool>`, which is also the form a permission rule uses
+(@Claude Code permissions). Without a `--scope` flag the server is added
+at `local` scope, which is you in this project. The `project` scope
+writes a `.mcp.json` the whole team's clients read, and Claude Code asks
+you before it uses a project-scoped server in an interactive session
+(@Claude Code mcp). `claude mcp list` shows what you have configured, and
+`/mcp` inside a session shows whether it connected (@Claude Code mcp).
+
+The other agents that speak MCP take the same three facts in their own
+configuration: a name, a command with its arguments, and a scope. If yours
+is another product, look up its "add a server" page and give it the same
+command line.
+
+<Sort id="which-calls-to-confirm" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['mcp-security', 'client']}
+  context="The reference file-system MCP server has read tools and write tools. The client can require a confirmation before each call of a named tool."
+  title="Which calls need a confirmation?" hint="Which tools leave the directory different from how they found it?"
+  buckets={['Runs without confirmation', 'Confirm before each call']}
+  items={[
+    { text: 'list_directory', bucket: 0 },
+    { text: 'write_file', bucket: 1 },
+    { text: 'read_text_file', bucket: 0 },
+    { text: 'move_file', bucket: 1 },
+    { text: 'list_allowed_directories', bucket: 0 },
+    { text: 'edit_file', bucket: 1 },
+  ]}>
+You are setting per-tool approval for the `handbook` server. Place each
+tool where it belongs.
+</Sort>
+
+## Read the transcript
+
+With the server connected, give the agent the test task. It is a task
+whose right answer you already know, so every tool call in the transcript
+can be checked against it. Ask for a list and a summary, and say that
+nothing is to change. The exchange below is illustrative: it shows the
+calls a good run makes, and your agent's words differ.
+
+<Prompt model="illustrative" recorded="illustrative">
+Using the handbook server, list the files in /tmp/handbook and give me a
+one-line summary of each. Don't change anything.
+</Prompt>
+<Response>
+
+```text
+list_allowed_directories()
+  -> /tmp/handbook
+list_directory(path="/tmp/handbook")
+  -> [FILE] README.md
+     [FILE] deploy.md
+     [FILE] on-call.md
+     [FILE] onboarding.md
+read_text_file(path="/tmp/handbook/README.md")
+read_text_file(path="/tmp/handbook/deploy.md")
+read_text_file(path="/tmp/handbook/on-call.md")
+read_text_file(path="/tmp/handbook/onboarding.md")
+```
+
+Four files. `README.md` is the index. `deploy.md` gives the four deploy
+steps and the rollback. `on-call.md` sets the rota change and the
+fifteen-minute response time. `onboarding.md` plans the first two weeks
+for a new colleague.
+
+</Response>
+
+Read it as you read the toy transcript in the concepts course. Each call
+shows the tool name with its arguments, and the result follows. Check the
+tool name of each call against the list you saw at `tools/list`, and
+check each path against the directory you scoped. Then look for a call
+from the write bucket. There should be none. Your client shows the same information in its own
+format, and a call you can't see the arguments of is a call you can't
+check, so find the setting that shows them before you trust the
+transcript.
+
+Now the mismatch. In a second run the learner asked one more thing.
+
+<Prompt model="illustrative" recorded="illustrative">
+Also check whether the parent folder has other handbooks.
+</Prompt>
+<Response>
+
+```text
+list_directory(path="/tmp")
+  -> Access denied - path outside allowed directories: /tmp
+```
+
+I can't list `/tmp`. The handbook server only allows `/tmp/handbook`. If
+you want me to look there, add that directory to the server's allowed
+list.
+
+</Response>
+
+The model did what it was asked and called the right tool with a path
+outside the scope. The server refused, the model reported the refusal,
+and the transcript shows both. That's the scope working. Had you scoped
+the server to `/tmp` "to be safe", the call would have listed your whole
+temporary directory. The write tools would have reached it too. The
+fix for a call like this is never to widen the scope in the moment. Ask
+what the task needs, and give that directory, and only that one.
+
+<Choice id="read-the-refusal" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['mcp-security', 'transport']}
+  context="A learner connected a file-system MCP server scoped to /tmp/handbook. The transcript shows the model calling list_directory with path /tmp and the server answering Access denied, path outside allowed directories."
+  title="What does the refusal tell you?" hint="Who refused the call, and what would have to change for it to succeed?"
+  options={[
+    { text: 'The model misread the tool and picked the wrong one, so the tool description needs a rewrite.', why: 'list_directory is the right tool for the question that was asked. The path was the problem, and the description said nothing wrong.' },
+    { text: 'The server refused a path outside the directory it was started with, which is the scope doing its job.', correct: true },
+    { text: 'The client blocked the call under a permission rule, so a rule on the list tool is too strict.', why: 'A client permission block shows up as a prompt or a denial in the client, and the model never sees a tool result. Here the result came back from the server with isError set.' },
+    { text: 'The stdio transport dropped the message, so the server should be restarted.', why: 'A transport failure shows up as a connection error in the client, and this call got a complete answer with a reason in it.' },
+  ]}>
+The transcript shows `list_directory(path="/tmp")` answered with
+`Access denied - path outside allowed directories`. What happened?
+</Choice>
+
+<Choice id="scope-for-a-new-task" phase="review" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['mcp-security', 'server']}
+  context="A learner has a local file-system MCP server connected and scoped to one project's docs directory. The next task needs the agent to read one file in a second directory."
+  title="Widen the scope?" hint="Which option gives the new task exactly what it needs, and not more?"
+  options={[
+    { text: 'Restart the server with the second directory added, and remove it again after the task.', correct: true },
+    { text: 'Restart the server scoped to the home directory, so that no later task hits the limit again.', why: 'Every write tool of the server now reaches every file you own. The limit was the point.' },
+    { text: 'Tell the model in the prompt that it may now read the second directory as well.', why: 'The server never sees the prompt. It refuses the path whatever the model was told.' },
+    { text: 'Copy the file into the allowed directory by hand and leave the server as it is.', why: 'This works once, and it hides the real access from the transcript. The next task copies a second file, and the copies are the ones that drift.' },
+  ]}>
+A server is scoped to `docs/`. The next task needs one file from
+`contracts/` as well. What do you do?
+</Choice>
+
+## Local and remote
+
+Everything in this lesson ran over stdio, so the server was a child
+process of your agent. It ran under your user account and had no
+credential of its own. A remote server is reached over the *Streamable HTTP* transport,
+runs as its own process, and answers HTTP requests from many clients
+(@MCP specification). The Academy's advanced MCP course draws the
+consequence for credentials: a local server borrows whatever the process
+that started it can reach, while a remote one needs a token or a login
+flow, and that token is a thing to scope and to expire
+(@Academy model-context-protocol-advanced-topics). Claude Code adds a
+remote server with `--transport http` and a URL, and it supports OAuth
+for servers that ask for a login (@Claude Code mcp). The transcript reading
+you did here is the same for both. The arguments you check now travel
+over a network to code you didn't start.
+
+<Pitfall title="A server on real work first">
+A developer adds a database server to their agent at user scope, so it is
+there in every project. They give it the connection string for the team's
+staging database. The first thing they ask it is real work: "clean up the
+duplicate customer rows". The agent finds a `run_query` tool, writes a
+`DELETE`, and runs it. Nobody had listed the tools, nobody had seen a
+transcript from this server, and the client's approval prompt was
+answered with "don't ask again" on the first call. The rule: the first
+task for a new server is one whose right answer you already know and whose
+wrong answer doesn't cost anything, and you read every call before the server
+meets real data.
+</Pitfall>
+
+<Scenario id="first-task-for-a-new-server" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['mcp-security', 'tool-cost']}
+  context="A teammate has added a new MCP server for the team's issue tracker to the project's shared configuration and asks what to do with it first."
+  title="The first task" hint="Which option produces a transcript you can check against something you already know?"
+  options={[
+    { text: 'Ask the agent to triage the open issues right away, since that is what the server is for.', consequence: 'The agent labels forty issues through a write tool you had not seen in the list. Half the labels are wrong, and each one sent a notification to the reporter.' },
+    { text: 'Ask the agent to list the tools and read back one issue you pick, and check the calls.', correct: true, consequence: 'You see three write tools you didn\'t expect, put them behind a confirmation, and the triage run the next day asks before each label.' },
+    { text: 'Leave it as it is, because the configuration was reviewed in the pull request that added it.', consequence: 'The review checked the command line. Nobody checked the tool list, and the first colleague to use it finds out what the write tools do.' },
+    { text: 'Remove the server and tell the team to use the tracker\'s CLI instead.', consequence: 'A fair call for some trackers, and you made it without one transcript to support it. The team adds the server back a week later, still untested.' },
+  ]}>
+A teammate added an issue-tracker server to the project's `.mcp.json`.
+Your client has just asked you to approve it. What do you do first?
+</Scenario>
+
+<Exercise stretch="Add a second directory to the server's allowed list, ask the same question about both, and check that every path in the transcript is under one of the two.">
+Make the connection this lesson described, on a copy. Copy the
+`handbook` directory from the fixture to a place you can delete, start
+your coding agent there, and add `@modelcontextprotocol/server-filesystem`
+with that copy as its only argument. The server has write tools, so the
+copy is the only directory it may ever see. Ask for a list of the files
+and a one-line summary of each, and say that nothing is to change. Then
+read the transcript and write down, in a few lines, each tool the agent
+called and the path it passed.
+
+A good result: every call is `list_allowed_directories`,
+`list_directory` or `read_text_file`, every path is under your copy, and
+the copy is unchanged afterwards, which `diff -r` against the fixture
+confirms. When you're done, remove the server from your configuration.
+Then ask yourself: if the agent had called `write_file`, at which point
+would you have found out?
+</Exercise>
+
+<Recap>
+1. A local server runs over stdio as a child process of the agent. The
+   client asks `tools/list` once and sends `tools/call` per use, and a
+   refusal comes back as a result with `isError` set (@MCP specification).
+2. Scope the server before it runs. The reference file-system server
+   reads only the directories on its command line, and a path outside
+   them fails whatever the model was told (@MCP filesystem server).
+3. In Claude Code, `claude mcp add <name> -- <command>` adds a server at
+   local scope by default, and a project-scoped `.mcp.json` server is
+   approved by you before its first use in an interactive session
+   (@Claude Code mcp).
+4. The first task for a new server is one whose answer you know. Read the
+   transcript for the tool name, the arguments and the bucket, read or
+   write, of every call.
+5. A remote server over Streamable HTTP does the same work with code you
+   didn't start and a credential you must scope and expire
+   (@Academy model-context-protocol-advanced-topics).
+</Recap>

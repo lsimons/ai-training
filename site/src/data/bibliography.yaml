@@ -720,3 +720,17 @@ Agent Skills spec:
   author: Anthropic
   license: CC BY 4.0
   url: https://agentskills.io/specification
+MCP specification:
+  type: reference
+  title: Model Context Protocol specification
+  container: modelcontextprotocol.io
+  author: Anthropic and the MCP contributors
+  license: MIT
+  url: https://modelcontextprotocol.io/specification/2025-06-18
+MCP filesystem server:
+  type: reference
+  title: Filesystem MCP Server
+  container: GitHub, modelcontextprotocol/servers README
+  author: Anthropic and the MCP contributors
+  license: MIT
+  url: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem

@@ -1,12 +1,22 @@
 id: customizing-agents/mcp-first-server
 title: Connecting your first tool server
+description: >-
+  Connect a local file-system server scoped to one copied directory, give the agent a list-and-summarize
+  test task, and read the transcript for every tool call and its arguments before the server touches real
+  work.
 mode: tutorial
 covers: customizing-agents/mcp
 serves: [customizing-agents/connects-tools-safely/adds-a-tool]
 introduces: []
 assumes:
   - objective: concepts/recognizes-agents/names-the-loop
+    lesson: concepts/agent-loop
+    section: read-the-transcript
   - objective: coding-with-agents/ships-with-agent/runs-a-session
+    lesson: coding-with-agents/first-session
+    section: start-the-agent-and-ask-it-to-explain
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 after: [customizing-agents/mcp]
 shorts:
   - Local and remote transports and what each one means for credentials (Academy model-context-protocol-advanced-topics)
@@ -15,8 +25,22 @@ exercise:
   brief: >-
     Connect a local file-system server scoped to one fixture directory, ask the agent to list and
     summarize its files, and read the transcript for what it called and with which arguments.
-sources: []
+sources:
+  - MCP specification
+  - MCP filesystem server
+  - Claude Code mcp
+  - Claude Code permissions
+  - Academy introduction-to-model-context-protocol
+  - Academy model-context-protocol-advanced-topics
 issue: 171
 minutes: 15
 notes: >-
   Introduces no concept: hands-on for server, client and transport, which the live lesson introduces.
+  The fixtures under site/examples/customizing-agents/mcp-first-server/ are a stdlib stand-in for a
+  file-system server over stdio with three read-only tools, so CI asserts the `tools/list` and `tools/call`
+  exchange without npm or the network. The exercise connects the real reference server
+  (@modelcontextprotocol/server-filesystem) through npx, scoped to a copy of the fixture's handbook
+  directory. The `claude mcp add` syntax, the scope names, the `.mcp.json` approval prompt and the
+  tool-search default come from code.claude.com/docs/en/mcp, the `mcp__` rule forms from
+  code.claude.com/docs/en/permissions, and the package name, tool names and directory scoping from the
+  server's README. All must be re-checked by review-by.
