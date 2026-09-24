@@ -452,7 +452,8 @@ zizmor --strict-collection .
 
 # Scans every committed lockfile (`uv.lock` and `site/bun.lock`) against
 # the OSV database. Not part of `ci` for the same reason as `site-audit`
-# and `links`: it needs network access. CI runs it in its own `vuln` job.
+# and `links`: it needs network access. CI runs it in its own `vuln` job,
+# and `.github/workflows/vuln.yml` runs it on `main` once a week.
 # `site-audit` stays as well: `bun audit` reads the registry's advisory
 # feed and OSV is a second database, so the two overlap but don't agree
 # on every advisory.
