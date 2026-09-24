@@ -8,11 +8,14 @@ the decisions are in docs/prose/.
 Usage: scripts/prose_eval.py <package> [out-dir]
 Writes <out-dir>/<package>.json and <out-dir>/wordcount.tsv
 (default out-dir: docs/prose/reports/<package>).
+Every package pinned in .vale-eval.ini must already be synced into
+.vale/styles (`vale sync --config .vale-eval.ini`), or the script stops.
 """
 
 import collections
 import json
 import pathlib
+import re
 import subprocess
 import sys
 from collections.abc import Callable, Sequence
@@ -22,6 +25,17 @@ from typing import Any
 # "Check", "Message", "Line" and so on. Vale's output is {path: [alert, ...]}.
 Alert = dict[str, Any]
 Hits = dict[str, list[Alert]]
+
+# The eval config and the directory its packages unpack into. `mise run
+# prose-sync` reads .vale.ini only, so the eval packages have their own
+# sync command.
+EVAL_INI = pathlib.Path(".vale-eval.ini")
+STYLES = pathlib.Path(".vale/styles")
+EVAL_SYNC = f"vale sync --config {EVAL_INI}"
+
+# A package URL on a `Packages` line ends in `<name>.zip`, and Vale unpacks
+# it to `<StylesPath>/<name>/`.
+PACKAGE_ZIP = re.compile(r"([^/\s,]+)\.zip")
 
 # Same file set as `mise run prose`, minus the reports themselves, which
 # quote the flagged sentences and would otherwise flag again, and minus
@@ -53,6 +67,42 @@ def area(path: str) -> str:
     return "repo-docs"
 
 
+def pinned_packages(ini: pathlib.Path) -> list[str]:
+    """The package names on the `Packages` lines of a Vale config.
+
+    Comment lines (`;` or `#`) are skipped. Same reading as the
+    `prose-check-packages` task in .mise.toml.
+    """
+    names: list[str] = []
+    for line in ini.read_text().splitlines():
+        if line.lstrip().startswith((";", "#")):
+            continue
+        names.extend(PACKAGE_ZIP.findall(line))
+    return names
+
+
+def missing_packages(ini: pathlib.Path, styles: pathlib.Path) -> list[str]:
+    """The pinned packages with no directory under the styles path.
+
+    The synced styles are gitignored, so in a fresh clone or worktree Vale
+    would otherwise run a smaller rule set and report fewer hits (#276).
+    """
+    return [name for name in pinned_packages(ini) if not (styles / name).is_dir()]
+
+
+def check_packages_synced(ini: pathlib.Path, styles: pathlib.Path) -> None:
+    """Exit with a message naming the sync command when a package is missing."""
+    names = pinned_packages(ini)
+    if not names:
+        sys.exit(f"prose: no .zip packages found on the Packages lines of {ini}")
+    missing = missing_packages(ini, styles)
+    if missing:
+        sys.exit(
+            f"prose: Vale packages from {ini} not synced under {styles}/: "
+            f"{', '.join(missing)}. Run '{EVAL_SYNC}' first."
+        )
+
+
 def tracked_files() -> list[str]:
     out = subprocess.run(
         ["git", "ls-files", "--", *FILE_PATHSPECS],
@@ -70,7 +120,7 @@ def parse_hits(vale_json: str) -> Hits:
 
 def run_vale(files: Sequence[str]) -> Hits:
     out = subprocess.run(
-        ["vale", "--no-exit", "--config", ".vale-eval.ini", "--output=JSON", *files],
+        ["vale", "--no-exit", "--config", str(EVAL_INI), "--output=JSON", *files],
         check=True,
         capture_output=True,
         text=True,
@@ -123,6 +173,7 @@ def main(argv: Sequence[str]) -> None:
         sys.exit(__doc__)
     package = argv[1]
     out_dir = pathlib.Path(argv[2] if len(argv) > 2 else f"docs/prose/reports/{package}")
+    check_packages_synced(EVAL_INI, STYLES)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     files = tracked_files()

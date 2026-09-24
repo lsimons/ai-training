@@ -321,6 +321,9 @@ vale --no-exit --config .vale-extended.ini --ext=.md $yaml
 # Evaluate a Vale style package before deciding, rule by rule, where it
 # goes (.vale.ini, .vale-extended.ini or off). Every hit as JSON plus word
 # counts per area, into docs/prose/reports/<package>/. See docs/prose/README.md.
+# Both scripts read .vale-eval.ini, whose packages `prose-sync` does not
+# fetch, and stop with a message naming `vale sync --config .vale-eval.ini`
+# when one is not under .vale/styles/ (the eval side of #103, issue #276).
 [tasks.prose-eval]
 description = "Collect every hit of a Vale package for review: mise run prose-eval -- <package>"
 run = "scripts/prose_eval.py"

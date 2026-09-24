@@ -10,8 +10,8 @@ every score. This script makes no judgment. The reading is in docs/prose/.
 
 Usage: scripts/prose_metrics.py <package> [out-dir]
 Writes <out-dir>/scores.tsv (default out-dir: docs/prose/reports/<package>).
-The package must already be synced into .vale/styles (`vale sync --config
-.vale-eval.ini`).
+Every package pinned in .vale-eval.ini must already be synced into
+.vale/styles (`vale sync --config .vale-eval.ini`), or the script stops.
 """
 
 import pathlib
@@ -107,6 +107,7 @@ def main(argv: Sequence[str]) -> None:
         sys.exit(__doc__)
     package = argv[1]
     out_dir = pathlib.Path(argv[2] if len(argv) > 2 else f"docs/prose/reports/{package}")
+    prose_eval.check_packages_synced(prose_eval.EVAL_INI, STYLES)
     out_dir.mkdir(parents=True, exist_ok=True)
     rules = sorted(p.stem for p in (STYLES / package).glob("*.yml"))
 

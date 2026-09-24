@@ -24,9 +24,13 @@ repository (committed, not fetched).
 
 ## Process for a package
 
-1. Add the package to `.vale-eval.ini` and run
+1. Add the package to `.vale-eval.ini`, run
+   `vale sync --config .vale-eval.ini` to fetch it, and run
    `mise run prose-eval -- <package>`. This writes every hit as JSON and word
-   counts per area into `docs/prose/reports/<package>/`.
+   counts per area into `docs/prose/reports/<package>/`. `mise run prose-sync`
+   reads `.vale.ini` only, so the eval packages need this separate sync, and
+   `prose-eval` and `prose-metrics` stop with a message naming the command
+   when a package pinned in `.vale-eval.ini` isn't under `.vale/styles/`.
 2. For each rule, an agent writes `reports/<package>/<Rule>.md` following
    `report-template.md`: stats, representative examples in context,
    concentration. The report gathers and doesn't judge.

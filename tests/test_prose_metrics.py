@@ -93,6 +93,10 @@ def test_main_writes_scores(
     def fake_scores(package: str, ini: pathlib.Path, files: Sequence[str]) -> prose_metrics.Scores:
         return {str(doc): {"FleschKincaid": 7.5}}
 
+    def synced(ini: pathlib.Path, styles: pathlib.Path) -> None:
+        pass
+
+    monkeypatch.setattr(prose_metrics.prose_eval, "check_packages_synced", synced)
     monkeypatch.setattr(prose_metrics.prose_eval, "tracked_files", lambda: [str(doc)])
     monkeypatch.setattr(prose_metrics, "scores", fake_scores)
 
@@ -104,3 +108,14 @@ def test_main_writes_scores(
         f"repo-docs\t{doc}\t4\t7.5\t",
     ]
     assert capsys.readouterr().out.startswith("1 of 1 files scored on 2 rules")
+
+
+def test_main_stops_when_eval_packages_not_synced(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(prose_metrics, "STYLES", tmp_path / "styles")
+    out_dir = tmp_path / "out"
+    with pytest.raises(SystemExit) as exc:
+        prose_metrics.main(["prose_metrics.py", "Readability", str(out_dir)])
+    assert "vale sync --config .vale-eval.ini" in str(exc.value)
+    assert not out_dir.exists()

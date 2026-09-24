@@ -103,6 +103,10 @@ def test_main_writes_report(
     def fake_vale(files: Sequence[str]) -> prose_eval.Hits:
         return HITS
 
+    def synced(ini: pathlib.Path, styles: pathlib.Path) -> None:
+        pass
+
+    monkeypatch.setattr(prose_eval, "check_packages_synced", synced)
     monkeypatch.setattr(prose_eval, "tracked_files", lambda: [str(doc)])
     monkeypatch.setattr(prose_eval, "run_vale", fake_vale)
 
@@ -112,3 +116,72 @@ def test_main_writes_report(
     assert json.loads((out_dir / "ai-tells.json").read_text()) == HITS
     assert (out_dir / "wordcount.tsv").read_text().splitlines()[1] == f"repo-docs\t{doc}\t5"
     assert capsys.readouterr().out.startswith("3 hits in 2 files; 5 words\n")
+
+
+EVAL_INI_TEXT = """\
+# Evaluation config
+StylesPath = .vale/styles
+; Packages = https://example.com/commented-out.zip
+Packages = https://github.com/errata-ai/write-good/releases/download/v0.4.1/write-good.zip, \\
+  https://github.com/tbhb/vale-ai-tells/releases/download/v1.37.0/ai-tells.zip
+"""
+
+
+def write_ini(tmp_path: pathlib.Path, text: str = EVAL_INI_TEXT) -> pathlib.Path:
+    ini = tmp_path / ".vale-eval.ini"
+    ini.write_text(text)
+    return ini
+
+
+def test_pinned_packages_reads_names_and_skips_comments(tmp_path: pathlib.Path) -> None:
+    assert prose_eval.pinned_packages(write_ini(tmp_path)) == ["write-good", "ai-tells"]
+
+
+def test_pinned_packages_reads_the_real_eval_ini() -> None:
+    names = prose_eval.pinned_packages(prose_eval.EVAL_INI)
+    assert "write-good" in names
+    assert "ai-tells" in names
+
+
+def test_missing_packages_names_only_the_unsynced(tmp_path: pathlib.Path) -> None:
+    ini = write_ini(tmp_path)
+    styles = tmp_path / "styles"
+    (styles / "write-good").mkdir(parents=True)
+    assert prose_eval.missing_packages(ini, styles) == ["ai-tells"]
+
+
+def test_check_packages_synced_passes_when_all_present(tmp_path: pathlib.Path) -> None:
+    ini = write_ini(tmp_path)
+    styles = tmp_path / "styles"
+    for name in ("write-good", "ai-tells"):
+        (styles / name).mkdir(parents=True)
+    prose_eval.check_packages_synced(ini, styles)
+
+
+def test_check_packages_synced_exits_naming_the_sync_command(tmp_path: pathlib.Path) -> None:
+    ini = write_ini(tmp_path)
+    styles = tmp_path / "styles"
+    styles.mkdir()
+    with pytest.raises(SystemExit) as exc:
+        prose_eval.check_packages_synced(ini, styles)
+    message = str(exc.value)
+    assert "write-good, ai-tells" in message
+    assert "vale sync --config .vale-eval.ini" in message
+
+
+def test_check_packages_synced_exits_on_empty_package_list(tmp_path: pathlib.Path) -> None:
+    ini = write_ini(tmp_path, "StylesPath = .vale/styles\n")
+    with pytest.raises(SystemExit) as exc:
+        prose_eval.check_packages_synced(ini, tmp_path)
+    assert "no .zip packages" in str(exc.value)
+
+
+def test_main_stops_before_writing_when_not_synced(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(prose_eval, "EVAL_INI", write_ini(tmp_path))
+    monkeypatch.setattr(prose_eval, "STYLES", tmp_path / "styles")
+    out_dir = tmp_path / "out"
+    with pytest.raises(SystemExit):
+        prose_eval.main(["prose_eval.py", "ai-tells", str(out_dir)])
+    assert not out_dir.exists()
