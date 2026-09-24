@@ -23,7 +23,9 @@ a `Predict` without `objective` is an ungraded example whose output CI
 still asserts (2026-09-20, see "Examples"). A lesson in the `foundations`
 group keeps code fences, `Predict run` and terminal instructions off the
 page, and `mise run data` checks it (2026-09-24, see "Foundations audience").
-Checkpoints take a `phase` (`first`, `review` or `practice`) and a lesson may have a "More practice" section between the exercise and the recap. The export lists the alternates and `mise run checkpoints` checks them
+Checkpoints take a `phase` (`first`, `review` or `practice`) and a lesson
+may have a "More practice" section between the exercise and the recap. The
+export lists the alternates and `mise run checkpoints` checks them
 (2026-09-24, see "Checkpoints", "Checkpoint props" and "More practice").
 
 ## Introduction
@@ -232,18 +234,35 @@ pitfall and the exercise.
   fails on an exemption that no cue needs, so a stale one is removed.
 - A checkpoint has a `phase` (S01 "Checkpoint"). A `first` checkpoint is
   the lesson's own and renders where the author puts it. A `review`
-  alternate is written in the same page, right after its sibling,
-  and is in the page's markup but hidden: it has no `data-checkpoint`
-  attribute, so nothing on the lesson page binds it, counts it, numbers it
-  or lists it in the "On this page" menu, and the review page takes it from
-  there. A `practice` alternate renders in the "More practice" section.
-- Every graded `first` checkpoint has at least one `review` alternate where
-  the objective allows it, of a different interaction type than the sibling
-  where that fits. A review then tests the idea rather than recognition of one wording. A `review` alternate is gradable in a review, which rules out a `repair`, an honor-system `predict` and `review={false}`.
-  `mise run checkpoints` fails an alternate without a `first` sibling and a
-  `review` alternate that isn't gradable, and it warns, without failing,
-  per lesson, on each reviewable `first` checkpoint that has no `review`
-  alternate. Alternates pass the same guessability check as every item.
+  alternate is written in the same page and is in the page's markup but
+  hidden: it has no `data-checkpoint` attribute, so nothing on the lesson
+  page binds it, counts it, numbers it or lists it in the "On this page"
+  menu, and the review page takes it from there. A `practice` alternate
+  renders in the "More practice" section.
+- Siblings are matched by objective: an alternate's siblings are the
+  `first` checkpoints of its lesson with the same `objective`, and the
+  review page may ask a `review` alternate for any of them. Nothing else
+  ties an alternate to one checkpoint, and its position in the source
+  doesn't matter to the site.
+- Authoring rules, which no check enforces: an alternate asks about the
+  idea that every `first` checkpoint on its objective shares, so it fits
+  whichever of them it replaces, and it goes after the last of them in
+  the source. An objective whose `first` checkpoints test different ideas
+  gets an alternate on the shared idea, or its checkpoints get separate
+  objectives.
+- Every graded `first` checkpoint should be matched by a `review`
+  alternate where the objective allows it: an objective has at least as
+  many gradable `review` alternates as reviewable `first` checkpoints,
+  each of a different interaction type than the checkpoints where that
+  fits. A review then tests the idea rather than recognition of one
+  wording. A `review` alternate is gradable in a review, which rules out a
+  `repair`, an honor-system `predict` and `review={false}`.
+- `mise run checkpoints` fails a `practice` alternate without a `first`
+  sibling, a `review` alternate without a reviewable `first` sibling (the
+  review page would never ask it) and a `review` alternate that isn't
+  gradable. It warns, without failing, per lesson, on each objective with
+  fewer `review` alternates than reviewable `first` checkpoints.
+  Alternates pass the same guessability check as every item.
 
 ### Checkpoint props
 
@@ -251,18 +270,18 @@ Every checkpoint kind takes these. Kind-specific props (`options`,
 `steps`, `buckets`, `answer`, `broken` and so on) are in the authoring
 guide.
 
-| Prop        | Required | Holds                                                                                                                                                            |
-| ----------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`        | yes      | Stable slug, unique in the page. The section id and the progress key.                                                                                            |
-| `objective` | yes      | The one learning objective id the checkpoint evidences.                                                                                                          |
-| `concepts`  | yes      | The S02 concept ids the checkpoint exercises, at least one, from any topic. The build fails on an unknown id. Rendered as `data-concepts`.                       |
-| `title`     | yes      | The heading.                                                                                                                                                     |
-| `hint`      | yes      | A diagnostic question or nudge, never the answer.                                                                                                                |
-| `context`   | no       | One plain paragraph that makes the item readable outside its lesson. Hidden on the lesson page, shown above the stem on the review page, included in the export. |
-| `review`    | no       | `false` opts the checkpoint out of review (spec S05). Default `true`.                                                                                            |
-| `revision`  | no       | Bumped when the answer changes, which resets outdated review items (spec S05). Default 1.                                                                        |
-| `guessable` | no       | `"<cue>: reason"`: the cues a `choice`, `scenario` or `multi-choice` item may trip, and why. The check prints it and fails on a named cue that doesn't trip.     |
-| `phase`     | no       | `first`, `review` or `practice` (S01 "Checkpoint"). Default `first`. A `practice` checkpoint sits inside `<MorePractice>`, and every other one outside it.       |
+| Prop        | Required | Holds                                                                                                                                                                            |
+| ----------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`        | yes      | Stable slug, unique in the page. The section id and the progress key.                                                                                                            |
+| `objective` | yes      | The one learning objective id the checkpoint evidences.                                                                                                                          |
+| `concepts`  | yes      | The S02 concept ids the checkpoint exercises, at least one, from any topic. The build fails on an unknown id. Rendered as `data-concepts`.                                       |
+| `title`     | yes      | The heading.                                                                                                                                                                     |
+| `hint`      | yes      | A diagnostic question or nudge, never the answer.                                                                                                                                |
+| `context`   | no       | One plain paragraph that makes the item readable outside its lesson. Hidden on the lesson page, shown above the stem on the review page, included in the export.                 |
+| `review`    | no       | `false` opts the checkpoint out of review (spec S05). Default `true`.                                                                                                            |
+| `revision`  | no       | Bumped when the answer changes, which resets outdated review items (spec S05). Default 1. An alternate's `revision` resets nothing: the item is keyed on the `first` checkpoint. |
+| `guessable` | no       | `"<cue>: reason"`: the cues a `choice`, `scenario` or `multi-choice` item may trip, and why. The check prints it and fails on a named cue that doesn't trip.                     |
+| `phase`     | no       | `first`, `review` or `practice` (S01 "Checkpoint"). Default `first`. A `practice` checkpoint sits inside `<MorePractice>`, and every other one outside it.                       |
 
 Difficulty has no tag. The `objective` has a level in S02, so difficulty
 is derivable.
@@ -298,8 +317,9 @@ reads it to ask a checkpoint as a standalone item.
   type, and every concept id is a concept in the topic YAML. The same
   check runs the guessability heuristics of "Checkpoints" over the `choice`,
   `scenario` and `multi-choice` items, and the alternate rules of
-  "Checkpoints": every `review` or `practice` item has a `first` item with
-  the same objective in its lesson, and every `review` item is `reviewable`.
+  "Checkpoints": every `practice` item has a `first` item with the same
+  objective in its lesson, every `review` item has a reviewable one, and
+  every `review` item is `reviewable`.
 
 ## Exercises
 

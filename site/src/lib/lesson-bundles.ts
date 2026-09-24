@@ -9,6 +9,7 @@ import {
 	type JsxElement,
 	type MdxNode,
 	parseMdx,
+	phaseProp,
 	propValue,
 } from './checkpoint-tags';
 import { getLessons, type Lesson } from './lessons';
@@ -182,7 +183,7 @@ function renderTag(
 	if (CHECKPOINT_TAGS.has(name)) {
 		// A `review` alternate is hidden on the page (S03 "Checkpoints"), so the prose leaves it out too.
 		// The bundle's `checkpoints` still lists it.
-		if (propValue(attrs, 'phase') === 'review') return '';
+		if (phaseProp(where, attrs) === 'review') return '';
 		// A <Predict> without an objective is a worked example, not a checkpoint (S03 "Examples").
 		const label = attrs.has('objective') ? 'Checkpoint' : 'Example';
 		const title = str('title') ?? str('id') ?? name;

@@ -5,6 +5,8 @@
  * renders the result hidden and a client script reveals it for finished
  * lessons. Pure: no DOM, no Astro.
  */
+
+import { DEFAULT_PHASE } from './checkpoint-rules';
 import {
 	attrsOf,
 	type CheckpointAttr,
@@ -12,7 +14,7 @@ import {
 	isJsxElement,
 	type MdxNode,
 	parseMdx,
-	propValue,
+	phaseProp,
 	stringProp,
 } from './checkpoint-tags';
 import { CODE_SPAN, EMPHASIS, LINK, STRONG } from './inline-markdown';
@@ -214,7 +216,7 @@ function promptOf(lesson: Lesson, block: Block, blocks: Block[]): PromptExample 
 export function canonicalExampleOf(lesson: Lesson): CanonicalExample | undefined {
 	const blocks = blocksOf(lesson);
 	const examples = blocks.filter(
-		(b) => (b.name === 'Predict' && (propValue(b.attrs, 'phase') ?? 'first') === 'first') || b.name === 'Prompt',
+		(b) => (b.name === 'Predict' && phaseProp(lesson.id, b.attrs) === DEFAULT_PHASE) || b.name === 'Prompt',
 	);
 	const marked = examples.filter((b) => isCanonical(b.attrs));
 	if (marked.length > 1) throw new Error(`${lesson.id}: more than one block is marked canonical`);
