@@ -2,9 +2,10 @@
 import { getCollection } from 'astro:content';
 /** One page per competency (spec S02 "Stable URLs"): objectives, behaviors, alignment, lessons serving it. */
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import CompetencyObjectives from '@components/CompetencyObjectives.astro';
 import { areaOf, getAreas } from '@lib/areas';
-import { getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
+import { citationKeys } from '../../../plugins/citation-syntax.mjs';
 
 export async function getStaticPaths() {
 	const competencies = await getCollection('competencies');
@@ -14,16 +15,19 @@ export async function getStaticPaths() {
 const { competency } = Astro.props;
 const area = areaOf(await getAreas(), competency.area);
 const topics = (await getCollection('topics')).map((t) => t.data);
-const lessons = await getLessons();
-const serving = (objectiveId: string) => lessons.filter((l) => l.data.serves.includes(objectiveId));
 // Alignment rows (spec S10 "Alignment") are kept per framework; a competency's rows are the ones naming one of its objectives.
 const own = new Set(competency.objectives.map((o) => o.id));
 const alignment = (await getCollection('alignment')).flatMap((f) =>
 	f.data.rows.filter((r) => r.objectives.some((o) => own.has(o))).map((r) => ({ framework: f.data.framework, ...r })),
 );
+// The References heading exists when a behavior cites (CompetencyObjectives renders the list).
+const cites = competency.objectives.some((o) =>
+	o.behaviors.some((b) => citationKeys(`${b.claim} ${b.why} ${b.example}`).length > 0),
+);
 const headings = [
 	{ depth: 2, slug: 'objectives', text: 'Learning objectives' },
 	...(alignment.length ? [{ depth: 2, slug: 'alignment', text: 'Alignment' }] : []),
+	...(cites ? [{ depth: 2, slug: 'references', text: 'References' }] : []),
 ];
 ---
 
@@ -35,26 +39,7 @@ const headings = [
 	</p>
 
 	<h2 id="objectives">Learning objectives</h2>
-	{
-		competency.objectives.map((o) => (
-			<section>
-				<h3 id={o.id.split('/').pop()}>{o.statement} <small>({o.level})</small></h3>
-				{o.behaviors.length ? (
-					<table>
-						<thead><tr><th>Claim</th><th>Why</th><th>Example</th></tr></thead>
-						<tbody>{o.behaviors.map((b) => <tr><td>{b.claim}</td><td>{b.why}</td><td>{b.example}</td></tr>)}</tbody>
-					</table>
-				) : (
-					<p><em>Behaviors not written yet.</em></p>
-				)}
-				{serving(o.id).length ? (
-					<p>Served by: {serving(o.id).map((l, i) => (<>{i > 0 && ', '}<a href={href(`/${l.id}/`)}>{l.data.title}</a></>))}</p>
-				) : (
-					<p>No lesson serves this objective yet.</p>
-				)}
-			</section>
-		))
-	}
+	<CompetencyObjectives competency={competency} />
 
 	{
 		alignment.length > 0 && (
