@@ -1,0 +1,294 @@
+import { Choice, MultiChoice, Order, Predict, Pitfall, Exercise, Recap } from '@components/lesson';
+
+The last lesson's rule was that a procedure the agent can already do,
+but does differently each time, belongs in a skill. This lesson writes
+one. The procedure is cutting a release of a small package, and the
+result is a directory with one file that any agent reading the open skill
+format can load and follow (@AEC-17). You build the file in three passes.
+The first pass gives it a name and the sentence that makes the agent pick
+it. The second writes the steps and the check that says the result is
+right. The third adds what to do when a step fails.
+
+The lesson runs three short Python scripts against the fixture, and the
+course checks their output on every build. The agent comes in at the
+exercise, where you run the finished skill from a session as you did in
+the first coding lesson.
+
+## The fixture
+
+The package is a notes command in one file, in the course repository under
+`site/examples/customizing-agents/first-skill/fixture-package/`. Copy that
+directory somewhere you can throw away, because the exercise has an agent
+change files in it. Inside are `notes.py`, its tests in `test_notes.py`, a
+`CHANGELOG.md` with three releases, and `release_check.py`. The check
+reads the version out of `notes.py`, looks for a matching heading in the
+changelog, runs the tests, and prints one line. That line is the
+skill's last step, so run it once now to see what "right" looks like.
+
+<Predict id="run-the-check" title="Run the release check"
+  answer="release 0.3.0: ok" run="customizing-agents/first-skill/check.py">
+Run this in the copied package, and compare with the output below.
+
+```sh
+python3 release_check.py
+```
+
+</Predict>
+
+The package also holds the finished skill at
+`.claude/skills/release/SKILL.md`. Read it at the end, and write your own
+first. Delete it from your copy if you want the exercise to test your
+version and not the one that ships with the fixture.
+
+## Pass one: the directory and the description
+
+A skill is a directory with a file named `SKILL.md` in it, and the
+directory's name is the skill's name (@Agent Skills spec). Claude Code
+reads project skills from `.claude/skills/<name>/SKILL.md` and personal
+ones from `~/.claude/skills/<name>/SKILL.md`, and a project skill is
+committed so the team's agents share it (@Claude Code skills). Make the
+directory in your copy of the package:
+
+```sh
+mkdir -p .claude/skills/release
+```
+
+The file starts with YAML front matter between two `---` lines. The
+specification requires two fields. `name` is at most 64 characters of
+lowercase letters, digits and single hyphens, with no hyphen at the start
+or the end, and it must equal the directory name. `description` is at
+most 1024 characters and says what the skill does and when to use it
+(@Agent Skills spec). Every other field is optional.
+
+The description does more work than its size suggests. At the start of a
+session Claude Code loads the name and description of every skill it can
+see. The body is loaded when a task matches the
+description, or when you type `/release` yourself, and it then stays in
+the conversation for the rest of the session (@Claude Code skills). So
+the description is the trigger, and it should name the requests that
+should fire it (@Academy introduction-to-agent-skills). Write this as the
+whole file for now:
+
+```markdown
+---
+name: release
+description: Cut a release of the notes package. Use when asked to release, to bump the version, or to tag a new version.
+---
+```
+
+The course keeps a small lint script next to the fixture that checks the
+required fields against the rules above. It reads two skills: the release
+skill in the fixture package, and `bad-skill/`, whose front matter is
+`name: Release-Notes` and an empty `description`.
+
+<Predict id="lint-two-skills" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['skill-spec']}
+  context="A lint script checks two SKILL.md files against the Agent Skills specification: name at most 64 lowercase letters, digits and single hyphens and equal to the directory name, and a non-empty description of at most 1024 characters. The first skill is a release skill in a directory named release. The second is in a directory named bad-skill, with name Release-Notes and an empty description."
+  title="What does the lint report?" hint="Check the name against each rule in turn, then the description. How many rules does Release-Notes in a directory called bad-skill break?"
+  answer={`release: ok, description is 108 characters
+  bad-skill: name has uppercase letters
+  bad-skill: name does not match the directory 'bad-skill'
+  bad-skill: description is missing or empty`}
+  run="customizing-agents/first-skill/skill_lint.py">
+Predict the four lines the lint prints, one for the release skill and one
+per broken rule for `bad-skill`.
+
+```sh
+python3 skill_lint.py
+```
+
+</Predict>
+
+The description above is 108 characters, far under the limit, and it
+should stay short. Every skill's description is in context on every
+turn of every session, whatever the task. Claude Code cuts the text it
+shows the model at 1,536 characters (@Claude Code skills), and a
+description that needs anything near that limit holds steps that belong
+in the body.
+
+## Pass two: when, the steps, the check
+
+The body is Markdown, and the specification doesn't restrict it beyond
+a recommendation to keep the whole file under 500 lines and move
+detailed reference material to files next to it (@Agent Skills spec).
+What the body has to do is let an agent that has none of your context run
+the procedure without asking. That takes an opening line on when to use
+it, the steps in order with the exact commands and file names, and the
+check that says the result is right.
+
+Add this below the front matter:
+
+```markdown
+# Release the notes package
+
+Use this when the user asks for a release of this package. A release is a
+version bump, a changelog entry, passing tests, and a tag. Ask for the new
+version if the user did not give one. Bump the last number for a fix, the
+middle one for a feature.
+
+## Steps
+
+1. Run `python3 -m unittest -q`. The last line must be `OK`.
+2. In `notes.py`, change the `__version__` line to the new version.
+3. In `CHANGELOG.md`, add a `## <version>` heading under the title, above
+   the previous release, with one bullet per user-visible change since
+   that release. Read `git log` for the list. Don't invent changes.
+4. Run `python3 release_check.py`. It must print `release <version>: ok`.
+5. Commit with the message `release: <version>` and tag it
+   `v<version>` with `git tag v<version>`.
+
+## Done when
+
+`python3 release_check.py` prints `release <version>: ok`, the commit is
+on the branch and `git tag --list 'v*'` shows the new tag. Don't push.
+Report the version, the tag and the changelog entry you wrote.
+```
+
+The commands and file names in that body are exact, `python3 -m unittest -q` and not "run
+the tests", because an agent on another machine picks the runner it
+guesses otherwise. The last step is a check the agent can run, with
+the exact line it must print, so "done" is a fact the agent reads and not
+a judgment it makes. The "Done when" section repeats that check and adds
+the limit, "Don't push", because a release skill that pushes is a
+release skill that can't be undone with `git reset`.
+
+<Order id="order-the-body" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill']}
+  context="A skill body for a release procedure has an opening that says when to use the skill, a version bump, a changelog entry, a test run before anything changes, a release check that prints one line, and a commit and tag."
+  title="Order the release steps" hint="Which step is a check that should run before anything is changed, and which one can only run once everything else is in place?"
+  steps={['Run the tests, and stop if they fail', 'Change the version line in the source file', 'Add the changelog heading and bullets', 'Run the release check and read its line', 'Commit and tag']} />
+
+## Pass three: when a step fails
+
+The body so far assumes every step works. The first time an agent runs
+it, one won't. The tests fail because of a change someone left half
+done, or the check prints a `FAIL` line because the agent bumped the
+version and forgot the changelog. A skill that says nothing about that
+leaves the agent to decide, and the decisions agents make at that moment
+include "edit the check until it passes".
+
+The fixture shows what the check prints after such a half-done release.
+The script copies the package, changes the version to 0.4.0 as step 2
+says, runs the check, then adds the changelog heading from step 3 and
+runs it again.
+
+<Predict id="half-done-release" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill']}
+  context="The fixture package's release check reads the version from notes.py, looks for a matching '## version' heading in CHANGELOG.md and runs the tests, then prints 'release <version>: ok' or one 'release <version>: FAIL: <problem>' line per problem. A script bumps the version to 0.4.0, runs the check, adds the changelog heading and runs it again."
+  title="What does the check print at each point?" hint="After the bump, which of the three things the check looks at is out of step with the others? What does the check print when nothing is?"
+  answer={`after step 2: release 0.4.0: FAIL: CHANGELOG.md has no '## 0.4.0' heading
+  after step 3: release 0.4.0: ok`}
+  run="customizing-agents/first-skill/failing_step.py">
+Predict the two lines, one after the version bump and one after the
+changelog entry.
+
+```sh
+python3 failing_step.py
+```
+
+</Predict>
+
+The check names the missing step, so the skill's job is to tell the agent
+to read the line and fix what it names. Change steps 1 and 4 to:
+
+```markdown
+1. Run `python3 -m unittest -q`. The last line must be `OK`. If it is
+   not, stop and report the failure. Never release with a failing test.
+...
+4. Run `python3 release_check.py`. It must print `release <version>: ok`.
+   If it prints a `FAIL` line, fix what the line names and run it again.
+   Don't edit `release_check.py`.
+```
+
+Each failure line has the same three parts. What the agent sees, what it
+does about it, and the one thing it must not do. The third part is the
+one authors skip, and it is the one that stops the agent from making the
+check pass by changing the check. Your `SKILL.md` now matches the
+finished one in the fixture, line for line.
+
+<MultiChoice id="what-makes-it-reusable" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill', 'skill-spec']}
+  context="A team writes a release skill for a coding agent. The question asks which lines in it let a colleague's agent, with none of the author's context, run the release without asking."
+  title="Which lines let a colleague's agent run it?" hint="For each line, ask: does an agent with none of the author's context need it to run the procedure without asking?"
+  options={[
+    { text: 'The exact test command, `python3 -m unittest -q`, and the line it must end with.', correct: true },
+    { text: 'A note that the author prefers releasing on Fridays.', why: 'A preference the agent can\'t act on adds context and no step.' },
+    { text: 'A check the agent runs at the end, with the exact line that means the release is right.', correct: true },
+    { text: 'The full history of why the team moved from one release tool to another.', why: 'History is reference material, and a body that carries it is loaded on every use. Put it in a file the skill points to, if anywhere.' },
+    { text: 'What to do when the check prints a failure, and what not to edit.', correct: true },
+  ]}>
+Which three lines earn their place in the release skill?
+</MultiChoice>
+
+<Choice id="which-description-fires" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['skill-spec', 'writing-a-good-skill']}
+  context="A skill's description is the only part of it the agent sees before deciding whether to load it, and it should name the requests that should fire the skill and no others."
+  title="Which description is the right trigger?" hint="Which requests should load a release skill, and which of these descriptions names those and only those?"
+  options={[
+    { text: '"Helps with the notes package, its version, its changelog, and its releases."', why: 'Every task in the package matches this, so the skill is loaded for work it has nothing to say about, and its body sits in context for the rest of the session.' },
+    { text: '"Cut a release of the notes package. Use when asked to release, bump the version, or tag."', correct: true },
+    { text: '"Follow the release steps below carefully, in order, and report when the work is done."', why: 'This says what to do once loaded and nothing about which requests the skill is for, so the agent has no way to match a request to it.' },
+  ]}>
+Three descriptions for the same release skill. Which one loads the skill
+for the right requests and leaves it unloaded for the rest?
+</Choice>
+
+<Choice id="which-description-fires-review" phase="review" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['skill-spec', 'writing-a-good-skill']}
+  context="A skill in the open skill format has a front matter description that the agent reads on every turn to decide whether to load the body, and a body with the procedure that is loaded only once a task matches."
+  title="Where does the step list go?" hint="Which part of the file does the agent read before it has decided to use the skill, and which part after?"
+  options={[
+    { text: 'In the description, so the agent sees the steps on every turn and never misses one.', why: 'The description is in context on every turn of every session. Steps there are paid for on every task, releases or not, and the description stops working as a trigger.' },
+    { text: 'In the body below the front matter, loaded once a task matches the description.', correct: true },
+    { text: 'In a separate file next to the skill, because the body should hold only the description.', why: 'The body is where the procedure goes. A separate file is for reference material a step points to.' },
+  ]}>
+A colleague writes a release skill and asks where the numbered steps
+belong. What do you tell them?
+</Choice>
+
+<Pitfall title="The description that fires on everything">
+A team writes a skill for updating the changelog and describes it as "Use
+when working on the notes package". For a week every session in the
+package loads it, whatever the task, and the agent starts adding a
+changelog bullet to a typo fix in the README because the loaded body
+says to. The body was fine. The description matched every request
+instead of the one it was for. Write the description as the list of
+requests that should load the skill, and read it once as a stranger to
+check that a request for something else wouldn't match.
+</Pitfall>
+
+<Exercise stretch="Change one bullet in the skill's changelog step so the entry has a fixed first line, for example the date, and run the skill again in a fresh session on a fresh copy. Did the agent follow the new line without being told about it?">
+In a fresh copy of the fixture package, with your `SKILL.md` in place
+and the one that ships with the fixture deleted, start your coding agent
+in the package directory and ask it to cut release 0.4.0. Run the skill
+by typing `/release 0.4.0` if your agent supports that, or ask in
+plain words and watch whether the description fires. The skill changes
+files: it edits `notes.py` and `CHANGELOG.md`, and it makes a commit and
+a tag, so run it only in the copy, and never in the course repository.
+If the copy isn't a git repository, run `git init` and commit the
+package first, so steps 3 and 5 have something to work with.
+
+A good result: the agent ran the tests first, `python3 release_check.py`
+prints `release 0.4.0: ok`, `git tag --list 'v*'` shows `v0.4.0`, and
+the agent didn't push and didn't edit `release_check.py`. Where did the
+agent hesitate or ask you something? That question is a line missing
+from the skill, and the next lesson is about finding those lines.
+</Exercise>
+
+<Recap>
+1. A skill is a directory named after the skill with a `SKILL.md` in it.
+   Its front matter needs `name` and `description`, and `name` must equal
+   the directory name (@Agent Skills spec).
+2. The description is the trigger. It is in context on every turn, and
+   the body is loaded when a task matches it or you invoke the skill,
+   then stays for the session (@Claude Code skills). Name the requests
+   that should fire it and no others.
+3. The body says when to use the skill, gives the steps in order with
+   exact commands and file names, and ends with a check the agent can
+   run, with the line that means the result is right.
+4. Each step that can fail says what the agent sees, what it does about
+   it, and what it must not do, so the procedure survives its first
+   surprise.
+5. A skill is done when someone else's agent runs it from a fresh
+   session without asking. Running it that way is the next lesson.
+</Recap>

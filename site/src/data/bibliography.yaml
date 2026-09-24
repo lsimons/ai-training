@@ -706,3 +706,10 @@ AI Index 2025:
   author: AI Index Steering Committee
   license: CC BY-ND 4.0
   url: https://hai.stanford.edu/ai-index/2025-ai-index-report
+Agent Skills spec:
+  type: reference
+  title: Agent Skills specification
+  container: agentskills.io
+  author: Anthropic and the Agent Skills contributors
+  license: Proprietary
+  url: https://agentskills.io/specification
