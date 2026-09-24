@@ -230,12 +230,13 @@ patterns below after the fact. Write so that it has nothing to say.
 - `site/bun.lock` is committed and must stay in the tree. `mise run ci` and CI
   install with `site-install-frozen`. Use `mise run site-install` when
   deliberately changing dependencies, and commit the result.
-- In `site/package.json`, tools are exact and libraries are ranges, and
-  `bun.lock` is the pin for both. The exact tools are `typescript`,
-  `markdownlint-cli2`, `@commitlint/*` and `cspell`. Dependabot moves a
-  range constraint. The prek hooks and `mise run spell` run the last
-  three tools from `site/node_modules/.bin`, so `site-install-frozen`
-  comes before `lint` and `spell`. `@playwright/test` is the one
+- In `site/package.json` every dependency is an exact version, tools and
+  libraries alike, and `bun.lock` pins the whole tree. An upgrade is a
+  deliberate choice: a dependabot pull request or `mise run site-install`
+  after editing the version, and never a range. The prek hooks and
+  `mise run spell` run `markdownlint-cli2`, `@commitlint/*` and `cspell`
+  from `site/node_modules/.bin`, so `site-install-frozen` comes before
+  `lint` and `spell`. `@playwright/test` is the one
   Playwright package (the screenshot script imports `chromium` from it
   too).
 - `uv.lock` is committed and must stay in the tree. `mise run ci` and CI
