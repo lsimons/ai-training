@@ -1,6 +1,6 @@
 import { buildCatalog, orderByPlan } from '@lib/catalog';
 import type { Lesson } from '@lib/lessons';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 // The safety course lists `deeper` before `agent-risk`, the reverse of id order, and
 // `concepts` has no course file at all.
@@ -33,5 +33,19 @@ describe('buildCatalog', () => {
 		]);
 		// No course file: id order.
 		expect(catalog.find((c) => c.area === 'concepts')?.lessons.map((l) => l.id)).toEqual(['concepts/how-models-work']);
+	});
+});
+
+describe('buildCatalog habits', () => {
+	let catalog: Awaited<ReturnType<typeof buildCatalog>>;
+	beforeAll(async () => {
+		catalog = await buildCatalog();
+	});
+	it('carries each lesson habit with its text rendered inline, and none for a lesson without one', async () => {
+		const safety = catalog.find((c) => c.area === 'safety');
+		expect(safety?.lessons.find((l) => l.id === 'safety/deeper')?.habits).toEqual([
+			{ id: 'go-one-level-deeper', html: 'The next time you <em>review</em> a change, go one level deeper.' },
+		]);
+		expect(safety?.lessons.find((l) => l.id === 'safety/agent-risk')?.habits).toEqual([]);
 	});
 });

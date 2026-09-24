@@ -1,5 +1,5 @@
-/** Overall progress figures derived from the catalog and the progress record. */
-import type { ProgressRecord } from './progress';
+/** Overall progress figures derived from the catalog and the progress record, and the progress page's habit lines. */
+import type { HabitEntry, ProgressRecord } from './progress';
 
 /** Mirrors `lib/catalog.ts` (that module imports astro:content, which client scripts cannot). */
 export interface CatalogCheckpoint {
@@ -7,10 +7,17 @@ export interface CatalogCheckpoint {
 	reviewable: boolean;
 	revision: number;
 }
+export interface CatalogHabit {
+	id: string;
+	/** The habit text as inline HTML. */
+	html: string;
+}
 export interface CatalogLesson {
 	id: string;
 	title: string;
 	checkpoints: CatalogCheckpoint[];
+	/** Absent in a catalog built before habits existed; read as none. */
+	habits?: CatalogHabit[];
 }
 export interface CatalogCourse {
 	area: string;
@@ -83,4 +90,35 @@ export function overall(catalog: CatalogCourse[], rec: ProgressRecord): Overall 
 		firstSkipped,
 		any: finished + skipped + started > 0 || passed > 0,
 	};
+}
+
+/** A habit line on the progress page (spec S07 "Where habits surface"): the text, the next date and the results so far. */
+export interface HabitLine {
+	/** Progress id, `<lesson id>#<habit id>`. */
+	id: string;
+	html: string;
+	next: string;
+	results: HabitEntry['history'][number]['result'][];
+}
+
+/**
+ * The active habits of a lesson, in page order: those with an entry that has
+ * not retired. A retired habit keeps its results on the lesson page and is
+ * left out here.
+ */
+export function activeHabits(lesson: CatalogLesson, rec: ProgressRecord): HabitLine[] {
+	const out: HabitLine[] = [];
+	for (const h of lesson.habits ?? []) {
+		const id = `${lesson.id}#${h.id}`;
+		const entry = rec.habits[id];
+		if (!entry || entry.next === null) continue;
+		out.push({ id, html: h.html, next: entry.next, results: entry.history.map((t) => t.result) });
+	}
+	return out;
+}
+
+/** The schedule part of a habit line: "Next on 2026-09-27. So far: done, skipped." */
+export function habitSummary(line: Pick<HabitLine, 'next' | 'results'>): string {
+	const results = line.results.length ? `So far: ${line.results.join(', ')}.` : 'No result yet.';
+	return `Next on ${line.next}. ${results}`;
 }

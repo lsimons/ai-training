@@ -1,6 +1,7 @@
 import { getAreas } from './areas';
 import { getAllCoursePlans } from './courses';
-import { checkpointsOf, getLessons, type Lesson } from './lessons';
+import { checkpointsOf, getLessons, habitsOf, type Lesson } from './lessons';
+import { renderInline } from './reference';
 
 /** The site's courses and lessons in path order, serializable for client scripts. */
 export interface CatalogCheckpoint {
@@ -16,6 +17,12 @@ export interface CatalogLesson {
 	checkpoints: CatalogCheckpoint[];
 	/** The ids of its `practice` checkpoints, which count nowhere; the progress page needs them to keep their entries. */
 	practice: string[];
+	/** Its habits (spec S07), the text as inline HTML, for the progress page's habit lines and orphan pruning. */
+	habits: CatalogHabit[];
+}
+export interface CatalogHabit {
+	id: string;
+	html: string;
 }
 export interface CatalogCourse {
 	area: string;
@@ -55,6 +62,7 @@ export async function buildCatalog(): Promise<CatalogCourse[]> {
 						.filter((c) => c.phase === 'first')
 						.map((c) => ({ id: c.id, title: c.title, reviewable: c.reviewable, revision: c.revision })),
 					practice: all.filter((c) => c.phase === 'practice').map((c) => c.id),
+					habits: habitsOf(l).map((h) => ({ id: h.id, html: renderInline(h.text) })),
 				};
 			}),
 		};
