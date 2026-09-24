@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -5,7 +6,31 @@ import { defineConfig, devices } from '@playwright/test';
  * e2e/ run against a static server for site/dist, which `site-e2e` builds
  * first. Playwright starts and stops the server itself.
  */
-const PORT = 4400;
+
+/**
+ * The static server's port: `E2E_PORT` when it is set, else a free port the OS
+ * hands out, so two e2e runs on one machine never collide (#345). The chosen
+ * port goes back into `E2E_PORT` because the worker processes load this file
+ * again and inherit the runner's environment, so they must see the same value.
+ * The probe runs in a child process since the config has to be synchronous.
+ */
+function e2ePort(): number {
+	const fromEnv = process.env.E2E_PORT;
+	if (fromEnv !== undefined && fromEnv !== '') {
+		const port = Number(fromEnv);
+		if (!Number.isInteger(port) || port < 1 || port > 65535) {
+			throw new Error(`E2E_PORT must be a port number from 1 to 65535, got "${fromEnv}"`);
+		}
+		return port;
+	}
+	const probe =
+		"const s=require('node:net').createServer();s.listen(0,'127.0.0.1',()=>{process.stdout.write(String(s.address().port));s.close()})";
+	const port = Number(execFileSync(process.execPath, ['-e', probe], { encoding: 'utf8' }).trim());
+	process.env.E2E_PORT = String(port);
+	return port;
+}
+
+const PORT = e2ePort();
 export const BASE = `http://localhost:${PORT}/ai-training`;
 
 export default defineConfig({
