@@ -150,8 +150,11 @@ dir = "site"
 run = ["bun run build", "bun run e2e"]
 
 [tasks.site-slides]
-description = "Render the example Quarto slide deck to HTML + PDF"
-run = "quarto render {{arg(name='deck', default='site/public/presentations/example.qmd')}}"
+description = "Render a Quarto slide deck to HTML + PDF (arg: [deck])"
+usage = '''
+arg "[deck]" help="Path to the .qmd deck" default="site/public/presentations/example.qmd"
+'''
+run = 'quarto render "$usage_deck"'
 
 [tasks.site-favicon]
 description = "Regenerate the favicon + apple-touch-icon from the palette"
@@ -181,9 +184,13 @@ run = "bunx playwright install --with-deps chromium"
 [tasks.site-screenshot]
 description = "Build, serve, and screenshot a page (args: [out] [path]). Needs `mise run site-browser` once."
 dir = "site"
+usage = '''
+arg "[out]" help="Output PNG path" default="out.png"
+arg "[path]" help="Site path to capture" default="/ai-training/"
+'''
 run = """
 bun run build
-bun scripts/screenshot.mjs "{{arg(name='out', default='out.png')}}" "{{arg(name='path', default='/ai-training/')}}"
+bun scripts/screenshot.mjs "$usage_out" "$usage_path"
 """
 
 # The prek hooks (mdformat, markdownlint, gitleaks, the pre-commit-hooks
