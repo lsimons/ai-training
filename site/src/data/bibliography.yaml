@@ -4,10 +4,8 @@
 # source (agent-engineer-course, DeepLearning.AI, Claude Academy, CS50,
 # Diátaxis, Fuchsia, OpenSSF); otherwise null. Academy keys are
 # `Academy <slug>`, one per cited course, and link to the public course page.
-# A paper is keyed `<First author surname> <year>`; author lists the authors
-# ("and N others" past three), container is the venue with volume, year and
-# pages, and url is the publisher or ACL Anthology page over the arXiv page
-# when both exist.
+# A `paper` entry follows spec S03 "Citations and terms" (key, author,
+# container and url rules).
 AEC-01:
   type: course
   title: "What are AI agents: model versus agent, autonomy levels, when a prompt suffices"
@@ -396,10 +394,10 @@ Brilliant ABS:
 Brown 2020:
   type: paper
   title: Language Models are Few-Shot Learners
-  container: arXiv preprint 2005.14165
+  container: Advances in Neural Information Processing Systems 33 (NeurIPS 2020)
   author: Tom B. Brown, Benjamin Mann, Nick Ryder and 28 others
   license: arXiv.org perpetual, non-exclusive license 1.0
-  url: https://arxiv.org/abs/2005.14165
+  url: https://proceedings.neurips.cc/paper/2020/hash/1457c0d6bfcb4967418bfb8ac142f64a-Abstract.html
 Learn Prompting:
   type: reference
   title: The community prompt engineering guide
@@ -571,21 +569,21 @@ Gitleaks:
 Sharma 2023:
   type: paper
   title: Towards Understanding Sycophancy in Language Models
-  container: arXiv preprint 2310.13548
+  container: International Conference on Learning Representations (ICLR 2024), arXiv preprint 2310.13548
   author: Mrinank Sharma, Meg Tong, Tomasz Korbak and 16 others
   license: CC BY 4.0
   url: https://arxiv.org/abs/2310.13548
 Wilson 2024:
   type: paper
   title: Gender, Race, and Intersectional Bias in Resume Screening via Language Model Retrieval
-  container: Proceedings of the AAAI/ACM Conference on AI, Ethics, and Society (AIES 2024), arXiv preprint 2407.20371
+  container: Proceedings of the AAAI/ACM Conference on AI, Ethics, and Society 7 (AIES 2024), 1578-1590
   author: Kyra Wilson and Aylin Caliskan
   license: CC BY-NC-SA 4.0
-  url: https://arxiv.org/abs/2407.20371
+  url: https://doi.org/10.1609/aies.v7i1.31748
 Bertrand 2004:
   type: paper
   title: "Are Emily and Greg More Employable than Lakisha and Jamal? A Field Experiment on Labor Market Discrimination"
-  container: American Economic Review 94(4), 991-1013
+  container: American Economic Review 94(4) (2004), 991-1013
   author: Marianne Bertrand and Sendhil Mullainathan
   license: Copyright American Economic Association
   url: https://www.aeaweb.org/articles?id=10.1257/0002828042002561

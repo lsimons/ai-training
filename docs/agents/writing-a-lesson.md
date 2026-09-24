@@ -408,8 +408,9 @@ The model never runs anything. Your loop does (@AEC-13).
 A bibliography entry has `type` (`book`, `course`, `paper`, `reference` or
 `video`, per S01), `title`, `container`, `author`, `license` and `url`. `url` is a
 public URL only where the licensing rules in `AGENTS.md` allow linking the
-source; otherwise `null`. Add a new entry to the YAML and to the source
-table in S02 together.
+source; otherwise `null`. A `paper` entry follows the key, author,
+container and url rules in S03 "Citations and terms". Add a new entry to
+the YAML and to the source table in S02 together.
 
 **Terms.** Terms have no syntax. In a lesson, the first mention of a concept
 from one of the topics in `covers` is marked automatically: it links to

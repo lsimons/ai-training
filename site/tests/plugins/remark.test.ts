@@ -37,6 +37,13 @@ const bibliography = {
 		author: null,
 		url: null,
 	},
+	'Liu 2024': {
+		type: 'paper',
+		title: 'Lost in the Middle',
+		container: 'TACL 12 (2024), 157-173',
+		author: 'N. Liu and 6 others',
+		url: 'https://aclanthology.org/2024.tacl-1.9/',
+	},
 };
 
 type Node = {
@@ -192,6 +199,16 @@ describe('remarkCitations', () => {
 		expect(text(list?.children?.[1] as Node)).toBe(
 			'Taste: what is worth building. Brilliant. Reference. Brilliant TAS',
 		);
+	});
+
+	it('renders a paper with its authors, venue and year, and links the title to the published page', async () => {
+		const tree = await run('Cite (@Liu 2024).\n');
+		const list = tree.children?.at(-1);
+		const [entry] = list?.children ?? [];
+		expect(entry && text(entry)).toBe(
+			'N. Liu and 6 others. Lost in the Middle. TACL 12 (2024), 157-173. Paper. Liu 2024',
+		);
+		expect(entry && allLinks(entry).map((l) => l.url)).toEqual(['https://aclanthology.org/2024.tacl-1.9/']);
 	});
 
 	it('never marks a term inside the appended References list', async () => {
