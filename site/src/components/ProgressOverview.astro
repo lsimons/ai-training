@@ -26,6 +26,7 @@ const catalog = await buildCatalog();
 </div>
 
 <script>
+	import { activeHabits, type CatalogHabit, habitSummary } from '@scripts/overview';
 	import * as progress from '@scripts/progress';
 
 	interface CatalogCheckpoint {
@@ -38,6 +39,7 @@ const catalog = await buildCatalog();
 		title: string;
 		checkpoints: CatalogCheckpoint[];
 		practice: string[];
+		habits: CatalogHabit[];
 	}
 	interface CatalogCourse {
 		area: string;
@@ -60,7 +62,8 @@ const catalog = await buildCatalog();
 			progress.pruneOrphans(
 				allLessons.map((l) => l.id),
 				allLessons.flatMap((l) => l.checkpoints.map((c) => `${l.id}#${c.id}`)),
-				allLessons.flatMap((l) => l.practice.map((id) => `${l.id}#${id}`))
+				allLessons.flatMap((l) => l.practice.map((id) => `${l.id}#${id}`)),
+				allLessons.flatMap((l) => l.habits.map((h) => `${l.id}#${h.id}`))
 			);
 		}
 		pruneOrphans();
@@ -102,6 +105,20 @@ const catalog = await buildCatalog();
 						}
 						row.append(dot, link, cps);
 						card.appendChild(row);
+						// One line per active habit under its lesson (spec S07 "Where habits surface").
+						for (const h of activeHabits(l, rec)) {
+							const line = document.createElement('p');
+							line.className = 'progress-habit';
+							line.dataset.progressHabit = h.id;
+							const text = document.createElement('span');
+							text.className = 'progress-habit-text';
+							text.innerHTML = h.html;
+							const when = document.createElement('span');
+							when.className = 'progress-habit-when';
+							when.textContent = habitSummary(h);
+							line.append(text, ' ', when);
+							card.appendChild(line);
+						}
 					}
 					if (course.lessons.length) {
 						const due = progress.dueReviewIds(rec, `${course.area}/`).length;

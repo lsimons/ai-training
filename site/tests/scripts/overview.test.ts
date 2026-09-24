@@ -1,4 +1,4 @@
-import { type CatalogCourse, overall, progressPercent } from '@scripts/overview';
+import { activeHabits, type CatalogCourse, habitSummary, overall, progressPercent } from '@scripts/overview';
 import { emptyRecord, type ProgressRecord } from '@scripts/progress-model';
 import { describe, expect, it } from 'vitest';
 
@@ -7,7 +7,15 @@ const catalog: CatalogCourse[] = [
 		area: 'concepts',
 		title: 'Concepts',
 		lessons: [
-			{ id: 'concepts/a', title: 'A', checkpoints: [{ id: 'c1', reviewable: true, revision: 1 }] },
+			{
+				id: 'concepts/a',
+				title: 'A',
+				checkpoints: [{ id: 'c1', reviewable: true, revision: 1 }],
+				habits: [
+					{ id: 'h1', html: 'Say it <em>out loud</em>.' },
+					{ id: 'h2', html: 'Read the diff.' },
+				],
+			},
 			{ id: 'concepts/b', title: 'B', checkpoints: [] },
 		],
 	},
@@ -104,5 +112,30 @@ describe('overall', () => {
 		expect(o.firstSkipped?.id).toBe('safety/c');
 		expect(o.percent).toBe(100);
 		expect(overall([], emptyRecord()).percent).toBe(0);
+	});
+});
+
+describe('habit lines (spec S07 "Where habits surface")', () => {
+	const lesson = catalog[0]?.lessons[0];
+	if (!lesson) throw new Error('fixture');
+	it('lists the active habits of a lesson in page order and leaves out retired ones and lessons without habits', () => {
+		const rec: ProgressRecord = {
+			...emptyRecord(),
+			habits: {
+				'concepts/a#h2': { since: at, next: '2026-01-04', history: [{ at: '2026-01-02', result: 'done' }] },
+				'concepts/a#h1': { since: at, next: null, history: [] },
+			},
+		};
+		expect(activeHabits(lesson, rec)).toEqual([
+			{ id: 'concepts/a#h2', html: 'Read the diff.', next: '2026-01-04', results: ['done'] },
+		]);
+		expect(activeHabits(lesson, emptyRecord())).toEqual([]);
+		expect(activeHabits({ id: 'x/y', title: 'Y', checkpoints: [] }, rec)).toEqual([]);
+	});
+	it('summarizes the next date and the results so far', () => {
+		expect(habitSummary({ next: '2026-01-04', results: [] })).toBe('Next on 2026-01-04. No result yet.');
+		expect(habitSummary({ next: '2026-01-08', results: ['done', 'skipped'] })).toBe(
+			'Next on 2026-01-08. So far: done, skipped.',
+		);
 	});
 });
