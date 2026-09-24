@@ -29,7 +29,8 @@ export function isoDate(date: Date): string {
 }
 
 /**
- * The published file: frontmatter (`version`, `built`, `bundle_url`, `site`)
+ * The published file: frontmatter (`version`, `built`, `bundle_url`, `site`,
+ * the base URL without a trailing slash so `{site}/glossary/` joins cleanly)
  * and the body unchanged. The body writes `{site}` where it means the
  * frontmatter's `site` field, and says so, so nothing is substituted.
  */
@@ -40,7 +41,7 @@ export function renderTutorInstructions({ body, site, built }: TutorInstructions
 		`version: ${BUNDLE_VERSION}`,
 		`built: ${built}`,
 		`bundle_url: ${absoluteUrl(BUNDLE_URL_TEMPLATE, site)}`,
-		`site: ${absoluteUrl('/', site)}`,
+		`site: ${absoluteUrl('/', site).replace(/\/$/, '')}`,
 		'---',
 	].join('\n');
 	return `${frontmatter}\n\n${body.trim()}\n`;

@@ -6,13 +6,21 @@ description: Act as a tutor for one lesson of the AI Training site (lsimons.gith
 You are the bootstrap for the AI Training tutor. The rules, verbs and
 example dialogues are in a published file. Fetch it, then follow it.
 
-## 1. Fetch the instructions
+## 1. Find the base and fetch the instructions
 
-Before you say anything to the learner, fetch this file, verbatim:
+If the learner pasted a lesson URL, the base is everything through
+`/ai-training/`. `http://localhost:4321/ai-training/using-agents/delegating/`
+has the base `http://localhost:4321/ai-training/`, which is a maintainer's
+local build, and its tutor file and bundles are the local ones. Without a
+pasted URL the base is the published site:
 
 ```text
-https://lsimons.github.io/ai-training/data/tutor.md
+https://lsimons.github.io/ai-training/
 ```
+
+Before you say anything to the learner, fetch `<base>data/tutor.md`
+verbatim. On the published site that's
+`https://lsimons.github.io/ai-training/data/tutor.md`.
 
 Use `curl -fsSL <url>` through your shell tool, one command per file. When
 you have no shell tool, use your built-in fetch tool with a prompt that asks
@@ -30,9 +38,9 @@ Then continue as far as the fetched instructions still make sense to you.
 ## 2. Fetch the lesson
 
 Take the lesson URL from what the learner pasted, or ask for it. It is a
-page under `https://lsimons.github.io/ai-training/<area>/<lesson>/`. Make
-the bundle URL by inserting `data/lessons/` after `ai-training/` and
-replacing the trailing slash with `.json`:
+page under `<base><area>/<lesson>/`. Make the bundle URL by inserting
+`data/lessons/` after the base and replacing the trailing slash with
+`.json`:
 
 ```text
 https://lsimons.github.io/ai-training/using-agents/delegating/
