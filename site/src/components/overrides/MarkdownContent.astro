@@ -10,12 +10,13 @@ import { getCollection, render } from 'astro:content';
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
 import ReviewLine from '@components/lesson/ReviewLine.astro';
 import RouteAhead, { type AheadItem } from '@components/lesson/RouteAhead.astro';
+import TutorBlock from '@components/lesson/TutorBlock.astro';
 import { getAreas, isEngineering } from '@lib/areas';
 import { checkExtendsToHref } from '@lib/extends-to';
 import { checkpointsOf, type Lesson } from '@lib/lessons';
 import { bibliographySources, knownPagePaths } from '@lib/links';
 import { chooseSkillsCheck } from '@lib/skills-check';
-import { href } from '@lib/url';
+import { absoluteUrl, href } from '@lib/url';
 
 const entry = Astro.locals.starlightRoute.entry;
 const data = entry.data as typeof entry.data & {
@@ -121,6 +122,7 @@ if (isLesson) {
 			<ReviewLine reviewBy={data['review-by']} sourcesChecked={data['sources-checked']} />
 			<Default><slot /></Default>
 			<RouteAhead items={ahead} />
+			<TutorBlock lessonUrl={absoluteUrl(`/${lessonId}/`, String(Astro.site))} />
 		</div>
 	) : (
 		<Default><slot /></Default>
