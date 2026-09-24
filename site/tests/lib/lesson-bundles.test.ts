@@ -241,5 +241,9 @@ describe('bundleOf and buildLessonBundles', () => {
 		);
 		expect(bare.assumes).toEqual([{ objective: 'o1', lesson: null, section: null, url: null }]);
 		expect(bare.extends_to).toEqual([{ label: 'Next', url: `${ROOT}/safety/deeper/` }]);
+		// An external entry (an https:// URL under a bibliography url) is passed through as is.
+		const academy = 'https://academy.claude.com/courses/ai-capabilities-and-limitations';
+		const external = bundleOf(lesson({ 'extends-to': [{ label: 'Academy', href: academy }] }), sources);
+		expect(external.extends_to).toEqual([{ label: 'Academy', url: academy }]);
 	});
 });
