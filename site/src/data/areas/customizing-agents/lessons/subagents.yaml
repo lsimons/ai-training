@@ -1,11 +1,18 @@
 id: customizing-agents/subagents
 title: Delegating to a subagent with narrower permissions
+description: >-
+  Define a read-only reviewer subagent with its own instructions and tool list, have a coding agent
+  delegate a review of a small diff to it, and compare what the main context holds before and after.
 mode: tutorial
 covers: customizing-agents/hooks-permissions
 serves: [customizing-agents/configures-agent/sets-permissions]
 introduces: [subagents]
 assumes:
   - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 after: [customizing-agents/allowlists]
 shorts:
   - Parallel subagents and what the parent sees of their work (Academy introduction-to-subagents)
@@ -14,6 +21,18 @@ exercise:
   brief: >-
     Define a read-only reviewer subagent with its own instructions and tool set, have the main agent
     delegate a review of the fixture diff to it, and compare the main context before and after.
-sources: []
+sources:
+  - Claude Code subagents
+  - Claude Code context window
+  - Academy introduction-to-subagents
 issue: 187
 minutes: 15
+notes: >-
+  The diff under review is the `clear` command from the allowlists lesson, saved as
+  `site/examples/customizing-agents/subagents/clear.diff` so the lesson has one fixed change to review
+  and the fixture can count its lines. The reviewer file `reviewer.md` next to it is the subagent
+  definition the learner copies. The reviewer has no Bash on purpose, so the learner writes the diff
+  to a file for it to read. File locations, frontmatter fields, tool inheritance and what a subagent
+  sees at startup come from code.claude.com/docs/en/sub-agents, and `/context` from
+  code.claude.com/docs/en/context-window. Both must be re-checked by review-by. The report shown on
+  the page is illustrative and the page says so.
