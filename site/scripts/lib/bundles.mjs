@@ -40,24 +40,45 @@ export const ARRAYS = ['topics', 'objectives', 'assumes', 'checkpoints', 'extend
 
 export const MODES = new Set(['tutorial', 'explanation']);
 
+/** The length of the run of `char` that `line` starts with, after its indentation. */
+function fenceLength(line, char) {
+	let i = 0;
+	while (i < line.length && (line[i] === ' ' || line[i] === '\t')) i++;
+	let n = 0;
+	while (i + n < line.length && line[i + n] === char) n++;
+	return n;
+}
+
+/** The fence character (backtick or tilde) `line` opens with, when it starts a run of three or more. */
+function fenceChar(line) {
+	for (const char of ['`', '~']) {
+		if (fenceLength(line, char) >= 3) return char;
+	}
+	return null;
+}
+
 /**
  * Every fenced code block in `src`, opening line to closing line, as the
  * page holds it. A fence is a line that starts with three or more backticks
  * or tildes (after optional indentation), closed by a line of the same
- * character at least as long, or by the end of the text.
+ * character at least as long and nothing else but whitespace, or by the end
+ * of the text. This reader is on purpose not the regex `setAsideCode` in
+ * `src/lib/lesson-bundles.ts` uses, so a mistake there is not repeated in
+ * the check of its output.
  */
 export function fencedBlocks(src) {
 	const lines = src.split('\n');
 	const out = [];
 	for (let i = 0; i < lines.length; i++) {
-		const open = /^\s*(`{3,}|~{3,})/.exec(lines[i]);
-		if (!open) continue;
-		const fence = open[1];
+		const char = fenceChar(lines[i]);
+		if (!char) continue;
+		const length = fenceLength(lines[i], char);
 		const block = [lines[i]];
 		for (i++; i < lines.length; i++) {
 			block.push(lines[i]);
-			const close = /^\s*(`{3,}|~{3,})\s*$/.exec(lines[i]);
-			if (close && close[1][0] === fence[0] && close[1].length >= fence.length) break;
+			const line = lines[i];
+			const closes = fenceLength(line, char) >= length && line.trim() === char.repeat(line.trim().length);
+			if (closes) break;
 		}
 		out.push(block.join('\n'));
 	}
@@ -74,7 +95,14 @@ export function bundleIds(bundlesDir) {
 	return out;
 }
 
-/** Whether `url` is an absolute URL whose path ends in `/<id>/`, the lesson page under the site's origin and base. */
+/**
+ * Whether `url` is an absolute URL whose path ends in `/<id>/`, the lesson
+ * page under the site's origin and base. The origin is not checked here: it
+ * is Astro's `site` in `astro.config.mjs`, and importing that config from a
+ * `bun` script loads Starlight and every integration. `lessonUrl` in
+ * `src/lib/lesson-bundles.ts` builds the URL from `site` and its unit test
+ * pins the origin, so this check covers the path only.
+ */
 export function isLessonUrl(url, id) {
 	try {
 		return new URL(url).pathname.endsWith(`/${id}/`);

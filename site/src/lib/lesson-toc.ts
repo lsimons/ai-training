@@ -1,15 +1,15 @@
 /**
  * The lesson entries of the right-hand "On this page" menu (issue #220): one
  * group for the checkpoints and one for the ungraded examples, each entry
- * linking to the item's section id. The checkpoints come from `checkpointsOf`,
- * the reader `mise run checkpoints` and the export use, so the menu and the
- * export cannot disagree. The examples are the `<Predict>` tags without an
+ * linking to the item's section id. The checkpoints come from the reader
+ * `mise run checkpoints` and the export use (`checkpointTagsIn` and
+ * `checkpointOf`), so the menu and the export cannot disagree. The examples are the `<Predict>` tags without an
  * `objective` (spec S03 "Examples"), which that reader skips on purpose, read
  * here from the same MDX tree.
  */
 import type { CollectionEntry } from 'astro:content';
-import { attrsOf, jsxElements, type MdxNode, parseMdx, stringProp } from './checkpoint-tags';
-import { checkpointsOf, type Lesson } from './lessons';
+import { attrsOf, checkpointTagsIn, jsxElements, type MdxNode, parseMdx, stringProp } from './checkpoint-tags';
+import { checkpointOf, type Lesson } from './lessons';
 
 export interface TocEntry {
 	/** The section id on the page, so the link is `#<id>`. */
@@ -43,12 +43,20 @@ export function isLessonEntry(entry: CollectionEntry<'docs'>): entry is Lesson {
  * its string.
  */
 export function examplesOf(body: string, where: string): TocEntry[] {
-	let tree: MdxNode;
+	return examplesIn(parseLesson(body, where), where);
+}
+
+/** The MDX tree of a lesson body. A parse error names `where`. */
+function parseLesson(body: string, where: string): MdxNode {
 	try {
-		tree = parseMdx(body);
+		return parseMdx(body);
 	} catch (e) {
 		throw new Error(`${where}: ${(e as Error).message}`);
 	}
+}
+
+/** The ungraded examples in an already parsed lesson `tree` (see `examplesOf`). */
+function examplesIn(tree: MdxNode, where: string): TocEntry[] {
 	const out: TocEntry[] = [];
 	for (const node of jsxElements(tree)) {
 		if (node.name !== 'Predict') continue;
@@ -63,13 +71,18 @@ export function examplesOf(body: string, where: string): TocEntry[] {
 
 /**
  * The menu groups of a lesson, in the order the menu shows them, without the
- * empty ones. The ids are unique across checkpoints and examples: the
- * checkpoint reader rejects a repeated `id` on any tag it knows, ungraded
- * `<Predict>` included, before this runs.
+ * empty ones. The body is parsed once and both groups are read from that
+ * tree. The ids are unique across checkpoints and examples: the checkpoint
+ * reader rejects a repeated `id` on any tag it knows, ungraded `<Predict>`
+ * included, before the examples are read.
  */
 export function lessonTocGroups(lesson: Lesson): TocGroup[] {
-	const checkpoints = checkpointsOf(lesson).map(({ id, title }) => ({ id, title }));
-	const examples = examplesOf(lesson.body ?? '', lesson.id);
+	const body = lesson.body ?? '';
+	const tree = parseLesson(body, lesson.id);
+	const checkpoints = checkpointTagsIn(tree, body, lesson.id)
+		.map((t) => checkpointOf(lesson, t))
+		.map(({ id, title }) => ({ id, title }));
+	const examples = examplesIn(tree, lesson.id);
 	const groups: TocGroup[] = [
 		{ label: 'Checkpoints', slug: 'checkpoints', entries: checkpoints },
 		{ label: 'Examples', slug: 'examples', entries: examples },

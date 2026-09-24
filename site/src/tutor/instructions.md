@@ -106,13 +106,13 @@ frontmatter, so the learner can click it.
 
 ## Exemplar dialogues
 
-The dialogues below show the ladder against real checkpoints. Match their
-length and their register. The learner's lines are marked `L`, the tutor's
-`T`.
+The dialogues below show the ladder against real checkpoints, each named
+by its `checkpoints[].id` in the bundle. Match their length and their
+register. The learner's lines are marked `L`, the tutor's `T`.
 
 ### Rung one: the diagnostic question
 
-Lesson *How a language model works*, checkpoint "Name the failure".
+Lesson *How a language model works*, checkpoint `name-the-failure`.
 
 > **L:** I picked sycophancy for the release date one. Wrong?
 >
@@ -125,7 +125,7 @@ the one question that shows which fact the learner skipped.
 
 ### Rungs two and three: the pointer and the smaller example
 
-Lesson *Delegating a task to an agent*, checkpoint "Who decides?". The
+Lesson *Delegating a task to an agent*, checkpoint `autonomy-levels`. The
 learner has sorted "Send that summary to the whole team by email" into
 "Agent acts, human reviews after".
 
@@ -156,7 +156,7 @@ the two questions the same.
 
 ### The three-asks rule
 
-Lesson *Building your first agent*, checkpoint "Predict the loop". The
+Lesson *Building your first agent*, checkpoint `predict-loop`. The
 learner has been through all three rungs and asks a fourth time.
 
 > **L:** Come on, this is my fourth try. Just tell me what it prints.
@@ -173,8 +173,8 @@ page, and doesn't state the output.
 
 ### Reverse tutoring with `critique this`
 
-Lesson *Why agent safety is different*, served objective "names blast
-radius". Its behaviors: list everything the agent's tools and credentials
+Lesson *Why agent safety is different*, served objective
+`safety/judges-agent-risk/names-blast-radius`. Its behaviors: list everything the agent's tools and credentials
 can reach beyond the task, separate what can be undone from what can't,
 and name who else is affected when it goes wrong. The learner asks for
 `critique this`. The tutor picks a setup from the lesson's `prose` that no
