@@ -1,4 +1,4 @@
-import type { spawnSync } from 'node:child_process';
+import { type spawnSync, spawnSync as spawnSyncReal } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -6,6 +6,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
 	checkExamples,
 	checkSource,
+	FIXTURE_TIMEOUT_MS,
 	FLOOR,
 	findPredictTags,
 	interpreters,
@@ -97,6 +98,13 @@ describe('checkSource', () => {
 			stderr: 'boom',
 		}));
 		expect(res.failures[0]).toMatch(/exited 2\nboom/);
+	});
+	it('reports a run that could not start or timed out, with the interpreter label', () => {
+		const res = checkSource('f.mdx', '<Predict id="a" answer="x" run="x.py">', () => ({
+			error: 'cannot run x.py with python3: did not finish within 30s',
+		}));
+		expect(res).toMatchObject({ found: 1, checked: 1 });
+		expect(res.failures).toEqual(['f.mdx #a: [python3] cannot run x.py with python3: did not finish within 30s']);
 	});
 	it('reports a run without an answer, an unsupported fixture, and a run the parser missed', () => {
 		expect(checkSource('f.mdx', '<Predict id="a" run="x.py">', ok).failures[0]).toContain('no answer');
@@ -200,6 +208,29 @@ describe('runFixture and checkExamples', () => {
 			error: 'unsupported fixture type .sh; fixtures are Python scripts (S03 "Examples")',
 		});
 		expect(runFixture(examples, 'x.rb').error).toContain('unsupported fixture type .rb');
+	});
+	it('fails a fixture whose interpreter cannot start, naming the interpreter', () => {
+		const res = runFixture(examples, 'hi.py', { label: 'missing', cmd: 'python-nope' }, fakeSpawn({}));
+		expect(res).toEqual({ error: 'cannot run hi.py with python-nope: spawnSync python-nope ENOENT' });
+	});
+	it('passes the timeout to spawnSync and fails a hung fixture with a clear message', () => {
+		const seen: { timeout?: number }[] = [];
+		const hung = ((_cmd: string, _args: string[], opts: { timeout?: number }) => {
+			seen.push(opts);
+			return { error: Object.assign(new Error('spawnSync python3 ETIMEDOUT'), { code: 'ETIMEDOUT' }), status: null };
+		}) as unknown as typeof spawnSync;
+		const res = runFixture(examples, 'hi.py', { label: 'python3', cmd: 'python3' }, hung);
+		expect(seen[0]?.timeout).toBe(FIXTURE_TIMEOUT_MS);
+		expect(res).toEqual({
+			error: `cannot run hi.py with python3: did not finish within ${FIXTURE_TIMEOUT_MS / 1000}s`,
+		});
+	});
+	it('really stops a fixture that never exits', () => {
+		writeFileSync(join(examples, 'hang.py'), 'import time\nwhile True:\n    time.sleep(1)\n');
+		const spawnShort = ((cmd: string, args: string[], opts: object) =>
+			spawnSyncReal(cmd, args, { ...opts, timeout: 200 })) as unknown as typeof spawnSync;
+		const res = runFixture(examples, 'hang.py', undefined, spawnShort);
+		expect(res.error).toMatch(/cannot run hang\.py with python3: did not finish within/);
 	});
 	it('runs a fixture with the interpreter it is given', () => {
 		writeFileSync(join(examples, 'version.py'), 'import sys\nprint(sys.version_info[0], sys.version_info[1])\n');
