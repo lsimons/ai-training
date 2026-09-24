@@ -45,18 +45,26 @@ def run(question, model=fake_model, max_steps=5):
             result = f"error: unknown tool {reply['tool']}"
         else:
             try:
-                result = tool["fn"](**reply["args"])
+                result = tool["fn"](**reply.get("args", {}))
             except Exception as exc:
-                result = f"error: {exc}"
+                result = f"error: {exc}" if str(exc) else f"error: {type(exc).__name__}"
         messages.append({"role": "assistant", "content": str(reply)})
-        messages.append({"role": "tool", "content": result})
+        messages.append({"role": "tool", "content": str(result)})
     return "stopped: step limit"
+
+
+def unknown_tool_model(messages):
+    """A model that asks for a tool the loop does not have, then answers like fake_model."""
+    if messages[-1]["role"] == "user":
+        return {"tool": "get_news", "args": {"city": "Lisbon"}}
+    return fake_model(messages)
 
 
 STEPS = {
     "tool_call": lambda: print(TOOLS["get_weather"]["fn"]("Lisbon")),
     "loop": lambda: print(run("What is the weather in Amsterdam?")),
     "tool_error": lambda: print(run("What is the weather in Oslo?")),
+    "unknown_tool": lambda: print(run("What is the news in Lisbon?", model=unknown_tool_model)),
 }
 
 if __name__ == "__main__":
