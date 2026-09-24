@@ -27,16 +27,29 @@ just a name here.
 
 That page does not describe comment lines, a value continued over several
 lines, or the same key set twice in one section. The parser handles them
-the way the configs in this repository write them, and no Vale page backs
-these choices:
+the way the configs in this repository write them. Where the Vale source
+shows what Vale does, the rule names the file:
 
-- A line that starts with `#` or `;` is a comment and is skipped.
+- A line that starts with `#` or `;` outside a continued value is a
+  comment and is skipped.
 - A value that ends in a backslash continues on the next line. The lines
   are joined with one space, after trimming the whitespace around each.
+  Every next line is part of the value, a `#` or `;` line included, until
+  one that does not end in a backslash. Vale's ini library does the same
+  (`readContinuationLines` in
+  https://github.com/errata-ai/ini/blob/v1.63.0/parser.go), so keep comment
+  lines out of a continued value.
 - A key set twice in one section is a parse error that names the section
-  and the key, so the parser never has to guess how Vale merges the two.
-- Text after a value is part of the value, so the configs keep their
-  comments on lines of their own.
+  and the key, because Vale's two readers disagree on it. The lint run
+  loads the file with `AllowShadows` and joins the values of a list key
+  (`shadowLoad` and `patternsWithShadows` in
+  https://github.com/vale-cli/vale/blob/275cd4c74d4353b01191b34a133008860389abf7/internal/core/ini.go),
+  while `vale sync` loads it with plain `ini.Load` and keeps only the last
+  `Packages` (`GetPackages` in
+  https://github.com/vale-cli/vale/blob/275cd4c74d4353b01191b34a133008860389abf7/internal/core/config.go).
+- Text after a value is part of the value. The lint run would drop a
+  ` #` or ` ;` inline comment (`SpaceBeforeInlineComment` in `shadowLoad`),
+  so the configs keep their comments on lines of their own.
 
 Usage: scripts/vale_configs.py [base-ini] [extended-ini]
 """

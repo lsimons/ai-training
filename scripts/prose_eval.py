@@ -59,9 +59,12 @@ def package_entries(ini: pathlib.Path) -> list[str]:
 
     The file is read by `vale_configs.parse_ini`, which owns the ini rules
     (comments, continuation lines, a repeated key) and raises `ValueError`
-    on a line it does not cover. Only the top-level `Packages` counts:
-    `Packages` is a core setting, and Vale reports a core key under a
-    section as an error (https://docs.vale.sh/topics/.vale.ini, "The file").
+    on a line it does not cover. Only the top-level `Packages` counts,
+    because that is the only one `vale sync` reads: `GetPackages` in
+    https://github.com/vale-cli/vale/blob/275cd4c74d4353b01191b34a133008860389abf7/internal/core/config.go
+    takes `Packages` from the section "" alone. Vale's page on the file also
+    reports a core key under a section as an error
+    (https://docs.vale.sh/topics/.vale.ini, "The file").
     """
     config = vale_configs.parse_ini(ini.read_text(encoding="utf-8"))
     value = config[""].get("Packages", "")
