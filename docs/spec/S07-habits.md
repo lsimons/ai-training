@@ -4,8 +4,11 @@
 work after finishing a lesson, on what days the site brings them back, where
 they surface, and what the progress record stores about them.
 
-**Status:** Accepted - design decided 2026-09-20, no code yet. The build is
-tracked in issue #67.
+**Status:** Implemented (2026-09-24, #67) - the `<Habit>` component, the
+`habits` map in record version 3 with its migration, the schedule, the
+lesson card, the due habits on the course review page, the lines on the
+progress page and the tutor's opener question. Open: the three questions at
+the end.
 
 ## Introduction
 

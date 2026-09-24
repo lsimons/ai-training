@@ -9,8 +9,10 @@ export, import and reset are implemented (2026-09-20). Record version 2
 (review `history` entries carry the day) and the migration from version 1 on
 load and on import are implemented (2026-09-20). The `practice` map and the
 `served` field of a review `history` entry are implemented, in version 2
-(2026-09-24). Deferred: goals and quizzes exist in the record format only,
-with no page that writes them.
+(2026-09-24). Record version 3 (the `habits` map, [S07](S07-habits.md))
+and the migration from version 2 are implemented (2026-09-24). Deferred:
+goals and quizzes exist in the record format only, with no page that
+writes them.
 
 ## Introduction
 
@@ -37,7 +39,7 @@ reads when the learner exports it.
 | checkpoint | `state`: `passed`, `skipped` or `attempted`; the number of attempts                                                                                                     |
 | review     | Per checkpoint: `stage`, `due`, `last`, `history`. Each `history` entry is `{ "at": <day>, "result": "pass" or "fail" }`, oldest first. Written by the review schedule. |
 | practice   | Per `practice` checkpoint: `state` and attempts, as for a checkpoint, in their own map. Not counted anywhere else.                                                      |
-| habit      | Per habit: `next`, `history`. Written by the habit schedule, set in a later spec.                                                                                       |
+| habit      | Per habit: `since`, `next`, `history`. Written by the habit schedule ([S07](S07-habits.md) "Storage").                                                                  |
 | quiz       | Per course: score and date                                                                                                                                              |
 | learner    | Chosen comfort level, chosen goals                                                                                                                                      |
 
@@ -140,10 +142,10 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
 ## Storage
 
 - Key: `ai-training-progress-v<N>`. Bump `N` when the meaning of a stored
-  field changes, not when content is added. The current version is 2.
+  field changes, not when content is added. The current version is 3.
 - Migration. Each bump comes with a step that brings a record from the
   version before it to the new one, and the steps run in a chain (1 to 2,
-  later 2 to 3) on load and on import. When nothing is stored under the
+  2 to 3) on load and on import. When nothing is stored under the
   current key, load reads the newest older key that has a migration,
   migrates the record and writes it under the current key. The old key is
   left in place for a manual export until a reset, which removes every
@@ -166,12 +168,17 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
   - `served` on a review `history` entry: the id (within its lesson) of the
     `review` alternate the review page asked in place of the item's own
     checkpoint. Absent means the item's own checkpoint was asked.
+- Version 2 to 3: the `habits` map ([S07](S07-habits.md) "Storage") joins
+  the record. The step copies the record and adds an empty map. A map of
+  its own with a bump, rather than a field added to version 2, because a
+  site from before the change would drop the learner's habit schedule on
+  load, and the bump keeps the old key in place for a manual export.
 - Dates are ISO calendar days in the learner's local time zone.
 - Shape:
 
 ```json
 {
-  "version": 2,
+  "version": 3,
   "comfort": "less",
   "goals": [{ "competency": "building-agents/builds-agent-loop", "level": "base" }],
   "lessons": {
@@ -195,6 +202,13 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
   "practice": {
     "using-agents/delegating#brief-for-a-colleague": { "state": "attempted", "attempts": 1 }
   },
+  "habits": {
+    "using-agents/delegating#name-the-outcome": {
+      "since": "2026-09-20",
+      "next": "2026-09-23",
+      "history": [{ "at": "2026-09-21", "result": "done" }]
+    }
+  },
   "quizzes": {
     "using-agents": { "score": 0.9, "at": "2026-09-21" }
   }
@@ -206,8 +220,8 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
 - Export downloads the whole record as one JSON file, including `version`.
 - Import replaces the record with the file's contents after a confirmation.
 - A file with an older `version` is migrated through the same chain as
-  Storage describes (version 1 files migrate to 2), and a file of any other
-  version is refused with a message naming the versions.
+  Storage describes (version 1 and 2 files migrate to 3), and a file of any
+  other version is refused with a message naming the versions.
 - Both live on one progress page, which is linked from the course page and the
   sidebar.
 

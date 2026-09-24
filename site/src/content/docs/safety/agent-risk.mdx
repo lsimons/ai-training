@@ -1,4 +1,4 @@
-import { Choice, Match, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Match, Scenario, Pitfall, Exercise, Recap, Habit, Prompt, Response } from '@components/lesson';
 
 A chat assistant that gets something wrong hands you a wrong paragraph. You
 read it, you frown, you delete it. The damage stops there. An agent that gets
@@ -328,3 +328,13 @@ mind.
 4. Put a human approval in front of steps that can't be undone or that reach other people. Let the agent read, search, draft, and propose freely.
 5. Everything an agent reads is text it may treat as an instruction. Prompt injection and exfiltration are why you need these habits even when you trust the agent.
 </Recap>
+
+<Habit id="name-the-blast-radius">
+The next time you hand an agent a task, say out loud what it can reach and
+change with the access it has before you press enter.
+</Habit>
+
+<Habit id="check-the-diff-first">
+The next time an agent proposes a change that reaches other people or can't
+be undone, read what it is about to do before you approve it.
+</Habit>
