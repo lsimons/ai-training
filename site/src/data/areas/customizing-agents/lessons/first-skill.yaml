@@ -1,11 +1,19 @@
 id: customizing-agents/first-skill
 title: Writing your first skill
+description: >-
+  Build a release skill for a small package step by step, in the open skill format: the description
+  that triggers it, the steps in order with exact commands, the check that says the result is right,
+  and what to do when a step fails.
 mode: tutorial
 covers: customizing-agents/skills
 serves: [customizing-agents/writes-skill/packages-a-procedure]
 introduces: [skill-spec, writing-a-good-skill]
 assumes:
   - objective: coding-with-agents/ships-with-agent/runs-a-session
+    lesson: coding-with-agents/first-session
+    section: start-the-agent-and-ask-it-to-explain
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 after: [customizing-agents/skill-or-tool-or-instruction]
 shorts:
   - The skill specification, field by field (Academy introduction-to-agent-skills)
@@ -13,7 +21,21 @@ exercise:
   kind: do
   brief: >-
     Write a skill that cuts a release of the fixture package, with the trigger in the description,
-    the commands in order and the check that says the result is right.
-sources: []
+    the commands in order and the check that says the result is right, and run it on a copy of the
+    package.
+sources:
+  - AEC-17
+  - Agent Skills spec
+  - Claude Code skills
+  - Academy introduction-to-agent-skills
 issue: 162
 minutes: 15
+notes: >-
+  The fixture package is `site/examples/customizing-agents/first-skill/fixture-package/`, a one-file
+  notes command with tests, a changelog and `release_check.py`, the check the skill ends with. The
+  finished skill is committed at `.claude/skills/release/SKILL.md` inside it, and `bad-skill/` next to
+  the package breaks three rules of the specification for the lint example. The field rules come from
+  agentskills.io/specification, and how Claude Code loads a skill (description at startup, body when
+  invoked, stays for the session) from code.claude.com/docs/en/skills. Both must be re-checked by
+  review-by. The Academy course is paraphrased for the idea that the description carries the
+  trigger. Running the skill from a fresh session is the next lesson, testing-a-skill.
