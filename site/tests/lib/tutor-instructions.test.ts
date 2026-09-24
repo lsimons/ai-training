@@ -17,7 +17,7 @@ describe('renderTutorInstructions', () => {
 				`version: ${BUNDLE_VERSION}`,
 				'built: 2026-09-24',
 				`bundle_url: ${ROOT}/data/lessons/{area}/{lesson}.json`,
-				`site: ${ROOT}/`,
+				`site: ${ROOT}`,
 				'',
 			].join('\n'),
 		);
@@ -33,6 +33,14 @@ describe('renderTutorInstructions', () => {
 
 	it('ships the bundle URL template from the URL scheme', () => {
 		expect(BUNDLE_URL_TEMPLATE).toBe('/data/lessons/{area}/{lesson}.json');
+	});
+});
+
+describe('the bootstrap SKILL.md', () => {
+	const skill = readFileSync(new URL('../../../.claude/skills/tutor/SKILL.md', import.meta.url), 'utf8');
+
+	it('understands the version the build publishes', () => {
+		expect(skill).toContain(`\`version: ${BUNDLE_VERSION}\``);
 	});
 });
 

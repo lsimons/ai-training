@@ -68,13 +68,14 @@ can open any lesson in a tutor session.
 
 The installed `SKILL.md` is the bootstrap. It contains, and only contains:
 
-| Part             | Content                                                                                                                                                                                                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Frontmatter      | `name: tutor` and a one-sentence `description`, as the skill format requires.                                                                                                                                                                     |
-| Instructions URL | The absolute URL of the published instruction file (below). The bootstrap fetches it first, before saying anything to the learner.                                                                                                                |
-| Version check    | The bootstrap declares the `version` it understands. If the fetched file's `version` is higher, the tutor tells the learner to reinstall the skill with the install command and then continues as far as the instructions still make sense to it. |
-| Lesson step      | Ask the learner for the lesson URL, or take it from what they pasted. Derive the bundle URL by the scheme below, fetch it, and follow the fetched instructions from there.                                                                        |
-| Offline message  | If either fetch fails, say so in one sentence, name the URL that failed, and offer to continue from the lesson page the learner has open, as a plain conversation without the verbs. Never invent lesson content when the fetch fails.            |
+| Part             | Content                                                                                                                                                                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Frontmatter      | `name: tutor` and a one-sentence `description`, as the skill format requires.                                                                                                                                                                                |
+| Instructions URL | The absolute URL of the published instruction file (below). The bootstrap fetches it first, before saying anything to the learner.                                                                                                                           |
+| Version check    | The bootstrap declares the `version` it understands. If the fetched file's `version` is higher, the tutor tells the learner to reinstall the skill with the install command and then continues as far as the instructions still make sense to it.            |
+| Lesson step      | Ask the learner for the lesson URL, or take it from what they pasted. Derive the bundle URL by the scheme below, fetch it, and follow the fetched instructions from there.                                                                                   |
+| Base             | Both fetches use the base of the pasted lesson URL (everything through `/ai-training/`), so a `localhost` URL from `mise run site-dev` or `site-preview` fetches the local instruction file and bundle. Without a pasted URL the base is the published site. |
+| Offline message  | If either fetch fails, say so in one sentence, name the URL that failed, and offer to continue from the lesson page the learner has open, as a plain conversation without the verbs. Never invent lesson content when the fetch fails.                       |
 
 The bootstrap has no ground rules, no verbs and no dialogues. Those are in
 the published instruction file, so a rule change reaches every installed
@@ -106,7 +107,7 @@ https://lsimons.github.io/ai-training/data/tutor.md
 | `version`           | Integer, starts at 1. Bumped when the bootstrap contract or the bundle format changes in a way an older bootstrap can't follow.                  |
 | `built`             | ISO date of the build that emitted the file.                                                                                                     |
 | `bundle_url`        | The bundle URL template, `https://lsimons.github.io/ai-training/data/lessons/{area}/{lesson}.json`, so the derivation rule ships with the rules. |
-| `site`              | The site's base URL, for citations.                                                                                                              |
+| `site`              | The site's base URL without a trailing slash, for citations (`{site}/glossary/`).                                                                |
 
 | Section (body)     | Holds                                                                                                                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -269,6 +270,6 @@ a checkpoint with the tutor doesn't mark it passed on the site.
 - An in-browser terminal or a coaching agent on the page. Decided against
   separately.
 - A tutor that writes progress back to the site.
-- Running the tutor against a local checkout. The published site is the
-  only source, and a maintainer previewing a change uses
-  `mise run site-preview` and points the bootstrap at `localhost` by hand.
+- Running the tutor against a local checkout's source files. The tutor
+  reads built output only, and a maintainer previewing a change uses
+  `mise run site-preview` and pastes the `localhost` lesson URL.
