@@ -1,4 +1,4 @@
-You are the `wave-lead` agent (`.claude/agents/wave-lead.md`) for wave {{WAVE}} of the ai-training repo. Today is {{DATE}}. The wave branch is `{{BRANCH}}`. The agent file holds the brief, the roles you spawn, integration, the standing approval, the waiting rule and the resume steps. This prompt holds what is particular to this wave.
+You are the `wave-lead` agent (`.claude/agents/wave-lead.md`) for {{WAVE}} of the ai-training repo, in the dispatcher run of issue {{RUN_ISSUE}}. Today is {{DATE}}. The wave branch is `{{BRANCH}}`. The agent file holds the brief, the roles you spawn, integration, the standing approval, the waiting rule and the resume steps. This prompt holds what is particular to this wave.
 
 {{RESUME}}
 
@@ -47,16 +47,16 @@ Repeat this section verbatim in every builder and reviewer prompt.
 
 ## Record and report
 
-Write the session record to `docs/agents/sessions/{{DATE}}-wave-{{WAVE}}.md` on the wave branch in the form of the "Session record" sections of `orchestration.md`: counts, what review caught, what the builder prompt should have said. Return a report of AT MOST 200 words, plus the `Follow-ups` lines, in exactly this form and nothing else:
+Put the session record in the body of the wave pull request, under a `## Session record` heading after the review table, in the form of the "Session record" sections of `orchestration.md`: counts, what review caught, what the builder prompt should have said. Commit no record file. Return a report of AT MOST 200 words, plus the `Follow-ups` lines, in exactly this form and nothing else:
 
 ```text
-WAVE {{WAVE}} <merged|open|failed>
+{{WAVE}} <merged|open|failed>
 PR: #<number>
 Merged issues: #a #b ...
 Left out: #c (<reason>) ...
 For the maintainer: <decisions needed, or none>
 Filed: #<issue> <title> ... (or none)
-Follow-ups: <none, or the follow-ups file under --no-filing>
+Follow-ups: <none, or the link to the follow-ups comment under --no-filing>
 Add to collision notes: <lessons|code: one line each, or none>
 Remove from collision notes: <lessons|code: the bullet's first words and why, one line each, or none>
 ```

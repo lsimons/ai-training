@@ -20,6 +20,7 @@ gh issue edit <number> --add-label ready-for-agent --remove-label needs-triage
 | content         | Adds, changes or improves content: lessons, courses, specs, docs         | #0e8a16 |
 | code            | Adds, changes or improves source code: the site's TypeScript, Python, CI | #1d76db |
 | harness         | Improves the agent harness: AGENTS.md, .claude, docs/agents, skills      | #5319e7 |
+| dispatcher-run  | One /wave dispatcher run: its arguments, waves and state                 | #fbca04 |
 | documentation   | Improvements or additions to documentation                               | #0075ca |
 | enhancement     | New feature or request                                                   | #a2eeef |
 | needs-triage    | Maintainer needs to evaluate this issue                                  | #e6e6fa |
@@ -38,7 +39,13 @@ code behind it (a fixture and its lesson page, a schema field and the spec
 row) gets both. `harness` is for changes to how agents work on this repo:
 `AGENTS.md`, `.claude/`, `docs/agents/` and the orchestration skills. No
 picker selects `harness` issues, so the maintainer starts that work by
-hand, when no dispatcher run is active.
+hand, when no `dispatcher-run` issue is open.
+
+`dispatcher-run` marks the one issue per `/wave` run, titled
+`Run: <Name> (<kind>)`. The dispatcher opens it, keeps its body current
+and closes it when the run stops (`docs/agents/meta-orchestration.md`).
+Such an issue is never triaged, picked or claimed, and it is the one kind
+of open issue without `content`, `code` or `harness`.
 
 ## Triage flow
 

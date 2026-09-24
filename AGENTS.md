@@ -307,9 +307,9 @@ patterns below after the fact. Write so that it has nothing to say.
   and triaged as `docs/agents/triage.md` describes. A cosmetic nit left
   open on a merged branch becomes a line in the one open `Cosmetic nits`
   issue. In a bounded unattended run (`/wave --no-filing`) the leads write
-  the same issues to a follow-ups file, and the dispatcher files them when
-  the run ends, after one check against `main`. Session records and
-  transcripts are never a place work waits.
+  the same issues in a comment on the run issue, and the dispatcher files
+  them when the run ends, after one check against `main`. Run issues,
+  session records and transcripts are never a place work waits.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`type(scope): description`), and commitlint enforces it.
 - A push to `main` deploys to GitHub Pages (`.github/workflows/deploy.yml`).

@@ -148,8 +148,9 @@ goes on the issue as a comment, because the pull request doesn't exist
 yet, with the same findings by severity and the same `Verdict:` line, and
 the revisions and re-checks follow it there.
 
-The coordinator keeps the integration branch, `wave/<n>-<slug>`, in a
-dedicated worktree created from `main`
+The coordinator keeps the integration branch, `wave/<n>-<slug>` (under
+`/wave`, `wave/<name>-<k>` after the run's name, see
+`meta-orchestration.md`), in a dedicated worktree created from `main`
 (`git worktree add ../ai-training-wt/wave/3-course-plans -b wave/3-course-plans origin/main`). When a
 branch is approved, it is rebased onto the wave branch rather than merged
 into it. The wave history then has no merge commits, and the later rebase
@@ -289,6 +290,10 @@ and never merge. Merging is the maintainer's call, relayed by the
 coordinator.
 
 ## Session record, 2026-09-20
+
+The session records below are the form a wave's record follows. A wave
+under `/wave` puts its record in the body of its wave pull request, and the
+files under `sessions/` hold the records of the runs before 2026-09-25.
 
 Twelve issues, twelve pull requests, thirteen merges including the front
 page update, eleven reviews, six pull requests sent back for a revision,

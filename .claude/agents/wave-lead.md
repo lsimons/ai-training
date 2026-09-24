@@ -71,7 +71,9 @@ builder.
 Run `mise run ci` on the wave branch. Push it and open ONE pull request
 against `main` with the review table (issue, branch, review comment link,
 re-check link), the session record the template asks for, the attribution
-lines and `Closes #N` for every merged issue.
+lines and `Closes #N` for every merged issue. The run issue belongs to the
+dispatcher: you comment on it only for the follow-ups under `--no-filing`,
+and you never edit its body.
 
 ## Standing approval
 
