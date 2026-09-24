@@ -26,7 +26,7 @@ minutes: 15
 notes: >-
   Introduces no concept: deepens prompt-injection and exfiltration from agent-risk. The page shows the
   output of the fixture site/examples/safety/tracing-a-planted-instruction/planted_line.py in text
-  fences, because safety is a foundations area and the page carries no Predict run. The test
-  tests/test_tracing_a_planted_instruction.py runs the fixture and asserts every printed line is on
-  the page, the pattern concepts/what-tokens-cost (#137) uses. The recipe site bramble-kitchen.example
+  fences, because safety is a foundations area and the page carries no Predict run. The fixture is
+  CI proof only, and how CI asserts a hidden fixture against a foundations page is decided in #237.
+  The recipe site bramble-kitchen.example
   is under the reserved .example domain, and the page holds no person names.
