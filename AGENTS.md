@@ -255,9 +255,9 @@ patterns below after the fact. Write so that it has nothing to say.
   tree. GitHub emails the last person who changed the cron line when a
   scheduled run fails, and there is no other notifier. In a public
   repository GitHub also disables a scheduled workflow after 60 days
-  without repository activity and emails about that too. That email is
-  the cue to re-enable the workflow under Actions, and a quiet quarter
-  isn't a sign that the scan is passing. Every advisory the scanner
+  without repository activity. A Monday with no run under Actions is the
+  cue to re-enable it there, and a quiet quarter isn't a sign that the
+  scan is passing. Every advisory the scanner
   reports counts. The repository has no `osv-scanner.toml`, and an
   `IgnoredVulns` or `ignoreUntil` entry never goes in. An advisory
   without a fix keeps the scan red until a fix ships or the dependency
