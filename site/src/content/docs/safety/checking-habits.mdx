@@ -27,7 +27,7 @@ author's.
 
 The table reads well. The columns line up, the totals are in the right
 place, and every number is one your colleague could have typed. One row
-doesn't add up. Before reading on, add one row yourself and decide which.
+doesn't add up. Before reading on, add up the rows yourself and decide which.
 
 <Choice id="which-row-fails" objective="safety/verifies-output/checks-claims"
   concepts={['checking-habits']}
@@ -52,7 +52,7 @@ ok        Support     written   258  recomputed   258
 MISMATCH  Marketing   written   466  recomputed   446
 ok        Operations  written   207  recomputed   207
 MISMATCH  Grand total written  1264  recomputed  1244
-1 of 4 rows do not add up: Marketing
+rows that do not add up: 1 of 4 (Marketing)
 ```
 
 Marketing closed 446 tickets, and the table says 466. The grand total is
@@ -89,24 +89,27 @@ on a page of output.
    the others probably hold too. If it fails, none of them can go out
    unchecked.
 
-They're one routine because they always run together and in this
-order on everything that leaves your desk. You don't decide each time
-whether to run them. Anthropic's AI Fluency course calls the skill of
+They're one routine because they run together and in this order on
+everything that leaves your desk. Output that stays with you, a
+brainstorm or a note to yourself, may skip them, and the next section
+says how to tell. For output that goes to someone else, you don't decide
+each time whether to run them. Anthropic's AI Fluency course calls the skill of
 judging what a model gave you discernment, and puts it next to the skill of
 asking well, because the two are used together on every exchange
 (@Academy ai-fluency-framework-foundations). The routine here is
 discernment made small enough to run when you have ten minutes.
 
 <Pitfall title="The check that gets skipped">
-The colleague with ten minutes before the meeting ran the first two
-checks. The table answered the request, and every number in it was one
-from the reports, or looked like one. The fourth check, redo one
-calculation, felt like the one that could wait, because adding up a row
-takes longer than reading it. It is the check that finds the error. It is also the one a busy person
-skips, and errors get through in the same busy moments. The rule: the
-check you are about to skip is the one you run. A routine that has a step
-you drop under time pressure is a routine that only works when you don't
-need it.
+The colleague with ten minutes before the meeting ran the first check and
+the second. The table answered the request, and every number in it was
+one from the reports. The third check had nothing to open, because the
+table has no links. The fourth check, redo one calculation, felt like the
+one that could wait, because adding up a row takes longer than reading it.
+It is the check that finds the error. A busy person skips it, and errors
+get through in those busy moments. When you notice
+that you are about to skip a check, that is the check you run. A routine
+that has a step you drop under time pressure is a routine that only works
+when you don't need it.
 </Pitfall>
 
 ## Depth scales with stakes
@@ -128,9 +131,9 @@ notes. A briefing with three cited reports for your manager gets every
 link opened and every number redone, because your manager acts on it and
 does not open the reports. A price table on the public web page gets every
 value read by a second person, because it cannot be recalled once a
-customer has seen it, and the customer checks nothing. The four outputs
-have the same fluency. The depth of the check comes from the cost of the
-mistake.
+customer has seen it, and the customer checks nothing. The list, the
+notes, the briefing and the price table read as fluently as each other.
+The depth of the check comes from the cost of the mistake.
 
 One more case sets the depth to the maximum whatever the size of the task.
 A domain you cannot judge is high risk even when the output is one
@@ -159,9 +162,10 @@ Match each output to the depth of checking it gets before it leaves your
 desk.
 </Match>
 
-Harvard's CS50 course runs a discussion forum where staff mark an answer
-they have reviewed as endorsed, so a student can tell a checked answer from
-a raw one (@CS50x). The idea transfers to your desk. What the assistant wrote and what you have
+Harvard's CS50 course gives its students an AI helper that answers
+questions on the course forum, and course staff read those answers and
+endorse the ones they have checked, so a student can tell a checked answer
+from a raw one (@CS50x). The idea transfers to your desk. What the assistant wrote and what you have
 checked are two different things, and the depth of checking is what turns
 one into the other. A later lesson in this course is about making that
 difference visible to the next reader.
@@ -197,7 +201,7 @@ found?
 </Exercise>
 
 <Recap>
-1. Four checks run on everything a model writes before it leaves your desk. Read the output against the request. Look for claims you did not supply. Open one link. Redo one calculation.
+1. Before a model's output leaves your desk, read it against the request and look for claims you did not supply. Then open one link and redo one calculation.
 2. A total is a specific like any other, and its source is the arithmetic. One wrong row total in a table can put two wrong numbers on a slide, and the table looks the same either way.
 3. The check you are about to skip is the one you run. Errors get through at the moment a routine loses a step, which is when you are busy.
 4. The routine is the same every time, and its depth comes from the cost of being wrong: whether the output can be undone, and whether its readers check it themselves (@Academy ai-fluency-framework-foundations).
