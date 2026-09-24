@@ -233,6 +233,14 @@ describe('foundations audience', () => {
 			'{}', // 21
 			'~~~', // 22
 			'Then `git clone` it, or Git Clone it. A terminal-like pane is fine, a Terminal is not.', // 23
+			'', // 24
+			'```text', // 25: a Predict quoted inside a text fence is shown, not run
+			'<Predict run="hidden/in-fence.py" answer="x">', // 26
+			'```', // 27
+			'', // 28
+			'{/* <Predict run="hidden/in-comment.py" answer="x"> is a note to the author */}', // 29
+			'', // 30
+			'<Predict run="c/d.py" answer="2" />', // 31: after the skipped ones, the line still maps
 		].join('\n');
 		expect(foundationsSurfaces(src)).toEqual([
 			{ line: 1, surface: 'the word "terminal"' },
@@ -240,6 +248,7 @@ describe('foundations audience', () => {
 			{ line: 12, surface: '<Predict run="a/b.py">' },
 			{ line: 20, surface: '```json fence' },
 			{ line: 23, surface: 'the word "Git Clone"' },
+			{ line: 31, surface: '<Predict run="c/d.py">' },
 		]);
 		expect(foundationsSurfaces('A JSON reply in a `json` span, a Python fan, and a bus terminal.\n')).toEqual([
 			{ line: 1, surface: 'the word "terminal"' },
@@ -248,6 +257,12 @@ describe('foundations audience', () => {
 			{ line: 1, surface: '```python fence' },
 			{ line: 4, surface: '```bash fence' },
 			{ line: 7, surface: '```shell fence' },
+		]);
+		// Aliases of the listed languages count as the language, and an unlisted one passes.
+		expect(foundationsSurfaces('```py\n1\n```\n```zsh\nls\n```\n```console\n$ ls\n```\n```yaml\na: 1\n```\n')).toEqual([
+			{ line: 1, surface: '```py fence' },
+			{ line: 4, surface: '```zsh fence' },
+			{ line: 7, surface: '```console fence' },
 		]);
 	});
 	it('fails a foundations lesson page that shows one, and passes the same page in another group', () => {
