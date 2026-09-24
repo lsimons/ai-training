@@ -244,20 +244,24 @@ patterns below after the fact. Write so that it has nothing to say.
   the same ruff version.
 - `mise run site-audit` (`bun audit`) must be clean. Fix an advisory in a
   *transitive* package with the `overrides` block in `site/package.json`.
-- `mise run vuln` (osv-scanner) must be clean. CI runs it as the `vuln`
-  job on every push and pull request, and `.github/workflows/vuln.yml`
-  runs it on `main` every Monday (cron `17 6 * * 1`, and on
-  `workflow_dispatch`), because GitHub's dependency graph reads
-  `package.json` and not `site/bun.lock`, so dependabot alerts see only a
-  small part of the npm tree. GitHub emails the last person who changed
-  the cron line when a scheduled run fails, and there is no other
-  notifier. Every advisory the scanner reports counts. The repository
-  has no `osv-scanner.toml`, and an `IgnoredVulns` or `ignoreUntil`
-  entry never goes in. An advisory without a fix keeps the scan red until
-  a fix ships or the dependency is replaced. It scans
-  `uv.lock` and `site/bun.lock` by name and fails when either is missing
-  or does not parse. A new lockfile goes in the list of the task in
-  `.mise.toml`. Fix a Python advisory by editing the `==` pin in
+- `mise run vuln` (osv-scanner) must be clean. The task scans `uv.lock`
+  and `site/bun.lock` by name and fails when either is missing or does
+  not parse. A new lockfile goes in the list of the task in `.mise.toml`.
+  CI runs the task as the `vuln` job on every push and pull request.
+  `.github/workflows/vuln.yml` also runs it on `main` every Monday (cron
+  `17 6 * * 1`, and on `workflow_dispatch`). The weekly run is needed
+  because GitHub's dependency graph reads `package.json` and not
+  `site/bun.lock`, so dependabot alerts see only a small part of the npm
+  tree. GitHub emails the last person who changed the cron line when a
+  scheduled run fails, and there is no other notifier. In a public
+  repository GitHub also disables a scheduled workflow after 60 days
+  without repository activity and emails about that too. That email is
+  the cue to re-enable the workflow under Actions, and a quiet quarter
+  isn't a sign that the scan is passing. Every advisory the scanner
+  reports counts. The repository has no `osv-scanner.toml`, and an
+  `IgnoredVulns` or `ignoreUntil` entry never goes in. An advisory
+  without a fix keeps the scan red until a fix ships or the dependency
+  is replaced. Fix a Python advisory by editing the `==` pin in
   the `dev` group of `pyproject.toml` and running `mise run py-install`
   (and moving the `ruff-pre-commit` rev in `prek.toml` when it is ruff, see
   the `uv.lock` bullet above). For a transitive package, add a
