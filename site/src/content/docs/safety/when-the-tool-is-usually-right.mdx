@@ -1,0 +1,241 @@
+import { Choice, MultiChoice, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we look at what happens to a person's attention when a
+tool has been right for a long time, and why the rare wrong answer then
+passes. The earlier lessons in this part showed an invented fact and a
+slant across many answers. This one is about the reader, because a failure
+the reader has stopped looking for is one nobody catches. By the end you
+can name the effect and set up a check that still works on a Friday
+afternoon in month six, when willpower has run out.
+
+Consider a team that uses a chat assistant to draft the covering note for
+every invoice it sends. The team is invented for this lesson. In the first
+week everyone reads each note before it goes out and fixes a wrong date or
+a misread total. In the first month they find two mistakes in about two
+hundred notes. By the second month nobody reads the notes any more. The
+assistant is good at this, the notes all look the same, and reading them
+feels like a waste of a skilled person's time. In the fifth month a
+customer replies to ask why the note offers a discount for early payment
+that the invoice does not mention. The assistant had picked the sentence
+up from an earlier customer's terms, and it had been in every note to
+that customer for three weeks. Nobody on the team was careless. The
+process had lost its check, and the tool being good is what removed it.
+
+## Trust that spreads
+
+**Overreliance** is trusting a tool's output beyond what you have checked
+or could check (@Academy ai-capabilities-and-limitations). It starts in a
+place that looks safe. You know the task well. The first fifty outputs
+were right when you read them closely, so you stop reading closely. The
+trust is built on that task. Then the same tool is used on a task next to
+it, where you know less, and the trust carries over without anyone
+deciding that it should. On the first task you could tell a good answer
+from a plausible one at a glance. On the second you can't, and a model
+produces plausible text whether or not it is right, because fluent text is
+what it is built to produce. The spread is the problem. Trust that was
+calibrated on tasks you could judge ends up covering tasks you can't.
+
+The invoicing team shows the pattern in one setting. The notes were a task
+the team knew. The customer's payment terms were a fact stored in a
+different document, and no one on the team was reading the notes against
+it, so the tool's mistake about the terms looked like every other correct
+note. The check that would have caught it was a comparison, and a comparison
+is exactly the kind of reading people stop doing once the output looks
+right every time.
+
+## A known effect with a name
+
+Researchers who study people working with automated systems have a name
+for the second half of this story. **Automation complacency** is the
+habit of waving a tool's output through because it has been right many
+times before. Parasuraman and Manzey reviewed decades of studies on
+pilots, operators and clinicians and describe complacency and automation
+bias as effects of how attention is spent. When a person has other
+tasks to attend to and one of them is a reliable machine, attention goes
+to the others, and the machine's rare failure arrives when nobody is
+watching it (@Parasuraman 2010). The reliability is the cause. A tool
+that is wrong one time in three keeps people reading. A tool that is wrong
+one time in three hundred trains them to stop.
+
+Aviation is where the effect was first studied in depth, and the accident
+reports name it. In 2013 an airliner on approach to San Francisco struck
+the seawall short of the runway. The National Transportation Safety Board
+found that the crew had not noticed that the autothrottle was no longer
+controlling the airspeed, and it listed the crew's reliance on that
+automation and the complexity of the autothrottle and autopilot systems
+among the contributing factors (@NTSB Asiana 214). The crew were trained
+professionals in a cockpit built for monitoring. Experience with the
+system did not protect them from the mode it was in.
+
+Medicine has the same finding for decision support software, the systems
+that suggest a diagnosis or flag a drug interaction. Goddard, Roudsari and
+Wyatt reviewed the studies that gave clinicians deliberately wrong advice
+and found that clinicians followed a wrong suggestion more often than a
+control group that worked without the system. In the studies they reviewed, the
+share of clinicians who changed a correct decision to a wrong one on the
+system's advice was between 6 and 11 percent. The effect was larger under
+time pressure and in people less sure of their own answer, and smaller in
+the experienced (@Goddard 2012). The people in these studies were not
+lazy. They were making a normal trade of attention against a tool with a
+good record.
+
+<Pitfall title="I need to concentrate harder">
+A team lead reads the story of the invoicing team and resolves that from
+now on she will read every note the assistant produces with full
+attention. For two weeks she does, and finds nothing, and in the third
+week a long day pushes the notes to the end of the queue and she signs
+them off in a batch. The resolve was sincere, and it was aimed at the
+wrong place. Attention to a source of rare errors decays in everyone, and
+the decay is faster when the person is busy and the tool is good
+(@Parasuraman 2010). Rule: treat complacency as a property of the setup
+you are in, and change the setup. A person who has decided to be more
+careful has changed nothing that will still be true in month six.
+</Pitfall>
+
+## Build the check in
+
+If attention cannot be relied on, the check has to live somewhere else.
+The counters that hold up are all process. They work when the person
+running them is tired, and they work for the new colleague who never saw
+the tool make a mistake. Four of them cover most settings.
+
+- **A designed check.** Decide, before the tool is trusted for a task,
+  what a wrong output would cost and who would see it, and write down
+  what gets checked and against what. For the invoicing team that would
+  have been "the note is compared against the invoice and the customer's
+  terms". A check that has a name and a place in the process is still done in a
+  busy week. A check that exists only in someone's intention is skipped.
+- **Sampling.** Reading everything is not sustainable, and it is not
+  what a check needs. Pick a fixed share of outputs, or every output above
+  a stake threshold, and read those with the source open. The share can be
+  small when the stakes are low. It is fixed in advance rather than left
+  to whoever has time.
+- **Rotating who reviews.** One reviewer's attention decays on the
+  same curve as everyone else's. When the review moves between people, the
+  fresh eyes arrive on a schedule, and a mistake that has been there for
+  three weeks looks new to someone. The medical review found that making
+  people accountable for the decision, and giving them the reasons behind
+  a suggestion rather than a bare answer, reduced how often they followed
+  wrong advice (@Goddard 2012). Both are process changes, and neither asks
+  anyone to try harder.
+- **Keeping your own skill.** Bainbridge pointed out in 1983 that an
+  operator who only watches a machine loses the skill to do the task, and
+  is then asked to take over exactly when the machine fails
+  (@Bainbridge 1983). A person who hasn't drafted a covering note or
+  checked a figure for a year is in the same position. Do part of the task by hand
+  now and then, so that you can still tell a wrong output when you see
+  one.
+
+Match the depth of these to the stakes, as the earlier lessons in this
+part did for an invented fact and for bias. An internal brainstorm list
+needs none of them. An output that goes to a customer or can't be taken
+back gets a designed check and a named reviewer, and so does an output in
+a domain you can't judge. The tool's good record is the reason the check
+has to be designed, because that record is what removes the reading.
+
+<Scenario id="the-quiet-quarter" objective="safety/verifies-output/calibrates-trust"
+  concepts={['overreliance', 'automation-complacency']}
+  context="A support team has used a chat assistant to draft replies to customer questions for three months. Nobody has found a mistake in the drafts since the first two weeks, and the replies go out under the team's name. The learner decides what checking the task gets from here."
+  title="Three months without a mistake"
+  hint="Where does the customer's reply go if the draft is wrong, and what does three months without a found mistake tell you about how closely people were looking?"
+  options={[
+    { text: 'Keep reading every draft, and remind the team at the next meeting that the drafts still need a careful read.', consequence: 'The reminder works for a fortnight. The drafts look the same as they did, and attention to them decays again, because nothing about the setup has changed.' },
+    { text: 'Stop checking. Three months without a mistake is enough evidence that the tool is reliable for this task.', consequence: 'Three months is evidence that nobody found a mistake, and the team stopped looking after two weeks. The next wrong reply goes to a customer under your name, and the customer is who finds it.' },
+    { text: 'Set a fixed sample, say one draft in ten plus every reply about money or a cancellation, read those with the ticket open, and rotate the reviewer each week.', correct: true, consequence: 'The check has a size and an owner and does not depend on anyone remembering. A wrong draft about a refund is caught before it leaves, and the rotating reviewer sees the drafts fresh.' },
+    { text: 'Ask the assistant to add a line at the end of each draft saying whether it is confident, and read only the drafts it marks as uncertain.', consequence: 'The model writes the confidence line in the same fluent voice as the rest, and the drafts that were wrong in month five read as confident as the ones that were right. The check now depends on the tool judging itself.' },
+  ]}>
+
+A support team has used a chat assistant to draft replies for three
+months. Nobody has found a mistake in the drafts since the first two
+weeks, and the replies go out under the team's name. What checking does
+the task get from here?
+
+</Scenario>
+
+<Choice id="process-or-willpower" objective="safety/verifies-output/calibrates-trust"
+  concepts={['automation-complacency']}
+  context="The lesson argues that counters to automation complacency have to be built into the process, because attention to a reliable tool decays in everyone. The learner sorts a list of counters a team proposed into the one that changes the setup and the ones that ask a person to try harder."
+  title="Which counter is process?"
+  hint="Which of these is still in place on a busy afternoon in month six, when nobody is thinking about it?"
+  options={[
+    { text: 'Everyone on the team commits to reading the drafts with the same care they gave them in the first week.', why: 'A commitment is a decision about attention, and attention to a tool with a good record decays whatever the person decided.' },
+    { text: 'The team lead puts a note above her desk that says "the tool can be wrong".', why: 'The note is read closely for a week and becomes part of the wall. It changes nothing about which drafts get compared against a source.' },
+    { text: 'Every draft that mentions a price or a date is compared against the invoice by whoever is on review duty that week.', correct: true },
+    { text: 'New team members are told the story of the discount sentence on their first day, so that they know the tool has failed before.', why: 'The story raises attention in the person who hears it, for a while. It does not name which drafts get checked, or by whom, or against what.' },
+  ]}>
+
+A team proposes four ways to stop waving the assistant's drafts through.
+Which one is a change to the process rather than a request for more
+willpower?
+
+</Choice>
+
+<MultiChoice id="what-decays-attention" phase="review" objective="safety/verifies-output/calibrates-trust"
+  concepts={['automation-complacency', 'overreliance']}
+  context="The lesson describes automation complacency as an effect of how attention is spent when a person works alongside a reliable tool, drawing on studies of pilots and clinicians. The learner picks the conditions under which the effect is stronger."
+  title="When is the effect stronger?"
+  hint="Think about what the tool's record and the person's workload each do to where attention goes."
+  options={[
+    { text: 'The tool has been right for a long time.', correct: true },
+    { text: 'The tool is wrong about one output in three.', why: 'A tool that fails often keeps people reading its output. Frequent failure is what the effect is not about.' },
+    { text: 'The person has several other things to attend to at the same time.', correct: true },
+    { text: 'The person has been told that the tool can make mistakes.', why: 'Knowing that a tool can fail raises attention for a while, and the studies found the effect in people who knew the systems well.' },
+  ]}>
+
+Under which of these conditions is a person more likely to wave a tool's
+wrong output through?
+
+</MultiChoice>
+
+<Choice id="where-the-check-lives" phase="review" objective="safety/verifies-output/calibrates-trust"
+  concepts={['automation-complacency']}
+  context="The lesson argues that the check on a usually-right tool's output has to be built into the process, sized to what a wrong output would cost, rather than left to each person's attention."
+  title="Where does the check live?"
+  hint="What is the one thing about a check that makes it still happen when the tool has been right for six months?"
+  options={[
+    { text: 'In the tool, which is asked to flag the outputs it is unsure about.', why: 'The tool writes its flags in the same fluent text as its answers, and its wrong outputs are the ones it did not know were wrong.' },
+    { text: 'In the process, as a fixed sample or a rule about which outputs are compared against a source, with a named reviewer.', correct: true },
+    { text: 'In each person, who is trusted to know when an output needs a closer read.', why: 'A person who has seen the tool be right for months reads its output as right. That is the effect the lesson is about.' },
+    { text: 'In the first month, when the tool is new and everyone reads its output closely anyway.', why: 'The first month is when the check is least needed and most likely to happen. The wrong output that matters arrives later.' },
+  ]}>
+
+A team wants its check on a usually-right tool to still be working in six
+months. Where does the check have to live?
+
+</Choice>
+
+<Exercise stretch="Do the same for a task a colleague has stopped checking, and compare the two answers on who would find the mistake. If the answer is 'the customer' for either, that is the first check to design.">
+
+Pick one task at your work where you or your team once read a tool's
+output closely and no longer do. Write down what the last unchecked
+mistake would have cost and who would have been the first to find it.
+Then write down what a designed check for it would compare against what.
+Ten minutes is enough. The exercise shows that the tasks you have stopped
+checking are the ones where the tool has your trust, and that this is the
+condition under which a mistake passes.
+
+A good result names a specific cost (a refund, a wrong figure in a report
+that went to a client, an hour of a colleague's time), a specific finder,
+and a check with a size and an owner. If the finder you wrote down is
+outside your team, does the depth of your check match that?
+
+</Exercise>
+
+<Recap>
+
+1. Overreliance is trusting a tool's output beyond what you have checked
+   or could check. It starts on tasks you know well and spreads to tasks
+   where a good answer and a plausible one look the same
+   (@Academy ai-capabilities-and-limitations).
+2. Automation complacency is the habit of waving a usually-right tool's
+   output through. It is an effect of how attention is spent, found in
+   trained pilots and clinicians, and it is stronger when the tool is
+   reliable and the person is busy (@Parasuraman 2010) (@Goddard 2012).
+3. Willpower is the wrong counter, because attention decays in everyone.
+   The counters that hold are process: a designed check, a fixed sample,
+   a rotating reviewer, and doing part of the task by hand so that you can
+   still see a wrong output (@Bainbridge 1983).
+4. Attention decays fastest when the tool is good, so the check has to be
+   built in before the tool has the record that would remove it.
+
+</Recap>
