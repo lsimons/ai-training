@@ -36,6 +36,22 @@ wave lead's final text reaches the dispatcher. (Tested 2026-09-23 with a
 lead that ran two sub-agents and a follow-up message: three results, no
 duplicate or missing notifications.)
 
+A lead waits by ending its turn. When a subagent ends its turn while its
+own children run, nothing reaches its parent. Each child's notification
+wakes it, and its parent hears from it only when it stops with no child
+left running. (Tested 2026-09-24 with a lead that spawned two children
+running `sleep 90` and ended its turn at once: the children woke it about
+90 seconds later, and the dispatcher got one notification, the final
+report, after both had finished.) So the lead ends its turn while
+builders and reviewers run, and waits in the foreground only for a check
+it started itself (`mise run ci`, `gh pr checks --watch`,
+`gh run watch`), and it never ends its turn while one of those runs.
+Sleeping and polling cost the most: waves 9 to 13 spent 61 to 81% of the
+leads' wall time in `sleep`, and a sleeping lead started each reviewer 2
+to 6 minutes late. Verdicts come back in the reviewer's hand-back, and nobody polls a
+pull request for review comments. The Bash guard hook rejects a `sleep`
+over 60 seconds and a shell loop that calls `gh`.
+
 The concurrent-agent cap (20 on this platform) is shared by every level, so
 the dispatcher runs one wave at a time. With six issues in a wave, the lead
 runs six builders plus up to six reviewers, under the cap with room for the

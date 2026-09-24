@@ -117,8 +117,13 @@ rejected.
    push it as `docs(agents): meta record wave <n> in flight`, following
    the commit steps above. Then spawn one `general-purpose` agent with the
    filled text as its whole prompt. Wait for its notification and do
-   nothing else in the meantime. Never spawn a second lead for any reason
-   while one runs.
+   nothing else in the meantime: end your turn, and the notification
+   wakes you. Never spawn a second lead for any reason while one runs.
+   If a fallback `ScheduleWakeup` is armed for this wave, re-arm it when
+   the report arrives (for the next wave's lead, or with `stop: true`
+   when the run ends), because a scheduled call replaces the pending one.
+   A scheduled wake-up that arrives after the wave's report is stale, so
+   say nothing about it and carry on.
 7. **Read the report and commit the record.** The report is at most 200
    words plus the `Follow-ups` lines, in the form the template ends with.
    Whatever the status, do this first:
