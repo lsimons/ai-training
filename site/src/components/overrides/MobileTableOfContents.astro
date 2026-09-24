@@ -1,0 +1,55 @@
+---
+/**
+ * Starlight `MobileTableOfContents` override. Below the `lg` breakpoint
+ * Starlight shows the "On this page" menu as a dropdown, from its own
+ * component rather than `TableOfContents`, so the "Checkpoints" and
+ * "Examples" groups of `overrides/TableOfContents.astro` were missing there
+ * (issue #287). This renders Starlight's dropdown as is, then the same
+ * groups (`lib/lesson-toc.ts`) in a hidden element next to it, and the
+ * client script (`scripts/mobile-toc.ts`) moves them into the dropdown
+ * panel and closes the dropdown when a group entry is clicked. Starlight's
+ * dropdown has no slot inside its `<details>`, so the move is the way in
+ * that keeps its markup, styles and current-heading script untouched.
+ *
+ * The markup of a group is the pattern of `TableOfContents.astro`, with the
+ * `lesson-toc-mobile` class so `styles/lesson.css` can style the entries
+ * like Starlight's mobile headings list. A page that is not a lesson, or a
+ * lesson without checkpoints and examples, renders the default alone.
+ */
+import Default from '@astrojs/starlight/components/MobileTableOfContents.astro';
+import { lessonEntryOf } from '@lib/lesson-context';
+import { isLessonEntry, lessonTocGroups } from '@lib/lesson-toc';
+
+const entry = lessonEntryOf(Astro);
+const groups = isLessonEntry(entry) ? lessonTocGroups(entry) : [];
+---
+
+<Default>
+	<slot />
+</Default>
+{
+	groups.length > 0 && (
+		<div class="lesson-toc-mobile" data-lesson-toc-mobile hidden>
+			{groups.map((group) => (
+				<nav aria-labelledby={`lesson-toc-mobile-${group.slug}`}>
+					<h2 id={`lesson-toc-mobile-${group.slug}`}>{group.label}</h2>
+					<ul>
+						{group.entries.map((item) => (
+							<li>
+								<a href={`#${item.id}`}>
+									<span>{item.title}</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				</nav>
+			))}
+		</div>
+	)
+}
+
+<script>
+	import { mountMobileTocGroups } from '@scripts/mobile-toc';
+
+	mountMobileTocGroups(document);
+</script>
