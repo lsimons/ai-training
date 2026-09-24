@@ -5,8 +5,12 @@ the tutor gets the lesson: a thin installed skill that fetches its
 instructions and a per-lesson bundle from the published site, with the
 GitHub Pages deploy as the publish step.
 
-**Status:** Accepted - design decided 2026-09-20, no code yet. The current
-`.claude/skills/tutor/SKILL.md` is the local-repo tutor this spec replaces.
+**Status:** In progress - bundles implemented 2026-09-24 (#68):
+`site/src/lib/lesson-bundles.ts` builds them and
+`site/src/pages/data/lessons/[...id].json.ts` writes them. The instruction
+file, the page block and the getting-started page are not built yet. The
+current `.claude/skills/tutor/SKILL.md` is the local-repo tutor this spec
+replaces.
 
 ## Introduction
 
@@ -167,7 +171,11 @@ from the learner.
   `lesson`, so the two never disagree.
 - The build fails when a live lesson has no bundle, and `mise run site-build`
   is the check. A small test asserts that every bundle parses and that its
-  `id` matches its path.
+  `id` matches its path. The route's `getStaticPaths` lists every lesson
+  page, so a lesson without a bundle is a page the build could not read,
+  and the build fails on that page first.
+- The route reads Astro's `site` for the origin. The build fails when it is
+  unset, because the bundle's URLs are absolute.
 - The bundle build rewrites every root-relative link in `prose` to an
   absolute URL from Astro's `site` plus `base`, so a link in the prose is
   one the tutor can quote. The rehype plugin that does this for pages runs
