@@ -3,10 +3,11 @@ import { Choice, MultiChoice, Sort, Pitfall, Exercise, Recap } from '@components
 In the last lesson you learned to tell an assistant from an agent by
 asking what it can do without another prompt, and you saw that the
 harness holds a permission check between a tool request and the tool.
-This lesson puts that check on a scale. Agents with the same tools can be far apart on it, and one agent can
-move along it with a change of settings. By the end you can place any product or workflow on the
-scale by asking one question, and you can say what would move it one
-step up or down.
+This lesson puts that check on a scale. Agents with the same tools can
+be far apart on it, and one agent can move along it with a change of
+settings. By the end you can place any product or workflow on the scale
+by asking one question, and you can say what would move it one step up
+or down.
 
 ## Three points on one scale
 
@@ -19,8 +20,9 @@ are enough for most conversations.
   change that waits for you to accept it, sits here.
 - **Acts, and asks before anything hard to undo.** The system takes the
   ordinary steps on its own and stops for approval at the steps that
-  can't be taken back. An agent that edits files in a folder by itself
-  and asks before it deletes one sits here.
+  can't be taken back. An agent that changes files in a folder by itself
+  and asks before it runs a command that reaches outside the folder sits
+  here.
 - **Runs unattended.** The system finishes the whole task, and a person
   looks at the result afterwards, if at all. A job that runs
   overnight and posts its result to a channel sits here.
@@ -56,8 +58,8 @@ steps, and you have the workflow's place on the scale.
   items={[
     { text: 'Autocomplete in an editor writes a whole function, and the programmer presses a key to accept it', bucket: 0 },
     { text: 'A mail assistant drafts a reply and waits for you to press send', bucket: 0 },
-    { text: 'A coding agent edits files on its own and stops to ask before it runs a command that deletes anything', bucket: 1 },
-    { text: 'A travel agent app books the flights it finds, and asks you before it pays', bucket: 1 },
+    { text: 'A coding agent changes files in the project folder on its own and stops to ask before it sends anything to a shared server', bucket: 1 },
+    { text: 'A travel agent app fills in the booking for the flights it finds, and asks you before it pays', bucket: 1 },
     { text: 'A nightly job reads the support inbox, files each ticket under a category and closes the duplicates', bucket: 2 },
     { text: 'A research agent searches, reads and writes a report while you sleep, and you read it in the morning', bucket: 2 },
   ]} />
@@ -83,26 +85,28 @@ programmer's editor. Its vendor documents a set of permission modes, and
 the mode decides which actions the agent takes without asking
 (@Claude Code permission modes). Described in plain words:
 
-- In its manual mode, the agent may read files, and it stops and asks
-  before it edits a file, runs a command or reaches the network. Every
-  change waits for a yes. This is the low end of the scale.
-- In its accept-edits mode, the agent edits files inside the project
-  folder by itself and still asks before other commands. It acts, and it
-  asks before the steps that reach further than a file edit. This is the
-  middle.
-- In its skip-all-checks mode, the agent runs without permission prompts.
+- In its manual mode, the agent reads files and runs a few read-only
+  commands on its own, and asks before every edit, every other command
+  and anything that reaches the network. Every change waits for a yes.
+  This is the low end of the scale.
+- In its accept-edits mode, the agent edits, moves, copies and removes
+  files inside the project folder by itself, and asks before any other
+  command. It acts inside the folder, and it asks before the steps that
+  reach past it. This is the middle.
+- In its skip-all-checks mode, the agent runs nearly everything without
+  a prompt.
   The vendor's page says to use this mode only inside an isolated
   container or virtual machine, a place where a mistake can't reach the
   rest of the computer. This is the high end.
 
-Same agent, same model, same tools, three places on the scale. What
-changed is one setting in the harness, so a product on its own can't be
-placed. A product page that says "agent" describes a range, and
+The agent, the model and the tools are the same in all three, and the
+agent is at three places on the scale. One setting in the harness made
+the difference, so a product on its own can't be placed. A product page that says "agent" describes a range, and
 the place on the scale is fixed only once someone picks the setting for
 a task (@Claude Code permission modes).
 
-Two questions decide which setting fits a task. How costly is a
-mistake, and how easily can it be undone? Edits in a folder under
+Which setting fits a task depends on how costly a mistake is and how
+easily it can be undone. Edits in a folder under
 version control are cheap to undo, so a person can let
 the agent make them and read the result afterwards. A command that
 deletes files, sends a message or spends money is costly or impossible
@@ -112,7 +116,7 @@ or "hard", pick a setting that asks before that step.
 
 <Choice id="pick-the-setting" objective="concepts/recognizes-agents/places-on-autonomy-scale"
   concepts={['degree-of-autonomy', 'harness']}
-  context="A coding agent has three permission settings: manual (asks before every edit and command), accept-edits (edits files in the project folder by itself and asks before other commands) and skip-all-checks (no prompts, for use inside an isolated container only). The right setting depends on how costly a mistake is and how easily it can be undone."
+  context="A coding agent has three permission settings: manual (asks before every edit and command), accept-edits (edits, moves, copies and removes files in the project folder by itself and asks before any other command) and skip-all-checks (nearly no prompts, for use inside an isolated container only). The right setting depends on how costly a mistake is and how easily it can be undone."
   title="Which setting for this task?" hint="Which steps of this task are cheap to undo, and which one isn't?"
   options={[
     { text: 'Manual, so that she approves each of the many small edits by hand.', why: 'The edits are tracked by version control and cheap to undo. Approving each of them one by one costs her time and buys her nothing that reading the result afterwards would not.' },
@@ -191,13 +195,13 @@ to be duplicates. Which change moves it one step down the scale?
 A team lead installs a coding agent for her team and tells everyone it
 asks before it changes anything, because that is what she remembers from
 a demo a few months back. Nobody checks. On the plan the team is on, the
-vendor's built-in starting mode has changed since the demo, and a fresh
-session now starts in a mode where a second model approves actions
-instead of the person at the keyboard (@Claude Code permission modes).
+vendor's built-in starting mode isn't the one she remembers from the
+demo. A fresh session starts in a mode where a second model approves
+actions instead of the person at the keyboard (@Claude Code permission modes).
 A week later a colleague finds that a run has rewritten files she meant
 to review first. Nothing went wrong that couldn't be undone, but the
-team had placed the product on the scale from memory, and the product
-had moved. The setting decides the place, so the first thing to read
+team had placed the product on the scale from memory, and the setting
+was another one. The setting decides the place, so the first thing to read
 when you install an agent, and again after each big update, is which
 mode it starts in.
 </Pitfall>
