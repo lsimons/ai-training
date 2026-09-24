@@ -212,3 +212,6 @@ Asiana
 Glidepath
 autothrottle
 toolu
+stdio
+npx
+modelcontextprotocol
