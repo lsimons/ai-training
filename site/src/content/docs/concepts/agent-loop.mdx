@@ -1,0 +1,274 @@
+import { Choice, MultiChoice, Sort, Order, Pitfall, Exercise, Recap } from '@components/lesson';
+
+So far in this course the model answered a prompt and stopped. In this
+lesson we watch a toy agent. The same kind of model sits in a loop
+with two tools, and its task is a question about a folder of meeting
+notes. The toy is small enough to read in one sitting. Its "model" is a
+script with a fixed list of replies. Every run below comes out the same
+way, and there is nothing for you to install or run. You read
+three transcripts. By the end you can label each line of one with the
+turn it belongs to, and you can say why the run stopped.
+
+## A model in a loop with two tools
+
+A model takes text in and produces text out, once. It can't open a file
+or look in a folder. An **agent** is software around a model that can.
+The software calls the model and reads the reply. When the reply asks
+for a tool, the software runs that tool and hands the result back to the
+model as more text, and then calls the model again (@AEC-01). The model
+supplies the judgment about what to do next, and the software supplies
+the hands.
+
+The toy has two tools. Before anything runs, the model is told what
+they are, in plain text. Each tool has a name, one sentence on what it
+does, and its parameters, which are the details the model has to fill
+in when it asks for the tool.
+
+```text
+list_dir: List the files in a directory. Parameter: path, the directory to list.
+read_file: Return the text of one file. Parameter: path, the file to read.
+```
+
+That text is the whole of what the model knows about the tools. It never
+sees the code behind `list_dir`, and it doesn't need to. When it wants a
+file listed, it writes a request that names the tool and fills in the
+parameter, and the loop does the rest (@Academy claude-platform-101).
+A tool with a vague description gets used badly, because the sentence
+is all the model has to go on.
+
+The folder the toy works in holds three short meeting notes, from 14, 21
+and 28 March.
+
+## Read the transcript
+
+The first task is a question about the notes. The transcript below is
+the toy's output, line for line. The lines that start with `model:` are
+what the model produced, and the ones that start with `loop:` are what
+the software around it did in response.
+
+```text
+task: Which meeting note mentions the June delivery?
+1. model: call list_dir with path "notes"
+   loop: ran list_dir, result: 2026-03-14-lantern.txt, 2026-03-21-budget.txt, 2026-03-28-lantern.txt
+2. model: call read_file with path "notes/2026-03-14-lantern.txt"
+   loop: ran read_file, result: Project Lantern, 14 March. Sensor boards moved from April to June. Ana confirms the date by Friday.
+3. model: done. The note of 14 March: the sensor boards moved from April to June.
+loop: stopped, the model said it is done after 3 steps
+```
+
+Read step 1 slowly, because it is the whole idea. The model didn't list
+the folder. It wrote the words `call list_dir with path "notes"`, which
+is text like any other reply. The loop recognized that text as a request,
+ran the real `list_dir` tool on the real folder, and put the three file
+names into the conversation as the next thing the model reads. In step 2
+the model, now knowing the file names, asked to read the one whose name
+suggested the right project. In step 3 it had what it needed and wrote an
+answer instead of a request, and the loop saw that and stopped.
+
+The model's text reached the folder only through the loop, and the loop
+is where a real agent checks permissions, logs what happened, and can
+refuse. When people say an agent "read a file", this two-line exchange
+is what happened.
+
+## Observe, think, act
+
+The transcript has a rhythm, and the **agent loop** is that rhythm. Each
+step is one turn of it (@AEC-01):
+
+- **Observe.** The model reads what is in front of it: the task at the
+  start, and after that the result of the last tool.
+- **Think.** The model decides what to do next and writes it down, either
+  a tool request or an answer. In the transcript this is every `model:`
+  line.
+- **Act.** The loop runs the tool the model asked for and returns the
+  result. In the transcript this is every `loop: ran` line.
+
+Then the model observes the result, and the turn repeats. Step 1 of the
+transcript is observe (the task), think (`call list_dir`), act (the
+listing comes back). Step 2 is observe (the file names), think
+(`call read_file`), act (the note comes back). Step 3 is observe (the
+note) and think (`done`), with no act, because the model produced an
+answer and there was nothing left to run.
+
+The split matters when something goes wrong. A wrong answer after a
+correct file read is a think problem, and the fix is in the prompt or
+the model. A right request that returned an error is an act problem, and
+the fix is in the tool. An agent that read the wrong file did a
+reasonable think on a poor observe, and the fix is often a better tool
+description or a better folder name. Naming the turn tells you where to
+look.
+
+<Sort id="label-the-turns" objective="concepts/recognizes-agents/names-the-loop"
+  concepts={['agent-loop', 'tool']}
+  context="The lesson shows the transcript of a toy agent with two tools, list_dir and read_file. Lines that start with model: are what the model wrote, and lines that start with loop: are what the software around it did."
+  title="Label the turns" hint="Who produced the line, the model or the loop, and was it a decision or a result?"
+  buckets={['Observe', 'Think', 'Act']}
+  items={[
+    { text: 'model: call list_dir with path "notes"', bucket: 1 },
+    { text: 'loop: ran list_dir, result: 2026-03-14-lantern.txt, ...', bucket: 2 },
+    { text: 'The model reads the three file names that came back', bucket: 0 },
+    { text: 'model: call read_file with path "notes/2026-03-14-lantern.txt"', bucket: 1 },
+    { text: 'loop: ran read_file, result: Project Lantern, 14 March. ...', bucket: 2 },
+    { text: 'model: done. The note of 14 March: the sensor boards moved from April to June.', bucket: 1 },
+  ]} />
+
+<Order id="order-one-turn" phase="review" objective="concepts/recognizes-agents/names-the-loop"
+  concepts={['agent-loop', 'tool']}
+  context="An agent is a model in a loop with tools. The question is the order of events inside one turn of the loop, from the moment a tool result comes back until the next result comes back."
+  title="Order one turn of the loop" hint="Which of these can happen before the model has read anything?"
+  steps={[
+    'The model reads the result of the last tool',
+    'The model writes a request that names a tool and its parameters',
+    'The loop runs the tool',
+    'The loop puts the result in the conversation',
+  ]} />
+
+<MultiChoice id="who-did-what" phase="review" objective="concepts/recognizes-agents/names-the-loop"
+  concepts={['agent-loop', 'tool', 'model-vs-agent']}
+  context="An agent is a model placed in a loop with tools. The model is told each tool's name, purpose and parameters as text."
+  title="Which of these did the model do itself?" hint="What can a model produce other than text?"
+  options={[
+    { text: 'Decided which file to read next.', correct: true },
+    { text: 'Opened the folder and listed the files in it.', why: 'The model wrote a request to list the folder. The loop ran the tool and returned the names.' },
+    { text: 'Wrote the request that named the tool and the path.', correct: true },
+    { text: 'Checked that the path was allowed before the file was read.', why: 'Any check on a request happens in the loop, between the request and the tool. The model only produces the request.' },
+  ]}>
+Looking at the transcript of an agent that found a fact in a folder of
+notes, which of these did the model do itself?
+</MultiChoice>
+
+## How the loop ends
+
+A loop with no end is a bug, so every agent has stop rules. The toy has
+two, and a real agent adds a third (@AEC-01).
+
+The model says it is done. This is the good ending, and the first
+transcript shows it: the model wrote an answer instead of a request, and
+the loop stopped after 3 steps.
+
+The step limit is reached. The loop counts the steps and stops at a
+fixed number even when the model isn't finished. The limit protects
+you from a model that keeps asking for tools without getting anywhere,
+which runs up the bill and, with tools that change things, keeps
+changing them. Here is the toy on a task with a step limit of 3, with a
+script that lists the folder twice and then reads the wrong file.
+
+```text
+task: Who confirms the delivery date?
+1. model: call list_dir with path "notes"
+   loop: ran list_dir, result: 2026-03-14-lantern.txt, 2026-03-21-budget.txt, 2026-03-28-lantern.txt
+2. model: call list_dir with path "notes"
+   loop: ran list_dir, result: 2026-03-14-lantern.txt, 2026-03-21-budget.txt, 2026-03-28-lantern.txt
+3. model: call read_file with path "notes/2026-03-21-budget.txt"
+   loop: ran read_file, result: Budget review, 21 March. Travel spend is under plan. The training budget is approved.
+loop: stopped, the step limit of 3 was reached, no answer
+```
+
+The answer was in the note of 14 March, and the model's script would
+have read it in step 4. The loop didn't allow a step 4. The transcript
+has no answer line, because the model never got to write one. The last
+thing it did was ask to read the budget note. A limit that stops a run always
+stops it in the middle of something.
+
+A person stops it. In a real agent the loop pauses and asks before an
+action that is hard to undo, and a person can say no, or close the
+window at any point (@DLAI-11). A stop of this kind looks like the step
+limit from the model's side: the last request was made, and no answer
+follows.
+
+<Choice id="why-it-stopped" objective="concepts/recognizes-agents/names-the-loop"
+  concepts={['agent-loop']}
+  context="A toy agent ran with a step limit of 3. Its transcript shows three tool requests, each with a result, and then a loop line that says the step limit was reached and there is no answer."
+  title="Why did the second run stop?" hint="Read the last line of the transcript. Who wrote it, and what does it say?"
+  options={[
+    { text: 'The model found the answer in the budget note and stopped.', why: 'A finished run has a model line that starts with "done". This transcript has none, and the budget note says nothing about a delivery date.' },
+    { text: 'The tool failed on the second listing, so the loop gave up.', why: 'Both listings returned the same three file names. The tool did its job each time it was asked.' },
+    { text: 'The loop reached its step limit before the model wrote an answer.', correct: true },
+    { text: 'The script ran out of replies, so the model had nothing more to say.', why: 'The script had two more replies, a read of the 14 March note and an answer. The loop stopped before it reached them.' },
+  ]}>
+In the second transcript the run ends without an answer. Why?
+</Choice>
+
+<Choice id="which-ending" phase="review" objective="concepts/recognizes-agents/names-the-loop"
+  concepts={['agent-loop']}
+  context="An agent's loop ends in one of three ways: the model writes an answer instead of a tool request, the loop reaches its step limit, or a person stops it."
+  title="Which ending is this?" hint="Did the model get to write an answer, and who decided to stop?"
+  options={[
+    { text: 'The model said it was done.', why: 'A model that is done writes an answer. This transcript ends after a request, and no answer follows it.' },
+    { text: 'The step limit was reached.', correct: true },
+    { text: 'A person stopped it.', why: 'A person stops a run from outside the loop, and nothing in this transcript records a person. The loop\'s own counter ended it.' },
+  ]}>
+An agent's transcript shows twelve tool requests, each with its result,
+and then one line from the loop: "stopped after 12 steps, no answer".
+Nobody was watching the run. Which ending is this?
+</Choice>
+
+<Pitfall title="Stopped in the middle">
+A team gives an agent a folder of forty customer reports and a task:
+read each one, write a one-line status into `summary.txt`, and finish
+with a count of the reports that need a follow-up call. The agent has a
+tool that writes to a file, and a step limit of 50, which the team took
+as generous. Reading and writing take two steps per report, so the loop
+reaches 50 after 25 reports and stops. `summary.txt` has 25 lines out of
+40, no total, and no note that anything is missing. The person who opens
+it the next morning sees a finished-looking file with a number of lines
+that happens to be short, and nothing on the page says why. The step
+limit did its job of ending the run, and it can't do the other job of
+finishing the work. A run that hit a limit needs to be read as an
+interrupted run: check the last request, check what it half did, and
+decide whether to rerun from there or throw the partial result away.
+</Pitfall>
+
+<Exercise stretch="Write the transcript a fourth run would produce for the task 'Which note names Bram?', with the fewest steps a model that read the file names carefully could take, and mark the three turns of each step.">
+
+Here is a third transcript, on a different task over the same three
+notes. Read it once. Then, on paper or in a note, write one line per
+step, in the form "step, tool used, which turns", where the turns are
+observe, think and act. Step 1 of the first transcript would read
+"1, list_dir, observe (task), think (request), act (listing)". Finish
+with one line that names how the run ended and how you know. Ten minutes
+is enough.
+
+```text
+task: How many of the meeting notes are about project Lantern?
+1. model: call list_dir with path "notes"
+   loop: ran list_dir, result: 2026-03-14-lantern.txt, 2026-03-21-budget.txt, 2026-03-28-lantern.txt
+2. model: call read_file with path "notes/2026-03-14-lantern.txt"
+   loop: ran read_file, result: Project Lantern, 14 March. Sensor boards moved from April to June. Ana confirms the date by Friday.
+3. model: call read_file with path "notes/2026-03-21-budget.txt"
+   loop: ran read_file, result: Budget review, 21 March. Travel spend is under plan. The training budget is approved.
+4. model: call read_file with path "notes/2026-03-28-lantern.txt"
+   loop: ran read_file, result: Project Lantern, 28 March. The Utrecht pilot moves to July. Bram writes the short install guide.
+5. model: done. Two of the three notes are about project Lantern: 14 March and 28 March.
+loop: stopped, the model said it is done after 5 steps
+```
+
+A good result has five lines, four of them naming a tool and the fifth
+naming none, because step 5 has a think and no act. The ending line says
+the model wrote an answer, and points at the `done` line and the loop's
+last line as the evidence. As you write, notice that the model read the
+budget note even though its name gave the answer away. A model in a loop
+does what its judgment tells it, one step at a time, and a step it could
+have skipped costs the same as one it needed. Where in this transcript
+would a better tool description, or a better file name, have saved a
+step?
+
+</Exercise>
+
+<Recap>
+
+1. An agent is a model in a loop with tools. The model produces text,
+   and when that text is a request the loop runs the tool and returns the
+   result as more text. The model never runs anything itself (@AEC-01).
+2. A tool is described to the model by name, purpose and parameters, in
+   plain text, and that description is all the model has to decide when
+   and how to ask for it.
+3. Each step of the loop is observe (read the task or the last result),
+   think (write a request or an answer) and act (the loop runs the
+   tool). Naming the turn tells you where a mistake came from.
+4. The loop ends when the model writes an answer, when the step limit is
+   reached, or when a person stops it. A run that ended on a limit or a
+   stop was interrupted in the middle of a step, and its output has to be
+   read that way.
+
+</Recap>
