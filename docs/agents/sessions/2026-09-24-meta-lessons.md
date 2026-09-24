@@ -42,3 +42,5 @@ Add to collision notes: A fixture that shells out to git removes `GIT_DIR`, `GIT
 Add to collision notes: A claim about how an agent product loads context (skills, MCP tools, memory files) names the vendor page and matches today's default behavior.
 Add to collision notes: Builders never message reviewers. Only the lead asks for a re-check.
 ```
+
+In flight: wave 16, branch wave/16-lessons, issues #146 #122 #158 #160 #162 #198 #152 #124 #169 #171, nits row #315
