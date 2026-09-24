@@ -42,10 +42,15 @@ UNDO_BRANCH = """    elif command == "undo" and len(argv) == 3 and argv[2].isdig
 """
 
 
+def _skipped(relative: Path) -> bool:
+    """Hidden files (a `.DS_Store`, a `.git/`) and caches aren't part of the fixture."""
+    return any(part.startswith(".") or part == "__pycache__" for part in relative.parts)
+
+
 def repo_files(repo: str) -> list[str]:
     """Every file in the repository, as a sorted relative path with slashes."""
     root = Path(repo)
-    paths = [p for p in root.rglob("*") if p.is_file() and "__pycache__" not in p.parts]
+    paths = [p for p in root.rglob("*") if p.is_file() and not _skipped(p.relative_to(root))]
     return sorted(p.relative_to(root).as_posix() for p in paths)
 
 

@@ -8,13 +8,13 @@ which test to extend and which command proves it done. Then we compare the
 two sessions on the files they read and the diff they produce.
 
 The brief is the agent's context, and the agent grounds its work in what it
-reads, as [the retrieval lesson](/concepts/retrieval/) showed for a chat model: an answer rests on
-the passage it was given, and the passage can be the wrong one. A coding
-agent that picks its own files can pick the wrong ones too. The vendor of
-Claude Code gives the same advice for its tool: name the files, mention the
-constraints and point at the pattern to follow (@Claude Code best
-practices), and its short course has a module on managing context
-(@Academy claude-code-101). Where this lesson names a Claude Code feature it
+reads, as [the retrieval lesson](/concepts/retrieval/) showed for a chat
+model: an answer rests on the passage it was given, and the passage can be
+the wrong one. A coding agent that picks its own files can pick the wrong
+ones too. The vendor of Claude Code gives the same advice for its tool: say
+which files are in play, what must not change, and which existing code the
+new code should copy (@Claude Code best practices), and its short course
+has a module on managing context (@Academy claude-code-101). Where this lesson names a Claude Code feature it
 says so, and the source is checked on the date shown above the lesson.
 
 ## The fixture
@@ -27,13 +27,20 @@ the first version of the program, one file, kept for reference. It is in the cou
 repository under
 `site/examples/coding-with-agents/scoping-and-referencing/fixture-repo/`.
 Copy that directory to a place of its own and change into it, as in the
-last lesson. Delete the copy and copy again to reset.
+last lesson. This time also make the copy a git repository with one
+commit, so that `git status` can show what a session changed:
+
+```sh
+git init -q && git add -A && git commit -qm start
+```
+
+Delete the copy and copy again to reset.
 
 Look at what is there before the agent does.
 
 <Predict id="run-files" title="Count the lines per file"
   answer={`    8 AGENTS.md
-     23 README.md
+     28 README.md
      16 docs/SPEC.md
      28 export.py
      57 legacy/todo_v1.py
@@ -42,16 +49,18 @@ Look at what is there before the agent does.
      45 test_todo.py
      55 todo.py
      18 todos.json
-    290 total`} run="coding-with-agents/scoping-and-referencing/files.py">
+    295 total`} run="coding-with-agents/scoping-and-referencing/files.py">
 Run this from inside the copy. The course prints the same table from its
 own copy of the fixture, and your `wc` may pad the numbers differently.
+The `find` leaves out hidden files such as `.git/` and a `.DS_Store`, and
+the `sed` strips the `./` that `find` prints.
 
 ```sh
-find . -type f | LC_ALL=C sort | xargs wc -l
+find . -type f -not -path '*/.*' | sed 's#^\./##' | LC_ALL=C sort | xargs wc -l
 ```
 </Predict>
 
-Ten files, 290 lines. An agent can read the whole repository. Even here, a
+Ten files, 295 lines. An agent can read the whole repository. Even here, a
 vague brief makes it read files it doesn't need, and one of those files is
 a trap.
 
@@ -125,7 +134,7 @@ list.
 
 ```sh
 for word in done undo; do
-  grep -ril "$word" . | sort
+  grep -ril --exclude-dir=.git "$word" . | sed 's#^\./##' | LC_ALL=C sort
 done
 ```
 </Predict>
@@ -154,7 +163,7 @@ spreads because nothing told the agent to stop.
     { text: 'The agent read files the task does not need and proposed changes in a module the task does not concern.', correct: true },
     { text: 'The agent could not find the code that marks an item done, because the brief did not name the function.', why: 'It found that code at once. The problem is what else it found and treated as equally relevant.' },
     { text: 'The agent refused the task until the learner named a file.', why: 'A coding agent fills a gap in the brief from what its search finds. It rarely stops to ask.' },
-    { text: 'The agent ran the tests before it had a plan, which wasted a turn.', why: 'Running the tests first is cheap and often right. The waste was in the files it read and the scope it chose.' },
+    { text: 'The agent ran the tests before it had a plan, which wasted a turn.', why: 'The response shows no test run. The waste was in the files it read and the scope it chose.' },
   ]}>
 Look at the illustrative response once more. What did the missing scope cost?
 </Choice>
@@ -176,7 +185,7 @@ thing at an address.
   20	    items[index]["done"] = True
   21	    return f"done #{number}: {items[index]['text']}"`} run="coding-with-agents/scoping-and-referencing/reference.py">
 Print lines 16 to 21 of `todo.py` with their line numbers. This is what the
-brief in the next section will point at.
+brief in the next section points at.
 
 ```sh
 awk 'NR >= 16 && NR <= 21 { print NR "\t" $0 }' todo.py
@@ -264,8 +273,9 @@ with a test for the normal case and one for a bad number.
 </Response>
 
 The agent read `todo.py`, `test_todo.py` and the spec, where the vague
-brief made it read six files, and it never opened `legacy/`. The agent didn't rewrite `done`, and `export.py` isn't in the
-list, because the brief said where the task stops. Run the check yourself.
+brief made it read six files, and it never opened `legacy/`. The agent
+didn't rewrite `done`, and `export.py` isn't in the list, because the brief
+said where the task stops. Run the check yourself.
 
 <Predict id="run-tests-after" title="Run the suite after the change"
   answer="OK" run="coding-with-agents/scoping-and-referencing/tests_after.py">
@@ -305,7 +315,7 @@ TODO_FILE=/tmp/todos.json python3 todo.py list
 
 The message is the one the spec asked for, because the brief named the
 spec. Compare the two sessions once more. The first read six files and
-proposed changes to three, one of them a rewrite nobody asked for. The
+proposed changes to two, one of them a rewrite nobody asked for. The
 second read three files and changed one, plus a new test. The diff a
 reviewer gets from the second session is one they can read in a minute.
 Scoping buys a smaller read for the agent now and a smaller read for the
