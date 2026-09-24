@@ -1,0 +1,1 @@
+{"type": "assistant", "timestamp": "2026-09-20T09:01:00.000Z", "message": {"id": "z1", "model": "claude-fable-5-1", "content": [], "usage": {"input_tokens": 2, "output_tokens": 100, "cache_read_input_tokens": 1000, "cache_creation_input_tokens": 10}}}

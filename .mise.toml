@@ -165,6 +165,14 @@ depends = ["require-setup"]
 dir = "site"
 run = "bun scripts/wave-status.mjs"
 
+# The numbers of a harness review (#355, docs/agents/harness-review.md):
+# tokens, tool calls, sleeps, human messages and more, from the Claude Code
+# transcript directories it is given. Read-only; `--json PATH` writes the
+# numbers too.
+[tasks.harness-metrics]
+description = "Harness review numbers from session transcripts: mise run harness-metrics -- [--since D] [--json P] [--config F] [LABEL=]DIR..."
+run = "uv run --locked python scripts/harness_metrics.py"
+
 # Names for dispatcher runs (#353): the open `dispatcher-run` issues and the
 # name the next run takes, from .claude/skills/wave/run-names.yaml, as JSON.
 # `-- --check N` also says whether an older open run holds the name of run
