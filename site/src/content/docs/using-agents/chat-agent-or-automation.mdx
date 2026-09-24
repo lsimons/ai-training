@@ -1,9 +1,10 @@
 import { Choice, MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
 
-In this lesson we pick one of three ways to apply a model to a task: chat,
-agent or automation. The three differ in how much the model does between
-one moment you look and the next, and the lesson gives you a way to pick
-the level for a task and to write down what would change the pick. You
+In this lesson we pick how to apply a model to a task. Chat, agent, and
+automation differ in how much the
+model does between one moment you look and the next, and the lesson gives
+you a way to pick the level for a task and to write down what would change
+the pick. You
 don't run anything here. The tasks are supplied, and the work is reading
 them and deciding.
 
@@ -12,7 +13,7 @@ agent, and the safety course showed where a person has to approve before
 an agent acts. This lesson puts the two together into one decision you
 make before the work starts: how much of it the model does on its own.
 
-## Three ways to apply a model
+## Chat, agent, and automation
 
 The same model can be used in three ways, and the difference is where you
 are while it works.
@@ -23,8 +24,8 @@ email is a chat task. You know what you want to say and the words won't
 come. You paste the thread and ask for a first draft. You cut a paragraph
 and ask for a softer second sentence, and you send the version you end up
 with. Every turn is a decision about tone, and you are the one making it.
-Chat fits thinking, one-off drafts, and any task where you would change
-your mind halfway through.
+Chat fits thinking and one-off drafts, and any other task where you would
+change your mind halfway through.
 
 **Agent.** You write a brief, and the agent works through the steps with
 its tools. It checks in with you at the points the brief names. A folder
@@ -36,8 +37,8 @@ and a person doesn't need to see each one. An agent fits a bounded task
 with clear done-criteria, where you want to read the result once instead
 of steering every step.
 
-**Automation.** Nobody is there. An event starts the run, the model does its part,
-and the result goes where it goes. Invoices renamed the moment they arrive
+**Automation.** An event starts the run while nobody is watching, the
+model does its part, and the result goes where it goes. Invoices renamed the moment they arrive
 in a mailbox are an automation task. The steps and the path are both
 fixed, the same thing happens every time, and the work is checked by
 sampling later, or by whoever opens the folder. Automation fits
@@ -58,7 +59,7 @@ path, or removes your attention from the place where it was needed.
   title="Which level fits each task?" hint="For each task, ask how many steps the model does before a person has to look, and whether a person would want to change course halfway."
   buckets={['Chat', 'Agent', 'Automation']}
   items={[
-    { text: 'Wording a reply to a customer who is angry about a late order', bucket: 0 },
+    { text: 'Finding the right tone for a reply to one angry customer, when you are not sure yet what you want to offer', bucket: 0 },
     { text: 'Renaming two hundred scanned documents to one naming pattern and reporting the ones it could not read', bucket: 1 },
     { text: 'Adding the amount and the sender of each incoming invoice to a spreadsheet as it arrives', bucket: 2 },
     { text: 'Deciding how to structure a proposal you have not thought through yet', bucket: 0 },
@@ -83,21 +84,23 @@ described: the mistake now has hands
 
 The level is also picked for the task's worst case, and this is the part
 people get wrong. A support queue looks like an automation task. Most
-tickets are a password reset, a delivery question or a refund under the
+tickets are a password reset, a delivery question, or a refund under the
 limit, and a well-briefed agent answers those correctly all day. One ticket
 in fifty is different. It is a complaint that mentions a lawyer, or a
 customer who was told something wrong by a person last week. The forty-nine routine tickets make the case for
 automation, and the fiftieth decides the level. If a wrong answer on that
 one ticket is expensive, and the system can't tell that ticket from the
-others with certainty, the queue stays at agent-with-approval: the agent
-drafts every reply and a person sends it, or the agent sends the routine
-ones and routes anything it isn't sure about to a person. The level is
+others with certainty, the queue stays at the agent level, with a person
+approving the result. Call that "agent with approval": the agent drafts
+every reply and a person sends it, or the agent sends the routine ones and
+routes anything it isn't sure about to a person. It is the agent level with
+the check that level needs, and the count of levels stays three. The level is
 set by the ticket you can't afford to get wrong, and the routine tickets
 only decide how little attention that level should cost.
 
-So the question for a task is never "what does this task usually need?"
-It is "what does this task need on its worst day, and can the system tell
-that day from the others?" A task with a worst case that is cheap to fix,
+So the question for a task is never "what does this task need on most
+days?" It is "what does this task need on its worst day, and can the system
+tell that day from the others?" A task with a worst case that's cheap to fix,
 or that the system reliably detects and hands over, can run at the level
 its routine case suggests. A task whose worst case is expensive and looks
 like the routine case from the outside is kept one level down.
@@ -108,7 +111,7 @@ like the routine case from the outside is kept one level down.
   title="Which level does the queue get?" hint="Which ticket sets the level, the one that arrives forty-nine times or the one that arrives once, and what does a wrong answer on each cost?"
   options={[
     { text: 'Automation, because the agent answers forty-nine of fifty tickets well and a person can review the complaints when they come up.', why: 'A person can only review the complaint if the system reliably tells it apart from the rest, and this one does not. The forty-nine tickets say how cheap the level should be, and the fiftieth says which level.' },
-    { text: 'Chat, because the fiftieth ticket is too important to hand to an agent, so a person should steer every reply.', why: 'Steering forty-nine routine replies by hand to catch one complaint wastes the attention on the tickets that do not need it. The level goes one step down from automation, and chat is two.' },
+    { text: 'Chat, because the fiftieth ticket is too important to hand to an agent, so a person should steer every reply.', why: 'Steering forty-nine routine replies by hand to catch one complaint wastes the attention on the tickets that do not need it. The task goes one level down from automation, to agent, and chat is a level further than the worst case asks for.' },
     { text: 'Agent with approval, because the worst ticket is expensive to get wrong and the agent cannot tell it apart, so a person sends every reply the agent drafts.', correct: true },
   ]}>
 Which level does the support queue get, and why?
@@ -119,31 +122,31 @@ Which level does the support queue get, and why?
 A pick made this way has a reason, and a reason can be written down. The
 useful form is two sentences per task, one for what would move the task
 up a level and one for what would move it back down. "The invoice renaming
-goes to automation once a month of agent runs has needed no correction and
+goes to automation once a month of agent runs hasn't needed a correction and
 the folder is backed up nightly. It comes back to agent if a run renames a
 file we can't match to an invoice." A rule like that makes the pick
 reviewable by someone who wasn't there when it was made, and it makes the
-next change a decision rather than a drift.
+next change a decision that someone takes on purpose.
 
 What moves a task up is evidence, and what moves it back is a new worst
 case. Evidence is a run of results without corrections, a test on the
 cases that used to fail, a backup or an undo that turns the worst case into
 a cheap one, or a check that finds the odd case and routes it to a person.
 A new worst case is a task that starts to receive a kind of input it
-didn't before, a consequence that got more expensive (the folder is now
-shared with a client), a correction that nobody caught for a week, or a
-rule that changed (a new customer contract that says a person answers
-every message). When the level is written with its moving rules, an
+didn't before, or a wrong result that got more expensive because the folder
+is now shared with a client. A correction that nobody caught for a week is
+a new worst case too. So is a changed rule, for example a new customer
+contract that says a person answers every message. When the level is written with its moving rules, an
 improvement in the tool is one more piece of evidence and a change in the
 task is a reason to look again, and both are decisions someone made on
 purpose (@Academy ai-fluency-for-builders).
 
-Writing the rule also stops the two silent moves. The first is the slide
-up: a task that was agent-with-approval becomes automation because the
-person approving stopped reading and started clicking, and nobody decided
-anything. The second is the slide down: a task that could safely run
-unattended stays in chat because it always has, and a person spends an
-hour a week steering a task with one right path. A written rule names the
+Writing the rule also stops the two silent moves. In the slide up, a task
+at the agent level with approval becomes automation because the person
+approving stopped reading and started clicking, and nobody decided
+anything. In the slide down, a task that could safely run unattended stays
+in chat because it always has, and a person spends an hour a week steering
+a task with one right path. A written rule names the
 evidence the first move needs and the worst case that would justify the
 second, and a task with neither stays where it is.
 
@@ -152,9 +155,9 @@ second, and a task with neither stays where it is.
   context="A team's monthly report is drafted by an agent from figures in shared folders, and the operations lead reads the draft and approves it. The lesson taught that a pick for a level should be written with the evidence that would move it up and the worst case that would move it back."
   title="Six months of approvals" hint="Has the level changed on paper, or in practice? What would each choice write down?"
   options={[
-    { text: 'Move the report to automation, since six months of approvals with no changes is the evidence the lesson asked for.', consequence: 'The move is made on evidence, and the moving rule is written the same week. A month later a folder is renamed and the agent draws a blank figure into the report. The rule you wrote says a blank field brings it back to agent, and it does.', correct: true },
-    { text: 'Keep the approval step as it is, because a person clicking approve each month is a check.', consequence: 'The level on paper stays agent-with-approval. In practice the lead has not read a draft since March, and the report is running unattended with no sample check, no error report and no undo. It is automation without the checks automation needs.' },
-    { text: 'Bring the report back to chat and have the lead build it turn by turn, because approvals that nobody reads show the task was never safe to delegate.', consequence: 'The lead spends two hours a month steering a task with one right path, and six months of correct drafts said nothing about the task being unsafe. The attention goes back to the tickets that did not need it.' },
+    { text: 'Move the report to automation, since six months of approvals with no changes is the evidence the lesson asked for.', consequence: 'The move is made on evidence, and before the first unattended run the team writes the moving rule, adds a check that reports a blank figure instead of guessing one, and keeps last month\'s draft to fall back on. A month later a folder is renamed, the check reports the blank, and the rule brings the report back to agent.', correct: true },
+    { text: 'Keep the approval step as it is, because a person clicking approve each month is a check.', consequence: 'On paper the level is still agent with a person approving. In practice the lead has not read a draft since March, and the report runs unattended with none of the checks automation needs. It is automation by drift.' },
+    { text: 'Bring the report back to chat and have the lead build it turn by turn, because approvals that nobody reads show the task was never safe to delegate.', consequence: 'The lead spends two hours a month steering a task with one right path, and six months of correct drafts said nothing about the task being unsafe. The attention goes back to drafts that were right six months running.' },
   ]}>
 The operations lead has approved the agent's monthly report draft for six
 months, and admits that since about March the approval has been a click
@@ -189,13 +192,26 @@ A team wants to move a task from agent to automation. When does the task
 stay at agent instead?
 </Choice>
 
+<Sort id="five-more-tasks" phase="review" objective="using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation"
+  concepts={['chat-vs-agent-vs-automation']}
+  context="Chat means a person steers every turn, an agent works through a briefed task with tools and checks in at agreed points, and automation runs unattended when an event starts it. The tasks here are everyday office tasks, and each one fits one level for its worst case."
+  title="Which level fits each of these?" hint="For each task, ask whether a person would change course halfway, whether the steps are known but the path varies, or whether the same fixed thing happens every time and a wrong result is cheap."
+  buckets={['Chat', 'Agent', 'Automation']}
+  items={[
+    { text: 'Working out what to say to a colleague whose work you have to turn down', bucket: 0 },
+    { text: 'Tagging each photo that lands in the shared album with the date and the event name from the calendar', bucket: 2 },
+    { text: 'Reading forty meeting recordings and listing every decision, with a note where the recording is unclear', bucket: 1 },
+    { text: 'Thinking through whether to take on a project you have doubts about', bucket: 0 },
+    { text: 'Moving each finished ticket in the tracker to the archive column overnight', bucket: 2 },
+  ]} />
+
 <Pitfall title="Routine nine times, consequential the tenth">
 A task that goes the same way nine times out of ten is the one most
 likely to be picked for the wrong level, because the nine times are all
-anyone sees when the pick is made. The renaming, the reply, the report
-all look like a fixed path, and the pick is automation. The tenth time is
-the scan that is a signed contract, the ticket that mentions a lawyer, the
-report where a folder moved. Pick the level for the tenth time, and use
+anyone sees when the pick is made. The renaming and the support reply
+both look like a fixed path, and the pick is automation. The tenth time is
+the scan that turns out to be a signed contract, or the ticket that
+mentions a lawyer. Pick the level for the tenth time, and use
 the nine to decide how cheap that level should be. When the tenth time
 can't be told from the others by the system, the level is the one where a
 person still sees each result.
@@ -221,18 +237,26 @@ minutes is enough.
 ```
 
 A good answer has the plan in chat, because the thinking is the task and
-you would change course halfway. The follow-up email is at agent with you
-sending it, because the meeting is in your memory and the customer
-receives the result. It moves up only when the notes are complete enough
-to draft from without you. The receipts are at automation with a monthly
-sample check and a way to move a wrong file. They come back to agent if a
-receipt turns out to be a contract or an invoice above a set amount. The
-team-channel questions are at agent. The agent answers from the team's own
-pages and says when it can't find an answer, and the task moves back to
-chat if a wrong answer about access or a password shows up. The contract
-check is at agent with a person reading each list, because a missed clause
-is the tenth time. Its moving sentence names what evidence would let the
-routine contracts go further. Where your answer differs, the sentence that matters is the one
+you would change course halfway. It has no up move while the plan is being
+thought out, and once the plan exists, filling in the sections from notes
+is a different task that an agent can do. It has no down move, because chat
+is the lowest level. The follow-up email is at agent with you sending it,
+because the meeting is in your memory and the customer receives the result.
+It moves up to automation only when the notes are complete enough to draft
+from without you and a wrong email costs little, and it moves back to chat
+when a meeting was difficult and the wording is the work. The receipts are
+at automation with a monthly sample check and a way to move a wrong file.
+They moved up on a month of agent runs without a correction, and they come
+back to agent if a receipt turns out to be a contract or an invoice above a
+set amount. The team-channel questions are at agent. The agent answers from
+the team's own pages and says when it can't find an answer. It moves up to
+automation once a month of answers has been checked and none was about
+access or a password, and it moves back to chat if a wrong answer about
+access or a password shows up. The contract check is at agent with a person
+reading each list, because a missed clause is the tenth time. It moves up
+for the standard contracts only, once a test on last year's contracts has
+found every difference a lawyer found, and it moves back to agent for all
+contracts if a supplier sends a form the test never saw. Where your answer differs, the sentence that matters is the one
 about the worst case, so check that one first. Which of your five picks
 would slide up on its own if nobody wrote the rule?
 </Exercise>
