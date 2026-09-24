@@ -32,8 +32,8 @@ const item = (id: string, over: Record<string, unknown> = {}) => ({
 });
 /** The warnings of an export whose two reviewable items `one` and `two` have no review alternate. */
 const NO_ALTERNATES = [
-	'a/x: 2 reviewable checkpoints without a review alternate: one, two',
-	'2 of 2 reviewable checkpoints have no review alternate',
+	'a/x: fewer review alternates than reviewable checkpoints: o (2 reviewable, 0 alternates)',
+	'2 of 2 reviewable checkpoints are not matched by a review alternate',
 ];
 const GOOD = { version: 1, items: [item('one'), item('two', { kind: 'sort', stem: '' })] };
 
@@ -123,20 +123,23 @@ describe('checkCheckpoints', () => {
 });
 
 describe('checkAlternates', () => {
-	it('passes a review alternate that shares the objective of a first item, and warns on one without', () => {
+	it('counts alternates per objective, so one alternate does not cover two checkpoints', () => {
 		const items = [
 			item('one'),
 			item('one-again', { phase: 'review', kind: 'multi-choice' }),
 			item('two', { objective: 'p' }),
-			item('shown', { objective: 'p', reviewable: false, kind: 'repair' }),
+			item('three', { objective: 'p' }),
+			item('two-again', { objective: 'p', phase: 'review' }),
+			item('shown', { objective: 'q', reviewable: false, kind: 'repair' }),
 		];
 		expect(checkAlternates(items)).toEqual({
 			errors: [],
 			warnings: [
-				'a/x: 1 reviewable checkpoint without a review alternate: two',
-				'1 of 2 reviewable checkpoints have no review alternate',
+				'a/x: fewer review alternates than reviewable checkpoints: p (2 reviewable, 1 alternate)',
+				'1 of 3 reviewable checkpoints are not matched by a review alternate',
 			],
 		});
+		expect(checkAlternates([item('one'), item('one-again', { phase: 'review' })]).warnings).toEqual([]);
 	});
 	it('fails an alternate without a first sibling and a review alternate that is not gradable', () => {
 		const items = [
@@ -148,7 +151,17 @@ describe('checkAlternates', () => {
 		expect(checkAlternates(items).errors).toEqual([
 			'a/x#stray: a practice alternate needs a first checkpoint with objective "q" in its lesson',
 			'a/x#self-graded: a review alternate must be gradable in a review (not a repair, an honor-system predict or review={false})',
-			'a/y#elsewhere: a review alternate needs a first checkpoint with objective "o" in its lesson',
+			'a/y#elsewhere: a review alternate needs a reviewable first checkpoint with objective "o" in its lesson, or the review page never asks it',
+		]);
+	});
+	it('fails a review alternate whose only sibling is not reviewable, and lets a practice one pass', () => {
+		const items = [
+			item('fix', { kind: 'repair', reviewable: false }),
+			item('fix-again', { phase: 'review' }),
+			item('fix-more', { phase: 'practice', reviewable: false }),
+		];
+		expect(checkAlternates(items).errors).toEqual([
+			'a/x#fix-again: a review alternate needs a reviewable first checkpoint with objective "o" in its lesson, or the review page never asks it',
 		]);
 	});
 	it('does not count a practice item or an ungradable alternate as covering its sibling, and skips malformed items', () => {
@@ -159,7 +172,9 @@ describe('checkAlternates', () => {
 			{ id: 'x' },
 		];
 		const { warnings } = checkAlternates(items);
-		expect(warnings[0]).toBe('a/x: 1 reviewable checkpoint without a review alternate: one');
+		expect(warnings[0]).toBe(
+			'a/x: fewer review alternates than reviewable checkpoints: o (1 reviewable, 0 alternates)',
+		);
 	});
 });
 

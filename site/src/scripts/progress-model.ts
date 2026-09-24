@@ -284,16 +284,20 @@ export function describeWarning(w: NormalizeWarning): string {
 
 /**
  * Drop lesson, checkpoint, review and practice entries whose id the build no
- * longer knows. `knownCheckpointIds` holds the `first` and the `practice`
- * checkpoint ids. Mutates `r`; returns how many entries went.
+ * longer knows. Each map is pruned against its own list: `checkpoints` and
+ * `reviews` against the `first` checkpoint ids, `practice` against the
+ * `practice` ids, so a checkpoint moved from `first` to `practice` loses its
+ * review item. Mutates `r`; returns how many entries went.
  */
 export function pruneOrphanEntries(
 	r: ProgressRecord,
 	knownLessonIds: Iterable<string>,
 	knownCheckpointIds: Iterable<string>,
+	knownPracticeIds: Iterable<string>,
 ): number {
 	const lessons = new Set(knownLessonIds);
 	const checkpoints = new Set(knownCheckpointIds);
+	const practice = new Set(knownPracticeIds);
 	let dropped = 0;
 	for (const id of Object.keys(r.lessons)) {
 		if (lessons.has(id)) continue;
@@ -311,7 +315,7 @@ export function pruneOrphanEntries(
 		dropped++;
 	}
 	for (const id of Object.keys(r.practice)) {
-		if (checkpoints.has(id)) continue;
+		if (practice.has(id)) continue;
 		delete r.practice[id];
 		dropped++;
 	}
@@ -515,10 +519,19 @@ export function dueReviewsOn(record: ProgressRecord, prefix: string, day: string
  * item's answers. The first alternate never asked wins. Otherwise the
  * candidate asked least often wins, and among those the one asked longest
  * ago, with `own` first when the history doesn't show it. A `served` id that
- * is no longer an alternate counts for nothing.
+ * is no longer an alternate counts for nothing. `taken` holds the
+ * alternates already asked for another item in this review session; they
+ * are not candidates, so one session never asks the same alternate twice.
+ * The item's own checkpoint is always a candidate.
  */
-export function servedCheckpoint(own: string, alternates: readonly string[], history: readonly ReviewTrace[]): string {
-	const candidates = [own, ...alternates.filter((a) => a !== own)];
+export function servedCheckpoint(
+	own: string,
+	alternates: readonly string[],
+	history: readonly ReviewTrace[],
+	taken: readonly string[] = [],
+): string {
+	const open = alternates.filter((a) => a !== own && !taken.includes(a));
+	const candidates = [own, ...open];
 	const asked = new Map(candidates.map((c) => [c, 0]));
 	const lastAsked = new Map<string, number>();
 	history.forEach((h, i) => {
@@ -528,7 +541,7 @@ export function servedCheckpoint(own: string, alternates: readonly string[], his
 		asked.set(id, n + 1);
 		lastAsked.set(id, i);
 	});
-	const fresh = alternates.find((a) => asked.get(a) === 0);
+	const fresh = open.find((a) => asked.get(a) === 0);
 	if (fresh !== undefined) return fresh;
 	let best = own;
 	for (const c of candidates) {

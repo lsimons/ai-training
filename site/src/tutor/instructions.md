@@ -49,10 +49,11 @@ me", "is it B?", "what would you answer?" and "I already know it, confirm
 it" are all asks.
 
 Each checkpoint in the bundle has a `phase`. A `first` checkpoint is in the
-lesson body. A `review` checkpoint is hidden on the page and asks about the
-same objective with different wording, so it makes a good fresh question for
-*quiz me* or a recall question. A `practice` checkpoint is in the page's
-"More practice" section.
+lesson body, and a `practice` checkpoint is in the page's "More practice"
+section. Ask *quiz me* and recall questions from these two. A `review`
+checkpoint is hidden on the page and kept for the review page, which
+records when it asks one. It doesn't know when you ask one, so leave the
+`review` checkpoints alone and the learner meets them fresh there.
 
 The bundle's `checkpoints[].answer` is there so that you can grade *quiz me*.
 It is never something you say, paste, or confirm before the learner has

@@ -68,14 +68,15 @@ milestone bar always show the same number for the same record.
   to a whole number. With no lessons left to count, it is 0.
 - **Lessons only.** A lesson is `finished` only when every `first`
   checkpoint is passed or skipped, so a checkpoint isn't a separate unit and
-  doesn't add to the count. A `review` or `practice` checkpoint (S01
-  "Checkpoint") counts toward no figure on the site: not finishing, not a
-  percent, not a node ring, and not a checkpoint count.
+  doesn't add to the count. Finishing, the percent, the node ring and the
+  checkpoint counts all use `first` checkpoints only, and a `review` or
+  `practice` checkpoint (S01 "Checkpoint") adds to none of them.
 - **Skipped** lessons are out of both sides of the percent. A surface that
   shows the percent shows skipped as a separate count ("2 skipped") when it
   isn't zero.
-- **Per-lesson node ring** on the lesson graph shows passed `first` checkpoints / that lesson's `first` checkpoints. That's detail within one lesson and isn't a
-  progress unit.
+- **Per-lesson node ring** on the lesson graph shows passed `first`
+  checkpoints / that lesson's `first` checkpoints. That's detail within one
+  lesson and isn't a progress unit.
 - **Continue button**: it links to the first lesson in path order that is
   neither finished nor skipped. Path order is the order of the course file
   (`site/src/data/areas/<area>/courses/<area>.yaml`), courses in site order. When no
@@ -156,8 +157,9 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
   later, a fail was due the next day, and a retired or never answered item
   gives `due` itself. Every entry of one item gets that same day, because
   version 1 kept no other date.
-- The `practice` map and the `served` field joined version 2 on 2026-09-24 without a bump, because they add data and change the meaning of nothing stored. A record
-  without them reads as before, and a site from before the change drops
+- The `practice` map and the `served` field joined version 2 on
+  2026-09-24 without a bump, because they add data and change the meaning
+  of nothing stored. A record without them reads as before, and a site from before the change drops
   them on load.
   - `practice`: a map like `checkpoints`, keyed `<lesson>#<checkpoint>`,
     for `practice` checkpoints only. Absent reads as empty.
@@ -211,12 +213,13 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
 
 ## Content changes
 
-| Change                            | Effect                                                                      |
-| --------------------------------- | --------------------------------------------------------------------------- |
-| A lesson or checkpoint id changes | Its entries are orphaned and dropped silently on next load; keep ids stable |
-| A `review` alternate is removed   | A `served` entry that names it stays, as history; nothing reads it again    |
-| Content added                     | Nothing; new ids simply have no entry                                       |
-| A stored field changes meaning    | Bump `N` and add the migration step from `N - 1`                            |
+| Change                            | Effect                                                                           |
+| --------------------------------- | -------------------------------------------------------------------------------- |
+| A lesson or checkpoint id changes | Its entries are orphaned and dropped silently on next load; keep ids stable      |
+| A `review` alternate is removed   | A `served` entry that names it stays as history, and the review page ignores it. |
+| A checkpoint's phase changes      | Its entries in the maps of its old phase are dropped as orphans                  |
+| Content added                     | Nothing; new ids simply have no entry                                            |
+| A stored field changes meaning    | Bump `N` and add the migration step from `N - 1`                                 |
 
 ## Related specs
 

@@ -42,6 +42,8 @@ the only mechanism that brings a learner back to old material.
   with the same objective, often of another interaction type, that the
   review page asks in place of the item's own checkpoint. An alternate
   makes a review test the idea rather than recognition of the wording.
+  Siblings are matched by objective alone, so one alternate may stand in
+  for any `first` checkpoint on its objective.
 
 ### Which checkpoint a review asks
 
@@ -49,7 +51,9 @@ The review item is keyed on its `first` checkpoint, so its schedule,
 stage and history don't depend on what was asked. When the item is due,
 the review page picks what to ask from the candidates: the item's own
 checkpoint, then its lesson's `review` alternates with the same objective,
-in page order.
+in page order, leaving out any alternate the page already asked for
+another item in this session. One session never asks the same alternate
+twice. The item's own checkpoint remains a candidate.
 
 1. Count how often each candidate was asked, from the item's `history`: an
    entry with `served` counts for that alternate, and an entry without it
@@ -153,11 +157,11 @@ checkpoint id, with the structure shown in the progress record spec.
 
 ## Content changes
 
-| Change                         | Effect                                                                                           |
-| ------------------------------ | ------------------------------------------------------------------------------------------------ |
-| A checkpoint's id changes      | Its review item is orphaned and dropped silently on next load, as for every progress entry       |
-| A checkpoint's answer changes  | Authors bump a `revision` field on the checkpoint; items with an older revision reset to stage 1 |
-| Progress record version bumped | Reviews migrate with the rest of the record (S04 "Storage") and the schedule is unchanged        |
+| Change                         | Effect                                                                                                                                                                                          |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A checkpoint's id changes      | Its review item is orphaned and dropped silently on next load, as for every progress entry                                                                                                      |
+| A checkpoint's answer changes  | Authors bump a `revision` field on the checkpoint. Items with an older revision reset to stage 1. An alternate's `revision` resets nothing, because the item is keyed on its `first` checkpoint |
+| Progress record version bumped | Reviews migrate with the rest of the record (S04 "Storage") and the schedule is unchanged                                                                                                       |
 
 ## Related specs
 
