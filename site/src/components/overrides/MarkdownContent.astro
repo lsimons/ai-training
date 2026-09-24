@@ -21,8 +21,8 @@ const data = entry.data as typeof entry.data & {
 	serves?: string[];
 	assumes?: { objective: string; lesson: string; section: string }[];
 	'extends-to'?: { label: string; href: string }[];
+	'sources-checked'?: Date;
 	'review-by'?: Date;
-	lastUpdated?: Date | boolean;
 };
 const isLesson = Boolean(data.mode);
 const lessonId = entry.id;
@@ -112,7 +112,7 @@ if (isLesson) {
 					</ul>
 				</aside>
 			)}
-			<ReviewLine reviewBy={data['review-by']} lastUpdated={data.lastUpdated} />
+			<ReviewLine reviewBy={data['review-by']} sourcesChecked={data['sources-checked']} />
 			<Default><slot /></Default>
 			{ahead.length > 0 && (
 				<aside class="route-card route-ahead not-content" data-route="ahead" hidden>
