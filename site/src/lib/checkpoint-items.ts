@@ -1,5 +1,5 @@
 import type { CheckpointKind } from './checkpoint-rules';
-import { type CheckpointAttr, propValue } from './checkpoint-source';
+import { type CheckpointAttr, propValue, stringProp } from './checkpoint-source';
 import { assertKnownConcepts, knownConceptIds } from './concepts';
 import { checkpointOf, checkpointTagsOf, getLessons, type Lesson } from './lessons';
 
@@ -22,6 +22,8 @@ export interface CheckpointItem {
 	hint: string;
 	reviewable: boolean;
 	revision: number;
+	/** The `guessable` opt-out reason, or null. The surface-cue check in `mise run checkpoints` reads it. */
+	guessable: string | null;
 }
 
 export interface CheckpointExport {
@@ -91,7 +93,8 @@ function shapeOf(
 export function checkpointItemsOf(lesson: Lesson): CheckpointItem[] {
 	return checkpointTagsOf(lesson).map((tag) => {
 		const c = checkpointOf(lesson, tag);
-		const { options, answer } = shapeOf(`${lesson.id}#${c.id}`, c.kind, tag.attrs);
+		const where = `${lesson.id}#${c.id}`;
+		const { options, answer } = shapeOf(where, c.kind, tag.attrs);
 		return {
 			id: c.id,
 			lesson: lesson.id,
@@ -105,6 +108,7 @@ export function checkpointItemsOf(lesson: Lesson): CheckpointItem[] {
 			hint: c.hint,
 			reviewable: c.reviewable,
 			revision: c.revision,
+			guessable: stringProp(where, tag.attrs, 'guessable') ?? null,
 		};
 	});
 }

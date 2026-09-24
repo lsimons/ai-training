@@ -22,16 +22,18 @@ interface Props {
 	context?: string;
 	review?: boolean;
 	revision?: number;
+	/** Opt-out from the surface-cue check with its reason (spec S03 "Checkpoints"). */
+	guessable?: string;
 	options: Option[];
 }
-const { id, objective, title, hint, concepts, context, review, revision, options } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, guessable, options } = Astro.props;
 const correct = options.filter((o) => o.correct).length;
 if (correct < 2)
 	throw new Error(`MultiChoice "${id}" needs at least two correct options, has ${correct}. Use Choice for one.`);
 if (correct === options.length) throw new Error(`MultiChoice "${id}" needs at least one wrong option`);
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} kind="multi-choice">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} {guessable} kind="multi-choice">
 	<slot />
 	<Fragment slot="body">
 		<fieldset class="cp-options cp-multi" data-count={correct}>

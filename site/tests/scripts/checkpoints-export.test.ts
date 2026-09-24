@@ -26,6 +26,7 @@ const item = (id: string, over: Record<string, unknown> = {}) => ({
 	hint: 'h',
 	reviewable: true,
 	revision: 1,
+	guessable: null,
 	...over,
 });
 const GOOD = { version: 1, items: [item('one'), item('two', { kind: 'sort', stem: '' })] };
