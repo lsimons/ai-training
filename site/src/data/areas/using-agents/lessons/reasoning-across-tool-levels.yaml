@@ -19,9 +19,9 @@ shorts: [Going down a level when the number looks round]
 exercise:
   kind: judge
   brief: >-
-    For two supplied before-and-after pairs (a summary you wrote versus one an agent wrote, a folder
-    you filed versus one an automation filed), name the check that stopped working and the check
-    that replaces it.
+    For two supplied before-and-after pairs (an action list you typed versus one an agent produced
+    from a recording, a supplier register lookup a person did versus one an automation did), name
+    the check that stopped working, the check that replaces it, and one signal to go back down.
 sources: [Brilliant ABS, Academy building-effective-human-agent-teams]
 issue: 168
 minutes: 15
@@ -36,3 +36,6 @@ notes: >-
   lesson with no coding-agent content, so they are not in sources. The pairs use the calibration
   team from the earlier lessons and nobody in them has a name. The dashboard numbers (500, 1,400,
   1,000) are invented illustrations and no fixture produces them.
+  The summary and folder pairs the plan named for the exercise are the body's worked examples and
+  the Match checkpoint, and the exercise supplies two fresh pairs so the learner applies the move
+  rather than repeating it.
