@@ -41,7 +41,7 @@ of the layers run from `mise run ci` and from the CI workflow.
   in a course or a topic, or of the checkpoints on a lesson page, comes from
   `liveCourseLessons`, `liveTopicLessons` or `lessonCheckpoints` in
   `site/e2e/fixtures.ts` (over `site/scripts/lib/live-lessons.mjs`), never
-  from a literal, so a new lesson page or checkpoint changes no spec.
+  from a literal, so a new lesson page or checkpoint doesn't change a spec.
   `passRemaining` passes whatever checkpoints a page still has open.
 - **A code example's output** is already asserted: `<Predict run="..." answer="...">` names the fixture and `mise run examples` compares it, so it gets no separate test.
 
