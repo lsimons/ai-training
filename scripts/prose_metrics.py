@@ -11,7 +11,7 @@ every score. This script makes no judgment. The reading is in docs/prose/.
 Usage: scripts/prose_metrics.py <package> [out-dir]
 Writes <out-dir>/scores.tsv (default out-dir: docs/prose/reports/<package>).
 Every package pinned in .vale-eval.ini must already be synced into
-.vale/styles (`vale sync --config .vale-eval.ini`), or the script stops.
+.vale/styles (`mise run prose-eval-sync`), or the script stops.
 """
 
 import pathlib

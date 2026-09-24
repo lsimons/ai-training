@@ -121,5 +121,5 @@ def test_main_stops_when_eval_packages_not_synced(
     out_dir = tmp_path / "out"
     with pytest.raises(SystemExit) as exc:
         prose_metrics.main(["prose_metrics.py", "Readability", str(out_dir)])
-    assert "vale sync --config .vale-eval.ini" in str(exc.value)
+    assert "mise run prose-eval-sync" in str(exc.value)
     assert not out_dir.exists()
