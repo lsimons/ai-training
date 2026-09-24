@@ -1,0 +1,47 @@
+---
+/**
+ * The "skip this lesson" tip of a lesson with `covered-by` (spec S11 "Lesson
+ * file", issue #111): the external course that covers it, linked, and a skip
+ * button with the same `data-skip-lesson` hook as the recap's, which the
+ * MarkdownContent script binds. `overrides/TableOfContents.astro` renders it
+ * above the right-hand menu and `overrides/MobileTableOfContents.astro`
+ * above the mobile dropdown (issue #294), so the two pages share this one
+ * markup and the script finds the same button in both places.
+ *
+ * Renders nothing for a page that is not a lesson or a lesson without the
+ * field. The href must be an `https://` URL under a bibliography `url`, and
+ * any other value fails the build.
+ */
+import type { CollectionEntry } from 'astro:content';
+import { checkExternalSourceHref } from '@lib/extends-to';
+import { isLessonEntry } from '@lib/lesson-toc';
+import { bibliographySources } from '@lib/links';
+
+interface Props {
+	entry: CollectionEntry<'docs'>;
+	/** An extra class on the `<aside>`, so each override can place the tip. */
+	class?: string;
+}
+
+const { entry, class: extra } = Astro.props;
+const coveredBy = isLessonEntry(entry)
+	? (entry.data as { 'covered-by'?: { label: string; href: string } })['covered-by']
+	: undefined;
+if (coveredBy) {
+	const check = checkExternalSourceHref(coveredBy.href, await bibliographySources(), 'covered-by');
+	if (check.kind === 'invalid') throw new Error(`${entry.id}: ${check.reason}`);
+}
+---
+
+{
+	coveredBy && (
+		<aside class:list={['not-content covered-by', extra]} data-covered-by>
+			<p>
+				If you have followed <a href={coveredBy.href} rel="noopener">{coveredBy.label}</a>, you can skip this lesson.
+			</p>
+			<button type="button" class="recap-skip" data-skip-lesson>
+				I know this, skip it
+			</button>
+		</aside>
+	)
+}
