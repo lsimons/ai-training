@@ -4,10 +4,36 @@
  * network), and any `pageerror` or console error fails the test. Specs
  * import `test` and `expect` from here instead of `@playwright/test`.
  */
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
+import { liveCourseLessonIds, liveTopicLessonIds, pageCheckpoints } from '../scripts/lib/live-lessons.mjs';
 import { STORAGE_KEY, storageKeyFor, VERSION } from '../src/scripts/progress-model';
 
 export { STORAGE_KEY, storageKeyFor, VERSION };
+
+const SITE = fileURLToPath(new URL('..', import.meta.url));
+const DATA_DIR = join(SITE, 'src/data');
+const CONTENT_DIR = join(SITE, 'src/content/docs');
+
+/**
+ * The live lesson ids of the course of `area`, from the data tree and the
+ * content directory (issue #242). A spec that expects a percentage or a
+ * count computes it from this list, so a new lesson page changes no spec.
+ */
+export function liveCourseLessons(area: string): string[] {
+	return liveCourseLessonIds(DATA_DIR, CONTENT_DIR, area);
+}
+
+/** The live lesson ids that cover `topic`. */
+export function liveTopicLessons(topic: string): string[] {
+	return liveTopicLessonIds(DATA_DIR, CONTENT_DIR, topic);
+}
+
+/** The graded checkpoints of a lesson page, `{ id, kind }` in page order, read from its MDX source. */
+export function lessonCheckpoints(lesson: string): { id: string; kind: string }[] {
+	return pageCheckpoints(CONTENT_DIR, lesson);
+}
 
 /** A partial progress record to seed before the first navigation. */
 export interface Seed {
@@ -88,6 +114,52 @@ export async function answerChoice(page: Page, id: string) {
 	await cp.locator('label[data-correct]').click();
 	await cp.locator('.cp-check').click();
 	await expect(cp).toHaveAttribute('data-state', 'passed');
+}
+
+/** Move each row of an `order` checkpoint up with its button until the rows are in `data-pos` order. */
+export async function orderByButtons(cp: Locator) {
+	const items = cp.locator('ol li');
+	const count = await items.count();
+	for (let pos = 1; pos <= count; pos++) {
+		for (let k = 0; k < count; k++) {
+			const idx = await items.evaluateAll(
+				(lis, p) => lis.findIndex((l) => Number((l as HTMLElement).dataset.pos) === p),
+				pos,
+			);
+			if (idx > pos - 1) await items.nth(idx).locator('button[data-move=up]').click();
+		}
+	}
+}
+
+/**
+ * Pass every checkpoint of the page that is not passed yet, each on its first
+ * try, in page order. A `predict` gets the answer the page carries in
+ * `data-answer`, a `choice` or `scenario` its correct option, and an `order`
+ * is sorted with the buttons. Another kind throws, so a lesson that gains one
+ * says so instead of failing on a later assertion.
+ */
+export async function passRemaining(page: Page) {
+	// Ids first: a locator over the unpassed checkpoints would shift as each one passes.
+	const ids = await page
+		.locator('[data-checkpoint]:not([data-state="passed"])')
+		.evaluateAll((els) => els.map((el) => el.id));
+	for (const id of ids) {
+		const cp = page.locator(`#${id}`);
+		const kind = await cp.getAttribute('data-kind');
+		if (kind === 'predict') {
+			const answer = await cp.locator('.cp-predict').getAttribute('data-answer');
+			if (answer === null) throw new Error(`passRemaining: predict ${id} has no data-answer to type`);
+			await cp.locator('textarea').fill(answer);
+		} else if (kind === 'choice' || kind === 'scenario') {
+			await cp.locator('label[data-correct]').click();
+		} else if (kind === 'order') {
+			await orderByButtons(cp);
+		} else {
+			throw new Error(`passRemaining: no solver for the ${kind} checkpoint ${id}`);
+		}
+		await cp.locator('.cp-check').click();
+		await expect(cp).toHaveAttribute('data-state', 'passed');
+	}
 }
 
 /**

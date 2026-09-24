@@ -1,13 +1,25 @@
 /** Finishing a lesson, and where that progress shows up and persists (spec S04). */
-import { answerChoice, expect, storageKeyFor, storedRecord, test } from './fixtures';
+import { progressPercent } from '../src/scripts/overview';
+import { emptyRecord } from '../src/scripts/progress-model';
+import {
+	answerChoice,
+	expect,
+	lessonCheckpoints,
+	liveCourseLessons,
+	liveTopicLessons,
+	storageKeyFor,
+	storedRecord,
+	test,
+} from './fixtures';
 
 // The site compares due dates against the local calendar day (progress-model.ts `today()`), so the
 // seed is built the same way. `toISOString()` is UTC, which is already tomorrow in the evening west of UTC.
 const pad = (n: number) => String(n).padStart(2, '0');
 const now = new Date();
 const TODAY = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+const LESSON = 'concepts/how-models-work';
 const finished = {
-	lessons: { 'concepts/how-models-work': { state: 'finished' as const, at: TODAY } },
+	lessons: { [LESSON]: { state: 'finished' as const, at: TODAY } },
 	checkpoints: {
 		'concepts/how-models-work#what-the-model-does': { state: 'passed' as const, attempts: 1 },
 		'concepts/how-models-work#name-the-failure': { state: 'passed' as const, attempts: 1 },
@@ -37,7 +49,10 @@ test('finish is enabled once every checkpoint is passed, and persists across a r
 
 test('the finish note counts the open checkpoints', async ({ page }) => {
 	await page.goto('building-agents/agent-loop/');
-	await expect(page.locator('[data-finish-note]')).toHaveText('Pass or skip 4 more checkpoints to finish this lesson.');
+	const open = lessonCheckpoints('building-agents/agent-loop').length;
+	await expect(page.locator('[data-finish-note]')).toHaveText(
+		`Pass or skip ${open} more checkpoint${open === 1 ? '' : 's'} to finish this lesson.`,
+	);
 	await expect(page.locator('.recap-sources')).toHaveCount(0);
 	await expect(page.locator('.recap-next')).toHaveCount(0);
 });
@@ -47,8 +62,12 @@ test('the course page shows the finished node, the ring and the review card', as
 	await page.goto('concepts/');
 	// `a[data-node]`: a coming (planned) lesson renders as `span[data-node]` and has no progress state.
 	await expect(page.locator('a[data-node="concepts/how-models-work"]')).toHaveAttribute('data-state', 'finished');
-	// The seed finishes one of the ten live Concepts lessons: round(1 / 10 * 100) = 10 (overview.ts `progressPercent`).
-	await expect(page.locator('[data-ring-label]')).toHaveText('10%');
+	// The seed finishes one of the live Concepts lessons, and the ring shows the same formula the page uses
+	// (overview.ts `progressPercent`) over the lessons that have a page.
+	const live = liveCourseLessons('concepts');
+	expect(live).toContain(LESSON);
+	const { percent } = progressPercent(live, { ...emptyRecord(), ...finished });
+	await expect(page.locator('[data-ring-label]')).toHaveText(`${percent}%`);
 	await expect(page.locator('[data-review-card]')).toHaveText('Review due: 2 items');
 });
 
@@ -62,11 +81,14 @@ test('the topic map colors covered topics by lesson state', async ({ page, seed 
 	await seed(finished);
 	await page.goto('map/');
 	expect(await page.locator('.topic-node').count()).toBeGreaterThan(0);
-	// The topic has two live lessons (how-models-work and context-window) and the seed finishes one, so the map
-	// colors it `in-progress`. A topic without a lesson in the seed stays `untouched`.
+	// The seed finishes one lesson of the topic. With another live lesson in the topic the map colors it
+	// `in-progress`, and were it the only one, `finished` (TopicMap.astro). A topic without a lesson in the seed
+	// stays `untouched`.
+	const topicLessons = liveTopicLessons('concepts/how-models-work');
+	expect(topicLessons).toContain(LESSON);
 	await expect(page.locator('.topic-node[data-topic="concepts/how-models-work"]')).toHaveAttribute(
 		'data-state',
-		'in-progress',
+		topicLessons.length > 1 ? 'in-progress' : 'finished',
 	);
 	await expect(page.locator('.topic-node[data-topic="concepts/prompting"]')).toHaveAttribute('data-state', 'untouched');
 });
