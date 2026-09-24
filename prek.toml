@@ -18,8 +18,14 @@
 # - Node tools (markdownlint-cli2, commitlint) are not installed by prek.
 #   They are devDependencies in `site/package.json`, locked by
 #   `site/bun.lock`, and run from `site/node_modules/.bin` as `system`
-#   hooks. `mise run site-install-frozen` (or `site-install`) has to have
-#   run first; `mise run ci` and CI already do it in that order.
+#   hooks through the `bun` pinned in `.mise.toml`, so no system `node` is
+#   needed or used. `mise run site-install-frozen` (or `site-install`) has
+#   to have run first; `mise run ci` and CI already do it in that order.
+# - The Python interpreter for the Python hooks is prek's own (a
+#   uv-managed CPython, not the mise one). The pinned trees below were
+#   compiled for 3.14 and hold for CPython 3.11 and later; below 3.11 both
+#   hook repos add `tomli`, so a rerun of the compile command on an older
+#   interpreter would print a longer list.
 
 minimum_prek_version = "0.3.0"
 default_stages = ["pre-commit"]
@@ -86,7 +92,7 @@ hooks = [
   {
     id = "markdownlint-cli2",
     name = "markdownlint-cli2",
-    entry = "site/node_modules/.bin/markdownlint-cli2",
+    entry = "bun site/node_modules/.bin/markdownlint-cli2",
     language = "system",
     types = ["markdown"],
     exclude = '\.mdx$',
@@ -128,7 +134,7 @@ hooks = [
   {
     id = "commitlint",
     name = "commitlint",
-    entry = "site/node_modules/.bin/commitlint --config site/commitlint.config.mjs --edit",
+    entry = "bun site/node_modules/.bin/commitlint --config site/commitlint.config.mjs --edit",
     language = "system",
     stages = ["commit-msg"],
     pass_filenames = false,
