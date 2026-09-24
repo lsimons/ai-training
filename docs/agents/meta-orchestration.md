@@ -23,12 +23,19 @@ that only ever holds one short report per wave.
 
 ## Roles
 
-| Role       | How many       | Lives in                                | Context per wave               |
-| ---------- | -------------- | --------------------------------------- | ------------------------------ |
-| Dispatcher | one            | the main checkout, on `main`, in a loop | one report, under 200 words    |
-| Wave lead  | one per wave   | its own context, spawning the others    | the whole wave, then discarded |
-| Builder    | one per issue  | its own worktree and branch             | as in `orchestration.md`       |
-| Reviewer   | one per branch | its own worktree                        | as in `orchestration.md`       |
+| Role       | Agent                              | How many       | Lives in                                | Context per wave               |
+| ---------- | ---------------------------------- | -------------- | --------------------------------------- | ------------------------------ |
+| Dispatcher | the `/wave` session                | one            | the main checkout, on `main`, in a loop | one report, under 200 words    |
+| Wave lead  | `wave-lead`                        | one per wave   | its own context, spawning the others    | the whole wave, then discarded |
+| Builder    | `builder`                          | one per issue  | its own worktree and branch             | as in `orchestration.md`       |
+| Reviewer   | `lesson-reviewer`, `code-reviewer` | one per branch | its own worktree                        | as in `orchestration.md`       |
+
+The four agents are defined in `.claude/agents/`, all on Opus 5.5: the
+lead at `high` effort with a 400-turn limit, the builder and the reviewers
+at `medium` with 200 and 80. The dispatcher spawns `wave-lead` by name,
+and the lead spawns the others by name, so no prompt sets a model. The
+`wave-lead` file holds everything that is the same for every wave, and the
+template holds the rest.
 
 Nested spawning works: a `general-purpose` agent can spawn its own agents,
 resume them with `SendMessage`, and receive their notifications. Only the
@@ -186,11 +193,14 @@ spec, a gate, or shared tooling that a lesson branch drags along.
 
 ## The wave lead prompt
 
-The lead starts with no context. Its prompt is the template at
-`.claude/skills/wave/wave-lead-prompt.md`, which `/wave` fills with the
+The lead starts with no context but its agent file,
+`.claude/agents/wave-lead.md`, which holds the brief, the roles it spawns
+by name, integration, the standing approval, the waiting rule, the
+two-round revision limit and the resume steps. Its prompt is the template
+at `.claude/skills/wave/wave-lead-prompt.md`, which `/wave` fills with the
 wave number, the branch, the date, the picker's table, the filing
-paragraph and the fresh-or-resuming line. The template holds everything
-below.
+paragraph and the fresh-or-resuming line. Between them they hold
+everything below.
 
 - The wave as `next-wave` printed it: issue numbers, lesson ids, course
   positions, and for each lesson the `after` entries that are still
