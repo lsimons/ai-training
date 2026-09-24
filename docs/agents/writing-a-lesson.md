@@ -133,6 +133,20 @@ its output is asserted in CI either way. Give it an `objective` only when
 predicting the output demonstrates a served objective. Otherwise leave
 `objective` off, and the block is an ungraded example (below).
 
+### Foundations lessons
+
+A lesson in the `concepts`, `safety` or `using-agents` area is in the
+`foundations` group and is written for a reader who doesn't program and
+doesn't use a terminal (spec S03 "Foundations audience"). The hands-on
+step is a widget on the page or a prompt the learner pastes into a chat
+assistant. `mise run data` fails the page on a `<Predict run=...>`, on an
+`sh`, `bash`, `shell`, `python` or `json` fence, and on the words
+`terminal`, `python3` and `git clone` in prose. The report names the file,
+the line and what it matched. A fixture
+may still back a claim as CI proof, as long as the page never shows or
+names it. A code span such as `` `python3` `` and a `text` fence pass, so
+prose may quote a command when the point is to recognize it.
+
 ## Checkpoints
 
 All checkpoints take `id` (stable slug, unique in the page; it becomes the
@@ -468,6 +482,13 @@ to `/glossary/#<id>` must name a real concept id, or the build fails.
   `mise run prose` reports every hit, and a lesson should read clean before
   it is committed. In a fresh worktree run `mise run prose-sync` first,
   because without the packages `prose` stops and names that task.
+
+- **Foundations audience.** In `concepts`, `safety` and `using-agents`,
+  `mise run data` fails on a `<Predict run=`, an `sh`, `bash`, `shell`,
+  `python` or `json` fence, or the words `terminal`, `python3` or
+  `git clone` outside a code span. The exemption list in
+  `site/scripts/lib/data.mjs` is for the lessons written before the rule
+  and only shrinks. See "Foundations lessons" above.
 
 - Component children are Markdown but must be separated from the tags by a
   blank line if they contain block elements (code fences, lists).

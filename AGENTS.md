@@ -86,7 +86,9 @@ The layout is what the tree shows. The parts that aren't obvious from it:
   copies a lesson's title, mode and the rest onto its page. Every lesson,
   written or not, has a file under `lessons/`, and the course file orders
   them, flat or in parts. `mise run data` checks the tree against itself
-  and the pages. `docs/agents/writing-a-lesson.md` is the authoring guide.
+  and the pages, and that no lesson in the `foundations` group shows code
+  or terminal work (spec S03 "Foundations audience").
+  `docs/agents/writing-a-lesson.md` is the authoring guide.
 - `site/src/styles/lesson.css` is global on purpose: review pages clone
   checkpoint markup out of lesson pages.
 - `site/examples/` holds the runnable fixtures behind `<Predict run=...>`.
