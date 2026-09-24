@@ -1,12 +1,24 @@
 id: concepts/memory
 title: Where memory comes from
+description: >-
+  Take the phrase "it remembered" apart into what was stored and what was read back, see how a long
+  session drifts as its window fills, and pick summarize, start fresh or retrieve as the way out.
 mode: explanation
 covers: concepts/grounding
 serves:
   - concepts/explains-models/explains-grounding
   - concepts/explains-models/explains-generation
 introduces: [short-and-long-term-memory, context-rot]
-assumes: []
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/context-window
+    section: what-the-window-holds
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/what-tokens-cost
+    section: the-rule-that-got-buried
+  - objective: concepts/explains-models/explains-grounding
+    lesson: concepts/retrieval
+    section: search-first-then-answer
 after: [concepts/retrieval, concepts/what-tokens-cost]
 shorts: []
 exercise:
@@ -14,9 +26,22 @@ exercise:
   brief: >-
     Read a long transcript, mark where the answers start to drift, and say which of summarize, start
     fresh or retrieve would have helped.
-sources: []
+sources:
+  - AEC-05
+  - Academy ai-capabilities-and-limitations
+  - Claude Code memory
+  - Claude Code context window
+  - Liu 2024
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 issue: 152
 minutes: 12
 notes: >-
   Context rot is the session-level decline as the window fills with old turns and tool output;
-  concepts/what-tokens-cost covers instruction dilution inside one prompt or file.
+  concepts/what-tokens-cost covers instruction dilution inside one prompt or file. Foundations page,
+  so the learner runs nothing, and the exercise transcript is written for the lesson and marked
+  illustrative on the page. No fixture backs it. The Claude Code claims (instruction files and auto
+  memory loaded at the start of every session, auto memory on by default, automatic compaction near
+  the limit that replaces the conversation with a summary) were checked against the two cited pages
+  on 2026-09-24. No context size is quoted. Chat memory features are described without naming a
+  product, because no bibliography entry covers a chat product's help page yet.
