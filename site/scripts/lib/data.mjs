@@ -114,8 +114,13 @@ export const FOUNDATIONS_EXEMPT = new Map([
 	['safety/saying-ai-helped', 284], // #284
 ]);
 
-/** Fence languages a foundations page may not show. */
-const BANNED_FENCES = new Set(['sh', 'bash', 'shell', 'python', 'json']);
+/**
+ * Fence languages a foundations page may not show: the five tags spec S03
+ * "Foundations audience" lists, plus the aliases highlighters accept for the
+ * same languages (`py`, `zsh`, `console`), so a page can't dodge the rule by
+ * spelling the tag differently.
+ */
+const BANNED_FENCES = new Set(['sh', 'bash', 'shell', 'zsh', 'console', 'python', 'py', 'json']);
 /** Words a foundations page may not use outside a code span or a fence. */
 const BANNED_WORDS = /\b(terminal|python3|git clone)\b/i;
 
@@ -123,19 +128,20 @@ const BANNED_WORDS = /\b(terminal|python3|git clone)\b/i;
  * Every surface in an MDX lesson body that needs a programmer, as
  * `{ line, surface }` (1-based line): a `<Predict run=...>` tag, a fenced
  * block tagged with one of `BANNED_FENCES`, or one of `BANNED_WORDS` in prose.
- * Text inside a fence of any language and inside an inline code span is
- * skipped, so a page may quote a command in a code span or a `text` fence
- * without tripping the check.
+ * Text inside a fence of any language, inside an inline code span and inside
+ * an MDX comment (an expression holding a block comment) is skipped, so a page
+ * may quote a command or a `<Predict run=...>` tag in a code span, a `text`
+ * fence or a comment without tripping the check.
  */
 export function foundationsSurfaces(src) {
 	const out = [];
-	for (const { props, index } of findPredictTags(src)) {
-		if (props.has('run')) out.push({ line: lineOf(src, index), surface: `<Predict run="${props.get('run')}">` });
-	}
+	const lines = src.split('\n');
+	const inFence = new Array(lines.length).fill(false); // true for the body lines and the closing line of a fenced block
 	let fence = null; // the fence marker (``` or ~~~) while inside a fenced block
-	src.split('\n').forEach((text, i) => {
+	lines.forEach((text, i) => {
 		const open = /^\s*(`{3,}|~{3,})\s*([\w-]*)/.exec(text);
 		if (fence) {
+			inFence[i] = true;
 			if (open && open[1][0] === fence[0] && open[1].length >= fence.length && !open[2]) fence = null;
 			return;
 		}
@@ -148,6 +154,15 @@ export function foundationsSurfaces(src) {
 		const m = BANNED_WORDS.exec(text.replace(/`[^`]*`/g, ''));
 		if (m) out.push({ line: i + 1, surface: `the word "${m[1]}"` });
 	});
+	// Blank out fence bodies and comments, keeping every newline so offsets still map to lines.
+	const blank = (s) => s.replace(/[^\n]/g, ' ');
+	const prose = lines
+		.map((text, i) => (inFence[i] ? blank(text) : text))
+		.join('\n')
+		.replace(/\{\/\*[\s\S]*?\*\/\}/g, blank);
+	for (const { props, index } of findPredictTags(prose)) {
+		if (props.has('run')) out.push({ line: lineOf(prose, index), surface: `<Predict run="${props.get('run')}">` });
+	}
 	return out.sort((a, b) => a.line - b.line);
 }
 

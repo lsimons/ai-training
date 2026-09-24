@@ -142,9 +142,8 @@ step is a widget on the page or a prompt the learner pastes into a chat
 assistant. `mise run data` fails the page on a `<Predict run=...>`, on an
 `sh`, `bash`, `shell`, `python` or `json` fence, and on the words
 `terminal`, `python3` and `git clone` in prose. The report names the file,
-the line and what it matched. A fixture
-may still back a claim as CI proof, as long as the page never shows or
-names it. A code span such as `` `python3` `` and a `text` fence pass, so
+the line and what it matched. A fixture may still back a claim as CI
+proof, as long as the page never shows or names it. A code span such as `` `python3` `` and a `text` fence pass, so
 prose may quote a command when the point is to recognize it.
 
 ## Checkpoints
