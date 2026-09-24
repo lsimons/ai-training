@@ -302,13 +302,14 @@ patterns below after the fact. Write so that it has nothing to say.
   and a lesson bundle from the published site. Install it with
   `npx skills add lsimons/ai-training --skill tutor -g` and invoke
   `/tutor <lesson URL>`.
-- A nit left open on a merged pull request, a follow-up a review or a
-  wave report names, and an improvement the maintainer defers all become
-  GitHub issues before the session ends, filed and triaged as
-  `docs/agents/triage.md` describes, or, in a bounded unattended run
-  (`/wave --no-filing`), are listed in the session record for the
-  maintainer to file. Session records and transcripts are otherwise not a
-  place work waits.
+- A follow-up a review or a wave report names, and an improvement the
+  maintainer defers, become GitHub issues before the session ends, filed
+  and triaged as `docs/agents/triage.md` describes. A cosmetic nit left
+  open on a merged branch becomes a line in the one open `Cosmetic nits`
+  issue. In a bounded unattended run (`/wave --no-filing`) the leads write
+  the same issues to a follow-ups file, and the dispatcher files them when
+  the run ends, after one check against `main`. Session records and
+  transcripts are never a place work waits.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`type(scope): description`), and commitlint enforces it.
 - A push to `main` deploys to GitHub Pages (`.github/workflows/deploy.yml`).

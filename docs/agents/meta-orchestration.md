@@ -83,14 +83,14 @@ so don't run one.
 default mode every wave files follow-up issues, and some of those are
 `ready-for-agent` content issues, so a content run can feed its own queue
 and never reach the empty wave that ends the loop. With `--no-filing`
-nobody in the wave files an issue. The lead passes that rule to every
-builder and reviewer, builders hand their follow-ups to the lead instead of
-filing them, and the lead lists everything under a `Follow-ups:` line in
-its report and in the session record. The queue only shrinks, the loop
-ends, and the maintainer files the follow-ups from the record the next
-day. The `AGENTS.md` rule that work never waits in a session record has
-this one exception, and the record names the run as unattended so the
-follow-ups are found.
+nobody files an issue while the run goes, so the queue only shrinks and
+the loop ends. The follow-up rule is otherwise the same in both modes:
+each lead writes the issue it would have filed, title, body and labels,
+to a follow-ups file on its wave branch, and when the run ends the
+dispatcher checks each entry once against `main` and files the ones that
+still hold. The overnight run of 2026-09-24 left 24 follow-ups in a record
+instead, and 6 of them were obsolete by the evening. Nothing waits in a
+record for the maintainer to reconcile.
 
 ## The loop
 
@@ -139,11 +139,12 @@ file and never the dispatcher's context. One tick:
    that has the `code` label too is marked so the lead adds a code review,
    and a nits issue is left out because it arrives as the nits row. The
    picker reads the tree of the checkout it runs in, which is why the
-   pull comes first. The dispatcher then appends the nits row: every open
-   `ready-for-agent` issue whose title starts with `Nits` or
-   `Cosmetic nits`, as one row for one nits builder in one worktree and
-   branch, reviewed with a diff read plus the fast checks and no content
-   review. A wave that is only the nits row proceeds. An empty table ends
+   pull comes first. The dispatcher then decides on the nits row: the one open
+   issue titled `Cosmetic nits`, as one row for one nits builder in one
+   worktree and branch, reviewed with a diff read plus the fast checks and
+   no content review. It joins only when the issue has 10 or more nit
+   lines or the table is otherwise empty. A wave that is only the nits
+   row proceeds. An empty table ends
    the loop.
 5. **Mark the wave in flight and spawn the wave lead.** The dispatcher
    writes `In flight: wave <n>, branch <b>, issues #a #b ...` to the meta
@@ -170,10 +171,13 @@ file and never the dispatcher's context. One tick:
    starts, filed and triaged as `triage.md` describes and linked from the
    session record. The wave lead files the ones it has the context for and
    lists their numbers on the report's `Filed` line. The dispatcher files
-   the rest. Nits are batched: the lead files one nits issue per wave
-   (`Cosmetic nits left open on wave <n> branches`, one line per nit) and
-   never one per lesson. With `--no-filing` nothing is filed and the
-   report's `Follow-ups:` lines hold the list instead.
+   the rest. There is one open nits issue at a time, titled
+   `Cosmetic nits`: a lead appends a line per open nit to its body and
+   creates it only when none is open. The nits row joins a wave only when
+   that issue has 10 or more lines or the picker's table is otherwise
+   empty, so the nits no longer chain from wave to wave (#256 to #315 were
+   eight such issues). With `--no-filing` the lead writes its follow-ups
+   file instead, and the dispatcher files it when the run ends.
 
 The dispatcher edits no code and runs no check of the site. The loop ends
 on an empty wave, an exhausted whitelist, an `open` or `failed` report, or
@@ -235,8 +239,9 @@ everything below.
 - The nits row rule and the "Resuming a half-done wave" section, so a lead
   that starts after a failed one knows what to reuse and what to spawn.
 
-- The filing paragraph: file per `triage.md` with one nits issue per wave,
-  or, under `--no-filing`, file nothing and list the follow-ups.
+- The filing paragraph: file per `triage.md` and append open nits to the
+  one `Cosmetic nits` issue, or, under `--no-filing`, write the follow-ups
+  file for the dispatcher to file when the run ends.
 
 - What the lead writes and returns. It writes the session record to
   `docs/agents/sessions/<date>-wave-<n>.md` on the wave branch, in the form
@@ -251,7 +256,7 @@ everything below.
   Left out: #c (<reason>) ...
   For the maintainer: <decisions needed, or none>
   Filed: #<issue> <title> ... (or none)
-  Follow-ups: <none, or one line per nit or follow-up under --no-filing>
+  Follow-ups: <none, or the follow-ups file under --no-filing>
   Add to collision notes: <lessons|code: one line each, or none>
   Remove from collision notes: <lessons|code: the bullet's first words and why, one line each, or none>
   ```
