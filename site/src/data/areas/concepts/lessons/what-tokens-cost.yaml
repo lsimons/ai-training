@@ -39,7 +39,8 @@ notes: >-
   uses round example numbers for "a small model" and "a large model" and quotes no vendor price. The
   pricing structure it describes (per million tokens, one input price and a higher output price, a
   large model several times a small one) was checked against the Claude Platform pricing page on
-  2026-09-24. The fixture site/examples/concepts/what-tokens-cost/price_prompts.py prints every
-  number in the two text fences, and tests/test_what_tokens_cost.py asserts that the page shows its
-  output, because a foundations page may not carry a Predict run tag. The instruction file and the
-  meeting notes are illustrative.
+  2026-09-24, and the example numbers match no price row on that page. The fixture
+  site/examples/concepts/what-tokens-cost/price_prompts.py is the source of every number in the two
+  text fences and is not wired into CI yet, because a foundations page may not carry a Predict run
+  tag and #237 decides how a hidden fixture backs such a page. The instruction file and the meeting
+  notes are illustrative.
