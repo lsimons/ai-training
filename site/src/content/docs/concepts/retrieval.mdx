@@ -1,0 +1,233 @@
+import { Choice, MultiChoice, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+
+A product assistant on a web shop is asked what the yearly plan costs,
+and it answers with last year's price. The price went up in January,
+and the model was trained before that. The first wish is to retrain the
+model on the new price list, which is slow, expensive, and out of date
+again at the next price change. In this lesson we look at what
+assistants do instead. A search step finds the passages that fit the
+question and puts them in the prompt, and the model answers from what
+it can see. You read the output of a small keyword search over four
+policy texts. The same question is asked in the document's own words
+and then in a colleague's words, and you judge what the search missed.
+You install and run nothing.
+By the end you can say what retrieval adds, what grounding promises, and
+which two questions to ask of any assistant that answers from documents.
+
+## Search first, then answer
+
+A model knows what was in its training data and what's in its context
+window right now. The previous lesson showed a tool that
+reads a file into the conversation. Retrieval is a search that runs
+before the model answers, so that the right text is already in the
+prompt when the model reads the question (@AEC-08). The whole approach
+is called **retrieval (RAG)**, short for retrieval-augmented generation, and it
+is how an assistant answers about your files or a company wiki without
+anyone retraining anything.
+
+The steps are the same in every retrieval product. The documents are
+split into passages. When a question comes in, a search scores each
+passage against the question and picks the best few. Those passages are
+pasted into the prompt above the question, with an instruction such as
+"answer from the passages below". The model then writes an answer from
+text it can see. Update the document, and the next answer uses the new
+text. The model never changed.
+
+The search is the weak point. A model can only ground its answer in the
+passages the search gave it. When the search returns the wrong passage,
+the model answers from the wrong passage, with the same confidence
+(@AEC-05). So the first thing to know about any retrieval assistant is
+how it searches.
+
+## What a keyword search finds
+
+The simplest search matches words. The question is split into words,
+common words such as "how" and "the" are dropped, and each document is
+scored by how many of the remaining words it contains. The best score
+wins and becomes the passage in the prompt. Similarity search, which
+most products use, scores meaning instead of exact words. The keyword
+version is the one you can check by eye, so it is the one this lesson
+uses.
+
+The policy texts are one paragraph each, on annual leave, expenses,
+remote work, and laptops. Here is the search on a question that uses
+the leave policy's own words. The output below is what the search
+printed, line for line.
+
+```text
+question: How many days of annual leave do I get?
+keywords: annual, days, leave
+  expenses.txt: 1 match
+  laptops.txt: 0 matches
+  leave.txt: 3 matches
+  remote-work.txt: 1 match
+retrieved: leave.txt
+passage: Annual leave. Every employee accrues 25 days of annual leave per year. Unused days carry over until 31 March. Requests go to your manager at least two weeks ahead.
+```
+
+Three keywords, and the leave policy contains all three. The expenses
+and remote work policies each contain "days" and score one. The search
+retrieves the leave policy, and a model that reads that passage answers
+"25 days" and is right.
+
+Now the same question in a colleague's words.
+
+```text
+question: How much holiday can I take?
+keywords: holiday, take
+  expenses.txt: 0 matches
+  laptops.txt: 0 matches
+  leave.txt: 0 matches
+  remote-work.txt: 0 matches
+retrieved: nothing, no document contains any of the keywords
+```
+
+The answer is in the leave policy, the same as before. The policy says
+"annual leave" and the colleague said "holiday", so the keyword search
+scores every document at zero and retrieves nothing. What happens next
+depends on the product. A careful assistant says the documents don't
+cover the question. Without that care, the model has an empty prompt
+and a question about holidays, and answers from training data, which
+for a company policy means it makes something up.
+
+<Choice id="why-the-miss" objective="concepts/explains-models/explains-grounding"
+  concepts={['retrieval-rag']}
+  context="A keyword search over four one-paragraph policy texts retrieved the leave policy for the question 'How many days of annual leave do I get?' and retrieved nothing for 'How much holiday can I take?'. The leave policy says 'annual leave' and never says 'holiday'."
+  title="Why did the second search find nothing?" hint="Compare the keywords line of each search with the words in the passage that was retrieved the first time."
+  options={[
+    { text: 'The model forgot the leave policy between the two questions.', why: 'The model was not involved yet. The search runs before the model, and it scores words in documents. Nothing was remembered or forgotten.' },
+    { text: 'The question used words that appear in no document.', correct: true },
+    { text: 'The leave policy is about leave, and holidays are a different policy.', why: 'The leave policy is the document that answers the question. The search did not fail because the answer is missing. It failed because the words differ.' },
+    { text: 'Two keywords are too few for a search to work.', why: 'A single keyword that appears in one document is enough for this search. The count of keywords was not the problem, and the third search on the page finds a document with one match.' },
+  ]}>
+The first search retrieved the leave policy and the second retrieved
+nothing, although both questions ask the same thing. Why?
+</Choice>
+
+## Grounding, and what it doesn't fix
+
+**Grounding** is tying an answer to sources the model was given, and
+not to what it remembers from training. A grounded answer does two
+things. It points at the passage it relied on, so you can read the
+passage yourself. And it says so when the passages don't cover the
+question (@Academy ai-capabilities-and-limitations).
+The instruction "answer from the passages below, and say if they don't
+answer the question" is what asks the model for both.
+
+Grounding narrows what the model can get wrong. It doesn't remove it.
+A grounded answer rests on the passage, and the passage can be the
+wrong one, as the third search below shows. The model can also misread
+a passage it was given, or answer a question the passage only half
+covers by adding a detail from training (@AEC-05). And a passage that
+is itself out of date grounds an out-of-date answer. Grounding makes an
+answer checkable, and checking is still yours to do.
+
+Here is the third search. The question is about the daily allowance
+for a meal on a work trip, which the expenses policy sets at 40 euros
+per day.
+
+```text
+question: What is the daily rate for working away from the office?
+keywords: daily, office, rate, working
+  expenses.txt: 0 matches
+  laptops.txt: 0 matches
+  leave.txt: 0 matches
+  remote-work.txt: 1 match
+retrieved: remote-work.txt
+passage: Remote work. Staff may work from home up to three days per week. A home office allowance of 30 euros per month is paid with salary. Equipment stays company property.
+```
+
+The expenses policy says "per day", and the question said "daily", so
+the expenses policy scores zero. The remote work policy contains
+"office" and wins with one match. A model that grounds its answer in
+this passage might say the daily rate is 30 euros, and cite the remote
+work policy for it. The citation is real, the passage is real, and the
+answer is wrong twice: the 30 euros is a monthly allowance, and it is
+for a home office and not for working away. A grounded wrong answer
+looks the same as a grounded right one until you read the passage.
+
+<Scenario id="outdated-price" objective="concepts/explains-models/explains-grounding"
+  concepts={['retrieval-rag', 'grounding']}
+  context="A product assistant answers customer questions from a folder of product documents through retrieval: a search picks passages from the documents and pastes them into the prompt before the model answers."
+  title="The assistant quotes last year's price" hint="Where does an assistant that answers from documents get its facts from, and which part of that is quick to change?"
+  options={[
+    { text: 'Ask the vendor to retrain the model on the new price list.', consequence: 'Weeks pass and money is spent. The retrained model repeats the new price until the next change, and then it is wrong again.' },
+    { text: 'Check the passage the answer was grounded in, and update that document.', correct: true, consequence: 'The passage shows the old price list. You replace the document, and the next question retrieves the new one.' },
+    { text: 'Add "always give the current price" to the assistant\'s instructions.', consequence: 'The model cannot tell current from old. It has only the passage in its prompt, and the passage still holds last year\'s price.' },
+    { text: 'Turn off retrieval so the model answers from what it knows.', consequence: 'The model now answers from training data, which is older than the document was. The price is still wrong, and now there is no passage to check.' },
+  ]}>
+The web shop's assistant answers from a folder of product documents.
+A customer asks what the yearly plan costs and gets last year's price.
+What do you do first?
+</Scenario>
+
+<MultiChoice id="what-grounding-fixes" phase="review" objective="concepts/explains-models/explains-grounding"
+  concepts={['grounding', 'retrieval-rag']}
+  context="A retrieval assistant searches a set of documents, pastes the best passages into the prompt, and is told to answer from them and to say when they don't cover the question."
+  title="Which of these does grounding take care of?" hint="Grounding ties the answer to the passage. What can still be wrong about the passage, and about the model's reading of it?"
+  options={[
+    { text: 'The answer points at a passage you can read yourself.', correct: true },
+    { text: 'The search picked the right passage from the documents.', why: 'The search picks the passage before the model sees anything. Grounding ties the answer to that passage, right or wrong.' },
+    { text: 'The model says when the passages leave the question open.', correct: true },
+    { text: 'The passages the model was given are up to date.', why: 'The model answers from the text it was given. An old document grounds an old answer, and only a person updating the document fixes that.' },
+  ]}>
+An assistant answers from documents through retrieval, with the
+instruction to answer from the passages and say when they don't cover
+the question. Which of these does grounding take care of?
+</MultiChoice>
+
+<Pitfall title="Two clauses, one sentence">
+An assistant is asked what the company pays for working from home. The
+search returns two passages, the remote work policy, and the expenses
+policy, because both mention euros and both mention days. The answer
+reads: "Staff may work from home up to three days per week, and are
+reimbursed up to 40 euros per day with a receipt." Each half is a real
+clause from a real policy. Together they say the company pays 40 euros
+for every home working day, which no document says. The 40 euros is for
+meals on a work trip. The answer cited both passages, and a reader who
+trusted the citations without opening them would have filed a claim.
+When an answer draws on more than one passage, read the sentence that
+joins them, because the join is the model's and the sources don't check
+it.
+</Pitfall>
+
+<Exercise stretch="Rewrite the third question so that the keyword search would retrieve the expenses policy. Which words did you have to borrow from the document, and would the colleague who asked have known them?">
+
+Read the third search on this page again, the one on the daily rate,
+together with the four sentences of the expenses policy it should have
+found: "Expenses. Travel by train is booked through the travel desk.
+Meals on a work trip are reimbursed up to 40 euros per day with a
+receipt. Claims are filed within 30 days." Then, on paper or in a note,
+write three lines. First, which document holds the answer, and which
+document the search retrieved. Second, which word in the question
+would have needed to match, and what the document says instead. Third,
+the answer a model would give from the retrieved passage, and what a
+reader would have to open to notice it is wrong. Ten minutes is enough.
+
+A good result names the expenses policy as the answer and the remote
+work policy as what was retrieved, names "daily" against "per day" (or
+"working away" against "work trip") as the miss, and says the model's
+answer would be a 30 euro figure that a reader can only catch by
+reading the passage and seeing "per month" and "home office". If your
+own assistant answers from documents, what would you have to open to do
+this same check on one of its answers?
+
+</Exercise>
+
+<Recap>
+
+1. Retrieval is a search that runs before the model answers and pastes
+   the best passages into the prompt. The model answers from text it
+   can see, and the documents can change without the model changing
+   (@AEC-08).
+2. The search bounds the answer. A keyword search finds a document only
+   when the question uses the document's words, and a wrong passage
+   produces a confident wrong answer (@AEC-05).
+3. A grounded answer points at its passage and says when the passages
+   don't cover the question. Grounding makes an answer checkable and
+   doesn't make it right: the passage can be wrong, old, or misread
+   (@Academy ai-capabilities-and-limitations).
+4. Ask two questions of any assistant that answers from documents. What
+   did it retrieve, and does the answer match the passage.
+
+</Recap>
