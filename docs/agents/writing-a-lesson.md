@@ -133,7 +133,8 @@ Components go between paragraphs and never inside list items or tables.
 Each served objective gets at least one checkpoint with
 `objective="<that id>"`, and each checkpoint names the one objective it
 evidences. A lesson has one `<Pitfall>`, one `<Exercise>`, and one `<Recap>`
-at the end. Tutorial mode: one or two paragraphs, then an example the
+at the end, and may have a `<MorePractice>` block between the exercise and
+the recap ("Alternates and More practice" below). Tutorial mode: one or two paragraphs, then an example the
 learner runs or predicts. Each example that runs gets a `<Predict>`, and
 its output is asserted in CI either way. Give it an `objective` only when
 predicting the output demonstrates a served objective. Otherwise leave
@@ -177,9 +178,59 @@ hint refers to something on the page: "the widget", "the table above",
 "the fixture", "the memo". Say what that thing is, without giving the
 answer.
 
-Across a course, aim for two interaction kinds per concept (a `Choice` and
-a `Sort` on blast radius, say). A review then tests the idea rather than
-one wording of it. This is guidance, and nothing checks it.
+### Alternates
+
+Every checkpoint takes `phase`: `first` (the default, so existing tags
+don't write it), `review` or `practice` (spec S01 "Checkpoint"). A
+`review` or `practice` checkpoint is an alternate. It has the same
+`objective` as a `first` checkpoint of the same lesson, its sibling, and
+asks about the same idea with different wording.
+
+The rule for new and revised lessons:
+
+- Give every graded `first` checkpoint at least one `review` alternate
+  where the objective allows it, and make it a different interaction kind
+  than the sibling where that fits (a `Choice` on blast radius and a `Sort` alternate, say). The review page asks the alternates in place of the sibling. A review then tests the idea rather than one wording of it.
+- A lesson may have zero to three `practice` checkpoints, for a learner
+  who wants more.
+
+A `review` alternate goes right after its sibling in the source. The lesson
+page renders it hidden, and nothing on the page counts it. It must be gradable in a review. A `Repair`, an honor-system `Predict` (no `answer`) and a checkpoint with `review={false}` can't be graded there, and the check rejects them. Write a `context` for it by the rule
+above, and give it its own `id`, `title`, `hint` and wrong-option `why`
+texts. It passes the guessability check like any item, and in a lesson with
+four or more `Choice` or `Scenario` items its key position counts toward
+`fixed-position`.
+
+```mdx
+<MultiChoice id="spot-the-leading-question" phase="review"
+  objective="concepts/explains-models/names-failure-modes" ...>
+Which two of these questions leave the answer open?
+</MultiChoice>
+```
+
+`practice` checkpoints sit in one `<MorePractice>` block between the
+`<Exercise>` and the `<Recap>`, which renders a "More practice" heading.
+Each one writes `phase="practice"`. The page grades and records them, and they don't have a Skip button. A learner can finish the lesson without them, and they don't become review items. Import `MorePractice` from `@components/lesson`.
+
+```mdx
+<MorePractice>
+
+<Choice id="a-fact-to-work-with" phase="practice"
+  objective="concepts/explains-models/names-failure-modes" ...>
+...
+</Choice>
+
+</MorePractice>
+```
+
+The page build fails on a `practice` checkpoint outside the block, another
+phase inside it, an empty block, a second block, or a block that isn't
+between the exercise and the recap. `mise run checkpoints` fails an
+alternate whose `objective` no `first` checkpoint of the lesson has, and a
+`review` alternate that isn't gradable. It prints a warning for each lesson
+with a reviewable `first` checkpoint that has no `review` alternate, and
+that warning doesn't fail the build: it measures how far the content has
+come.
 
 ```mdx
 <Choice id="what-the-model-does" objective="concepts/explains-models/explains-generation"
@@ -390,7 +441,7 @@ indentation after it: a fixture line that starts with two spaces and
 with the fixture output, and fails when an indented line was pasted at
 column 0. Each item has `id`, `lesson`, `kind`, `objective`,
 `concepts`, `context`, `stem`, `options`, `answer`, `hint`, `reviewable`,
-`revision` and `guessable`. S03 "Checkpoint export" gives the form of
+`revision`, `guessable` and `phase`. S03 "Checkpoint export" gives the form of
 `options` and `answer` per kind. `mise run checkpoints` (part of
 `mise run ci`, after the build) reads the file back and fails when a page
 checkpoint is missing from it, an item has no page, a field is missing, a

@@ -7,8 +7,10 @@ lives, how it is versioned, and how it moves between browsers.
 states, the review map, comfort level, progress display, the skills check,
 export, import and reset are implemented (2026-09-20). Record version 2
 (review `history` entries carry the day) and the migration from version 1 on
-load and on import are implemented (2026-09-20). Deferred: goals and quizzes
-exist in the record shape only, with no page that writes them.
+load and on import are implemented (2026-09-20). The `practice` map and the
+`served` field of a review `history` entry are implemented, in version 2
+(2026-09-24). Deferred: goals and quizzes exist in the record format only,
+with no page that writes them.
 
 ## Introduction
 
@@ -34,18 +36,19 @@ reads when the learner exports it.
 | lesson     | `state`: `read`, `finished` or `skipped`; the date it changed                                                                                                           |
 | checkpoint | `state`: `passed`, `skipped` or `attempted`; the number of attempts                                                                                                     |
 | review     | Per checkpoint: `stage`, `due`, `last`, `history`. Each `history` entry is `{ "at": <day>, "result": "pass" or "fail" }`, oldest first. Written by the review schedule. |
+| practice   | Per `practice` checkpoint: `state` and attempts, as for a checkpoint, in their own map. Not counted anywhere else.                                                      |
 | habit      | Per habit: `next`, `history`. Written by the habit schedule, set in a later spec.                                                                                       |
 | quiz       | Per course: score and date                                                                                                                                              |
 | learner    | Chosen comfort level, chosen goals                                                                                                                                      |
 
 ### Lesson states
 
-| Stored     | Meaning                                               | Shown on the graph as |
-| ---------- | ----------------------------------------------------- | --------------------- |
-| (absent)   | Never opened                                          | untouched             |
-| `read`     | Opened, recap not reached                             | in progress           |
-| `finished` | Recap reached with every checkpoint passed or skipped | finished              |
-| `skipped`  | Learner marked "I know this"; not counted as finished | skipped               |
+| Stored     | Meaning                                                       | Shown on the graph as |
+| ---------- | ------------------------------------------------------------- | --------------------- |
+| (absent)   | Never opened                                                  | untouched             |
+| `read`     | Opened, recap not reached                                     | in progress           |
+| `finished` | Recap reached with every `first` checkpoint passed or skipped | finished              |
+| `skipped`  | Learner marked "I know this"; not counted as finished         | skipped               |
 
 ### Checkpoint states
 
@@ -63,14 +66,15 @@ milestone bar always show the same number for the same record.
 
 - **Percent** = finished lessons / (all lessons − skipped lessons), rounded
   to a whole number. With no lessons left to count, it is 0.
-- **Lessons only.** A lesson is `finished` only when every checkpoint is
-  passed or skipped, so a checkpoint isn't a separate unit and doesn't add to
-  the count.
+- **Lessons only.** A lesson is `finished` only when every `first`
+  checkpoint is passed or skipped, so a checkpoint isn't a separate unit and
+  doesn't add to the count. A `review` or `practice` checkpoint (S01
+  "Checkpoint") counts toward no figure on the site: not finishing, not a
+  percent, not a node ring, and not a checkpoint count.
 - **Skipped** lessons are out of both sides of the percent. A surface that
   shows the percent shows skipped as a separate count ("2 skipped") when it
   isn't zero.
-- **Per-lesson node ring** on the lesson graph stays passed checkpoints /
-  that lesson's checkpoints. That is detail within one lesson and isn't a
+- **Per-lesson node ring** on the lesson graph shows passed `first` checkpoints / that lesson's `first` checkpoints. That's detail within one lesson and isn't a
   progress unit.
 - **Continue button**: it links to the first lesson in path order that is
   neither finished nor skipped. Path order is the order of the course file
@@ -95,8 +99,9 @@ is in this spec because it writes checkpoint states, and the review item it
 creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
 
 - **Item choice.** One checkpoint per objective in the lesson's `serves`,
-  in `serves` order: the lesson's first checkpoint for that objective that
-  is reviewable, else its first checkpoint of any kind. An objective without
+  in `serves` order: the lesson's first `first`-phase checkpoint for that
+  objective that is reviewable, else its first `first`-phase checkpoint of
+  any kind. Alternates are never asked. An objective without
   a checkpoint contributes nothing. The choice is made at build time from
   the lesson source, so the card and the lesson body always agree.
 - **Who sees it.** Only a learner whose record has `comfort: more`, and only
@@ -151,6 +156,14 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
   later, a fail was due the next day, and a retired or never answered item
   gives `due` itself. Every entry of one item gets that same day, because
   version 1 kept no other date.
+- The `practice` map and the `served` field joined version 2 on 2026-09-24 without a bump, because they add data and change the meaning of nothing stored. A record
+  without them reads as before, and a site from before the change drops
+  them on load.
+  - `practice`: a map like `checkpoints`, keyed `<lesson>#<checkpoint>`,
+    for `practice` checkpoints only. Absent reads as empty.
+  - `served` on a review `history` entry: the id (within its lesson) of the
+    `review` alternate the review page asked in place of the item's own
+    checkpoint. Absent means the item's own checkpoint was asked.
 - Dates are ISO calendar days in the learner's local time zone.
 - Shape:
 
@@ -172,10 +185,13 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
       "last": "pass",
       "history": [
         { "at": "2026-09-12", "result": "fail" },
-        { "at": "2026-09-13", "result": "pass" },
+        { "at": "2026-09-13", "result": "pass", "served": "sort-the-briefs" },
         { "at": "2026-09-20", "result": "pass" }
       ]
     }
+  },
+  "practice": {
+    "using-agents/delegating#brief-for-a-colleague": { "state": "attempted", "attempts": 1 }
   },
   "quizzes": {
     "using-agents": { "score": 0.9, "at": "2026-09-21" }
@@ -198,6 +214,7 @@ creates follows the [spaced review](S05-spaced-review.md) rules unchanged.
 | Change                            | Effect                                                                      |
 | --------------------------------- | --------------------------------------------------------------------------- |
 | A lesson or checkpoint id changes | Its entries are orphaned and dropped silently on next load; keep ids stable |
+| A `review` alternate is removed   | A `served` entry that names it stays, as history; nothing reads it again    |
 | Content added                     | Nothing; new ids simply have no entry                                       |
 | A stored field changes meaning    | Bump `N` and add the migration step from `N - 1`                            |
 
