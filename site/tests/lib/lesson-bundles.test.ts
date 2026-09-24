@@ -38,6 +38,10 @@ describe('setAsideCode', () => {
 });
 
 describe('proseOf', () => {
+	it('keeps a run of blank lines inside a fenced block and collapses one outside', () => {
+		const block = '```python\nimport os\n\n\ndef f():\n    pass\n```';
+		expect(proseOf(`Before.\n\n\n\n${block}\n\n\n\nAfter.\n`, site)).toBe(`Before.\n\n${block}\n\nAfter.\n`);
+	});
 	it('drops the import block, omits widgets, and renders components to Markdown', () => {
 		const md = proseOf(
 			[
@@ -229,12 +233,16 @@ describe('bundleOf and buildLessonBundles', () => {
 			topics: topics.map((t) => ({ ...t.data, definition: 'd' })),
 			competencies: competencies.map((c) => c.data) as BundleSources['competencies'],
 			items: [],
+			lessonIds: new Set(['concepts/how-models-work']),
 			site,
 		};
 		const base = docs.find((d) => d.id === 'safety/agent-risk') as unknown as Lesson;
 		const lesson = (data: object): Lesson => ({ ...base, data: { ...base.data, ...data } }) as Lesson;
 		expect(() => bundleOf(lesson({ covers: 'nowhere/none' }), sources)).toThrow(/covers nowhere\/none/);
 		expect(() => bundleOf(lesson({ serves: ['o9'] }), sources)).toThrow(/serves o9/);
+		expect(() => bundleOf(lesson({ assumes: [{ objective: 'o1', lesson: 'concepts/gone' }] }), sources)).toThrow(
+			/assumes o1 from concepts\/gone, which is not a lesson page/,
+		);
 		const bare = bundleOf(
 			lesson({ assumes: [{ objective: 'o1' }], 'extends-to': [{ label: 'Next', href: '/safety/deeper/' }] }),
 			sources,

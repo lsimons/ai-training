@@ -13,6 +13,7 @@ changed file is prose or prose tooling (see "When the browser suite runs").
 | Component | `mise run site-test`   | The same Vitest run; `site/tests/components/` renders `.astro` files | Wrong server-rendered markup: a missing `data-` attribute, a bad prop check, a wrong link                           |
 | Examples  | `mise run examples`    | `site/scripts/check-examples.mjs`                                    | A `<Predict run= answer=>` whose fixture prints something else than the lesson shows                                |
 | Export    | `mise run checkpoints` | `site/scripts/check-checkpoints.mjs`, after `site-build`             | A built `dist/data/checkpoints.json` that misses a page checkpoint, has an item without a page, or a bad concept id |
+| Bundles   | `mise run bundles`     | `site/scripts/check-bundles.mjs`, after `site-build`                 | A built `dist/data/lessons/<id>.json` missing for a page, without an S08 field, or with a fenced block changed      |
 | e2e       | `mise run site-e2e`    | Playwright, `site/e2e/*.spec.ts`, against the built site             | The scripts and the markup disagreeing, a page error, a console error, a flow that only works with real navigation  |
 
 ## Where a new assertion belongs

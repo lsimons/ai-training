@@ -110,7 +110,7 @@ Body of the response.
 			serves: [],
 			assumes: [
 				{ objective: 'o1', lesson: 'safety/agent-risk', section: 's' },
-				{ objective: 'o1', lesson: 'nowhere/none', section: 's' },
+				{ objective: 'o1', lesson: 'concepts/how-models-work', section: 's' },
 			],
 		},
 		body: '',
