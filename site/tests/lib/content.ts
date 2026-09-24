@@ -227,6 +227,7 @@ export interface LessonPlanFixture {
 		introduces: string[];
 		assumes: { objective: string; lesson?: string; section?: string }[];
 		'extends-to': { label: string; href: string }[];
+		'covered-by'?: { label: string; href: string };
 		after: string[];
 		shorts: string[];
 		exercise?: { kind: 'do' | 'judge'; brief: string };

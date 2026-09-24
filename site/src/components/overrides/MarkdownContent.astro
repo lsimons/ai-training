@@ -13,7 +13,7 @@ import RouteAhead, { type AheadItem } from '@components/lesson/RouteAhead.astro'
 import { getAreas, isEngineering } from '@lib/areas';
 import { checkExtendsToHref } from '@lib/extends-to';
 import { checkpointsOf, type Lesson } from '@lib/lessons';
-import { knownPagePaths } from '@lib/links';
+import { bibliographySources, knownPagePaths } from '@lib/links';
 import { chooseSkillsCheck } from '@lib/skills-check';
 import { href } from '@lib/url';
 
@@ -82,10 +82,7 @@ if (isLesson) {
 	// An `extends-to` href is a root-relative page path, or an `https://` URL under
 	// a bibliography `url` (spec S03 "Frontmatter"). Anything else fails the build.
 	const pages = await knownPagePaths();
-	const sources = (await getCollection('bibliography')).map((b): [string, string | null | undefined] => [
-		b.id,
-		b.data.url,
-	]);
+	const sources = await bibliographySources();
 	ahead = (data['extends-to'] ?? []).map((n) => {
 		const check = checkExtendsToHref(n.href, sources);
 		if (check.kind === 'invalid') throw new Error(`${lessonId}: ${check.reason}`);
@@ -241,7 +238,8 @@ if (isLesson) {
 		// Finish and skip (spec S04 lesson states; finishing schedules reviews, spec S05).
 		const finish = root.querySelector<HTMLButtonElement>('[data-finish]');
 		const finishNote = root.querySelector<HTMLElement>('[data-finish-note]');
-		const skip = root.querySelector<HTMLButtonElement>('[data-skip-lesson]');
+		// Two skip buttons: the recap's, and the sidebar tip's when the lesson has `covered-by` (#111).
+		const skips = document.querySelectorAll<HTMLButtonElement>('[data-skip-lesson]');
 		/** `finished` needs every checkpoint passed or skipped (spec S04 "Lesson states"). */
 		function openCheckpoints(): number {
 			const rec = progress.load();
@@ -260,7 +258,7 @@ if (isLesson) {
 			if (finishNote) {
 				finishNote.textContent = l?.state !== 'finished' && open > 0 ? `Pass or skip ${open} more checkpoint${open === 1 ? '' : 's'} to finish this lesson.` : '';
 			}
-			if (skip) {
+			for (const skip of skips) {
 				skip.disabled = l?.state === 'skipped' || l?.state === 'finished';
 				skip.textContent = l?.state === 'skipped' ? `Skipped (${l.at})` : 'I know this, skip it';
 			}
@@ -273,10 +271,12 @@ if (isLesson) {
 			progress.finishLesson(lessonId, reviewable);
 			drawLesson();
 		});
-		skip?.addEventListener('click', () => {
-			progress.skipLesson(lessonId);
-			drawLesson();
-		});
+		for (const skip of skips) {
+			skip.addEventListener('click', () => {
+				progress.skipLesson(lessonId);
+				drawLesson();
+			});
+		}
 		drawLesson();
 	}
 </script>

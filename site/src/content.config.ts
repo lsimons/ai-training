@@ -28,6 +28,18 @@ const extendsToSchema = z
 	})
 	.strict();
 
+/**
+ * The one external course that covers every objective the lesson serves (spec
+ * S11 "Lesson file", `covered-by`). `href` is an `https://` URL that the
+ * TableOfContents override checks against the bibliography (`lib/extends-to.ts`).
+ */
+const coveredBySchema = z
+	.object({
+		label: z.string(),
+		href: z.string().regex(/^https:\/\//, 'an https:// URL'),
+	})
+	.strict();
+
 /** The hands-on task of a lesson, as the plan states it (spec S11 "Lesson file"). */
 const exerciseSchema = z.object({ kind: z.enum(['do', 'judge']), brief: z.string() }).strict();
 
@@ -46,6 +58,7 @@ const lessonDocsFields = z.object({
 	serves: z.array(idSchema).optional(),
 	assumes: z.array(assumesSchema).optional(),
 	'extends-to': z.array(extendsToSchema).optional(),
+	'covered-by': coveredBySchema.optional(),
 	/** The day the page's sources were last checked, shown in the review line with `review-by` (spec S03). */
 	'sources-checked': z.date().optional(),
 	/** The date by which the page's sources must be checked again (spec S03). */
@@ -66,6 +79,7 @@ const lessonPlanSchema = z
 		introduces: z.array(idSchema).default([]),
 		assumes: z.array(assumesSchema).default([]),
 		'extends-to': z.array(extendsToSchema).default([]),
+		'covered-by': coveredBySchema.optional(),
 		/** Lesson ids in the same area this lesson comes after in the lesson graph, until it is live. */
 		after: z.array(idSchema).default([]),
 		/** Titles of the shorts the lesson would link to for depth. */
@@ -130,6 +144,7 @@ function lessonDocsLoader(): Loader {
 						serves: lesson.serves,
 						assumes: lesson.assumes,
 						'extends-to': lesson['extends-to'],
+						'covered-by': lesson['covered-by'],
 						'sources-checked': lesson['sources-checked'],
 						'review-by': lesson['review-by'],
 					};

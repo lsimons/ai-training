@@ -2,7 +2,8 @@
  * Renders the `TableOfContents` override (issue #220) with Astro's Container
  * API: a lesson page gets a "Checkpoints" and an "Examples" group after
  * Starlight's headings list, each entry linking to its section id, and a
- * page with only its title and no lesson entries renders no menu.
+ * page with only its title and no lesson entries renders no menu. A lesson
+ * with `covered-by` (issue #111) gets the skip tip above the menu.
  */
 import TableOfContents from '@components/overrides/TableOfContents.astro';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
@@ -20,6 +21,8 @@ const title = { depth: 2, slug: '_top', text: 'Overview', children: [] };
 const heading = { depth: 2, slug: 'first', text: 'First', children: [] };
 const lesson = docs.find((d) => d.id === 'concepts/how-models-work');
 const page = { id: 'concepts/index', data: { title: 'Concepts' } };
+const coveredBy = { label: 'How agents think', href: 'https://example.com/aec/lesson-2' };
+const covered = { ...lesson, data: { ...lesson?.data, 'covered-by': coveredBy } };
 
 async function render(entry: unknown, items: unknown[]) {
 	// Starlight's own list reads `toc` and the `t()` translator from the route locals; the override reads `entry`.
@@ -51,5 +54,29 @@ describe('TableOfContents', () => {
 	it('renders no groups on a page that is not a lesson, and no menu when the title is its only entry', async () => {
 		expect(await render(page, [{ ...title, children: [heading] }])).not.toContain('lesson-toc');
 		expect((await render(page, [title])).trim()).toBe('');
+	});
+	it('renders no skip tip on a lesson without covered-by', async () => {
+		const html = await render(lesson, [{ ...title, children: [heading] }]);
+		expect(html).not.toContain('data-covered-by');
+		expect(html).not.toContain('data-skip-lesson');
+	});
+	it('renders the skip tip above the menu on a lesson with covered-by, with the label linked', async () => {
+		const html = await render(covered, [{ ...title, children: [heading] }]);
+		expect(html).toMatch(
+			/<aside class="not-content covered-by" data-covered-by><p>If you have followed <a href="https:\/\/example.com\/aec\/lesson-2" rel="noopener">How agents think<\/a>, you can skip this lesson.<\/p><button type="button" class="recap-skip" data-skip-lesson>I know this, skip it<\/button><\/aside>/,
+		);
+		expect(html.indexOf('data-covered-by')).toBeLessThan(html.indexOf('<starlight-toc'));
+	});
+	it('renders the skip tip even when the title is the only entry and the lesson has no groups', async () => {
+		const bare = { ...covered, body: '' };
+		const html = await render(bare, [title]);
+		expect(html).toContain('data-covered-by');
+	});
+	it('fails the build on a covered-by href that is a page path or is under no bibliography url', async () => {
+		const bad = (href: string) => ({ ...covered, data: { ...covered.data, 'covered-by': { ...coveredBy, href } } });
+		await expect(render(bad('/concepts/how-models-work/'), [title])).rejects.toThrow(
+			/covered-by href must be an https/,
+		);
+		await expect(render(bad('https://nowhere.example/'), [title])).rejects.toThrow(/bibliography\.yaml/);
 	});
 });
