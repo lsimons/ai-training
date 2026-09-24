@@ -12,10 +12,15 @@ work is in GitHub issues (`docs/agents/issue-tracker.md`).
 ## Quick reference
 
 The repo tasks are defined in `.mise.toml`, and `mise tasks` lists them with
-a description each. Run `mise trust` and `mise install` once per clone.
+a description each. Run `mise trust` and `mise install` once per clone, and
+`mise run setup` once per clone or worktree: it installs from the lockfiles
+and fetches the Vale packages when one is missing. A task that needs the
+install stops and names `setup` when it hasn't run.
 
 `mise run ci` is the full gate and runs the same list the CI job runs, in the
-same order. `mise run links` (lychee, external URLs) and `mise run site-audit`
+same order. Its last line says which task failed. `mise run fast` is the
+same list without the installs and the e2e walkthrough, and it is the check
+a builder runs before each push. `mise run links` (lychee, external URLs) and `mise run site-audit`
 (`bun audit`) are network calls that flake, so they're not part of `ci`. Run
 them now and then. `mise run vuln` (osv-scanner over `uv.lock` and
 `site/bun.lock`) is a network call too and stays out of `ci`, but the CI
@@ -200,8 +205,9 @@ patterns below after the fact. Write so that it has nothing to say.
 - Vale (`mise run prose`): errors fail the build, style warnings print and
   are the house style. Fix a warning by rewriting unless the rewrite reads
   worse. The style packages are gitignored, so a fresh clone or worktree
-  needs `mise run prose-sync` (network) once, and `prose` stops with a
-  message naming that task when a package is missing. The vocabulary in
+  needs `mise run setup` (network) once, and `prose` stops with a
+  message naming that task when a package is missing. `prose` and `spell`
+  check untracked files too, so a new page is checked before `git add`. The vocabulary in
   `.vale/styles/config/vocabularies/ai-training/accept.txt` holds the
   canonical casing of names, and every entry has its casing enforced
   everywhere, so common words never go in. `House.Quotes`: a comma or
@@ -235,8 +241,8 @@ patterns below after the fact. Write so that it has nothing to say.
   deliberate choice: a dependabot pull request or `mise run site-install`
   after editing the version, and never a range. The prek hooks and
   `mise run spell` run `markdownlint-cli2`, `@commitlint/*` and `cspell`
-  from `site/node_modules/.bin`, so `site-install-frozen` comes before
-  `lint` and `spell`. `@playwright/test` is the one
+  from `site/node_modules/.bin`, so `site-install-frozen` (part of
+  `mise run setup`) comes before `lint` and `spell`. `@playwright/test` is the one
   Playwright package (the screenshot script imports `chromium` from it
   too).
 - `uv.lock` is committed and must stay in the tree. `mise run ci` and CI

@@ -14,11 +14,11 @@ A row marked as the nits row is one issue that holds the cosmetic nits left open
 
 Read `docs/agents/orchestration.md` and `docs/agents/meta-orchestration.md` in full before doing anything. Follow `orchestration.md` end to end in INTEGRATION MODE:
 
-- One builder agent per issue (`general-purpose`, low effort), each in its own worktree and branch `feat/<issue>-<slug>` from `origin/main`, pushed when its local checks pass, no pull request. At most six builders run at once. The builder prompt holds every item listed under step 2 of "The flow" in `orchestration.md`, plus the collision notes below, plus everything the "Session record" sections say the prompt should have said. Tell the builder to load the `build` skill and to assign the issue to itself.
+- One builder agent per issue (`general-purpose`, low effort), each in its own worktree and branch `feat/<issue>-<slug>` from `origin/main`, pushed when `mise run fast` passes, no pull request. At most six builders run at once. The builder prompt holds every item listed under step 2 of "The flow" in `orchestration.md`, plus the collision notes below, plus everything the "Session record" sections say the prompt should have said. Tell the builder to load the `build` skill and to assign the issue to itself.
 - One reviewer agent per pushed branch, in its own worktree detached at the branch tip: a content and prose review against `docs/agents/writing-a-lesson.md` and spec S03, a licensing check on every cited source (near-verbatim Academy or other source text is a blocking finding), and a probe of every factual claim against a public source. A branch with code changes also gets the `code-review` skill. The review goes on the ISSUE as a comment, findings by severity with `file:line` and a concrete failure scenario, ending in `Verdict: approve` or `Verdict: needs changes`. If the `code-review` skill returns nothing, the reviewer probes on its own.
 - You read each verdict and send the builder one message: required findings, suggested rewrites to apply unless they read worse, findings to skip. One commit, reply on the issue, re-check by the same reviewer. Loop until approve.
-- Integration: wave branch `{{BRANCH}}` in a dedicated worktree from `origin/main`, each approved branch rebased `--onto` it exactly as `orchestration.md` shows. Resolve add/add conflicts in the word list, the S02 source table and the bibliography yourself by keeping every line in course order. Any other conflict goes back to the builder whose branch came second. Since #242 the e2e specs derive their lesson and checkpoint counts from the data tree; if one still fails on the wave branch, fix it there yourself or delegate that to one builder.
-- `mise run ci` on the wave branch (wait until `lsof -i :4400` is empty first). Push, open ONE pull request against `main` with the review table (issue, branch, review comment link, re-check link), the attribution lines, and `Closes #N` for every merged issue.
+- Integration: wave branch `{{BRANCH}}` in a dedicated worktree from `origin/main`, each approved branch rebased `--onto` it exactly as `orchestration.md` shows. The word list and the bibliography merge with git's union driver (`.gitattributes`). Resolve add/add conflicts in the S02 source table yourself by keeping every line in course order, and after the rebases drop a duplicate bibliography key that `mise run data` reports. Any other conflict goes back to the builder whose branch came second. Since #242 the e2e specs derive their lesson and checkpoint counts from the data tree; if one still fails on the wave branch, fix it there yourself or delegate that to one builder.
+- `mise run ci` on the wave branch. Push, open ONE pull request against `main` with the review table (issue, branch, review comment link, re-check link), the attribution lines, and `Closes #N` for every merged issue.
 - When a builder or reviewer you spawned has finished its last task, stop it with `TaskStop` so it doesn't linger in the maintainer's agent list.
 
 ## Standing approval
@@ -42,18 +42,17 @@ If the line under the first paragraph says you are resuming, a previous lead for
 ## Collision notes (repeat verbatim in every builder prompt)
 
 - The sidebar in `site/astro.config.mjs` is generated from the data tree by `courseSidebar()`. Change nothing there.
-- `cspell-words.txt`, the S02 source table in `docs/spec/S02-topic-map.md` and the bibliography are add/add hot spots. Add lines, never reflow or re-sort, and a `Claude docs <slug>` bibliography key needs no S02 table row.
-- `mise run prose` and `mise run spell` read `git ls-files`, so `git add` the new page before running either, and run `mise run prose-sync` before `mise run prose`.
-- In a fresh worktree run `mise run site-install-frozen` before any `site-*` task.
+- The S02 source table in `docs/spec/S02-topic-map.md` is an add/add hot spot. Add lines, never reflow or re-sort, and a `Claude docs <slug>` bibliography key needs no S02 table row. `cspell-words.txt` and the bibliography merge with git's union driver, so add a word or an entry as one line or block and never re-sort.
+- In a fresh worktree run `mise run setup` once, before any other task.
 - The e2e specs derive live-lesson and checkpoint counts from the data tree (#242). Don't touch them. If the wave's `mise run ci` still fails in an e2e spec, the lead fixes it on the wave branch.
-- Do not run `site-dev`, `site-e2e`, or `site-screenshot`. Run the individual tasks your change touches (`data`, `examples`, `site-check`, `site-lint`, `site-test`, `site-build`, `checkpoints`, `prose`, `spell`), and let the wave run be the one `mise run ci`.
+- Do not run `site-dev`. Run `mise run fast` before every push, and let the wave run be the one `mise run ci`.
 - A live lesson's `assumes` entries must each name the `lesson` and `section` that teach the objective, and that lesson must be live on `main`. The picker chose only lessons whose assumed objectives a live lesson already serves.
 - Every commit message ends with exactly these two lines, and no Signed-off-by:
   Co-Authored-By: lsimons-bot <bot@leosimons.com>
   Assisted-by: Claude:claude-fable-5-1
 - Rebase on `origin/main` before the final push, and `git push --force-with-lease` on your own branch only. Never discard another agent's work to resolve a conflict, and never merge.
 - When the issue asks for a GitHub comment, edit only the comment id your own `gh issue comment` call returned.
-- Run `mise run lint` (prek, mdformat) as one of your individual tasks. A new S02 source-table row must fit the existing column widths, or mdformat reflows the table and `ci` fails.
+- A new S02 source-table row must fit the existing column widths, or mdformat reflows the table and `lint` fails.
 - A fixture may read only files that `git ls-files` lists. `site/.gitignore` ignores `.env`, so commit a sample under another name and copy it at run time.
 - Two branches adding the same `Claude Code <page>` bibliography key must make the entry and the S02 row byte-identical, so the lead can drop one copy.
 - Every source a page cites must also be in the plan file's `sources` list, even though no check enforces it yet.
@@ -62,7 +61,7 @@ If the line under the first paragraph says you are resuming, a previous lead for
 - Markdown-looking content inside `<Response>` (headings, lists) must be inside a fenced code block with the `text` language, or it renders as page structure and sidebar entries.
 - Every number in prose that a fixture can produce must be pasted from the fixture's output, never derived by hand. Three of six branches in wave 7 had an arithmetic claim the fixture contradicted.
 - Check invented names for group signal (ethnicity, gender) as well as for existence.
-- A fix commit runs the same check list as the first commit, `spell` and `prose` included. A one-word `notes` edit failed `spell` on the wave in wave 8.
+- A fix commit runs `mise run fast` like the first commit. A one-word `notes` edit failed `spell` on the wave in wave 8.
 - After changing a lesson's code or loop, grep the course for pages that say "the previous lesson" and re-read them.
 - When an `assumes` teaching lesson is not live, the lead names the stand-in before dispatch and the builder records it in the plan file's `notes`.
 - The lesson issue bodies use the old layout (frontmatter, `status: live`, `site/src/data/courses/`). `docs/agents/writing-a-lesson.md` is the truth.
