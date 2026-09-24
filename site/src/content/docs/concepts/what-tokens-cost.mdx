@@ -1,0 +1,322 @@
+import { Choice, MultiChoice, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+Your team wants a chat assistant to write a summary of every meeting's notes
+for the finance team, about a thousand times a month. Before anyone approves it, someone
+asks what it costs, and someone else asks why last week's trial ignored
+the rule about bullet length that was in the instructions. Both answers
+come from counting tokens. In this lesson we price a short prompt
+and a long one on a small model and a large one. Then we find the rule
+that a long instruction file buried.
+
+The lesson on [what the model can see](/concepts/context-window/) counted a
+page of text in tokens. This lesson puts a price on each one.
+
+## Two prompts for one task
+
+The short prompt states the task, the format and the audience, then gives
+the notes.
+
+```text
+Summarize these meeting notes in five bullet points for the finance team.
+Keep each bullet under 20 words.
+
+Meeting notes, project Lantern, 14 March.
+Present: Ana, Bram, Chidi. The supplier moved the delivery of the sensor
+boards from April to June. Ana will confirm the June date in writing by
+Friday. The installation guide needs a shorter version with one photo per
+step. The pilot in the Utrecht warehouse moves to July. Next meeting on
+28 March.
+```
+
+The long prompt asks for the same summary of the same meeting. It opens
+with a greeting, explains what project Lantern is, says why the finance
+team is busy, apologizes for the trouble, gives the notes in full
+sentences and closes with thanks. It is the kind of prompt people write
+when they treat the assistant as a colleague. Counted with the same
+rule of thumb as the last lesson, about four characters per token, the two
+come out like this, with the answer the model writes added for the price
+table below. Both counts are estimates, and the vendor's own tokenizer
+gives the exact number.
+
+```text
+short prompt: 111 tokens (estimate)
+long prompt: 343 tokens (estimate)
+difference: 232 tokens
+answer: 120 tokens (assumed)
+```
+
+The long prompt is three times the short one, and every extra token is a
+token the model reads before it writes a word. Most of the extra text is
+about you and your feelings about the task. The summary comes out the same without it.
+
+## What a token costs
+
+A vendor charges by the million tokens, with one price for the tokens the
+model reads (input) and a higher price for the tokens it writes (output),
+because writing a token takes far more computing than reading one.
+The table below uses round example numbers for "a small model" and "a
+large model". They follow the pattern on the market in 2026, where a vendor's
+large model costs several times its small one and output costs about
+five times input. The current prices are on the vendor pricing pages
+(@Claude docs pricing), and they change more often than this page does.
+
+| Example prices, per million tokens | Input | Output |
+| ---------------------------------- | ----- | ------ |
+| A small model                      | $1    | $5     |
+| A large model                      | $10   | $50    |
+
+A call is the prompt going in and the answer coming out. Suppose every
+summary is the same five bullets, about 120 tokens of output. Priced at
+the example numbers, once and for the 30,000 calls a month a busy support
+team might make, the two prompts come to this.
+
+```text
+                            one call    30,000 calls
+small model, short prompt    $0.0007          $21.33
+small model, long prompt     $0.0009          $28.29
+large model, short prompt    $0.0071         $213.30
+large model, long prompt     $0.0094         $282.90
+```
+
+Read the table down and then across. Down, the choice of model moves the
+price by ten times. Across, the extra 232 tokens of politeness move it by
+about a third. One call costs a fraction of a cent on either model, which
+is why nobody notices the price of one chat. At 30,000 calls the same
+fraction is a monthly bill, and the difference between the two models is
+the difference between a lunch and a laptop.
+
+The answer is often the expensive part of a call, because output costs
+more per token, so asking for five bullets instead of a page saves more
+than trimming a greeting. A document you paste is input, so a 3,000-token
+report attached to every call costs more than any prompt you would write
+by hand. A long chat sends the whole conversation again with every
+message, so the tenth turn of a chat costs the tokens of the ten turns
+before it, on top of the new ones (@AEC-02).
+
+<Choice id="where-the-money-goes" objective="concepts/explains-models/explains-generation"
+  concepts={['cost-and-latency', 'token']}
+  context="The lesson prices a call as input tokens (the prompt) at one price and output tokens (the answer) at a higher price, and shows a table where the same task costs a third more with a verbose prompt and ten times more on a large model."
+  title="Which change saves the most?"
+  hint="Which tokens carry the higher price, and how many of them does each change remove?"
+  options={[
+    { text: 'Cut the greeting and the thanks from the summary prompt.', why: 'That removes input tokens, the cheaper kind, and the table shows it moving the price by about a third.' },
+    { text: 'Ask for five bullets instead of the one-page summary the team asked for last week.', correct: true },
+    { text: 'Send the meeting notes as an attachment instead of pasting them.', why: 'An attachment becomes tokens like pasted text. The model reads the same words either way.' },
+    { text: 'Ask the model to answer faster.', why: 'Speed is a property of the model and the answer length. A request in the prompt adds tokens and changes nothing else.' },
+  ]}>
+
+A colleague runs a summary call 30,000 times a month and wants to lower
+the bill. Which one change saves the most money?
+
+</Choice>
+
+## Small model or large
+
+Vendors publish models in a family with several sizes, and the sizes
+share a name and a release date but differ in price and in what they can
+do. The larger model has more weights, follows a complex instruction more
+reliably and reasons through more steps, and it costs more per token and
+produces each token more slowly. The smaller one is cheaper and faster,
+and for a narrow task with a clear instruction, such as a five-bullet
+summary in a fixed format, it is often good enough
+(@Academy ai-capabilities-and-limitations).
+
+The time you wait has the same structure as the price. A model produces
+its answer one token at a time, as the [lesson on how models
+work](/concepts/how-models-work/#one-token-at-a-time) showed, so a
+long answer takes longer than a short one on any model, and a large model
+takes longer per token than a small one. A long prompt adds a smaller
+delay up front, while the model reads it. Cost and latency both grow with
+every token, and both grow faster on a larger model.
+
+Which model fits which task is a decision of its own, and the course on
+using agents has a lesson that puts a small and a large model side by
+side on the same inputs. Here the point is only what changes when you
+switch, which is the price and the wait, by a factor and not by a little.
+
+<Sort id="price-or-wait" objective="concepts/explains-models/explains-generation"
+  concepts={['cost-and-latency', 'model-family-and-size']}
+  context="The lesson prices a call as input tokens at one rate and output tokens at a higher rate, and says that a model writes one token at a time, so the wait grows with the answer length and with the model size."
+  title="What does each change do?"
+  hint="For each change, ask two questions. Does the model read or write more tokens, and does each token take longer?"
+  buckets={['Raises the price and the wait', 'Raises the price more than the wait', 'Changes neither']}
+  items={[
+    { text: 'Switch from the small model to the large one', bucket: 0 },
+    { text: 'Ask for a two-page report instead of five bullets', bucket: 0 },
+    { text: 'Attach a 3,000-token document to a prompt that was 100 tokens', bucket: 1 },
+    { text: 'Send the same short prompt at night instead of during the day', bucket: 2 },
+    { text: 'Rename the file you attach before you attach it', bucket: 2 },
+  ]} />
+
+## The rule that got buried
+
+Now the second question from the top of the page. Last week's trial used
+an instruction file, a page of rules the team wrote once and pasted at the
+start of every chat. Rule seven said "keep each bullet under 20 words".
+The summary that came back had bullets of 40 words. The file below is
+illustrative, written for this lesson, and shortened to twelve rules from
+the twenty-two the team had.
+
+```text
+You summarize meeting notes for the finance team of project Lantern.
+1. Write in plain English for readers outside the project.
+2. Use the past tense for what happened and the future tense for what is planned.
+3. Start with the decision that affects the budget most.
+4. Name the person who owns each action, as in the notes.
+5. Give every date as day and month, as in "14 March".
+6. Do not mention people who were absent.
+7. Keep each bullet under 20 words.
+8. Use "supplier" rather than a company name.
+9. Put open questions in a final bullet that starts with "Open:".
+10. Do not add facts that are not in the notes.
+11. If a meeting had no decision, say so in the first bullet.
+12. Write "sensor boards", never "sensors" or "boards".
+```
+
+Every line of the file is a token in the context window like every other,
+and a rule stated once competes with everything that comes after it: the
+other eleven rules, the notes, and the answer the model is writing. The
+model has no list of rules it checks off. It predicts the next token from
+the whole window, and a rule in the middle of a long file weighs less in
+that prediction than the same rule at the top or at the bottom. Liu and
+colleagues measured the effect on facts: models found a fact in the middle
+of a long context less reliably than the same fact at either end
+(@Liu 2024). The [lesson on how models
+work](/concepts/how-models-work/#failure-modes-named) named this
+**instruction dilution**, and the [lesson on the system
+prompt](/concepts/system-prompt/) showed that a system prompt is subject to
+it too.
+
+Dilution here is about one prompt or one file, where an instruction
+competes with the text after it. A long chat has a second, separate effect:
+the window fills, early turns fall out or get summarized, and the model
+loses the facts rather than weighing them less. The last lesson covered
+that under [when the early facts fall
+out](/concepts/context-window/#when-the-early-facts-fall-out), and a later
+lesson on memory returns to it.
+
+Shorten the file first. A rule the model keeps anyway ("write in plain
+English") doesn't help and dilutes the rules that matter. Then look
+at the rules that are left and ask, for each one, what happens when the
+model drops it. A rule you can live without once in a while stays in the
+file, near the top. A rule that must hold every time belongs in a check
+that a person or a program runs on the answer, such as counting the words
+in each bullet, because prose in an instruction file is a strong default
+and never a guarantee (@Academy ai-capabilities-and-limitations).
+
+<Choice id="the-buried-rule" objective="concepts/explains-models/explains-generation"
+  concepts={['instruction-dilution', 'context-window']}
+  context="A team's instruction file has twelve rules. Rule seven, about bullet length, was ignored in the last summary. The lesson explains that every rule is tokens in the context window and that a rule competes with everything after it."
+  title="Why did rule seven fail?"
+  hint="How does the model treat a rule, and what does it treat the rest of the window as?"
+  options={[
+    { text: 'The model keeps a checklist of the rules it was given and ran out of room at the seventh.', why: 'There is no checklist. The model predicts tokens from the whole window, and a rule is tokens like everything else.' },
+    { text: 'Twenty words is too few for a summary of these notes, so the model overrode the rule.', why: 'A model has no opinion about your rules. It produced likely text, and the likely text for a summary of these notes was longer.' },
+    { text: 'The rule sat in the middle of a long file and weighed less than the rules at either end.', correct: true },
+    { text: 'The model forgot the rule because the chat was two hours old.', why: 'This was the first message of a fresh chat. Nothing had fallen out of the window yet. Look at the file itself.' },
+  ]}>
+
+The instruction file above was pasted as the first message of a new chat,
+followed by the notes. The summary ignored rule seven. Which explanation
+fits?
+
+</Choice>
+
+<Pitfall title="Adding a rule for every mistake">
+The summary breaks rule seven. The team adds rule thirteen: "Remember
+rule 7." The next summary breaks rule five instead, and rule fourteen goes
+in. After a month the file is two pages, every summary breaks one rule or
+another, and each call costs more because the file is read on every one.
+The rules were never the problem. Each one added made the others count for
+less. The rule: when a model drops an instruction, shorten the file before
+you lengthen it, and move a rule that must always hold into a check on the
+answer.
+</Pitfall>
+
+<MultiChoice id="what-dilutes" phase="review" objective="concepts/explains-models/explains-generation"
+  concepts={['instruction-dilution', 'cost-and-latency']}
+  context="Instruction dilution is the weakening of an instruction as more text piles up after it in one prompt or file. A separate effect, in a long chat, is that early messages fall out of the context window."
+  title="Which two are dilution at work?"
+  hint="In each case, is the rule still in the window and competing with more text, or has it left the window?"
+  options={[
+    { text: 'A twenty-rule instruction file is pasted at the start of a fresh chat, and the answer follows most rules and skips two in the middle.', correct: true },
+    { text: 'Two hours into a chat, the model writes for the wrong team because the first instruction no longer fits in the window.', why: 'The instruction is gone from the window, and so the model never read it for this answer. That is the window filling up, from the last lesson.' },
+    { text: 'A prompt that gives one rule and then pastes a fifty-page contract gets an answer that follows the rule loosely.', correct: true },
+    { text: 'A call with a long prompt costs a third more than the same call with a short one.', why: 'Price grows with every token read. That is the cost of the tokens, and it says nothing about which rule the model followed.' },
+  ]}>
+
+Which two of these are instruction dilution?
+
+</MultiChoice>
+
+<Choice id="cheaper-token" phase="review" objective="concepts/explains-models/explains-generation"
+  concepts={['cost-and-latency', 'token']}
+  context="Vendors charge per million tokens, with one price for input tokens (what the model reads) and a higher price for output tokens (what the model writes), and a larger model in a family costs several times a smaller one."
+  title="Which token is the cheapest?"
+  hint="Which price is lower, input or output, and which model in a family is cheaper per token?"
+  options={[
+    { text: 'A token in the answer, on the small model.', why: 'The answer is output, and output is the higher price on any model.' },
+    { text: 'A token in the answer, on the large model.', why: 'That is the higher price on the dearer model, so it is the most expensive of the four.' },
+    { text: 'A token in the prompt, on the small model.', correct: true },
+    { text: 'A token in the prompt, on the large model.', why: 'Input is the lower price, but the large model charges several times what the small one does for it.' },
+  ]}>
+
+At the example prices in this lesson, which of these tokens costs the
+least?
+
+</Choice>
+
+<Choice id="what-the-wait-tracks" phase="review" objective="concepts/explains-models/explains-generation"
+  concepts={['cost-and-latency', 'model-family-and-size']}
+  context="A model writes its answer one token at a time. The lesson says that the wait for an answer grows with the answer length and with the size of the model, and that a long prompt adds a smaller delay up front."
+  title="Why is this answer slow?"
+  hint="Count what the model writes, and ask how long each token takes on this model."
+  options={[
+    { text: 'The prompt was polite, and the model spent time on the greeting.', why: 'The greeting is input tokens, read up front. It adds a little to the wait and much less than the answer does.' },
+    { text: 'The answer runs to two pages on the large model, and each token of it takes longer there.', correct: true },
+    { text: 'The vendor slows down long answers to save money.', why: 'A long answer takes longer because the model produces it one token at a time. A slower model is a cost to the vendor too, and there is no saving in it.' },
+    { text: 'The instruction file has too many rules.', why: 'The rules are input, read up front. A long file dilutes the rules and adds a little delay, and it does not set the pace of the answer.' },
+  ]}>
+
+A colleague asks the large model for a two-page report and waits a long
+time for it. Which explanation fits?
+
+</Choice>
+
+<Exercise stretch="Take an instruction file or a long list of rules you use with a chat assistant, count its rules, and mark each one as a default you can live without now and then or a rule that must always hold. Move one of the second kind into a check you run on the answer, and cut two of the first kind.">
+
+Open a chat assistant and find the longest prompt you sent this week.
+Paste it into a new chat and ask the assistant for an approximate token
+count, or use the token counting page your vendor publishes. Then count
+the tokens of the answer you got the same way. Price the call at the
+example numbers from this lesson, for the small model and the large one,
+once and for a thousand calls a month. Rewrite the prompt with only the
+task, the format, the audience and the material, count it again and price
+it again.
+
+A good result is two lines: the token counts of your prompt and the
+answer with the two monthly prices, and the token count of the rewrite
+with its two prices. The counts are
+approximate, because the assistant estimates them the way the rule of
+thumb does. Then answer this: of the money in your line, how much is the
+answer, and what would change if you asked for half as much of it?
+
+</Exercise>
+
+<Recap>
+
+1. A vendor charges per million tokens, with a lower price for the tokens
+   the model reads and a higher one for the tokens it writes, and a large
+   model in a family costs several times a small one (@Claude docs pricing).
+2. One call costs a fraction of a cent, and a thousand calls a day is a
+   bill. The choice of model moves the price by a factor, the length of the
+   prompt and the answer by a share, and a long chat pays for every earlier
+   turn again (@AEC-02).
+3. The wait grows the same way, because a model writes one token at a
+   time. A long answer on a large model is the slow case.
+4. A rule in an instruction file is tokens like everything else and
+   competes with all the text after it, so a rule in the middle of a long
+   file weighs less than one at either end (@Liu 2024). Shorten the file,
+   and move a rule that must always hold into a check on the answer.
+
+</Recap>

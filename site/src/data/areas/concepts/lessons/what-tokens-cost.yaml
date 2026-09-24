@@ -1,10 +1,22 @@
 id: concepts/what-tokens-cost
 title: What every token costs
+description: >-
+  Price a short prompt and a long one on a small model and a large one, see why the answer and the
+  model size set the bill and the wait, and find the rule a long instruction file buried.
 mode: tutorial
 covers: concepts/limits
 serves: [concepts/explains-models/explains-generation]
 introduces: [model-family-and-size, cost-and-latency, instruction-dilution]
-assumes: []
+assumes:
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+  - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/context-window
+    section: when-the-early-facts-fall-out
 after: [concepts/context-window]
 shorts: [why long instruction files fail]
 exercise:
@@ -12,9 +24,22 @@ exercise:
   brief: >-
     Price a long prompt and a short one with the token counter and a price table for a small and a
     large model, then find the rule that a long instruction file buried.
-sources: []
+sources:
+  - Claude docs pricing
+  - Academy ai-capabilities-and-limitations
+  - AEC-02
+  - Liu 2024
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 issue: 137
 minutes: 15
 notes: >-
   Dilution here is about one instruction competing with the text after it, in one prompt or file.
-  Context rot (concepts/memory) is the session-level effect of a filling window.
+  Context rot (concepts/memory) is the session-level effect of a filling window. The price table
+  uses round example numbers for "a small model" and "a large model" and quotes no vendor price. The
+  pricing structure it describes (per million tokens, one input price and a higher output price, a
+  large model several times a small one) was checked against the Claude Platform pricing page on
+  2026-09-24. The fixture site/examples/concepts/what-tokens-cost/price_prompts.py prints every
+  number in the two text fences, and tests/test_what_tokens_cost.py asserts that the page shows its
+  output, because a foundations page may not carry a Predict run tag. The instruction file and the
+  meeting notes are illustrative.
