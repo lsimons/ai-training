@@ -332,3 +332,5 @@ Work isn't complete until every change is committed, pushed, and CI passes.
 4. `mise run ci-watch`; on failure `gh run view --log-failed`, fix, repeat
 
 Never stop before CI is green.
+
+Whoever finds `main` red fixes it, whoever broke it.
