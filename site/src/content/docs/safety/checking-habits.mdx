@@ -1,0 +1,205 @@
+import { Choice, Match, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we find the row that doesn't add up in a table a chat
+assistant wrote from three months of ticket counts. The check that finds
+it is one of four, and the four together are a routine short enough to
+run in the ten minutes before a meeting. The last two lessons showed what
+an invented specific looks like and why attention to a good tool fades.
+The routine here is what you do about both, and the last section sets how
+deep each check goes from the cost of being wrong.
+
+## A table sent in a hurry
+
+It is ten minutes before a meeting. A colleague pastes three monthly
+reports into a chat assistant and asks for "a table of tickets closed per
+team, with a total per team and a grand total". The assistant answers in a
+second, and the table goes into the slides as it came back. The teams and
+the numbers are invented for this lesson, and the assistant's table is the
+author's.
+
+| Team        | Jul | Aug | Sep | Total |
+| ----------- | --- | --- | --- | ----- |
+| Design      | 124 | 98  | 111 | 333   |
+| Support     | 82  | 86  | 90  | 258   |
+| Marketing   | 145 | 162 | 139 | 466   |
+| Operations  | 67  | 71  | 69  | 207   |
+| Grand total |     |     |     | 1,264 |
+
+The table reads well. The columns line up, the totals are in the right
+place, and every number is one your colleague could have typed. One row
+doesn't add up. Before reading on, add one row yourself and decide which.
+
+<Choice id="which-row-fails" objective="safety/verifies-output/checks-claims"
+  concepts={['checking-habits']}
+  context="A chat assistant wrote a table of tickets closed per team over three months, with a total per team. Design has 124, 98 and 111 with total 333. Support has 82, 86 and 90 with total 258. Marketing has 145, 162 and 139 with total 466. Operations has 67, 71 and 69 with total 207. One of the four totals is not the sum of its three months."
+  title="Which row does not add up?"
+  hint="Add the three months of each row and compare the sum with the total column. Which row is off, and by how much?"
+  options={[
+    { text: 'Design: 124, 98 and 111 with total 333.', why: 'Add the three months again. This total is the sum of its row.' },
+    { text: 'Support: 82, 86 and 90 with total 258.', why: 'Add the three months again. This total is the sum of its row.' },
+    { text: 'Marketing: 145, 162 and 139 with total 466.', correct: true },
+    { text: 'Operations: 67, 71 and 69 with total 207.', why: 'Add the three months again. This total is the sum of its row.' },
+  ]}>
+Which row's total is not the sum of its three months?
+</Choice>
+
+A short program written for this lesson adds every row again and compares
+the sum with the total the assistant wrote. This is what it prints.
+
+```text
+ok        Design      written   333  recomputed   333
+ok        Support     written   258  recomputed   258
+MISMATCH  Marketing   written   466  recomputed   446
+ok        Operations  written   207  recomputed   207
+MISMATCH  Grand total written  1264  recomputed  1244
+1 of 4 rows do not add up: Marketing
+```
+
+Marketing closed 446 tickets, and the table says 466. The grand total is
+wrong by the same 20, because the assistant added its own row totals
+rather than the months. One slip, two wrong numbers on the slide, and
+nothing in the way the table looks tells you which two. The model predicted
+the totals the way it predicts every other number in the table, and 466
+is a likely number. It isn't the sum. The lesson
+[What an invented fact looks like](/safety/spotting-hallucination/#specificity-is-the-tell)
+called this specificity without a source. A total is a specific, and its
+source is the arithmetic, which you can redo in the time it takes to read
+the row.
+
+## The routine
+
+The check that caught the Marketing row is one of four. Together they're
+what **checking habits** means in this course, and they take a few minutes
+on a page of output.
+
+1. **Read the output against the request.** Put the prompt next to the
+   answer and read them together. Did you ask for tickets closed, and is
+   that what the column says? Did you ask for a total per team, and is
+   there one for every team? A model answers a nearby question as fluently
+   as the one you asked.
+2. **Look for claims you did not supply.** Every number, name, date and
+   reference in the output came from what you pasted, or it came from the
+   model. Mark the ones you didn't supply. Each is a claim to check or to
+   take out, as the previous lesson on invented facts showed.
+3. **Open one link.** If the output cites anything, a page, a document, a
+   section number, open one and read whether it says what the output says.
+   One is enough to tell you whether the rest deserve the same.
+4. **Redo one calculation.** Pick one row, one percentage, one date
+   difference, and do it by hand or in a spreadsheet cell. If it holds,
+   the others probably hold too. If it fails, none of them can go out
+   unchecked.
+
+They're one routine because they always run together and in this
+order on everything that leaves your desk. You don't decide each time
+whether to run them. Anthropic's AI Fluency course calls the skill of
+judging what a model gave you discernment, and puts it next to the skill of
+asking well, because the two are used together on every exchange
+(@Academy ai-fluency-framework-foundations). The routine here is
+discernment made small enough to run when you have ten minutes.
+
+<Pitfall title="The check that gets skipped">
+The colleague with ten minutes before the meeting ran the first two
+checks. The table answered the request, and every number in it was one
+from the reports, or looked like one. The fourth check, redo one
+calculation, felt like the one that could wait, because adding up a row
+takes longer than reading it. It is the check that finds the error. It is also the one a busy person
+skips, and errors get through in the same busy moments. The rule: the
+check you are about to skip is the one you run. A routine that has a step
+you drop under time pressure is a routine that only works when you don't
+need it.
+</Pitfall>
+
+## Depth scales with stakes
+
+The routine is the same every time, and the depth of each check isn't. The
+last lesson,
+[When the tool is usually right](/safety/when-the-tool-is-usually-right/#build-the-check-in),
+said to build the check into the process and to set its depth from what
+happens when the output is wrong. Fluency is constant and consequences are
+not, so the cost of a mistake is the only thing that should change the
+effort. The depth comes from whether the output can be undone, and from
+who reads it and whether they check it themselves.
+
+A brainstorm list of names for an internal project isn't checked at all.
+A wrong entry doesn't cost anything, and you throw most of them away. A summary of a
+meeting for your own notes gets one read against the request, because you
+were in the meeting and you will notice a wrong point when you use the
+notes. A briefing with three cited reports for your manager gets every
+link opened and every number redone, because your manager acts on it and
+does not open the reports. A price table on the public web page gets every
+value read by a second person, because it cannot be recalled once a
+customer has seen it, and the customer checks nothing. The four outputs
+have the same fluency. The depth of the check comes from the cost of the
+mistake.
+
+One more case sets the depth to the maximum whatever the size of the task.
+A domain you cannot judge is high risk even when the output is one
+paragraph, because you cannot see the mistake. A one-paragraph legal clause
+goes to the legal team, however well it reads.
+
+<Match id="how-deep-each-check" objective="safety/verifies-output/calibrates-trust"
+  concepts={['checking-habits']}
+  context="The lesson gives four checks that run on everything a model writes before it leaves the learner's desk, and says that how far each check goes depends on what happens if the output is wrong: whether it can be undone, and whether its readers will check it themselves."
+  title="How deep does each check go?"
+  hint="For each output, ask what happens if it is wrong: can you undo it, and does its reader check it?"
+  options={[
+    'No check',
+    'One read against the request',
+    'Every link opened and every number redone',
+    'Every value read by a second person',
+  ]}
+  rows={[
+    { statement: 'A list of twenty candidate names for an internal project', option: 0, why: 'What does a wrong entry on this list cost, and how many of the twenty will you keep?' },
+    { statement: 'A summary of a meeting you attended, for your own notes', option: 1, why: 'Who reads these notes, and were they in the room?' },
+    { statement: 'A briefing with three cited reports, for your manager to act on', option: 2, why: 'Will your manager open the reports, or act on what the briefing says they say?' },
+    { statement: 'A price table for the public web page', option: 3, why: 'Once a customer has seen a price, can you take it back, and does the customer check it?' },
+  ]}
+  rationale="The four outputs are equally fluent. What sets the depth is the cost of being wrong: whether the output can be undone and whether its readers will catch a mistake themselves.">
+Match each output to the depth of checking it gets before it leaves your
+desk.
+</Match>
+
+Harvard's CS50 course runs a discussion forum where staff mark an answer
+they have reviewed as endorsed, so a student can tell a checked answer from
+a raw one (@CS50x). The idea transfers to your desk. What the assistant wrote and what you have
+checked are two different things, and the depth of checking is what turns
+one into the other. A later lesson in this course is about making that
+difference visible to the next reader.
+
+<Choice id="which-gets-the-deeper-check" phase="review" objective="safety/verifies-output/calibrates-trust"
+  concepts={['checking-habits']}
+  context="The lesson says the depth of checking a model's output gets comes from what happens if the output is wrong: whether it can be undone, and whether its readers will check it themselves. The learner compares four outputs of similar length and fluency."
+  title="Which output gets the deeper check?"
+  hint="Which of the four cannot be undone, or goes to a reader who will not check it?"
+  options={[
+    { text: 'A three-line answer to a customer, posted on a public help page.', correct: true },
+    { text: 'A three-page internal report your team reads before a workshop.', why: 'It is long, and it has readers who know the subject and will raise a wrong point in the workshop.' },
+    { text: 'A one-page plan for your own next week.', why: 'You wrote the input and you are the reader. A wrong item costs you a moment when you meet it.' },
+    { text: 'Ten draft subject lines for an email you have not written yet.', why: 'You will pick one and drop nine. The pick is the check.' },
+  ]}>
+The same assistant wrote these four outputs for you today. Which one gets
+the deepest check before it goes anywhere?
+</Choice>
+
+<Exercise stretch="Do the same for a second document, one going to a reader outside your team, and compare how deep each check went.">
+Pick one document from your week that an assistant wrote or drafted: a
+summary, a table, a reply, a report section. Run the four checks on it in
+a note. Read it against the request you gave and write down any question
+it answered instead. List the claims you did not supply. Open one link or
+reference, if it has any, and write what the source says next to what the
+document says. Redo one calculation, if it has any, and write both numbers
+down. Fifteen minutes is enough.
+
+A good result is a note with four headings and something under each, even
+if that something is "no links" or "no numbers". Which of the four checks
+would you have skipped, and would the document have gone out with what it
+found?
+</Exercise>
+
+<Recap>
+1. Four checks run on everything a model writes before it leaves your desk. Read the output against the request. Look for claims you did not supply. Open one link. Redo one calculation.
+2. A total is a specific like any other, and its source is the arithmetic. One wrong row total in a table can put two wrong numbers on a slide, and the table looks the same either way.
+3. The check you are about to skip is the one you run. Errors get through at the moment a routine loses a step, which is when you are busy.
+4. The routine is the same every time, and its depth comes from the cost of being wrong: whether the output can be undone, and whether its readers check it themselves (@Academy ai-fluency-framework-foundations).
+5. A habit is better than a rule because it runs when you are in a hurry, which is when a rule gets skipped.
+</Recap>
