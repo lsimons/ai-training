@@ -30,6 +30,18 @@ describe('setAsideCode', () => {
 		expect(text).not.toContain('inner');
 		expect(restore(text)).toBe(src);
 	});
+	it('sets a code span that wraps across a line break aside, but not one across a blank line', () => {
+		const wrapped = 'See `a\n<Tag>` here.';
+		const { text, restore } = setAsideCode(wrapped);
+		expect(text).not.toContain('<Tag>');
+		expect(restore(text)).toBe(wrapped);
+		const paragraphs = 'Odd ` tick.\n\nAnother ` tick.';
+		expect(setAsideCode(paragraphs).text).toBe(paragraphs);
+	});
+	it('does not pair the backticks of template-literal attributes on adjacent lines as a span', () => {
+		const tag = '<Repair broken={`# a\n\nb`}\n  model={`# c\n\nd`}>\nWhy?\n</Repair>';
+		expect(setAsideCode(tag).text).toBe(tag);
+	});
 	it('leaves an unclosed fence as code to the end', () => {
 		const { text, restore } = setAsideCode('```\nopen\n<Tag>');
 		expect(text).toMatch(/^\uE000\d+\uE001$/);
@@ -115,6 +127,11 @@ describe('proseOf', () => {
 		);
 		expect(proseOf('<Prompt model="claude-x" recorded="2026-09">\nHi.\n</Prompt>\n', site)).toBe(
 			'#### Prompt · claude-x, recorded 2026-09\n\n```text\nHi.\n```\n',
+		);
+	});
+	it('leaves a link inside a Prompt or Response body alone, in a code span or not', () => {
+		expect(proseOf('<Response>\nSee `[a](/x/)` and [b](/y/).\n</Response>\n', site)).toBe(
+			'#### Response\n\n```text\nSee `[a](/x/)` and [b](/y/).\n```\n',
 		);
 	});
 	it('copies code unchanged: imports, tags, XML and links inside fences or code spans', () => {
