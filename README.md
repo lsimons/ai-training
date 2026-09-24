@@ -72,7 +72,7 @@ ai-training/
 │   ├── src/content/docs/         # the pages
 │   ├── src/styles/custom.css     # the LSD Warm theme
 │   ├── astro.config.mjs          # site, base path, sidebar, rehype plugin
-│   ├── package.json              # site dependencies (ranges; bun.lock pins them)
+│   ├── package.json              # site dependencies (exact; bun.lock pins the tree)
 │   └── bun.lock                  # committed; never gitignore this
 ├── docs/spec/                    # numbered specs (S01 is the dictionary)
 ├── docs/agents/                  # agent-facing process docs (issue tracker)
