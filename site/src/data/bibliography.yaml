@@ -594,3 +594,31 @@ Liu 2024:
   author: Nelson F. Liu, Kevin Lin, John Hewitt and 4 others
   license: CC BY 4.0
   url: https://aclanthology.org/2024.tacl-1.9/
+Parasuraman 2010:
+  type: paper
+  title: "Complacency and Bias in Human Use of Automation: An Attentional Integration"
+  container: Human Factors 52(3) (2010), 381-410
+  author: Raja Parasuraman and Dietrich H. Manzey
+  license: Copyright Human Factors and Ergonomics Society
+  url: https://doi.org/10.1177/0018720810376055
+Goddard 2012:
+  type: paper
+  title: "Automation bias: a systematic review of frequency, effect mediators, and mitigators"
+  container: Journal of the American Medical Informatics Association 19(1) (2012), 121-127
+  author: Kate Goddard, Abdul Roudsari and Jeremy C. Wyatt
+  license: Copyright BMJ Publishing Group
+  url: https://doi.org/10.1136/amiajnl-2011-000089
+Bainbridge 1983:
+  type: paper
+  title: Ironies of automation
+  container: Automatica 19(6) (1983), 775-779
+  author: Lisanne Bainbridge
+  license: Copyright IFAC, published by Elsevier
+  url: https://doi.org/10.1016/0005-1098(83)90046-8
+NTSB Asiana 214:
+  type: reference
+  title: "Descent Below Visual Glidepath and Impact With Seawall, Asiana Airlines Flight 214, Boeing 777-200ER, HL7742, San Francisco, California, July 6, 2013 (AAR-14/01)"
+  container: National Transportation Safety Board
+  author: National Transportation Safety Board
+  license: Public domain (US government work)
+  url: https://www.ntsb.gov/investigations/AccidentReports/Reports/AAR1401.pdf
