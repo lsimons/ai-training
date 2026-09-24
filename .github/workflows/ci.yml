@@ -224,6 +224,36 @@ jobs:
           path: site/playwright-report/
           retention-days: 7
 
+  # Its own job, like `site-audit` would be: the scan needs network access
+  # and is out of `mise run ci` for that reason. It fails on an advisory
+  # against a pinned version in `uv.lock` or `site/bun.lock`, and when the
+  # scanner did not open either file.
+  vuln:
+    name: OSV (dependency vulnerability scan)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up mise
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          # CI pins the mise binary: `sha256` is the hash of the extracted
+          # `mise/bin/mise` from the linux-x64 archive. `.mise.toml`
+          # `min_version` requires at least this version. Refresh them
+          # together (AGENTS.md, Supply chain).
+          version: 2026.9.12
+          sha256: e79ae57945034903aee8aa2ea66b4c7ca9cd4f4edd5a8a78a589cbae6d0f428a
+          install: true
+          cache: true
+
+      # The same mise-pinned osv-scanner as `mise run vuln` locally, so
+      # there is no second version to keep in step.
+      - name: Scan every committed lockfile against the OSV database
+        run: mise run vuln
+
   zizmor:
     name: Zizmor (GitHub Actions audit)
     runs-on: ubuntu-latest
