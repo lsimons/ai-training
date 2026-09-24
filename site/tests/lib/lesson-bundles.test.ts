@@ -222,7 +222,7 @@ describe('proseOf', () => {
 		);
 		expect(proseOf('<Pitfall title={`Tick`}>\nT.\n</Pitfall>\n', site)).toBe('#### Pitfall: Tick\n\nT.\n');
 		expect(() => proseOf('<Pitfall title={1}>\nT.\n</Pitfall>\n', site, 'a/b')).toThrow(
-			/^a\/b <Pitfall>: title must be a string, got number/,
+			/^a\/b: title of <Pitfall> must be a string, got number/,
 		);
 		expect(() => proseOf('<Sampler seed={seed} />\n', site, 'a/b')).toThrow(
 			/^a\/b: cannot read seed=\{\.\.\.\} of <Sampler>: Identifier is not a literal/,
