@@ -101,8 +101,10 @@ progress export the learner hands it.
 A Vitest test (`site/tests/lib/tutor-instructions.test.ts`, run by
 `mise run site-test`) reads `SKILL.md` and fails when its instruction URL,
 its bundle URL example or the `version` it declares no longer match the
-constants the build uses (`TUTOR_INSTRUCTIONS_PATH`, `BUNDLE_URL_TEMPLATE`
-and `BUNDLE_VERSION` in `site/src/lib/`). The route file at
+constants the build uses (`TUTOR_INSTRUCTIONS_PATH` and `BUNDLE_URL_TEMPLATE`
+in `site/src/lib/tutor-instructions.ts`, `BUNDLE_VERSION` in
+`site/src/lib/bundle-version.ts`) and the `site` in `site/astro.config.mjs`.
+The route file at
 `site/src/pages/data/tutor.md.ts` is checked against the same path.
 
 Issue #285 considered a stop on a missing or lower `version` and rejected
