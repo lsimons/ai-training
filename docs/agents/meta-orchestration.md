@@ -103,10 +103,10 @@ file and never the dispatcher's context. One tick:
    merged in this wave. Within an area it orders the rest with no planned
    `after` first, then earliest-in-course, takes them round-robin across
    the areas, and prints the wave as a table plus `--json` for the prompt.
-   With `--unblockers-first` it ranks, within an area and after the planned
-   `after` rule, a lesson that serves a missing objective of more blocked
-   lessons ahead of course position, and the table gains an `Unblocks`
-   column with that count.
+   With `--unblockers-first`, each candidate is scored by how many blocked
+   lessons it serves a missing objective for, the score sorts before the
+   course position and after the planned `after` rule, and the table gains
+   an `Unblocks` column with that count.
    It also lists what it blocked and skipped and why, which candidates wait
    for a later wave, and, under `--only`, every listed number it didn't
    pick with the reason, so nothing drops silently. A content wave
