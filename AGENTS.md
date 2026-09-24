@@ -235,7 +235,7 @@ patterns below after the fact. Write so that it has nothing to say.
   *transitive* package with the `overrides` block in `site/package.json`.
 - `mise run vuln` (osv-scanner) must be clean, and CI runs it as the `vuln`
   job. It scans `uv.lock` and `site/bun.lock` by name and fails when either
-  is missing or does not parse, so a new lockfile goes in the list of the
+  is missing or does not parse. A new lockfile goes in the list of the
   task in `.mise.toml`. Fix a Python advisory by editing the `==` pin in
   the `dev` group of `pyproject.toml` and running `mise run py-install`
   (and moving the `ruff-pre-commit` rev in `prek.toml` when it is ruff, see
