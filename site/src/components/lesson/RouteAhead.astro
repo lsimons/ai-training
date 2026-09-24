@@ -1,0 +1,57 @@
+---
+/**
+ * The "You are ahead" routing card (spec S02 "Differentiation by routing",
+ * S03 "Frontmatter" `extends-to`). The MarkdownContent override renders it
+ * after the lesson body, hidden, and the lesson script shows it. An internal
+ * entry links to the page when it exists and says so when it does not. An
+ * external entry, an `https://` URL under a bibliography `url`, renders as
+ * a plain link with `rel="noopener"` and a visible marker. Renders nothing
+ * for an empty list.
+ */
+import { href } from '@lib/url';
+
+export interface AheadItem {
+	label: string;
+	/** Root-relative for an internal entry, the full URL for an external one. */
+	href: string;
+	external: boolean;
+	/** For an internal entry, whether the page is built. Always true for an external one. */
+	exists: boolean;
+}
+
+interface Props {
+	items: AheadItem[];
+}
+
+const { items } = Astro.props;
+---
+
+{
+	items.length > 0 && (
+		<aside class="route-card route-ahead not-content" data-route="ahead" hidden>
+			<p class="route-title">You are ahead. Next:</p>
+			<ul>
+				{items.map((n) =>
+					n.external ? (
+						<li>
+							<a href={n.href} rel="noopener">
+								{n.label}
+							</a>{' '}
+							<span class="route-where">(external link)</span>
+						</li>
+					) : n.exists ? (
+						<li>
+							<a href={href(n.href)}>{n.label}</a>
+						</li>
+					) : (
+						<li>
+							<span>
+								{n.label} <span class="route-where">(not written yet)</span>
+							</span>
+						</li>
+					),
+				)}
+			</ul>
+		</aside>
+	)
+}

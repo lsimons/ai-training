@@ -1,0 +1,60 @@
+import { checkExtendsToHref, isExternalHref, isUnderUrl } from '@lib/extends-to';
+import { describe, expect, it } from 'vitest';
+
+const sources: [string, string | null | undefined][] = [
+	['Academy ai-capabilities-and-limitations', 'https://academy.claude.com/courses/ai-capabilities-and-limitations'],
+	['Diátaxis', 'https://diataxis.fr/'],
+	['No url', null],
+	['Empty url', ''],
+];
+
+describe('isExternalHref', () => {
+	it('is true for https:// and false for a path or http://', () => {
+		expect(isExternalHref('https://academy.claude.com/')).toBe(true);
+		expect(isExternalHref('/safety/agent-risk/')).toBe(false);
+		expect(isExternalHref('http://academy.claude.com/')).toBe(false);
+	});
+});
+
+describe('isUnderUrl', () => {
+	it('matches the url itself, with or without a trailing slash', () => {
+		expect(isUnderUrl('https://diataxis.fr', 'https://diataxis.fr/')).toBe(true);
+		expect(isUnderUrl('https://diataxis.fr/', 'https://diataxis.fr')).toBe(true);
+	});
+	it('matches a path, query or fragment under the url', () => {
+		expect(isUnderUrl('https://diataxis.fr/tutorials/', 'https://diataxis.fr/')).toBe(true);
+		expect(isUnderUrl('https://diataxis.fr/?x=1', 'https://diataxis.fr/')).toBe(true);
+		expect(isUnderUrl('https://diataxis.fr/#top', 'https://diataxis.fr/')).toBe(true);
+	});
+	it('rejects a longer host and an empty url', () => {
+		expect(isUnderUrl('https://diataxis.fr.evil/', 'https://diataxis.fr/')).toBe(false);
+		expect(isUnderUrl('https://diataxis.fr/', '')).toBe(false);
+	});
+});
+
+describe('checkExtendsToHref', () => {
+	it('accepts a root-relative path without looking at the bibliography', () => {
+		expect(checkExtendsToHref('/safety/agent-risk/', [])).toEqual({ kind: 'internal' });
+	});
+	it('accepts an https:// href under a bibliography url and names the source', () => {
+		expect(checkExtendsToHref('https://academy.claude.com/courses/ai-capabilities-and-limitations', sources)).toEqual({
+			kind: 'external',
+			source: 'Academy ai-capabilities-and-limitations',
+		});
+	});
+	it('rejects an https:// href no bibliography entry covers', () => {
+		const result = checkExtendsToHref('https://academy.claude.com/courses/other', sources);
+		expect(result.kind).toBe('invalid');
+		expect(result).toMatchObject({ reason: expect.stringContaining('bibliography.yaml') });
+	});
+	it('rejects a relative path, an http:// URL and another scheme', () => {
+		for (const href of ['safety/agent-risk/', 'http://diataxis.fr/', 'mailto:a@b.example']) {
+			const result = checkExtendsToHref(href, sources);
+			expect(result.kind).toBe('invalid');
+			expect(result).toMatchObject({ reason: expect.stringContaining('https://') });
+		}
+	});
+	it('skips a source without a url', () => {
+		expect(checkExtendsToHref('https://nowhere.example/', sources).kind).toBe('invalid');
+	});
+});

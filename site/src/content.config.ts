@@ -16,8 +16,17 @@ const assumesSchema = z
 	.object({ objective: idSchema, lesson: idSchema.optional(), section: z.string().optional() })
 	.strict();
 
-/** Where a confident learner goes next (spec S03 "Frontmatter", `extends-to`). */
-const extendsToSchema = z.object({ label: z.string(), href: z.string() }).strict();
+/**
+ * Where a confident learner goes next (spec S03 "Frontmatter", `extends-to`).
+ * `href` is a root-relative page path or an `https://` URL. The MarkdownContent
+ * override checks an `https://` href against the bibliography (`lib/extends-to.ts`).
+ */
+const extendsToSchema = z
+	.object({
+		label: z.string(),
+		href: z.string().regex(/^(\/|https:\/\/)/, 'a root-relative path or an https:// URL'),
+	})
+	.strict();
 
 /** The hands-on task of a lesson, as the plan states it (spec S11 "Lesson file"). */
 const exerciseSchema = z.object({ kind: z.enum(['do', 'judge']), brief: z.string() }).strict();
