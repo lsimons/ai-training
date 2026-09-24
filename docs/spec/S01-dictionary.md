@@ -8,7 +8,8 @@ same name.
 **Status:** In progress - page kinds, content units, section kinds, every
 interaction type, comfort level (the `more` skills check included), progress,
 review and review item, and tutor verbs are implemented (2026-09-20).
-Deferred: path, goal, quiz, project, and the learner's reference.
+Checkpoint phases and alternates are implemented (2026-09-24). Deferred:
+path, goal, quiz, project, and the learner's reference.
 
 ## Introduction
 
@@ -95,8 +96,24 @@ course > lesson > section.
 
 - One graded interaction of one of the interaction types below, mapped to
   exactly one learning objective.
+
 - Can be **passed** or **skipped**. Skipping is recorded and isn't a pass.
-- Once its lesson is finished, a checkpoint becomes a **review item**.
+
+- Has a **phase**, which says where the learner meets it:
+
+  | Phase      | Where it is asked                                                                                                                                    |
+  | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | `first`    | In the lesson body. The default. Counts toward finishing the lesson.                                                                                 |
+  | `review`   | On the review page, in place of a `first` checkpoint with the same objective. Hidden on the lesson page.                                             |
+  | `practice` | In the lesson's **More practice** section, after the exercise. Graded and recorded, but the lesson can be finished without it and it isn't reviewed. |
+
+- An **alternate** is a checkpoint in the `review` or `practice` phase. It
+  shares its objective with at least one `first` checkpoint of the same
+  lesson, and those checkpoints are its **siblings**. Don't use: variant,
+  version, copy.
+
+- Once its lesson is finished, a `first` checkpoint becomes a **review
+  item**. An alternate never becomes one of its own.
 
 ### Exercise
 
