@@ -47,7 +47,7 @@ Repeat this section verbatim in every builder and reviewer prompt.
 
 ## Record and report
 
-Put the session record in the body of the wave pull request, under a `## Session record` heading after the review table, in the form of the "Session record" sections of `orchestration.md`: counts, what review caught, what the builder prompt should have said. Commit no record file. Return a report of AT MOST 200 words, plus the `Follow-ups` lines, in exactly this form and nothing else:
+Put the session record in the body of the wave pull request, under a `## Session record` heading after the review table, in the form of the records in `docs/agents/sessions/2026-09-20-waves-1-5.md`: counts, what review caught, what the builder prompt should have said. Commit no record file. Return a report of AT MOST 200 words, plus the `Follow-ups` lines, in exactly this form and nothing else:
 
 ```text
 {{WAVE}} <merged|open|failed>

@@ -225,8 +225,8 @@ The cases that come up:
   against rules merged since it started.
 - **Ports.** `site-e2e` and `site-screenshot` each take a free port, so
   they don't collide. A stale `astro dev` daemon still holds its port and
-  serves old content, so builders don't run `site-dev` (see `AGENTS.md`,
-  "Astro 7 dev server").
+  serves old content, so builders don't run `site-dev` (see `testing.md`,
+  "The Astro dev server").
 
 ## Working with the platform
 
@@ -289,97 +289,10 @@ force-push a branch another pull request is based on, never delete a branch,
 and never merge. Merging is the maintainer's call, relayed by the
 coordinator.
 
-## Session record, 2026-09-20
+## Session records
 
-The session records below are the form a wave's record follows. A wave
-under `/wave` puts its record in the body of its wave pull request, and the
-files under `sessions/` hold the records of the runs before 2026-09-25.
-
-Twelve issues, twelve pull requests, thirteen merges including the front
-page update, eleven reviews, six pull requests sent back for a revision,
-zero merged with an open blocking finding. Review caught two real npm
-package names presented as invented, a false claim about the MCP
-specification, a misattributed framework, an unverified interpreter
-download in place of a lockfile pin, a validator exclusion that hid typo
-links, and a crash in the e2e static server. Each of those would have
-shipped without the review pass.
-
-## Session record, 2026-09-20, waves 2 and 3
-
-Wave 2 ran in per-pull-request mode. Twenty-five issues were in scope at
-the start of the day, twenty pull requests merged, sixteen issues closed,
-about twenty-two review passes, fifteen pull requests sent back or given
-items to apply at least once, zero merged with an open blocking finding.
-Review caught a tutor exemplar dialogue that leaked a graded checkpoint's
-answer, a reset that
-resurrected a migrated progress record, a skills-check input rename that
-broke self-graded checkpoints, a spec bootstrap contract that WebFetch couldn't
-meet, near-verbatim Academy sentences in three lesson pull requests,
-four wrong concept tags, a sidebar badge invisible in the light theme, and
-a widget whose bars had never rendered on `main`.
-
-Wave 3 was the first run of the integration mode. Nine issues (#30
-to #35, then #60, #61 and #19) plus a plan-table request from the maintainer
-became eleven branches, and the wave and stacked pull requests that merged
-were #108 with the six course plans and the plan table, #109 with two
-lesson changes, and #110 with the EU AI Act lesson stacked on the plans. A
-write-back pull request, #219, followed with the issue numbers of the 103 lesson
-issues the plans opened (deliverable 2 of #30 to #35). About twenty review
-passes, nine of the eleven branches sent back or given items to apply
-once. Review caught the competency-topic mismatch in four of the six
-plans, an exercise that had the learner paste their own confidential
-document, a sort item with two defensible answers, and a course-plan table
-that scrolled the page sideways on a phone. It also verified a July 2026
-amendment to the EU AI Act and every article reference against EUR-Lex
-before the maintainer's own check. The wave
-pull requests, two of them, replaced what would have been nine pull
-requests and nine deploys.
-
-## Session record, 2026-09-21, wave 4
-
-Five Concepts lesson issues (#117, #119, #121, #123, #125) became five
-branches and one wave pull request, #222, merged the same evening with the
-maintainer's standing approval for a green wave. Three of the lessons had
-`after: concepts/prompt-anatomy`, and the build rejects an `assumes` entry
-whose lesson page doesn't exist, so those three started from the #119
-branch once it was pushed, and #119 appended its review fixes instead of
-rewriting. Ten review passes, five branches sent back once, all five
-approved on the re-check, zero merged with an open finding. Review caught a
-fictional freight company that turned out to be real (used by two lessons),
-a fixture that parsed the pitfall's own JSON object as lines, a misreading
-of the few-shot paper's example counts, two sort items with two defensible
-buckets, a "put the instruction first" rule that contradicts the vendor
-docs, and a system prompt too close to an Academy example. Two things the
-builder prompt should have said: the sidebar in `astro.config.mjs` is
-manual, and `mise run prose-sync` has to run before `mise run prose` or
-the builder reports a clean page that isn't. The wave's `mise run ci`
-found the semantic conflict the branches couldn't: three e2e specs assumed
-Concepts had one live lesson. Every branch added its sidebar line at the
-same spot, and the coordinator resolved those add/add conflicts on the wave
-branch by keeping every line in course order, since no builder's work was
-at stake.
-
-## Session record, 2026-09-21, wave 5
-
-Ten lesson issues, the first unwritten lesson or two of each of the six
-courses (#113, #115, #129, #131, #133, #147, #151, #177, #185, #188), became
-ten branches and one wave pull request, #229, merged about ninety minutes
-after the first builder started. Three earlier-in-course candidates were
-skipped because their `assumes` named a planned lesson, which `mise run data`
-rejects. Twenty review passes: every first review said needs changes, every
-re-check approved, zero merged with an open finding. Review caught an
-overstated claim that an abstain instruction changes nothing, a hedge about
-temperature 0 attributed to an Academy page that says the opposite, a
-done-criterion the lesson's own model answer failed, a page that promised no
-pasting and then asked for it, a git worktree presented as isolation for
-bypass mode against the vendor docs, a graded prediction whose answer
-depended on code the page never showed, and four sort items with two
-defensible buckets. Two things for the builder prompt: `mise run prose` and
-`mise run spell` read `git ls-files`, so a builder must stage the new page
-before trusting either (one branch shipped twelve Vale errors that way), and
-two builders adding a bibliography key both reflowed the S02 source table,
-so name the key pattern (`Claude docs <slug>`) and say not to add a table
-row. The coordinator resolved the add/add conflicts in the word list, the
-source table and the bibliography by keeping every line, squashed one branch
-whose second commit reverted part of its first, and delegated the e2e fix
-for two specs that assumed Concepts had six live lessons.
+The records of waves 1 to 5 are in
+[`sessions/2026-09-20-waves-1-5.md`](sessions/2026-09-20-waves-1-5.md), and
+they are the form a wave's session record follows: counts, what review
+caught, and what the builder prompt should have said. A wave under
+`/wave` puts its record in the body of its wave pull request.
