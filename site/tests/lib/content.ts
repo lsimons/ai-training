@@ -293,6 +293,43 @@ export const competencies = [
 			objectives: [{ id: 'o1', statement: 'Explains generation', level: 'base', behaviors: [] }],
 		},
 	},
+	{
+		id: 'safety/competencies/judges-output',
+		data: {
+			id: 'safety/judges-output',
+			area: 'safety',
+			statement: 'Judges agent output',
+			topics: ['safety/risk'],
+			objectives: [
+				{
+					id: 'o2',
+					statement: 'Checks before trusting',
+					level: 'base',
+					behaviors: [
+						{
+							claim: 'Reads the diff before `git push` (@AEC-02).',
+							why: 'A wrong line ships otherwise (@Brilliant TAS).',
+							example: 'Runs the tests once more (@AEC-02).',
+						},
+					],
+				},
+			],
+		},
+	},
+];
+
+export const bibliography = [
+	{
+		id: 'AEC-02',
+		data: {
+			type: 'course',
+			title: 'How agents think',
+			container: 'Agent Engineer Course',
+			author: 'A. Osmani',
+			url: 'https://example.com/aec',
+		},
+	},
+	{ id: 'Brilliant TAS', data: { type: 'reference', title: 'Taste', container: 'Brilliant', author: null, url: null } },
 ];
 
 export const alignment = [
@@ -315,7 +352,8 @@ export function mockContent(
 	} = {},
 ) {
 	const collections: Record<string, unknown[]> = {
-		docs: overrides.docs ?? docs,
+		// The docs schema defaults `serves` to [], so the fixture does too.
+		docs: (overrides.docs ?? docs).map((d) => ({ ...d, data: { serves: [], ...d.data } })),
 		topics: overrides.topics ?? topics,
 		courses: overrides.courses ?? courses,
 		lessonPlans: overrides.lessonPlans ?? lessonPlans,
@@ -323,6 +361,7 @@ export function mockContent(
 		areas,
 		competencies,
 		alignment,
+		bibliography,
 	};
 	return {
 		getCollection: vi.fn(async (name: string) => collections[name] ?? []),

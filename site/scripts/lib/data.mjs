@@ -34,7 +34,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
-import { citationKeys } from '../../plugins/remark-citations.mjs';
+import { citationKeys } from '../../plugins/citation-syntax.mjs';
 import { allTopics, courseLessonIds, readAreaTree } from './area-tree.mjs';
 
 /** Every file under `dir`, recursively. */

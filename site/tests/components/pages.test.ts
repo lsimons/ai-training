@@ -1,10 +1,11 @@
 /**
  * Renders the page-level components that read the content collections
- * (CourseGraph, CoursePlan, TopicMap, Settings, OverallProgress) against the fixture lessons in
+ * (CourseGraph, CoursePlan, TopicMap, Settings, OverallProgress, CompetencyObjectives) against the fixture lessons in
  * tests/lib/content.ts. What the client scripts draw on top is covered by
  * the e2e suite; these tests check the server-rendered frame the scripts
  * bind to.
  */
+import CompetencyObjectives from '@components/CompetencyObjectives.astro';
 import CourseGraph from '@components/CourseGraph.astro';
 import CoursePlan from '@components/CoursePlan.astro';
 import LearnersReference from '@components/LearnersReference.astro';
@@ -14,6 +15,7 @@ import TopicMap from '@components/TopicMap.astro';
 import TopicReference from '@components/TopicReference.astro';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { competencies } from '../lib/content';
 
 vi.mock('astro:content', async () => (await import('../lib/content')).mockContent());
 
@@ -62,6 +64,45 @@ describe('CourseGraph', () => {
 	});
 	it('rejects an unknown area', async () => {
 		await expect(container.renderToString(CourseGraph, { props: { area: 'nope' } })).rejects.toThrow(/Unknown area/);
+	});
+});
+
+describe('CompetencyObjectives', () => {
+	const competency = (id: string) => competencies.find((c) => c.data.id === id)?.data;
+	it('renders citations in behaviors as numbered links, code spans as code, and a References list', async () => {
+		const html = await container.renderToString(CompetencyObjectives, {
+			props: { competency: competency('safety/judges-output') },
+		});
+		expect(html).not.toContain('(@');
+		expect(html).toContain(
+			'Reads the diff before <code>git push</code> <a class="citation" data-key="AEC-02" href="#ref-1" title="AEC-02">[1]</a>.',
+		);
+		expect(html).toContain('href="#ref-2" title="Brilliant TAS">[2]</a>');
+		expect(html).toContain('<h2 id="references">References</h2>');
+		expect(html).toContain(
+			'<li id="ref-1">A. Osmani. <a href="https://example.com/aec"><em>How agents think</em></a>.',
+		);
+		expect(html).toContain('Agent Engineer Course. Course. <code>AEC-02</code>');
+		expect(html).toContain('<li id="ref-2"><em>Taste</em>. Brilliant. Reference. <code>Brilliant TAS</code>');
+		expect(html.match(/<li id="ref-/g)).toHaveLength(2);
+	});
+	it('renders no References section when nothing cites', async () => {
+		const html = await container.renderToString(CompetencyObjectives, {
+			props: { competency: competency('concepts/explains-models') },
+		});
+		expect(html).toContain('Behaviors not written yet.');
+		expect(html).not.toContain('References');
+	});
+	it('rejects an unknown citation key', async () => {
+		const bad = {
+			id: 'x/y',
+			objectives: [
+				{ id: 'o', statement: 'S', level: 'base', behaviors: [{ claim: 'See (@Nope).', why: '', example: '' }] },
+			],
+		};
+		await expect(container.renderToString(CompetencyObjectives, { props: { competency: bad } })).rejects.toThrow(
+			/competency x\/y: unknown citation key "Nope"/,
+		);
 	});
 });
 

@@ -2,8 +2,9 @@ import remarkMdx from 'remark-mdx';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { describe, expect, it } from 'vitest';
+import { citationKeys, splitCitations } from '../../plugins/citation-syntax.mjs';
 import { CODE_AND_COMPONENTS, CODE_ONLY, walkText } from '../../plugins/mdast-walk.mjs';
-import { citationKeys, remarkCitations } from '../../plugins/remark-citations.mjs';
+import { remarkCitations } from '../../plugins/remark-citations.mjs';
 import { remarkTerms } from '../../plugins/remark-terms.mjs';
 
 const topics = [
@@ -167,6 +168,17 @@ describe('remarkCitations', () => {
 			'Brilliant TAS',
 		]);
 		expect(citationKeys('No citation here.\n')).toEqual([]);
+	});
+	it('splitCitations keeps the text runs around each token and returns plain text as one part', () => {
+		expect(splitCitations('A (@K-1) b (@ K-2 ).')).toEqual([
+			{ type: 'text', value: 'A ' },
+			{ type: 'citation', key: 'K-1' },
+			{ type: 'text', value: ' b ' },
+			{ type: 'citation', key: 'K-2' },
+			{ type: 'text', value: '.' },
+		]);
+		expect(splitCitations('plain')).toEqual([{ type: 'text', value: 'plain' }]);
+		expect(splitCitations('')).toEqual([{ type: 'text', value: '' }]);
 	});
 	it('numbers citations by first appearance, links them page-absolute, and appends a References section', async () => {
 		const tree = await run('One (@AEC-02). Two (@Brilliant TAS). One again (@AEC-02).\n');
