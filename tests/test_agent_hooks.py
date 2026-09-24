@@ -295,3 +295,49 @@ def test_format_file_never_fails(repo: Path, tmp_path: Path) -> None:
     broken.write_text("not a program")
     broken.chmod(0o755)
     assert agent_hooks.format_file({"tool_input": {"file_path": str(repo / "wt" / "b.py")}}) == 0
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git diff origin/main...HEAD",
+        "git log --oneline -5",
+        "git -C ../ai-training-wt/feat/1-x show HEAD",
+        "git status --short",
+        "gh pr diff 12",
+        "gh pr view 12 --json files",
+        "gh issue view 12 --comments",
+        "mise run site-test",
+        "cd ../ai-training-wt/feat/1-x && git diff origin/main...HEAD | head -50",
+    ],
+)
+def test_review_bash_allows_the_read_only_review_commands(command: str) -> None:
+    event = {"tool_input": {"command": command}}
+    assert agent_hooks.review_bash(event) == (0, "")
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git commit -am fix",
+        "git push",
+        "gh pr comment 12 --body x",
+        "gh issue comment 12 --body x",
+        "sed -i s/a/b/ file.md",
+        "rm -rf site",
+        "git diff && git checkout -- .",
+        "AI_TRAINING_ROLE=dispatcher git diff",
+        "git",
+    ],
+)
+def test_review_bash_rejects_anything_else(command: str) -> None:
+    code, message = agent_hooks.review_bash({"tool_input": {"command": command}})
+    assert code == 2
+    assert "not a review command" in message
+
+
+def test_review_bash_through_main(capsys: pytest.CaptureFixture[str]) -> None:
+    event = json.dumps({"tool_input": {"command": "git push"}})
+    assert agent_hooks.main(["agent_hooks.py", "review-bash"], event, {}) == 2
+    assert "code-reviewer hook" in capsys.readouterr().err
+    assert agent_hooks.review_bash({"tool_input": {}}) == (0, "")
