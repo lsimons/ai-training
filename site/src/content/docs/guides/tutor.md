@@ -5,9 +5,9 @@ description: Install the tutor skill in Claude Code or opencode, open a lesson w
 
 The tutor is Claude acting as a study partner for one lesson of this site.
 It runs inside your own coding agent and reads the lesson you name, and it
-gives hints while keeping the answers back. This page gets you from nothing installed
-to a first session, and reading it doesn't count toward any course
-progress.
+gives hints while keeping the answers back. This page gets you from
+nothing installed to a first session, and reading it doesn't count toward
+any course progress.
 
 ## Install
 
