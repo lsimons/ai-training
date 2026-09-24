@@ -73,7 +73,7 @@ under Biome, the strict tsconfig flags and the coverage include set.
 
 ## Timeouts
 
-`site/vitest.config.ts` sets no `testTimeout`. Every test gets Vitest's
+`site/vitest.config.ts` doesn't set `testTimeout`. Every test gets Vitest's
 default of 5000 ms, and unit and component tests keep it: a test that
 needs longer is doing too much. The one case for a per-test timeout is a
 sweep over external processes, where the time goes to subprocesses the
@@ -87,10 +87,10 @@ test, and leave the default for the rest of the file.
 
 `mise run site-build` writes to `site/.astro/` (the content collection
 types and modules) and `site/node_modules/.vite/deps` (Vite's dependency
-cache) while it runs. A build started in a worktree where another build is
-running writes to the same files, and one of them fails or builds from the
-other's half-written output. A test that runs builds at the same time, such
-as a load or concurrency check, runs each build in its own worktree, and
+cache) while it runs. A second build started in the same worktree while the
+first is running writes to the same files, and one of them fails or builds
+from the other's half-written output. A test that runs builds in parallel,
+such as a load or concurrency check, runs each build in its own worktree, and
 this covers `site-build` next to `site-e2e` too, since `site-e2e` builds
 first.
 
