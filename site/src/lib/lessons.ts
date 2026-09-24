@@ -48,10 +48,11 @@ export async function getLessons(area?: string): Promise<Lesson[]> {
 /**
  * The checkpoint tags of a lesson, read from the MDX tree of its body
  * (`lib/checkpoint-tags.ts`). A collection entry carries the source and not
- * the tree the page build made, so the body is parsed here again with the
- * same parser. The remark plugin (`plugins/remark-checkpoints.mjs`) reads
- * the build's tree with the same function, so a tag that fails here failed
- * the page first, with the file path in the message.
+ * the tree the page build made, and this reader is synchronous, so the body
+ * is parsed here with the same parser rather than read from rendered
+ * frontmatter. The remark plugin (`plugins/remark-checkpoints.mjs`) runs the
+ * same function over the build's tree, so a tag that fails here failed the
+ * page first, with the file path in the message.
  */
 export function checkpointTagsOf(lesson: Lesson): CheckpointTagInfo[] {
 	return checkpointTagsOfSource(lesson.body ?? '', lesson.id);
