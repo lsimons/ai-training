@@ -132,13 +132,32 @@ export function interpreters(spawn = spawnSync) {
 }
 
 /**
- * Run one fixture with `interp` (`{ label, cmd }`, default `python3`). Every
- * fixture is a Python script; any other file type is an error.
+ * How long one fixture may run, in milliseconds. A fixture that waits on
+ * input or loops would otherwise hang `mise run examples` for good; the
+ * slowest real fixture takes well under a second.
  */
-export function runFixture(examplesDir, run, interp = { label: 'python3', cmd: 'python3' }) {
+export const FIXTURE_TIMEOUT_MS = 30_000;
+
+/**
+ * Run one fixture with `interp` (`{ label, cmd }`, default `python3`). Every
+ * fixture is a Python script; any other file type is an error. Returns
+ * `{ status, stdout, stderr }`, or `{ error }` when the interpreter could not
+ * run or the fixture hit `FIXTURE_TIMEOUT_MS`. `spawn` is injectable for
+ * tests.
+ */
+export function runFixture(examplesDir, run, interp = { label: 'python3', cmd: 'python3' }, spawn = spawnSync) {
 	const typeError = fixtureTypeError(run);
 	if (typeError) return { error: typeError };
-	const res = spawnSync(interp.cmd, [join(examplesDir, run)], { encoding: 'utf8', env: fixtureEnv });
+	const res = spawn(interp.cmd, [join(examplesDir, run)], {
+		encoding: 'utf8',
+		env: fixtureEnv,
+		timeout: FIXTURE_TIMEOUT_MS,
+	});
+	if (res.error) {
+		const why =
+			res.error.code === 'ETIMEDOUT' ? `did not finish within ${FIXTURE_TIMEOUT_MS / 1000}s` : res.error.message;
+		return { error: `cannot run ${run} with ${interp.cmd}: ${why}` };
+	}
 	return { status: res.status, stdout: (res.stdout ?? '').trimEnd(), stderr: res.stderr };
 }
 
@@ -179,7 +198,8 @@ export function checkSource(file, src, run, interps = DEFAULT_INTERPRETERS) {
 		for (const interp of interps) {
 			const res = run(name, interp);
 			checked++;
-			if (res.status !== 0)
+			if (res.error) failures.push(`${file} #${id}: [${interp.label}] ${res.error}`);
+			else if (res.status !== 0)
 				failures.push(`${file} #${id}: ${name} [${interp.label}] exited ${res.status}\n${res.stderr}`);
 			else if (res.stdout !== answer.trimEnd())
 				failures.push(
