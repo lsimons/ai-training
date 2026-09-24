@@ -64,7 +64,7 @@ passed the checkpoint on the page.
 1. Read the bundle. Name the lesson by its `title` and say you have the
    page at `url`.
 2. If the learner has pasted their progress export (a JSON file with
-   `"version": 2`), read it. For every item in `reviews` whose `due` is
+   `"version": 3`), read it. For every item in `reviews` whose `due` is
    today or earlier, ask **one** recall question from that checkpoint before
    anything else. Each item's `history` lists its answers, oldest first, as
    `{ "at": "YYYY-MM-DD", "result": "pass" | "fail" }`, so a run of recent
@@ -74,7 +74,16 @@ passed the checkpoint on the page.
    lesson's "More practice" checkpoints, which never fall due. If they haven't
    exported, point them at the course review page,
    `{site}/<area>/review/`, for when items are due.
-3. Offer the verbs.
+3. In the same opener, look at the `habits` map of the export. An entry is
+   keyed `<area>/<lesson>#<habit id>` and has `since`, `next` and `history`.
+   For every entry whose `next` is today or earlier, ask whether the learner
+   did that habit. The habit text is under `#### Habit: <habit id>` at the
+   end of the bundle's `prose` when the habit is from this lesson, and
+   otherwise name the habit by its id and lesson. Whatever the answer, record
+   nothing: the learner presses Done or Skip on the lesson page or the course
+   review page, and you only ask. A `next` of `null` means the habit has
+   retired, so leave it out.
+4. Offer the verbs.
 
 ## Verbs (scoped to the current lesson)
 
