@@ -368,8 +368,8 @@ to keep gets a supply-chain risk rating, from maintenance activity, known
 vulnerabilities, trust signals, and what the package does at install or
 run time. Expect an empty risk section for a package it wants to inline.
 The procedure skips that step on purpose. Its last step is an action plan,
-and the skill as written also executes the plan: it removes packages, runs
-the tests, and commits. Copy the
+and the skill as written also executes the plan, from removing packages to
+committing the result. Copy the
 `skills/sbp-dependency-audit/` directory into the place your coding agent
 reads skills from (for Claude Code, `.claude/skills/` in the project, and
 other agents document their own directory), start a new session in the
@@ -379,16 +379,17 @@ with the instruction that the agent may not change any file. Running it on
 a copy of the repository is the other safe option.
 
 Compare its report with your page, and write the comparison under your
-verdict. Which of the six dimensions did the agent cover, and which did it
-skip or fold into another? Which questions did it answer differently from
-you, and which of you was right? A claim about the last release or the
-number of maintainers is a fact you can check at the source. The agent's five categories and your three verdicts are different lists,
-so first translate its category into accept, accept with conditions, or
+verdict. Note which dimension took you the longest to answer, and whether
+the time matched the risk. Which of the six dimensions did the agent cover,
+and which did it skip or fold into another? Which questions did it answer
+differently from you, and which of you was right? A claim about the last
+release or the number of maintainers is a fact you can check at the source.
+The agent's five categories and your three verdicts are different lists, so
+first translate its category into accept, accept with conditions, or
 reject. Then, where that differs from your verdict, write down why. Last,
 name what you would still check by hand after reading the agent's report.
 
-Reflect: which dimension took the longest to answer, and did the time match
-the risk? Which parts of a dependency review can you hand to an agent from
+Reflect: which parts of a dependency review can you hand to an agent from
 now on, and which parts stay with you?
 </Exercise>
 
