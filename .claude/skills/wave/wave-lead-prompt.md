@@ -14,8 +14,8 @@ A row marked as the nits row is one issue that holds the cosmetic nits left open
 
 Read `docs/agents/orchestration.md` and `docs/agents/meta-orchestration.md` in full before doing anything. Follow `orchestration.md` end to end in INTEGRATION MODE:
 
-- One builder agent per issue (`general-purpose`, low effort), each in its own worktree `../ai-training-wt/feat/<issue>-<slug>` on branch `feat/<issue>-<slug>` from `origin/main`, pushed when `mise run fast` passes, no pull request. At most six builders run at once. The builder prompt holds every item listed under step 2 of "The flow" in `orchestration.md`, plus the collision notes below, plus everything the "Session record" sections say the prompt should have said. Tell the builder to load the `build` skill and to assign the issue to itself.
-- One reviewer agent per pushed branch, in its own worktree detached at the branch tip: a content and prose review against `docs/agents/writing-a-lesson.md` and spec S03, a licensing check on every cited source (near-verbatim Academy or other source text is a blocking finding), and a probe of every factual claim against a public source. A branch with code changes also gets the `code-review` skill. The review goes on the ISSUE as a comment, findings by severity with `file:line` and a concrete failure scenario, ending in `Verdict: approve` or `Verdict: needs changes`. If the `code-review` skill returns nothing, the reviewer probes on its own.
+- One builder agent per issue (`general-purpose`, low effort), each in its own worktree `../ai-training-wt/feat/<issue>-<slug>` on branch `feat/<issue>-<slug>` from `origin/main`, pushed when `mise run fast` passes, no pull request. At most six builders run at once. The builder prompt holds every item listed under step 2 of "The flow" in `orchestration.md`, plus the builder rules and the matching collision list below (see "Lead rules"), plus everything the "Session record" sections say the prompt should have said. Tell the builder to load the `build` skill and to assign the issue to itself.
+- One reviewer agent per pushed branch, in its own worktree detached at the branch tip: a content and prose review against `docs/agents/writing-a-lesson.md` and spec S03, a licensing check on every cited source (near-verbatim Academy or other source text is a blocking finding), and a probe of every factual claim against a public source. A branch with code changes also gets the `code-review` skill. The review goes on the ISSUE as a comment, findings by severity with `file:line` and a concrete failure scenario, ending in `Verdict: approve` or `Verdict: needs changes`. Every reviewer prompt holds the reviewer rules below.
 - You read each verdict and send the builder one message: required findings, suggested rewrites to apply unless they read worse, findings to skip. One commit, reply on the issue, re-check by the same reviewer. Loop until approve.
 - Integration: wave branch `{{BRANCH}}` in the worktree `../ai-training-wt/{{BRANCH}}` from `origin/main`, each approved branch rebased `--onto` it exactly as `orchestration.md` shows. The word list and the bibliography merge with git's union driver (`.gitattributes`). Resolve add/add conflicts in the S02 source table yourself by keeping every line in course order, and after the rebases drop a duplicate bibliography key that `mise run data` reports. Any other conflict goes back to the builder whose branch came second. Since #242 the e2e specs derive their lesson and checkpoint counts from the data tree; if one still fails on the wave branch, fix it there yourself or delegate that to one builder.
 - `mise run ci` on the wave branch. Push, open ONE pull request against `main` with the review table (issue, branch, review comment link, re-check link), the attribution lines, and `Closes #N` for every merged issue.
@@ -39,65 +39,61 @@ If the line under the first paragraph says you are resuming, a previous lead for
 4. Spawn only what is missing: a reviewer for a pushed but unreviewed branch, a fresh builder agent in a new worktree checked out on the branch for a needs-changes branch (the review comment is its whole brief), and a builder from scratch for an issue with no branch at all.
 5. Continue with the brief above from there: integration, `mise run ci`, one pull request. If a pull request for `{{BRANCH}}` is already open, update it rather than opening a second one.
 
-## Collision notes (repeat verbatim in every builder prompt)
+## Builder rules (repeat verbatim in every builder prompt)
 
-- The sidebar in `site/astro.config.mjs` is generated from the data tree by `courseSidebar()`. Change nothing there.
-- The S02 source table in `docs/spec/S02-topic-map.md` is an add/add hot spot. Add lines, never reflow or re-sort, and a `Claude docs <slug>` bibliography key needs no S02 table row. `cspell-words.txt` and the bibliography merge with git's union driver, so add a word or an entry as one line or block and never re-sort.
-- In a fresh worktree run `mise run setup` once, before any other task.
-- The e2e specs derive live-lesson and checkpoint counts from the data tree (#242). Don't touch them. If the wave's `mise run ci` still fails in an e2e spec, the lead fixes it on the wave branch.
-- Do not run `site-dev`. Run `mise run fast` before every push, and let the wave run be the one `mise run ci`.
-- A live lesson's `assumes` entries must each name the `lesson` and `section` that teach the objective, and that lesson must be live on `main`. The picker chose only lessons whose assumed objectives a live lesson already serves.
+- In a fresh worktree run `mise run setup` once, before any other task. Don't run `site-dev`. Run `mise run fast` before every push, fix commits included, and let the wave run be the one `mise run ci`.
 - Keep scratch files in `.scratch/` in your own worktree, never under `/tmp`. `rm -rf .scratch` needs no permission.
-- Every commit message ends with exactly these two lines, and no Signed-off-by:
+- Every commit message ends with exactly these two lines, and no Signed-off-by. The `Assisted-by` line names the model you are actually running, for example `claude-opus-5-5`:
   Co-Authored-By: lsimons-bot <bot@leosimons.com>
-  Assisted-by: Claude:claude-fable-5-1
+  Assisted-by: Claude:<the model you are running>
 - Rebase on `origin/main` before the final push, and `git push --force-with-lease` on your own branch only. Never discard another agent's work to resolve a conflict, and never merge.
 - When the issue asks for a GitHub comment, edit only the comment id your own `gh issue comment` call returned.
-- A new S02 source-table row must fit the existing column widths, or mdformat reflows the table and `lint` fails.
-- A fixture may read only files that `git ls-files` lists. `site/.gitignore` ignores `.env`, so commit a sample under another name and copy it at run time.
-- Two branches adding the same `Claude Code <page>` bibliography key must make the entry and the S02 row byte-identical, so the lead can drop one copy.
-- Every source a page cites must also be in the plan file's `sources` list, even though no check enforces it yet.
-- When a lesson goes live, keep `after` as the plan had it (spec S11 step 3). Only `assumes` changes.
-- A page that says "as the last lesson taught" needs an `assumes` entry for that lesson, even when the plan arrived with `assumes: []`.
-- Markdown-looking content inside `<Response>` (headings, lists) must be inside a fenced code block with the `text` language, or it renders as page structure and sidebar entries.
-- Every number in prose that a fixture can produce must be pasted from the fixture's output, never derived by hand. Three of six branches in wave 7 had an arithmetic claim the fixture contradicted.
-- Check invented names for group signal (ethnicity, gender) as well as for existence.
-- A fix commit runs `mise run fast` like the first commit. A one-word `notes` edit failed `spell` on the wave in wave 8.
-- After changing a lesson's code or loop, grep the course for pages that say "the previous lesson" and re-read them.
-- When an `assumes` teaching lesson is not live, the lead names the stand-in before dispatch and the builder records it in the plan file's `notes`.
-- The lesson issue bodies use the old layout (frontmatter, `status: live`, `site/src/data/courses/`). `docs/agents/writing-a-lesson.md` is the truth.
 - Never edit `docs/agents/sessions/<date>-meta*.md` or `.claude/skills/wave/wave-lead-prompt.md`. The dispatcher owns both.
-- Quote a vendor limit (a context size, a file cap, a rate) only where two vendor pages agree, and record `sources-checked` and `review-by` in the plan file.
-- An exercise that runs a third-party agent skill states whether the skill changes files, and tells the learner to ask for a report only or to run it on a copy.
-- Several rows of the S02 alignment table are at full width, so a new objective can't always be added without a reflow. Skipping the row, with the reason in the issue reply, is acceptable.
-- Cheap nits from a re-check go back as one more one-line commit without another review round. The lead reads the diff.
-- Run `mise run site-format` then `mise run site-lint` after the last edit, before the push.
-- A builder that rewrites a checkpoint option re-reads that option's `why` and feedback text in the same edit.
-- A change to markup that a Starlight client script reads (sidebar `details` and `summary`) is tested from the restored state, not only on a fresh page.
-- Reviewers give the `code-review` skill an explicit target (branch or worktree range).
-- When a sibling branch replaces every reader of lesson source (as #98 did), new code that reads lesson source uses that reader and starts from that branch.
-- The lead names, per branch, the files a sibling also edits, including test files and import blocks.
-- A builder that says an item is already done on `main` quotes the line that shows it.
-- A CSS rule for markup inside a Starlight sidebar is checked in the built page at the target width, because Starlight's own styles apply there and Container API tests don't see CSS.
-- A sentence about vendor behavior (a CLI flag, a GitHub notification) names the vendor page that states it. Drop what no page states.
-- The gate's result beats the list in the issue body. #286 named two lessons, and seven tags in four lessons failed.
-- An e2e in-viewport assertion after a click needs a not-in-viewport assertion before it.
-- In an `.astro` template, keep a link and the words next to it on one source line, because the compiler drops the newline at a tag's line edge and the words run together (#70 shipped two words run together this way).
-- A copy button on a code line sits outside the scrolling `pre`, checked at 390px in the built page.
-- A parser for a vendor file format names the vendor page for each rule it copies, such as how a repeated key merges.
-- An e2e selector for a component picks its element by structure (`pre code`) and not by position (`code` nth(1)), since a review fix can add an element above it.
-- A test that a module-level path doesn't depend on the working directory reloads the module after the `chdir`, or it passes against the bug.
-- When siblings are matched by a shared key (an objective), the builder checks the case where two items share one sibling.
-- A foundations lesson backed by a fixture pastes its output into a `text` fence and doesn't add a test or CI check of its own until #237 is merged (then see #311).
-- A rewrap of lesson prose keeps every `(@key)` citation on one line, and the builder compares the built page's citation count with main.
-- A plan title that says the learner runs something is checked against the foundations rule that the learner runs nothing.
-- Reviewers start the `code-review` skill from inside the review worktree, because it reviews the checkout it runs in (three reviewers got an empty result this wave), and they probe by hand when it returns nothing.
-- A claim about how an agent product loads context (skills, MCP tools, memory files) names the vendor page and matches today's default behavior.
 - Builders never message reviewers. Only the lead asks for a re-check.
-- A fixture that runs git passes an allow-list env (PATH, temp HOME, LC_ALL=C, fixed identity, global/system config at /dev/null) rather than stripping the `GIT_*` names, and runs `git diff --stat` with a fixed width. A deny-list let `GIT_TEMPLATE_DIR` install a hook in #169.
-- An exercise that connects a real MCP server checks how the server takes its allowed folders from the client's roots, and has the learner start the agent inside the folder it may touch (#171 blocking).
+- A builder that says an item is already done on `main` quotes the line that shows it.
+- The gate's result beats the list in the issue body. #286 named two lessons, and seven tags in four lessons failed.
+- `docs/agents/writing-a-lesson.md` ("Rules that bite") holds the authoring rules and `docs/agents/testing.md` ("Rules from review") the test rules. Read the one your issue needs.
+
+## Lead rules
+
+- Pass every builder the builder rules above, then the collision list that matches the issue: the lessons list for a lesson or content issue and the nits row, the code list for a code issue, and both for an issue marked `(content and code)`.
+- Name, per branch, the files a sibling also edits, including test files and import blocks.
+- When an `assumes` teaching lesson is not live, name the stand-in before dispatch, and the builder records it in the plan file's `notes`.
+- If the wave's `mise run ci` fails in an e2e spec, fix it on the wave branch yourself or delegate it to one builder.
+- Cheap nits from a re-check go back as one more one-line commit without another review round. You read the diff.
+
+## Reviewer rules (repeat verbatim in every reviewer prompt)
+
+- Start the `code-review` skill from inside the review worktree, with an explicit target (the branch or the range `origin/main...HEAD`), because it reviews the checkout it runs in. Three reviewers got an empty result from it in one wave. When it returns nothing, probe by hand.
+- Run every shell command a page shows by following the page's own steps (a fresh copy, macOS sort order), and compare its output with the page.
+
+## Collision notes: lessons (at most 15)
+
+- The sidebar in `site/astro.config.mjs` is generated from the data tree by `courseSidebar()`. Change nothing there.
+- The S02 source table in `docs/spec/S02-topic-map.md` is an add/add hot spot. Add lines, never reflow or re-sort, and fit a new row to the existing column widths, or mdformat reflows the table and `lint` fails. Several rows of the S02 alignment table are at full width, so skipping a new objective's row, with the reason in the issue reply, is acceptable.
+- `cspell-words.txt` and the bibliography merge with git's union driver, so add a word or an entry as one line or block and never re-sort. A `Claude docs <slug>` bibliography key needs no S02 table row. Two branches adding the same `Claude Code <page>` key make the entry and the S02 row byte-identical, so the lead can drop one copy.
 - A bibliography license cell is read from the source's own license page or repository. In wave 16, builders marked CC-licensed sources as Proprietary by default.
-- A shell command shown on a page is run by following the page's own steps (a fresh copy, macOS sort order), and its output is compared with the page.
+- The e2e specs derive live-lesson and checkpoint counts from the data tree (#242). Don't touch them.
+- The lesson issue bodies use the old layout (frontmatter, `status: live`, `site/src/data/courses/`). `docs/agents/writing-a-lesson.md` is the truth.
+- A fixture may read only files that `git ls-files` lists. `site/.gitignore` ignores `.env`, so commit a sample under another name and copy it at run time.
+- A fixture that runs git passes an allow-list env (PATH, temp HOME, LC_ALL=C, fixed identity, global/system config at /dev/null) rather than stripping the `GIT_*` names, and runs `git diff --stat` with a fixed width. A deny-list let `GIT_TEMPLATE_DIR` install a hook in #169.
+- An exercise that runs a third-party agent skill or connects a real MCP server says what it can change. A skill exercise tells the learner to ask for a report only or to run it on a copy. An MCP exercise checks how the server takes its allowed folders from the client's roots, and has the learner start the agent inside the folder it may touch (#171 blocking).
+- A builder that rewrites a checkpoint option re-reads that option's `why` and feedback text in the same edit.
+- After changing a lesson's code or loop, grep the course for pages that say "the previous lesson" and re-read them.
+- A plan title that says the learner runs something is checked against the foundations rule that the learner runs nothing.
+- A foundations lesson backed by a fixture pastes its output into a `text` fence and doesn't add a test or CI check of its own until #237 is merged (then see #311). (remove after #311)
+- A rewrap of lesson prose keeps every `(@key)` citation on one line, and the builder compares the built page's citation count with main. (remove after #310)
+
+## Collision notes: code (at most 15)
+
+- Run `mise run site-format` then `mise run site-lint` after the last edit, before the push.
+- The e2e specs derive live-lesson and checkpoint counts from the data tree (#242). Don't hard-code a count.
+- When a sibling branch replaces every reader of lesson source (as #98 did), new code that reads lesson source uses that reader and starts from that branch.
+- In an `.astro` template, keep a link and the words next to it on one source line, because the compiler drops the newline at a tag's line edge and the words run together (#70 shipped two words run together this way).
+- A parser for a vendor file format names the vendor page for each rule it copies, such as how a repeated key merges.
+- When siblings are matched by a shared key (an objective), the builder checks the case where two items share one sibling.
+
+A list holds at most 15 bullets. At the cap, a new note replaces an old one or becomes a check, and your report says which.
 
 ## Filing
 
@@ -117,5 +113,6 @@ Left out: #c (<reason>) ...
 For the maintainer: <decisions needed, or none>
 Filed: #<issue> <title> ... (or none)
 Follow-ups: <none, or one line per nit or follow-up when no issues were filed>
-Add to collision notes: <one line each, or none>
+Add to collision notes: <lessons|code: one line each, or none>
+Remove from collision notes: <lessons|code: the bullet's first words and why, one line each, or none>
 ```

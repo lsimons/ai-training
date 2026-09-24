@@ -52,6 +52,24 @@ changed file is prose or prose tooling (see "When the browser suite runs").
   so.
 - **A code example's output** is already asserted: `<Predict run="..." answer="...">` names the fixture and `mise run examples` compares it, so it gets no separate test.
 
+## Rules from review
+
+Each of these came from a review finding in a wave.
+
+- An e2e in-viewport assertion after a click needs a not-in-viewport
+  assertion before the click, or it passes when the click did nothing.
+- An e2e selector for a component picks its element by structure
+  (`pre code`) and not by position (`code` nth(1)), since a review fix can
+  add an element above it.
+- A test that a module-level path doesn't depend on the working directory
+  reloads the module after the `chdir`, or it passes against the bug.
+- A CSS rule for markup inside the Starlight sidebar is checked in the
+  built page at the target width, because Starlight's own styles apply
+  there and the Container API tests don't see CSS.
+- A change to markup that a Starlight client script reads (the sidebar's
+  `details` and `summary`) is tested from the restored state, and on a
+  fresh page as well.
+
 ## Coverage
 
 `site/vitest.config.ts` sets an 80% floor for lines, functions, branches

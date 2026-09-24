@@ -143,8 +143,9 @@ file and never the dispatcher's context. One tick:
    record, commits and pushes it, then spawns the lead with the filled
    template, waits for the lead's notification and does nothing else.
 6. **Read the report and commit the record.** Replace the `In flight` line
-   with the report, apply its `Add to collision notes` lines to the
-   template, and under `--only` remove the merged and the left-out issues
+   with the report, copy its `Add to collision notes` and
+   `Remove from collision notes` lines to the record's
+   `Pending collision notes` section, and under `--only` remove the merged and the left-out issues
    from the remaining whitelist, parking the left-out ones so the run
    never picks them again. Run `mise run spell` and `mise run prose` on
    the two files, commit them on `main` as
@@ -209,10 +210,17 @@ below.
 
 - The standing approval as written above, and the merge command.
 
-- The collision notes, which every builder prompt repeats. The template's
-  "Collision notes" section is the canonical list, and the dispatcher adds
-  to it from each wave's `Add to collision notes` line. This document keeps
-  no copy.
+- The builder, lead and reviewer rules, and two collision lists, one for
+  lessons and one for code. The lead passes each builder the builder
+  rules and the list that matches its issue. The template is the
+  canonical copy, and this document keeps none. Durable rules live in
+  `writing-a-lesson.md` ("Rules that bite") and `testing.md` ("Rules from
+  review") instead. Each list holds at most 15 bullets. A wave report
+  proposes changes on its `Add to collision notes` and
+  `Remove from collision notes` lines, the dispatcher keeps them under
+  `Pending collision notes` in the meta record, and they reach the
+  template only after the maintainer has read them. At the cap a new note
+  replaces an old one or becomes a check.
 
 - The nits row rule and the "Resuming a half-done wave" section, so a lead
   that starts after a failed one knows what to reuse and what to spawn.
@@ -234,7 +242,8 @@ below.
   For the maintainer: <decisions needed, or none>
   Filed: #<issue> <title> ... (or none)
   Follow-ups: <none, or one line per nit or follow-up under --no-filing>
-  Add to collision notes: <one line each, or none>
+  Add to collision notes: <lessons|code: one line each, or none>
+  Remove from collision notes: <lessons|code: the bullet's first words and why, one line each, or none>
   ```
 
   The 200 words exclude the `Follow-ups` lines.

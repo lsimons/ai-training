@@ -47,6 +47,8 @@ heading and the arguments. Keep these sections current:
   `--only`).
 - `## Parked`: issues a lead left out, with the reason. A parked issue is
   never picked again in this run.
+- `## Pending collision notes`: the add and remove lines from the leads'
+  reports that the maintainer hasn't read yet (step 7).
 - `## Waves`: per wave, first an `In flight: wave <n>, branch <b>, issues #a #b ...` line while the lead runs, replaced by the lead's report when
   it arrives. An `In flight` line with no report after it marks a wave to
   resume.
@@ -129,13 +131,19 @@ rejected.
    Whatever the status, do this first:
    - Replace the wave's `In flight` line in the meta record with the
      report.
-   - Apply every line under `Add to collision notes` to the template's
-     collision list, as a new bullet each, and drop a note the report says
-     is wrong.
+   - Copy every line under `Add to collision notes` and
+     `Remove from collision notes` into the `## Pending collision notes`
+     section of the meta record, each marked add or remove and with its
+     list (lessons or code). Don't edit the template's lists yourself.
+     When the maintainer has read a pending line and agreed, apply it to
+     the named list and delete it from the section. Each list holds at
+     most 15 bullets, so an add at the cap names the bullet it replaces
+     or the check that makes one unnecessary.
    - Under `--only`: remove the `Merged issues` and the `Left out` numbers
      from `Remaining --only`, and add the `Left out` ones to `## Parked`
      with their reason.
-   - Commit the meta record and the template on `main` as
+   - Commit the meta record (and the template, when a pending line was
+     applied) on `main` as
      `docs(agents): meta record wave <n>`, following the commit steps
      above. Nothing of the dispatcher's stays uncommitted between ticks.
    - Then act on the status.
