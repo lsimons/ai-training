@@ -193,10 +193,11 @@ a data change is designed with its way back written down before it runs,
 and the write-up is part of the change the reviewer reads.
 
 The usual design is to add before you remove. The migration adds the new
-column and backfills it from the old one, and the code starts writing to
-both and reading from the new one. Dropping the old column is a separate
-change, days later, after the new code has run in production and nothing
-still reads the old one. After each of those steps, the previous
+column, and the code starts writing to both columns. Then a backfill
+copies the old column into the new one for every row written before that,
+and the code starts reading from the new one. Dropping the old column is a
+separate change, days later, after the new code has run in production and
+nothing still reads the old one. After each of those steps, the previous
 version of the code works against the current table, so a revert of the
 code is still a revert. The to-do fixture follows the same rule in
 miniature: the spec says an item without a `due` field is still valid, so the first
