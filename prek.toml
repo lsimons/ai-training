@@ -28,7 +28,13 @@
 #   interpreter would print a longer list.
 
 minimum_prek_version = "0.3.0"
-default_stages = ["pre-commit"]
+# Every hook without its own `stages` runs before a commit and again
+# before a push, on the files the push changes. The push run catches a
+# commit that skipped the pre-commit hooks, and the pre-push-only prose
+# hooks at the end of this file run there too (docs/agents/testing.md,
+# "Before a push").
+default_stages = ["pre-commit", "pre-push"]
+default_install_hook_types = ["pre-commit", "commit-msg", "pre-push"]
 
 # pre-commit-hooks 6.0.0 has one runtime dependency, ruamel.yaml. It is
 # pinned on every hook so they share one environment and none of them
@@ -107,6 +113,8 @@ hooks = [
     entry = "bash -c 'lychee --no-progress --config .lychee.toml \"$@\"' --",
     language = "system",
     types_or = ["markdown", "mdx", "yaml"],
+    # A network check, so never on a push (see `mise run links`).
+    stages = ["pre-commit"],
   }
 ]
 
@@ -137,5 +145,42 @@ hooks = [
     stages = ["commit-msg"],
     pass_filenames = false,
     always_run = true,
+  }
+]
+
+# The prose checks of `mise run spell` and `mise run prose`, before a push
+# only, over the Markdown, MDX and data YAML the push changes. The file
+# rules match the two tasks in .mise.toml. Commits pushed straight to
+# `main` (the dispatcher's records) get no pull request run, and these
+# catch what CI would reject there (#344). `mise run lint` runs the
+# pre-commit stage, so these don't run twice in `ci`.
+[[repos]]
+repo = "local"
+hooks = [
+  {
+    id = "cspell",
+    name = "cspell (changed prose)",
+    entry = "bun site/node_modules/.bin/cspell --no-progress --no-must-find-files",
+    language = "system",
+    stages = ["pre-push"],
+    files = '(\.mdx?$|^site/src/data/.*\.yaml$)',
+    exclude = '^(site/examples/|docs/prose/reports/|CLAUDE\.md$)',
+  },
+  {
+    id = "vale",
+    name = "vale (changed Markdown and MDX)",
+    entry = "sh -c 'scripts/prose_eval.py --check-packages .vale.ini .vale-extended.ini && vale --minAlertLevel=error \"$@\"' --",
+    language = "system",
+    stages = ["pre-push"],
+    files = '\.mdx?$',
+    exclude = '^(site/examples/|docs/prose/reports/|CLAUDE\.md$|CODE_OF_CONDUCT\.md$)',
+  },
+  {
+    id = "vale-yaml",
+    name = "vale (changed data YAML)",
+    entry = "sh -c 'scripts/prose_eval.py --check-packages .vale.ini .vale-extended.ini && vale --minAlertLevel=error --ext=.md \"$@\"' --",
+    language = "system",
+    stages = ["pre-push"],
+    files = '^site/src/data/.*\.yaml$',
   }
 ]

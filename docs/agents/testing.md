@@ -127,6 +127,20 @@ only for files no spec can read.
 detached child and exits, so a supervisor cannot stop it. The static server
 serves the same files under the same `/ai-training` base path.
 
+## Before a push
+
+`prek.toml` runs its hooks at two stages. Before a commit, the lint hooks
+run on the staged files. Before a push, the same hooks run again on the
+files the push changes, and so do `cspell` and Vale (the checks of
+`mise run spell` and `mise run prose`, with the same file rules). The push
+stage is there for commits that no pull request checks: the dispatcher's
+records go straight to `main`, and ten of the twelve red runs on `main`
+between 2026-09-20 and 2026-09-24 were spelling, Vale or mdformat hits in
+such commits (#344). Install all three hook types once per clone with
+`prek install`. The `default_install_hook_types` line in `prek.toml` names
+them. `prek run --stage pre-push --from-ref origin/main` runs the push
+stage by hand.
+
 ## Lint notes
 
 Biome formats and lints the frontmatter of `.astro` files and leaves the
