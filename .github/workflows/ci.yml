@@ -163,6 +163,10 @@ jobs:
       - name: Checkpoint export
         run: mise run checkpoints
 
+      # Reads dist/data/lessons/ back, so it runs after the build too.
+      - name: Lesson bundles
+        run: mise run bundles
+
   # The browser walkthrough is its own job so a lint or unit failure above
   # reports before the browser install and the build finish here. It builds
   # the site again rather than passing dist/ around: the build is fast and

@@ -182,10 +182,17 @@ from the learner.
 - `checkpoints[]` is filtered from the `checkpoints.json` export by
   `lesson`, so the two never disagree.
 - The build fails when a live lesson has no bundle, and `mise run site-build`
-  is the check. A small test asserts that every bundle parses and that its
-  `id` matches its path. The route's `getStaticPaths` lists every lesson
-  page, so a lesson without a bundle is a page the build could not read,
-  and the build fails on that page first.
+  is the check. The route's `getStaticPaths` lists every lesson page, so a
+  lesson without a bundle is a page the build could not read, and the build
+  fails on that page first.
+- `mise run bundles` (`site/scripts/check-bundles.mjs`, after `site-build`)
+  reads the built bundles back: one per lesson page and none without a page,
+  every field of the format table present with its type, `id` equal to the
+  path, and every fenced code block of the page in `prose` byte for byte.
+  The unit tests run the bundle build on fixture lessons, and this check is
+  what catches a rewrite that only shows on a real page.
+- The build fails when an `assumes` entry names a `lesson` that has no
+  lesson page, since its `url` would be a 404.
 - The route reads Astro's `site` for the origin. The build fails when it is
   unset, because the bundle's URLs are absolute.
 - The bundle build rewrites every root-relative link in `prose` to an

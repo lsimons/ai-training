@@ -123,6 +123,15 @@ description = "Check the built checkpoints.json export against the lesson pages 
 dir = "site"
 run = "bun scripts/check-checkpoints.mjs"
 
+# The build writes one lesson bundle (spec S08 "Lesson bundles") per lesson
+# page to site/dist/data/lessons/<area>/<lesson>.json. This reads them back
+# and checks them against the lesson pages, so it runs after `site-build`.
+# site/scripts/lib/bundles.mjs lists what it rejects in its header comment.
+[tasks.bundles]
+description = "Check the built lesson bundles under dist/data/lessons against the lesson pages: one per page, every S08 field, fenced code unchanged (after site-build)"
+dir = "site"
+run = "bun scripts/check-bundles.mjs"
+
 [tasks.site-check]
 description = "Astro type/content check"
 dir = "site"
@@ -379,7 +388,7 @@ bun site/node_modules/.bin/cspell --no-progress $files
 # browser from `site-browser`; in the workflow the walkthrough is its own
 # job after the build, so there it runs `site-e2e` (build and run).
 [tasks.ci]
-description = "Full CI gate: install + lint + Python lint/typecheck/test + prose + spell + examples + course plans + Astro check + Biome + unit tests + build + checkpoint export + e2e"
+description = "Full CI gate: install + lint + Python lint/typecheck/test + prose + spell + examples + course plans + Astro check + Biome + unit tests + build + checkpoint export + lesson bundles + e2e"
 run = [
   "mise run site-install-frozen",
   "mise run py-install-frozen",
@@ -397,6 +406,7 @@ run = [
   "mise run site-test",
   "mise run site-build",
   "mise run checkpoints",
+  "mise run bundles",
   "mise run site-e2e-only",
 ]
 

@@ -1,6 +1,6 @@
 import { DEFAULT_REVISION, isReviewable, KIND_OF_TAG } from '@lib/checkpoint-rules';
 import { jsonForScript } from '@lib/json';
-import { absoluteUrl, href } from '@lib/url';
+import { absoluteUrl, href, siteRoot } from '@lib/url';
 import { describe, expect, it } from 'vitest';
 
 describe('checkpoint rules', () => {
@@ -43,6 +43,8 @@ describe('href', () => {
 		expect(absoluteUrl('/ai-training', 'https://lsimons.github.io')).toBe('https://lsimons.github.io/ai-training');
 		expect(absoluteUrl('https://example.com/x', 'https://lsimons.github.io')).toBe('https://example.com/x');
 		expect(absoluteUrl('mailto:a@b.c', 'https://lsimons.github.io')).toBe('mailto:a@b.c');
+		expect(siteRoot('https://lsimons.github.io')).toBe('https://lsimons.github.io/ai-training');
+		expect(siteRoot('https://lsimons.github.io/')).toBe('https://lsimons.github.io/ai-training');
 		expect(() => absoluteUrl('guides/', 'https://lsimons.github.io')).toThrow(/root-relative/);
 	});
 });
