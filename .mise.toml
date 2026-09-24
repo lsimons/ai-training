@@ -160,6 +160,13 @@ description = "Build, then run the Playwright walkthrough in site/e2e/. Needs `m
 dir = "site"
 run = ["bun run build", "bun run e2e"]
 
+# The `ci` list runs this after `site-build`, so the site is built once.
+# `site-e2e` above stays the one-command form for local use.
+[tasks.site-e2e-only]
+description = "Run the Playwright walkthrough against an existing site/dist (after site-build). Needs `mise run site-browser` once."
+dir = "site"
+run = "bun run e2e"
+
 [tasks.site-favicon]
 description = "Regenerate the favicon + apple-touch-icon from the palette"
 dir = "site"
@@ -368,8 +375,9 @@ bun site/node_modules/.bin/cspell --no-progress $files
 # Sequential rather than `depends`, which mise runs in parallel:
 # `site-check` and `site-build` both write `site/.astro`. The workflow runs
 # the same list as separate steps for readable logs — keep the two in sync.
-# `site-e2e` is last because it builds the site again and needs the browser
-# from `site-browser`; in the workflow it is its own job after the build.
+# `site-e2e-only` is last because it needs `site-build`'s dist and the
+# browser from `site-browser`; in the workflow the walkthrough is its own
+# job after the build, so there it runs `site-e2e` (build and run).
 [tasks.ci]
 description = "Full CI gate: install + lint + Python lint/typecheck/test + prose + spell + examples + course plans + Astro check + Biome + unit tests + build + checkpoint export + e2e"
 run = [
@@ -389,7 +397,7 @@ run = [
   "mise run site-test",
   "mise run site-build",
   "mise run checkpoints",
-  "mise run site-e2e",
+  "mise run site-e2e-only",
 ]
 
 # Local mirror of the `zizmor` CI job, using the mise-pinned zizmor. Not

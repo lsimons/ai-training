@@ -35,6 +35,9 @@ The site's own checks, in the order `ci` runs them after the prose tasks:
 | `mise run checkpoints` | Check the built `checkpoints.json` export against the lesson pages            |
 | `mise run site-e2e`    | Build, then the Playwright walkthrough in `site/e2e/`                         |
 
+`ci` runs `site-e2e-only` (the walkthrough alone) after `site-build`, so
+the site is built once. `site-e2e` is the one-command form for local use.
+
 `site-e2e` and `site-screenshot` need `mise run site-browser` once per
 machine. `docs/agents/testing.md` says which layer a new assertion belongs
 in. On a pull request the CI workflow skips the Playwright job when every
