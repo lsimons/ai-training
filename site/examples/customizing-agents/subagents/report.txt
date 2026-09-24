@@ -1,0 +1,8 @@
+The change adds a `clear` command that drops every done item from the list and prints how many it removed.
+
+Findings:
+- should fix, todo.py:57: `items[:] = kept` mutates the caller's list in place, which the other commands don't do. `main` would work as well with a returned list, and a test that keeps a reference to the old list will be surprised.
+- nit, todo.py:56: the message says `item(s)`. `list_items` and `done` don't hedge on plurals, so pick one form.
+- nit, test_todo.py:35: the new test covers two done items and one kept. There is no case for an empty list or for a list with nothing done.
+
+Not checked: the pre-existing failure in `test_done_marks_the_numbered_item` is not touched by this diff, and I did not run the tests, because this reviewer has no tool for running commands.

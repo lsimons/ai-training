@@ -1,0 +1,355 @@
+import { Choice, MultiChoice, Predict, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we hand a code review to a second agent that can read and
+nothing else. A short file defines it, and the main agent delegates the
+review of a small diff to it. Afterwards we compare what the main
+conversation holds with the same review done in the main conversation.
+We also read what the reviewer couldn't do. The change under review is the `clear` command
+from the [allowlists lesson](/customizing-agents/allowlists/), saved as a
+diff in the repository so everyone reviews the same lines.
+
+The file format, the field names and the delegation behavior here are
+Claude Code's, checked against the vendor's documentation on the date shown
+above the lesson (@Claude Code subagents). Other coding agents delegate in
+other ways. The idea, a narrower agent for a bounded job, transfers.
+
+## What a subagent is
+
+A **subagent** is a separate agent instance the main agent delegates a task
+to. It has a context window of its own and a system prompt of its own.
+Its tool list and its permission mode can be narrower than the main
+agent's. It starts empty. The main conversation isn't in it, and neither are the files
+the main agent has read. The main agent writes a delegation message that
+describes the task, the subagent works from that, and when it is done its
+result comes back to the main conversation. Everything the subagent read or
+searched on the way stays in its own window (@Claude Code subagents).
+
+That gives two things you can use. The first is context: a task that would
+fill the main conversation with search results, logs or file contents runs
+elsewhere. The result comes back, and the search results don't. The second is permissions: a
+subagent's tool list can be shorter than the main agent's, so a job that
+needs only reading runs in an agent that can only read. The [blast
+radius](/safety/agent-risk/#blast-radius) of a review then is the review,
+whatever the reviewer's instructions say (@Claude Code subagents).
+
+<Choice id="what-the-parent-sees" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['subagents']}
+  context="A coding agent delegates a task to a subagent, a separate agent instance with its own context window, tool list and instructions, which reads several files while working."
+  title="What comes back?" hint="Where does the text of the files the subagent read end up?"
+  options={[
+    { text: 'The result the subagent reports, and nothing it read on the way.', correct: true },
+    { text: 'The result and every file the subagent read, so the main agent can check its work.', why: 'The files the subagent read stay in its own context window. Only the result returns.' },
+    { text: 'The full transcript of the subagent, as if the main agent had done the work itself.', why: 'The two contexts stay separate. The main conversation receives the result, and the subagent transcript is available to you elsewhere.' },
+  ]}>
+The main agent delegates a search across the repository to a subagent,
+which reads twelve files and answers. What does the main conversation
+contain afterwards?
+</Choice>
+
+## A read-only reviewer
+
+In Claude Code a subagent is a Markdown file with YAML frontmatter, and
+the body of the file is the subagent's system prompt. A file in
+`.claude/agents/` in the project defines a subagent for that project, and
+a file in `~/.claude/agents/` defines one for every project on your
+machine. Only `name` and `description` are required. The main agent uses
+the `description` to decide when to delegate, so it says when to use the
+subagent, and the body says how to do the work (@Claude Code subagents).
+
+Make a fresh copy of the fixture directory,
+`site/examples/coding-with-agents/first-session/fixture-repo/`, outside the
+course repository, change into it, and give it a first commit, as in the
+two lessons before this one. Then create `.claude/agents/reviewer.md` with
+this content. The same file is in the course repository at
+`site/examples/customizing-agents/subagents/reviewer.md`.
+
+```markdown
+---
+name: reviewer
+description: Reviews a diff and reports findings. Use when asked to review a change before it is committed.
+tools: Read, Grep, Glob
+model: inherit
+---
+
+You review one change and report on it. You never edit files and you never
+run commands. Read the diff you are given, then read the files it touches
+for context.
+
+Report in this order:
+
+1. What the change does, in one sentence.
+2. Findings, one line each, marked `must fix`, `should fix` or `nit`, with
+   the file and line.
+3. What you did not check, and why.
+
+Keep the whole report under 25 lines. Do not quote the diff back.
+```
+
+The line that limits the reviewer is `tools: Read, Grep, Glob`, its whole
+tool list. Without a `tools` line a subagent inherits every tool available
+to subagents, which in the main agent's usual setup includes `Edit`,
+`Write` and `Bash`. With the line, the reviewer can open files and search
+them, and it has no tool for editing a file or running a command. The
+sentence "You never edit files" in the body is an instruction, and the
+`tools` line is what enforces it. `model: inherit` runs the reviewer on the
+same model as the main conversation. The other field you'll meet is
+`disallowedTools`, which removes tools from the inherited list instead of
+naming the ones to keep. When a file sets both, Claude Code applies
+`disallowedTools` first and then resolves `tools` against what remains
+(@Claude Code subagents).
+
+Here is that resolution as a small program, over a shortened tool pool.
+`reviewer` is the file above, `no-writes` sets only
+`disallowedTools: Write, Edit`, and `helper` sets neither field. The
+complete file is `site/examples/customizing-agents/subagents/tools.py` in
+the repository.
+
+```python
+POOL = ["Read", "Grep", "Glob", "Bash", "Edit", "Write"]
+
+
+def resolve(pool, tools=None, disallowed=None):
+    remaining = [tool for tool in pool if tool not in (disallowed or [])]
+    if tools is None:
+        return remaining
+    return [tool for tool in remaining if tool in tools]
+
+
+DEFINITIONS = {
+    "reviewer": {"tools": ["Read", "Grep", "Glob"]},
+    "no-writes": {"disallowed": ["Write", "Edit"]},
+    "helper": {},
+}
+```
+
+<Predict id="which-tools-remain" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['subagents']}
+  context="A small Python function models how a coding agent resolves a subagent's tool list: without a tools field the subagent inherits the whole pool, a disallowedTools field removes tools from it, and a tools field keeps only the named ones. Three subagent definitions are resolved against a pool of six tools: Read, Grep, Glob, Bash, Edit and Write."
+  title="Which tools does each subagent get?" hint="For each frontmatter, start from the pool, remove what disallowedTools names, then keep only what tools names if there is a tools field."
+  answer={`reviewer: Read, Grep, Glob
+  no-writes: Read, Grep, Glob, Bash
+  helper: Read, Grep, Glob, Bash, Edit, Write`} run="customizing-agents/subagents/tools.py">
+
+What does this print, one line per subagent?
+
+```python
+for name, fields in DEFINITIONS.items():
+    print(f"{name}: {', '.join(resolve(POOL, **fields))}")
+```
+
+</Predict>
+
+The middle line is the one to read twice. `no-writes` can't edit a file
+with the `Edit` tool, and it still has `Bash`, so it can run
+`sed -i` or a redirect and change the file that way. A denylist removes
+what you thought of. An allowlist of tools grants what you thought of and
+nothing else, which is why the reviewer uses `tools`. Note one more thing
+the vendor's page says about `disallowedTools`: an entry with a specifier
+such as `Bash(git push *)` removes the whole `Bash` tool from the
+subagent, and to keep `Bash` and block one command you write a deny rule
+in the permissions settings instead, as in the allowlists lesson
+(@Claude Code subagents).
+
+## Delegate and compare
+
+The reviewer has no tool for running `git diff`, so you write the diff to
+a file it can read. Apply the `clear` change to your copy. The quickest
+way is to copy `site/examples/customizing-agents/subagents/clear.diff`
+into the copy and run `git apply clear.diff`, and then `git diff` shows
+the change. Save it and look at the size.
+
+```sh
+git diff > review.diff && wc -l review.diff
+```
+
+Start the agent in the copy with `claude --permission-mode default` and
+run `/context`. It prints how much of the context window is in use and
+what by (@Claude Code context window). Write down the total. Then send
+this.
+
+```text
+Use the reviewer subagent to review the change in review.diff. Give me its
+report as it came back, and then tell me in one line whether you read
+review.diff yourself.
+```
+
+In the transcript the delegation appears as a tool call row with the
+subagent's name and a short task description, such as
+`reviewer(Review the clear change)` (@Claude Code subagents). The report
+comes back into the main conversation, and the main agent shows it to you.
+Below is the kind of report the reviewer file above produces. It is
+illustrative, written for this page and not recorded from a model, and
+your reviewer's findings differ in detail.
+
+<Prompt model="illustrative" recorded="illustrative">
+Review the change in review.diff and report as your instructions say.
+</Prompt>
+<Response>
+
+```text
+The change adds a `clear` command that drops every done item from the list and prints how many it removed.
+
+Findings:
+- should fix, todo.py:57: `items[:] = kept` mutates the caller's list in place, which the other commands don't do. `main` would work as well with a returned list, and a test that keeps a reference to the old list will be surprised.
+- nit, todo.py:56: the message says `item(s)`. `list_items` and `done` don't hedge on plurals, so pick one form.
+- nit, test_todo.py:35: the new test covers two done items and one kept. There is no case for an empty list or for a list with nothing done.
+
+Not checked: the pre-existing failure in `test_done_marks_the_numbered_item` is not touched by this diff, and I did not run the tests, because this reviewer has no tool for running commands.
+```
+
+</Response>
+
+Run `/context` again and compare the total with the one you wrote down.
+The difference is the delegation message the main agent wrote plus the
+report that came back. The diff itself was read in the reviewer's window,
+and `todo.py` and `test_todo.py` with it. The last line of the main
+agent's answer says the same thing in words: it did not read
+`review.diff`. To feel the difference, ask the main agent in a fresh
+session to review `review.diff` itself, and run `/context` before and
+after that too. The whole diff and every file it opened are in the main
+window this time.
+
+The fixture puts numbers on the two routes with the diff and the report
+from this page. The complete file is
+`site/examples/customizing-agents/subagents/context.py`, next to
+`clear.diff` and `report.txt`, and `line_count` counts the lines of a
+file next to it.
+
+<Predict id="lines-in-context" title="Lines the main agent takes in"
+  answer={`diff: 53 lines
+  report: 8 lines
+  saved: 45 lines`} run="customizing-agents/subagents/context.py">
+
+Run this from the fixture directory, and compare what you see with the
+output below.
+
+```sh
+python3 context.py
+```
+
+</Predict>
+
+Lines are a rough stand-in for tokens, and the point holds at any scale:
+the main window took in the report and not the diff. The vendor's own
+warning is the other side of the same fact. The result of every subagent
+returns to the main conversation, so many subagents that each return a
+long result fill it anyway (@Claude Code subagents). The reviewer's
+instructions cap the report at 25 lines for that reason.
+
+Now the second comparison, what the reviewer could do. Its `tools` line
+gave it three tools. If your reviewer's report says it ran the tests, it
+didn't, and its transcript doesn't contain a command. Open the subagent's
+transcript through `/tasks` while its row is shown, or ask the main agent
+what tools the reviewer used (@Claude Code subagents).
+
+<Sort id="who-can-do-what" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['subagents', 'permissions']}
+  context="A reviewer subagent is defined with the tool list Read, Grep and Glob and a system prompt that tells it to review a diff and report. The main agent that delegated to it has the usual tools, including Edit, Write and Bash."
+  title="Can the reviewer do it?" hint="Which of the three tools in the reviewer's list would the action need?"
+  buckets={['The reviewer can do this', 'Only the main agent can do this']}
+  items={[
+    { text: 'Open todo.py and read the new clear function', bucket: 0 },
+    { text: 'Run python3 -m unittest -q to see whether the new test passes', bucket: 1 },
+    { text: 'Search every file for other callers of save', bucket: 0 },
+    { text: 'Fix the plural in the message while it is at it', bucket: 1 },
+    { text: 'Read review.diff', bucket: 0 },
+    { text: 'Commit the change with a message', bucket: 1 },
+  ]}>
+Place each action where it belongs.
+</Sort>
+
+<Choice id="whose-mode-wins" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['subagents', 'permission-modes']}
+  context="A subagent file can set a permissionMode field. The main conversation also has a permission mode, chosen at start with a flag or a setting."
+  title="Whose mode applies?" hint="Which of the two modes is the wider one, and what does the vendor say happens when the main conversation is already in a wide mode?"
+  options={[
+    { text: 'The subagent runs in `default` and asks before each command, because its own file says so.', why: 'The vendor page says the value is ignored when the main conversation is in `acceptEdits`, `auto` or `bypassPermissions`.' },
+    { text: 'The subagent runs in `default` for edits and `acceptEdits` for commands, a mix of the two.', why: 'There is no mixing. One mode applies to the subagent, and it is decided by the main conversation.' },
+    { text: 'The subagent runs in `acceptEdits`, and the line in its file has no effect in this session.', correct: true },
+  ]}>
+A subagent file sets `permissionMode: default`. The main conversation was
+started with `--permission-mode acceptEdits`. Which mode does the subagent
+run in (@Claude Code subagents)?
+</Choice>
+
+<MultiChoice id="what-narrows-a-subagent" phase="review"
+  objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['subagents']}
+  context="A subagent in a coding agent is a Markdown file with YAML frontmatter and a system prompt body. The frontmatter can list tools, remove tools, set a model and set a permission mode."
+  title="Which lines enforce the limit?" hint="Which of these can the subagent disobey, and which does the tool itself apply?"
+  options={[
+    { text: 'A `tools` line that names Read, Grep and Glob', correct: true },
+    { text: 'A sentence in the body that says the subagent must not edit files', why: 'The body is the system prompt. It asks, and a tool list enforces.' },
+    { text: 'A `disallowedTools` line that names Edit and Write', correct: true },
+    { text: 'A `model` line that names a smaller model', why: 'The model changes cost and speed. It does not change which tools the subagent has.' },
+  ]}>
+You want a subagent that can read files and cannot change them. Which two
+of these lines make that true whatever the subagent decides to do?
+</MultiChoice>
+
+<Choice id="why-delegate-the-search" phase="review"
+  objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['subagents']}
+  context="A developer's coding agent needs to find every place a function is called across a large repository before changing its signature. The developer can let the main agent search, or delegate the search to a subagent."
+  title="Why a subagent here?" hint="What fills up when an agent reads many files, and where does that filling happen when a subagent does the reading?"
+  options={[
+    { text: 'The subagent searches faster, because it runs with a shorter system prompt and fewer instructions.', why: 'Nothing on the vendor page says a subagent is faster. It starts fresh and may need time to gather context.' },
+    { text: 'The subagent reads the files in its own window, and its list of call sites comes back.', correct: true },
+    { text: 'The subagent can read files the main agent has no permission to read in this session.', why: 'A subagent inherits the main conversation\'s tools and can only be narrower. It gains no access the main agent lacks.' },
+  ]}>
+Which of these is a reason the vendor gives to delegate the search to a
+subagent?
+</Choice>
+
+<Pitfall title="The reviewer that fixed the code">
+A developer writes `.claude/agents/reviewer.md` with a `name`, a
+`description` and a careful body that says "report findings, do not
+change anything", and leaves out the `tools` line. The main conversation
+runs in `acceptEdits`. The subagent inherits every tool, edits go through
+without a prompt, and the reviewer's report says "fixed the plural and
+committed". Both the fix and the commit happened. The body asked, and
+nothing enforced. Two lines were missing: `tools: Read, Grep, Glob`, and
+a main conversation in a mode that asks (@Claude Code subagents).
+</Pitfall>
+
+<Exercise stretch="Add a second subagent, a test runner with `tools: Read, Bash` and a body that says to run the tests and report only the failures, and have the main agent chain the two: review first, then tests. Read what came back from each.">
+In a fresh copy of the fixture with its own first commit, create
+`.claude/agents/reviewer.md` from this lesson, apply `clear.diff`, and
+save `git diff` to `review.diff`. Start the agent in Manual mode, note
+the `/context` total, ask it to use the reviewer subagent on `review.diff`
+and to say whether it read the file itself, then note `/context` again. In
+a second fresh session, ask the main agent to review `review.diff` with
+no subagent and note `/context` before and after that too. The result is
+two before-and-after pairs and the reviewer's report. The point is to
+see with your own numbers that the diff never entered the main window,
+and to read the report knowing what the reviewer could not have done.
+
+A good result: the reviewer's report has a summary, findings with file
+and line, and a line on what it did not check; the main agent says it did
+not read `review.diff`; the delegated pair grew by less than the direct
+pair; and nothing in the copy changed, which `git status` confirms.
+Reflection: which task in your own work last week produced a long output
+you read once and never needed again?
+</Exercise>
+
+<Recap>
+1. A subagent is a separate agent instance with its own context window,
+   system prompt, tool list and permission mode. It starts without the
+   main conversation, and only its result comes back
+   (@Claude Code subagents).
+2. In Claude Code a subagent is a Markdown file in `.claude/agents/` or
+   `~/.claude/agents/`, with `name` and `description` required and the
+   body as its system prompt. `tools` names what it may use,
+   `disallowedTools` removes from what it inherits, and without `tools`
+   it inherits every tool (@Claude Code subagents).
+3. The body asks and the `tools` line enforces. A reviewer with
+   `tools: Read, Grep, Glob` has no tool for editing or running, whatever
+   its report says it did.
+4. `/context` before and after a delegation shows the saving: the diff
+   and the files it touched were read in the reviewer's window, and the
+   main window took in the report (@Claude Code context window).
+5. A subagent's `permissionMode` applies when the main conversation is in
+   `default`, `dontAsk` or `plan`. In `acceptEdits`, `auto` or
+   `bypassPermissions` the subagent runs in the main conversation's mode
+   (@Claude Code subagents).
+</Recap>

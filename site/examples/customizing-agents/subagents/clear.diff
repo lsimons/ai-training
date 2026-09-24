@@ -1,0 +1,53 @@
+diff --git a/test_todo.py b/test_todo.py
+index c03a3c0..196c83f 100644
+--- a/test_todo.py
++++ b/test_todo.py
+@@ -32,6 +32,13 @@ class TodoTests(unittest.TestCase):
+         self.assertTrue(items[0]["done"])
+         self.assertFalse(items[1]["done"])
+
++    def test_clear_removes_done_items(self):
++        items = sample()
++        items[0]["done"] = True
++        items[2]["done"] = True
++        self.assertEqual(todo.clear(items), "removed 2 done item(s)")
++        self.assertEqual(items, [{"text": "Call the plumber", "done": False}])
++
+
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/todo.py b/todo.py
+index febcd3e..d27a802 100644
+--- a/todo.py
++++ b/todo.py
+@@ -4,6 +4,7 @@ Usage:
+     python3 todo.py add "Buy milk"
+     python3 todo.py list
+     python3 todo.py done 1
++    python3 todo.py clear
+ """
+
+ import json
+@@ -49,6 +50,13 @@ def done(items, number):
+     return f"done #{number}: {items[index]['text']}"
+
+
++def clear(items):
++    kept = [item for item in items if not item["done"]]
++    removed = len(items) - len(kept)
++    items[:] = kept
++    return f"removed {removed} done item(s)"
++
++
+ def main(argv):
+     items = load()
+     command = argv[1] if len(argv) > 1 else "list"
+@@ -58,6 +66,8 @@ def main(argv):
+         message = list_items(items)
+     elif command == "done" and len(argv) == 3 and argv[2].isdigit():
+         message = done(items, int(argv[2]))
++    elif command == "clear":
++        message = clear(items)
+     else:
+         print((__doc__ or "").strip(), file=sys.stderr)
+         return 2

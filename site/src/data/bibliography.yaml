@@ -594,3 +594,17 @@ Liu 2024:
   author: Nelson F. Liu, Kevin Lin, John Hewitt and 4 others
   license: CC BY 4.0
   url: https://aclanthology.org/2024.tacl-1.9/
+Claude Code subagents:
+  type: reference
+  title: Create custom subagents
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/sub-agents
+Claude Code context window:
+  type: reference
+  title: Explore the context window
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/context-window
