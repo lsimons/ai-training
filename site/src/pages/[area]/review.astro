@@ -21,7 +21,7 @@ export async function getStaticPaths() {
 const { area } = Astro.props;
 const lessons = await getLessons(area.slug);
 const catalog = lessons.map((l) => {
-	const all = checkpointsOf(l);
+	const all = checkpointsOf(l, { alternates: true });
 	return {
 		id: l.id,
 		title: l.data.title,
@@ -35,7 +35,7 @@ const catalog = lessons.map((l) => {
 const formats = [
 	...new Set(
 		lessons.flatMap((l) =>
-			checkpointsOf(l)
+			checkpointsOf(l, { alternates: true })
 				.filter((c) => c.phase !== 'practice' && c.reviewable)
 				.map((c) => c.kind),
 		),

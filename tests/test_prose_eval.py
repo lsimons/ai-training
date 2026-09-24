@@ -1,6 +1,7 @@
 """Tests for scripts/prose_eval.py, on fixture JSON rather than a Vale run."""
 
 import collections
+import importlib
 import json
 import pathlib
 from collections.abc import Sequence
@@ -278,9 +279,6 @@ def test_main_stops_before_writing_when_not_synced(
 def test_styles_path_is_resolved_from_the_repository_root(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Imported here so the import block stays as #299 leaves it.
-    import importlib
-
     # Reload with another working directory, so a cwd-relative STYLES would differ.
     monkeypatch.chdir(tmp_path)
     try:
