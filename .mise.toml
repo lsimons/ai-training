@@ -267,6 +267,14 @@ for ini in .vale.ini .vale-extended.ini; do
 done
 """
 
+# .vale-extended.ini must stay a superset of .vale.ini (same TokenIgnores,
+# BasedOnStyles and rule levels per section, issue #289). The script names
+# the file, section and key on drift, and lists the extended-only rules.
+[tasks.prose-check-configs]
+description = "Fail when .vale.ini and .vale-extended.ini disagree on a shared setting"
+hide = true
+run = "scripts/vale_configs.py"
+
 # Which files: every tracked Markdown/MDX file plus the topic, competency
 # and bibliography YAML under site/src/data (Vale reads YAML as plain text,
 # keys included). Going through `git ls-files` is what excludes site/dist,
@@ -287,7 +295,7 @@ done
 # The `[*.{yaml,yml}]` section still selects the rules by file name.
 [tasks.prose]
 description = "Vale prose lint over Markdown, MDX and the site data YAML. Errors gate; warnings advise."
-depends = ["prose-check-packages"]
+depends = ["prose-check-packages", "prose-check-configs"]
 run = """
 set -e
 files=$(git ls-files -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
@@ -307,7 +315,7 @@ vale --minAlertLevel=error --ext=.md $yaml
 # Run it every so often and rewrite the sentences that hide who does what.
 [tasks.prose-extended]
 description = "Vale prose lint with the extended (passive-voice) rules; advisory only"
-depends = ["prose-check-packages"]
+depends = ["prose-check-packages", "prose-check-configs"]
 run = """
 set -e
 files=$(git ls-files -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')

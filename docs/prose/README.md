@@ -22,6 +22,14 @@ Rules come from pinned packages, plus `.vale/styles/House/`, the project's
 own style for the cases where a package has a rule backwards for this
 repository (committed, not fetched).
 
+`.vale-extended.ini` is a superset of `.vale.ini`: the same top-level
+settings and, per section, the same `BasedOnStyles`, `Vale.Spelling`,
+`TokenIgnores` and rule levels. `scripts/vale_configs.py` checks that
+(`mise run prose-check-configs`, which `prose` and `prose-extended` run
+first) and fails naming the file, section, and key that drifted. A rule
+that runs only in the extended pass is listed in `EXTENDED_ONLY` in that
+script with its reason, so add the entry when you add the rule.
+
 ## Process for a package
 
 1. Add the package to `.vale-eval.ini`, run
