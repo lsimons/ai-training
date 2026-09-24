@@ -185,9 +185,31 @@ def test_check_packages_synced_names_prose_sync_for_the_main_configs(
         assert "prose-eval-sync" not in str(exc.value)
 
 
-def test_pinned_packages_ignores_a_bare_package_name(tmp_path: pathlib.Path) -> None:
+def test_pinned_packages_rejects_a_bare_package_name(tmp_path: pathlib.Path) -> None:
     ini = write_ini(tmp_path, "StylesPath = .vale/styles\nPackages = Google\n")
-    assert prose_eval.pinned_packages(ini) == []
+    with pytest.raises(prose_eval.UnsupportedPackageError, match=r"^Google$"):
+        prose_eval.pinned_packages(ini)
+
+
+def test_check_packages_synced_exits_on_a_mixed_list(tmp_path: pathlib.Path) -> None:
+    ini = write_ini(
+        tmp_path,
+        "Packages = Google, https://github.com/errata-ai/write-good/releases/download/v0.4.1/write-good.zip\n",
+    )
+    styles = tmp_path / "styles"
+    (styles / "write-good").mkdir(parents=True)
+    with pytest.raises(SystemExit) as exc:
+        prose_eval.check_packages_synced(ini, styles)
+    message = str(exc.value)
+    assert "entry 'Google'" in message
+    assert "bare package name is not supported" in message
+
+
+def test_package_entries_joins_continuation_lines(tmp_path: pathlib.Path) -> None:
+    assert prose_eval.package_entries(write_ini(tmp_path)) == [
+        "https://github.com/errata-ai/write-good/releases/download/v0.4.1/write-good.zip",
+        "https://github.com/tbhb/vale-ai-tells/releases/download/v1.37.0/ai-tells.zip",
+    ]
 
 
 def test_check_packages_synced_exits_on_empty_package_list(tmp_path: pathlib.Path) -> None:
