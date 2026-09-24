@@ -155,6 +155,18 @@ describe('proseOf', () => {
 			'#### Prompt · claude-x, recorded 2026-09\n\n```text\nHi.\n```\n',
 		);
 	});
+	it('leaves out a hidden review alternate and titles the More practice section', () => {
+		const md = proseOf(
+			[
+				'<Choice id="a" objective="o" title="Own">\nAsk.\n</Choice>',
+				'<Choice id="b" phase="review" objective="o" title="Hidden">\nAgain.\n</Choice>',
+				'<MorePractice>\n<Choice id="c" phase="practice" objective="o" title="Extra">\nMore.\n</Choice>\n</MorePractice>',
+				'',
+			].join('\n\n'),
+			site,
+		);
+		expect(md).toBe('#### Checkpoint: Own\n\nAsk.\n\n## More practice\n\n#### Checkpoint: Extra\n\nMore.\n');
+	});
 	it('leaves a link inside a Prompt or Response body alone, in a code span or not', () => {
 		expect(proseOf('<Response>\nSee `[a](/x/)` and [b](/y/).\n</Response>\n', site)).toBe(
 			'#### Response\n\n```text\nSee `[a](/x/)` and [b](/y/).\n```\n',

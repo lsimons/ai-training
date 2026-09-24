@@ -1,5 +1,6 @@
 ---
 /** Fix a broken artifact, reveal the model answer, then self-grade (spec S01 `repair`, `self-grade`). Not reviewed. */
+import type { CheckpointPhase } from '@lib/checkpoint-rules';
 import CheckpointShell from './CheckpointShell.astro';
 
 interface Props {
@@ -14,11 +15,13 @@ interface Props {
 	broken: string;
 	model: string;
 	revision?: number;
+	/** `first` (default), `review` or `practice` (spec S03 "Checkpoint props"). */
+	phase?: CheckpointPhase;
 }
-const { id, objective, title, hint, concepts, context, broken, model, revision } = Astro.props;
+const { id, objective, title, hint, concepts, context, broken, model, revision, phase } = Astro.props;
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {revision} kind="repair" checkLabel="Record grade">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {revision} {phase} kind="repair" checkLabel="Record grade">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-repair">

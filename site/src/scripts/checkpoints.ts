@@ -5,7 +5,11 @@
  * The components render the markup; this module binds it. A checkpoint is a
  * `<section data-checkpoint data-kind=...>` whose progress key is
  * `data-progress-id` (`<lesson id>#<checkpoint id>`). The grading rules and
- * feedback texts are in `checkpoint-logic.ts`.
+ * feedback texts are in `checkpoint-logic.ts`. A `data-phase="practice"`
+ * checkpoint records to the record's `practice` map instead of
+ * `checkpoints` (spec S04 "What gets recorded"). On the review page, a
+ * section with `data-served` is a `review` alternate asked in place of the
+ * item, and its result records the alternate's id.
  */
 
 import type { CheckpointKind } from '@lib/checkpoint-rules';
@@ -14,6 +18,7 @@ import {
 	choiceFeedback,
 	dropPlacement,
 	type Feedback,
+	isPracticeSection,
 	matchVerdict,
 	multiChoiceVerdict,
 	orderFeedback,
@@ -351,7 +356,8 @@ const binders: Record<CheckpointKind, (el: HTMLElement) => Grader> = {
 /** Redraw the state label and `data-state` from the record. Exported so the skills check can refresh the lesson's copy of a checkpoint it answered. */
 export function drawState(el: HTMLElement) {
 	const id = el.dataset.progressId ?? '';
-	const c = progress.load().checkpoints[id];
+	const rec = progress.load();
+	const c = isPracticeSection(el.dataset.phase) ? rec.practice[id] : rec.checkpoints[id];
 	const s = $(el, '.cp-state');
 	if (s) s.textContent = c ? c.state : '';
 	el.dataset.state = c?.state ?? 'untouched';
@@ -392,7 +398,7 @@ export function bindCheckpoint(el: HTMLElement, opts: BindOptions = {}): void {
 	function recordReviewOnce(passed: boolean) {
 		if (reviewRecorded) return;
 		reviewRecorded = true;
-		progress.recordReview(id, passed);
+		progress.recordReview(id, passed, el.dataset.served);
 		if (giveUp) giveUp.disabled = true;
 		drawStage(el);
 		const after = $(el, '.cp-after');
@@ -413,6 +419,7 @@ export function bindCheckpoint(el: HTMLElement, opts: BindOptions = {}): void {
 			return;
 		}
 		if (opts.record) opts.record(id, result);
+		else if (isPracticeSection(el.dataset.phase)) progress.recordPractice(id, result);
 		else progress.recordCheckpoint(id, result);
 		drawState(el);
 		opts.onResult?.(el, result);

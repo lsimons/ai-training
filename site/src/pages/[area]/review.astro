@@ -3,9 +3,14 @@
  * The review page, one per course (spec S05 "The review page"). Items are the
  * course's checkpoints that are due; their markup is fetched from the lesson
  * pages at runtime and bound in review mode (Give Up, stage pills, frequency).
+ * A due item may be asked through one of its `review` alternates (spec S05
+ * "Which checkpoint a review asks"): the catalog lists each item's
+ * alternates, `servedCheckpoint` picks one from the item's history, and the
+ * alternate's hidden section is shown in the item's place.
  */
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { getAreas } from '@lib/areas';
+import { reviewAlternatesOf } from '@lib/checkpoint-rules';
 import { checkpointsOf, getLessons } from '@lib/lessons';
 import { href } from '@lib/url';
 
@@ -15,19 +20,23 @@ export async function getStaticPaths() {
 
 const { area } = Astro.props;
 const lessons = await getLessons(area.slug);
-const catalog = lessons.map((l) => ({
-	id: l.id,
-	title: l.data.title,
-	href: href(`/${l.id}/`),
-	checkpoints: checkpointsOf(l)
-		.filter((c) => c.reviewable)
-		.map((c) => ({ id: c.id, revision: c.revision })),
-}));
+const catalog = lessons.map((l) => {
+	const all = checkpointsOf(l);
+	return {
+		id: l.id,
+		title: l.data.title,
+		href: href(`/${l.id}/`),
+		checkpoints: all
+			.filter((c) => c.phase === 'first' && c.reviewable)
+			.map((c) => ({ id: c.id, revision: c.revision, alternates: reviewAlternatesOf(c, all) })),
+	};
+});
+// Every kind the page may ask: the reviewable `first` checkpoints and their `review` alternates.
 const formats = [
 	...new Set(
 		lessons.flatMap((l) =>
 			checkpointsOf(l)
-				.filter((c) => c.reviewable)
+				.filter((c) => c.phase !== 'practice' && c.reviewable)
 				.map((c) => c.kind),
 		),
 	),
@@ -58,7 +67,8 @@ const formats = [
 		id: string;
 		title: string;
 		href: string;
-		checkpoints: { id: string; revision: number }[];
+		/** `alternates`: the ids of the item's `review` alternates, in page order. */
+		checkpoints: { id: string; revision: number; alternates: string[] }[];
 	}
 
 	const root = document.querySelector<HTMLElement>('.review[data-review]');
@@ -75,12 +85,37 @@ const formats = [
 		const totalDue = progress.dueReviewIds(progress.load(), `${area}/`).length;
 		let answered = 0;
 
+		/**
+		 * The section to ask for `progressId`: the item's own checkpoint, or the
+		 * `review` alternate `servedCheckpoint` picks. An alternate is hidden and
+		 * marked `data-alternate` in the lesson, so the copy is shown, marked
+		 * `data-checkpoint`, keyed on the item's progress id (the result is the
+		 * item's) and given `data-served`, which the review result records. Its
+		 * lesson link points at the item's own checkpoint. When the picked
+		 * alternate is missing from the page, the item's own checkpoint is asked.
+		 */
 		async function fetchSection(progressId: string): Promise<HTMLElement | null> {
 			const [lessonId, cpId] = progressId.split('#');
 			const lesson = catalog.find((l) => l.id === lessonId);
-			if (!lesson || !lesson.checkpoints.some((c) => c.id === cpId)) return null;
+			const checkpoint = lesson?.checkpoints.find((c) => c.id === cpId);
+			if (!lesson || !checkpoint || !cpId) return null;
+			const history = progress.load().reviews[progressId]?.history ?? [];
+			const pick = progress.servedCheckpoint(cpId, checkpoint.alternates, history);
 			const html = await (await fetch(lesson.href)).text();
 			const doc = new DOMParser().parseFromString(html, 'text/html');
+			const alternate =
+				pick === cpId ? null : doc.querySelector<HTMLElement>(`[data-alternate][data-progress-id="${lessonId}#${pick}"]`);
+			if (alternate) {
+				const copy = document.importNode(alternate, true) as HTMLElement;
+				copy.hidden = false;
+				copy.removeAttribute('data-alternate');
+				copy.dataset.checkpoint = '';
+				copy.dataset.progressId = progressId;
+				copy.dataset.served = pick;
+				const link = copy.querySelector<HTMLAnchorElement>('.cp-lesson-link');
+				if (link) link.href = `${lesson.href}#${cpId}`;
+				return copy;
+			}
 			const section = doc.querySelector<HTMLElement>(`[data-checkpoint][data-progress-id="${progressId}"]`);
 			return section ? (document.importNode(section, true) as HTMLElement) : null;
 		}

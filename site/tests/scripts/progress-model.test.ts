@@ -6,6 +6,7 @@ import {
 	applyLessonFinished,
 	applyLessonRead,
 	applyLessonSkipped,
+	applyPracticeResult,
 	applyReviewResult,
 	applySkillsCheckResult,
 	applyStageAdjust,
@@ -31,6 +32,7 @@ import {
 	resetOutdatedReviewEntries,
 	STORAGE_KEY,
 	scheduleReview,
+	servedCheckpoint,
 	stageDays,
 	storageKeyFor,
 	today,
@@ -131,6 +133,32 @@ describe('normalize', () => {
 		expect(r?.reviews.b).toEqual(review({ history: [] }));
 		expect(warnings).toEqual([{ field: 'reviews.history', kind: 'dropped', count: 3 }]);
 	});
+	it('reads a record without practice as empty, and keeps practice entries and served ids', () => {
+		const warnings: NormalizeWarning[] = [];
+		expect(normalize({ version: VERSION }, warnings)?.practice).toEqual({});
+		expect(warnings).toEqual([]);
+		const r = normalize(
+			{
+				version: VERSION,
+				practice: { ok: { state: 'passed', attempts: 1 }, bad: { state: 'done', attempts: 1 } },
+				reviews: {
+					a: review({
+						history: [
+							{ at: DAY, result: 'pass', served: 'alt' },
+							{ at: DAY, result: 'pass', served: 3 as never },
+						],
+					}),
+				},
+			},
+			warnings,
+		);
+		expect(r?.practice).toEqual({ ok: { state: 'passed', attempts: 1 } });
+		expect(r?.reviews.a?.history).toEqual([{ at: DAY, result: 'pass', served: 'alt' }]);
+		expect(warnings).toEqual([
+			{ field: 'reviews.history', kind: 'dropped', count: 1 },
+			{ field: 'practice', kind: 'dropped', count: 1 },
+		]);
+	});
 	it('keeps a valid quiz entry', () => {
 		const r = normalize({ version: VERSION, quizzes: { q: { score: 3, at: DAY } } });
 		expect(r?.quizzes).toEqual({ q: { score: 3, at: DAY } });
@@ -149,11 +177,13 @@ describe('content changes', () => {
 			checkpoints: { 'a/x#c1': { state: 'passed', attempts: 1 }, 'a/gone#c1': { state: 'passed', attempts: 1 } },
 			reviews: { 'a/x#c1': review(), 'a/gone#c1': review() },
 		});
-		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'])).toBe(3);
+		r.practice = { 'a/x#p1': { state: 'passed', attempts: 1 }, 'a/x#gone': { state: 'attempted', attempts: 1 } };
+		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1', 'a/x#p1'])).toBe(4);
 		expect(Object.keys(r.lessons)).toEqual(['a/x']);
 		expect(Object.keys(r.checkpoints)).toEqual(['a/x#c1']);
 		expect(Object.keys(r.reviews)).toEqual(['a/x#c1']);
-		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'])).toBe(0);
+		expect(Object.keys(r.practice)).toEqual(['a/x#p1']);
+		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1', 'a/x#p1'])).toBe(0);
 	});
 	it('resets a review item whose revision changed, treating a missing revision as 1', () => {
 		const r = record({
@@ -242,6 +272,14 @@ describe('checkpoints', () => {
 		applyCheckpointResult(r, 'd', false);
 		expect(applyCheckpointSkipped(r, 'd')).toEqual({ state: 'skipped', attempts: 2 });
 	});
+	it('a practice result goes to practice, never to checkpoints, with the same pass rule', () => {
+		const r = record();
+		expect(applyPracticeResult(r, 'a/x#p', false)).toEqual({ state: 'attempted', attempts: 1 });
+		expect(applyPracticeResult(r, 'a/x#p', true)).toEqual({ state: 'passed', attempts: 2 });
+		expect(applyPracticeResult(r, 'a/x#p', false)).toEqual({ state: 'passed', attempts: 3 });
+		expect(r.checkpoints).toEqual({});
+		expect(r.reviews).toEqual({});
+	});
 });
 
 describe('reviews', () => {
@@ -264,6 +302,15 @@ describe('reviews', () => {
 		// A pass on a retired item stays retired.
 		r.reviews.c = review({ stage: 'done' });
 		expect(applyReviewResult(r, 'c', true, DAY)?.stage).toBe('done');
+	});
+	it('writes the alternate served into the new history entry, and nothing for the own checkpoint', () => {
+		const r = record({ reviews: { c: review() } });
+		applyReviewResult(r, 'c', true, DAY, 'alt');
+		applyReviewResult(r, 'c', false, DAY);
+		expect(r.reviews.c?.history).toEqual([
+			{ at: DAY, result: 'pass', served: 'alt' },
+			{ at: DAY, result: 'fail' },
+		]);
 	});
 	it('keeps only the last results', () => {
 		const r = record({ reviews: { c: review() } });
@@ -298,6 +345,32 @@ describe('reviews', () => {
 		expect(due).not.toContain('b/y#late');
 		expect(due).toHaveLength(REVIEW_CAP + 5);
 		expect(dueReviewsOn(r, 'a/', DAY)).toHaveLength(REVIEW_CAP);
+	});
+});
+
+describe('servedCheckpoint', () => {
+	const asked = (...served: (string | undefined)[]) =>
+		served.map((s) =>
+			s === undefined ? { at: DAY, result: 'pass' as const } : { at: DAY, result: 'pass' as const, served: s },
+		);
+	it('asks the own checkpoint when there is no alternate', () => {
+		expect(servedCheckpoint('own', [], [])).toBe('own');
+		expect(servedCheckpoint('own', [], asked(undefined, undefined))).toBe('own');
+	});
+	it('asks the first alternate never asked, in page order (spec S05 examples)', () => {
+		expect(servedCheckpoint('own', ['a', 'b'], [])).toBe('a');
+		expect(servedCheckpoint('own', ['a', 'b'], asked('a'))).toBe('b');
+		expect(servedCheckpoint('own', ['a'], asked(undefined))).toBe('a');
+	});
+	it('then the candidate asked least often, and among those the one asked longest ago', () => {
+		expect(servedCheckpoint('own', ['a', 'b'], asked('a', 'b'))).toBe('own');
+		expect(servedCheckpoint('own', ['a', 'b'], asked('a', 'b', undefined))).toBe('a');
+		expect(servedCheckpoint('own', ['a', 'b'], asked('a', 'b', undefined, 'a'))).toBe('b');
+		expect(servedCheckpoint('own', ['a', 'b'], asked(undefined, 'a', 'a', 'b'))).toBe('own');
+	});
+	it('ignores a served id that is no longer an alternate', () => {
+		expect(servedCheckpoint('own', ['a'], asked('gone', 'a'))).toBe('own');
+		expect(servedCheckpoint('own', ['own'], [])).toBe('own');
 	});
 });
 

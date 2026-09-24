@@ -21,10 +21,16 @@ export type LessonState = 'read' | 'finished' | 'skipped';
 export type CheckpointState = 'passed' | 'skipped' | 'attempted';
 export type Comfort = 'less' | 'more';
 export type ReviewResult = 'pass' | 'fail';
-/** One answered review: the local calendar day and the result. */
+/**
+ * One answered review: the local calendar day and the result. `served` is the
+ * id (within the lesson) of the `review` alternate the review page asked in
+ * place of the item's own checkpoint; absent when it asked the item's own
+ * (spec S04 "Storage", S05 "Which checkpoint a review asks").
+ */
 export interface ReviewTrace {
 	at: string;
 	result: ReviewResult;
+	served?: string;
 }
 
 export interface LessonEntry {
@@ -60,6 +66,11 @@ export interface ProgressRecord {
 	lessons: Record<string, LessonEntry>;
 	checkpoints: Record<string, CheckpointEntry>;
 	reviews: Record<string, ReviewEntry>;
+	/**
+	 * Results of `practice` checkpoints, in the form of `checkpoints` (spec S04 "What gets recorded"). Kept apart
+	 * so that no progress figure, finishing rule or review counts them. Added to version 2 without a bump.
+	 */
+	practice: Record<string, CheckpointEntry>;
 	quizzes: Record<string, QuizEntry>;
 }
 
@@ -100,7 +111,7 @@ export function stageDays(stage: number): number {
 }
 
 export function emptyRecord(): ProgressRecord {
-	return { version: VERSION, goals: [], lessons: {}, checkpoints: {}, reviews: {}, quizzes: {} };
+	return { version: VERSION, goals: [], lessons: {}, checkpoints: {}, reviews: {}, practice: {}, quizzes: {} };
 }
 
 // --- Shape validation -------------------------------------------------------
@@ -121,7 +132,7 @@ function isCheckpointEntry(v: unknown): v is CheckpointEntry {
 }
 const isResult = (v: unknown): v is ReviewResult => v === 'pass' || v === 'fail';
 function isReviewTrace(v: unknown): v is ReviewTrace {
-	return isObject(v) && isDay(v.at) && isResult(v.result);
+	return isObject(v) && isDay(v.at) && isResult(v.result) && (v.served === undefined || typeof v.served === 'string');
 }
 function isReviewEntry(v: unknown): v is ReviewEntry {
 	if (!isObject(v)) return false;
@@ -258,6 +269,8 @@ export function normalize(raw: unknown, warnings: NormalizeWarning[] = []): Prog
 	record.lessons = cleanMap('lessons', parsed.lessons, isLessonEntry, warnings);
 	record.checkpoints = cleanMap('checkpoints', parsed.checkpoints, isCheckpointEntry, warnings);
 	record.reviews = cleanMap('reviews', cleanHistories(parsed.reviews, warnings), isReviewEntry, warnings);
+	// Absent in a record written before practice existed: empty, with no warning (cleanMap warns only on a value).
+	record.practice = cleanMap('practice', parsed.practice, isCheckpointEntry, warnings);
 	record.quizzes = cleanMap('quizzes', parsed.quizzes, isQuizEntry, warnings);
 	return record;
 }
@@ -270,8 +283,9 @@ export function describeWarning(w: NormalizeWarning): string {
 // --- Content changes (spec S04 and S05 "Content changes") --------------------
 
 /**
- * Drop lesson, checkpoint and review entries whose id the build no longer
- * knows. Mutates `r`; returns how many entries went.
+ * Drop lesson, checkpoint, review and practice entries whose id the build no
+ * longer knows. `knownCheckpointIds` holds the `first` and the `practice`
+ * checkpoint ids. Mutates `r`; returns how many entries went.
  */
 export function pruneOrphanEntries(
 	r: ProgressRecord,
@@ -294,6 +308,11 @@ export function pruneOrphanEntries(
 	for (const id of Object.keys(r.reviews)) {
 		if (checkpoints.has(id)) continue;
 		delete r.reviews[id];
+		dropped++;
+	}
+	for (const id of Object.keys(r.practice)) {
+		if (checkpoints.has(id)) continue;
+		delete r.practice[id];
 		dropped++;
 	}
 	return dropped;
@@ -402,6 +421,20 @@ export function applyCheckpointResult(r: ProgressRecord, id: string, passed: boo
 	return c;
 }
 
+/**
+ * A Check press on a `practice` checkpoint (spec S03 "More practice"): the
+ * same rule as `applyCheckpointResult`, written to `practice`, so it never
+ * counts toward finishing the lesson or any progress figure.
+ */
+export function applyPracticeResult(r: ProgressRecord, id: string, passed: boolean): CheckpointEntry {
+	const c = r.practice[id] ?? { state: 'attempted', attempts: 0 };
+	c.attempts += 1;
+	if (passed) c.state = 'passed';
+	else if (c.state !== 'passed') c.state = 'attempted';
+	r.practice[id] = c;
+	return c;
+}
+
 /** Skip counts as an attempt (so a later pass is not first-try) and never overrides a pass. */
 export function applyCheckpointSkipped(r: ProgressRecord, id: string): CheckpointEntry {
 	const c = r.checkpoints[id] ?? { state: 'skipped', attempts: 0 };
@@ -416,18 +449,22 @@ export function applyCheckpointSkipped(r: ProgressRecord, id: string): Checkpoin
 /**
  * A review answer on `day`: pass moves up a stage (past the last stage the
  * item retires as `done`), fail drops to stage 1 due tomorrow (spec S05).
- * Returns the item, or `undefined` when there is no such review item.
+ * `served` is the id of the `review` alternate that was asked, if one was,
+ * and goes into the new history entry. Returns the item, or `undefined`
+ * when there is no such review item.
  */
 export function applyReviewResult(
 	r: ProgressRecord,
 	id: string,
 	passed: boolean,
 	day: string,
+	served?: string,
 ): ReviewEntry | undefined {
 	const item = r.reviews[id];
 	if (!item) return undefined;
 	const result: ReviewResult = passed ? 'pass' : 'fail';
-	item.history = [...item.history, { at: day, result }].slice(-HISTORY_LENGTH);
+	const trace: ReviewTrace = served === undefined ? { at: day, result } : { at: day, result, served };
+	item.history = [...item.history, trace].slice(-HISTORY_LENGTH);
 	item.last = result;
 	if (passed) {
 		const next = typeof item.stage === 'number' ? item.stage + 1 : LAST_STAGE + 1;
@@ -469,6 +506,39 @@ export function dueReviewIdsOn(record: ProgressRecord, prefix: string, day: stri
 /** The due items for one session: `dueReviewIdsOn` capped at `REVIEW_CAP` (spec S05). */
 export function dueReviewsOn(record: ProgressRecord, prefix: string, day: string): string[] {
 	return dueReviewIdsOn(record, prefix, day).slice(0, REVIEW_CAP);
+}
+
+/**
+ * Which checkpoint the review page asks for a due item (spec S05 "Which
+ * checkpoint a review asks"). `own` is the item's checkpoint id,
+ * `alternates` its `review` alternates in page order, and `history` the
+ * item's answers. The first alternate never asked wins. Otherwise the
+ * candidate asked least often wins, and among those the one asked longest
+ * ago, with `own` first when the history doesn't show it. A `served` id that
+ * is no longer an alternate counts for nothing.
+ */
+export function servedCheckpoint(own: string, alternates: readonly string[], history: readonly ReviewTrace[]): string {
+	const candidates = [own, ...alternates.filter((a) => a !== own)];
+	const asked = new Map(candidates.map((c) => [c, 0]));
+	const lastAsked = new Map<string, number>();
+	history.forEach((h, i) => {
+		const id = h.served ?? own;
+		const n = asked.get(id);
+		if (n === undefined) return;
+		asked.set(id, n + 1);
+		lastAsked.set(id, i);
+	});
+	const fresh = alternates.find((a) => asked.get(a) === 0);
+	if (fresh !== undefined) return fresh;
+	let best = own;
+	for (const c of candidates) {
+		const count = asked.get(c) ?? 0;
+		const bestCount = asked.get(best) ?? 0;
+		const last = lastAsked.get(c) ?? -1;
+		const bestLast = lastAsked.get(best) ?? -1;
+		if (count < bestCount || (count === bestCount && last < bestLast)) best = c;
+	}
+	return best;
 }
 
 export function applyComfort(r: ProgressRecord, level: Comfort | undefined): void {

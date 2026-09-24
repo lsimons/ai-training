@@ -13,6 +13,7 @@
  * `answer` and `run` (an example that is shown has to be verified) and takes
  * no `hint`, `concepts` or `context`.
  */
+import type { CheckpointPhase } from '@lib/checkpoint-rules';
 import CheckpointShell from './CheckpointShell.astro';
 import SectionTitle from './SectionTitle.astro';
 
@@ -31,17 +32,19 @@ interface Props {
 	run?: string;
 	review?: boolean;
 	revision?: number;
+	/** `first` (default), `review` or `practice` (spec S03 "Checkpoint props"). */
+	phase?: CheckpointPhase;
 	/** Marks this block as the lesson's canonical example (spec S03 "Examples"). Read from the MDX source by lib/reference.ts; not rendered. */
 	canonical?: boolean;
 }
-const { id, objective, title, hint, concepts, context, answer, run, review, revision } = Astro.props;
+const { id, objective, title, hint, concepts, context, answer, run, review, revision, phase } = Astro.props;
 const graded = objective !== undefined;
 const honor = answer === undefined;
 if (!graded) {
 	if (answer === undefined || run === undefined)
 		throw new Error(`Predict "${id}": an ungraded example (no objective) needs answer and run`);
-	if (hint !== undefined || concepts !== undefined || context !== undefined)
-		throw new Error(`Predict "${id}": an ungraded example (no objective) takes no hint, concepts or context`);
+	if (hint !== undefined || concepts !== undefined || context !== undefined || phase !== undefined)
+		throw new Error(`Predict "${id}": an ungraded example (no objective) takes no hint, concepts, context or phase`);
 }
 ---
 
@@ -56,6 +59,7 @@ if (!graded) {
 			{context}
 			{review}
 			{revision}
+			{phase}
 			{honor}
 			kind="predict"
 			checkLabel={honor ? 'Record' : 'Check'}

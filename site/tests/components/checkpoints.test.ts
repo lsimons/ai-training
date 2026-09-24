@@ -5,10 +5,12 @@
  */
 import Choice from '@components/lesson/Choice.astro';
 import Match from '@components/lesson/Match.astro';
+import MorePractice from '@components/lesson/MorePractice.astro';
 import MultiChoice from '@components/lesson/MultiChoice.astro';
 import Order from '@components/lesson/Order.astro';
 import Predict from '@components/lesson/Predict.astro';
 import Repair from '@components/lesson/Repair.astro';
+import Scenario from '@components/lesson/Scenario.astro';
 import Sort from '@components/lesson/Sort.astro';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
@@ -29,6 +31,85 @@ beforeAll(async () => {
 async function render(component: any, props: Record<string, unknown>, slots?: Record<string, string>) {
 	return container.renderToString(component, { props, locals, ...(slots ? { slots } : {}) });
 }
+
+describe('phase (spec S03 "Checkpoints")', () => {
+	const options = [{ text: 'a', correct: true }, { text: 'b' }];
+	it('first is the default: data-checkpoint, data-phase and a Skip button, not hidden', async () => {
+		const html = await render(Choice, { ...base, options });
+		expect(html).toMatch(/<section class="checkpoint not-content" id="cp" data-checkpoint(="")? data-phase="first"/);
+		expect(html).toContain('class="cp-skip"');
+		expect(html).not.toContain('data-alternate');
+		expect(html).not.toMatch(/<section[^>]* hidden/);
+	});
+	it('a review alternate is hidden and marked data-alternate instead of data-checkpoint', async () => {
+		const html = await render(MultiChoice, {
+			...base,
+			phase: 'review',
+			options: [...options, { text: 'c', correct: true }],
+		});
+		expect(html).toMatch(
+			/<section class="checkpoint not-content" id="cp" hidden data-alternate(="")? data-phase="review"/,
+		);
+		expect(html).not.toContain('data-checkpoint');
+		expect(html).toContain('data-progress-id="concepts/how-models-work#cp"');
+		expect(html).toContain('data-reviewable="true"');
+	});
+	it('a practice checkpoint is shown, never reviewable, and has no Skip button', async () => {
+		const html = await render(Choice, { ...base, phase: 'practice', options });
+		expect(html).toMatch(/data-checkpoint(="")? data-phase="practice"/);
+		expect(html).toContain('data-reviewable="false"');
+		expect(html).not.toContain('cp-skip');
+		expect(html).toContain('class="cp-check"');
+	});
+	it('every kind passes the phase through, and an unknown phase fails the build', async () => {
+		const kinds: [unknown, Record<string, unknown>][] = [
+			[
+				Match,
+				{
+					options: ['x', 'y'],
+					rows: [
+						{ statement: 's', option: 0 },
+						{ statement: 't', option: 1 },
+					],
+					rationale: 'r',
+				},
+			],
+			[
+				Sort,
+				{
+					buckets: ['b', 'c'],
+					items: [
+						{ text: 't', bucket: 0 },
+						{ text: 'u', bucket: 1 },
+					],
+				},
+			],
+			[Order, { steps: ['one', 'two'] }],
+			[Predict, { answer: '1' }],
+			[Repair, { broken: 'x', model: 'y' }],
+			[
+				Scenario,
+				{
+					options: [
+						{ text: 'a', correct: true, consequence: 'c' },
+						{ text: 'b', consequence: 'd' },
+					],
+				},
+			],
+		];
+		for (const [component, props] of kinds) {
+			expect(await render(component, { ...base, ...props, phase: 'review' })).toContain('data-phase="review"');
+		}
+		await expect(render(Choice, { ...base, phase: 'later', options })).rejects.toThrow(
+			/Checkpoint "cp": phase must be one of first, review, practice, got "later"/,
+		);
+	});
+	it('More practice is an H2 section around its checkpoints', async () => {
+		const html = await render(MorePractice, {}, { default: '<p>inside</p>' });
+		expect(html).toMatch(/<section class="more-practice" id="more-practice"><h2>More practice<\/h2>/);
+		expect(html).toContain('<p>inside</p>');
+	});
+});
 
 describe('CheckpointShell (through Choice)', () => {
 	it('carries the progress id, kind, reviewability and revision, and the control buttons', async () => {
@@ -151,7 +232,9 @@ describe('Predict', () => {
 		const example = { id: 'e', title: 'T', answer: '1', run: 'x.py' };
 		await expect(render(Predict, { id: 'e', title: 'T', answer: '1' })).rejects.toThrow(/needs answer and run/);
 		await expect(render(Predict, { id: 'e', title: 'T', run: 'x.py' })).rejects.toThrow(/needs answer and run/);
-		await expect(render(Predict, { ...example, hint: 'h' })).rejects.toThrow(/takes no hint, concepts or context/);
+		await expect(render(Predict, { ...example, hint: 'h' })).rejects.toThrow(
+			/takes no hint, concepts, context or phase/,
+		);
 		await expect(render(Predict, { ...example, concepts: ['token'] })).rejects.toThrow(/takes no hint/);
 		await expect(render(Predict, { ...example, context: 'c' })).rejects.toThrow(/takes no hint/);
 	});

@@ -1,5 +1,5 @@
 import { buildCatalog } from '@lib/catalog';
-import { checkpointsOf, checkpointTagsOf, getLessons, type Lesson } from '@lib/lessons';
+import { checkpointsOf, checkpointTagsOf, firstCheckpointsOf, getLessons, type Lesson } from '@lib/lessons';
 import { knownPagePaths } from '@lib/links';
 import { describe, expect, it, vi } from 'vitest';
 import { type DocFixture, docs } from './content';
@@ -46,7 +46,7 @@ describe('checkpointTagsOf', () => {
 
 describe('checkpointsOf', () => {
 	it('reads every checkpoint tag with its kind, title, revision, reviewability, concepts, context and stem', () => {
-		const common = { objective: 'o1', hint: 'h', stem: '' };
+		const common = { objective: 'o1', hint: 'h', stem: '', phase: 'first' };
 		expect(checkpointsOf(lesson('concepts/how-models-work'))).toEqual([
 			{
 				...common,
@@ -165,6 +165,24 @@ describe('checkpointsOf', () => {
 		expect(one?.context).toBe('ctx');
 		expect(() => checkpointsOf(body('<Choice id="a" concepts={["c"]} hint={3} options={[]}>\n</Choice>'))).toThrow(
 			/x\/y#a: hint must be a string, got number/,
+		);
+	});
+	it('reads the phase, and a practice checkpoint is never reviewable', () => {
+		const src = [
+			'<Choice id="a" objective="o" concepts={["c"]} options={[]}>\n</Choice>',
+			'<MultiChoice id="b" phase="review" objective="o" concepts={["c"]} options={[]}>\n</MultiChoice>',
+			'<Exercise>\nDo.\n</Exercise>',
+			'<MorePractice>\n<Choice id="c" phase="practice" objective="o" concepts={["c"]} options={[]}>\n</Choice>\n</MorePractice>',
+		].join('\n\n');
+		const all = checkpointsOf(body(src));
+		expect(all.map((c) => [c.id, c.phase, c.reviewable])).toEqual([
+			['a', 'first', true],
+			['b', 'review', true],
+			['c', 'practice', false],
+		]);
+		expect(firstCheckpointsOf(body(src)).map((c) => c.id)).toEqual(['a']);
+		expect(() => checkpointsOf(body('<Choice id="a" phase="later" concepts={["c"]}>\n</Choice>'))).toThrow(
+			/x\/y#a: phase must be one of first, review, practice, got "later"/,
 		);
 	});
 	it('skips a > inside quotes, braces and template literals', () => {

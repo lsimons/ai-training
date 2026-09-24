@@ -5,8 +5,25 @@
  * Check / Hint / Skip controls. Review-only controls (Give up, the stage
  * pills) are rendered hidden and enabled by the review page. The review
  * frequency is adjusted on the settings page, not here.
+ *
+ * The `phase` (spec S03 "Checkpoints") decides how the section is marked. A
+ * `first` or `practice` checkpoint carries `data-checkpoint`, which is what
+ * the lesson script binds and every count on the page selects. A `review`
+ * alternate is rendered `hidden` with `data-alternate` in its place, so the
+ * lesson page leaves it alone and the review page can fetch it by its
+ * progress id. A `practice` checkpoint has no Skip button, because nothing
+ * waits on it.
  */
-import { type CheckpointKind, CONCEPTS_FORM, DEFAULT_REVISION, isReviewable } from '@lib/checkpoint-rules';
+import {
+	type CheckpointKind,
+	type CheckpointPhase,
+	CONCEPTS_FORM,
+	DEFAULT_PHASE,
+	DEFAULT_REVISION,
+	isPhase,
+	isReviewable,
+	PHASES,
+} from '@lib/checkpoint-rules';
 import { assertKnownConcepts, knownConceptIds } from '@lib/concepts';
 import { lessonIdOf } from '@lib/lesson-context';
 import { href } from '@lib/url';
@@ -37,6 +54,8 @@ interface Props {
 	 * not trip. Exported as `guessable`; not rendered.
 	 */
 	guessable?: string;
+	/** `first` (default), `review` or `practice`. */
+	phase?: CheckpointPhase;
 	checkLabel?: string;
 }
 
@@ -52,8 +71,11 @@ const {
 	revision = DEFAULT_REVISION,
 	honor = false,
 	guessable,
+	phase = DEFAULT_PHASE,
 	checkLabel = 'Check',
 } = Astro.props;
+if (!isPhase(phase))
+	throw new Error(`Checkpoint "${id}": phase must be one of ${PHASES.join(', ')}, got ${JSON.stringify(phase)}`);
 if (guessable !== undefined && (typeof guessable !== 'string' || !/^[a-z, -]+:\s*\S/.test(guessable)))
 	throw new Error(`Checkpoint "${id}": guessable must be "<cue>: reason", got ${JSON.stringify(guessable)}`);
 if (!Number.isInteger(revision) || revision < 1)
@@ -64,13 +86,17 @@ if (!Array.isArray(concepts) || !concepts.every((c) => typeof c === 'string')) {
 	throw new Error(`${progressId}: ${CONCEPTS_FORM} is required`);
 }
 assertKnownConcepts(progressId, concepts, await knownConceptIds());
-const reviewable = isReviewable({ kind, review, honor });
+const reviewable = isReviewable({ kind, review, honor, phase });
+// A hidden `review` alternate is marked `data-alternate` instead of `data-checkpoint`; see the header.
+const marker = phase === 'review' ? { 'data-alternate': '' } : { 'data-checkpoint': '' };
 ---
 
 <section
 	class="checkpoint not-content"
 	id={id}
-	data-checkpoint
+	hidden={phase === 'review'}
+	{...marker}
+	data-phase={phase}
 	data-kind={kind}
 	data-progress-id={progressId}
 	data-objective={objective}
@@ -90,7 +116,7 @@ const reviewable = isReviewable({ kind, review, honor });
 	<div class="cp-controls">
 		<button type="button" class="cp-check">{checkLabel}</button>
 		<button type="button" class="cp-hint-btn" aria-expanded="false">Hint</button>
-		<button type="button" class="cp-skip">Skip</button>
+		{phase !== 'practice' && <button type="button" class="cp-skip">Skip</button>}
 		<button type="button" class="cp-giveup" hidden>Give up</button>
 	</div>
 	<p class="cp-hint" hidden>{hint}</p>

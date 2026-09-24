@@ -1,7 +1,18 @@
 import remarkMdx from 'remark-mdx';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
-import { type CheckpointKind, type CheckpointTag, CONCEPTS_FORM, KIND_OF_TAG } from './checkpoint-rules';
+import {
+	type CheckpointKind,
+	type CheckpointPhase,
+	type CheckpointTag,
+	CONCEPTS_FORM,
+	DEFAULT_PHASE,
+	isPhase,
+	KIND_OF_TAG,
+	MAX_PRACTICE,
+	MORE_PRACTICE_TAG,
+	PHASES,
+} from './checkpoint-rules';
 
 /**
  * The checkpoint tag reader: finds every `<Choice ...>` (and the other kinds
@@ -29,6 +40,8 @@ export interface CheckpointTagInfo {
 	attrs: Map<string, CheckpointAttr>;
 	/** The children of the tag, as Markdown source. Empty for a self-closing tag. */
 	stem: string;
+	/** The `phase` prop, `first` when absent (spec S03 "Checkpoint props"). */
+	phase: CheckpointPhase;
 }
 
 /** The mdast fields the reader touches. The full types are in `mdast-util-mdx-jsx`; only these matter here. */
@@ -164,6 +177,55 @@ export function jsxElements(tree: MdxNode): JsxElement[] {
 	return out;
 }
 
+/** The `phase` prop of a checkpoint tag: one of `PHASES` as a string, `first` when absent. */
+export function phaseProp(where: string, attrs: Map<string, CheckpointAttr>): CheckpointPhase {
+	const v = attrs.get('phase')?.value;
+	if (v === undefined) return DEFAULT_PHASE;
+	if (!isPhase(v)) throw new Error(`${where}: phase must be one of ${PHASES.join(', ')}, got ${JSON.stringify(v)}`);
+	return v;
+}
+
+/** The start and end offsets of a node; `-1` when the parser gave none. */
+function offsets(node: MdxNode): { start: number; end: number } {
+	return { start: node.position?.start.offset ?? -1, end: node.position?.end.offset ?? -1 };
+}
+
+/**
+ * The "More practice" rules (spec S03 "More practice"): at most one
+ * `<MorePractice>` block, after the `<Exercise>` and before the `<Recap>`,
+ * holding one to `MAX_PRACTICE` checkpoints, all `practice` and every
+ * `practice` checkpoint in it. Throws on the first break, naming `where`.
+ */
+function checkPracticePlacement(
+	tree: MdxNode,
+	tags: { node: JsxElement; info: CheckpointTagInfo; id: string }[],
+	where: string,
+): void {
+	const elements = jsxElements(tree);
+	const blocks = elements.filter((n) => n.name === MORE_PRACTICE_TAG);
+	if (blocks.length > 1) throw new Error(`${where}: <${MORE_PRACTICE_TAG}> is used ${blocks.length} times; use one`);
+	const block = blocks[0];
+	const inside = new Set(block ? jsxElements(block) : []);
+	for (const { node, info, id } of tags) {
+		if (info.phase === 'practice' && !inside.has(node))
+			throw new Error(`${where}: "${id}" has phase="practice" but is outside <${MORE_PRACTICE_TAG}>`);
+		if (info.phase !== 'practice' && inside.has(node))
+			throw new Error(`${where}: "${id}" is inside <${MORE_PRACTICE_TAG}>, so it needs phase="practice"`);
+	}
+	if (!block) return;
+	const count = tags.filter((t) => inside.has(t.node)).length;
+	if (count === 0 || count > MAX_PRACTICE)
+		throw new Error(`${where}: <${MORE_PRACTICE_TAG}> holds ${count} checkpoints; it takes 1 to ${MAX_PRACTICE}`);
+	const at = offsets(block);
+	for (const exercise of elements.filter((n) => n.name === 'Exercise')) {
+		if (offsets(exercise).end > at.start)
+			throw new Error(`${where}: <${MORE_PRACTICE_TAG}> must come after the <Exercise>`);
+	}
+	for (const recap of elements.filter((n) => n.name === 'Recap')) {
+		if (offsets(recap).start < at.end) throw new Error(`${where}: <${MORE_PRACTICE_TAG}> must come before the <Recap>`);
+	}
+}
+
 /**
  * The checkpoint tags in `tree`, parsed from `src`: the component name, its
  * props, and the children as Markdown (empty for a self-closing tag). `where`
@@ -171,10 +233,12 @@ export function jsxElements(tree: MdxNode): JsxElement[] {
  * `KIND_OF_TAG`, so a new kind enters there first. A `<Predict>` with no
  * `objective` is an ungraded example, not a checkpoint, and is skipped, but
  * its `id` still counts: every tag's string `id` must be unique in the page,
- * because each one becomes a DOM id.
+ * because each one becomes a DOM id. Each tag's `phase` is read and checked,
+ * and so is where the `practice` ones are (`checkPracticePlacement`).
  */
 export function checkpointTagsIn(tree: MdxNode, src: string, where: string): CheckpointTagInfo[] {
 	const out: CheckpointTagInfo[] = [];
+	const placed: { node: JsxElement; info: CheckpointTagInfo; id: string }[] = [];
 	const ids = new Set<string>();
 	for (const node of jsxElements(tree)) {
 		const kind: CheckpointKind | undefined = node.name ? KIND_OF_TAG[node.name as CheckpointTag] : undefined;
@@ -189,8 +253,18 @@ export function checkpointTagsIn(tree: MdxNode, src: string, where: string): Che
 		// A Predict without an objective is an ungraded example (spec S03 "Examples"): CI runs its fixture,
 		// the page shows the output, and it is not a checkpoint anywhere.
 		if (tag === 'Predict' && !attrs.has('objective')) continue;
-		out.push({ tag, kind, attrs, stem: childrenSource(node, src) });
+		const label = typeof id?.value === 'string' ? id.value : `<${tag}>`;
+		const info: CheckpointTagInfo = {
+			tag,
+			kind,
+			attrs,
+			stem: childrenSource(node, src),
+			phase: phaseProp(`${where}#${label}`, attrs),
+		};
+		out.push(info);
+		placed.push({ node, info, id: label });
 	}
+	checkPracticePlacement(tree, placed, where);
 	return out;
 }
 

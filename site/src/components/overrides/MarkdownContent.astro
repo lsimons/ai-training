@@ -13,7 +13,7 @@ import RouteAhead, { type AheadItem } from '@components/lesson/RouteAhead.astro'
 import TutorBlock from '@components/lesson/TutorBlock.astro';
 import { getAreas, isEngineering } from '@lib/areas';
 import { checkExtendsToHref } from '@lib/extends-to';
-import { checkpointsOf, type Lesson } from '@lib/lessons';
+import { firstCheckpointsOf, type Lesson } from '@lib/lessons';
 import { bibliographySources, knownPagePaths } from '@lib/links';
 import { chooseSkillsCheck } from '@lib/skills-check';
 import { absoluteUrl, href } from '@lib/url';
@@ -39,7 +39,8 @@ let ahead: AheadItem[] = [];
 // has no comfort levels (spec S01).
 let skillsCheck: string[] = [];
 if (isLesson) {
-	if (engineering) skillsCheck = chooseSkillsCheck(data.serves ?? [], checkpointsOf(entry as Lesson));
+	// Only `first` checkpoints are asked: an alternate never stands in for the lesson's own (spec S04).
+	if (engineering) skillsCheck = chooseSkillsCheck(data.serves ?? [], firstCheckpointsOf(entry as Lesson));
 	const docs = await getCollection('docs');
 	const competencies = await getCollection('competencies');
 	const statements = new Map<string, string>();
@@ -131,7 +132,7 @@ if (isLesson) {
 
 <script>
 	import { openSkillsCheck } from '@lib/skills-check';
-	import { skillsCheckNote, skillsCheckOffer } from '@scripts/checkpoint-logic';
+	import { countsForLesson, skillsCheckNote, skillsCheckOffer } from '@scripts/checkpoint-logic';
 	import * as progress from '@scripts/progress';
 	import { bindAll, bindCheckpoint, copyForSkillsCheck, drawState } from '@scripts/checkpoints';
 
@@ -155,13 +156,16 @@ if (isLesson) {
 		const openSkillsItems = () => openSkillsCheck(skillsItems, progress.load().checkpoints);
 		let skillsStarted = false;
 
+		// Every checkpoint on the page is bound, the "More practice" ones included. Only the `first` ones
+		// count toward finishing, the finish note and routing (spec S04 "Lesson states"). A hidden
+		// `review` alternate has no `data-checkpoint`, so `bindAll` never sees it.
 		const checkpoints = bindAll(root, {
 			onResult: () => {
 				route();
 				drawLesson();
 				if (!skillsStarted) offerSkillsCheck();
 			},
-		});
+		}).filter((el) => countsForLesson(el.dataset.phase));
 		progress.markLessonRead(lessonId);
 
 		/** Show the offer with the current open count, or hide the card when nothing is left to ask. */

@@ -19,7 +19,7 @@ import { lessonPages } from './data.mjs';
 
 /**
  * @typedef {{ id: string, area: string, topic: string }} LiveLesson A live lesson, its area (which is its course, spec S01) and the topic it covers.
- * @typedef {{ id: string, kind: string }} PageCheckpoint One graded checkpoint tag of a lesson page.
+ * @typedef {{ id: string, kind: string, phase: string }} PageCheckpoint One graded checkpoint tag of a lesson page, as the page shows it.
  */
 
 /**
@@ -73,19 +73,25 @@ export function liveTopicLessonIds(dataDir, contentDir, topic) {
 }
 
 /**
- * The graded checkpoints of the page of `lesson`, in page order. An ungraded
- * example (a `<Predict>` without an objective) is not listed, as in the
- * build. A tag without a string `id` is reported as an error by the export
- * check, so here it throws.
+ * The graded checkpoints the page of `lesson` shows, in page order: every
+ * `[data-checkpoint]` section, which is the `first` checkpoints and the
+ * `practice` ones in "More practice", each with its `phase`. A hidden
+ * `review` alternate is not listed, and neither is an ungraded example (a
+ * `<Predict>` without an objective), as in the build. A spec that counts
+ * what finishing needs filters on `phase === 'first'`. A tag without a
+ * string `id` is reported as an error by the export check, so here it
+ * throws.
  * @param {string} contentDir
  * @param {string} lesson `<area>/<lesson>`
  * @returns {PageCheckpoint[]}
  */
 export function pageCheckpoints(contentDir, lesson) {
 	const src = readFileSync(join(contentDir, `${lesson}.mdx`), 'utf8');
-	return checkpointTagsOfSource(src, lesson).map((t) => {
-		const id = t.attrs.get('id');
-		if (!id || id.expr || typeof id.value !== 'string') throw new Error(`${lesson}: <${t.tag}> without an id="..."`);
-		return { id: id.value, kind: t.kind };
-	});
+	return checkpointTagsOfSource(src, lesson)
+		.filter((t) => t.phase !== 'review')
+		.map((t) => {
+			const id = t.attrs.get('id');
+			if (!id || id.expr || typeof id.value !== 'string') throw new Error(`${lesson}: <${t.tag}> without an id="..."`);
+			return { id: id.value, kind: t.kind, phase: t.phase };
+		});
 }

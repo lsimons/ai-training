@@ -1,6 +1,7 @@
 /**
  * The lesson entries of the right-hand "On this page" menu (issue #220): one
- * group for the checkpoints and one for the ungraded examples, each entry
+ * group for the checkpoints the page shows (`first` and `practice`, not the
+ * hidden `review` alternates) and one for the ungraded examples, each entry
  * linking to the item's section id. The checkpoints come from the reader
  * `mise run checkpoints` and the export use (`checkpointTagsIn` and
  * `checkpointOf`), so the menu and the export cannot disagree. The examples
@@ -81,6 +82,8 @@ export function lessonTocGroups(lesson: Lesson): TocGroup[] {
 	const tree = parseLesson(body, lesson.id);
 	const checkpoints = checkpointTagsIn(tree, body, lesson.id)
 		.map((t) => checkpointOf(lesson, t))
+		// A `review` alternate is hidden on the page (spec S03 "Checkpoints"), so the menu has no link to it.
+		.filter((c) => c.phase !== 'review')
 		.map(({ id, title }) => ({ id, title }));
 	const examples = examplesIn(tree, lesson.id);
 	const groups: TocGroup[] = [

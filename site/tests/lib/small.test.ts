@@ -1,4 +1,4 @@
-import { DEFAULT_REVISION, isReviewable, KIND_OF_TAG } from '@lib/checkpoint-rules';
+import { DEFAULT_REVISION, isPhase, isReviewable, KIND_OF_TAG, reviewAlternatesOf } from '@lib/checkpoint-rules';
 import { jsonForScript } from '@lib/json';
 import { absoluteUrl, href, siteRoot } from '@lib/url';
 import { describe, expect, it } from 'vitest';
@@ -19,6 +19,32 @@ describe('checkpoint rules', () => {
 		expect(isReviewable({ kind: 'order' })).toBe(true);
 		expect(isReviewable({ kind: 'multi-choice' })).toBe(true);
 		expect(isReviewable({ kind: 'match' })).toBe(true);
+	});
+	it('a practice checkpoint is never reviewed, and a review alternate follows the kind rule', () => {
+		expect(isReviewable({ kind: 'choice', phase: 'practice' })).toBe(false);
+		expect(isReviewable({ kind: 'choice', phase: 'review' })).toBe(true);
+		expect(isReviewable({ kind: 'repair', phase: 'review' })).toBe(false);
+		expect(isPhase('first')).toBe(true);
+		expect(isPhase('later')).toBe(false);
+	});
+	it('lists the gradable review alternates with the same objective, in page order', () => {
+		const cp = (id: string, objective: string, phase: 'first' | 'review' | 'practice', reviewable = true) => ({
+			id,
+			objective,
+			phase,
+			reviewable,
+		});
+		const all = [
+			cp('own', 'o', 'first'),
+			cp('alt-b', 'o', 'review'),
+			cp('other', 'p', 'review'),
+			cp('self-graded', 'o', 'review', false),
+			cp('extra', 'o', 'practice', false),
+			cp('alt-a', 'o', 'review'),
+			cp('second', 'o', 'first'),
+		];
+		expect(reviewAlternatesOf(cp('own', 'o', 'first'), all)).toEqual(['alt-b', 'alt-a']);
+		expect(reviewAlternatesOf(cp('x', 'q', 'first'), all)).toEqual([]);
 	});
 });
 

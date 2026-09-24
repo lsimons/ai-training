@@ -1,5 +1,5 @@
 import { type CollectionEntry, getCollection } from 'astro:content';
-import { type CheckpointKind, DEFAULT_REVISION, isReviewable } from './checkpoint-rules';
+import { type CheckpointKind, type CheckpointPhase, DEFAULT_REVISION, isReviewable } from './checkpoint-rules';
 import { type CheckpointTagInfo, checkpointTagsOfSource, conceptsProp, stringProp } from './checkpoint-tags';
 
 /**
@@ -34,6 +34,11 @@ export interface CheckpointInfo {
 	hint: string;
 	/** The children of the tag, as Markdown source. Empty for a self-closing tag. */
 	stem: string;
+	/**
+	 * `first`, `review` or `practice` (spec S01 "Checkpoint"). Only `first` checkpoints count on the lesson
+	 * page and in progress; `review` ones are hidden there, `practice` ones are in "More practice".
+	 */
+	phase: CheckpointPhase;
 }
 
 /** Every lesson: a docs entry with `mode`, which only the lesson YAML sets. */
@@ -63,7 +68,7 @@ export function checkpointTagsOf(lesson: Lesson): CheckpointTagInfo[] {
  * S03). Reviewability follows the same rule the component uses for
  * `data-reviewable` (`lib/checkpoint-rules.ts`).
  */
-export function checkpointOf(lesson: Lesson, { tag, kind, attrs, stem }: CheckpointTagInfo): CheckpointInfo {
+export function checkpointOf(lesson: Lesson, { tag, kind, attrs, stem, phase }: CheckpointTagInfo): CheckpointInfo {
 	const id = stringProp(`${lesson.id} <${tag}>`, attrs, 'id');
 	if (!id) throw new Error(`${lesson.id}: <${tag}> without an id`);
 	const where = `${lesson.id}#${id}`;
@@ -83,16 +88,26 @@ export function checkpointOf(lesson: Lesson, { tag, kind, attrs, stem }: Checkpo
 		title,
 		kind,
 		revision,
-		reviewable: isReviewable({ kind, review: reviewAttr, honor }),
+		reviewable: isReviewable({ kind, review: reviewAttr, honor, phase }),
 		objective: str('objective') ?? '',
 		concepts: conceptsProp(where, attrs),
 		context: str('context'),
 		hint: str('hint') ?? '',
 		stem,
+		phase,
 	};
 }
 
-/** The checkpoints of a lesson, read from the MDX tree of its body. */
+/** The checkpoints of a lesson, read from the MDX tree of its body, alternates included. */
 export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 	return checkpointTagsOf(lesson).map((t) => checkpointOf(lesson, t));
+}
+
+/**
+ * The lesson's own checkpoints: the `first` phase, which the lesson page
+ * counts, finishing needs, and progress figures use (spec S04 "Progress
+ * display"). Alternates are left out.
+ */
+export function firstCheckpointsOf(lesson: Lesson): CheckpointInfo[] {
+	return checkpointsOf(lesson).filter((c) => c.phase === 'first');
 }

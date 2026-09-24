@@ -73,6 +73,21 @@ describe('bindCheckpoint', () => {
 		click('.cp-check');
 		expect(feedback()).toBe('');
 	});
+	it('a practice checkpoint records to practice and draws its state from there', () => {
+		const el = shell('choice', 'p', choiceBody, 'data-phase="practice"');
+		const onResult = vi.fn();
+		bindCheckpoint(el, { onResult });
+		q<HTMLInputElement>('label:not([data-correct]) input').checked = true;
+		click('.cp-check');
+		expect(state()).toBe('attempted');
+		q<HTMLInputElement>('label[data-correct] input').checked = true;
+		click('.cp-check');
+		const id = `${LESSON}#p`;
+		expect(progress.load().practice[id]).toEqual({ state: 'passed', attempts: 2 });
+		expect(progress.load().checkpoints[id]).toBeUndefined();
+		expect(state()).toBe('passed');
+		expect(onResult).toHaveBeenLastCalledWith(el, true);
+	});
 	it('bindAll returns every checkpoint under the root', () => {
 		shell('choice', 'c', choiceBody);
 		expect(bindAll(document.body)).toHaveLength(1);
@@ -517,6 +532,13 @@ describe('review mode', () => {
 		expect(q<HTMLButtonElement>('.cp-giveup').disabled).toBe(true);
 		click('.cp-giveup');
 		expect(progress.load().reviews[id]?.history).toEqual([{ at: progress.today(), result: 'fail' }]);
+	});
+	it('records the alternate a served section names in the history entry', () => {
+		schedule(1);
+		bindCheckpoint(shell('choice', 'c', choiceBody, 'data-served="c-again"'), { review: true });
+		q<HTMLInputElement>('label[data-correct] input').checked = true;
+		click('.cp-check');
+		expect(progress.load().reviews[id]?.history).toEqual([{ at: progress.today(), result: 'pass', served: 'c-again' }]);
 	});
 	it('a retired item shows every pill lit', () => {
 		schedule('done');

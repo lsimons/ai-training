@@ -49,7 +49,8 @@ test('finish is enabled once every checkpoint is passed, and persists across a r
 
 test('the finish note counts the open checkpoints', async ({ page }) => {
 	await page.goto('building-agents/agent-loop/');
-	const open = lessonCheckpoints('building-agents/agent-loop').length;
+	// Only the `first` checkpoints are needed to finish (spec S04 "Lesson states").
+	const open = lessonCheckpoints('building-agents/agent-loop').filter((c) => c.phase === 'first').length;
 	await expect(page.locator('[data-finish-note]')).toHaveText(
 		`Pass or skip ${open} more checkpoint${open === 1 ? '' : 's'} to finish this lesson.`,
 	);
