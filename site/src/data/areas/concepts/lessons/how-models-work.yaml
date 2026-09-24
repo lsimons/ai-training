@@ -18,6 +18,8 @@ assumes: []
 extends-to:
   - label: Why agent safety is different
     href: /safety/agent-risk/
+  - label: AI capabilities and limitations (Claude Academy)
+    href: https://academy.claude.com/courses/ai-capabilities-and-limitations
 after: []
 shorts: []
 exercise:
