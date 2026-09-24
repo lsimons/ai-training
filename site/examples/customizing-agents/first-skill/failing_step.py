@@ -19,12 +19,11 @@ NEW_VERSION = "0.4.0"
 
 def bump(package: Path, old: str, new: str) -> None:
     source = package / "notes.py"
-    source.write_text(
-        source.read_text(encoding="utf-8").replace(
-            f'__version__ = "{old}"', f'__version__ = "{new}"'
-        ),
-        encoding="utf-8",
-    )
+    before = source.read_text(encoding="utf-8")
+    after = before.replace(f'__version__ = "{old}"', f'__version__ = "{new}"')
+    if after == before:
+        raise ValueError(f"notes.py has no __version__ line for {old}")
+    source.write_text(after, encoding="utf-8")
 
 
 def add_changelog_entry(package: Path, version: str, line: str) -> None:

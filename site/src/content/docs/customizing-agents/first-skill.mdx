@@ -63,8 +63,9 @@ most 1024 characters and says what the skill does and when to use it
 The description does more work than its size suggests. At the start of a
 session Claude Code loads the name and description of every skill it can
 see. The body is loaded when a task matches the
-description, or when you type `/release` yourself, and it then stays in
-the conversation for the rest of the session (@Claude Code skills). So
+description, or when you type `/release` yourself. The loaded text
+remains in the conversation on later turns, until compaction trims it
+(@Claude Code skills). So
 the description is the trigger, and it should name the requests that
 should fire it (@Academy introduction-to-agent-skills). Write this as the
 whole file for now:
@@ -101,10 +102,10 @@ python3 skill_lint.py
 
 The description above is 108 characters, far under the limit, and it
 should stay short. Every skill's description is in context on every
-turn of every session, whatever the task. Claude Code cuts the text it
-shows the model at 1,536 characters (@Claude Code skills), and a
-description that needs anything near that limit holds steps that belong
-in the body.
+turn of every session, whatever the task. Claude Code shortens a long
+description in the listing it shows the model (@Claude Code skills), so
+the end of a long one may never be read, and a description that long
+holds steps that belong in the body.
 
 ## Pass two: when, the steps, the check
 
@@ -144,19 +145,19 @@ on the branch and `git tag --list 'v*'` shows the new tag. Don't push.
 Report the version, the tag and the changelog entry you wrote.
 ```
 
-The commands and file names in that body are exact, `python3 -m unittest -q` and not "run
-the tests", because an agent on another machine picks the runner it
-guesses otherwise. The last step is a check the agent can run, with
-the exact line it must print, so "done" is a fact the agent reads and not
-a judgment it makes. The "Done when" section repeats that check and adds
+The commands and file names in that body are exact. The step says
+`python3 -m unittest -q`, because an agent on another machine that reads
+"run the tests" picks the runner it guesses. The last step is a check the
+agent can run, with the exact line it must print, so "done" is a line the
+agent reads. The "Done when" section repeats that check and adds
 the limit, "Don't push", because a release skill that pushes is a
 release skill that can't be undone with `git reset`.
 
 <Order id="order-the-body" objective="customizing-agents/writes-skill/packages-a-procedure"
   concepts={['writing-a-good-skill']}
-  context="A skill body for a release procedure has an opening that says when to use the skill, a version bump, a changelog entry, a test run before anything changes, a release check that prints one line, and a commit and tag."
-  title="Order the release steps" hint="Which step is a check that should run before anything is changed, and which one can only run once everything else is in place?"
-  steps={['Run the tests, and stop if they fail', 'Change the version line in the source file', 'Add the changelog heading and bullets', 'Run the release check and read its line', 'Commit and tag']} />
+  context="A release skill runs the tests before it changes anything, then edits the version and the changelog, then runs a release check that prints ok or a FAIL line naming a problem, and commits and tags only once the check prints ok."
+  title="Order the release steps" hint="Which step must come before any file changes, which step needs the changes in place to have anything to check, which one needs the check's line, and which one needs the check to print ok?"
+  steps={['Run the tests, and stop if they fail', 'Change the version line and write its changelog entry', 'Run the release check and read its line', 'Fix what a FAIL line names and run the check again', 'Commit and tag']} />
 
 ## Pass three: when a step fails
 
@@ -222,10 +223,10 @@ Which three lines earn their place in the release skill?
 
 <Choice id="which-description-fires" objective="customizing-agents/writes-skill/packages-a-procedure"
   concepts={['skill-spec', 'writing-a-good-skill']}
-  context="A skill's description is the only part of it the agent sees before deciding whether to load it, and it should name the requests that should fire the skill and no others."
+  context="A skill's name and description are what the agent sees before deciding whether to load the body, and the description should name the requests that should fire the skill and no others."
   title="Which description is the right trigger?" hint="Which requests should load a release skill, and which of these descriptions names those and only those?"
   options={[
-    { text: '"Helps with the notes package, its version, its changelog, and its releases."', why: 'Every task in the package matches this, so the skill is loaded for work it has nothing to say about, and its body sits in context for the rest of the session.' },
+    { text: '"Helps with the notes package, its version, its changelog, and its releases."', why: 'Every task in the package matches this, so the skill is loaded for work it has nothing to say about, and its body is then in context on the turns that follow.' },
     { text: '"Cut a release of the notes package. Use when asked to release, bump the version, or tag."', correct: true },
     { text: '"Follow the release steps below carefully, in order, and report when the work is done."', why: 'This says what to do once loaded and nothing about which requests the skill is for, so the agent has no way to match a request to it.' },
   ]}>
@@ -281,7 +282,8 @@ from the skill, and the next lesson is about finding those lines.
    the directory name (@Agent Skills spec).
 2. The description is the trigger. It is in context on every turn, and
    the body is loaded when a task matches it or you invoke the skill,
-   then stays for the session (@Claude Code skills). Name the requests
+   and remains on later turns until compaction (@Claude Code skills).
+   Name the requests
    that should fire it and no others.
 3. The body says when to use the skill, gives the steps in order with
    exact commands and file names, and ends with a check the agent can
