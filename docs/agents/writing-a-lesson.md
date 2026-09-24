@@ -62,8 +62,9 @@ A lesson whose facts move (a law, a product) sets `review-by: 2027-03-20`,
 the date by which its sources must be checked again, and
 `sources-checked: 2026-09-20` for the day they were last checked. The page
 then shows "Sources checked on September 20, 2026. Review due by March 20,
-2027." above the lesson body. Move both dates when you re-check the sources,
-and leave them alone for a prose fix. Starlight's `lastUpdated` is a separate
+2027." above the lesson body. `mise run data` rejects a lesson that sets one
+of the two dates without the other. Move both dates when you re-check the
+sources, and leave them alone for a prose fix. Starlight's `lastUpdated` is a separate
 field about the page, and the site doesn't set it.
 
 ## Course plan

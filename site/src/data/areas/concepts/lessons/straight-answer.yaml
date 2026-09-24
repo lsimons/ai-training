@@ -25,10 +25,11 @@ exercise:
     Ask a leading and a neutral question about the same plan, then ask for the strongest objections,
     and compare the three answers.
 sources: [Sharma 2023]
-sources-checked: 2026-09-23
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 minutes: 12
 notes: >-
   The plan named Academy ai-capabilities-and-limitations, Academy ai-fluency-framework-foundations
   and DLAI-3 as inspiration; the page cites none of them and grounds the sycophancy claim in
-  Sharma et al. 2023 instead, whose findings were checked against the arXiv abstract on 2026-09-23.
+  Sharma et al. 2023 instead, whose findings were checked against the arXiv abstract on 2026-09-24.
   All chat exchanges are illustrative. The leap year fact is common calendar knowledge.
