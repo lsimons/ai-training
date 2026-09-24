@@ -1,11 +1,9 @@
-"""The toy agent behind the lesson "Run a tiny agent".
+"""The toy agent behind the lesson "Watch a tiny agent work".
 
 A scripted stand-in for a model, two tools (list a directory, read a file)
 and a loop that runs each tool the model asks for and hands the result
 back, until the model says it is done, the step limit is reached, or the
-script runs out. The lesson page shows the transcripts this prints, and
-`tests/test_agent_loop_concepts.py` checks that the page and the output
-agree.
+script runs out. The lesson page shows the transcripts this prints.
 
 Run one of the scripted tasks with:  python3 tiny_agent.py <run>
 where run is one of the names in RUNS below.
@@ -112,6 +110,8 @@ def transcript(name: str) -> str:
 
 def main(argv: list[str]) -> None:
     name = argv[1] if len(argv) > 1 else "find"
+    if name not in RUNS:
+        sys.exit(f"unknown run {name!r}, expected one of: {', '.join(RUNS)}")
     print(transcript(name))
 
 

@@ -65,9 +65,9 @@ the model, now knowing the file names, asked to read the one whose name
 suggested the right project. In step 3 it had what it needed and wrote an
 answer instead of a request, and the loop saw that and stopped.
 
-The model's text reached the folder only through the loop, and the loop
-is where a real agent checks permissions, logs what happened, and can
-refuse. When people say an agent "read a file", this two-line exchange
+The model's text reached the folder only through the loop. In a real
+agent the loop is also where permissions are checked and where a request
+can be refused. When people say an agent "read a file", this two-line exchange
 is what happened.
 
 ## Observe, think, act
@@ -101,15 +101,17 @@ look.
 <Sort id="label-the-turns" objective="concepts/recognizes-agents/names-the-loop"
   concepts={['agent-loop', 'tool']}
   context="The lesson shows the transcript of a toy agent with two tools, list_dir and read_file. Lines that start with model: are what the model wrote, and lines that start with loop: are what the software around it did."
-  title="Label the turns" hint="Who produced the line, the model or the loop, and was it a decision or a result?"
+  title="Label the turns" hint="Is something being read, being decided, or being run?"
   buckets={['Observe', 'Think', 'Act']}
   items={[
-    { text: 'model: call list_dir with path "notes"', bucket: 1 },
-    { text: 'loop: ran list_dir, result: 2026-03-14-lantern.txt, ...', bucket: 2 },
+    { text: 'The model reads the task at the top of the transcript', bucket: 0 },
+    { text: 'The model writes a request to list the notes folder', bucket: 1 },
+    { text: 'The list_dir tool runs on the folder and returns three file names', bucket: 2 },
     { text: 'The model reads the three file names that came back', bucket: 0 },
-    { text: 'model: call read_file with path "notes/2026-03-14-lantern.txt"', bucket: 1 },
-    { text: 'loop: ran read_file, result: Project Lantern, 14 March. ...', bucket: 2 },
-    { text: 'model: done. The note of 14 March: the sensor boards moved from April to June.', bucket: 1 },
+    { text: 'The model picks the 14 March note as the one to read next', bucket: 1 },
+    { text: 'The read_file tool runs and returns the text of the note', bucket: 2 },
+    { text: 'The model reads the text of the note', bucket: 0 },
+    { text: 'The model writes the answer instead of another request', bucket: 1 },
   ]} />
 
 <Order id="order-one-turn" phase="review" objective="concepts/recognizes-agents/names-the-loop"
@@ -208,15 +210,16 @@ A team gives an agent a folder of forty customer reports and a task:
 read each one, write a one-line status into `summary.txt`, and finish
 with a count of the reports that need a follow-up call. The agent has a
 tool that writes to a file, and a step limit of 50, which the team took
-as generous. Reading and writing take two steps per report, so the loop
-reaches 50 after 25 reports and stops. `summary.txt` has 25 lines out of
-40, no total, and no note that anything is missing. The person who opens
+as generous. Listing the folder is one step, and each report takes two
+more, one read and one write, so step 50 is the read of report 25, and
+the loop stops before its write. `summary.txt` has 24 lines out of 40, no total,
+and no note that anything is missing. The person who opens
 it the next morning sees a finished-looking file with a number of lines
 that happens to be short, and nothing on the page says why. The step
 limit did its job of ending the run, and it can't do the other job of
 finishing the work. A run that hit a limit needs to be read as an
-interrupted run: check the last request, check what it half did, and
-decide whether to rerun from there or throw the partial result away.
+interrupted run. Look at the last request and at what it half did, and
+then decide whether to rerun from there or throw the partial result away.
 </Pitfall>
 
 <Exercise stretch="Write the transcript a fourth run would produce for the task 'Which note names Bram?', with the fewest steps a model that read the file names carefully could take, and mark the three turns of each step.">
