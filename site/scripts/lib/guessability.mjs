@@ -15,8 +15,10 @@
  *   `may`, `depends`, ...) and no wrong option has one.
  * - `echo`: a correct option shares a content word (four or more letters,
  *   not in `STOPWORDS`) with the stem and no wrong option does.
- * - `fixed-position`: within one lesson, three or more `choice`/`scenario`
- *   items and the correct option is at the same index in all of them.
+ * - `fixed-position`: within one lesson with `FIXED_POSITION_MIN_ITEMS` or
+ *   more `choice`/`scenario` items, one index holds the correct option in
+ *   more than `FIXED_POSITION_MAX_SHARE` of them (three quarters). Four
+ *   items with the same key index fail, and three of four pass.
  *
  * An item with `guessable="<cue>[, <cue>]: reason"` names the cues it is
  * exempt from, in the repo's noqa form (the rule and the reason together).
@@ -34,6 +36,11 @@ export const GUESSABLE_KINDS = new Set(['choice', 'scenario', 'multi-choice']);
 export const LONGEST_RATIO = 1.4;
 /** ... and by at least this many characters, so `Yes` against `No` is not a cue. */
 export const LONGEST_MIN_GAP = 12;
+
+/** `fixed-position` looks only at lessons with at least this many `choice`/`scenario` items ... */
+export const FIXED_POSITION_MIN_ITEMS = 4;
+/** ... and fails one when a single index holds the key in more than this share of them. */
+export const FIXED_POSITION_MAX_SHARE = 0.75;
 
 /** The cue names, in the order the messages use. */
 export const CUES = ['longest', 'hedge', 'echo', 'fixed-position'];
@@ -248,10 +255,13 @@ export function parseGuessable(text) {
 }
 
 /**
- * The lessons in which three or more `choice`/`scenario` items all have the
- * correct option at the same index, with that index and the item count.
- * `exempt(item)` says which items to leave out of the run; the count still
- * includes them.
+ * The lessons in which one index holds the correct option in more than
+ * `FIXED_POSITION_MAX_SHARE` of the `choice`/`scenario` items, among lessons
+ * with at least `FIXED_POSITION_MIN_ITEMS` such items. Each entry has that
+ * index, how many items (`hits`) have the key there, and the lesson's item
+ * count. `exempt(item)` says which items to leave out of the run: they count
+ * toward neither the minimum nor the share, and the `count` still includes
+ * them.
  *
  * @param {Array<Record<string, unknown>>} items
  * @param {(item: Record<string, unknown>) => boolean} [exempt]
@@ -270,7 +280,12 @@ export function fixedPositionLessons(items, exempt = () => false) {
 	}
 	const out = [];
 	for (const [lesson, { run, count }] of byLesson) {
-		if (run.length >= 3 && run.every((i) => i === run[0])) out.push({ lesson, index: run[0], count });
+		if (run.length < FIXED_POSITION_MIN_ITEMS) continue;
+		const hitsByIndex = new Map();
+		for (const i of run) hitsByIndex.set(i, (hitsByIndex.get(i) ?? 0) + 1);
+		for (const [index, hits] of hitsByIndex) {
+			if (hits > run.length * FIXED_POSITION_MAX_SHARE) out.push({ lesson, index, hits, count });
+		}
 	}
 	return out;
 }
@@ -314,9 +329,9 @@ export function checkGuessability(items) {
 			if (!named.includes(cue)) errors.push(`${where}: ${describe(cue)} (guessable does not name it)`);
 		exemptions.push(`${where}: guessable (${named.join(', ')}): ${reason}`);
 	}
-	for (const { lesson, index, count } of fixedPositionLessons(items, exemptFromPosition)) {
+	for (const { lesson, index, hits, count } of fixedPositionLessons(items, exemptFromPosition)) {
 		errors.push(
-			`${lesson}: fixed-position: the correct option is option ${index + 1} in every one of the ${count} choice/scenario checkpoints; move some`,
+			`${lesson}: fixed-position: the correct option is option ${index + 1} in ${hits} of the ${count} choice/scenario checkpoints (more than three quarters); move some`,
 		);
 	}
 	return { errors, exemptions };
@@ -331,7 +346,7 @@ function describe(cue) {
 		case 'echo':
 			return 'echo: only a correct option repeats a content word from the stem; reword it or let a distractor share the word';
 		case 'fixed-position':
-			return 'fixed-position: every choice/scenario key in this lesson is at the same index';
+			return 'fixed-position: one index holds the choice/scenario key in more than three quarters of this lesson';
 		default:
 			return cue;
 	}

@@ -168,33 +168,56 @@ describe('parseGuessable', () => {
 describe('fixedPositionLessons', () => {
 	const at = (lesson: string, id: string, index: number, over: Record<string, unknown> = {}) =>
 		item({ lesson, id, options: ['one', 'two', 'three'], answer: ['one', 'two', 'three'][index], ...over });
-	it('reports a lesson with three or more choice/scenario keys at one index', () => {
+	it('reports a lesson with four or more choice/scenario keys all at one index', () => {
 		expect(
-			fixedPositionLessons([at('a/x', 'p', 1), at('a/x', 'q', 1, { kind: 'scenario' }), at('a/x', 'r', 1)]),
-		).toEqual([{ lesson: 'a/x', index: 1, count: 3 }]);
+			fixedPositionLessons([
+				at('a/x', 'p', 1),
+				at('a/x', 'q', 1, { kind: 'scenario' }),
+				at('a/x', 'r', 1),
+				at('a/x', 's', 1),
+			]),
+		).toEqual([{ lesson: 'a/x', index: 1, hits: 4, count: 4 }]);
 	});
-	it('passes two items, a moved key, and multi-choice items', () => {
-		expect(fixedPositionLessons([at('a/x', 'p', 1), at('a/x', 'q', 1)])).toEqual([]);
-		expect(fixedPositionLessons([at('a/x', 'p', 1), at('a/x', 'q', 1), at('a/x', 'r', 0)])).toEqual([]);
+	it('reports one index in more than three quarters of five or more items', () => {
+		const five = ['p', 'q', 'r', 's', 't'].map((id) => at('a/x', id, 1));
+		expect(fixedPositionLessons([...five, at('a/x', 'u', 0)])).toEqual([
+			{ lesson: 'a/x', index: 1, hits: 5, count: 6 },
+		]);
+		expect(fixedPositionLessons([...five, at('a/x', 'u', 0), at('a/x', 'v', 2)])).toEqual([]);
+	});
+	it('passes three same-index items, three of four, exactly three quarters, and multi-choice items', () => {
+		expect(fixedPositionLessons([at('a/x', 'p', 1), at('a/x', 'q', 1), at('a/x', 'r', 1)])).toEqual([]);
+		expect(fixedPositionLessons([at('a/x', 'p', 1), at('a/x', 'q', 1), at('a/x', 'r', 1), at('a/x', 's', 0)])).toEqual(
+			[],
+		);
+		const six = ['p', 'q', 'r', 's', 't', 'u'].map((id) => at('a/x', id, 1));
+		expect(fixedPositionLessons([...six, at('a/x', 'v', 0), at('a/x', 'w', 2)])).toEqual([]);
 		expect(
 			fixedPositionLessons([
 				at('a/x', 'p', 1),
 				at('a/x', 'q', 1),
-				at('a/x', 'r', 1, { kind: 'multi-choice', answer: ['two'] }),
+				at('a/x', 'r', 1),
+				at('a/x', 's', 1, { kind: 'multi-choice', answer: ['two'] }),
 			]),
 		).toEqual([]);
 	});
 	it('leaves exempt items out of the run and keeps them in the count', () => {
-		const items = [at('a/x', 'p', 1), at('a/x', 'q', 1), at('a/x', 'r', 1), at('a/x', 's', 1, { guessable: 'x' })];
-		expect(fixedPositionLessons(items)).toEqual([{ lesson: 'a/x', index: 1, count: 4 }]);
-		expect(fixedPositionLessons(items, (i) => i.id === 's')).toEqual([{ lesson: 'a/x', index: 1, count: 4 }]);
-		expect(fixedPositionLessons(items, (i) => i.id === 's' || i.id === 'r')).toEqual([]);
+		const items = [
+			at('a/x', 'p', 1),
+			at('a/x', 'q', 1),
+			at('a/x', 'r', 1),
+			at('a/x', 's', 1),
+			at('a/x', 't', 1, { guessable: 'x' }),
+		];
+		expect(fixedPositionLessons(items)).toEqual([{ lesson: 'a/x', index: 1, hits: 5, count: 5 }]);
+		expect(fixedPositionLessons(items, (i) => i.id === 't')).toEqual([{ lesson: 'a/x', index: 1, hits: 4, count: 5 }]);
+		expect(fixedPositionLessons(items, (i) => i.id === 't' || i.id === 's')).toEqual([]);
 	});
 });
 
 describe('checkGuessability', () => {
-	const three = (over: (id: string) => Record<string, unknown> = () => ({})) =>
-		['p', 'q', 'r'].map((id) => item({ id, options: ['one', 'two', 'three'], answer: 'two', ...over(id) }));
+	const four = (over: (id: string) => Record<string, unknown> = () => ({})) =>
+		['p', 'q', 'r', 's'].map((id) => item({ id, options: ['one', 'two', 'three'], answer: 'two', ...over(id) }));
 	it('passes a clean list with no exemptions', () => {
 		expect(checkGuessability([item()])).toEqual({ errors: [], exemptions: [] });
 	});
@@ -207,8 +230,8 @@ describe('checkGuessability', () => {
 		]);
 	});
 	it('reports a fixed position per lesson with the full item count', () => {
-		expect(checkGuessability(three()).errors).toEqual([
-			'a/x: fixed-position: the correct option is option 2 in every one of the 3 choice/scenario checkpoints; move some',
+		expect(checkGuessability(four()).errors).toEqual([
+			'a/x: fixed-position: the correct option is option 2 in 4 of the 4 choice/scenario checkpoints (more than three quarters); move some',
 		]);
 	});
 	it('skips a named cue, lists the exemption, and rejects a malformed, stale or incomplete one', () => {
@@ -240,12 +263,12 @@ describe('checkGuessability', () => {
 		]);
 	});
 	it('drops the lesson error only for an exemption that names fixed-position, and keeps the full count', () => {
-		const named = three((id) => (id === 'r' ? { guessable: 'fixed-position: the three keys are the same step' } : {}));
+		const named = four((id) => (id === 'r' ? { guessable: 'fixed-position: the four keys are the same step' } : {}));
 		expect(checkGuessability(named)).toEqual({
 			errors: [],
-			exemptions: ['a/x#r: guessable (fixed-position): the three keys are the same step'],
+			exemptions: ['a/x#r: guessable (fixed-position): the four keys are the same step'],
 		});
-		const other = three((id) =>
+		const other = four((id) =>
 			id === 'r'
 				? {
 						options: ['No', 'Drafts in the outbox', 'Yes'],
@@ -256,14 +279,14 @@ describe('checkGuessability', () => {
 		);
 		expect(checkGuessability(other).errors).toEqual([
 			expect.stringMatching(/^a\/x#r: fixed-position: .*\(guessable does not name it\)$/),
-			'a/x: fixed-position: the correct option is option 2 in every one of the 3 choice/scenario checkpoints; move some',
+			'a/x: fixed-position: the correct option is option 2 in 4 of the 4 choice/scenario checkpoints (more than three quarters); move some',
 		]);
-		const four = [
-			...three(),
-			item({ id: 's', options: ['one', 'two', 'three'], answer: 'two', guessable: 'fixed-position: r' }),
+		const five = [
+			...four(),
+			item({ id: 't', options: ['one', 'two', 'three'], answer: 'two', guessable: 'fixed-position: r' }),
 		];
-		expect(checkGuessability(four).errors).toEqual([
-			'a/x: fixed-position: the correct option is option 2 in every one of the 4 choice/scenario checkpoints; move some',
+		expect(checkGuessability(five).errors).toEqual([
+			'a/x: fixed-position: the correct option is option 2 in 4 of the 5 choice/scenario checkpoints (more than three quarters); move some',
 		]);
 	});
 });
