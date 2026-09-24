@@ -16,7 +16,11 @@ export const LINK = /\[([^\]]+)\]\(([^)\s]+)\)/g;
 
 /** A `(@key)` citation token, as `renderProse` drops it and `lib/citations.ts` splits on it. */
 const CITATION = /\(@[A-Za-z0-9-]+\)/;
-/** `_x_` or `__x__` at a word edge, so `snake_case`, a URL path segment and a lone `_` stay out. */
+/**
+ * `_x_` or `__x__` at a word edge, so `snake_case`, a URL path segment and a lone `_` stay out.
+ * A name such as `__init__.py` or a path such as `/x/_y_/` is flagged outside a code span, on purpose:
+ * CommonMark renders both as strong or emphasis there, so write them in a code span.
+ */
 const UNDERSCORE_EMPHASIS = /(?:^|[^\w])(_{1,2})\S(?:[^_]*?\S)?\1(?!\w)/;
 /** A link whose target is followed by a title, `[t](/x/ "title")`. */
 const LINK_WITH_TITLE = /\[[^\]]+\]\([^)\s]+\s+[^)]+\)/;

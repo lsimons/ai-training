@@ -273,3 +273,11 @@ def test_main_stops_before_writing_when_not_synced(
     with pytest.raises(SystemExit):
         prose_eval.main(["prose_eval.py", "ai-tells", str(out_dir)])
     assert not out_dir.exists()
+
+
+def test_styles_path_is_resolved_from_the_repository_root(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    assert prose_eval.STYLES.is_absolute()
+    assert prose_eval.STYLES == REPO_ROOT / ".vale" / "styles"
