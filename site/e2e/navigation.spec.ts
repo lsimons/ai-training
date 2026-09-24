@@ -50,7 +50,8 @@ test('the last lesson of a course links to the next course, and the footer carri
 function lessonWithReviewBy(): string {
 	for (const id of liveLessons()) {
 		const [area, lesson] = id.split('/');
-		const plan = readFileSync(join(SITE, 'src/data/areas', area ?? '', 'lessons', `${lesson}.yaml`), 'utf8');
+		if (!area || !lesson) throw new Error(`lesson id without an area: ${id}`);
+		const plan = readFileSync(join(SITE, 'src/data/areas', area, 'lessons', `${lesson}.yaml`), 'utf8');
 		if (/^review-by:/m.test(plan)) return id;
 	}
 	throw new Error('no live lesson sets review-by');

@@ -17,7 +17,7 @@ const text = reviewLine(reviewBy, sourcesChecked);
 
 {
 	text && reviewBy && (
-		<p class="lesson-review not-content" data-review-by={isoDate(reviewBy)}>
+		<p class="lesson-review" data-review-by={isoDate(reviewBy)}>
 			{text}
 		</p>
 	)
