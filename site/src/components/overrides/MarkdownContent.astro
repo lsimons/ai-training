@@ -270,7 +270,9 @@ if (isLesson) {
 			const reviewable = checkpoints
 				.filter((el) => el.dataset.reviewable === 'true')
 				.map((el) => ({ id: el.dataset.progressId!, revision: Number(el.dataset.revision ?? progress.DEFAULT_REVISION) }));
-			progress.finishLesson(lessonId, reviewable);
+			// The page's habits, `<lesson id>#<habit id>` as the Habit component emits them (spec S07).
+			const habitIds = [...root.querySelectorAll<HTMLElement>('[data-habit]')].map((el) => el.dataset.progressId!);
+			progress.finishLesson(lessonId, reviewable, habitIds);
 			drawLesson();
 		});
 		for (const skip of skips) {
