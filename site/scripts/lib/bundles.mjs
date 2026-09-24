@@ -101,7 +101,8 @@ export function bundleIds(bundlesDir) {
  * is Astro's `site` in `astro.config.mjs`, and importing that config from a
  * `bun` script loads Starlight and every integration. `lessonUrl` in
  * `src/lib/lesson-bundles.ts` builds the URL from `site` and its unit test
- * pins the origin, so this check covers the path only.
+ * pins how `site` and the base compose into it, so this check covers the
+ * path only.
  */
 export function isLessonUrl(url, id) {
 	try {
