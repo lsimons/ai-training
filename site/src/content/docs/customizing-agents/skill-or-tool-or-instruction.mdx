@@ -22,30 +22,32 @@ software a different set of tools to run.
 
 An **instruction** is standing text, loaded at the start of every session
 and present on every turn. `AGENTS.md` from the last lesson is one. It
-suits a rule that always applies: the test command, the branch rule, the
-commit format. The agent doesn't decide whether to read it. It is there
+suits a rule that always applies, the test command being the usual
+example. The agent doesn't decide whether to read it. It is there
 whether the task needs it or not (@Academy claude-code-101).
 
 A **skill** is a procedure with a trigger. It is a directory with a
 short description of when it applies, and the agent sees only that
-description until a task matches it. Then it loads the full instructions,
-follows them, and the text leaves the context when the session moves on.
-A skill suits work the agent could do on its own but does inconsistently:
-a release checklist, a review routine, a migration recipe
+description until a task matches it. Then it loads the full instructions
+and follows them. In Claude Code the loaded text stays in the
+conversation for the rest of the session, and compaction is what trims
+it (@Claude Code skills). A skill suits work the agent could do on its
+own but does inconsistently. A release checklist is the usual example
 (@Academy introduction-to-agent-skills).
 
 A **tool** is a function the software runs when the model asks. It adds an
 ability the model doesn't have. A database query and a call to an
-internal service are two examples. The agent sees the tool's name and
-description on every turn, and the function itself runs outside the
-model. A tool suits a need the agent can't meet with text alone.
+internal service are two examples. The agent sees at least the tool's
+name on every turn, and its full description and schema either on every
+turn or when it looks the tool up, depending on the client
+(@Claude Code mcp). The function itself runs outside the model. A tool suits a need the agent can't meet with text alone.
 
 The same fact, laid out:
 
 | | Instruction | Skill | Tool |
 | --- | --- | --- | --- |
 | What it is | Standing text | A procedure with a trigger | A function the software runs |
-| Loaded | On every turn of every session | When a task matches its description | Name and description every turn, body never |
+| Loaded | On every turn of every session | When a task matches its description | Name every turn, and the definition up front or when looked up |
 | Fixes | The agent doesn't know a rule | The agent knows how but does it differently each time | The agent can't do it at all |
 | Example | "Test with `uv run pytest`" | "Prepare a release: bump, changelog, tag" | `billing_plan(account_id)` |
 
@@ -72,9 +74,8 @@ every task, in every session. Which mechanism fits?
 ## The question to ask first
 
 Before choosing among the three, ask whether the agent can already do the
-task with what it has. A coding agent ships with a shell, a file reader
-and an editor, and the model behind it has read a great deal of
-documentation. Much of what a team reaches for a skill or a tool to do is
+task with what it has. A coding agent ships with a shell and an editor,
+and the model behind it has read a great deal of documentation. Much of what a team reaches for a skill or a tool to do is
 already within reach.
 
 Take a concrete case. The team wants the agent to check a pull request's
@@ -92,14 +93,14 @@ failure.
 ```
 
 Now ask the question. The agent has a shell. The `gh` command is on the
-machine. The model knows `gh pr checks` and `gh run view` as well as any
-of us, because their documentation is public and common. Asked to "check
+machine. The model knows `gh pr checks` and `gh run view` already, because
+their documentation is public and common. Asked to "check
 whether CI passed", the agent runs those commands without help. The skill
 adds a name to the skill list on every turn and teaches nothing the
 agent didn't know.
 
-What the team wanted wasn't the procedure. It was for the agent to check
-CI *before* claiming to be done, every time. That is one line in
+What the team wanted was for the agent to check CI *before* claiming to
+be done, every time. That is one line in
 `AGENTS.md`: "Before you say a task is done, run `gh pr checks` and
 report the result." The rule always applies, so it belongs in standing
 text.
@@ -115,12 +116,13 @@ what the model already knows is context spent for nothing.
   title="Can the agent already do it?" hint="Which parts of this does the model already know, and which parts are the team's own?"
   options={[
     { text: 'Write a tool that returns the list of failing tests.', consequence: 'The tool duplicates what the shell and the test runner already give the agent. It adds a tool description to every turn and nothing the agent could not do.', },
-    { text: 'Write a skill with the three test commands and the order in which to run them.', consequence: 'The agent runs the commands, but it already knew how. The three-command sequence is the one part the agent could not guess, and it applies to every test run, not to a kind of task.', },
+    { text: 'Write a skill with the three test commands and the order in which to run them.', consequence: 'The skill loads only on tasks the agent decides are about testing. The team wants the order kept on every task that touches code, and on most of those the agent runs the tests without deciding that a testing skill applies.', },
     { text: 'Add the three commands and their order to the project instructions, and write nothing else.', correct: true, consequence: 'The agent runs the right commands in the right order on every task. The only thing it lacked was the team\'s order, and that is a rule that always applies.', },
   ]}>
 The team's tests run in three stages, each with its own command, and the
-second stage is only valid after the first passed. The agent keeps
-running the stages out of order. What do you do?
+second stage is only valid after the first passed. The team wants the
+order kept on every task that touches code, and the agent keeps running
+the stages out of order. What do you do?
 </Scenario>
 
 ## What each one costs
@@ -130,10 +132,14 @@ turn and in what they let it do. Put them on two axes.
 
 **Context.** An instruction file is read in full on every turn of every
 session, whether or not the task needs it. A skill puts one line, its
-description, in the context on every turn, and the full body only while
-it is in use. A tool puts its name, description and parameter schema in
-the context on every turn, and a server that exposes thirty tools puts
-thirty of them there (@AEC-17). The last lesson's warning about long
+description, in the context on every turn, and the full body from the
+turn it is invoked on. In an agent that loads every tool up front, a
+tool puts its name, description and parameter schema in the context on
+every turn, and a server that exposes thirty tools puts thirty of them
+there (@AEC-17). Claude Code defers MCP tool definitions by default and
+loads only the tool names and the server's instructions at the start of
+a session, so the cost per tool is smaller there, and it is still a cost
+on every turn (@Claude Code mcp). The last lesson's warning about long
 instruction files is the same warning as the one about connecting too
 many tool servers. Both spend the same budget.
 
@@ -148,10 +154,10 @@ and a tool server that wraps a system. Take an internal service with a
 command-line client the team already uses. The agent has a shell, so it
 can run the client as it is, and often that is enough. When the client's
 flags are unusual, or the team's use of it has a fixed order of steps,
-a skill that wraps the client fills the gap. It loads only when the task
-calls for the service, it costs one description line the rest of the
-time, and it adds no new ability, because the shell and the client were
-already there. Anthropic's own guidance points at this middle way: reach
+a skill that wraps the client fills the gap. It loads only when a task
+calls for the service, it costs one description line until then, and it
+adds no new ability, because the shell and the client were already
+there. Anthropic's own guidance points at this middle way: reach
 for a skill around a command before you write or connect a tool server
 for it (@Academy claude-code-101). A tool server is right when there is
 no client to wrap, when the ability is new to the agent, or when you
@@ -165,7 +171,7 @@ command doesn't.
   items={[
     { text: 'Use the repository\'s task runner for every command, never the underlying tool', bucket: 0 },
     { text: 'Draft a customer-facing incident report in the team\'s five-section format', bucket: 1 },
-    { text: 'Look up which feature flags are on for a given customer in the internal flag service', bucket: 2 },
+    { text: 'Look up which feature flags are on for a customer in an internal service that has no command-line client', bucket: 2 },
     { text: 'Rename a function across a codebase', bucket: 3 },
     { text: 'Never edit files under the generated directory', bucket: 0 },
     { text: 'Onboard a new service into the monitoring stack, in the order the platform team requires', bucket: 1 },
@@ -177,11 +183,11 @@ command doesn't.
   title="Sort these needs" hint="Does the need apply to every task, to a kind of task, or does it need an ability the agent doesn't have?"
   buckets={['Instruction', 'Skill', 'Tool', 'Already possible']}
   items={[
-    { text: 'Use the wording from the team\'s glossary in every user-facing string', bucket: 0 },
+    { text: 'Use the team\'s six product names, as spelled in the project file, in every user-facing string', bucket: 0 },
     { text: 'Rotate a service credential, following the security team\'s eight steps', bucket: 1 },
-    { text: 'Read the current on-call schedule from the paging system', bucket: 2 },
+    { text: 'Read the on-call schedule from a paging system that has no command-line client', bucket: 2 },
     { text: 'Write a unit test for a function', bucket: 3 },
-    { text: 'Post a summary of a merged change to the team chat channel', bucket: 2 },
+    { text: 'Post a summary of a merged change to a chat service that has no command-line client', bucket: 2 },
     { text: 'Run the linter before proposing a change', bucket: 0 },
   ]} />
 
