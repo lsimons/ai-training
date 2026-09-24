@@ -1,0 +1,198 @@
+---
+/**
+ * The sidebar list, in place of Starlight's `SidebarSublist` (issue #228).
+ * Starlight's copy renders a group as a `<details>` with a label. This one
+ * adds a second kind of group: when the first entry is a link with the
+ * `group-link` class (`lib/sidebar-groups.ts`), that link is the group's
+ * heading, so a course page or the topic map is the parent of its children
+ * and clicking the heading opens the page. The caret still toggles the group.
+ * Groups under a linked group are parts (spec S01) and get a plain label
+ * instead of the bold one. The rest of the markup and the styles are
+ * Starlight's, kept so the persisted open state and the restore points keep
+ * working. `overrides/Sidebar.astro` renders this in place of the default.
+ */
+import { Badge, Icon } from '@astrojs/starlight/components';
+import SidebarRestorePoint from '@astrojs/starlight/components/SidebarRestorePoint.astro';
+import { attrsWithoutClass, linkedGroup, type SidebarEntry, startsOpen } from '@lib/sidebar-groups';
+
+interface Props {
+	sublist: SidebarEntry[];
+	nested?: boolean;
+	/** Inside a linked group: a nested group is a part, with a plain label. */
+	part?: boolean;
+}
+
+const { sublist, nested, part } = Astro.props;
+---
+
+<ul class:list={{ 'top-level': !nested }}>
+	{
+		sublist.map((entry) => {
+			if (entry.type === 'link') {
+				return (
+					<li>
+						<a
+							href={entry.href}
+							aria-current={entry.isCurrent ? 'page' : undefined}
+							class:list={[{ large: !nested }, entry.attrs.class]}
+							{...attrsWithoutClass(entry)}
+						>
+							<span>{entry.label}</span>
+							{entry.badge && <Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />}
+						</a>
+					</li>
+				);
+			}
+			const linked = linkedGroup(entry);
+			return (
+				<li>
+					<details open={startsOpen(entry)}>
+						{linked ? (
+							<summary class="linked" data-group-link>
+								<a
+									href={linked.link.href}
+									aria-current={linked.link.isCurrent ? 'page' : undefined}
+									class:list={['large', linked.link.attrs.class]}
+									{...attrsWithoutClass(linked.link)}
+								>
+									<span>{linked.link.label}</span>
+									{linked.link.badge && (
+										<Badge variant={linked.link.badge.variant} class={linked.link.badge.class} text={linked.link.badge.text} />
+									)}
+								</a>
+								<Icon name="right-caret" class="caret" size="1.25rem" />
+							</summary>
+						) : (
+							<summary>
+								<span class="group-label">
+									<span class:list={part ? 'part-label' : 'large'}>{entry.label}</span>
+									{entry.badge && <Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />}
+								</span>
+								<Icon name="right-caret" class="caret" size="1.25rem" />
+							</summary>
+						)}
+						<SidebarRestorePoint />
+						<Astro.self sublist={linked ? linked.entries : entry.entries} nested part={part || Boolean(linked)} />
+					</details>
+				</li>
+			);
+		})
+	}
+</ul>
+
+<style>
+	/* Starlight's SidebarSublist styles, plus the linked heading and part label at the end. */
+	@layer starlight.core {
+		ul {
+			--sl-sidebar-item-padding-inline: 0.5rem;
+			list-style: none;
+			padding: 0;
+		}
+
+		li {
+			overflow-wrap: anywhere;
+		}
+
+		ul ul li {
+			margin-inline-start: var(--sl-sidebar-item-padding-inline);
+			border-inline-start: 1px solid var(--sl-color-hairline-light);
+			padding-inline-start: var(--sl-sidebar-item-padding-inline);
+		}
+
+		.large {
+			font-size: var(--sl-text-lg);
+			font-weight: 600;
+			color: var(--sl-color-white);
+		}
+
+		.top-level > li + li {
+			margin-top: 0.75rem;
+		}
+
+		summary {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0.2em var(--sl-sidebar-item-padding-inline);
+			line-height: 1.4;
+			cursor: pointer;
+			user-select: none;
+		}
+		summary::marker,
+		summary::-webkit-details-marker {
+			display: none;
+		}
+
+		.caret {
+			transition: transform 0.2s ease-in-out;
+			flex-shrink: 0;
+		}
+		:global([dir='rtl']) .caret {
+			transform: rotateZ(180deg);
+		}
+		[open] > summary .caret {
+			transform: rotateZ(90deg);
+		}
+
+		a {
+			display: block;
+			border-radius: 0.25rem;
+			text-decoration: none;
+			color: var(--sl-color-gray-2);
+			padding: 0.3em var(--sl-sidebar-item-padding-inline);
+			line-height: 1.4;
+		}
+
+		a:hover,
+		a:focus {
+			color: var(--sl-color-white);
+		}
+
+		[aria-current='page'],
+		[aria-current='page']:hover,
+		[aria-current='page']:focus {
+			font-weight: 600;
+			color: var(--sl-color-text-invert);
+			background-color: var(--sl-color-text-accent);
+		}
+
+		a > *:not(:last-child),
+		.group-label > *:not(:last-child) {
+			margin-inline-end: 0.25em;
+		}
+
+		/* A linked heading: the link fills the row and the caret sits at the end,
+		   so the link's own padding replaces the summary's. The link keeps the
+		   browser focus ring; the summary is a second tab stop that toggles. */
+		summary.linked {
+			padding: 0;
+			gap: 0.25rem;
+		}
+		summary.linked > a {
+			flex: 1 1 auto;
+			user-select: text;
+		}
+		summary.linked > .caret {
+			margin-inline-end: var(--sl-sidebar-item-padding-inline);
+		}
+
+		/* A part label reads as a child of its course: same size and weight as a lesson link. */
+		.part-label {
+			font-size: var(--sl-text-sm);
+			color: var(--sl-color-gray-2);
+		}
+
+		@media (min-width: 50rem) {
+			.top-level > li + li {
+				margin-top: 0.5rem;
+			}
+			.large {
+				font-size: var(--sl-text-base);
+			}
+			a,
+			.part-label {
+				font-size: var(--sl-text-sm);
+			}
+		}
+	}
+</style>

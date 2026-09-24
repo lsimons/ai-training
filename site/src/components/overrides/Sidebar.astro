@@ -1,20 +1,32 @@
 ---
 /**
- * Starlight `Sidebar` override. Renders the default sidebar, then a client
- * script adds a due review count next to each course link (spec S05 "Where
- * reviews surface"). The sidebar is static at build time, so the count is
+ * Starlight `Sidebar` override. Renders Starlight's sidebar with our
+ * `SidebarSublist` in place of the default one, so a course page and the topic
+ * map are the headings of their groups (issue #228, `lib/sidebar-groups.ts`).
+ * Then a client script adds a due review count next to each course link (spec
+ * S05 "Where reviews surface"). The sidebar is static at build time, so the count is
  * drawn from the progress record on the client and redrawn on the progress
  * event. A course with nothing due has no count element. The style is in
  * `styles/custom.css` with the other sidebar rules.
  */
-import Default from '@astrojs/starlight/components/Sidebar.astro';
+import MobileMenuFooter from '@astrojs/starlight/components/MobileMenuFooter.astro';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
 import { getAreas } from '@lib/areas';
+import SidebarSublist from './SidebarSublist.astro';
+
+const { sidebar } = Astro.locals.starlightRoute;
 
 // The course list comes from the data tree on the server; the client script reads it from the attribute.
 const courses = (await getAreas()).map((a) => ({ area: a.slug, title: a.name }));
 ---
 
-<Default {...Astro.props}><slot /></Default>
+<SidebarPersister>
+	<SidebarSublist sublist={sidebar} />
+</SidebarPersister>
+
+<div class="md:sl-hidden">
+	<MobileMenuFooter />
+</div>
 <script is:inline type="application/json" data-sidebar-courses set:html={JSON.stringify(courses)} />
 
 <script>

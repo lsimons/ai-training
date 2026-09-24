@@ -69,3 +69,15 @@ test('the reference page shows the empty state without progress, and the sidebar
 	await expect(page.locator('[data-reference-empty]')).toBeVisible();
 	await expect(page.locator('[data-reference-area]')).toHaveCount(0);
 });
+
+test('the topic map is the heading of the topic groups, and clicking it opens the map (#228)', async ({ page }) => {
+	await page.goto('progress/');
+	const heading = page.locator('nav.sidebar summary[data-group-link] a[href="/ai-training/map/"]');
+	await expect(heading).toHaveCount(1);
+	// The heading's group holds the per-area topic groups; the course groups are built the same way.
+	const group = heading.locator('xpath=ancestor::details[1]');
+	await expect(group.locator('summary .part-label').first()).toHaveText('Concepts');
+	await expect(page.locator('nav.sidebar summary[data-group-link] a[href="/ai-training/concepts/"]')).toHaveCount(1);
+	await heading.click();
+	await expect(page).toHaveURL(/\/ai-training\/map\/$/);
+});
