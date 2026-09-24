@@ -33,8 +33,10 @@ Hits = dict[str, list[Alert]]
 # The eval config and the directory its packages unpack into. `mise run
 # prose-sync` reads .vale.ini only, so the eval packages have their own
 # sync task, `prose-eval-sync` (`vale sync --config .vale-eval.ini`).
+# STYLES is resolved from this file, so the check finds the synced packages
+# from any working directory (#300).
 EVAL_INI = pathlib.Path(".vale-eval.ini")
-STYLES = pathlib.Path(".vale/styles")
+STYLES = pathlib.Path(__file__).resolve().parent.parent / ".vale" / "styles"
 EVAL_SYNC = "mise run prose-eval-sync"
 MAIN_SYNC = "mise run prose-sync"
 CHECK_FLAG = "--check-packages"

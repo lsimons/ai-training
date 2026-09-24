@@ -11,7 +11,9 @@ const SITE = fileURLToPath(new URL('..', import.meta.url));
  * The first live lesson, in area and course order, whose page has a graded
  * checkpoint and an ungraded example (a `<Predict>` without an `objective`),
  * so its menu shows both groups. Read from the data tree and the MDX source
- * (issue #242), so a new lesson changes nothing here.
+ * (issue #242), so a new lesson changes nothing here. The first match is
+ * enough: every lesson page uses the same layout and menu script, whatever
+ * its area, so the tests below don't depend on which lesson comes first.
  */
 function lessonWithCheckpointsAndExamples(): string {
 	for (const id of liveLessons()) {
