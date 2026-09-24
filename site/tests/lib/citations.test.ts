@@ -1,4 +1,4 @@
-import { competencyHeadings, createCitations, renderObjectives } from '@lib/citations';
+import { competencyHeadings, createCitations, referenceHtml, renderObjectives } from '@lib/citations';
 import { describe, expect, it } from 'vitest';
 
 const bibliography = {
@@ -35,6 +35,31 @@ describe('createCitations', () => {
 			'Run <code>mise run ci</code> &amp; <code>(@AEC-02)</code> now.',
 		);
 		expect(c.references()).toEqual([]);
+	});
+});
+
+describe('createCitations with renderInline', () => {
+	it('renders strong, emphasis and links in the text around a citation, as renderInline does', () => {
+		const c = createCitations(bibliography, 'test');
+		expect(c.render('**Bold** and *em* (@AEC-02), see [the map](/map/).')).toBe(
+			'<strong>Bold</strong> and <em>em</em> <a class="citation" data-key="AEC-02" href="#ref-1" title="AEC-02">[1]</a>, see <a href="/ai-training/map/">the map</a>.',
+		);
+	});
+});
+
+describe('referenceHtml', () => {
+	it('renders author, linked title, container, type and key, and skips what the entry lacks', () => {
+		expect(referenceHtml('AEC-02', bibliography['AEC-02'])).toBe(
+			'A. Osmani. <a href="https://example.com/aec"><em>How agents think</em></a>. Course. <code>AEC-02</code>',
+		);
+		expect(referenceHtml('Brilliant TAS', bibliography['Brilliant TAS'])).toBe(
+			'<em>Taste</em>. Brilliant. Reference. <code>Brilliant TAS</code>',
+		);
+	});
+	it('escapes the entry text and skips a container equal to the title', () => {
+		expect(referenceHtml('k', { type: 'web', title: 'A & B', container: 'A & B', author: 'C <D>', url: null })).toBe(
+			'C &lt;D&gt;. <em>A &amp; B</em>. Web. <code>k</code>',
+		);
 	});
 });
 

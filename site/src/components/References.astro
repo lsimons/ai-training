@@ -2,16 +2,16 @@
 /**
  * The References list of a page whose text the data tree holds, with the
  * markup remark-citations.mjs emits for a lesson page (`ol.references`,
- * `li#ref-N`, the same entry format). Renders nothing when nothing cited.
+ * `li#ref-N`) and the entry format both get from `referenceParts` in
+ * plugins/citation-syntax.mjs. Renders nothing when nothing cited.
  */
-import type { Reference } from '@lib/citations';
+import { type Reference, referenceHtml } from '@lib/citations';
 
 interface Props {
 	references: Reference[];
 }
 
 const { references } = Astro.props;
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 ---
 
 {
@@ -19,15 +19,7 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 		<>
 			<h2 id="references">References</h2>
 			<ol class="references">
-				{references.map(({ n, key, entry }) => (
-					<li id={`ref-${n}`}>
-						{entry.author && `${entry.author}. `}
-						{entry.url ? <a href={entry.url}><em>{entry.title}</em></a> : <em>{entry.title}</em>}.
-						{entry.container && entry.container !== entry.title && ` ${entry.container}.`}
-						{` ${capitalize(entry.type)}. `}
-						<code>{key}</code>
-					</li>
-				))}
+				{references.map(({ n, key, entry }) => <li id={`ref-${n}`} set:html={referenceHtml(key, entry)} />)}
 			</ol>
 		</>
 	)
