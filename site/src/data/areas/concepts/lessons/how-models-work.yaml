@@ -27,6 +27,7 @@ exercise:
 sources:
   - Academy ai-capabilities-and-limitations
   - AEC-02
+  - Liu 2024
 minutes: 20
 notes: >-
   Names context-window, non-determinism and sycophancy in passing; the lessons below teach them.

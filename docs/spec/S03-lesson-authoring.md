@@ -177,6 +177,13 @@ pitfall and the exercise.
   of a topic is on the topic page. Concept definitions, recaps, and
   behaviors cite papers and vendor documentation this way, never as bare
   inline URLs.
+- **A paper is a source of type `paper`.** Its key is the first author's
+  surname and the year (`Liu 2024`), its `author` names the authors (the
+  first three and "and N others" past that), its `container` is the venue
+  with volume, year and pages, and its `url` is the publisher's or the ACL
+  Anthology page, with the arXiv page only when no published version
+  exists. The reference list renders these fields as it does for any other
+  source, so the entry shows authors, venue, year and a stable link.
 - **The first mention of a concept is a term.** A remark plugin marks it in
   Markdown rather than a component, so plain Markdown stays plain. The term
   renders the concept's glossary definition on hover and links to its
