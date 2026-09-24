@@ -10,9 +10,10 @@ import { type CheckpointKind, type CheckpointTag, CONCEPTS_FORM, KIND_OF_TAG } f
  * so a tag reads the same here as on the rendered page. The remark plugin
  * (`plugins/remark-checkpoints.mjs`) runs `checkpointTagsIn` during the page
  * build, `lib/lessons.ts` runs it over a collection entry's body for the
- * review page and the export, and the command-line gates
- * (`scripts/lib/checkpoints.mjs`, `live-lessons.mjs`) run it over the page
- * files. No Astro import, so every caller can load it.
+ * review page and the export, `lib/lesson-bundles.ts` renders every
+ * component of a lesson from the same tree, and the command-line gates
+ * (`scripts/lib/checkpoints.mjs`, `live-lessons.mjs`, `examples.mjs`) run it
+ * over the page files. No Astro import, so every caller can load it.
  */
 
 /** One prop of a checkpoint tag: `name="text"` (`expr` false), `name={...}` (`expr` true) or bare `name` (value `true`). */

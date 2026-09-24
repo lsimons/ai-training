@@ -210,9 +210,23 @@ describe('proseOf', () => {
 			].join('\n'),
 		);
 	});
-	it('keeps the children of an unknown component and rejects an unclosed one', () => {
+	it('keeps the children of an unknown component and rejects an unclosed one, naming the lesson', () => {
 		expect(proseOf('<Aside>\nKept.\n</Aside>\n', site)).toBe('Kept.\n');
-		expect(() => proseOf('<Pitfall title="x">\nno end\n', site)).toThrow(/unclosed <Pitfall>/);
+		expect(() => proseOf('<Pitfall title="x">\nno end\n', site, 'a/b')).toThrow(
+			/^a\/b: Expected a closing tag for `<Pitfall>`/,
+		);
+	});
+	it('reads the tags from the MDX tree: raw HTML stays, a component inside it renders, and a prop must be a literal', () => {
+		expect(proseOf('<div class="x">\n<Pitfall title="In">\nText.\n</Pitfall>\n</div>\n', site)).toBe(
+			'<div class="x">\n\n#### Pitfall: In\n\nText.\n\n</div>\n',
+		);
+		expect(proseOf('<Pitfall title={`Tick`}>\nT.\n</Pitfall>\n', site)).toBe('#### Pitfall: Tick\n\nT.\n');
+		expect(() => proseOf('<Pitfall title={1}>\nT.\n</Pitfall>\n', site, 'a/b')).toThrow(
+			/^a\/b <Pitfall>: title must be a string, got number/,
+		);
+		expect(() => proseOf('<Sampler seed={seed} />\n', site, 'a/b')).toThrow(
+			/^a\/b: cannot read seed=\{\.\.\.\} of <Sampler>: Identifier is not a literal/,
+		);
 	});
 });
 

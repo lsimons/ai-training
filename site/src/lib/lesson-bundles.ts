@@ -2,7 +2,15 @@ import { getCollection } from 'astro:content';
 import { BUNDLE_VERSION } from './bundle-version';
 import { buildCheckpointExport, type CheckpointItem } from './checkpoint-items';
 import { KIND_OF_TAG } from './checkpoint-rules';
-import { openingTagEnd, parseAttrs } from './jsx-source';
+import {
+	attrsOf,
+	type CheckpointAttr,
+	isJsxElement,
+	type JsxElement,
+	type MdxNode,
+	parseMdx,
+	stringProp,
+} from './checkpoint-tags';
 import { getLessons, type Lesson } from './lessons';
 import { absoluteUrl } from './url';
 
@@ -149,10 +157,16 @@ export function setAsideCode(src: string): CodeAside {
 /**
  * One component, as plain Markdown. `children` is already rendered, with code set aside. A `Prompt` or
  * `Response` body is restored and fenced here, and the fenced block is set aside again, so the link pass
- * that follows leaves a code span inside it alone.
+ * that follows leaves a code span inside it alone. `where` names the component in error messages.
  */
-function renderTag(name: string, attrs: Map<string, { value: string }>, children: string, aside: CodeAside): string {
-	const str = (n: string) => attrs.get(n)?.value;
+function renderTag(
+	where: string,
+	name: string,
+	attrs: Map<string, CheckpointAttr>,
+	children: string,
+	aside: CodeAside,
+): string {
+	const str = (n: string) => stringProp(where, attrs, n);
 	const body = children.trim();
 	const withHeading = (heading: string) => (body ? `${heading}\n\n${body}` : heading);
 	if (CHECKPOINT_TAGS.has(name)) {
@@ -188,40 +202,71 @@ function renderTag(name: string, attrs: Map<string, { value: string }>, children
 	}
 }
 
+/** A component is a JSX element with a capitalized name. A lowercase element is raw HTML (`<a href>`) and stays as written. */
+const isComponent = (node: MdxNode): node is JsxElement => isJsxElement(node) && /^[A-Z]/.test(node.name ?? '');
+
+/** The outermost components under `node`, in source order. The search goes through Markdown and raw HTML nodes and stops at a component, whose own children `renderComponents` handles. */
+function componentsUnder(node: MdxNode): JsxElement[] {
+	const out: JsxElement[] = [];
+	for (const child of node.children ?? []) {
+		if (isComponent(child)) out.push(child);
+		else out.push(...componentsUnder(child));
+	}
+	return out;
+}
+
+/** The source offsets a node spans. The parser sets them on every node, so a missing one is a bug. */
+function spanOf(node: MdxNode, where: string): { start: number; end: number } {
+	const start = node.position?.start.offset;
+	const end = node.position?.end.offset;
+	if (start === undefined || end === undefined) throw new Error(`${where}: a node without a source position`);
+	return { start, end };
+}
+
 /**
- * The component tags in `src`, rendered to Markdown (`renderTag`), children
- * first. A tag is `<Name ...>` with a capitalized name, self-closing or
- * closed by the first `</Name>` after it; components of one kind don't nest.
- * `src` has its code set aside, so a tag inside code is not seen.
+ * The text of `src` between `from` and `to`, with each component in `components`
+ * (the outermost ones in that range, in order) rendered to Markdown (`renderTag`),
+ * children first. `src` is the lesson with its code set aside, parsed by the MDX
+ * parser (`lib/checkpoint-tags.ts`), so a tag reads here as it does on the page
+ * and a tag inside code is not seen.
  */
-function renderComponents(src: string, aside: CodeAside): string {
+function renderComponents(
+	src: string,
+	from: number,
+	to: number,
+	components: JsxElement[],
+	aside: CodeAside,
+	where: string,
+): string {
 	let out = '';
-	let pos = 0;
-	const tagStart = /<([A-Z][A-Za-z]*)\b/g;
-	for (;;) {
-		tagStart.lastIndex = pos;
-		const m = tagStart.exec(src);
-		if (!m) break;
-		const name = m[1] as string;
-		const start = m.index;
-		const openEnd = openingTagEnd(src, start);
-		const opening = src.slice(start, openEnd);
-		const attrs = parseAttrs(opening);
+	let pos = from;
+	for (const node of components) {
+		const name = node.name as string;
+		const { start, end } = spanOf(node, where);
+		const tagWhere = `${where} <${name}>`;
+		const attrs = attrsOf(node, where);
 		let children = '';
-		let end = openEnd;
-		if (!opening.endsWith('/>')) {
-			const close = `</${name}>`;
-			const closeAt = src.indexOf(close, openEnd);
-			if (closeAt === -1) throw new Error(`unclosed <${name}> at offset ${start}`);
-			children = renderComponents(src.slice(openEnd, closeAt), aside);
-			end = closeAt + close.length;
+		const first = node.children[0];
+		const last = node.children.at(-1);
+		if (first && last) {
+			const range = { from: spanOf(first, tagWhere).start, to: spanOf(last, tagWhere).end };
+			children = renderComponents(src, range.from, range.to, componentsUnder(node), aside, where);
 		}
 		// A component is a block of its own, so blank lines set it off from its neighbors.
-		const rendered = renderTag(name, attrs, children, aside);
+		const rendered = renderTag(tagWhere, name, attrs, children, aside);
 		out += src.slice(pos, start) + (rendered ? `\n\n${rendered}\n\n` : '');
 		pos = end;
 	}
-	return out + src.slice(pos);
+	return out + src.slice(pos, to);
+}
+
+/** The MDX tree of the lesson with its code set aside. A parse error names `where`. */
+function parseAside(text: string, where: string): MdxNode {
+	try {
+		return parseMdx(text);
+	} catch (e) {
+		throw new Error(`${where}: ${(e as Error).message}`);
+	}
 }
 
 /** Every root-relative link and image in Markdown and raw HTML, made absolute. Links with a scheme, `#` and `mailto:` are left alone. */
@@ -243,12 +288,15 @@ function withoutImportBlock(body: string): string {
  * The lesson body as Markdown for a reader without the components: the
  * import block dropped, components rendered to plain text (a `Pitfall`
  * becomes a titled paragraph, a `Prompt` a fenced block), widgets omitted,
- * links absolute. Fenced blocks and inline code are copied unchanged.
+ * links absolute. Fenced blocks and inline code are copied unchanged. `where`
+ * names the lesson in error messages.
  */
-export function proseOf(body: string, site: string): string {
+export function proseOf(body: string, site: string, where = 'lesson'): string {
 	const aside = setAsideCode(withoutImportBlock(body));
+	const tree = parseAside(aside.text, where);
+	const components = renderComponents(aside.text, 0, aside.text.length, componentsUnder(tree), aside, where);
 	// Runs of blank lines are collapsed before the code comes back, so a double blank line inside a fence stays.
-	const rendered = absolutizeLinks(renderComponents(aside.text, aside), site).replace(/\n{3,}/g, '\n\n');
+	const rendered = absolutizeLinks(components, site).replace(/\n{3,}/g, '\n\n');
 	return `${aside.restore(rendered).trim()}\n`;
 }
 
@@ -294,7 +342,7 @@ export function bundleOf(lesson: Lesson, sources: BundleSources): LessonBundle {
 		url: lessonUrl(lesson.id, site),
 		title: data.title,
 		mode: data.mode,
-		prose: proseOf(lesson.body ?? '', site),
+		prose: proseOf(lesson.body ?? '', site, lesson.id),
 		topics: [
 			{
 				id: topic.id,

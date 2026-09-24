@@ -309,28 +309,19 @@ describe('remarkCheckpoints', () => {
 		const file = { path, value: src, data: {} as { astro?: { frontmatter?: Record<string, unknown> } } };
 		const tree = unified().use(remarkParse).use(remarkMdx).parse(src);
 		remarkCheckpoints()(tree, file);
-		return file.data.astro?.frontmatter?.checkpoints;
+		return file;
 	};
-	it('writes every graded tag with its props and stem into the frontmatter', () => {
+	it('accepts a page whose tags read, and writes nothing into its data', () => {
 		const src =
 			'<Choice id="a" concepts={[\'c\']} review={false} options={[{ text: \'x\', correct: true }]}>\n\nStem.\n\n</Choice>\n\n<Predict id="e" answer="1" run="x.py">\nShown.\n</Predict>\n';
-		expect(run(src)).toEqual([
-			{
-				tag: 'Choice',
-				kind: 'choice',
-				props: { id: 'a', concepts: ['c'], review: false, options: [{ text: 'x', correct: true }] },
-				stem: 'Stem.',
-			},
-		]);
+		expect(run(src).data).toEqual({});
 	});
 	it('fails the page on a prop that is not a literal, naming the file', () => {
 		expect(() => run('<Choice id="a" options={opts} />')).toThrow(
 			/docs\/a\/b\.mdx: cannot read options=\{\.\.\.\} of <Choice>: Identifier is not a literal/,
 		);
 	});
-	it('leaves a page without tags with an empty list and keeps other frontmatter', () => {
-		const file = { path: 'p', value: 'Text.', data: { astro: { frontmatter: { title: 'T' } } } };
-		remarkCheckpoints()(unified().use(remarkParse).use(remarkMdx).parse('Text.'), file);
-		expect(file.data.astro.frontmatter).toEqual({ title: 'T', checkpoints: [] });
+	it('fails the page on an id used twice', () => {
+		expect(() => run('<Choice id="a" />\n\n<Predict id="a" />')).toThrow(/docs\/a\/b\.mdx: id "a" is used twice/);
 	});
 });
