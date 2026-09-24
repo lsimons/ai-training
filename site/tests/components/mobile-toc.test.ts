@@ -63,7 +63,7 @@ describe('MobileTableOfContents', () => {
 	it('renders the skip tip before the dropdown on a lesson with covered-by, with the label linked', async () => {
 		const html = await render(covered, [{ ...title, children: [heading] }]);
 		expect(html).toMatch(
-			/<aside class="not-content covered-by covered-by-mobile" data-covered-by><p>If you have followed <a href="https:\/\/example.com\/aec\/lesson-2" rel="noopener">How agents think<\/a>, you can skip this lesson.<\/p><button type="button" class="recap-skip" data-skip-lesson>I know this, skip it<\/button><\/aside>/,
+			/<div role="note" class="not-content covered-by covered-by-mobile" data-covered-by><p>If you have followed <a href="https:\/\/example.com\/aec\/lesson-2" rel="noopener">How agents think<\/a>, you can skip this lesson.<\/p><button type="button" class="recap-skip" data-skip-lesson>I know this, skip it<\/button><\/div>/,
 		);
 		expect(html.indexOf('data-covered-by')).toBeLessThan(html.indexOf('<mobile-starlight-toc'));
 		expect(html).toContain('data-lesson-toc-mobile');
