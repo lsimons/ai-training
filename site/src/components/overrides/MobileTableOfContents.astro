@@ -17,15 +17,24 @@
  * `lesson-toc-mobile` class lets `styles/lesson.css` style the entries like
  * Starlight's mobile headings list. A page that is not a lesson, or a
  * lesson without checkpoints and examples, renders the default alone.
+ *
+ * A lesson with `covered-by` gets the skip tip of `CoveredByTip.astro` before
+ * the dropdown (issue #294), since Starlight hides the right sidebar and its
+ * copy of the tip below the `lg` breakpoint. Starlight's dropdown bar is
+ * fixed to the top of the viewport, so the tip, a sibling in normal flow,
+ * shows under the bar and above the page title. The `covered-by-mobile`
+ * class gives it the page's side margins (`styles/lesson.css`).
  */
 import Default from '@astrojs/starlight/components/MobileTableOfContents.astro';
 import { lessonEntryOf } from '@lib/lesson-context';
 import { isLessonEntry, lessonTocGroups } from '@lib/lesson-toc';
+import CoveredByTip from './CoveredByTip.astro';
 
 const entry = lessonEntryOf(Astro);
 const groups = isLessonEntry(entry) ? lessonTocGroups(entry) : [];
 ---
 
+<CoveredByTip entry={entry} class="covered-by-mobile" />
 <Default>
 	<slot />
 </Default>
