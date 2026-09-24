@@ -98,7 +98,10 @@ first.
 
 `mise run site-browser` installs Chromium once. `mise run site-e2e` builds
 the site, and Playwright starts `site/scripts/serve-dist.mjs` (a static
-server for `site/dist`), runs `site/e2e/`, and stops the server. To run one
+server for `site/dist`), runs `site/e2e/`, and stops the server. The server
+listens on `E2E_PORT` when it is set, and otherwise on a free port that
+`site/playwright.config.ts` asks the OS for, so two e2e runs on one
+machine don't collide. To run one
 file: `cd site && bunx playwright test e2e/review.spec.ts`. On a failure the
 trace is under `site/test-results/`, and `bunx playwright show-trace <zip>`
 opens it. Every spec blocks requests that leave `localhost` and fails on a

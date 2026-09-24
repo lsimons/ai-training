@@ -40,21 +40,19 @@ both, so the builder and the reviewer never talk to each other.
    - the issue number and the instruction to load the `build` skill;
    - the branch name (`feat/<issue>-<slug>`);
    - the setup a fresh worktree needs before any check runs:
-     `mise run site-install-frozen` before the `site-*` tasks and
-     `mise run prose-sync` before `mise run prose`. Without the sync
-     `prose` stops and names the sync task, so the `ai-tells` errors
-     can't appear only in CI (issue #103);
-   - the definition of done: `mise run ci` green locally, pushed, a pull
-     request against `main` whose body says `Closes #N`, GitHub CI green,
-     not merged;
+     `mise run setup`, once. A task that needs it stops and names it;
+   - the definition of done: `mise run fast` green locally before every
+     push, fix commits included, then pushed, a pull request against
+     `main` whose body says `Closes #N`, GitHub CI green, not merged.
+     GitHub CI runs the e2e walkthrough that `fast` leaves out;
    - the attribution lines every commit and pull request body ends with;
    - the rule to rebase on `origin/main` before the final push and never
      resolve a conflict by discarding another agent's work;
    - what the other builders are doing that could collide, so the builder
      writes for the future state (for example, write fixtures in Python
      because another builder is removing bash support);
-   - what not to run: `site-dev` and anything on a fixed port that siblings
-     share;
+   - what not to run: `site-dev`, whose Astro daemon stays on its port
+     after the shell exits;
    - when the issue asks for a comment on GitHub, edit only the comment
      whose id the builder's own `gh issue comment` call returned. One
      builder overwrote two siblings' comments by id.
@@ -193,10 +191,9 @@ The cases that come up:
   request with `--base wave/<n>-<slug>`. The rules under "Stacked pull
   requests" apply as written, with the wave branch as the base and the
   change to `main` after the wave merges.
-- **The port.** The port rule under "What collides" applies. The
-  coordinator's `mise run ci` on the wave branch is the one e2e run, so it
-  waits until `lsof -i :4400` is empty, and builders run the individual
-  tasks their change touches instead of `mise run ci`.
+- **The e2e run.** The coordinator's `mise run ci` on the wave branch is
+  the one e2e run of the wave, and builders run `mise run fast`, which
+  leaves the walkthrough out.
 
 ## What collides, and how to avoid it
 
@@ -220,11 +217,10 @@ The cases that come up:
   a lesson builder that started earlier still adds a `.sh` file. Say the
   future rule in every builder prompt, and check each finished pull request
   against rules merged since it started.
-- **Ports.** Anything that serves the site on a fixed port (`site-e2e` on
-  4400, `site-screenshot`, a stale `astro dev` daemon) breaks a sibling
-  doing the same. Only the builder changing that tooling runs it, after
-  `lsof -i :4400` comes back empty, and in integration mode the
-  coordinator's wave run is the one e2e run.
+- **Ports.** `site-e2e` and `site-screenshot` each take a free port, so
+  they don't collide. A stale `astro dev` daemon still holds its port and
+  serves old content, so builders don't run `site-dev` (see `AGENTS.md`,
+  "Astro 7 dev server").
 
 ## Working with the platform
 
