@@ -1,6 +1,4 @@
 ---
-import { type CheckpointKind, DEFAULT_REVISION, isReviewable } from '@lib/checkpoint-rules';
-import { CONCEPTS_FORM } from '@lib/checkpoint-source';
 /**
  * Shared frame for every checkpoint kind (spec S03 "Checkpoints"): a section
  * whose id is the checkpoint id, a heading, the stem, the interaction, and the
@@ -8,6 +6,8 @@ import { CONCEPTS_FORM } from '@lib/checkpoint-source';
  * pills) are rendered hidden and enabled by the review page. The review
  * frequency is adjusted on the settings page, not here.
  */
+import { type CheckpointKind, DEFAULT_REVISION, isReviewable } from '@lib/checkpoint-rules';
+import { CONCEPTS_FORM } from '@lib/checkpoint-source';
 import { assertKnownConcepts, knownConceptIds } from '@lib/concepts';
 import { lessonIdOf } from '@lib/lesson-context';
 import { href } from '@lib/url';
