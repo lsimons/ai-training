@@ -17,8 +17,8 @@ shorts: []
 exercise:
   kind: judge
   brief: >-
-    Classify five product descriptions by what each can do without another prompt, and list the
-    tools of the ones that are agents.
+    Find five AI products or features you use or were offered, classify each by what it can do
+    without another prompt, and list the tools of the ones that are agents.
 sources: [AEC-01, DLAI-11, Academy claude-platform-101]
 issue: 143
 minutes: 12
