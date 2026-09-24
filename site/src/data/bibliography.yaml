@@ -594,3 +594,31 @@ Liu 2024:
   author: Nelson F. Liu, Kevin Lin, John Hewitt and 4 others
   license: CC BY 4.0
   url: https://aclanthology.org/2024.tacl-1.9/
+Claude Code agent loop:
+  type: reference
+  title: How the agent loop works
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/agent-sdk/agent-loop
+Claude Code agent sdk python:
+  type: reference
+  title: Agent SDK reference - Python
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/agent-sdk/python
+Claude docs tool-runner:
+  type: reference
+  title: Tool runner (SDK)
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-runner
+Claude Code custom tools:
+  type: reference
+  title: Give Claude custom tools
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/agent-sdk/custom-tools
