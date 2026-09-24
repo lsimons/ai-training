@@ -1,0 +1,69 @@
+import { parseMdx } from '@lib/checkpoint-tags';
+import { assertHabitId, HABIT_ID, habitTagsOfSource, MAX_HABITS, sectionSlugsIn, slugOf } from '@lib/habit-tags';
+import { describe, expect, it } from 'vitest';
+
+const page = (habits: string, before = '') =>
+	`## Blast radius\n\nText.\n\n## Putting it together\n\n${before}<Recap>\n1. One.\n</Recap>\n\n${habits}`;
+
+describe('habitTagsOfSource (spec S07 "Authoring")', () => {
+	it('reads the id and the text of each habit after the recap, in source order', () => {
+		const habits = habitTagsOfSource(
+			page(
+				'<Habit id="name-the-blast-radius">\nThe next time you hand an agent a task, say what it can reach.\n</Habit>\n\n<Habit id="check-the-diff-first">\nRead the diff.\n</Habit>\n',
+			),
+			'x/y',
+		);
+		expect(habits).toEqual([
+			{ id: 'name-the-blast-radius', text: 'The next time you hand an agent a task, say what it can reach.' },
+			{ id: 'check-the-diff-first', text: 'Read the diff.' },
+		]);
+	});
+	it('a page without habits has none', () => {
+		expect(habitTagsOfSource(page(''), 'x/y')).toEqual([]);
+		expect(habitTagsOfSource('', 'x/y')).toEqual([]);
+	});
+	it('allows at most two', () => {
+		expect(MAX_HABITS).toBe(2);
+		const three = ['a', 'b', 'c'].map((id) => `<Habit id="${id}">\nT.\n</Habit>`).join('\n');
+		expect(() => habitTagsOfSource(page(three), 'x/y')).toThrow(/3 <Habit> tags; a lesson has at most 2/);
+	});
+	it('requires a kebab-case id, unique in the lesson', () => {
+		expect(() => habitTagsOfSource(page('<Habit>\nT.\n</Habit>'), 'x/y')).toThrow(/x\/y: <Habit> without an id/);
+		expect(() => habitTagsOfSource(page('<Habit id="Name It">\nT.\n</Habit>'), 'x/y')).toThrow(
+			/"Name It" is not a lowercase kebab-case slug/,
+		);
+		expect(() => habitTagsOfSource(page('<Habit id={1}>\nT.\n</Habit>'), 'x/y')).toThrow(/id must be a string/);
+		const twice = '<Habit id="a">\nT.\n</Habit>\n<Habit id="a">\nU.\n</Habit>';
+		expect(() => habitTagsOfSource(page(twice), 'x/y')).toThrow(/habit id "a" is used twice/);
+		expect(HABIT_ID.test('name-the-blast-radius')).toBe(true);
+		expect(HABIT_ID.test('-leading')).toBe(false);
+		expect(assertHabitId('x/y', 'ok-id')).toBe('ok-id');
+	});
+	it('rejects an id that is also a section slug, because both are # fragments of the page', () => {
+		expect(() => habitTagsOfSource(page('<Habit id="blast-radius">\nT.\n</Habit>'), 'x/y')).toThrow(
+			/habit id "blast-radius" is also a section slug/,
+		);
+	});
+	it('rejects a habit before the recap, or without a recap, and one without text', () => {
+		expect(() => habitTagsOfSource(page('', '<Habit id="a">\nT.\n</Habit>\n\n'), 'x/y')).toThrow(
+			/x\/y#a: <Habit> must come after the <Recap>/,
+		);
+		expect(() => habitTagsOfSource('<Habit id="a">\nT.\n</Habit>', 'x/y')).toThrow(/must come after the <Recap>/);
+		expect(() => habitTagsOfSource(page('<Habit id="a" />'), 'x/y')).toThrow(/x\/y#a: <Habit> has no text/);
+	});
+	it('names the lesson on a parse error', () => {
+		expect(() => habitTagsOfSource('<Habit id="a">', 'x/y')).toThrow(/^x\/y: /);
+	});
+});
+
+describe('section slugs', () => {
+	it('slugs a heading the way Starlight does for plain headings', () => {
+		expect(slugOf('Blast radius')).toBe('blast-radius');
+		expect(slugOf('Prompt injection: when the data gives orders')).toBe('prompt-injection-when-the-data-gives-orders');
+		expect(slugOf('  Human in the loop ')).toBe('human-in-the-loop');
+	});
+	it('reads the ## headings only', () => {
+		const src = '# Title\n\n## One two\n\n### Three\n\nText\n\n## Four';
+		expect(sectionSlugsIn(parseMdx(src), src)).toEqual(['one-two', 'four']);
+	});
+});
