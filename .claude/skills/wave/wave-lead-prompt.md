@@ -86,6 +86,8 @@ If the line under the first paragraph says you are resuming, a previous lead for
 - A copy button on a code line sits outside the scrolling `pre`, checked at 390px in the built page.
 - A parser for a vendor file format names the vendor page for each rule it copies, such as how a repeated key merges.
 - An e2e selector for a component picks its element by structure (`pre code`) and not by position (`code` nth(1)), since a review fix can add an element above it.
+- A test that a module-level path doesn't depend on the working directory reloads the module after the `chdir`, or it passes against the bug.
+- When siblings are matched by a shared key (an objective), the builder checks the case where two items share one sibling.
 
 ## Filing
 
