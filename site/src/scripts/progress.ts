@@ -123,13 +123,18 @@ export function update(fn: (r: ProgressRecord) => void): ProgressRecord {
 // --- Content changes (spec S04 and S05 "Content changes") --------------------
 
 /**
- * Drop entries whose id the build no longer knows. Needs the whole catalog, so
+ * Drop entries whose id the build no longer knows: `first` checkpoint ids and
+ * `practice` ids in separate lists (`pruneOrphanEntries`). Needs the whole catalog, so
  * it runs where that is available (the progress page), not in `load()`. Saves
  * only when something was dropped.
  */
-export function pruneOrphans(knownLessonIds: Iterable<string>, knownCheckpointIds: Iterable<string>): number {
+export function pruneOrphans(
+	knownLessonIds: Iterable<string>,
+	knownCheckpointIds: Iterable<string>,
+	knownPracticeIds: Iterable<string>,
+): number {
 	const r = load();
-	const dropped = model.pruneOrphanEntries(r, knownLessonIds, knownCheckpointIds);
+	const dropped = model.pruneOrphanEntries(r, knownLessonIds, knownCheckpointIds, knownPracticeIds);
 	if (dropped) save(r);
 	return dropped;
 }

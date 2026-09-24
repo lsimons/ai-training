@@ -84,6 +84,8 @@ const formats = [
 		const due = progress.dueReviews(progress.load(), `${area}/`);
 		const totalDue = progress.dueReviewIds(progress.load(), `${area}/`).length;
 		let answered = 0;
+		/** The alternates asked so far in this session, as progress ids: one session never asks one twice. */
+		const servedThisSession = new Set<string>();
 
 		/**
 		 * The section to ask for `progressId`: the item's own checkpoint, or the
@@ -100,12 +102,14 @@ const formats = [
 			const checkpoint = lesson?.checkpoints.find((c) => c.id === cpId);
 			if (!lesson || !checkpoint || !cpId) return null;
 			const history = progress.load().reviews[progressId]?.history ?? [];
-			const pick = progress.servedCheckpoint(cpId, checkpoint.alternates, history);
+			const taken = checkpoint.alternates.filter((a) => servedThisSession.has(`${lessonId}#${a}`));
+			const pick = progress.servedCheckpoint(cpId, checkpoint.alternates, history, taken);
 			const html = await (await fetch(lesson.href)).text();
 			const doc = new DOMParser().parseFromString(html, 'text/html');
 			const alternate =
 				pick === cpId ? null : doc.querySelector<HTMLElement>(`[data-alternate][data-progress-id="${lessonId}#${pick}"]`);
 			if (alternate) {
+				servedThisSession.add(`${lessonId}#${pick}`);
 				const copy = document.importNode(alternate, true) as HTMLElement;
 				copy.hidden = false;
 				copy.removeAttribute('data-alternate');

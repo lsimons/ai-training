@@ -134,11 +134,12 @@ Each served objective gets at least one checkpoint with
 `objective="<that id>"`, and each checkpoint names the one objective it
 evidences. A lesson has one `<Pitfall>`, one `<Exercise>`, and one `<Recap>`
 at the end, and may have a `<MorePractice>` block between the exercise and
-the recap ("Alternates and More practice" below). Tutorial mode: one or two paragraphs, then an example the
-learner runs or predicts. Each example that runs gets a `<Predict>`, and
-its output is asserted in CI either way. Give it an `objective` only when
-predicting the output demonstrates a served objective. Otherwise leave
-`objective` off, and the block is an ungraded example (below).
+the recap ("Alternates" below). Tutorial mode: one or two paragraphs, then
+an example the learner runs or predicts. Each example that runs gets a
+`<Predict>`, and its output is asserted in CI either way. Give it an
+`objective` only when predicting the output demonstrates a served
+objective. Otherwise leave `objective` off, and the block is an ungraded
+example (below).
 
 ### Foundations lessons
 
@@ -177,60 +178,6 @@ the context there. The review page shows it above the stem, and the export
 hint refers to something on the page: "the widget", "the table above",
 "the fixture", "the memo". Say what that thing is, without giving the
 answer.
-
-### Alternates
-
-Every checkpoint takes `phase`: `first` (the default, so existing tags
-don't write it), `review` or `practice` (spec S01 "Checkpoint"). A
-`review` or `practice` checkpoint is an alternate. It has the same
-`objective` as a `first` checkpoint of the same lesson, its sibling, and
-asks about the same idea with different wording.
-
-The rule for new and revised lessons:
-
-- Give every graded `first` checkpoint at least one `review` alternate
-  where the objective allows it, and make it a different interaction kind
-  than the sibling where that fits (a `Choice` on blast radius and a `Sort` alternate, say). The review page asks the alternates in place of the sibling. A review then tests the idea rather than one wording of it.
-- A lesson may have zero to three `practice` checkpoints, for a learner
-  who wants more.
-
-A `review` alternate goes right after its sibling in the source. The lesson
-page renders it hidden, and nothing on the page counts it. It must be gradable in a review. A `Repair`, an honor-system `Predict` (no `answer`) and a checkpoint with `review={false}` can't be graded there, and the check rejects them. Write a `context` for it by the rule
-above, and give it its own `id`, `title`, `hint` and wrong-option `why`
-texts. It passes the guessability check like any item, and in a lesson with
-four or more `Choice` or `Scenario` items its key position counts toward
-`fixed-position`.
-
-```mdx
-<MultiChoice id="spot-the-leading-question" phase="review"
-  objective="concepts/explains-models/names-failure-modes" ...>
-Which two of these questions leave the answer open?
-</MultiChoice>
-```
-
-`practice` checkpoints sit in one `<MorePractice>` block between the
-`<Exercise>` and the `<Recap>`, which renders a "More practice" heading.
-Each one writes `phase="practice"`. The page grades and records them, and they don't have a Skip button. A learner can finish the lesson without them, and they don't become review items. Import `MorePractice` from `@components/lesson`.
-
-```mdx
-<MorePractice>
-
-<Choice id="a-fact-to-work-with" phase="practice"
-  objective="concepts/explains-models/names-failure-modes" ...>
-...
-</Choice>
-
-</MorePractice>
-```
-
-The page build fails on a `practice` checkpoint outside the block, another
-phase inside it, an empty block, a second block, or a block that isn't
-between the exercise and the recap. `mise run checkpoints` fails an
-alternate whose `objective` no `first` checkpoint of the lesson has, and a
-`review` alternate that isn't gradable. It prints a warning for each lesson
-with a reviewable `first` checkpoint that has no `review` alternate, and
-that warning doesn't fail the build: it measures how far the content has
-come.
 
 ```mdx
 <Choice id="what-the-model-does" objective="concepts/explains-models/explains-generation"
@@ -420,6 +367,84 @@ This brief will send the agent off track. Rewrite it so it states goal, context,
 
 `Repair` reveals the model answer on request and then asks the learner to
 self-grade (pass, partial, retry). Only pass counts. Not reviewed later.
+
+### Alternates
+
+Every checkpoint takes `phase`: `first` (the default, so existing tags
+don't write it), `review` or `practice` (spec S01 "Checkpoint"). A
+`review` or `practice` checkpoint is an alternate. Its siblings are the
+`first` checkpoints of the same lesson with the same `objective`, and
+nothing else links them: the review page may ask a `review` alternate in
+place of any `first` checkpoint on its objective.
+
+The authoring rules for new and revised lessons follow from that
+matching. The first two are instructions for the author, and the build
+and `mise run checkpoints` check the last two.
+
+- Write an alternate on the idea that every `first` checkpoint of its
+  objective shares, because the review page may ask it for any of them.
+  If two `first` checkpoints on one objective test different ideas, write
+  one alternate per checkpoint, each on the shared idea, or give the
+  checkpoints their own objectives in the plan.
+- Put a `review` alternate after the last `first` checkpoint of its
+  objective in the source. The position is a convention for readers of
+  the source, and the page and the review page ignore it.
+- Give an objective at least as many `review` alternates as it has
+  graded `first` checkpoints, where the objective allows it, and make each
+  one a different interaction kind than the checkpoints where that fits
+  (a `Choice` on blast radius and a `Sort` alternate, say). A review then
+  tests the idea rather than one wording of it. `mise run checkpoints`
+  warns per objective when there are fewer.
+- A lesson may have zero to three `practice` checkpoints, for a learner
+  who wants more.
+
+The lesson page renders a `review` alternate hidden, and nothing on the
+page counts it. It must be gradable in a review. A `Repair`, an
+honor-system `Predict` (no `answer`) and a checkpoint with
+`review={false}` can't be graded there, and the check rejects them. It
+also needs a reviewable `first` sibling, or the review page never asks
+it. Write a `context` for it by the rule above, and give it its own
+`id`, `title`, `hint` and wrong-option `why` texts. It passes the
+guessability check like any item, and in a lesson with four or more
+`Choice` or `Scenario` items its key position counts toward
+`fixed-position`. One review session never asks the same alternate
+twice. Changing an alternate's answer and bumping its `revision` doesn't
+reset the review item, which is keyed on the `first` checkpoint.
+
+```mdx
+<MultiChoice id="spot-the-sycophancy" phase="review"
+  objective="concepts/explains-models/names-failure-modes" ...>
+Which two of these replies are sycophancy at work?
+</MultiChoice>
+```
+
+`practice` checkpoints sit in one `<MorePractice>` block between the
+`<Exercise>` and the `<Recap>`, which renders a "More practice" heading.
+Each one writes `phase="practice"`. The page grades and records them, and
+they don't have a Skip button. A learner can finish the lesson without
+them, and they don't become review items. Import `MorePractice` from
+`@components/lesson`.
+
+```mdx
+<MorePractice>
+
+<Choice id="a-fact-to-work-with" phase="practice"
+  objective="concepts/explains-models/names-failure-modes" ...>
+...
+</Choice>
+
+</MorePractice>
+```
+
+The page build fails on a `practice` checkpoint outside the block,
+another phase inside it, an empty block, a second block, or a block that
+isn't between the exercise and the recap. `mise run checkpoints` fails a
+`practice` alternate whose `objective` no `first` checkpoint of the
+lesson has, and a `review` alternate without a reviewable `first`
+sibling or that isn't gradable. It prints a warning for each lesson with
+an objective that has fewer `review` alternates than graded `first`
+checkpoints, and that warning doesn't fail the build: it measures how
+far the content has come.
 
 ### The checkpoint export
 

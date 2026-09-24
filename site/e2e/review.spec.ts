@@ -107,7 +107,7 @@ test('the review page clones an order checkpoint that drags like the lesson copy
 const ALT_LESSON = 'concepts/straight-answer';
 const OWN_ID = 'hide-the-preference';
 const OWN = `${ALT_LESSON}#${OWN_ID}`;
-const ALTERNATE = 'spot-the-open-question';
+const ALTERNATE = 'spot-the-sycophancy';
 
 function dueWith(history: { at: string; result: 'pass' | 'fail'; served?: string }[]) {
 	return {
@@ -158,4 +158,25 @@ test("once every alternate was asked, the review page asks the item's own checkp
 	const history =
 		(record.reviews?.[OWN] as { history: { result: string; served?: string }[] } | undefined)?.history ?? [];
 	expect(history.map((h) => h.served ?? null)).toEqual([ALTERNATE, null]);
+});
+
+test('one review session never asks the same alternate for two items', async ({ page, seed }) => {
+	// Both checkpoints of the objective are due, and the one alternate matches both by objective.
+	const other = `${ALT_LESSON}#reversal-under-pushback`;
+	const item = { stage: 1, due: '2000-01-01', last: null, history: [], revision: 1 };
+	await seed({
+		lessons: { [ALT_LESSON]: { state: 'finished', at: TODAY } },
+		reviews: { [OWN]: item, [other]: item },
+	});
+	await page.goto('concepts/review/');
+	const cp = page.locator('.review [data-checkpoint]');
+	await expect(page.locator('[data-status]')).toHaveText('Item 1 of 2');
+	await expect(cp).toHaveAttribute('id', ALTERNATE);
+	for (const label of await cp.locator('label[data-correct]').all()) await label.click();
+	await cp.locator('.cp-check').first().click();
+	await page.getByRole('button', { name: 'Next item' }).click();
+	await expect(page.locator('[data-status]')).toHaveText('Item 2 of 2');
+	// The alternate is taken, so the second item asks its own checkpoint.
+	await expect(cp).toHaveAttribute('id', 'reversal-under-pushback');
+	await expect(cp).not.toHaveAttribute('data-served');
 });

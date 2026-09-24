@@ -204,24 +204,6 @@ preference?
 
 </Choice>
 
-<MultiChoice id="spot-the-open-question" phase="review" objective="concepts/explains-models/names-failure-modes"
-  concepts={['sycophancy']}
-  context="Sycophancy is the tendency of a model to agree with the user, praise their idea or change a correct answer when challenged, because agreeable text was rewarded in training. A question that shows which answer the user hopes for makes agreement the likely reply."
-  title="Which questions leave the answer open?"
-  hint="For each question, ask yourself: could the model tell from it which answer you would like to read?"
-  options={[
-    { text: 'Our planning meeting moves from Monday to Thursday next month. That works better for everyone, right?', why: 'The question announces the change and asks for agreement, so agreeing is the likely reply.' },
-    { text: 'Compare a Monday and a Thursday planning meeting for a team that ships a release every Friday.', correct: true },
-    { text: 'My team is happy about moving planning to Thursday. How should I announce the change to them?', why: 'The question treats the move as settled and says the team likes it, so the answer builds on the plan instead of testing it.' },
-    { text: 'What are the strongest reasons against moving our weekly planning meeting from Monday to Thursday?', correct: true },
-  ]}>
-
-You want a useful answer about moving your team's weekly planning meeting
-from Monday to Thursday. Which two of these questions leave the answer
-open?
-
-</MultiChoice>
-
 <Pitfall title="The challenge that flips a right answer">
 You ask a model to check a spreadsheet formula that adds up a column of
 monthly totals. It says the formula skips the last row. You are sure it
@@ -251,6 +233,22 @@ correct after all. What do you do next?
 
 </Scenario>
 
+<MultiChoice id="spot-the-sycophancy" phase="review" objective="concepts/explains-models/names-failure-modes"
+  concepts={['sycophancy']}
+  context="Sycophancy is the tendency of a model to agree with the user, praise their idea or change a correct answer when challenged, because agreeable text was rewarded in training."
+  title="Which replies are sycophancy?"
+  hint="In each reply, did the model move toward what the user wanted to hear, with no new fact to explain the move?"
+  options={[
+    { text: 'A model says a formula skips a row. You reply that you are sure it does not, and the model agrees with you.', correct: true },
+    { text: 'You ask the same question in two new chats and get two answers that say the same thing in different words.', why: 'Different wording from one run to the next comes from sampling. Neither answer followed what you hoped to hear.' },
+    { text: 'You call your plan a great idea, and the review you get back repeats your own reasons for it in warmer words.', correct: true },
+    { text: 'You ask a model to read a web page, and it says that this chat has no tool that can open a web page.', why: 'Saying what the chat cannot do is a statement about its tools. Nothing in the reply moves toward what you wanted.' },
+  ]}>
+
+Which two of these replies are sycophancy at work?
+
+</MultiChoice>
+
 <Exercise stretch="Take one objection from the third answer and ask the model to argue the case for keeping the meeting as strongly as it can. Note which points it makes that the first two answers left out.">
 
 Open any chat assistant you have access to and pick a small plan of your
@@ -276,7 +274,7 @@ never have read if you had stopped after the first answer?
 
 <Choice id="a-fact-to-work-with" phase="practice" objective="concepts/explains-models/names-failure-modes"
   concepts={['sycophancy']}
-  context="A model said that a date in the user's report is wrong. The user thinks the date is right and wants an answer they can rely on, not one that follows their own opinion."
+  context="A model said that a date in the user's report is wrong. The user thinks the date is right and wants an answer they can rely on."
   title="Give it something to work with"
   hint="Which reply adds a fact to the chat, and which ones only add your opinion?"
   options={[

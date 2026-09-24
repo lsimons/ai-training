@@ -177,13 +177,17 @@ describe('content changes', () => {
 			checkpoints: { 'a/x#c1': { state: 'passed', attempts: 1 }, 'a/gone#c1': { state: 'passed', attempts: 1 } },
 			reviews: { 'a/x#c1': review(), 'a/gone#c1': review() },
 		});
-		r.practice = { 'a/x#p1': { state: 'passed', attempts: 1 }, 'a/x#gone': { state: 'attempted', attempts: 1 } };
-		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1', 'a/x#p1'])).toBe(4);
+		r.practice = { 'a/x#p1': { state: 'passed', attempts: 1 }, 'a/x#c1': { state: 'attempted', attempts: 1 } };
+		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'])).toBe(4);
 		expect(Object.keys(r.lessons)).toEqual(['a/x']);
 		expect(Object.keys(r.checkpoints)).toEqual(['a/x#c1']);
 		expect(Object.keys(r.reviews)).toEqual(['a/x#c1']);
 		expect(Object.keys(r.practice)).toEqual(['a/x#p1']);
-		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1', 'a/x#p1'])).toBe(0);
+		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'])).toBe(0);
+		// A checkpoint moved from `first` to `practice` keeps its practice entry and loses its review item.
+		r.reviews['a/x#p1'] = review();
+		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'])).toBe(1);
+		expect(Object.keys(r.reviews)).toEqual(['a/x#c1']);
 	});
 	it('resets a review item whose revision changed, treating a missing revision as 1', () => {
 		const r = record({
@@ -367,6 +371,12 @@ describe('servedCheckpoint', () => {
 		expect(servedCheckpoint('own', ['a', 'b'], asked('a', 'b', undefined))).toBe('a');
 		expect(servedCheckpoint('own', ['a', 'b'], asked('a', 'b', undefined, 'a'))).toBe('b');
 		expect(servedCheckpoint('own', ['a', 'b'], asked(undefined, 'a', 'a', 'b'))).toBe('own');
+	});
+	it('never picks an alternate already asked in this session, and falls back by the same rule', () => {
+		expect(servedCheckpoint('own', ['a', 'b'], [], ['a'])).toBe('b');
+		expect(servedCheckpoint('own', ['a', 'b'], [], ['a', 'b'])).toBe('own');
+		expect(servedCheckpoint('own', ['a', 'b'], asked('b', undefined), ['a'])).toBe('b');
+		expect(servedCheckpoint('own', ['a'], asked('a'), ['a'])).toBe('own');
 	});
 	it('ignores a served id that is no longer an alternate', () => {
 		expect(servedCheckpoint('own', ['a'], asked('gone', 'a'))).toBe('own');

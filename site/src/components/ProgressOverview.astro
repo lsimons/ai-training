@@ -59,7 +59,8 @@ const catalog = await buildCatalog();
 		function pruneOrphans() {
 			progress.pruneOrphans(
 				allLessons.map((l) => l.id),
-				allLessons.flatMap((l) => [...l.checkpoints.map((c) => c.id), ...l.practice].map((id) => `${l.id}#${id}`))
+				allLessons.flatMap((l) => l.checkpoints.map((c) => `${l.id}#${c.id}`)),
+				allLessons.flatMap((l) => l.practice.map((id) => `${l.id}#${id}`))
 			);
 		}
 		pruneOrphans();
