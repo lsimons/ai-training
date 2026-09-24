@@ -1,11 +1,17 @@
 id: safety/asking-a-model-to-disagree
 title: Asking a model to disagree
+description: >-
+  Why a model's yes to your plan is not a check, how to ask for the strongest counter-argument
+  before asking for confirmation, and how to strip your own opinion out of the question when you
+  want an assessment.
 mode: tutorial
 covers: safety/verification
 serves: [safety/verifies-output/spots-sycophancy]
 introduces: []
 assumes:
   - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/straight-answer
+    section: why-agreeing-is-likely-text
 after: [safety/checking-habits]
 shorts: []
 exercise:
@@ -13,9 +19,15 @@ exercise:
   brief: >-
     Ask a model whether a plan of yours is good in three ways: leading, neutral, and asking for the
     strongest counter-argument first. Compare the three answers.
-sources: []
+sources: [Sharma 2023, Academy ai-fluency-framework-foundations]
 issue: 124
 minutes: 15
 notes: >-
   Sycophancy, as a limit of the model. Introduces no concept: deepens checking-habits with prompts
-  the learner types into their own chat tool, and recorded responses marked illustrative.
+  the learner types into their own chat tool, and every exchange on the page is illustrative and
+  marked so. The plan named concepts/how-models-work as the teacher of names-failure-modes, and the
+  live lesson concepts/straight-answer teaches sycophancy and its cause in depth, so the assumes
+  entry points there and the page links it for the why. The plan listed CS50 as a source, and the
+  page does not cite it, because the endorsed-answers idea is already used in checking-habits and
+  a second use here would repeat it. Sharma 2023 backs every claim about what sycophancy looks
+  like in deployed assistants.
