@@ -27,7 +27,8 @@
  *   frontmatter field the lesson file owns, cites a source (`(@key)`, the
  *   remark citation plugin's form) that its lesson file's `sources` list
  *   lacks, or its lesson file has no `description` or an `assumes` entry
- *   without `lesson` and `section`; a course page (`<area>/index.mdx`) carries `title` or `description`;
+ *   without `lesson` and `section`; a course page (`<area>/index.mdx`)
+ *   carries `title` or `description`;
  * - a lesson page in the `foundations` group shows a surface that needs a
  *   programmer (spec S03 "Foundations audience"): a `<Predict run=...>`, a
  *   fenced block tagged `sh`, `bash`, `shell`, `python` or `json`, or the
