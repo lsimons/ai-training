@@ -238,7 +238,7 @@ patterns below after the fact. Write so that it has nothing to say.
   hash the extracted `mise/bin/mise` with `shasum -a 256`, then update
   the workflows and `.mise.toml` in one commit. The action checks that
   binary against `sha256`, so it doesn't matter that it fetches the
-  `.tar.zst` archive on runners that have zstd: both archives hold the
+  `.tar.zst` archive on runners that have `zstd`: both archives hold the
   same binary.
 - `prek.toml` hook repos are pinned by commit SHA (tag in the comment),
   and each Python hook lists its full transitive tree in
