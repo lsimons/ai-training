@@ -1,4 +1,4 @@
-import { checkExtendsToHref, isExternalHref, isUnderUrl } from '@lib/extends-to';
+import { checkExtendsToHref, isExternalHref, isRootRelative, isUnderUrl } from '@lib/extends-to';
 import { describe, expect, it } from 'vitest';
 
 const sources: [string, string | null | undefined][] = [
@@ -16,6 +16,14 @@ describe('isExternalHref', () => {
 	});
 });
 
+describe('isRootRelative', () => {
+	it('is true for one leading slash and false for a protocol-relative URL', () => {
+		expect(isRootRelative('/safety/agent-risk/')).toBe(true);
+		expect(isRootRelative('//evil.example/x')).toBe(false);
+		expect(isRootRelative('safety/')).toBe(false);
+	});
+});
+
 describe('isUnderUrl', () => {
 	it('matches the url itself, with or without a trailing slash', () => {
 		expect(isUnderUrl('https://diataxis.fr', 'https://diataxis.fr/')).toBe(true);
@@ -25,10 +33,21 @@ describe('isUnderUrl', () => {
 		expect(isUnderUrl('https://diataxis.fr/tutorials/', 'https://diataxis.fr/')).toBe(true);
 		expect(isUnderUrl('https://diataxis.fr/?x=1', 'https://diataxis.fr/')).toBe(true);
 		expect(isUnderUrl('https://diataxis.fr/#top', 'https://diataxis.fr/')).toBe(true);
+		expect(isUnderUrl('https://academy.claude.com/courses/x/lessons/1', 'https://academy.claude.com/courses/x')).toBe(
+			true,
+		);
 	});
-	it('rejects a longer host and an empty url', () => {
+	it('rejects a longer host, another scheme, a path that is only a string prefix, and an empty url', () => {
 		expect(isUnderUrl('https://diataxis.fr.evil/', 'https://diataxis.fr/')).toBe(false);
+		expect(isUnderUrl('http://diataxis.fr/', 'https://diataxis.fr/')).toBe(false);
+		expect(isUnderUrl('https://academy.claude.com/courses/x-y', 'https://academy.claude.com/courses/x')).toBe(false);
 		expect(isUnderUrl('https://diataxis.fr/', '')).toBe(false);
+	});
+	it('resolves ../ segments before comparing, so they cannot leave the prefix', () => {
+		expect(isUnderUrl('https://academy.claude.com/courses/x/../y', 'https://academy.claude.com/courses/x')).toBe(false);
+		expect(isUnderUrl('https://academy.claude.com/courses/x/a/../b', 'https://academy.claude.com/courses/x')).toBe(
+			true,
+		);
 	});
 });
 
@@ -47,12 +66,18 @@ describe('checkExtendsToHref', () => {
 		expect(result.kind).toBe('invalid');
 		expect(result).toMatchObject({ reason: expect.stringContaining('bibliography.yaml') });
 	});
-	it('rejects a relative path, an http:// URL and another scheme', () => {
-		for (const href of ['safety/agent-risk/', 'http://diataxis.fr/', 'mailto:a@b.example']) {
+	it('rejects a protocol-relative URL, a relative path, an http:// URL and another scheme', () => {
+		for (const href of ['//diataxis.fr/', 'safety/agent-risk/', 'http://diataxis.fr/', 'mailto:a@b.example']) {
 			const result = checkExtendsToHref(href, sources);
 			expect(result.kind).toBe('invalid');
 			expect(result).toMatchObject({ reason: expect.stringContaining('https://') });
 		}
+	});
+	it('names the field in the error, extends-to by default', () => {
+		expect(checkExtendsToHref('nope', sources)).toMatchObject({ reason: expect.stringMatching(/^extends-to href/) });
+		expect(checkExtendsToHref('nope', sources, 'covered-by')).toMatchObject({
+			reason: expect.stringMatching(/^covered-by href/),
+		});
 	});
 	it('skips a source without a url', () => {
 		expect(checkExtendsToHref('https://nowhere.example/', sources).kind).toBe('invalid');
