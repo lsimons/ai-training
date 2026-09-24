@@ -422,16 +422,31 @@ export function initialDue(comfort: Comfort | undefined, stage: number, day: str
 
 /**
  * Finishing a lesson on `day` schedules every reviewable checkpoint that has no
- * review item yet. Items that exist already keep their schedule.
+ * review item yet, and enters every habit of the page (`habitIds`, as
+ * `<lesson id>#<habit id>`) that has no entry yet, due the day after (spec
+ * S07 "Schedule"). Items and entries that exist already keep their schedule.
  */
 export function applyLessonFinished(
 	r: ProgressRecord,
 	lessonId: string,
 	reviewable: ReviewableCheckpoint[],
 	day: string,
+	habitIds: readonly string[] = [],
 ): void {
 	r.lessons[lessonId] = { state: 'finished', at: day };
 	for (const cp of reviewable) scheduleReview(r, cp, day);
+	for (const id of habitIds) enterHabit(r, id, day);
+}
+
+/**
+ * The habit entry a finished lesson creates: `since` is the finish day and
+ * `next` its first occurrence. An entry that exists, retired or not, is kept
+ * (spec S07 "Lesson finished again"). Returns whether an entry was created.
+ */
+export function enterHabit(r: ProgressRecord, id: string, day: string): boolean {
+	if (r.habits[id]) return false;
+	r.habits[id] = { since: day, next: nextOccurrence(day, day), history: [] };
+	return true;
 }
 
 /**

@@ -178,6 +178,12 @@ describe('wrappers write through storage', () => {
 		expect(progress.dueReviews(progress.load(), 'a/')).toEqual(['a/x#c']);
 	});
 	it('habit results go through the record and the due list reads today', () => {
+		progress.finishLesson('a/x', [], ['a/x#h']);
+		expect(stored().habits['a/x#h']).toEqual({
+			since: progress.today(),
+			next: progress.addDays(progress.today(), 1),
+			history: [],
+		});
 		progress.update((r) => {
 			r.habits['a/x#h'] = { since: '2000-01-01', next: '2000-01-02', history: [] };
 		});
