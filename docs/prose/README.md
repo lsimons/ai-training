@@ -33,8 +33,8 @@ script with its reason, so add the entry when you add the rule.
 ## Process for a package
 
 1. Add the package to `.vale-eval.ini` by its release `.zip` URL (a bare
-   package name is not supported), run `mise run prose-eval-sync` (that is
-   `vale sync --config .vale-eval.ini`) to fetch it, and run
+   package name is not supported) and run `mise run prose-eval-sync` (that
+   is `vale sync --config .vale-eval.ini`) to fetch it. Then run
    `mise run prose-eval -- <package>`. This writes every hit as JSON and word
    counts per area into `docs/prose/reports/<package>/`. `mise run prose-sync`
    reads `.vale.ini` only, so the eval packages need this separate sync, and

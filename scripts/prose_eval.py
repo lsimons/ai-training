@@ -43,7 +43,39 @@ CHECK_FLAG = "--check-packages"
 # it to `<StylesPath>/<name>/`. A bare package name (`Packages = Google`,
 # which Vale fetches from its own library) has no `.zip` and is not
 # supported here: the check would not know the directory to look for.
-PACKAGE_ZIP = re.compile(r"([^/\s,]+)\.zip")
+PACKAGE_ZIP = re.compile(r"([^/\s,]+)\.zip$")
+PACKAGES_KEY = re.compile(r"^\s*Packages\s*=\s*(.*)$")
+
+
+class UnsupportedPackageError(ValueError):
+    """A `Packages` entry that is not a `.zip` URL, with the entry as `str(exc)`."""
+
+
+def package_entries(ini: pathlib.Path) -> list[str]:
+    """Every comma-separated entry of the `Packages` keys, continuation lines joined.
+
+    Comment lines (`;` or `#`) are skipped. A trailing backslash continues
+    the value on the next line, the way the configs here write it.
+    """
+    entries: list[str] = []
+    pending: str | None = None
+    for line in ini.read_text().splitlines():
+        if line.lstrip().startswith((";", "#")):
+            continue
+        if pending is not None:
+            value = pending + line
+        else:
+            match = PACKAGES_KEY.match(line)
+            if match is None:
+                continue
+            value = match.group(1)
+        if value.rstrip().endswith("\\"):
+            pending = value.rstrip()[:-1]
+            continue
+        entries.extend(part.strip() for part in value.split(",") if part.strip())
+        pending = None
+    return entries
+
 
 # Same file set as `mise run prose`, minus the reports themselves, which
 # quote the flagged sentences and would otherwise flag again, and minus
@@ -78,15 +110,18 @@ def area(path: str) -> str:
 def pinned_packages(ini: pathlib.Path) -> list[str]:
     """The package names on the `Packages` lines of a Vale config.
 
-    Comment lines (`;` or `#`) are skipped. The `prose-check-packages`
+    Raises `UnsupportedPackageError` for an entry that is not a `.zip` URL, so a
+    mixed list (`Packages = Google, https://.../write-good.zip`) never
+    passes with the bare name silently dropped. The `prose-check-packages`
     task in .mise.toml reads .vale.ini and .vale-extended.ini through this
     same function.
     """
     names: list[str] = []
-    for line in ini.read_text().splitlines():
-        if line.lstrip().startswith((";", "#")):
-            continue
-        names.extend(PACKAGE_ZIP.findall(line))
+    for entry in package_entries(ini):
+        match = PACKAGE_ZIP.search(entry)
+        if match is None:
+            raise UnsupportedPackageError(entry)
+        names.append(match.group(1))
     return names
 
 
@@ -110,7 +145,13 @@ def sync_command(ini: pathlib.Path) -> str:
 
 def check_packages_synced(ini: pathlib.Path, styles: pathlib.Path) -> None:
     """Exit with a message naming the sync command when a package is missing."""
-    names = pinned_packages(ini)
+    try:
+        names = pinned_packages(ini)
+    except UnsupportedPackageError as exc:
+        sys.exit(
+            f"prose: Packages entry '{exc}' in {ini} is not a .zip URL. "
+            "Pin each package by its release .zip URL: a bare package name is not supported."
+        )
     if not names:
         sys.exit(
             f"prose: no .zip packages found on the Packages lines of {ini}. "
