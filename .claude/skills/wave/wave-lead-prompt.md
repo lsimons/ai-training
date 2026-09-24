@@ -56,7 +56,7 @@ Merged issues: #a #b ...
 Left out: #c (<reason>) ...
 For the maintainer: <decisions needed, or none>
 Filed: #<issue> <title> ... (or none)
-Follow-ups: <none, or one line per nit or follow-up when no issues were filed>
+Follow-ups: <none, or the follow-ups file under --no-filing>
 Add to collision notes: <lessons|code: one line each, or none>
 Remove from collision notes: <lessons|code: the bullet's first words and why, one line each, or none>
 ```

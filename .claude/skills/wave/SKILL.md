@@ -28,8 +28,9 @@ prose and rejects a double hyphen there. The flags themselves keep them.
   reason. The meta record (below) holds the remaining list, and the run
   ends when it is empty.
 - `--no-filing`: the bounded-run mode. Nobody in the wave files a GitHub
-  issue. The lead lists every nit and follow-up in its report and session
-  record instead, for the maintainer to file later. Use it for an
+  issue while the run goes. Each lead writes its follow-ups, as issue
+  titles and bodies, to a follow-ups file on its wave branch, and you file
+  them all when the run ends (see "When the run ends"). Use it for an
   unattended run, so the loop has a fixed amount of work and never grows
   its own queue.
 
@@ -89,16 +90,16 @@ rejected.
    `--unblockers-first`, which scores each candidate by how many blocked
    lessons it unblocks, sorts that score before the course position within
    an area (the planned `after` rule still comes first), and adds an
-   `Unblocks` column. Use it when the maintainer asks for it. Then build
-   the nits row: the open
-   `ready-for-agent` issues whose title starts with `Nits` or
-   `Cosmetic nits` (`gh issue list -l ready-for-agent --search "nits in:title"`;
+   `Unblocks` column. Use it when the maintainer asks for it. Then decide on
+   the nits row. There is at most one open nits issue, titled
+   `Cosmetic nits` (`gh issue list -s open --search "Cosmetic nits in:title"`;
    the repo has no nits label, so the title is the marker, and the
-   `content` picker leaves them out for this reason). Under `--only`, take
-   only the nits issues in the remaining list. Every nits issue found goes
-   into ONE extra row appended to the picker's table, marked `(nits row)`,
-   for one nits builder in one worktree and branch. A wave that is only the
-   nits row is valid and proceeds. When the table is empty after that,
+   `content` picker leaves it out for this reason). Add it as ONE extra row
+   appended to the picker's table, marked `(nits row)`, for one nits
+   builder in one worktree and branch, only when its body has 10 or more
+   nit lines or the picker's table is otherwise empty. Under `--only`, add
+   it only when it is in the remaining list. A wave that is only the nits
+   row is valid and proceeds. When the table is empty after that,
    stop, and report what the picker listed as blocked, skipped, waiting and
    not picked.
 5. **Fill the template.** Read `.claude/skills/wave/wave-lead-prompt.md`
@@ -163,24 +164,39 @@ Default (no `--no-filing`):
 > Before you report, file a GitHub issue (per `docs/agents/triage.md`,
 > labeled `code` or `content` plus `ready-for-agent` when every decision is
 > made, or `ready-for-human` when one is the maintainer's) for every
-> follow-up a review named. Collect every cosmetic nit you left open on a
-> merged branch into ONE issue for this wave, titled
-> `Cosmetic nits left open on wave <n> branches`, with one line per nit
-> naming the file and the change. Never file one nits issue per lesson.
-> Link every filed issue from the session record and list them on the
-> `Filed` line. The `Follow-ups` line is `none`.
+> follow-up a review named. Fix cheap nits in the branch. Every cosmetic nit
+> you leave open on a merged branch becomes one line, naming the file and
+> the change, appended to the body of the one open issue titled
+> `Cosmetic nits` (`gh issue view <n> --json body`, then
+> `gh issue edit <n> --body-file`). Create that issue, labeled `content`
+> and `ready-for-agent`, only when none is open. Never file a nits issue
+> per wave or per lesson. Link every filed issue from the session record
+> and list them on the `Filed` line. The `Follow-ups` line is `none`.
 
 Under `--no-filing`:
 
-> Nobody in this wave runs `gh issue create`. Pass this rule, this whole
-> paragraph, verbatim to every builder and reviewer you spawn. Builders skip
-> the `complete` skill's follow-up-filing step and put every follow-up and
-> nit they'd have filed, one line each with the file and the change, in
-> their final report to you. You collect them, plus every nit you left open
-> on a merged branch and every follow-up a review named, under a
-> `Follow-ups:` line in your report and in a `## Follow-ups` section of the
-> session record, so the maintainer can file them. The `Filed` line is
-> `none`.
+> Nobody in this wave runs `gh issue create` or edits an issue body. Pass
+> this rule, this whole paragraph, verbatim to every builder you spawn.
+> Builders skip the `complete` skill's follow-up-filing step and put every
+> follow-up and nit they'd have filed, one line each with the file and the
+> change, in their final report to you. For every follow-up a review named
+> or a builder reported, write the issue you would have filed, as a
+> `## <title>` heading with the body and labels under it, to
+> `docs/agents/sessions/<date>-wave-<n>-follow-ups.md` on the wave branch.
+> Put the cosmetic nits you left open in the same file under one
+> `## Cosmetic nits` heading, one line each. Name the file on the
+> `Follow-ups:` line of your report. The `Filed` line is `none`.
+
+## When the run ends
+
+Under `--no-filing`, before the final report, file what the leads wrote.
+For each follow-ups file the run's reports name, check every entry once
+against `main` as it is now, and drop the ones already done or made
+obsolete, saying which and why. File each remaining entry as the issue it
+describes, per `docs/agents/triage.md`, and append the nit lines to the
+open `Cosmetic nits` issue (create it only when none is open). List the
+filed numbers in the final report. Nothing is left in a record for the
+maintainer to reconcile by hand.
 
 ## Stop conditions
 
