@@ -1,8 +1,9 @@
 /**
  * Renders the `ReviewLine` component (spec S03 "Frontmatter", `review-by`)
- * with Astro's Container API. The MarkdownContent override passes it the
- * lesson's `review-by` and `sources-checked` fields, which the docs loader
- * copies from the lesson YAML. Starlight's `lastUpdated` is not involved.
+ * with Astro's Container API. The Footer override passes it the lesson's
+ * `review-by` and `sources-checked` fields, which the docs loader copies
+ * from the lesson YAML. Which date line the footer picks is tested in
+ * footer.test.ts.
  */
 import ReviewLine from '@components/lesson/ReviewLine.astro';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
