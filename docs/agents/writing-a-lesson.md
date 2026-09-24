@@ -236,8 +236,9 @@ distractor does), `echo` (a key shares a content word of four or more
 letters with the stem and no distractor does) and `fixed-position`
 (in a lesson with four or more `Choice` or `Scenario` items, one index
 holds the key in more than three quarters of them, so four of four
-fails and three of four passes). Fix a hit by tightening the key or making the
-distractors as specific and as long. Moving the key or giving a
+fails and three of four passes). Every item counts toward that total,
+and an item exempt from this cue is never a hit. Fix a hit by
+tightening the key or making the distractors as specific and as long. Moving the key or giving a
 distractor its own hedge also works. When a rewrite would read worse,
 add `guessable="<cue>: reason"` to the tag, naming the cue (or cues,
 comma-separated) and a reason a reader of the check output accepts. An
