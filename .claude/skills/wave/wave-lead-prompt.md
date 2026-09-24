@@ -65,11 +65,15 @@ If the line under the first paragraph says you are resuming, a previous lead for
 - After changing a lesson's code or loop, grep the course for pages that say "the previous lesson" and re-read them.
 - When an `assumes` teaching lesson is not live, the lead names the stand-in before dispatch and the builder records it in the plan file's `notes`.
 - The lesson issue bodies use the old layout (frontmatter, `status: live`, `site/src/data/courses/`). `docs/agents/writing-a-lesson.md` is the truth.
-- Never edit `docs/agents/sessions/<date>-meta.md` or `.claude/skills/wave/wave-lead-prompt.md`. The dispatcher owns both.
+- Never edit `docs/agents/sessions/<date>-meta*.md` or `.claude/skills/wave/wave-lead-prompt.md`. The dispatcher owns both.
 - Quote a vendor limit (a context size, a file cap, a rate) only where two vendor pages agree, and record `sources-checked` and `review-by` in the plan file.
 - An exercise that runs a third-party agent skill states whether the skill changes files, and tells the learner to ask for a report only or to run it on a copy.
 - Several rows of the S02 alignment table are at full width, so a new objective can't always be added without a reflow. Skipping the row, with the reason in the issue reply, is acceptable.
 - Cheap nits from a re-check go back as one more one-line commit without another review round. The lead reads the diff.
+- Run `mise run site-format` then `mise run site-lint` after the last edit, before the push.
+- A builder that rewrites a checkpoint option re-reads that option's `why` and feedback text in the same edit.
+- A change to markup that a Starlight client script reads (sidebar `details` and `summary`) is tested from the restored state, not only on a fresh page.
+- Reviewers give the `code-review` skill an explicit target (branch or worktree range).
 
 ## Filing
 
