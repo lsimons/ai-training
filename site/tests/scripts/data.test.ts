@@ -175,6 +175,11 @@ describe('checkData', () => {
 		]);
 		expect(check(tree({ 'content/a/x.mdx': 'Cited (@AEC-01) and again (@ AEC-01 ).\n' })).errors).toEqual([]);
 	});
+	it('fails a page whose token holds two keys, wrapped or not, and says to write one key per token', () => {
+		expect(check(tree({ 'content/a/x.mdx': 'Cited (@AEC-01,\n@AEC-01).\n' })).errors).toEqual([
+			'src/content/docs/a/x.mdx: citation key "AEC-01, @AEC-01" contains "@". Write one key per token: (@a) (@b).',
+		]);
+	});
 	it('warns, without failing, about a concept no lesson introduces', () => {
 		const r = check(tree({ 'data/areas/a/lessons/p.yaml': PLANNED.replace('introduces: [c2]', 'introduces: []') }));
 		expect(r.errors).toEqual([]);
