@@ -52,8 +52,9 @@ objectives:
           end.
       - claim: Data and schema changes are designed with the way back written down before they run.
         why: Code reverts in a second, and a migrated table does not.
-        example: The migration adds the new column and backfills it. Dropping the old column is a separate
-          change a week later, after the code has run on the new one.
+        example: The migration adds the new column, the code writes both columns, and then a backfill
+          fills the old rows. Dropping the old column is a separate change a week later, after the code
+          has run on the new one.
       - claim: The learner prefers a change that can be turned off to one that can only be undone.
         why: A feature flag or a configuration switch reverses in seconds and without a deploy.
         example: The new ranking algorithm ships behind a flag that is off by default, and is enabled for

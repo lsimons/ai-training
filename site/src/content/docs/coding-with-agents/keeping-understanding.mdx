@@ -26,8 +26,9 @@ an agent removes the second one entirely. Suppose you had written the
 `overdue` command yourself instead of briefing the agent for it. You would
 have decided where today's date comes from, seen a first try fail the test
 with the two `TODO_TODAY` dates, and fixed it. The decision would stay
-with you because you made it. When the agent merges the same increment, the code arrives finished. The tests pass. The diff is
-small and the report is confident. Every reason to slow down and read it
+with you because you made it. When the agent merges the same increment,
+the code arrives finished. The tests pass. The diff is small and the
+report is confident. Every reason to slow down and read it
 is gone, and so is the moment where the decision would have become yours.
 
 The leak is slow. After one increment you still know the program, because
@@ -64,8 +65,8 @@ with its tests already green and a paragraph saying it is done.
 
 Reading means the whole diff, at the speed it takes to follow it. You stop
 at anything you can't explain, such as a regular expression you can't
-parse or a helper whose name doesn't say what it does. At each stop, you have two moves. Ask the agent to
-explain the line in plain language, and ask it for a test that documents
+parse or a helper whose name doesn't say what it does. At each stop, you
+have two moves. Ask the agent to explain the line in plain language, and ask it for a test that documents
 the behavior you couldn't see. The test stays in the suite after the
 explanation is forgotten, and it turns a line you took on faith into one
 the suite checks.
