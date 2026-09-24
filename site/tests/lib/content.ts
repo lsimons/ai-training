@@ -24,6 +24,7 @@ export interface TopicFixture {
 		id: string;
 		area: string;
 		name: string;
+		definition?: string;
 		concepts: { id: string; name: string; definition: string }[];
 		links: { prerequisites: string[] };
 	};
@@ -82,6 +83,7 @@ print(2)
 			mode: 'tutorial',
 			assumes: [{ objective: 'o1', lesson: 'concepts/how-models-work', section: 's' }],
 			covers: 'safety/injection',
+			serves: [],
 		},
 		body: `
 <Scenario id="s1" objective="o1" title="S" hint="h" concepts={['risk']} options={[]}>
@@ -104,6 +106,8 @@ Body of the response.
 		data: {
 			title: 'Deeper',
 			mode: 'tutorial',
+			covers: 'safety/depth',
+			serves: [],
 			assumes: [
 				{ objective: 'o1', lesson: 'safety/agent-risk', section: 's' },
 				{ objective: 'o1', lesson: 'nowhere/none', section: 's' },
@@ -141,6 +145,18 @@ export const topics: TopicFixture[] = [
 	{
 		id: 'safety/injection',
 		data: { id: 'safety/injection', area: 'safety', name: 'Injection', concepts: [], links: { prerequisites: [] } },
+	},
+	// Covered by safety/deeper, which has no Prompt block and no checkpoints.
+	{
+		id: 'safety/depth',
+		data: {
+			id: 'safety/depth',
+			area: 'safety',
+			name: 'Depth',
+			definition: 'd',
+			concepts: [],
+			links: { prerequisites: [] },
+		},
 	},
 	// No lesson covers it and no plan entry names it: the topic map's gap state.
 	{

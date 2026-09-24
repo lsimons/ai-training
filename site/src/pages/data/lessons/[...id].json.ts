@@ -10,13 +10,10 @@ import type { APIRoute, GetStaticPaths } from 'astro';
  * them.
  */
 export const getStaticPaths: GetStaticPaths = async () => {
-	// `site` and `base` from astro.config.mjs; the bundle's links are absolute, so `site` is required.
+	// `site` from astro.config.mjs; the bundle's links are absolute, so it is required.
 	const site: string | undefined = import.meta.env.SITE;
 	if (!site) throw new Error('lesson bundles need `site` in astro.config.mjs for absolute URLs');
-	const bundles = await buildLessonBundles({
-		site: new URL(site).origin,
-		base: import.meta.env.BASE_URL.replace(/\/$/, ''),
-	});
+	const bundles = await buildLessonBundles(new URL(site).origin);
 	return bundles.map((bundle) => ({ params: { id: bundle.id }, props: { bundle } }));
 };
 
