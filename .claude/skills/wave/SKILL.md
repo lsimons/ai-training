@@ -82,10 +82,11 @@ push once if the push is rejected.
 4. **Pick.** Run `mise run next-wave -- --size <size> --kind <kind>`, and
    add `--only <remaining>` under `--only`, where `<remaining>` is the
    record's `Remaining --only` list. The picker also takes
-   `--unblockers-first`, which ranks a lesson that unblocks more blocked
-   lessons ahead of course position within its area (the planned `after`
-   rule still comes first) and adds an `Unblocks` column, when the
-   maintainer asks for it. Then build the nits row: the open
+   `--unblockers-first`, which scores each candidate by how many blocked
+   lessons it unblocks, sorts that score before the course position within
+   an area (the planned `after` rule still comes first), and adds an
+   `Unblocks` column. Use it when the maintainer asks for it. Then build
+   the nits row: the open
    `ready-for-agent` issues whose title starts with `Nits` or
    `Cosmetic nits` (`gh issue list -l ready-for-agent --search "nits in:title"`;
    the repo has no nits label, so the title is the marker, and the
