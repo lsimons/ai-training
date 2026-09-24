@@ -17,8 +17,9 @@ shorts: []
 exercise:
   kind: do
   brief: >-
-    Ask a model whether a plan of yours is good in three ways: leading, neutral, and asking for the
-    strongest counter-argument first. Compare the three answers.
+    Ask a model for the strongest counter-argument to a plan of yours twice: once after it has
+    already said yes to a leading question in the same chat, and once as the first message of a
+    fresh chat. Compare the two counter-arguments.
 sources: [Sharma 2023, Academy ai-fluency-framework-foundations]
 issue: 124
 minutes: 15
@@ -30,4 +31,6 @@ notes: >-
   entry points there and the page links it for the why. The plan listed CS50 as a source, and the
   page does not cite it, because the endorsed-answers idea is already used in checking-habits and
   a second use here would repeat it. Sharma 2023 backs every claim about what sycophancy looks
-  like in deployed assistants.
+  like in deployed assistants. The plan's exercise (ask the plan three ways and compare) is the
+  exercise of the live lesson concepts/straight-answer, so the review of #124 moved it to
+  what this lesson adds: the order of yes and counter-argument within one conversation.
