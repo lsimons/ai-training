@@ -92,11 +92,11 @@ def run(question, model=fake_model, max_steps=5):
             result = f"error: unknown tool {reply['tool']}"
         else:
             try:
-                result = tool["fn"](**reply["args"])
+                result = tool["fn"](**reply.get("args", {}))
             except Exception as exc:
-                result = f"error: {exc}"
+                result = f"error: {exc}" if str(exc) else f"error: {type(exc).__name__}"
         messages.append({"role": "assistant", "content": str(reply)})
-        messages.append({"role": "tool", "content": result})
+        messages.append({"role": "tool", "content": str(result)})
     return "stopped: step limit"
 ```
 
@@ -138,6 +138,12 @@ The loop also keeps going when a tool fails. A tool name that isn't in
 `error:` and goes back to the model like any other result. The model can
 then retry with better arguments or tell the user what went wrong. A tool
 error never escapes the loop, so the run always ends with something to show.
+The same path handles a reply that names a tool but has no `args`. The
+loop calls the function with none, Python reports the missing argument,
+and that report goes back to the model as a tool error it can repair. An
+exception with no message is named by its type. The model then reads
+`error: ValueError` rather than a bare `error:`. The loop stores every
+tool result as text, the form the model reads.
 
 <Predict id="predict-tool-error" objective="building-agents/builds-agent-loop/implements-the-loop"
   concepts={['loop-from-scratch', 'stop-conditions']}
