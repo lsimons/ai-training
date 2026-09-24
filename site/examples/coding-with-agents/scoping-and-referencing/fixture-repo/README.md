@@ -18,6 +18,11 @@ python3 -m unittest -q
 specifies the commands, including one that isn't built yet. `legacy/` holds
 the first version of the program, one file, kept for reference.
 
-Work in a copy of this directory, and reset it by deleting the copy and
-copying again. In a clone of the course repository, `git checkout -- .` does
-the same.
+Work in a copy of this directory, and give the copy one commit of its own so
+that `git status` shows what a session changed:
+
+```sh
+git init -q && git add -A && git commit -qm start
+```
+
+Reset it by deleting the copy and copying again.
