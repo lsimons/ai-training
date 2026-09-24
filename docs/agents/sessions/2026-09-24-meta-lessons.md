@@ -43,4 +43,26 @@ Add to collision notes: A claim about how an agent product loads context (skills
 Add to collision notes: Builders never message reviewers. Only the lead asks for a re-check.
 ```
 
-In flight: wave 16, branch wave/16-lessons, issues #146 #122 #158 #160 #162 #198 #152 #124 #169 #171, nits row #315
+### Wave 16
+
+```text
+WAVE 16 merged
+PR: #341
+Merged issues: #146 #152 #122 #124 #158 #160 #169 #162 #171 #198 #315
+Left out: none
+For the maintainer: none
+Filed: #333 Allow-list git env in the reversible-changes fixture and share the git fixture helpers; #334 Name a chat product's memory feature in concepts/memory; #335 Stop spell-checking assumes section slugs, and check that they exist; #340 Cosmetic nits left open on wave 16 branches
+Follow-ups: none
+Add to collision notes: A fixture that runs git passes an allow-list env (PATH, temp HOME, LC_ALL=C, fixed identity, global/system config at /dev/null) rather than stripping the `GIT_*` names, and runs `git diff --stat` with a fixed width. A deny-list let `GIT_TEMPLATE_DIR` install a hook in #169.
+Add to collision notes: An exercise that connects a real MCP server checks how the server takes its allowed folders from the client's roots, and has the learner start the agent inside the folder it may touch (#171 blocking).
+Add to collision notes: A bibliography license cell is read from the source's own license page or repository. In wave 16, builders marked CC-licensed sources as Proprietary by default.
+Add to collision notes: A shell command shown on a page is run by following the page's own steps (a fresh copy, macOS sort order), and its output is compared with the page.
+```
+
+The dispatcher dropped the wave 15 note on stripping the `GIT_*` variables, because the first wave 16 note replaces it.
+
+## Paused
+
+The maintainer paused the run after wave 16 on 2026-09-24 to change the harness. Nothing is in flight. A new `/wave` starts a new wave 17 and doesn't resume.
+
+While this run went on, a separate code run on another machine took #67, #274, #317, #319, #320, #321 and #322 (branches `wave/c<n>-*`). #319 is titled "Cosmetic nits ..." but belongs to that run. The nits row must leave out any nits issue that has an assignee.

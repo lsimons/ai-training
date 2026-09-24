@@ -92,9 +92,12 @@ If the line under the first paragraph says you are resuming, a previous lead for
 - A rewrap of lesson prose keeps every `(@key)` citation on one line, and the builder compares the built page's citation count with main.
 - A plan title that says the learner runs something is checked against the foundations rule that the learner runs nothing.
 - Reviewers start the `code-review` skill from inside the review worktree, because it reviews the checkout it runs in (three reviewers got an empty result this wave), and they probe by hand when it returns nothing.
-- A fixture that shells out to git removes `GIT_DIR`, `GIT_WORK_TREE`, `GIT_INDEX_FILE` and the other repository variables from the env it passes, and reads input directories with a glob, not `iterdir()`.
 - A claim about how an agent product loads context (skills, MCP tools, memory files) names the vendor page and matches today's default behavior.
 - Builders never message reviewers. Only the lead asks for a re-check.
+- A fixture that runs git passes an allow-list env (PATH, temp HOME, LC_ALL=C, fixed identity, global/system config at /dev/null) rather than stripping the `GIT_*` names, and runs `git diff --stat` with a fixed width. A deny-list let `GIT_TEMPLATE_DIR` install a hook in #169.
+- An exercise that connects a real MCP server checks how the server takes its allowed folders from the client's roots, and has the learner start the agent inside the folder it may touch (#171 blocking).
+- A bibliography license cell is read from the source's own license page or repository. In wave 16, builders marked CC-licensed sources as Proprietary by default.
+- A shell command shown on a page is run by following the page's own steps (a fresh copy, macOS sort order), and its output is compared with the page.
 
 ## Filing
 
