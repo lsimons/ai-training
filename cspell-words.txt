@@ -53,6 +53,7 @@ Rovo
 papaparse
 prek
 zizmor
+zstd
 davinci
 MRKL
 Fuchsia
