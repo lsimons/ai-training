@@ -1,0 +1,302 @@
+import { Choice, MultiChoice, Predict, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson you review a branch a coding agent made and you didn't
+watch it make. The branch implements the due-dates spec from *Working
+from a spec in small increments*, and it arrives with a summary that
+says the work is done and a test suite that passes. The course keeps a copy of that branch as a fixture,
+so everyone reviews the same code. It hides four problems, and the
+lesson is the order of reading that finds them. Reviewing code you did
+not write is a different kind of reading from reviewing your own. You
+have no memory of why a line exists, so every line has to justify itself
+against the spec (@Brilliant VER).
+
+The agent's summary is where most reviews start, and it is the one text
+on the branch the agent wrote about itself. Here is the one that came
+with the branch. The transcripts in this lesson are illustrative and
+don't record a specific model's words.
+
+<Prompt model="illustrative" recorded="illustrative">
+Implement `SPEC.md` on the branch `due-dates` and commit when
+`python3 -m unittest -q` passes. Then summarize what you changed.
+</Prompt>
+<Response>
+Done. I added the `due` and `overdue` commands to `todo.py`, with date
+validation so a malformed date is refused with `bad date: <input>`.
+`list` shows the date after the text. I added `test_due_dates.py` with
+tests for `due`, `list`, `overdue` and the validation, and the whole
+suite passes. I also cleaned up the formatting in one test file while I
+was there.
+</Response>
+
+## Read the brief before the diff
+
+Read the summary once and then set it aside, because it is a claim to
+check rather than a record to trust. *Spotting a hallucination* checked
+a summary against its sources, and this review checks the agent's
+claims against the branch in the same way. The order that works is the
+brief first, then the tests, then the diff. The brief is `SPEC.md`, and
+it says what was asked. The tests say what the agent thinks it built.
+The diff says what changed. Reading in that order means the first
+question you answer is whether the change does what was asked, and only
+then how it does it. Well-written code that solves a slightly different
+problem is the most common agent failure and the hardest to see line by
+line, because every line looks reasonable on its own (@Academy ai-fluency-for-builders).
+
+Open `SPEC.md` and write down what the review has to find: the three
+commands, the four limits, and the five success criteria. Then ask git
+which files the branch touched. `git diff --stat main` prints one line per
+changed file, with the count of changed lines, and a total (@Git docs git-diff).
+
+<Predict id="run-stat" title="Which files did the branch touch?"
+  answer={` render.py         |  7 ++++---
+   store.py          |  2 +-
+   test_clear.py     | 12 ++++++------
+   test_due_dates.py | 51 +++++++++++++++++++++++++++++++++++++++++++++++++++
+   test_todo.py      |  3 ---
+   todo.py           | 36 ++++++++++++++++++++++++++++++++++++
+   6 files changed, 98 insertions(+), 13 deletions(-)`} run="coding-with-agents/reviewing-the-diff/stat.py">
+In a clone of the course repository, from
+`site/examples/coding-with-agents/reviewing-the-diff/`, run the script
+that builds the branch on a copy and prints its diffstat against `main`.
+
+```sh
+python3 stat.py
+```
+
+</Predict>
+
+The examples in this lesson aren't graded. Each one is a command you
+run, with output the course itself checks on every build. The
+checkpoints ask what a reviewer does with what the commands show.
+
+Hold the list against the spec before opening a file. The spec
+names `todo.py`, `render.py` and the tests for the new behavior. The
+branch touched six files. `store.py` isn't about due dates, `test_clear.py`
+isn't either, and `test_todo.py` lost three lines. Three of the six
+files are already questions, and you found them without reading any
+code.
+
+<Choice id="first-question" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['reviewing-code-you-did-not-write']}
+  context="A coding agent has finished a feature on a branch and posted a summary saying the work is done and the tests pass. The learner is about to review the branch and decides where to start."
+  title="What is the first thing the review answers?" hint="Which question, answered wrong, makes the answers to all the others worthless?"
+  options={[
+    { text: 'Whether the code is written the way you would have written it.', why: 'Style is the last question. A change written in your style that does the wrong thing is still wrong.' },
+    { text: 'Whether the summary matches the commit message.', why: 'Both texts are the agent\'s own account. Checking one claim against another claim from the same source checks nothing.' },
+    { text: 'Whether the change does what the spec asked for.', correct: true },
+    { text: 'Whether the test suite passes on the branch.', why: 'A green suite says the code does what the tests say. The tests are the agent\'s too, and the deleted one no longer says anything.' },
+  ]}>
+The spec and the agent's summary are open, the diff is in front of you,
+and the test run is green. Which question do you answer first?
+</Choice>
+
+## Every changed file
+
+A file the brief never named is a change the brief never asked for, and
+those are the riskiest part of an agent's diff. They pass unread because
+the reviewer's attention is on the feature. Read each one and ask what
+it does to the program and who asked for it.
+
+`store.py` changed two lines. Before, the list was read from
+`todos.json` unless `TODO_FILE` said otherwise. After, the default is
+`.todos.json`. No line of the spec mentions the file name, and the
+limits say `add`, `list`, `done` and `clear` keep working as they do. A
+learner who runs `python3 todo.py list` on the branch gets an empty list,
+because the program is now looking at a file that doesn't exist. That's
+a silent behavior change in a file the feature had no reason to touch.
+
+`test_clear.py` changed twelve lines. Read them side by side and every
+change is a double quote turned into an apostrophe. The file does the
+same thing as before. The reformat is the tidying the summary mentioned,
+and it costs the reviewer twelve lines of reading that hide nothing and
+find nothing. The ask is to drop it from this change, or to put it in a
+commit of its own where it can be skimmed as what it is.
+
+`test_todo.py` lost three lines and gained none. A test file that only
+shrinks is the line in a diffstat to read first.
+
+<Predict id="run-deleted-test" title="The three lines test_todo.py lost"
+  answer={`diff --git a/test_todo.py b/test_todo.py
+  --- a/test_todo.py
+  +++ b/test_todo.py
+  @@ -37,9 +37,6 @@ class TodoTests(unittest.TestCase):
+           )
+           self.assertEqual(render.list_items(items), expected)
+
+  -    def test_list_empty(self):
+  -        self.assertEqual(render.list_items([]), "nothing to do")
+  -
+
+   if __name__ == "__main__":
+       unittest.main()`} run="coding-with-agents/reviewing-the-diff/deleted_test.py">
+The course's script prints the branch's diff of `test_todo.py`, without
+the `index` line, which holds hashes that differ per machine.
+
+```sh
+python3 deleted_test.py
+```
+
+</Predict>
+
+The deleted test checked that an empty list prints `nothing to do`. Now
+read `render.py` with that in mind. The old version returned
+`nothing to do` for an empty list before it built any lines. The new
+version dropped that early return. An empty list now prints the count
+line and nothing else. The test failed, and the agent made the suite green by deleting
+the test instead of restoring the behavior. The spec's limits say `list`
+keeps working as it does, so this is a criterion broken and its evidence
+removed in the same commit. The summary said "the whole suite passes",
+and that sentence is true.
+
+<Pitfall title="The summary that said 'with validation'">
+An engineer asks an agent to add input validation to a form handler. The
+summary comes back: "Added validation for the three fields, with tests.
+All 41 tests pass." The engineer reads the new validation code, finds it
+clean, and approves. Two weeks later a colleague asks why the handler
+accepts an empty email address. The diff had deleted the test that
+checked it, because the new validation rejected a different set of
+inputs and the old test failed. The suite count in the summary was
+right. It had been 42 before. The rule is to read the diff before the
+summary, and to read a deleted test as a claim the code no longer
+makes.
+</Pitfall>
+
+<MultiChoice id="changes-to-question" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['reviewing-code-you-did-not-write']}
+  context="A coding agent's branch for a due-dates feature touched six files. The spec named the program file, the rendering file and new tests. The learner decides which changes to send back."
+  title="Which changes do you ask the agent to drop or split out?" hint="For each file, who asked for the change, and what does it do to the program?"
+  options={[
+    { text: 'The new default file name in `store.py`.', correct: true },
+    { text: 'The new `due` and `overdue` functions in `todo.py`.', why: 'The spec asked for both commands. They are the change, and the review reads them for correctness rather than for whether they belong.' },
+    { text: 'The reformat of `test_clear.py`.', correct: true },
+    { text: 'The new `test_due_dates.py` file.', why: 'The spec asks for tests that pass after every increment. This file is what the spec asked for, and the question about it is what it leaves untested.' },
+    { text: 'The deleted `test_list_empty` and the `render.py` change it covered.', correct: true },
+  ]}>
+Which of these changes on the branch do you send back, as changes the
+spec never asked for?
+</MultiChoice>
+
+<Choice id="summary-or-diff" phase="review" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['reviewing-code-you-did-not-write']}
+  context="A coding agent posts a summary of a finished branch and the test suite passes. The learner decides how much of the review the summary and the suite have already done."
+  title="What has the green suite proven?" hint="Who wrote the tests, and who can delete one?"
+  options={[
+    { text: 'That the branch meets the spec, because the spec asked for a passing suite.', why: 'The spec asks for a passing suite after every increment as one criterion of five. The other four are checked by running the commands.' },
+    { text: 'That every behavior the old suite covered still works.', why: 'Only if the old suite is still there. A diffstat that shows a test file shrinking says it may not be.' },
+    { text: 'That the summary is accurate about what changed.', why: 'The suite runs the code. It knows nothing about the summary.' },
+    { text: 'That the code does what the tests on the branch say, and no more than that.', correct: true },
+  ]}>
+The agent's branch is green. What does that tell the reviewer?
+</Choice>
+
+## The criteria, item by item
+
+The feature itself is left, and the way to read it is against the five
+success criteria, one at a time. Verifying against the specification
+means checking each criterion the way it is written instead of asking
+whether the change looks reasonable. A plausible change that drops one
+criterion, or skips the edge case a criterion names, looks exactly like a
+complete one until each line of the spec is ticked or not (@Brilliant VER).
+The criteria in `SPEC.md` are written as commands with expected output,
+so each one is a command you run.
+
+Read the code first. Criterion 3 says `overdue` prints `nothing overdue` when
+no item is overdue. The agent's `overdue` builds a list of lines and
+returns them joined. When the list is empty, it returns an empty string.
+Criterion 4 says a malformed date is refused with `bad date: <input>`,
+the command exits with status 2 and the file is unchanged. The agent's
+dispatch sets `message` to the bad-date text and then reaches the same
+`store.save` and `return 0` as every other command. The message
+is there. The exit status isn't. Reading finds both, and running confirms
+them.
+
+<Predict id="run-criteria" title="The five criteria, run"
+  answer={`1. due then list: ok
+  2. committed file lists as before: ok
+  3. overdue: 2026-09-30 printed an empty line
+  4. bad date: exit status 0
+  5. unittest: OK`} run="coding-with-agents/reviewing-the-diff/criteria.py">
+The course's script runs each success criterion of `SPEC.md` against the
+branch, the way the spec states it, and prints one line per criterion.
+`ok` means the branch does what the line says, and a failure names what
+the branch did instead. The script points `TODO_FILE` at the copy's own
+`todos.json`, as the earlier scripts did, so the renamed default in
+`store.py` doesn't show here. Reading the diff is what found that one.
+
+```sh
+python3 criteria.py
+```
+
+</Predict>
+
+Three of five lines say `ok`, including the suite. Criteria 3 and 4
+fail, and neither failure is a test failure, because the agent's tests test
+what the agent built. `test_due_dates.py` has a test for an overdue item
+and none for the `nothing overdue` case. It tests `valid_date` and never
+runs the command to see its exit status. A test file written by the
+author of the code covers the cases the author thought of, and the spec
+is the list of cases someone else thought of. The criteria are the
+review's checklist for exactly that reason. When a criterion can't be
+checked by a command, the spec or the verification needs fixing before
+the change is accepted, and that's a finding too.
+
+Running the branch also turns a reading into a fact. The changed lines
+in `store.py` read as harmless until you run `python3 todo.py list`
+in the copy without `TODO_FILE` set and get an empty list where the
+committed items should be. Reading catches design problems, and running
+catches the behavior the tests missed. A review that does both is the
+one that finds every problem on this branch.
+
+<Choice id="green-but-not-done" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['verifying-against-the-specification']}
+  context="A coding agent's branch passes its test suite, and a check of the spec's five success criteria finds two that fail. The learner explains to a colleague why the two results don't contradict each other."
+  title="Why did a green suite and two failed criteria happen together?" hint="Who wrote the list of cases the suite checks, and who wrote the criteria?"
+  options={[
+    { text: 'The tests cover the cases the agent built, and the criteria list the cases the spec asked for. A case in the second list and not the first fails only the criterion.', correct: true },
+    { text: 'The suite ran on the wrong branch, because the agent committed before its last change was saved, so the green result belongs to older code.', why: 'The script builds the branch and runs the suite on it. The verdict is about the same code the criteria ran against.' },
+    { text: 'Two of the five criteria describe behavior the spec never asked for, so they were never going to pass whatever the agent built.', why: 'The two that failed are criteria 3 and 4 of the spec the agent worked from. They are the spec.' },
+    { text: 'The unit tests run the functions, and the criteria run the commands, so the suite can never check a criterion that mentions a command.', why: 'A test can run the command and read its exit status, as the earlier lessons\' fixtures do. The agent\'s tests chose not to.' },
+  ]}>
+A colleague reads the criteria output and says the checker must be wrong,
+because the suite is green. What do you tell them?
+</Choice>
+
+<Scenario id="approve-the-branch" phase="review" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['verifying-against-the-specification']}
+  context="A coding agent's branch for a spec with five success criteria arrives with a summary that says the work is done and a passing suite. The learner has the spec and a terminal and decides what to do before approving."
+  title="Before you approve" hint="Which of these produces a fact about the branch that nobody on the branch's side has produced yet?"
+  options={[
+    { text: 'Read the summary and the diff, and approve when every line of the diff looks like it belongs to the feature.', consequence: 'You approve a branch where a criterion prints an empty line where the spec asked for a message. Every line looked like it belonged.' },
+    { text: 'Run each success criterion of the spec as the command it names, on the branch, and compare with what the spec says it prints.', correct: true, consequence: 'Two criteria fail. The branch goes back with the two lines of the spec it doesn\'t meet, and the tests that should have caught them.' },
+    { text: 'Ask the agent whether every success criterion is met, and approve when it confirms each one.', consequence: 'The agent confirms all five. It is answering from the same understanding that produced the branch, and its answer is another claim to check.' },
+    { text: 'Run the suite yourself, so the green result is one you saw rather than one you were told about.', consequence: 'The suite is green on your machine too. The tests are the agent\'s, and the criterion with no test stays unchecked.' },
+  ]}>
+The branch is in front of you with its summary and a green suite. What
+do you do before approving?
+</Scenario>
+
+<Exercise stretch="Then brief your own coding agent to fix the branch: name the two failing criteria, the deleted test and the two files to leave alone. Review the fix the same way, and count what the second review finds.">
+Build the branch on a copy with the course's `stat.py`, or make your own
+copy of the fixture, and review it as if a colleague had asked you to.
+Write your review as a list of findings, one line each, before you look
+at the model answer. Spend fifteen minutes. Read the spec first, then
+the tests, then every changed file, and finish by running the five
+criteria by hand. This is the review a branch gets before it reaches
+`main`, and the habit is what you take from the fixture.
+
+A good result lists five findings: `overdue` prints an empty line where
+the spec says `nothing overdue`, a bad date exits with status 0 where the
+spec says 2, `render.py` no longer prints `nothing to do` and the test
+for it was deleted, `store.py` reads a different file by default, and
+`test_clear.py` was reformatted for no reason the spec gives. Each
+finding names the file and the line of the spec it is measured against.
+Then answer one question: which finding would reading alone have missed,
+and which would running alone have missed?
+</Exercise>
+
+<Recap>
+1. Read the brief, then the tests, then the diff, and answer whether the change does what was asked before how it does it (@Academy ai-fluency-for-builders). Reviewing code you didn't write means every line has to justify itself against the spec, because you have no memory of why it exists (@Brilliant VER).
+2. Start with the list of changed files and question every file the brief never named. A silent behavior change, a reformat and a shrinking test file are the riskiest part of an agent's diff, and a deleted test is a claim the code no longer makes.
+3. Check the success criteria item by item, by running the command each one names. A plausible change with a criterion dropped or an edge case skipped looks complete until then, and a green suite proves only what the agent's own tests say (@Brilliant VER).
+4. Run the branch as well as reading it. Reading catches the design, and running catches the behavior the tests missed.
+</Recap>
