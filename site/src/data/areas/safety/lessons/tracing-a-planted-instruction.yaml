@@ -1,10 +1,16 @@
 id: safety/tracing-a-planted-instruction
 title: Tracing a planted instruction to the tool that leaks
+description: >-
+  Follow one planted line on a web page through three permission sets, and find that the tool that
+  can send is the one that leaks.
 mode: tutorial
 covers: safety/agent-risk
 serves: [safety/judges-agent-risk/recognizes-injection]
 introduces: []
-assumes: []
+assumes:
+  - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: permissions-and-least-privilege
 after: [safety/agent-risk]
 shorts: [Why a model cannot tell data from commands]
 exercise:
@@ -12,10 +18,15 @@ exercise:
   brief: >-
     For an assistant you use that reads content you did not write, name the outbound abilities it
     has and which one you would remove or gate for a summarizing task.
-sources: []
+sources:
+  - AEC-10
+  - Academy introduction-to-claude-cowork
 issue: 132
 minutes: 15
 notes: >-
-  Introduces no concept: deepens prompt-injection and exfiltration with a fixture that simulates an
-  agent reading a page with a planted line under three permission sets and prints, for each, whether
-  data leaves and by which tool.
+  Introduces no concept: deepens prompt-injection and exfiltration from agent-risk. The page shows the
+  output of the fixture site/examples/safety/tracing-a-planted-instruction/planted_line.py in text
+  fences, because safety is a foundations area and the page carries no Predict run. The test
+  tests/test_tracing_a_planted_instruction.py runs the fixture and asserts every printed line is on
+  the page, the pattern concepts/what-tokens-cost (#137) uses. The recipe site bramble-kitchen.example
+  is under the reserved .example domain, and the page holds no person names.
