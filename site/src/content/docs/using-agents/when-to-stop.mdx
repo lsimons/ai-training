@@ -1,0 +1,326 @@
+import { Choice, MultiChoice, Match, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we read three logs of delegated work and find, in each, the
+round where handing the piece back to the agent started to cost more than
+doing the step yourself. Then we name the signs that show that point, and
+we look at why taking a step back is a judgment about cost and says nothing
+about the tool or about you. You don't run anything in this lesson. The
+logs are supplied, and the work is reading them.
+
+A round, in this lesson, is one pass of delegated work. You hand the agent
+a piece with a brief and get a result back. After checking the result
+against the done-criteria, you change the brief with what the check showed
+and hand the piece over again. Working in rounds is how a split task gets
+done, and most pieces take one or two. This lesson is about the piece that
+doesn't.
+
+## The round logs
+
+The logs below come from the calibration team at Brindlewick Instruments,
+the fictional company from the earlier lessons. Each log is a few lines per
+round: what was handed over, what came back, what the check found. Read them
+once before the next section names what they show, and keep in mind that
+each one stops for its own reason.
+
+The first log is the "Blocked" section of the weekly status update. The
+brief for this piece said: list every item from the notes that's waiting on
+someone outside the team, one bullet each, with who it is waiting on and
+the date.
+
+```text
+Log A: the Blocked section
+
+Round 1
+  Handed over: the brief and notes.md.
+  Came back: two bullets. The reference weight, waiting on the supplier.
+    The thermocouple batch, waiting on the food lab.
+  Check: the thermocouple batch is in progress, and the team is doing it.
+    The notes say "12 of 40 done", and nothing is waiting on the lab.
+  Brief change: added "an item counts as blocked only when the team
+    cannot continue until someone outside the team acts".
+
+Round 2
+  Handed over: the changed brief.
+  Came back: one bullet, the reference weight. A second bullet: the
+    spirit levels, waiting on the survey team to confirm the start date.
+  Check: the notes say "start the spirit levels" under next week. There
+    is no confirmation in the notes. The agent read a plan as a wait.
+  Brief change: added "use only what the notes say is waiting".
+
+Round 3
+  Handed over: the changed brief.
+  Came back: one bullet, the reference weight, "due 26 Sep, supplier".
+    A note under it: "the storeroom probe shortage may also block
+    calibration work".
+  Check: the bullet is right. The note is a guess, and the brief asked
+    for bullets only.
+```
+
+The section is one bullet long. The person running this log has now read
+three results, found a wrong line in each, and written two additions to the
+brief. Writing the bullet by hand takes less time than reading round three.
+
+The second log is a piece of the same update that the director asked for
+after the meeting: mark which of the finished items she has already signed
+off, so the update doesn't ask her to look at them again.
+
+```text
+Log B: the signed-off marks
+
+Round 1
+  Handed over: the brief, notes.md and the finished update.
+  Came back: the update with "(signed off)" on none of the items, and a
+    question: "The notes and the update do not say which items the
+    director has signed off. Where can I find that?"
+  Check: the question is right. The sign-offs happened in a meeting,
+    and nothing in the folder records them.
+  Brief change: added "the torque wrenches were signed off in the
+    meeting of 18 Sep".
+
+Round 2
+  Handed over: the changed brief.
+  Came back: "(signed off)" on the torque wrenches. A question: "Was the
+    storeroom count also signed off? It is listed as done."
+  Check: it was, and again the answer is in your memory of the meeting.
+```
+
+Every round of this log ends with the agent asking you for a fact and you
+typing it. The agent adds nothing to the fact. The only place the answer
+exists is your head, so the step is yours whether you delegate it or not.
+
+The third log is the thermocouple batch. The lab sent back a sheet with 40
+serial numbers and a pass or fail for each, and the piece is a two-line
+count for the update: how many passed, how many failed.
+
+```text
+Log C: the pass and fail count
+
+Round 1
+  Handed over: the brief and the lab sheet, pasted in.
+  Came back: "37 passed, 3 failed."
+  Check: the sheet has 40 rows. Counting the fails by hand gives 4,
+    and one of the rows says "fail (recheck)" in a different column.
+  Brief change: added "a row with fail anywhere in it counts as a fail".
+
+Round 2
+  Handed over: the changed brief and the sheet.
+  Came back: "36 passed, 4 failed."
+  Check: read all 40 rows again, one by one, against the two numbers.
+```
+
+The result is right in round two. Getting to "right" took reading 40 rows
+twice, and reading them once with a tally is the whole task. When the check
+is the work, delegating it doesn't remove the work from your desk. It
+doubles it.
+
+## The signs
+
+Each log ends in a different round, and each shows one sign that it was
+time to take the piece back.
+
+**A third round on one piece.** The first result nearly always shows a
+gap in the brief, and filling the gap for a second round is the normal
+course of working in rounds. By the third round the second fix hasn't held
+either, and the piece has become a series of small corrections on
+something you could see the answer to from round one. In Log A that's the
+third result on a one-bullet section.
+
+**A step that depends on knowledge only you hold.** The agent works from
+what it can read. When the fact the piece needs is in your memory, in a
+conversation you had, or in a judgment only you are in a position to make,
+every round is the agent asking and you answering. In Log B the sign-offs
+happened in a meeting and are written down nowhere the agent can reach.
+
+**A check that takes longer than the work.** A result you can only trust
+after redoing the task is a result you have done yourself, with a
+delegation on top. In Log C the check is reading every row, and reading
+every row once is the piece.
+
+The signs are silent about how well the agent did. The agent in Log A wrote a
+correct bullet in every round and a wrong extra each time. The agent in Log
+B asked the right question twice. The agent in Log C got the count right
+once the brief said what a fail looks like. The signs measure the cost of
+the next round against the cost of the step. That cost is a fact about the
+piece and the situation, and it can be read from the log.
+
+<Match id="log-to-sign" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['when-to-stop-and-do-it-yourself']}
+  context="The lesson shows three logs of delegated work from a fictional calibration team. Log A reaches a third round on a one-bullet section, Log B has the agent asking for facts from a meeting in every round, and Log C is a count of 40 rows that the learner reads in full to check."
+  title="Which sign does each log show?" hint="For each log, what is the thing that made the last round expensive?"
+  options={['A third round on one piece', 'A step that depends on knowledge only you hold', 'A check that takes longer than the work']}
+  rows={[
+    { statement: 'Log A, the Blocked section', option: 0, why: 'Count the rounds, and compare the length of the section to the number of results read.' },
+    { statement: 'Log B, the signed-off marks', option: 1, why: 'Where does the answer to the agent\'s question exist, and can the agent get there?' },
+    { statement: 'Log C, the pass and fail count', option: 2, why: 'What did checking the result involve, and how does it compare to doing the piece?' },
+  ]}
+  rationale="Each log stopped for a different reason, and each reason can be read from the log without knowing how the agent was feeling or how good it is.">
+Match each log to the sign it shows.
+</Match>
+
+<Choice id="read-the-sign" phase="review" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['when-to-stop-and-do-it-yourself']}
+  context="A learner delegates a two-line summary of a colleague's feedback that was given in a hallway conversation nobody wrote down. The agent returns a summary each round and asks in each round what the colleague said."
+  title="Which sign is this?" hint="What does every round of this log have in common, and where does the fact the agent needs exist?"
+  options={[
+    { text: 'A check that takes longer than the work, because the learner reads the summary each round.', why: 'The summary is two lines and reading it is quick. Look at what the agent asks for each time instead.' },
+    { text: 'A step that needs knowledge only the learner holds, because the conversation exists only in their memory.', correct: true },
+    { text: 'A third round on one piece, because the learner has now answered more than twice.', why: 'Count the rounds in the description. The sign here shows up in the first round already, before any count is reached.' },
+  ]}>
+You ask an agent for a two-line summary of what a colleague told you in the
+hallway. Nobody wrote the conversation down. The agent returns a summary,
+and it asks you what the colleague said. Which sign is this?
+</Choice>
+
+## Taking the step back is a cost judgment
+
+When a sign shows, take the piece back and do the step. The reason is
+cost. A round has a price: writing the brief change, waiting for the
+result, and reading it against the done-criteria (@DLAI-11). A step done by
+hand has a price too. When the next round costs more than the step, the
+step is cheaper by hand, and that is the whole argument. Which tool you
+used, and how good it is, doesn't enter into it. Neither does how good you
+are at briefing. A brief can be written well and still be handed to a
+piece where the fact needed is in your memory, and no rewrite of the brief
+changes where that fact is.
+
+Taking one piece back also loses nothing else. The piece is still the piece
+your split produced, with its own input, its own output and its own check.
+The pieces around it stay delegated, and the check you wrote for this piece
+still applies to the result you make by hand. In Log A the bullet still has
+to name who it waits on and the date. In Log C the two numbers still have to
+add up to 40. The split shaped the work, and the split holds whether an
+agent or you fills a given slot in it.
+
+The judgment runs the other way as well. A piece that shows none of the
+signs stays with the agent even when doing it yourself would be quicker
+today, because the brief you write is one you can run again next week, and
+a step you did by hand is gone when it's done. Delegating is a judgment
+about what the situation makes cheap, and the same person delegates one
+piece and takes back the next (@Academy ai-fluency-framework-foundations).
+
+<Pitfall title="Finishing the wrong thing well">
+A learner reaches a third round on a piece and feels that stopping now
+would mean the earlier rounds were wasted, so they write one more brief
+change and run it again. The fourth result is clean. The section is one
+bullet, and four results and three brief changes went into it. The earlier
+rounds cost what they cost, and a fourth round adds to that cost without
+taking any of it back. The feeling that stopping is giving up is about you,
+and the log is about the piece. Read the log. When it shows a sign, the
+cheapest next step is the one you take yourself, and the rounds already
+spent don't change that.
+</Pitfall>
+
+<Scenario id="the-third-round" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['when-to-stop-and-do-it-yourself', 'checking-results']}
+  context="A learner is delegating a short list for a weekly update in rounds, with a written brief and done-criteria. Round three has just returned, and like the two before it, the list has one right line and one wrong extra line."
+  title="The third result is back" hint="Compare the cost of a fourth round with the cost of writing the list, and think about what the earlier rounds cost regardless of what you do now."
+  options={[
+    { text: 'Write the list yourself, check it against the done-criteria in the brief, and move on to the next piece.', correct: true, consequence: 'The list is done in the time it took to read one result. The done-criteria still applied, and the next piece goes to the agent as planned.' },
+    { text: 'Add one more line to the brief that rules out this extra, and run a fourth round, since three rounds of work would be wasted otherwise.', consequence: 'The fourth result may be clean. The three rounds cost the same whether you stop or not, and the fourth round costs on top of them, for a list you could see the answer to.' },
+    { text: 'Switch to a different agent and hand it the same brief, since this one keeps adding a line.', consequence: 'A new agent reads the same brief for the same one-line list, and you read a fourth result. The cost of the round did not depend on which agent ran it.' },
+    { text: 'Accept the result with the extra line and mark the piece done, since it has a right line in it.', consequence: 'The done-criteria say every line must come from the notes, and one does not. The piece is not done, and the next reader of the update has a wrong line to find.' },
+  ]}>
+The third round on a short list comes back with one right line and one
+wrong extra line, as the two before it did. The list is four lines long.
+What do you do?
+</Scenario>
+
+<MultiChoice id="signs-or-not" phase="review" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['when-to-stop-and-do-it-yourself']}
+  context="A learner is delegating pieces of a report in rounds and is deciding, per piece, whether the next round is worth running or the step is cheaper done by hand."
+  title="Which of these are signs to take the piece back?" hint="For each line, ask whether it changes the cost of the next round compared to the step done by hand."
+  options={[
+    { text: 'The result of the second round on a short piece shows a new wrong line after the first one was fixed.', correct: true },
+    { text: 'The first result has a gap that one added line in the brief fills.', why: 'One gap after a first result is the normal shape of a round. The fix goes in the brief and the second round is cheap.' },
+    { text: 'Trusting the result means reading every source row again, and reading the rows is the task.', correct: true },
+    { text: 'The agent finished the piece faster than you expected and the result passed every done-criterion.', why: 'A quick pass is delegation working. Nothing in it raises the cost of the next round.' },
+    { text: 'The agent asks in every round for a decision that only you can make and that nothing in the folder records.', correct: true },
+  ]}>
+Which of these lines from a round log are signs that the piece is cheaper
+done by hand?
+</MultiChoice>
+
+<Exercise stretch="Take a piece from your own recent work that you delegated and re-ran more than once. Write its round log in the format above, and mark the round where you would stop now.">
+Below are three short round logs from the same fictional team. For each
+one, write down the round where taking the step back would have been
+cheaper, and the sign that shows it. Then write one line on what the person
+would have done by hand at that point. Ten minutes is enough.
+
+```text
+Log 1: the meeting date line
+
+Round 1
+  Handed over: write one line naming the next review meeting, from
+    calendar.md.
+  Came back: "Next review: Thursday 2 Oct, 10:00."
+  Check: calendar.md has the meeting on 2 Oct. The time moved to 14:00
+    in a message to you this morning, and the file still says 10:00.
+  Brief change: added "the meeting is at 14:00".
+
+Round 2
+  Came back: "Next review: Thursday 2 Oct, 14:00."
+  Check: correct. A question: "Should I also note that the room
+    changed? calendar.md lists room 3 and the message you mention
+    may say otherwise."
+```
+
+```text
+Log 2: the supplier list
+
+Round 1
+  Handed over: from the six order emails pasted in, list each supplier
+    once with the item ordered.
+  Came back: six suppliers, six items.
+  Check: two of the emails are from the same supplier. The list has it
+    twice, under two spellings of its name.
+  Brief change: added "the same supplier under two spellings is one
+    supplier".
+
+Round 2
+  Came back: five suppliers, six items.
+  Check: correct. A seventh line lists an item with "supplier not
+    named". The email for it names the supplier in the signature.
+  Brief change: added "the supplier may be named in the signature".
+
+Round 3
+  Came back: five suppliers, six items, and a note that one email may
+    be a duplicate of another.
+  Check: the emails are not duplicates. The list is right apart from
+    the note.
+```
+
+```text
+Log 3: the serial number check
+
+Round 1
+  Handed over: the sheet of 40 serial numbers from the lab and the
+    sheet of 40 from the storeroom. Report any number on one sheet and
+    not the other.
+  Came back: "All 40 numbers appear on both sheets."
+  Check: read both sheets side by side, 40 rows each, and found one
+    number on the lab sheet with two digits swapped.
+  Brief change: added "compare digit by digit".
+
+Round 2
+  Came back: "One mismatch: row 23, digits 5 and 6 swapped."
+  Check: read both sheets side by side again to confirm there is no
+    second one.
+```
+
+A good answer names Log 1 round 2, because the facts the piece needs
+arrive in messages to you and the agent can only ask for them. It names
+Log 2 round 3, because the piece is a five-line list and the third
+result again holds one thing the brief never asked for. It names Log 3
+round 1, because trusting either result means reading both sheets side
+by side, and that reading is the task. Where your answer differs, write
+down which cost you weighed differently. Which piece in your own work
+this week reached one of these three points?
+</Exercise>
+
+<Recap>
+1. A round is a brief handed over, a result checked against the done-criteria, and a brief changed with what the check showed. Most pieces take one or two, and a first result with a gap is the normal shape of a round.
+2. A third round on one piece, a step that depends on knowledge only you hold, and a check that takes longer than the work are the signs that the next round costs more than the step done by hand.
+3. Taking the piece back is a judgment about cost (@DLAI-11). It says nothing about the tool, its quality, or your briefing, because none of those move where a fact is or how long a check takes.
+4. The piece you take back keeps the input, output and check the split gave it, and the other pieces stay delegated, so the split loses nothing.
+5. Stopping after spent rounds can feel like giving up. The spent rounds cost the same either way, and the log says whether the next step is yours, however stopping feels (@Academy ai-fluency-framework-foundations).
+</Recap>
