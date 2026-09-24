@@ -1,0 +1,357 @@
+import { Choice, MultiChoice, Predict, Order, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson the agent commits the three increments of the due-dates
+spec one by one on a branch, and then we take the middle one out again
+with one command. The point of the exercise is the boundary between the
+commits. A change on a branch, in commits small enough to revert one at
+a time and with no step in it that can't be undone, is safe to hand to an
+agent. The worst outcome costs a revert. The second half
+of the lesson covers the changes that don't revert that way, data and
+schema, and then the commit messages and the pull request description
+that let a reviewer see what the agent did and what was checked.
+
+The previous lesson landed increment 1 of the spec and stopped. Here the
+agent does all three, and the commits are the record of the work. The
+course keeps scripts that apply the increments to a copy for you, and
+each example below names its script.
+
+## One commit per increment, on a branch
+
+Start from a fresh copy of the fixture from *Working from a spec in small
+increments*, with its `SPEC.md`, and make the copy a git repository before
+the agent touches it: `git init`, one commit with the program as it is,
+one commit with the spec, and a branch `due-dates` to work on. The branch
+is what makes the whole change reversible at once. Deleting it, or
+leaving it unmerged, undoes everything, and `main` never changes while the
+agent works. Coding agents commit when asked, and the brief has to ask.
+Left alone, most agents edit until the task is done and leave you one
+working tree with every change in it (@Brilliant INC).
+
+<Prompt model="illustrative" recorded="illustrative">
+Read `SPEC.md` and land its three increments on this branch, one commit
+per increment. After each increment run `python3 -m unittest -q`, and
+commit only when it passes. Use a one-line commit message that starts
+with `feat:` and says what the increment adds. Don't touch `main`, don't
+rewrite a commit once it exists, and don't run any git command that
+deletes or force-pushes anything. Stop after the third commit and show me
+`git log --oneline main..HEAD`.
+</Prompt>
+<Response>
+The branch `due-dates` has one commit per increment, and the suite
+passes after each one.
+
+```text
+a3f9c1e feat: refuse a malformed date
+5b27d04 feat: overdue command with TODO_TODAY
+e81a6b2 feat: due command and the date in list
+```
+
+Each commit touches `todo.py` and adds one test file. The first also
+changes `render.py`. `store.py` and `todos.json` are unchanged.
+</Response>
+
+The transcripts in this lesson are illustrative. They show what a good
+exchange looks like and don't record a specific model's words. The
+hashes in your log differ from the ones above, so the course's own check
+prints the log without them.
+
+<Predict id="run-commits" title="Three commits, and the suite at the tip"
+  answer={`feat: refuse a malformed date
+feat: overdue command with TODO_TODAY
+feat: due command and the date in list
+OK`} run="coding-with-agents/reversible-changes/commits.py">
+In a clone of the course repository, from
+`site/examples/coding-with-agents/reversible-changes/`, run the script
+that commits the three increments on a copy. Its output is the commit
+subjects on the branch, newest first, with the last line of the test run
+under them.
+
+```sh
+python3 commits.py
+```
+
+</Predict>
+
+The examples in this lesson aren't graded. Each one is a command you run,
+with the output the course itself checks on every build. The checkpoints
+ask about which changes revert and what a reviewer needs to read, the
+judgment this lesson teaches.
+
+Now the reason for the boundaries. Suppose the `overdue` command turns out
+to be wrong in a way you don't want to fix today, and `due` and the date
+check should stay. With three commits, the fix is one command that adds a
+fourth commit, and nothing is rewritten.
+
+```sh
+git revert --no-edit HEAD~1
+```
+
+<Predict id="run-revert" title="Revert the middle commit"
+  answer={`Revert "feat: overdue command with TODO_TODAY"
+feat: refuse a malformed date
+feat: overdue command with TODO_TODAY
+feat: due command and the date in list
+OK
+bad date: tomorrow
+overdue exits with status 2`} run="coding-with-agents/reversible-changes/revert.py">
+The course's script makes the three commits and reverts the middle one.
+Then it prints the log, the last line of the test run, the output of
+`due 1 tomorrow`, and the exit status of `overdue`.
+
+```sh
+python3 revert.py
+```
+
+</Predict>
+
+The revert is a fourth commit, so the history still says that `overdue`
+was there and was taken out. The suite passes, because the test for
+`overdue` left with the code it tested. The third increment still refuses
+a bad date, and `overdue` now gets the usage message and status 2, as
+any unknown command does. Had the agent made one commit for the whole
+feature, taking `overdue` out would have meant editing the code by hand
+and hoping the tests still cover what's left. The revert only works
+because the second commit changed the lines that belong to `overdue` and
+no others. That's a property of the brief as much as of the agent. "One
+commit per increment" gave the agent a boundary to keep, and the
+increments from the spec gave it boundaries that make sense.
+
+<Choice id="why-the-revert-is-clean" objective="coding-with-agents/ships-with-agent/keeps-change-reversible"
+  concepts={['reversibility']}
+  context="A coding agent landed a three-increment feature as three commits on a branch. The learner reverted the middle commit with git revert, the tests passed, and the other two increments kept working."
+  title="What made the revert cheap?" hint="What would the same command have done if the agent had made one commit for the whole feature?"
+  options={[
+    { text: 'Each commit changed only the lines its increment needed, so one can leave without the others.', correct: true },
+    { text: 'The agent ran the tests before each commit, so the tests knew which lines belonged to which increment.', why: 'The tests say whether the program works. They don\'t mark which lines belong together. The commit boundary does that.' },
+    { text: 'The branch kept `main` untouched, so anything on the branch could be dropped without cost.', why: 'The branch makes the whole change disposable. It says nothing about taking one part out and keeping the rest.' },
+    { text: 'The revert command is written to find the increment on its own and remove it whatever the commit history looks like.', why: 'Revert undoes one commit\'s diff. When a commit holds three increments, the revert takes all three out or conflicts.' },
+  ]}>
+Reverting the middle commit removed `overdue`, kept `due` and the date
+check, and left the suite green. Which property of the work made that
+possible?
+</Choice>
+
+## The step a human looks at before it runs
+
+Everything so far is reversible because it is text in a repository. A
+revert undoes it, and the branch bounds it. Some steps an agent can take
+have no undo, and those are the ones to find in the plan before they run.
+In a code repository they're the git commands that discard history:
+`push --force`, `branch -D`, `reset --hard`, and `clean -f`. Outside the
+repository they're a deleted file that isn't tracked, a dropped table, an
+email sent, a payment made, a deploy to a system other people use. The
+brief above rules out the git commands by name. The rule in general is
+that a step with no way back is the step you read before it runs, and
+the agent runs everything else without waiting for you (@DLAI-5).
+
+The question to ask of every step is "if this is wrong, what undoes it,
+and how long does that take?" When the answer is "a revert, in a minute",
+the agent may take the step. When it is "nothing" or "a restore from last
+night's backup", the step is yours to approve.
+
+<Sort id="revert-or-look-first" objective="coding-with-agents/ships-with-agent/keeps-change-reversible"
+  concepts={['reversibility']}
+  context="A learner sorts the steps a coding agent proposes in a session into two groups: steps a git revert undoes, and steps with no way back that a human reads before they run."
+  title="Which steps can the agent take on its own?" hint="For each step, name the command that undoes it. Is there one?"
+  buckets={['A revert undoes it', 'A human reads it before it runs']}
+  items={[
+    { text: 'Rename a function and update its callers in six files', bucket: 0 },
+    { text: 'Delete the branch the last three commits are on, because the work is "done"', bucket: 1 },
+    { text: 'Run the migration that drops the `email_old` column from the production table', bucket: 1 },
+    { text: 'Add a new module and its tests', bucket: 0 },
+    { text: 'Run the cleanup script that removes every untracked file in the working tree', bucket: 1 },
+    { text: 'Change the message a command prints', bucket: 0 },
+  ]} />
+
+<Pitfall title="The rename that took the data with it">
+An engineer asks the agent to rename the `email` column to
+`contact_email`. The agent's migration does exactly that in one step. The
+same commit updates the model. It passes review,
+because the diff is small and the tests pass. On deploy, the version of
+the service still running during the rollout reads `email`, finds no
+such column, and fails every request for four minutes. The engineer
+reverts the code, and the revert deploys against a table that now has
+`contact_email`. The old code fails too. The way forward is a second
+migration written under pressure. A schema change has no revert of its
+own. Its way back is a change you design before it runs.
+</Pitfall>
+
+## Data changes with the way back written down
+
+Code is stored in the repository, and a revert brings back the old
+version in a second. Data is stored in a database, a file or an index,
+and it has no history unless you keep one. When a change touches data, the code revert
+alone isn't enough, because the old code meets data in the new form. So
+a data change is designed with its way back written down before it runs,
+and the write-up is part of the change the reviewer reads.
+
+The usual design is to add before you remove. The migration adds the new
+column and backfills it from the old one, and the code starts writing to
+both and reading from the new one. Dropping the old column is a separate
+change, days later, after the new code has run in production and nothing
+still reads the old one. After each of those steps, the previous
+version of the code works against the current table, so a revert of the
+code is still a revert. The to-do fixture follows the same rule in
+miniature: the spec says an item without a `due` field is still valid, so the first
+increment added a field that some items have and some don't, and an
+older `todo.py` still reads the file.
+
+Cheaper still is a change that can be turned off. A feature flag or a
+configuration switch that's off by default lets the new code ship in
+the same deploy as the old, and turning the new behavior off takes a
+setting change and no deploy at all. When the agent proposes a change
+whose undo is "revert and redeploy", ask whether it could be "flip the
+switch" instead. Ship the new ranking behind a flag, enable it for the
+team first, and the way back is a configuration edit. The flag is
+removed later, in its own commit, once the old path has no callers.
+
+<Order id="order-the-migration" objective="coding-with-agents/ships-with-agent/keeps-change-reversible"
+  concepts={['reversibility']}
+  context="A team moves a column to a new name in a production database while the service keeps running. The rule is to add before you remove, so that every version of the code in the rollout works against the current table."
+  title="Order the column move" hint="At each step, does the version of the code deployed just before it still work against the table?"
+  steps={[
+    'Add the new column and backfill it from the old one',
+    'Deploy code that writes to both columns and reads from the new one',
+    'Deploy code that writes only to the new column',
+    'Drop the old column, in its own change, after the previous step has run for a while',
+  ]} />
+
+<Scenario id="agent-proposes-one-step-rename" phase="review" objective="coding-with-agents/ships-with-agent/keeps-change-reversible"
+  concepts={['reversibility']}
+  context="A coding agent proposes a database migration for a feature. The learner judges the proposal by whether the change has a way back written down before it runs."
+  title="The migration the agent proposes" hint="After this migration runs, what happens when you revert the code?"
+  options={[
+    { text: 'Accept it as proposed. The migration is one file, the model change is small, and the tests pass.', consequence: 'The migration runs, the rollout fails halfway, and the code revert fails against the renamed column. The way back is written under pressure.' },
+    { text: 'Ask the agent to split it: add and backfill the new column now, and drop the old one in a later change.', correct: true, consequence: 'Each step leaves the previous code working. A revert at any point is a code revert, and the drop waits until nothing reads the old column.' },
+    { text: 'Ask the agent to write a second migration that reverses the rename, and keep it ready.', consequence: 'A down migration helps, and it still fails when the old code has already written rows the reversal doesn\'t know about. Adding before removing avoids the question.' },
+    { text: 'Do the rename by hand in the database console instead, so that no migration file is needed at all.', consequence: 'The change is now recorded nowhere, and the next deploy runs a migration set that doesn\'t match the table.' },
+  ]}>
+The agent proposes a migration that renames the `email` column to
+`contact_email` and updates the model in the same commit. What do you
+do?
+</Scenario>
+
+<Choice id="switch-or-revert" phase="review" objective="coding-with-agents/ships-with-agent/keeps-change-reversible"
+  concepts={['reversibility']}
+  context="A learner compares ways to undo a change a coding agent ships: a code revert with a redeploy, a feature flag that is off by default, a database restore."
+  title="The cheapest undo" hint="How long does each undo take, and who has to be awake for it?"
+  options={[
+    { text: 'A code revert, because git keeps the whole history and nothing is ever lost.', why: 'A revert needs a deploy to take effect, and a revert of code that changed data meets data in the new form.' },
+    { text: 'A switch that turns the new behavior off, because it reverses in seconds and without a deploy.', correct: true },
+    { text: 'A restore from the last backup, because it puts everything back exactly as it was.', why: 'A restore loses every write since the backup and takes the longest of the three. It is the way back of last resort.' },
+    { text: 'A second migration that reverses the first, because a migration is the tool for schema changes.', why: 'A down migration reverses the schema and knows nothing about the rows the new code wrote in between. It is a partial answer.' },
+  ]}>
+The agent has a new ranking of search results ready to ship. Which undo
+do you want to have when the ranking proves wrong?
+</Choice>
+
+## The commit message and the pull request description
+
+The commits are on the branch, and a reviewer now reads them. Two texts
+carry the change to the team: the commit messages and the pull request
+description. A commit message says what changed and why, in a line a
+reader of `git log` can act on. The messages on the branch do that:
+`feat: overdue command with TODO_TODAY` tells the reader what the commit adds and how
+it picks the day, and a revert of it explains itself. A message like
+`update todo.py` says where the diff is and nothing the diff doesn't say
+better.
+
+The pull request description is where the reviewer's attention is set.
+It names the spec the change follows, and the reviewer checks against
+the same document the agent worked from. It says what was verified and
+how, criterion by criterion. The reviewer then knows what has been
+checked and what's left to them. And it says what the agent did and what
+you did, because a reviewer reads a diff differently when they know a
+machine wrote it and a person checked the criteria. That last line isn't
+a confession. It is the information the reviewer needs to spend their
+time where a human hasn't looked yet. Ask the agent to draft it from the
+commits and the spec, and then read it against what you did.
+
+<Prompt model="illustrative" recorded="illustrative">
+Draft the pull request description for this branch. Name the spec, list
+the increments as committed, and say for each success criterion how it was
+checked. I ran criteria 1, 3 and 4 by hand on a copy of the list; you
+ran the suite after each commit. Say which of us did what.
+</Prompt>
+<Response>
+The draft below follows the commits and the spec.
+
+```text
+# Due dates
+
+Implements `SPEC.md` (due dates) in three increments, one commit each,
+on top of the spec commit, in the order the spec lists them.
+
+## Changes
+
+- `due N YYYY-MM-DD` sets a date on an item, and `list` shows it.
+- `overdue` lists open items whose date is before today.
+  `TODO_TODAY=YYYY-MM-DD` overrides today.
+- A malformed date is refused with `bad date: <input>`, status 2, and
+  the file is unchanged.
+
+## Verification
+
+- Criterion 1, 3, 4: run by hand by the author on a copy of `todos.json`.
+- Criterion 2: the committed `todos.json` has no `due` field, and
+  `list` shows it as before. Checked by the author.
+- Criterion 5: `python3 -m unittest -q` passes after each commit. Run by
+  the agent after each increment and by the author at the tip.
+
+## How this was made
+
+A coding agent wrote the code and the tests from `SPEC.md` and made the
+three commits. The author wrote the spec, reviewed each diff, and
+checked the criteria above. `store.py` and `todos.json` are unchanged.
+```
+</Response>
+
+Read the draft against what happened. The verification section makes
+claims, and each one is a line you can check. The line about criterion 2
+says the file has no `due` field, and `git diff main -- todos.json` says
+so in a second. The line about criterion 5 says the agent ran the suite
+after each increment, and `git log` can't show that, so the description
+is where it is written down. A reviewer who reads this knows that the
+suite was the agent's check, the criteria were the author's, and the
+author read every diff. Their time goes to the code itself.
+
+<MultiChoice id="what-the-description-holds" objective="coding-with-agents/ships-with-agent/keeps-change-reversible"
+  concepts={['commits-and-prs']}
+  context="A learner writes the pull request description for a branch a coding agent worked on. The description names the spec, says what was verified and how, and says what the agent did and what the author did."
+  title="What does the reviewer need from the description?" hint="Which lines let the reviewer decide where to spend their attention, and which does the diff already say?"
+  options={[
+    { text: 'The spec the change follows, so the review checks against the same document the agent worked from.', correct: true },
+    { text: 'The full diff pasted into the description, so the reviewer sees the change without opening the files.', why: 'The pull request already shows the diff. Pasting it doubles the reading and hides the lines that aren\'t in the diff.' },
+    { text: 'Which criteria were checked, by whom, and how.', correct: true },
+    { text: 'The name of the model and the whole session transcript, so nothing about the agent\'s work is hidden.', why: 'The transcript is longer than the change. The reviewer needs to know what the agent did and what a person checked, in a few lines.' },
+    { text: 'What the agent did and what the author did.', correct: true },
+  ]}>
+Which of these belong in the pull request description for the
+`due-dates` branch?
+</MultiChoice>
+
+<Exercise stretch="Then have the agent put the `overdue` command back with `git revert` of the revert, and check that the description still tells the truth. Which lines had to change?">
+In a fresh copy of the fixture, make a git repository with the two
+commits and the `due-dates` branch as this lesson did. Brief your coding
+agent to commit the three increments of `SPEC.md` one by one, with the
+rule that it commits only when the suite passes and doesn't run a git
+command that deletes or rewrites. Then revert the middle commit yourself, run
+the suite, and have the agent draft the pull request description with
+the spec, the criteria, and who checked what. Plan on fifteen minutes.
+After this, a change an agent made is a change your team can review
+and, when needed, undo.
+
+A good result: four commits on the branch after the revert, `OK` from
+the suite, `due 1 tomorrow` still refused, and a description whose
+verification lines you can each check in a command. Finish by deleting
+your copy. Then answer one question: which line of the description
+could you not check from the repository alone, and where's it written
+down instead?
+</Exercise>
+
+<Recap>
+1. A change is reversible when it is on a branch in commits small enough to revert one at a time, and no step in it is one that can't be undone. That's what makes it safe to let an agent try (@Brilliant INC).
+2. Ask for one commit per increment in the brief, and rule out the git commands that discard history by name. The step with no way back is the one you read before it runs (@DLAI-5).
+3. A data or schema change is designed with its way back written down before it runs: add and backfill first, drop later, and prefer a switch that turns the change off over a revert that needs a deploy.
+4. The commit message says what changed and why. The pull request description names the spec, says what was verified and how, and says what the agent did and what you did. The reviewer then spends their time where no person has looked yet.
+</Recap>
