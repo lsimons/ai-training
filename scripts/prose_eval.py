@@ -25,6 +25,8 @@ import sys
 from collections.abc import Callable, Sequence
 from typing import Any
 
+import vale_configs
+
 # One Vale alert as it appears in `vale --output=JSON`: a dict keyed by
 # "Check", "Message", "Line" and so on. Vale's output is {path: [alert, ...]}.
 Alert = dict[str, Any]
@@ -40,11 +42,12 @@ MAIN_SYNC = "mise run prose-sync"
 CHECK_FLAG = "--check-packages"
 
 # A package URL on a `Packages` line ends in `<name>.zip`, and Vale unpacks
-# it to `<StylesPath>/<name>/`. A bare package name (`Packages = Google`,
-# which Vale fetches from its own library) has no `.zip` and is not
-# supported here: the check would not know the directory to look for.
+# it to `<StylesPath>/<name>/`: "A package's name is the archive's file name
+# without `.zip`" (https://docs.vale.sh/keys/packages, "Naming a package").
+# A bare package name (`Packages = Google`, which that page says Vale looks
+# up in its package library) has no `.zip` and is not supported here: the
+# check would not know the directory to look for.
 PACKAGE_ZIP = re.compile(r"([^/\s,]+)\.zip$")
-PACKAGES_KEY = re.compile(r"^\s*Packages\s*=\s*(.*)$")
 
 
 class UnsupportedPackageError(ValueError):
@@ -52,29 +55,17 @@ class UnsupportedPackageError(ValueError):
 
 
 def package_entries(ini: pathlib.Path) -> list[str]:
-    """Every comma-separated entry of the `Packages` keys, continuation lines joined.
+    """Every comma-separated entry of the top-level `Packages` key.
 
-    Comment lines (`;` or `#`) are skipped. A trailing backslash continues
-    the value on the next line, the way the configs here write it.
+    The file is read by `vale_configs.parse_ini`, which owns the ini rules
+    (comments, continuation lines, a repeated key) and raises `ValueError`
+    on a line it does not cover. Only the top-level `Packages` counts:
+    `Packages` is a core setting, and Vale reports a core key under a
+    section as an error (https://docs.vale.sh/topics/.vale.ini, "The file").
     """
-    entries: list[str] = []
-    pending: str | None = None
-    for line in ini.read_text().splitlines():
-        if line.lstrip().startswith((";", "#")):
-            continue
-        if pending is not None:
-            value = pending + line
-        else:
-            match = PACKAGES_KEY.match(line)
-            if match is None:
-                continue
-            value = match.group(1)
-        if value.rstrip().endswith("\\"):
-            pending = value.rstrip()[:-1]
-            continue
-        entries.extend(part.strip() for part in value.split(",") if part.strip())
-        pending = None
-    return entries
+    config = vale_configs.parse_ini(ini.read_text(encoding="utf-8"))
+    value = config[""].get("Packages", "")
+    return [part.strip() for part in value.split(",") if part.strip()]
 
 
 # Same file set as `mise run prose`, minus the reports themselves, which
@@ -152,6 +143,8 @@ def check_packages_synced(ini: pathlib.Path, styles: pathlib.Path) -> None:
             f"prose: Packages entry '{exc}' in {ini} is not a .zip URL. "
             "Pin each package by its release .zip URL: a bare package name is not supported."
         )
+    except ValueError as exc:
+        sys.exit(f"prose: {ini}: {exc}")
     if not names:
         sys.exit(
             f"prose: no .zip packages found on the Packages lines of {ini}. "
