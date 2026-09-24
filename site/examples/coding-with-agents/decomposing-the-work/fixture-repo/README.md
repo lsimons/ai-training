@@ -16,7 +16,7 @@ python3 -m unittest -q
 `render.py` formats it. Items live in `todos.json` next to the scripts. Set
 `TODO_FILE` to use a different file.
 
-The tests pass. The lesson adds an `import` command in components, one at
-a time. Work in a copy of this directory, and reset it by deleting the copy
+The tests pass. The lesson designs an `import` command as components,
+built one at a time. Work in a copy of this directory, and reset it by deleting the copy
 and copying again. In a clone of the course repository, `git checkout -- .`
 does the same.
