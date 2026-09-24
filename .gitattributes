@@ -1,0 +1,11 @@
+# Append-only lists that many branches add to at once (#345). The union
+# driver keeps the lines of both sides instead of stopping on an add/add
+# conflict, in merges, rebases and cherry-picks alike.
+#
+# The bibliography is safe for it because the YAML parser rejects a
+# duplicate key: two branches that add the same key with different bodies
+# fail `mise run data` and `site-build` after the merge, and an identical
+# entry added at the same place merges to one copy. Keep adding each entry
+# as one block.
+cspell-words.txt merge=union
+site/src/data/bibliography.yaml merge=union
