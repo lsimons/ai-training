@@ -8,14 +8,17 @@ mode: tutorial
 covers: coding-with-agents/workflow
 serves: [coding-with-agents/ships-with-agent/works-in-increments]
 introduces: [spec-driven-change, working-increments, sequencing-for-early-feedback]
-assumes: []
+assumes:
+  - objective: coding-with-agents/specifies-work/defines-success
+    lesson: coding-with-agents/deciding-what-to-build
+    section: writing-down-what-success-requires
 after: [coding-with-agents/plan-then-test]
 shorts: [the thin end-to-end path]
 exercise:
   kind: do
   brief: >-
-    Write a one-page spec for a fixture feature and order its increments with the least certain one
-    first. Land the first increment with the agent.
+    From the spec on the page, brief the agent for the second increment only and land it: the test
+    with the two dates first, then the code, then the criterion checked by hand.
 sources: [Academy ai-native-sdlc-playbook, Brilliant INC]
 issue: 155
 minutes: 15
@@ -27,6 +30,9 @@ notes: >-
   and date validation. The spec is SPEC.md next to the fixture scripts, and the fixtures copy it
   and the first increment (todo.py due command, render.py date suffix, test_due.py) into a copy of
   the repository. criteria.py runs every success criterion of the spec against the copy after the
-  first increment, so the page's "3 of 5" comes from a fixture. The lesson doesn't lean on
-  plan-then-test's teaching (plan mode, failing test first), so assumes stays empty. Decomposition
+  first increment, so the page's "3 of 5" comes from a fixture. The page leans on success
+  criteria, which deciding-what-to-build introduces, so that lesson is the one assumes entry. That
+  lesson specifies a smaller due-dates feature on the same fixture (date on add, overdue out of
+  scope), and the page says in "Write the spec" that this spec changes both decisions on purpose.
+  The lesson doesn't lean on plan-then-test's teaching (plan mode, failing test first). Decomposition
   into components is a separate planned lesson and isn't taught here.
