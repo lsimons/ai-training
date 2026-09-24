@@ -31,5 +31,8 @@ exercise:
   kind: do
   brief: >-
     Replace a paragraph of formatting rules with one worked example and compare the two outputs.
-sources: []
+sources:
+  - Brown 2020
+  - Academy building-with-the-claude-api
+  - DLAI-1
 minutes: 12

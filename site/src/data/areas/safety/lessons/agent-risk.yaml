@@ -33,7 +33,8 @@ exercise:
   kind: do
   brief: >-
     Describe one agent task, list its reach, and place the approval before the irreversible step.
-sources: []
+sources:
+  - Academy introduction-to-claude-cowork
 minutes: 20
 notes: >-
   The plan also assumed concepts/recognizes-agents/tells-agent-from-assistant, which the page does

@@ -21,9 +21,10 @@
  *   introduces an unknown concept or one another lesson introduces, or cites
  *   a source key the bibliography lacks;
  * - a lesson page (`<area>/<lesson>.mdx`) has no lesson file, carries a
- *   frontmatter field the lesson file owns, or its lesson file has no
- *   `description` or an `assumes` entry without `lesson` and `section`;
- *   a course page (`<area>/index.mdx`) carries `title` or `description`.
+ *   frontmatter field the lesson file owns, cites a source (`(@key)`, the
+ *   remark citation plugin's form) that its lesson file's `sources` list
+ *   lacks, or its lesson file has no `description` or an `assumes` entry
+ *   without `lesson` and `section`; a course page (`<area>/index.mdx`) carries `title` or `description`.
  *
  * It reports a warning, which doesn't fail, when a concept of one of the
  * area's topics is introduced by no lesson: a gap in the plan, which is a
@@ -33,6 +34,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
+import { citationKeys } from '../../plugins/remark-citations.mjs';
 import { allTopics, courseLessonIds, readAreaTree } from './area-tree.mjs';
 
 /** Every file under `dir`, recursively. */
@@ -169,6 +171,7 @@ export function checkData(dataDir, contentDir) {
 	// Courses and lessons.
 	const pages = lessonPages(contentDir, areaIds);
 	const lessonIds = new Set();
+	const sourcesOf = new Map(); // lesson id -> Set of bibliography keys the plan lists
 	const introducedBy = new Map(); // area -> Map(concept -> lesson id)
 	for (const a of tree.areas) {
 		const areaLessons = new Set(a.lessons.map((l) => l.data?.id));
@@ -194,6 +197,7 @@ export function checkData(dataDir, contentDir) {
 			if (l?.id !== `${a.dir}/${stem}`) fail(`${where}: id is ${JSON.stringify(l?.id)}, expected ${a.dir}/${stem}`);
 			if (lessonIds.has(l?.id)) fail(`${where}: duplicate id`);
 			lessonIds.add(l?.id);
+			sourcesOf.set(l?.id, new Set(l?.sources ?? []));
 			if (!listedIn.has(l?.id)) fail(`${where}: no course under src/data/areas/${a.dir}/courses/ lists it`);
 			if (!topicIds.has(l?.covers)) fail(`${where}: covers ${JSON.stringify(l?.covers)} is not a topic id`);
 			else if (topicArea.get(l.covers) !== a.dir) fail(`${where}: covers ${l.covers}, a topic of another area`);
@@ -243,6 +247,10 @@ export function checkData(dataDir, contentDir) {
 		}
 		const owned = LESSON_OWNED_FIELDS.filter((k) => k in fm);
 		if (owned.length) fail(`${where}: frontmatter sets ${owned.join(', ')}, which the lesson file owns`);
+		// The plan may list a source the page doesn't cite (consulted, not quoted), so only this direction is checked.
+		for (const key of citationKeys(readFileSync(join(contentDir, `${id}.mdx`), 'utf8'))) {
+			if (!sourcesOf.get(id).has(key)) fail(`${where}: cites "${key}", which its plan file's sources list lacks`);
+		}
 	}
 	for (const a of tree.areas) {
 		const index = join(contentDir, a.dir, 'index.mdx');

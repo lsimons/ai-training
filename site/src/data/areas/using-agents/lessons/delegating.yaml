@@ -23,7 +23,9 @@ exercise:
   kind: do
   brief: >-
     Delegate the memo summary from the lesson with a brief, then walk the done-criteria one by one.
-sources: []
+sources:
+  - Academy introduction-to-claude-cowork
+  - Academy ai-fluency-framework-foundations
 minutes: 20
 notes: >-
   The plan assumed the topics concepts/what-is-an-agent and safety/verification, which the page does

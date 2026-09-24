@@ -24,7 +24,9 @@ exercise:
   kind: judge
   brief: >-
     Ask the same question twice, read both answers, and explain the difference in terms of sampling.
-sources: []
+sources:
+  - Academy ai-capabilities-and-limitations
+  - AEC-02
 minutes: 20
 notes: >-
   Names context-window, non-determinism and sycophancy in passing; the lessons below teach them.

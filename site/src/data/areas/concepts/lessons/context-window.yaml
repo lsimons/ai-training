@@ -32,5 +32,7 @@ exercise:
   brief: >-
     Count the tokens of a page of your own text with the fixture, then work out how many such pages
     fill a window of a given size.
-sources: []
+sources:
+  - AEC-02
+  - Academy ai-capabilities-and-limitations
 minutes: 12

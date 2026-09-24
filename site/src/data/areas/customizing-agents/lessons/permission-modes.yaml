@@ -24,7 +24,9 @@ exercise:
   brief: >-
     Run the same small fixture task in an ask-everything mode and in an accept-edits mode, count the
     prompts, and write one line on which mode fits the task and why.
-sources: [Claude Code permission modes]
+sources:
+  - Claude Code permission modes
+  - Academy claude-code-in-action
 minutes: 15
 notes: >-
   The fixture task reuses the first-session to-do directory, copied and given its own first commit

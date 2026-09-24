@@ -17,6 +17,24 @@ const CITATION = /\(@([^()\n]+?)\)/g;
 const DOCS_DIR = /[\\/]src[\\/]content[\\/]docs[\\/]/;
 
 /**
+ * The citation keys in `source`, in order of first appearance, matched the
+ * way the plugin matches them. This scans raw text, so it also sees a
+ * `(@key)` inside a code block, which the plugin leaves alone; the data
+ * check accepts that, because no lesson shows the syntax in code.
+ * @param {string} source
+ * @returns {string[]}
+ */
+export function citationKeys(source) {
+	/** @type {string[]} */
+	const keys = [];
+	for (const m of source.matchAll(CITATION)) {
+		const key = (m[1] ?? '').trim();
+		if (!keys.includes(key)) keys.push(key);
+	}
+	return keys;
+}
+
+/**
  * The root-relative URL of the page a file renders to, per Starlight's
  * routing: `src/content/docs/a/b.mdx` is `/a/b/` and `a/index.mdx` is `/a/`.
  * @param {string} path

@@ -27,5 +27,6 @@ exercise:
   brief: >-
     Write down, for one tool you use, where a prompt goes: retention, training, region,
     subprocessors.
-sources: []
+sources:
+  - Academy ai-fluency-framework-foundations
 minutes: 20

@@ -21,5 +21,6 @@ exercise:
   brief: >-
     In a throwaway project, run three tasks without an instruction file, note the wrong guesses, and
     write an AGENTS.md of at most fifteen lines from them.
-sources: []
+sources:
+  - Academy claude-code-101
 minutes: 20

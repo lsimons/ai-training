@@ -31,5 +31,7 @@ exercise:
   kind: judge
   brief: >-
     Read two short system prompts and predict, for three user messages, how the answers differ.
-sources: []
+sources:
+  - AEC-02
+  - Academy building-with-the-claude-api
 minutes: 10

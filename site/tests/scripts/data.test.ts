@@ -153,6 +153,15 @@ describe('checkData', () => {
 			check(tree({ 'data/areas/a/lessons/p.yaml': PLANNED.replace('covers: a/t', 'covers: a/nope') })).errors,
 		).toContain('src/data/areas/a/lessons/p.yaml: covers "a/nope" is not a topic id');
 	});
+	it('fails a page that cites a key its plan file does not list, and passes one whose citations all match', () => {
+		const { errors } = check(
+			tree({ 'content/a/x.mdx': 'Cited (@AEC-01) and again (@AEC-01), then (@Claude Code permission modes).\n' }),
+		);
+		expect(errors).toEqual([
+			'src/content/docs/a/x.mdx: cites "Claude Code permission modes", which its plan file\'s sources list lacks',
+		]);
+		expect(check(tree({ 'content/a/x.mdx': 'Cited (@AEC-01) and again (@ AEC-01 ).\n' })).errors).toEqual([]);
+	});
 	it('warns, without failing, about a concept no lesson introduces', () => {
 		const r = check(tree({ 'data/areas/a/lessons/p.yaml': PLANNED.replace('introduces: [c2]', 'introduces: []') }));
 		expect(r.errors).toEqual([]);

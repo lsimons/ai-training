@@ -109,7 +109,8 @@ per part, from the same files (`site/astro.config.mjs`). A merged lesson
 page appears there with no edit to the config.
 
 `mise run data` (part of `mise run ci`) fails when a lesson page has no plan
-file or sets a field that belongs in the plan, when a plan's `covers`, `serves`,
+file or sets a field that belongs in the plan, when a page cites a key its
+plan's `sources` list lacks, when a plan's `covers`, `serves`,
 `assumes`, `after`, `introduces` or `sources` id is unknown, when two
 lessons introduce the same concept, when a course lists a lesson twice or
 not at all, or when a live lesson lacks a `description` or an `assumes`
