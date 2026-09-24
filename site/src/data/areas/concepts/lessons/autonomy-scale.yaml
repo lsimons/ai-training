@@ -1,10 +1,17 @@
 id: concepts/autonomy-scale
 title: Who decides the next step
+description: >-
+  Place a product or workflow on the autonomy scale by asking who decides the next step, see one
+  coding agent land on three points in three permission settings, and name the step that moves a
+  workflow up or down.
 mode: explanation
 covers: concepts/what-is-an-agent
 serves: [concepts/recognizes-agents/places-on-autonomy-scale]
 introduces: [degree-of-autonomy]
-assumes: []
+assumes:
+  - objective: concepts/recognizes-agents/tells-agent-from-assistant
+    lesson: concepts/assistant-or-agent
+    section: the-harness
 after: [concepts/assistant-or-agent]
 shorts: []
 exercise:
@@ -12,6 +19,16 @@ exercise:
   brief: >-
     Place one coding agent in three permission settings on the scale and say what moves each one
     step up or down.
-sources: []
+sources: [AEC-01, DLAI-11, Claude Code permission modes]
+sources-checked: 2026-09-24
+review-by: 2027-03-24
 issue: 146
 minutes: 12
+notes: >-
+  Foundations page with no fixture. The page opens with "In the last lesson" about
+  concepts/assistant-or-agent, which is live, so assumes names its harness section. The three
+  permission settings are Claude Code's manual, acceptEdits and bypassPermissions modes, described in
+  plain words with no mode names or flags, and the pitfall's claim about the built-in starting mode
+  is from the same vendor page. AEC-01 and DLAI-11 are cited for ideas in our own words, so NOTICE.md
+  gets no new entry. Academy ai-fluency-framework-foundations from the issue is not cited because the
+  page uses nothing from it.
