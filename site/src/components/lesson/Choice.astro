@@ -18,14 +18,16 @@ interface Props {
 	context?: string;
 	review?: boolean;
 	revision?: number;
+	/** Opt-out from the surface-cue check with its reason (spec S03 "Checkpoints"). */
+	guessable?: string;
 	options: Option[];
 }
-const { id, objective, title, hint, concepts, context, review, revision, options } = Astro.props;
+const { id, objective, title, hint, concepts, context, review, revision, guessable, options } = Astro.props;
 const correct = options.filter((o) => o.correct).length;
 if (correct !== 1) throw new Error(`Choice "${id}" needs exactly one correct option, has ${correct}`);
 ---
 
-<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} kind="choice">
+<CheckpointShell {id} {objective} {title} {hint} {concepts} {context} {review} {revision} {guessable} kind="choice">
 	<slot />
 	<Fragment slot="body">
 		<div class="cp-options" role="radiogroup" aria-label={title}>
