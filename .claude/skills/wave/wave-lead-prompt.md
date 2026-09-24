@@ -19,6 +19,7 @@ Read `docs/agents/orchestration.md` and `docs/agents/meta-orchestration.md` in f
 - You read each verdict and send the builder one message: required findings, suggested rewrites to apply unless they read worse, findings to skip. One commit, reply on the issue, re-check by the same reviewer. Loop until approve.
 - Integration: wave branch `{{BRANCH}}` in a dedicated worktree from `origin/main`, each approved branch rebased `--onto` it exactly as `orchestration.md` shows. Resolve add/add conflicts in the word list, the S02 source table and the bibliography yourself by keeping every line in course order. Any other conflict goes back to the builder whose branch came second. Since #242 the e2e specs derive their lesson and checkpoint counts from the data tree; if one still fails on the wave branch, fix it there yourself or delegate that to one builder.
 - `mise run ci` on the wave branch (wait until `lsof -i :4400` is empty first). Push, open ONE pull request against `main` with the review table (issue, branch, review comment link, re-check link), the attribution lines, and `Closes #N` for every merged issue.
+- When a builder or reviewer you spawned has finished its last task, stop it with `TaskStop` so it doesn't linger in the maintainer's agent list.
 
 ## Standing approval
 
@@ -81,6 +82,10 @@ If the line under the first paragraph says you are resuming, a previous lead for
 - A sentence about vendor behavior (a CLI flag, a GitHub notification) names the vendor page that states it. Drop what no page states.
 - The gate's result beats the list in the issue body. #286 named two lessons, and seven tags in four lessons failed.
 - An e2e in-viewport assertion after a click needs a not-in-viewport assertion before it.
+- In an `.astro` template, keep a link and the words next to it on one source line, because the compiler drops the newline at a tag's line edge and the words run together (#70 shipped two words run together this way).
+- A copy button on a code line sits outside the scrolling `pre`, checked at 390px in the built page.
+- A parser for a vendor file format names the vendor page for each rule it copies, such as how a repeated key merges.
+- An e2e selector for a component picks its element by structure (`pre code`) and not by position (`code` nth(1)), since a review fix can add an element above it.
 
 ## Filing
 
