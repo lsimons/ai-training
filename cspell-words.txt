@@ -145,6 +145,7 @@ upvotes
 worktrees
 pseudonymized
 reflog
+diffstat
 
 # Invented people and companies in lesson fixtures
 Renske
