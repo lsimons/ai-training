@@ -1,0 +1,246 @@
+import { Choice, MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we pick one of three ways to apply a model to a task: chat,
+agent or automation. The three differ in how much the model does between
+one moment you look and the next, and the lesson gives you a way to pick
+the level for a task and to write down what would change the pick. You
+don't run anything here. The tasks are supplied, and the work is reading
+them and deciding.
+
+The concepts course gave you a test for telling an assistant from an
+agent, and the safety course showed where a person has to approve before
+an agent acts. This lesson puts the two together into one decision you
+make before the work starts: how much of it the model does on its own.
+
+## Three ways to apply a model
+
+The same model can be used in three ways, and the difference is where you
+are while it works.
+
+**Chat.** You type, the model answers, you read the answer and type again.
+Every step is yours, and the model does one step per turn. A difficult
+email is a chat task. You know what you want to say and the words won't
+come. You paste the thread and ask for a first draft. You cut a paragraph
+and ask for a softer second sentence, and you send the version you end up
+with. Every turn is a decision about tone, and you are the one making it.
+Chat fits thinking, one-off drafts, and any task where you would change
+your mind halfway through.
+
+**Agent.** You write a brief, and the agent works through the steps with
+its tools. It checks in with you at the points the brief names. A folder
+of two hundred misnamed scans is an agent task. You say what the names
+should look like and what to do with a file it can't read. You also say
+that it reports back before deleting anything. Then it works, and you read
+the report. The steps are known, but the path through them varies per file,
+and a person doesn't need to see each one. An agent fits a bounded task
+with clear done-criteria, where you want to read the result once instead
+of steering every step.
+
+**Automation.** Nobody is there. An event starts the run, the model does its part,
+and the result goes where it goes. Invoices renamed the moment they arrive
+in a mailbox are an automation task. The steps and the path are both
+fixed, the same thing happens every time, and the work is checked by
+sampling later, or by whoever opens the folder. Automation fits
+repetitive, low-stakes work that has been tested enough that nobody needs
+to watch it.
+
+The pattern across the three is one variable moving. In chat the model
+does one step and waits. In an agent it does many steps and waits at the
+points you named. In automation it does the whole task and waits for
+nobody. The word for that variable is autonomy, and each level trades your
+attention for the model's independence. A wrong pick either wastes your
+attention, when you steer step by step through work that has one right
+path, or removes your attention from the place where it was needed.
+
+<Sort id="which-level-fits" objective="using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation"
+  concepts={['chat-vs-agent-vs-automation']}
+  context="The lesson defines chat as steering every turn, an agent as working through a briefed task with tools and checking in at agreed points, and automation as running unattended on a trigger. The tasks here are everyday office tasks."
+  title="Which level fits each task?" hint="For each task, ask how many steps the model does before a person has to look, and whether a person would want to change course halfway."
+  buckets={['Chat', 'Agent', 'Automation']}
+  items={[
+    { text: 'Wording a reply to a customer who is angry about a late order', bucket: 0 },
+    { text: 'Renaming two hundred scanned documents to one naming pattern and reporting the ones it could not read', bucket: 1 },
+    { text: 'Adding the amount and the sender of each incoming invoice to a spreadsheet as it arrives', bucket: 2 },
+    { text: 'Deciding how to structure a proposal you have not thought through yet', bucket: 0 },
+    { text: 'Collecting the figures for the monthly report from four shared folders into one draft you will read', bucket: 1 },
+  ]} />
+
+## Autonomy rises and the checks rise with it
+
+Moving up a level gives the model more steps between checks. The trade
+only holds when the checks on the other side grow with it. In chat, the
+check is you reading every answer, and you need nothing else. In an
+agent, you read the result once. The brief has to contain the checks you
+won't be there for, such as what the agent must not do and where it stops
+to ask. In automation, you don't read anything at the
+time, and the checks have to exist and be tested before the first run. A
+sample you look at each week is one. An error the system reports instead
+of guessing through is another, and so is a way to undo a batch. A step-up in autonomy without
+the matching step-up in checks is a task that runs unwatched and
+unchecked, and the failures that follow are the ones the safety course
+described: the mistake now has hands
+(@Academy building-effective-human-agent-teams).
+
+The level is also picked for the task's worst case, and this is the part
+people get wrong. A support queue looks like an automation task. Most
+tickets are a password reset, a delivery question or a refund under the
+limit, and a well-briefed agent answers those correctly all day. One ticket
+in fifty is different. It is a complaint that mentions a lawyer, or a
+customer who was told something wrong by a person last week. The forty-nine routine tickets make the case for
+automation, and the fiftieth decides the level. If a wrong answer on that
+one ticket is expensive, and the system can't tell that ticket from the
+others with certainty, the queue stays at agent-with-approval: the agent
+drafts every reply and a person sends it, or the agent sends the routine
+ones and routes anything it isn't sure about to a person. The level is
+set by the ticket you can't afford to get wrong, and the routine tickets
+only decide how little attention that level should cost.
+
+So the question for a task is never "what does this task usually need?"
+It is "what does this task need on its worst day, and can the system tell
+that day from the others?" A task with a worst case that is cheap to fix,
+or that the system reliably detects and hands over, can run at the level
+its routine case suggests. A task whose worst case is expensive and looks
+like the routine case from the outside is kept one level down.
+
+<Choice id="the-fiftieth-ticket" objective="using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation"
+  concepts={['chat-vs-agent-vs-automation', 'human-in-the-loop']}
+  context="A team is deciding how to apply a model to a customer support queue. Nearly every ticket is routine and the agent handles those well, but about one ticket in fifty is a legal complaint or a privacy request that the agent cannot reliably tell apart from the rest."
+  title="Which level does the queue get?" hint="Which ticket sets the level, the one that arrives forty-nine times or the one that arrives once, and what does a wrong answer on each cost?"
+  options={[
+    { text: 'Automation, because the agent answers forty-nine of fifty tickets well and a person can review the complaints when they come up.', why: 'A person can only review the complaint if the system reliably tells it apart from the rest, and this one does not. The forty-nine tickets say how cheap the level should be, and the fiftieth says which level.' },
+    { text: 'Chat, because the fiftieth ticket is too important to hand to an agent, so a person should steer every reply.', why: 'Steering forty-nine routine replies by hand to catch one complaint wastes the attention on the tickets that do not need it. The level goes one step down from automation, and chat is two.' },
+    { text: 'Agent with approval, because the worst ticket is expensive to get wrong and the agent cannot tell it apart, so a person sends every reply the agent drafts.', correct: true },
+  ]}>
+Which level does the support queue get, and why?
+</Choice>
+
+## The moving rule
+
+A pick made this way has a reason, and a reason can be written down. The
+useful form is two sentences per task, one for what would move the task
+up a level and one for what would move it back down. "The invoice renaming
+goes to automation once a month of agent runs has needed no correction and
+the folder is backed up nightly. It comes back to agent if a run renames a
+file we can't match to an invoice." A rule like that makes the pick
+reviewable by someone who wasn't there when it was made, and it makes the
+next change a decision rather than a drift.
+
+What moves a task up is evidence, and what moves it back is a new worst
+case. Evidence is a run of results without corrections, a test on the
+cases that used to fail, a backup or an undo that turns the worst case into
+a cheap one, or a check that finds the odd case and routes it to a person.
+A new worst case is a task that starts to receive a kind of input it
+didn't before, a consequence that got more expensive (the folder is now
+shared with a client), a correction that nobody caught for a week, or a
+rule that changed (a new customer contract that says a person answers
+every message). When the level is written with its moving rules, an
+improvement in the tool is one more piece of evidence and a change in the
+task is a reason to look again, and both are decisions someone made on
+purpose (@Academy ai-fluency-for-builders).
+
+Writing the rule also stops the two silent moves. The first is the slide
+up: a task that was agent-with-approval becomes automation because the
+person approving stopped reading and started clicking, and nobody decided
+anything. The second is the slide down: a task that could safely run
+unattended stays in chat because it always has, and a person spends an
+hour a week steering a task with one right path. A written rule names the
+evidence the first move needs and the worst case that would justify the
+second, and a task with neither stays where it is.
+
+<Scenario id="the-approver-stopped-reading" objective="using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation"
+  concepts={['chat-vs-agent-vs-automation']}
+  context="A team's monthly report is drafted by an agent from figures in shared folders, and the operations lead reads the draft and approves it. The lesson taught that a pick for a level should be written with the evidence that would move it up and the worst case that would move it back."
+  title="Six months of approvals" hint="Has the level changed on paper, or in practice? What would each choice write down?"
+  options={[
+    { text: 'Move the report to automation, since six months of approvals with no changes is the evidence the lesson asked for.', consequence: 'The move is made on evidence, and the moving rule is written the same week. A month later a folder is renamed and the agent draws a blank figure into the report. The rule you wrote says a blank field brings it back to agent, and it does.', correct: true },
+    { text: 'Keep the approval step as it is, because a person clicking approve each month is a check.', consequence: 'The level on paper stays agent-with-approval. In practice the lead has not read a draft since March, and the report is running unattended with no sample check, no error report and no undo. It is automation without the checks automation needs.' },
+    { text: 'Bring the report back to chat and have the lead build it turn by turn, because approvals that nobody reads show the task was never safe to delegate.', consequence: 'The lead spends two hours a month steering a task with one right path, and six months of correct drafts said nothing about the task being unsafe. The attention goes back to the tickets that did not need it.' },
+  ]}>
+The operations lead has approved the agent's monthly report draft for six
+months, and admits that since about March the approval has been a click
+without a read. Nothing in the drafts has been wrong. What do you do?
+</Scenario>
+
+<MultiChoice id="what-sets-the-level" phase="review" objective="using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation"
+  concepts={['chat-vs-agent-vs-automation']}
+  context="A team is choosing between chat, agent and automation for a recurring task, and is listing what should decide the level."
+  title="What decides the level?" hint="For each line, ask whether it is about the task's worst day and its checks, or about something else."
+  options={[
+    { text: 'What a wrong result costs on the task\'s worst day, and whether the system can tell that day apart.', correct: true },
+    { text: 'How often the task comes up, because a task that runs every day has earned automation on its own.', why: 'Frequency says how much attention a level costs, and nothing about which level the task can carry. A daily task with an expensive worst case stays one level down.' },
+    { text: 'Whether the checks grow with the level, such as stop points in the brief or a tested sample and undo.', correct: true },
+    { text: 'Which level the tool\'s vendor recommends in its documentation for tasks of this kind.', why: 'The vendor knows the tool and not your task\'s worst case, your data, or what a wrong result costs you.' },
+    { text: 'Whether the evidence to move up and the worst case to move back are written down as a rule.', correct: true },
+  ]}>
+Which of these should decide whether a task runs as chat, agent or
+automation?
+</MultiChoice>
+
+<Choice id="one-level-down" phase="review" objective="using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation"
+  concepts={['chat-vs-agent-vs-automation']}
+  context="A team wants to run a recurring task unattended, and one case in the task's input is expensive to get wrong and looks like the routine cases from the outside."
+  title="When does a task stay one level down?" hint="Two things about the worst case together decide it. Which pair?"
+  options={[
+    { text: 'When the worst case is expensive to get wrong and the system reliably detects it and hands it to a person.', why: 'A detected worst case can go to a person while the routine cases run at the higher level. The detector is what makes the higher level safe.' },
+    { text: 'When the worst case is expensive to get wrong and looks like the routine case from the outside.', correct: true },
+    { text: 'When the worst case is rare enough that the team has not seen it yet in testing.', why: 'Rarity is why the routine cases argue for the higher level. It is the cost and the detectability of the rare case that decide whether they win.' },
+  ]}>
+A team wants to move a task from agent to automation. When does the task
+stay at agent instead?
+</Choice>
+
+<Pitfall title="Routine nine times, consequential the tenth">
+A task that goes the same way nine times out of ten is the one most
+likely to be picked for the wrong level, because the nine times are all
+anyone sees when the pick is made. The renaming, the reply, the report
+all look like a fixed path, and the pick is automation. The tenth time is
+the scan that is a signed contract, the ticket that mentions a lawyer, the
+report where a folder moved. Pick the level for the tenth time, and use
+the nine to decide how cheap that level should be. When the tenth time
+can't be told from the others by the system, the level is the one where a
+person still sees each result.
+</Pitfall>
+
+<Exercise stretch="Take a task from your own work that a model already does or could do, write its level with the two moving sentences, and check the pick against the task's worst day of the last year.">
+For each of the five tasks below, pick chat, agent or automation for the
+task's worst case, and write one sentence for what would move the task up
+a level and one for what would move it back. Fifteen lines, and fifteen
+minutes is enough.
+
+```text
+1. Answering the questions new colleagues ask in the team channel
+   about where things are and how the tools work.
+2. Turning the notes of a customer meeting into a follow-up email
+   to the customer.
+3. Sorting the receipts that arrive in the expenses mailbox into
+   the month and the category they belong to.
+4. Writing the first version of a project plan for something the
+   team has never done before.
+5. Checking each new supplier contract against the company's
+   standard terms and listing the differences.
+```
+
+A good answer has the plan in chat, because the thinking is the task and
+you would change course halfway. The follow-up email is at agent with you
+sending it, because the meeting is in your memory and the customer
+receives the result. It moves up only when the notes are complete enough
+to draft from without you. The receipts are at automation with a monthly
+sample check and a way to move a wrong file. They come back to agent if a
+receipt turns out to be a contract or an invoice above a set amount. The
+team-channel questions are at agent. The agent answers from the team's own
+pages and says when it can't find an answer, and the task moves back to
+chat if a wrong answer about access or a password shows up. The contract
+check is at agent with a person reading each list, because a missed clause
+is the tenth time. Its moving sentence names what evidence would let the
+routine contracts go further. Where your answer differs, the sentence that matters is the one
+about the worst case, so check that one first. Which of your five picks
+would slide up on its own if nobody wrote the rule?
+</Exercise>
+
+<Recap>
+1. Chat, agent and automation are three ways to apply one model, and the difference is how many steps it does before you look.
+2. Autonomy rises across the three. The checks rise with it, from your reading in chat to the brief's stop points for an agent to a tested sample and undo for automation (@Academy building-effective-human-agent-teams).
+3. The level is picked for the task's worst case. A worst case that is expensive and can't be told from the routine case keeps the task one level down.
+4. Each pick gets a moving rule: the evidence that moves the task up, and the new worst case that moves it back (@Academy ai-fluency-for-builders).
+5. The written rule stops the two silent moves, the approval that becomes a click and the task that stays in chat because it always has.
+</Recap>
