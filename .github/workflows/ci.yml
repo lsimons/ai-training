@@ -33,6 +33,12 @@ jobs:
       - name: Set up mise
         uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
+          # Pinned mise binary. `sha256` is the hash of the extracted
+          # `mise/bin/mise` from the linux-x64 tarball, and `.mise.toml`
+          # `min_version` matches. Refresh all three together (AGENTS.md,
+          # Supply chain).
+          version: 2026.9.12
+          sha256: e79ae57945034903aee8aa2ea66b4c7ca9cd4f4edd5a8a78a589cbae6d0f428a
           install: true
           cache: true
 
@@ -130,6 +136,12 @@ jobs:
       - name: Set up mise
         uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
+          # Pinned mise binary. `sha256` is the hash of the extracted
+          # `mise/bin/mise` from the linux-x64 tarball, and `.mise.toml`
+          # `min_version` matches. Refresh all three together (AGENTS.md,
+          # Supply chain).
+          version: 2026.9.12
+          sha256: e79ae57945034903aee8aa2ea66b4c7ca9cd4f4edd5a8a78a589cbae6d0f428a
           install: true
           cache: true
 
