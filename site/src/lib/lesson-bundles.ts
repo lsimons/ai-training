@@ -141,7 +141,11 @@ export function setAsideCode(src: string): CodeAside {
 	// ends a paragraph and so a span, so the body pattern excludes one and a stray backtick before a blank
 	// line pairs with nothing. The fenced blocks are placeholders by now, so no backtick is theirs.
 	// A backtick next to a brace (`={\`` and `\`}`) delimits a template literal in a component attribute, and
-	// is never a span's edge, so two such attributes on adjacent lines don't pair up as one span.
+	// is never a span's edge, so two such attributes on adjacent lines don't pair up as one span. The same rule
+	// makes a span whose whole body is one brace (`{` or `}`) no span, since its closing backtick follows a `{`
+	// or its opening backtick precedes a `}`, and the backticks it leaves pair with the next span's. No lesson
+	// has such a span (write the brace in a fenced block instead), and `scripts/lib/bundles.mjs` checks only
+	// fenced blocks, so a rewrite inside one would pass. Extend the rule before writing one.
 	// The body's edges are not backticks, and its middle may hold one, so ``a ` b`` is one span.
 	const edge = '(?:[^`\\n]|\\n(?![ \\t]*\\n))';
 	const middle = '(?:[^\\n]|\\n(?![ \\t]*\\n))';

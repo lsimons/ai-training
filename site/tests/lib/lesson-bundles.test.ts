@@ -56,6 +56,14 @@ describe('setAsideCode', () => {
 		const tag = '<Repair broken={`# a\n\nb`}\n  model={`# c\n\nd`}>\nWhy?\n</Repair>';
 		expect(setAsideCode(tag).text).toBe(tag);
 	});
+	it('a documented limit: a span whose whole body is one brace is no span, and its backticks pair with the next', () => {
+		// The template-literal rule above rejects `{` and `}` as a body. No lesson has one, and the comment in
+		// `setAsideCode` says so. This test pins the behavior so that a change to the rule shows up here.
+		expect(setAsideCode('An open `{` brace.').text).toBe('An open `{` brace.');
+		const { text, restore } = setAsideCode('A close `}` and `x` here.');
+		expect(text).toMatch(/^A close `}\uE000\d+\uE001x` here\.$/);
+		expect(restore(text)).toBe('A close `}` and `x` here.');
+	});
 	it('leaves an unclosed fence as code to the end', () => {
 		const { text, restore } = setAsideCode('```\nopen\n<Tag>');
 		expect(text).toMatch(/^\uE000\d+\uE001$/);
