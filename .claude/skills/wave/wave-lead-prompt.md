@@ -74,6 +74,9 @@ If the line under the first paragraph says you are resuming, a previous lead for
 - A builder that rewrites a checkpoint option re-reads that option's `why` and feedback text in the same edit.
 - A change to markup that a Starlight client script reads (sidebar `details` and `summary`) is tested from the restored state, not only on a fresh page.
 - Reviewers give the `code-review` skill an explicit target (branch or worktree range).
+- When a sibling branch replaces every reader of lesson source (as #98 did), new code that reads lesson source uses that reader and starts from that branch.
+- The lead names, per branch, the files a sibling also edits, including test files and import blocks.
+- A builder that says an item is already done on `main` quotes the line that shows it.
 
 ## Filing
 
