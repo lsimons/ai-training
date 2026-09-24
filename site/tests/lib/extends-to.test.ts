@@ -103,6 +103,14 @@ describe('checkExternalSourceHref', () => {
 			reason: 'covered-by href must be an https:// URL, got /safety/agent-risk/',
 		});
 	});
+	it('rejects a protocol-relative URL and an http:// URL', () => {
+		for (const href of ['//diataxis.fr/', 'http://diataxis.fr/']) {
+			expect(checkExternalSourceHref(href, sources, 'covered-by')).toEqual({
+				kind: 'invalid',
+				reason: `covered-by href must be an https:// URL, got ${href}`,
+			});
+		}
+	});
 	it('rejects an https:// href no bibliography entry covers, naming the field', () => {
 		expect(checkExternalSourceHref('https://nowhere.example/', sources, 'covered-by')).toMatchObject({
 			kind: 'invalid',
