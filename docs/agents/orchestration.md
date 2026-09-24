@@ -227,6 +227,13 @@ The cases that come up:
 
 ## Working with the platform
 
+- The coordinator waits by ending its turn. Each agent's notification
+  wakes it, so it never sleeps or polls a pull request for comments. It
+  waits in the foreground only for a check it started itself
+  (`mise run ci`, `gh pr checks --watch`, `gh run watch`), and never ends
+  its turn while one runs. `meta-orchestration.md` has the test behind
+  this rule, and the Bash guard hook rejects a `sleep` over 60 seconds
+  and a shell loop that calls `gh`.
 - Concurrent agents are capped (20 in this session). A spawn that hits the
   cap fails with a clear message; retry when a builder or reviewer
   finishes. Finished agents do not free a slot until their turn ends.
