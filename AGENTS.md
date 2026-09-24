@@ -228,9 +228,14 @@ patterns below after the fact. Write so that it has nothing to say.
 - `mise run site-audit` (`bun audit`) must be clean. Fix an advisory in a
   *transitive* package with the `overrides` block in `site/package.json`.
 - `mise run vuln` (osv-scanner) must be clean, and CI runs it as the `vuln`
-  job. It fails when the scanner did not open `uv.lock` or `site/bun.lock`,
-  so a new lockfile goes in the glob list of the task in `.mise.toml`. Fix
-  a Python advisory by bumping the pin with `mise run py-install`.
+  job. It scans `uv.lock` and `site/bun.lock` by name and fails when either
+  is missing or does not parse, so a new lockfile goes in the list of the
+  task in `.mise.toml`. Fix a Python advisory by editing the `==` pin in
+  the `dev` group of `pyproject.toml` and running `mise run py-install`
+  (and moving the `ruff-pre-commit` rev in `prek.toml` when it is ruff, see
+  the `uv.lock` bullet above). For a transitive package, add a
+  `[tool.uv] constraint-dependencies` entry in `pyproject.toml` and run
+  `mise run py-install` again.
 - Pin GitHub Actions to full-length commit SHAs. `zizmor` enforces it.
 - Every `.mise.toml` tool is exact-pinned and invisible to dependabot.
   Refresh with `mise up` and read the diff.
