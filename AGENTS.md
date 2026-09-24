@@ -224,11 +224,12 @@ patterns below after the fact. Write so that it has nothing to say.
   install with `site-install-frozen`. Use `mise run site-install` when
   deliberately changing dependencies, and commit the result.
 - Dependencies in `site/package.json` stay as ranges; `bun.lock` is the pin,
-  and dependabot moves the constraint. The exception is tools: `playwright`,
+  and dependabot moves the constraint. The exception is tools:
   `typescript`, `markdownlint-cli2`, `@commitlint/*` and `cspell` are
   exact, and the prek hooks and `mise run spell` run the last three from
   `site/node_modules/.bin`, so `site-install-frozen` comes before `lint`
-  and `spell`.
+  and `spell`. `@playwright/test` is the one Playwright package (the
+  screenshot script imports `chromium` from it too).
 - `uv.lock` is committed and must stay in the tree. `mise run ci` and CI
   install with `py-install-frozen`. The dev group in `pyproject.toml` is
   exact-pinned. Use `mise run py-install` when deliberately changing it,
