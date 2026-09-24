@@ -2,11 +2,12 @@
  * `(@key)` citations in text the data tree holds (competency behaviors, spec
  * S10), rendered the way remark-citations.mjs renders them in a lesson page:
  * a numbered `[N]` link by first appearance, and a References list at the
- * end of the page. Backtick spans render as `<code>`. An unknown key throws,
- * so the build fails the same way it does for a lesson page.
+ * end of the page. The text between citations is the inline Markdown
+ * `renderInline` knows (code spans, strong, emphasis, links). An unknown key
+ * throws, so the build fails the same way it does for a lesson page.
  */
-import { splitCitations } from '../../plugins/citation-syntax.mjs';
-import { escapeHtml } from './reference';
+import { createNumbering, referenceParts, splitCitations } from '../../plugins/citation-syntax.mjs';
+import { escapeHtml, renderInline } from './reference';
 
 export interface BibliographyEntry {
 	type: string;
@@ -23,48 +24,61 @@ export interface Reference {
 }
 
 export interface Citations {
-	/** `text` as HTML: escaped, code spans as `<code>`, each citation as a numbered link. */
+	/** `text` as HTML: inline Markdown via `renderInline`, each citation as a numbered link. */
 	render(text: string): string;
 	/** The cited entries, numbered by first appearance, for the References list. */
 	references(): Reference[];
 }
 
-const CODE_SPAN = /`([^`]+)`/g;
+/** A code span, so a `(@key)` inside one stays literal text. */
+const CODE_SPAN = /`[^`]+`/g;
+
+type Part = ReturnType<typeof splitCitations>[number];
+
+/**
+ * `text` as text runs and citation tokens. A code span is its own text run,
+ * so a token inside one is not a citation and `renderInline` shows it as code.
+ */
+function splitOutsideCode(text: string): Part[] {
+	const out: Part[] = [];
+	let last = 0;
+	for (const m of text.matchAll(CODE_SPAN)) {
+		out.push(...splitCitations(text.slice(last, m.index)));
+		out.push({ type: 'text', value: m[0] });
+		last = m.index + m[0].length;
+	}
+	out.push(...splitCitations(text.slice(last)));
+	return out;
+}
+
+/**
+ * One reference entry as HTML, in the entry format `referenceParts` gives,
+ * so `References.astro` and a lesson page's References list read the same.
+ */
+export function referenceHtml(key: string, entry: BibliographyEntry): string {
+	return referenceParts(key, entry)
+		.map((part) => {
+			if (part.type === 'code') return `<code>${escapeHtml(part.value)}</code>`;
+			if (part.type === 'text') return escapeHtml(part.value);
+			const title = `<em>${escapeHtml(part.value)}</em>`;
+			return part.url ? `<a href="${escapeHtml(part.url)}">${title}</a>` : title;
+		})
+		.join('');
+}
 
 export function createCitations(bibliography: Record<string, BibliographyEntry>, where: string): Citations {
-	const order: string[] = [];
-	const numberOf = (key: string): number => {
-		let n = order.indexOf(key);
-		if (n === -1) {
-			if (!(key in bibliography)) {
-				throw new Error(
-					`${where}: unknown citation key "${key}". Keys are defined in site/src/data/bibliography.yaml.`,
-				);
-			}
-			order.push(key);
-			n = order.length - 1;
-		}
-		return n + 1;
-	};
-	const prose = (text: string): string =>
-		splitCitations(text)
-			.map((part) => {
-				if (part.type === 'text') return escapeHtml(part.value);
-				const n = numberOf(part.key);
-				return `<a class="citation" data-key="${escapeHtml(part.key)}" href="#ref-${n}" title="${escapeHtml(part.key)}">[${n}]</a>`;
-			})
-			.join('');
+	const { numberOf, order } = createNumbering(bibliography, where);
 	return {
 		render(text) {
-			const out: string[] = [];
-			let last = 0;
-			for (const m of text.matchAll(CODE_SPAN)) {
-				out.push(prose(text.slice(last, m.index)));
-				out.push(`<code>${escapeHtml(m[1] ?? '')}</code>`);
-				last = m.index + m[0].length;
-			}
-			out.push(prose(text.slice(last)));
-			return out.join('');
+			// Each run renders on its own, so a strong or link span cannot cross a citation or a code span.
+			return splitOutsideCode(text)
+				.map((part) => {
+					if (part.type === 'text') return renderInline(part.value);
+					const n = numberOf(part.key);
+					const key = escapeHtml(part.key);
+					return `<a class="citation" data-key="${key}" href="#ref-${n}" title="${key}">[${n}]</a>`;
+				})
+				.join('');
 		},
 		references() {
 			return order.map((key, i) => ({ n: i + 1, key, entry: bibliography[key] as BibliographyEntry }));

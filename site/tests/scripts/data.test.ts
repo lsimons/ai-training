@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { allLessons, allTopics, courseLessonIds, readAreaTree, yamlFilesIn } from '../../scripts/lib/area-tree.mjs';
 import {
+	checkBehaviorCitations,
 	checkData,
 	FOUNDATIONS_EXEMPT,
 	foundationsSurfaces,
@@ -216,6 +217,23 @@ describe('checkData', () => {
 			'src/content/docs/a/y.mdx: lesson page without a lesson file at src/data/areas/a/lessons/y.yaml',
 			'src/content/docs/a/index.mdx: frontmatter sets title, which area.yaml owns',
 		]);
+	});
+});
+
+describe('competency behavior citations', () => {
+	const behaviors = (example: string) =>
+		`${COMPETENCY}    behaviors:\n      - claim: Reads (@AEC-01).\n        why: w\n        example: ${JSON.stringify(example)}\n`;
+	it('fails a behavior that cites a key the bibliography lacks, naming the objective, cell and key', () => {
+		const { errors } = check(tree({ 'data/areas/a/competencies/c.yaml': behaviors('See (@AEC-O1) too.') }));
+		expect(errors).toEqual([
+			'src/data/areas/a/competencies/c.yaml: objective a/c/o behavior 1 example cites "AEC-O1", which is not a bibliography key',
+		]);
+	});
+	it('passes behaviors whose keys all exist, and a competency without behaviors', () => {
+		expect(check(tree({ 'data/areas/a/competencies/c.yaml': behaviors('And (@ AEC-01 ).') })).errors).toEqual([]);
+		expect(check(tree()).errors).toEqual([]);
+		const root = tree();
+		expect(checkBehaviorCitations(readAreaTree(join(root, 'data')), (f) => f)).toEqual([]);
 	});
 });
 

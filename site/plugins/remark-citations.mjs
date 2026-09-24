@@ -11,7 +11,7 @@
  * checkpoint stem still resolves when a review page clones it. Only code is
  * left alone.
  */
-import { splitCitations } from './citation-syntax.mjs';
+import { createNumbering, referenceParts, splitCitations } from './citation-syntax.mjs';
 import { CODE_ONLY, walkText } from './mdast-walk.mjs';
 
 const DOCS_DIR = /[\\/]src[\\/]content[\\/]docs[\\/]/;
@@ -40,21 +40,7 @@ export function remarkCitations({ bibliography }) {
 		throw new Error('remarkCitations needs the parsed bibliography');
 	}
 	return (/** @type {any} */ tree, /** @type {any} */ file) => {
-		/** @type {string[]} */
-		const order = [];
-		const numberOf = (/** @type {string} */ key) => {
-			let n = order.indexOf(key);
-			if (n === -1) {
-				if (!(key in bibliography)) {
-					throw new Error(
-						`${file.path}: unknown citation key "${key}". Keys are defined in site/src/data/bibliography.yaml.`,
-					);
-				}
-				order.push(key);
-				n = order.length - 1;
-			}
-			return n + 1;
-		};
+		const { numberOf, order } = createNumbering(bibliography, file.path);
 
 		const page = pageUrl(file.path);
 		walkText(tree, {
@@ -112,25 +98,15 @@ function splitText(node, numberOf, page) {
 }
 
 /**
- * One reference entry as inline mdast: author, title (linked when the entry
- * has a public url), container, type, and the key.
+ * One reference entry as inline mdast, from the parts `referenceParts` gives.
  * @param {string} key
  * @param {any} entry
  */
 function referenceText(key, entry) {
-	/** @type {any[]} */
-	const parts = [];
-	if (entry.author) parts.push({ type: 'text', value: `${entry.author}. ` });
-	const title = { type: 'emphasis', children: [{ type: 'text', value: entry.title }] };
-	parts.push(entry.url ? { type: 'link', url: entry.url, children: [title] } : title);
-	parts.push({ type: 'text', value: '.' });
-	if (entry.container && entry.container !== entry.title) parts.push({ type: 'text', value: ` ${entry.container}.` });
-	if (entry.type) parts.push({ type: 'text', value: ` ${capitalize(entry.type)}.` });
-	parts.push({ type: 'text', value: ' ' }, { type: 'inlineCode', value: key });
-	return parts;
-}
-
-/** @param {string} s */
-function capitalize(s) {
-	return s.charAt(0).toUpperCase() + s.slice(1);
+	return referenceParts(key, entry).map((part) => {
+		if (part.type === 'code') return { type: 'inlineCode', value: part.value };
+		if (part.type === 'text') return { type: 'text', value: part.value };
+		const title = { type: 'emphasis', children: [{ type: 'text', value: part.value }] };
+		return part.url ? { type: 'link', url: part.url, children: [title] } : title;
+	});
 }
