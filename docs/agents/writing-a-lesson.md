@@ -31,7 +31,7 @@ assumes:                  # once live, each names the lesson section that teache
   - objective: concepts/explains-models/explains-generation
     lesson: concepts/how-models-work
     section: one-token-at-a-time   # slug of a real `## ` heading in that lesson
-extends-to:
+extends-to:               # a root-relative page path, or an https:// URL under a bibliography `url`
   - label: Decomposing work
     href: /using-agents/decomposition/
 after: []                 # lesson ids of this area, for the graph while the lesson is coming
@@ -408,8 +408,11 @@ The next time you hand an agent a task, say out loud what it can reach before yo
 `Recap` appends "You can now..." from the served objectives and the finish
 button. Don't write those by hand. Where to go next is the page footer's
 previous/next, which follows the sidebar order. `extends-to` only feeds the
-"You are ahead" card. Sources are listed on the topic page, from the topic
-YAML, not on the lesson.
+"You are ahead" card. An `extends-to` href may also be an `https://` URL
+that starts with the `url` of a bibliography entry, for example a Claude
+Academy course, and the card renders it as a plain link marked "(external
+link)". Sources are listed on the topic page, from the topic YAML, not on
+the lesson.
 
 Widgets are their own components under `site/src/components/widgets/` and
 are imported by name. They teach and never grade.

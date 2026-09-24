@@ -9,7 +9,9 @@
 import { getCollection, render } from 'astro:content';
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
 import ReviewLine from '@components/lesson/ReviewLine.astro';
+import RouteAhead, { type AheadItem } from '@components/lesson/RouteAhead.astro';
 import { getAreas, isEngineering } from '@lib/areas';
+import { checkExtendsToHref } from '@lib/extends-to';
 import { checkpointsOf, type Lesson } from '@lib/lessons';
 import { knownPagePaths } from '@lib/links';
 import { chooseSkillsCheck } from '@lib/skills-check';
@@ -30,7 +32,7 @@ const area = lessonId.split('/')[0] ?? '';
 const engineering = isLesson && isEngineering(await getAreas(), area);
 
 let behind: { objective: string; statement: string; href: string; lessonTitle: string }[] = [];
-let ahead: { label: string; href: string; exists: boolean }[] = [];
+let ahead: AheadItem[] = [];
 // The skills check (spec S04 "Skills check"): one checkpoint per served
 // objective, offered to comfort `more` on Engineering lessons. Foundations
 // has no comfort levels (spec S01).
@@ -77,12 +79,19 @@ if (isLesson) {
 			lessonTitle: lesson.data.title ?? a.lesson,
 		};
 	});
+	// An `extends-to` href is a root-relative page path, or an `https://` URL under
+	// a bibliography `url` (spec S03 "Frontmatter"). Anything else fails the build.
 	const pages = await knownPagePaths();
-	ahead = (data['extends-to'] ?? []).map((n) => ({
-		label: n.label,
-		href: href(n.href),
-		exists: pages.has(n.href),
-	}));
+	const sources = (await getCollection('bibliography')).map((b): [string, string | null | undefined] => [
+		b.id,
+		b.data.url,
+	]);
+	ahead = (data['extends-to'] ?? []).map((n) => {
+		const check = checkExtendsToHref(n.href, sources);
+		if (check.kind === 'invalid') throw new Error(`${lessonId}: ${check.reason}`);
+		const external = check.kind === 'external';
+		return { label: n.label, href: n.href, external, exists: external || pages.has(n.href) };
+	});
 }
 ---
 
@@ -114,16 +123,7 @@ if (isLesson) {
 			)}
 			<ReviewLine reviewBy={data['review-by']} sourcesChecked={data['sources-checked']} />
 			<Default><slot /></Default>
-			{ahead.length > 0 && (
-				<aside class="route-card route-ahead not-content" data-route="ahead" hidden>
-					<p class="route-title">You are ahead. Next:</p>
-					<ul>
-						{ahead.map((n) => (
-							<li>{n.exists ? <a href={n.href}>{n.label}</a> : <span>{n.label} <span class="route-where">(not written yet)</span></span>}</li>
-						))}
-					</ul>
-				</aside>
-			)}
+			<RouteAhead items={ahead} />
 		</div>
 	) : (
 		<Default><slot /></Default>

@@ -124,7 +124,7 @@ notes: >-
 | `serves`          | yes       | The objective ids the lesson teaches toward. Each gets at least one checkpoint (S03). May be empty while planning.                                            |
 | `introduces`      | yes       | The concept ids first taught in this lesson. Every concept of the area's topics is introduced by exactly one lesson, or the check warns. May be empty.        |
 | `assumes`         | yes       | The objectives the lesson relies on, from any area, as `{objective, lesson?, section?}`. Once live, each names the lesson and the `##` section that teach it. |
-| `extends-to`      | yes       | Where a confident learner goes next: `{label, href}` pairs (S03 "Frontmatter"). May be empty.                                                                 |
+| `extends-to`      | yes       | Where a confident learner goes next, as `{label, href}` (S03 "Frontmatter"): a page path or an `https://` URL under a bibliography `url`. May be empty.       |
 | `after`           | yes       | Lesson ids of this area the lesson comes after, for its place in the lesson graph while it is coming. A live lesson takes its place from `assumes`.           |
 | `shorts`          | yes       | Titles of the shorts the lesson would link to for depth (S01 "Short"), or an empty list. The short pages are still to be written.                             |
 | `exercise`        | one of    | The lesson's hands-on task: `{kind, brief}` with `kind` `do` or `judge` (S03 "Exercises") and a one-sentence brief.                                           |
