@@ -51,7 +51,7 @@ describe('takeawaysOf', () => {
 	it('is empty without a Recap or a body, and rejects an unclosed Recap', () => {
 		expect(takeawaysOf(lesson('no recap'))).toEqual([]);
 		expect(takeawaysOf(lesson())).toEqual([]);
-		expect(() => takeawaysOf(lesson('<Recap>\n1. a\n'))).toThrow(/unclosed <Recap>/);
+		expect(() => takeawaysOf(lesson('<Recap>\n1. a\n'))).toThrow(/closing tag for `<Recap>`/);
 	});
 });
 

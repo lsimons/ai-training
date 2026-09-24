@@ -5,7 +5,15 @@
  * renders the result hidden and a client script reveals it for finished
  * lessons. Pure: no DOM, no Astro.
  */
-import { type CheckpointAttr, openingTagEnd, parseAttrs, stringProp } from './checkpoint-source';
+import {
+	attrsOf,
+	type CheckpointAttr,
+	childrenSource,
+	isJsxElement,
+	type MdxNode,
+	parseMdx,
+	stringProp,
+} from './checkpoint-tags';
 import type { Lesson } from './lessons';
 import { href } from './url';
 
@@ -40,13 +48,37 @@ export interface LessonReference {
 	example: CanonicalExample | undefined;
 }
 
-const BLOCK_START = /<(Predict|Prompt)\b/g;
 /** A fenced code block; the info string after the language (`title=...`, `frame=none`) is dropped. */
 const FENCE = /^```(\w*)[^\n]*\n([\s\S]*?)\n```$/m;
 /** A bare `canonical` prop or `canonical={true}` (spec S03 "Examples"). */
 function isCanonical(attrs: Map<string, CheckpointAttr>): boolean {
-	const a = attrs.get('canonical');
-	return a !== undefined && (a.value === '' || a.value === 'true');
+	return attrs.get('canonical')?.value === true;
+}
+
+/** A component block in the lesson's MDX tree: its name, its props, its children as source, and where it sits. */
+interface Block {
+	name: string;
+	attrs: Map<string, CheckpointAttr>;
+	body: string;
+	/** The node's parent and its index there, so a following block can be told from a following sibling. */
+	parent: object;
+	index: number;
+}
+
+/** Every named component in the lesson body, in source order, read from the MDX tree (`lib/checkpoint-tags.ts`). */
+function blocksOf(lesson: Lesson): Block[] {
+	const src = lesson.body ?? '';
+	const out: Block[] = [];
+	const walk = (parent: MdxNode) => {
+		for (const [index, node] of (parent.children ?? []).entries()) {
+			if (isJsxElement(node) && node.name !== null) {
+				out.push({ name: node.name, attrs: attrsOf(node, lesson.id), body: childrenSource(node, src), parent, index });
+			}
+			walk(node);
+		}
+	};
+	walk(parseMdx(src));
+	return out;
 }
 
 export function escapeHtml(s: string): string {
@@ -122,26 +154,12 @@ export function segmentsOf(body: string): Segment[] {
 	return out;
 }
 
-/** `<Tag ...>` at `start`: its props, its body, and the offset after its closing tag. */
-function blockAt(
-	src: string,
-	start: number,
-	tag: string,
-): { attrs: Map<string, CheckpointAttr>; body: string; end: number } {
-	const bodyStart = openingTagEnd(src, start);
-	const attrs = parseAttrs(src.slice(start, bodyStart));
-	const close = src.indexOf(`</${tag}>`, bodyStart);
-	if (close < 0) throw new Error(`unclosed <${tag}> at offset ${start}`);
-	return { attrs, body: src.slice(bodyStart, close), end: close + tag.length + 3 };
-}
-
 /** The numbered takeaways inside the lesson's `<Recap>`, each as inline HTML. */
 export function takeawaysOf(lesson: Lesson): string[] {
-	const src = lesson.body ?? '';
-	const start = src.indexOf('<Recap');
-	if (start < 0) return [];
-	const { body } = blockAt(src, start, 'Recap');
+	const recap = blocksOf(lesson).find((b) => b.name === 'Recap');
+	if (!recap) return [];
 	const items: string[] = [];
+	const { body } = recap;
 	for (const line of body.split('\n')) {
 		if (/^\d+\.\s/.test(line)) items.push(line.replace(/^\d+\.\s+/, '').trim());
 		else if (items.length && /^\s+\S/.test(line)) items[items.length - 1] = `${items[items.length - 1]} ${line.trim()}`;
@@ -149,8 +167,7 @@ export function takeawaysOf(lesson: Lesson): string[] {
 	return items.map(renderInline);
 }
 
-function predictAt(lesson: Lesson, src: string, start: number): PredictExample {
-	const { attrs, body } = blockAt(src, start, 'Predict');
+function predictOf(lesson: Lesson, { attrs, body }: Block): PredictExample {
 	const id = stringProp(lesson.id, attrs, 'id');
 	if (!id) throw new Error(`${lesson.id}: <Predict> without an id`);
 	const where = `${lesson.id}#${id}`;
@@ -167,14 +184,21 @@ function predictAt(lesson: Lesson, src: string, start: number): PredictExample {
 	return out;
 }
 
-function promptAt(lesson: Lesson, src: string, start: number): PromptExample {
-	const { attrs, body, end } = blockAt(src, start, 'Prompt');
+/**
+ * A `Prompt` block and the `Response` block that follows it, when the next
+ * block in the tree is one. Prose between the two makes the response
+ * a block of its own.
+ */
+function promptOf(lesson: Lesson, block: Block, blocks: Block[]): PromptExample {
+	const { attrs, body } = block;
 	const model = stringProp(lesson.id, attrs, 'model') ?? '';
 	const recorded = stringProp(lesson.id, attrs, 'recorded') ?? '';
 	const illustrative = model === 'illustrative' || recorded === 'illustrative';
 	const out: PromptExample = { kind: 'prompt', model, recorded, illustrative, prompt: segmentsOf(body) };
-	const m = /^\s*(?=<Response\b)/.exec(src.slice(end));
-	if (m) out.response = segmentsOf(blockAt(src, end + m[0].length, 'Response').body);
+	const next = blocks[blocks.indexOf(block) + 1];
+	if (next?.name === 'Response' && next.parent === block.parent && next.index === block.index + 1) {
+		out.response = segmentsOf(next.body);
+	}
 	return out;
 }
 
@@ -184,13 +208,13 @@ function promptAt(lesson: Lesson, src: string, start: number): PromptExample {
  * marked blocks are an authoring error.
  */
 export function canonicalExampleOf(lesson: Lesson): CanonicalExample | undefined {
-	const src = lesson.body ?? '';
-	const starts = [...src.matchAll(BLOCK_START)].map((m) => ({ tag: m[1] as 'Predict' | 'Prompt', index: m.index }));
-	const marked = starts.filter((s) => isCanonical(parseAttrs(src.slice(s.index, openingTagEnd(src, s.index)))));
+	const blocks = blocksOf(lesson);
+	const examples = blocks.filter((b) => b.name === 'Predict' || b.name === 'Prompt');
+	const marked = examples.filter((b) => isCanonical(b.attrs));
 	if (marked.length > 1) throw new Error(`${lesson.id}: more than one block is marked canonical`);
-	const pick = marked[0] ?? starts[0];
+	const pick = marked[0] ?? examples[0];
 	if (!pick) return undefined;
-	return pick.tag === 'Predict' ? predictAt(lesson, src, pick.index) : promptAt(lesson, src, pick.index);
+	return pick.name === 'Predict' ? predictOf(lesson, pick) : promptOf(lesson, pick, blocks);
 }
 
 export function referenceOf(lesson: Lesson): LessonReference {

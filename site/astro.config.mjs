@@ -5,6 +5,7 @@ import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 import starlightLinksValidator from 'starlight-links-validator';
 import { parse as parseYaml } from 'yaml';
+import { remarkCheckpoints } from './plugins/remark-checkpoints.mjs';
 import { remarkCitations } from './plugins/remark-citations.mjs';
 import { remarkTerms } from './plugins/remark-terms.mjs';
 import { allLessons, allTopics, courseLessonIds, readAreaTree } from './scripts/lib/area-tree.mjs';
@@ -122,12 +123,14 @@ export default defineConfig({
 	site: 'https://lsimons.github.io',
 	base,
 	markdown: {
-		// First-mention terms, then citations `(@key)` (spec S03 "Citations and
-		// terms"). Terms run first so the References list the citation plugin
-		// appends is never scanned for terms. Both emit root-relative or
-		// in-page links, so they run before rehypeBaseLinks, which adds the
-		// deploy base.
+		// Checkpoint props first, read from the tree before any plugin rewrites
+		// it. Then first-mention terms, then citations `(@key)` (spec S03
+		// "Citations and terms"). Terms run before citations so the References
+		// list the citation plugin appends is never scanned for terms. Both
+		// emit root-relative or in-page links, so they run before
+		// rehypeBaseLinks, which adds the deploy base.
 		remarkPlugins: [
+			remarkCheckpoints,
 			[remarkTerms, { topics, lessons, docsDir }],
 			[remarkCitations, { bibliography }],
 		],

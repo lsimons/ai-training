@@ -1,6 +1,6 @@
 import { type CollectionEntry, getCollection } from 'astro:content';
 import { type CheckpointKind, DEFAULT_REVISION, isReviewable } from './checkpoint-rules';
-import { type CheckpointTagInfo, CONCEPTS_FORM, propValue, scanCheckpointTags, stringProp } from './checkpoint-source';
+import { type CheckpointTagInfo, checkpointTagsOfSource, conceptsProp, stringProp } from './checkpoint-tags';
 
 /**
  * A lesson page: a docs entry whose data the lesson docs loader filled from
@@ -15,8 +15,8 @@ export type LessonData = CollectionEntry<'docs'>['data'] & {
 };
 export type Lesson = Omit<CollectionEntry<'docs'>, 'data'> & { data: LessonData };
 
-export type { CheckpointAttr, CheckpointTagInfo } from './checkpoint-source';
-export { CONCEPTS_FORM, parseAttrs } from './checkpoint-source';
+export type { CheckpointAttr, CheckpointTagInfo } from './checkpoint-tags';
+export { conceptsProp } from './checkpoint-tags';
 
 export interface CheckpointInfo {
 	id: string;
@@ -45,25 +45,16 @@ export async function getLessons(area?: string): Promise<Lesson[]> {
 		.sort((a, b) => a.id.localeCompare(b.id));
 }
 
-/** The checkpoint tags of a lesson, read from its MDX source (`lib/checkpoint-source.ts`). */
-export function checkpointTagsOf(lesson: Lesson): CheckpointTagInfo[] {
-	return scanCheckpointTags(lesson.body ?? '', lesson.id);
-}
-
 /**
- * The `concepts` prop as a list of ids: the array-literal form, evaluated
- * the same way the component receives it, non-empty and all strings. The
- * ids are checked against the topics by the caller (`lib/concepts.ts`).
+ * The checkpoint tags of a lesson, read from the MDX tree of its body
+ * (`lib/checkpoint-tags.ts`). A collection entry carries the source and not
+ * the tree the page build made, so the body is parsed here again with the
+ * same parser. The remark plugin (`plugins/remark-checkpoints.mjs`) reads
+ * the build's tree with the same function, so a tag that fails here failed
+ * the page first, with the file path in the message.
  */
-export function conceptsProp(where: string, attrs: CheckpointTagInfo['attrs']): string[] {
-	const attr = attrs.get('concepts');
-	if (!attr?.expr) throw new Error(`${where}: ${CONCEPTS_FORM} is required`);
-	const value = propValue(where, attrs, 'concepts');
-	if (!Array.isArray(value) || !value.every((c) => typeof c === 'string')) {
-		throw new Error(`${where}: concepts must be an array of concept ids, as ${CONCEPTS_FORM}`);
-	}
-	if (value.length === 0) throw new Error(`${where}: concepts needs at least one concept id`);
-	return value as string[];
+export function checkpointTagsOf(lesson: Lesson): CheckpointTagInfo[] {
+	return checkpointTagsOfSource(lesson.body ?? '', lesson.id);
 }
 
 /**
@@ -78,20 +69,20 @@ export function checkpointOf(lesson: Lesson, { tag, kind, attrs, stem }: Checkpo
 	const str = (name: string) => stringProp(where, attrs, name);
 	const title = str('title') ?? id;
 	const reviewAttr = attrs.get('review')?.value;
-	if (reviewAttr !== undefined && reviewAttr !== 'true' && reviewAttr !== 'false') {
-		throw new Error(`${where}: review must be {true} or {false}, got ${reviewAttr}`);
+	if (reviewAttr !== undefined && typeof reviewAttr !== 'boolean') {
+		throw new Error(`${where}: review must be {true} or {false}, got ${JSON.stringify(reviewAttr)}`);
 	}
 	const revisionAttr = attrs.get('revision')?.value;
-	const revision = revisionAttr === undefined ? DEFAULT_REVISION : Number(revisionAttr);
-	if (!Number.isInteger(revision) || revision < 1)
-		throw new Error(`${where}: revision must be a positive integer, got ${revisionAttr}`);
+	const revision = revisionAttr === undefined ? DEFAULT_REVISION : revisionAttr;
+	if (typeof revision !== 'number' || !Number.isInteger(revision) || revision < 1)
+		throw new Error(`${where}: revision must be a positive integer, got ${JSON.stringify(revisionAttr)}`);
 	const honor = kind === 'predict' && !attrs.has('answer');
 	return {
 		id,
 		title,
 		kind,
 		revision,
-		reviewable: isReviewable({ kind, review: reviewAttr === undefined ? undefined : reviewAttr === 'true', honor }),
+		reviewable: isReviewable({ kind, review: reviewAttr, honor }),
 		objective: str('objective') ?? '',
 		concepts: conceptsProp(where, attrs),
 		context: str('context'),
@@ -100,7 +91,7 @@ export function checkpointOf(lesson: Lesson, { tag, kind, attrs, stem }: Checkpo
 	};
 }
 
-/** The checkpoints of a lesson, read from its MDX source. */
+/** The checkpoints of a lesson, read from the MDX tree of its body. */
 export function checkpointsOf(lesson: Lesson): CheckpointInfo[] {
 	return checkpointTagsOf(lesson).map((t) => checkpointOf(lesson, t));
 }

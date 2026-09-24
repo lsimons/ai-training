@@ -100,8 +100,8 @@ describe('checkpointItemsOf', () => {
 			reviewable: false,
 		});
 	});
-	it('names the checkpoint and the prop when an expression does not evaluate', () => {
-		expect(() => one(`<Order ${base} steps={[oops]} />`)).toThrow(/x\/y#a: cannot evaluate steps=\{\.\.\.\}/);
+	it('names the lesson and the prop when an expression is not a literal', () => {
+		expect(() => one(`<Order ${base} steps={[oops]} />`)).toThrow(/x\/y: cannot read steps=\{\.\.\.\} of <Order>/);
 	});
 });
 
