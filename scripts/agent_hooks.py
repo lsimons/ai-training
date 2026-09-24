@@ -1,0 +1,384 @@
+#!/usr/bin/env python3
+"""Claude Code hooks for this repo (`.claude/settings.json`, issues #349 and #342).
+
+Two entry points, each reading the hook's JSON event on stdin:
+
+- `guard-bash` (PreToolUse on Bash) rejects a command that breaks a rule
+  of `AGENTS.md` or `docs/agents/orchestration.md` and exits 2 with a
+  reason that names the alternative, which Claude Code shows the agent.
+- `format` (PostToolUse on Edit and Write) runs Biome on an edited file
+  under `site/` and ruff on an edited `.py` file. It never fails the tool
+  call: a formatter that is missing or errors is skipped.
+
+The guard matches shell text, so it catches mistakes and not an agent that
+works around it on purpose. It splits the command at `&&`, `||`, `;`, `|`
+and newlines outside quotes, skips here-document bodies (a commit message
+is data), follows `cd`, and reads `git -C <dir>`.
+
+Roles: a push to `main` and `gh pr merge` are allowed only when
+`AI_TRAINING_ROLE` names a role that may do them, either in the hook's
+environment or as a prefix on the command itself
+(`AI_TRAINING_ROLE=dispatcher git push`).
+"""
+
+import contextlib
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, cast
+
+ROLE_VAR = "AI_TRAINING_ROLE"
+PUSH_MAIN_ROLES = frozenset({"dispatcher"})
+MERGE_ROLES = frozenset({"dispatcher", "wave-lead", "coordinator"})
+MAX_SLEEP_SECONDS = 60
+MAIN_BRANCH = "main"
+
+OPERATORS = frozenset({"&&", "||", ";", "|", "&", "\n", ";;", "|&"})
+KEYWORDS = frozenset({"do", "then", "else", "elif", "{", "(", "!", "time"})
+LOOP_WORDS = frozenset({"for", "while", "until"})
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\1")
+SLEEP_ARG = re.compile(r"^(\d+(?:\.\d+)?)([smhd]?)$")
+GH_SUBSHELL = re.compile(r"(?:\$\(|`)\s*gh\s")
+UNITS = {"": 1, "s": 1, "m": 60, "h": 3600, "d": 86400}
+
+BIOME_SUFFIXES = frozenset(
+    {".ts", ".tsx", ".js", ".mjs", ".cjs", ".jsx", ".json", ".jsonc", ".astro", ".css"}
+)
+
+
+@dataclass(frozen=True)
+class Segment:
+    """One simple command: its words, the role prefix it carries, and where it runs."""
+
+    words: list[str]
+    role: str | None
+    cwd: str
+
+
+def strip_heredocs(command: str) -> str:
+    """The command without the bodies of its here-documents, which are data."""
+    lines = command.split("\n")
+    kept: list[str] = []
+    ends: list[str] = []
+    for line in lines:
+        if ends:
+            if line.strip() == ends[0]:
+                ends.pop(0)
+            continue
+        kept.append(line)
+        ends.extend(m.group(2) for m in HEREDOC.finditer(line))
+    return "\n".join(kept)
+
+
+def tokens(command: str) -> list[str]:
+    """Shell words and control operators, with quotes respected and newlines kept."""
+    lexer = shlex.shlex(strip_heredocs(command), posix=True, punctuation_chars=";&|\n")
+    lexer.whitespace = " \t\r"
+    lexer.whitespace_split = True
+    lexer.commenters = ""
+    try:
+        return list(lexer)
+    except ValueError:
+        return command.split()
+
+
+def split_segments(command: str, cwd: str) -> list[Segment]:
+    """The simple commands of a shell line, with `cd` followed for the ones after it."""
+    segments: list[Segment] = []
+    here = cwd
+    current: list[str] = []
+    for token in [*tokens(command), ";"]:
+        if token not in OPERATORS and not set(token) <= set(";&|\n"):
+            current.append(token)
+            continue
+        words = current
+        current = []
+        while words and words[0] in KEYWORDS:
+            words = words[1:]
+        role: str | None = None
+        while words and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", words[0]):
+            name, _, value = words[0].partition("=")
+            if name == ROLE_VAR:
+                role = value
+            words = words[1:]
+        if not words:
+            continue
+        if words[0] == "cd" and len(words) > 1:
+            here = str(Path(here, Path(words[1]).expanduser()))
+        segments.append(Segment(words, role, here))
+    return segments
+
+
+def is_gh_poll_loop(segments: Sequence[Segment]) -> bool:
+    """True when the command has a shell loop and calls `gh` anywhere in it."""
+    if not any(seg.words[0] in LOOP_WORDS for seg in segments):
+        return False
+    return any(calls_gh(seg.words) for seg in segments)
+
+
+def calls_gh(words: Sequence[str]) -> bool:
+    """True when a simple command runs `gh`, directly, as a loop condition or in `$(...)`."""
+    if words[0] == "gh" or (words[0] in LOOP_WORDS and words[1:2] == ["gh"]):
+        return True
+    return any(GH_SUBSHELL.search(w) for w in words)
+
+
+def git_args(words: Sequence[str], cwd: str) -> tuple[list[str], str] | None:
+    """The git subcommand and its arguments, and the directory it runs in, or None."""
+    if not words or words[0] != "git":
+        return None
+    rest = list(words[1:])
+    here = cwd
+    while rest and rest[0].startswith("-"):
+        flag = rest.pop(0)
+        if flag == "-C" and rest:
+            here = str(Path(here, Path(rest.pop(0)).expanduser()))
+        elif flag in {"-c", "--git-dir", "--work-tree", "--namespace"} and rest:
+            rest.pop(0)
+    return rest, here
+
+
+def is_main_checkout(path: str) -> bool:
+    """True when `path` is inside the repository's first worktree (not a linked one)."""
+    try:
+        out = subprocess.run(
+            ["git", "-C", path, "rev-parse", "--absolute-git-dir", "--git-common-dir"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.split()
+    except OSError, subprocess.CalledProcessError:
+        return False
+    if len(out) != 2:
+        return False
+    git_dir, common = out
+    return Path(git_dir).resolve() == Path(path, common).resolve()
+
+
+def current_branch(path: str) -> str:
+    """The checked-out branch at `path`, or "" when there is none."""
+    try:
+        return subprocess.run(
+            ["git", "-C", path, "branch", "--show-current"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except OSError, subprocess.CalledProcessError:
+        return ""
+
+
+def role_of(segment: Segment, env: Mapping[str, str]) -> str:
+    return segment.role or env.get(ROLE_VAR, "")
+
+
+def pushes_main(args: Sequence[str], branch: str) -> bool:
+    """True when a `git push` argument list updates `main` on the remote."""
+    positional = [a for a in args if not a.startswith("-")]
+    refspecs = positional[1:]
+    if not refspecs:
+        return branch == MAIN_BRANCH
+    for spec in refspecs:
+        dest = spec.lstrip("+").split(":")[-1]
+        if dest in {MAIN_BRANCH, f"refs/heads/{MAIN_BRANCH}"}:
+            return True
+        if dest == "HEAD" and branch == MAIN_BRANCH:
+            return True
+    return False
+
+
+def force_push(args: Sequence[str]) -> bool:
+    for a in args:
+        if a in {"--force", "-f"}:
+            return True
+        if re.match(r"^-[a-zA-Z]*f[a-zA-Z]*$", a) and not a.startswith("--"):
+            return True
+    positional = [a for a in args if not a.startswith("-")]
+    return any(spec.startswith("+") for spec in positional[1:])
+
+
+def sleep_seconds(words: Sequence[str]) -> float:
+    """The total a `sleep` command waits (GNU sleep adds its arguments), or 0."""
+    if not words or words[0] != "sleep":
+        return 0
+    total = 0.0
+    for arg in words[1:]:
+        m = SLEEP_ARG.match(arg)
+        if m:
+            total += float(m.group(1)) * UNITS[m.group(2)]
+    return total
+
+
+def check_segment(
+    segment: Segment,
+    env: Mapping[str, str],
+    main_checkout: Callable[[str], bool],
+    branch_of: Callable[[str], str],
+) -> str | None:
+    """The reason a simple command is rejected, or None when it may run."""
+    words = segment.words
+    waited = sleep_seconds(words)
+    if waited > MAX_SLEEP_SECONDS:
+        return (
+            f"`sleep` of {waited:g} seconds: the limit is {MAX_SLEEP_SECONDS}. End your turn "
+            "and let the agents' notifications wake you, or wait on the thing itself in one "
+            "blocking call (`gh pr checks <n> --watch`, `gh run watch <id>`, or a Bash call "
+            "with run_in_background)."
+        )
+    if words[:3] == ["gh", "pr", "merge"] and role_of(segment, env) not in MERGE_ROLES:
+        return (
+            "`gh pr merge` is for the wave lead, the dispatcher, or a coordinator the "
+            "maintainer asked to merge. Report the pull request as ready instead. A role "
+            f"that may merge prefixes the command with `{ROLE_VAR}=<role>`."
+        )
+    parsed = git_args(words, segment.cwd)
+    if parsed is None:
+        return None
+    args, where = parsed
+    if not args:
+        return None
+    sub, rest = args[0], args[1:]
+    if sub == "push":
+        if force_push(rest):
+            return (
+                "Force push: use `git push --force-with-lease` on your own branch instead, "
+                "and never on a branch another branch is stacked on."
+            )
+        if pushes_main(rest, branch_of(where)) and role_of(segment, env) not in PUSH_MAIN_ROLES:
+            return (
+                "Push to `main`: only the dispatcher commits to `main`. Push your own branch "
+                "and open a pull request. The dispatcher prefixes the push with "
+                f"`{ROLE_VAR}=dispatcher`."
+            )
+        return None
+    destructive = (
+        (sub == "stash" and (not rest or rest[0] not in {"list", "show"}))
+        or (sub == "reset" and "--hard" in rest)
+        or (sub == "checkout" and "--" in rest and "." in rest[rest.index("--") :])
+        or (sub == "checkout" and rest == ["."])
+        or (sub == "restore" and "." in rest)
+    )
+    if destructive and main_checkout(where):
+        return (
+            f"`git {' '.join(args)}` in the main checkout: other agents' work may be in it. "
+            "Work in your own worktree (`../ai-training-wt/<branch>`), and leave the main "
+            "checkout as you found it."
+        )
+    return None
+
+
+def check_command(
+    command: str,
+    cwd: str,
+    env: Mapping[str, str],
+    main_checkout: Callable[[str], bool] = is_main_checkout,
+    branch_of: Callable[[str], str] = current_branch,
+) -> str | None:
+    """The reason a Bash command is rejected, or None when it may run."""
+    segments = split_segments(command, cwd)
+    if is_gh_poll_loop(segments):
+        return (
+            "A shell loop that calls `gh` is a poll loop. Wait in one blocking call "
+            "(`gh pr checks <n> --watch`, `gh run watch <id>`), or end your turn and let "
+            "the notifications wake you. Reviews come back in the reviewer's hand-back, so "
+            "never poll a pull request for comments."
+        )
+    for segment in segments:
+        reason = check_segment(segment, env, main_checkout, branch_of)
+        if reason:
+            return reason
+    return None
+
+
+def guard_bash(event: Mapping[str, Any], env: Mapping[str, str]) -> tuple[int, str]:
+    """Exit code and message for a PreToolUse event: 2 blocks the call, 0 lets it run."""
+    tool_input: Mapping[str, Any] = event.get("tool_input") or {}
+    command = tool_input.get("command")
+    if not isinstance(command, str):
+        return 0, ""
+    cwd = event.get("cwd")
+    reason = check_command(command, cwd if isinstance(cwd, str) else str(Path.cwd()), env)
+    if reason:
+        return 2, f"Blocked by .claude/hooks/guard-bash.sh: {reason}"
+    return 0, ""
+
+
+def formatter_for(path: Path, root: Path) -> tuple[list[str], Path] | None:
+    """The formatter command for an edited file and the directory to run it in, or None."""
+    try:
+        rel = path.resolve().relative_to(root.resolve())
+    except ValueError:
+        return None
+    if rel.suffix == ".py":
+        ruff = root / ".venv" / "bin" / "ruff"
+        return ([str(ruff), "format", "--quiet", str(rel)], root) if ruff.exists() else None
+    if rel.parts[:1] == ("site",) and rel.suffix in BIOME_SUFFIXES:
+        biome = root / "site" / "node_modules" / ".bin" / "biome"
+        if not biome.exists():
+            return None
+        inner = Path(*rel.parts[1:])
+        cmd = [str(biome), "check", "--write", "--no-errors-on-unmatched", str(inner)]
+        return cmd, root / "site"
+    return None
+
+
+def repo_root(path: Path) -> Path | None:
+    """The worktree that holds `path`, so an edit in a linked worktree formats there."""
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(path.parent), "rev-parse", "--show-toplevel"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except OSError, subprocess.CalledProcessError:
+        return None
+    return Path(out) if out else None
+
+
+def format_file(event: Mapping[str, Any]) -> int:
+    """Run the formatter for a PostToolUse event's file. Always 0."""
+    tool_input: Mapping[str, Any] = event.get("tool_input") or {}
+    file_path = tool_input.get("file_path")
+    if not isinstance(file_path, str):
+        return 0
+    path = Path(file_path)
+    root = repo_root(path)
+    if root is None:
+        return 0
+    found = formatter_for(path, root)
+    if found is None:
+        return 0
+    cmd, where = found
+    with contextlib.suppress(OSError, subprocess.TimeoutExpired):
+        subprocess.run(cmd, cwd=where, capture_output=True, timeout=25, check=False)
+    return 0
+
+
+def main(argv: Sequence[str], stdin: str, env: Mapping[str, str]) -> int:
+    if len(argv) != 2 or argv[1] not in {"guard-bash", "format"}:
+        print("usage: agent_hooks.py guard-bash|format < event.json", file=sys.stderr)
+        return 1
+    try:
+        parsed: object = json.loads(stdin)
+    except json.JSONDecodeError:
+        return 0
+    if not isinstance(parsed, dict):
+        return 0
+    event = cast("dict[str, Any]", parsed)
+    if argv[1] == "format":
+        return format_file(event)
+    code, message = guard_bash(event, env)
+    if message:
+        print(message, file=sys.stderr)
+    return code
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv, sys.stdin.read(), os.environ))
