@@ -39,10 +39,10 @@ describe('MobileTableOfContents', () => {
 		);
 		expect(html).toMatch(/<div class="lesson-toc-mobile" data-lesson-toc-mobile hidden>/);
 		expect(html).toMatch(
-			/<nav aria-labelledby="lesson-toc-mobile-checkpoints"><h2 id="lesson-toc-mobile-checkpoints">Checkpoints<\/h2><ul><li><a href="#what-the-model-does"><span>What the model does<\/span><\/a><\/li><li><a href="#honor">/,
+			/<div role="group" aria-labelledby="lesson-toc-mobile-checkpoints"><h2 id="lesson-toc-mobile-checkpoints">Checkpoints<\/h2><ul><li><a href="#what-the-model-does"><span>What the model does<\/span><\/a><\/li><li><a href="#honor">/,
 		);
 		expect(html).toMatch(
-			/<nav aria-labelledby="lesson-toc-mobile-examples"><h2 id="lesson-toc-mobile-examples">Examples<\/h2><ul><li><a href="#shown"><span>Shown<\/span><\/a><\/li><\/ul><\/nav>/,
+			/<div role="group" aria-labelledby="lesson-toc-mobile-examples"><h2 id="lesson-toc-mobile-examples">Examples<\/h2><ul><li><a href="#shown"><span>Shown<\/span><\/a><\/li><\/ul><\/div>/,
 		);
 		expect(html.indexOf('</mobile-starlight-toc>')).toBeLessThan(html.indexOf('data-lesson-toc-mobile'));
 		expect(html.indexOf('lesson-toc-mobile-checkpoints')).toBeLessThan(html.indexOf('lesson-toc-mobile-examples'));
