@@ -165,9 +165,12 @@ export function skipLesson(lessonId: string): void {
 	update((r) => model.applyLessonSkipped(r, lessonId, model.today()));
 }
 
-/** Finishing a lesson schedules every reviewable checkpoint (spec S05 "Lesson finished"). */
-export function finishLesson(lessonId: string, reviewable: ReviewableCheckpoint[]): void {
-	update((r) => model.applyLessonFinished(r, lessonId, reviewable, model.today()));
+/**
+ * Finishing a lesson schedules every reviewable checkpoint (spec S05 "Lesson
+ * finished") and enters the page's habits (spec S07 "Schedule").
+ */
+export function finishLesson(lessonId: string, reviewable: ReviewableCheckpoint[], habitIds: string[] = []): void {
+	update((r) => model.applyLessonFinished(r, lessonId, reviewable, model.today(), habitIds));
 }
 
 /**

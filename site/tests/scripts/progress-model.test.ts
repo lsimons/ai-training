@@ -16,6 +16,7 @@ import {
 	dueReviewIdsOn,
 	dueReviewsOn,
 	emptyRecord,
+	enterHabit,
 	exportJson,
 	HABIT_DAYS,
 	HABIT_HISTORY_LENGTH,
@@ -206,6 +207,25 @@ describe('normalize habits (spec S07 "Storage")', () => {
 });
 
 describe('habits (spec S07 "Schedule")', () => {
+	it('finishing a lesson enters each habit once, due the day after, and a second finish keeps the entries', () => {
+		const r = record();
+		applyLessonFinished(r, 'a/x', [], DAY, ['a/x#h1', 'a/x#h2']);
+		expect(r.habits).toEqual({
+			'a/x#h1': { since: DAY, next: '2026-03-11', history: [] },
+			'a/x#h2': { since: DAY, next: '2026-03-11', history: [] },
+		});
+		recordHabit(r, 'a/x#h1', 'done', '2026-03-11');
+		r.habits['a/x#h2'] = habit({ next: null });
+		applyLessonFinished(r, 'a/x', [], '2026-04-01', ['a/x#h1', 'a/x#h2', 'a/x#h3']);
+		expect(r.habits['a/x#h1']).toMatchObject({ since: DAY, next: '2026-03-13' });
+		expect(r.habits['a/x#h2']?.next).toBeNull();
+		expect(r.habits['a/x#h3']).toEqual({ since: '2026-04-01', next: '2026-04-02', history: [] });
+		expect(enterHabit(r, 'a/x#h3', '2026-05-01')).toBe(false);
+		// Without habit ids the finish records nothing under habits.
+		const plain = record();
+		applyLessonFinished(plain, 'a/x', [], DAY);
+		expect(plain.habits).toEqual({});
+	});
 	it('falls due 1, 3 and 7 days after the finish day, then retires', () => {
 		expect(HABIT_DAYS).toEqual([1, 3, 7]);
 		expect(nextOccurrence(DAY, DAY)).toBe('2026-03-11');
