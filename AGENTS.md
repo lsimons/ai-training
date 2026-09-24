@@ -236,10 +236,12 @@ patterns below after the fact. Write so that it has nothing to say.
   least seven days old, download its `mise-v<version>-linux-x64.tar.gz`
   and check it against the release's `SHASUMS256.txt`, extract it and
   hash the extracted `mise/bin/mise` with `shasum -a 256`, then update
-  the workflows and `.mise.toml` in one commit. The action checks that
-  binary against `sha256`, so it doesn't matter that it fetches the
-  `.tar.zst` archive on runners that have `zstd`: both archives hold the
-  same binary.
+  the workflows and `.mise.toml` in one commit. With `sha256` set, the
+  action checks only that binary and no longer checks the download
+  against the signed `SHASUMS256.txt`, so the check against the release
+  file in this procedure is that check. It doesn't matter that the
+  action fetches the `.tar.zst` archive on runners that have `zstd`:
+  both archives hold the same binary.
 - `prek.toml` hook repos are pinned by commit SHA (tag in the comment),
   and each Python hook lists its full transitive tree in
   `additional_dependencies`, exact-pinned. Both are invisible to
