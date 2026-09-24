@@ -1,0 +1,304 @@
+import { Choice, MultiChoice, Match, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we give the same three small tasks to two models and watch
+what each one does with them. Most chat tools have a model picker with at
+least two entries, a small one that answers fast and a large one that
+answers slower and costs more per message. Many people leave the picker on
+the largest model for everything, because "the best" sounds like the safe
+choice. By the end of the lesson you have a six-cell table for these
+three tasks. It shows which task the large model's extra price and delay
+paid for, and you have a way to build the same table for a task of your
+own.
+
+You need a chat tool whose model picker offers a small and a large model.
+Any pair works, and you don't have to know the names. Pick the smallest
+and the largest, and call them "small" and "large" in your notes. The
+answers shown on this page are illustrative. The author wrote them to show
+the pattern, and your models give a different text.
+
+## Three tasks, one prediction each
+
+The inputs follow. Read each one and, before you run anything,
+write down which of the two models you think it needs. That prediction is
+the point of the section. Once you have run the tasks you can't recover
+what you would have guessed.
+
+The first is reformatting. The text goes in, the same facts come out as
+a table, and nothing has to be decided.
+
+<Prompt model="illustrative" recorded="illustrative">
+Turn these lines, in the order given, into a table with the columns
+Room, Floor, Seats and Screen.
+
+Harbor room, second floor, seats 8, has a screen
+Meadow room, ground floor, seats 4, no screen
+Summit room, third floor, seats 12, has a screen
+Quarry room, ground floor, seats 6, no screen
+</Prompt>
+
+The second is classification. Each message gets one label from a fixed
+list, and the list is short enough that the answer is either right or
+wrong.
+
+<Prompt model="illustrative" recorded="illustrative">
+Label each of these customer messages as billing, delivery or other. Reply
+with one line per message: the number and the label, nothing else.
+
+1. I was charged twice for the same order last week.
+2. The parcel says delivered but nothing has arrived.
+3. Can I change the email address on my account?
+4. The invoice shows the old company name.
+5. Your driver left the box in the rain.
+</Prompt>
+
+The third is an ambiguous request. The useful reply depends on facts the
+message doesn't give, and a good answer either asks for them or lays out
+how the advice changes with each one.
+
+<Prompt model="illustrative" recorded="illustrative">
+Our team offsite is in six weeks and the budget was just cut by a third.
+What should we do?
+</Prompt>
+
+Write your three predictions down now. A common guess is "large for all
+three, to be safe". Hold on to yours and see how it does.
+
+<Match id="what-each-task-needs" objective="using-agents/chooses-tool-and-autonomy/picks-a-model-by-fit"
+  concepts={['model-fit']}
+  context="The lesson supplies three chat inputs, a request to turn four lines about meeting rooms into a table, a request to label five customer messages as billing, delivery or other, and a question about what to do when an offsite budget was cut, and adds a fourth request about a competitor's news this week."
+  title="Name the work before the model" hint="For each request, what does the model have to do with the text: reshape it, pick from a fixed list, weigh options that depend on missing facts, or know something that happened after its training?"
+  options={['Reformatting', 'Classification', 'Multi-step reasoning', 'Fresh facts']}
+  rows={[
+    { statement: 'Turn these four lines about rooms into a table with four columns.', option: 0, why: 'Does the model have to decide anything, or only move the same facts into another shape?' },
+    { statement: 'Label each of these five messages as billing, delivery or other.', option: 1, why: 'Is the set of possible answers fixed and short?' },
+    { statement: 'Our offsite budget was cut by a third. What should we do?', option: 2, why: 'Does a good answer depend on facts the message leaves out?' },
+    { statement: 'What did our main competitor announce this week?', option: 3, why: 'Could a model answer this from training alone, whatever its size?' },
+  ]}
+  rationale="Naming the kind of work comes first. Reformatting and classification are within reach of a small model. Multi-step reasoning is where size starts to matter. Fresh facts need a model with a search tool, and size has nothing to do with it.">
+Match each request to what it asks the model to do.
+</Match>
+
+## Run them on both models
+
+Now run all three inputs on the small model, then on the large one. Use a
+fresh chat for each run, so no earlier answer is in the context. For each
+of the six answers, note two things: how long it took to finish, counted
+on a clock or by feel, and whether the answer is good enough for the task.
+"Good enough" means you would use it as it is. Write the six verdicts in a
+table with a row per task and a column per model.
+
+Here is what one run looked like for the author, with the small model's
+answers first. This is one example run, written to show the pattern. It is
+not a measurement of any model, and your table may differ.
+
+<Response>
+```text
+| Room   | Floor  | Seats | Screen |
+|--------|--------|-------|--------|
+| Harbor | Second | 8     | Yes    |
+| Meadow | Ground | 4     | No     |
+| Summit | Third  | 12    | Yes    |
+| Quarry | Ground | 6     | No     |
+```
+</Response>
+
+The small model reformats in a second or two, and every cell matches the
+input. The large model gives the same table a few seconds later. Nothing
+in this task needed the extra time.
+
+<Response>
+```text
+1. billing
+2. delivery
+3. other
+4. billing
+5. delivery
+```
+</Response>
+
+The same on classification. Both models label the five messages the same
+way, and the small one is done first. The one place you might see a
+difference is message 4, where "invoice" and "company name" pull toward
+two labels. Both models in the example run chose billing, which is the
+label the fixed list makes most useful.
+
+<Response>
+```text
+Here are some ways to handle a budget cut for a team offsite:
+
+1. Shorten it. Two days instead of three cuts hotel and meal costs.
+2. Move it closer. Travel is often the largest line item.
+3. Go remote for part of it. Run the workshops online and meet in
+   person for one day.
+4. Cut the extras. Drop the outside speaker or the evening activity.
+5. Ask for sponsorship. Some vendors will co-fund an event.
+
+Would you like me to expand on any of these?
+```
+</Response>
+
+The small model's answer to the ambiguous request is a generic list. Every
+item could apply to any offsite anywhere. The one fact in the message,
+that a third of the budget is gone, appears in none of them. This is the
+failure mode you learned to name in the lesson on how models work. The
+model produced the most likely text for a question like this, one token
+at a time, and nothing in that process notices what the question left
+out.
+
+<Response>
+```text
+Before choosing, it helps to know what the missing third was going to
+pay for, because that decides which options are open.
+
+- If the cut lands on travel, the offsite can move to a location most
+  of the team can reach by train, or go hybrid with one in-person day.
+- If it lands on venue and catering, a shorter event keeps the agenda
+  and drops one night's hotel and two meals.
+- If it lands on the program, the outside facilitator goes and a team
+  member runs the sessions, which changes the tone more than the
+  content.
+
+Two questions would narrow it down: what was the original budget split,
+and which parts of the offsite are the reason it exists at all? Protect
+those parts and cut around them.
+```
+</Response>
+
+The large model's answer takes longer to arrive and is the one you could
+act on. It names the missing fact, shows how the choice depends on it, and
+asks the two questions whose answers pick the option. This is what the
+concept of model fit describes: a small model handles reformatting and
+classification, and a larger one handles reasoning about an ambiguous
+request (@AEC-02). Fit is tested with a run like this one, and it isn't
+assumed from the size of the model.
+
+The example run's table then reads like this. "Yes" means good enough
+to use as it is.
+
+| Task              | Small model | Large model |
+| ----------------- | ----------- | ----------- |
+| Reformatting      | Yes, fast   | Yes, slower |
+| Classification    | Yes, fast   | Yes, slower |
+| Ambiguous request | No          | Yes         |
+
+<Choice id="which-task-needs-large" objective="using-agents/chooses-tool-and-autonomy/picks-a-model-by-fit"
+  concepts={['model-fit', 'cost-and-speed']}
+  context="The lesson ran a reformatting task, a classification task and an ambiguous request about a cut offsite budget on a small and a large model, and put the six verdicts in a table."
+  title="Where the large model earns its price" hint="Which cell in the six-cell table changed from no to yes when the model got larger?"
+  options={[
+    { text: 'The reformatting, because a large model is more careful with the cells of a table.', why: 'Both models produced the same table. Moving facts into another shape asks nothing of the extra size.' },
+    { text: 'The classification, because a large model knows the difference between billing and delivery.', why: 'Both models gave the same five labels. A short fixed list is within reach of the small model.' },
+    { text: 'The ambiguous request, because the useful answer needed a fact the message left out.', correct: true },
+    { text: 'All three, because a large model is more accurate on every task and speed does not matter in a chat.', why: 'Two of the three cells were already good enough on the small model, and the delay is a cost you paid for nothing there.' },
+  ]}>
+Of the three tasks in the run, which one justifies the large model, and why?
+</Choice>
+
+<Choice id="tested-not-assumed" phase="review" objective="using-agents/chooses-tool-and-autonomy/picks-a-model-by-fit"
+  concepts={['model-fit']}
+  context="A colleague has to pick a model for a task they will run many times, and their chat tool offers a small and a large model."
+  title="How to find out which model a task needs" hint="What is the one piece of evidence that settles the question, and where does it come from?"
+  options={[
+    { text: 'Run a handful of representative inputs on each model and compare the answers side by side.', correct: true },
+    { text: 'Pick the large model, because a task that a small model can do is also done by a large one.', why: 'True, and you pay the higher price and the longer wait on every call for a difference you never checked.' },
+    { text: 'Ask the large model which model the task needs and follow its advice.', why: 'The model answers with the most likely text for that question. It has not run your inputs on either model.' },
+    { text: 'Read the vendor\'s description of each model and pick the one whose description matches the task.', why: 'A description tells you what the vendor intends. Your inputs tell you what the model does with them.' },
+  ]}>
+A colleague asks how to decide which of the two models a task needs. What
+do you tell them?
+</Choice>
+
+## Read the table at volume
+
+For one chat, the difference between the two columns is a few seconds and
+a fraction of a cent. That is why the picker set to "large" feels free. The
+table starts to matter when the task repeats.
+
+Suppose the classification task is real: your team gets five thousand
+customer messages a day, and someone wants a model to label each one. From
+your run, the small model labeled the five messages as well as the large
+one. Now scale the other two columns. If the large model took four seconds
+per answer where the small one took one, that is a difference of three
+seconds a message, and three seconds times five thousand is more than four
+hours of waiting a day. If the large model costs several times the small
+one per message, the cost gap is also multiplied by five thousand, every
+day. Cost and speed, per call, become the whole budget of a repeated task
+(@Academy ai-fluency-for-builders).
+
+So the order of work is the one you followed in this lesson. Say what the
+task needs. Run a few real inputs on each candidate and fill the table.
+Then read the table at the volume you expect, and measure before you
+schedule anything repeated. The large model goes where the table says a
+cell changed from no to yes, and nowhere else.
+
+<Scenario id="scaling-the-labels" objective="using-agents/chooses-tool-and-autonomy/picks-a-model-by-fit"
+  concepts={['cost-and-speed']}
+  context="A colleague proposes to label five thousand customer messages a day with the large model from the chat tool's picker, because it is the most capable one."
+  title="Five thousand messages a day" hint="What does the team know from a small run, and what does it not know yet about the run at this size?"
+  options={[
+    { text: 'Agree. The large model gives the best labels, and a few extra seconds per message is nothing.', consequence: 'The batch takes hours longer each day and costs several times more, for labels the small model matched on your sample.' },
+    { text: 'Run fifty real messages through both models first, compare the labels, and time each run before choosing.', correct: true, consequence: 'The labels match on the sample, and the small model finishes in a fraction of the time. The team schedules the small model and keeps the fifty as a check set.' },
+    { text: 'Use the small model without a test. It handled five messages in the lesson, so it will handle five thousand.', consequence: 'Five messages is a very small sample. The one kind of message the small model gets wrong shows up two hundred times a day before anyone notices.' },
+    { text: 'Use the large model for the first week and switch to the small one once the labels look right.', consequence: 'You pay for a week of the expensive run and still have not compared the two models on the same messages.' },
+  ]}>
+A colleague wants to label the team's five thousand daily customer
+messages with the large model, "because it is the best one". What do you
+propose?
+</Scenario>
+
+<MultiChoice id="what-changes-the-pick" phase="review" objective="using-agents/chooses-tool-and-autonomy/picks-a-model-by-fit"
+  concepts={['model-fit', 'cost-and-speed']}
+  context="A learner has run a few inputs of a task on a small and a large model and found that both models give answers that are good enough."
+  title="What could still change the pick" hint="The two models tied on quality. What else about the task decides between them, and what does not?"
+  options={[
+    { text: 'The task runs thousands of times a day, so the per-call delay and price are multiplied by that count.', correct: true },
+    { text: 'The large model has a newer version number, so it is the more recent and better tested of the two.', why: 'A version number says nothing about how the model did on your inputs. The comparison already answered that.' },
+    { text: 'The task asks about events of this week, so the pick moves to whichever model has a search tool.', correct: true },
+    { text: 'The large model is the default in the picker, so it is the vendor\'s recommendation for tasks like this one.', why: 'A default is a setting. It has not seen your task.' },
+  ]}>
+Both models gave good enough answers on the sample. Which two facts about
+the task would still change which model you pick?
+</MultiChoice>
+
+<Scenario id="fresh-facts-any-size" phase="review" objective="using-agents/chooses-tool-and-autonomy/picks-a-model-by-fit"
+  concepts={['model-fit']}
+  context="A colleague needs a weekly summary of what three named suppliers announced that week, and is choosing between a small and a large model in a chat tool."
+  title="A summary of this week's news" hint="Where would either model get this week's announcements from, if not from a tool?"
+  options={[
+    { text: 'Pick the large model. A larger model knows more, so it is more likely to know recent announcements.', consequence: 'The summary is fluent, and two of the three announcements are from last year. The large model has no more access to this week than the small one.' },
+    { text: 'Pick the small model. Summarizing three announcements is short work, so size does not matter.', consequence: 'The small model also summarizes from memory. Size was the wrong question here.' },
+    { text: 'Pick whichever model in the picker can search the web, whatever its size, and ask for a link behind each announcement.', correct: true, consequence: 'The summary carries three links from this week, and checking it means opening them.' },
+  ]}>
+A colleague wants a weekly summary of what three suppliers announced that
+week. Which model should they pick from the picker?
+</Scenario>
+
+<Pitfall title="Leaving the picker on the largest model">
+A team sets every tool to the largest model, because nobody wants to be
+the one who chose a worse answer. Six months in, the largest model is
+labeling tickets, reformatting exports and answering questions about the
+office printer. A test on twenty tickets shows the small model gives the
+same labels in a quarter of the time. Nobody had run the comparison,
+because "the best" never felt like a decision. Treat the model pick as a
+decision, and make it from a table you filled in.
+</Pitfall>
+
+<Exercise stretch="Add a fourth input that asks about something that happened this month, run it on both models, and note whether either one says it cannot know, or whether the answer needs a model with a search tool instead.">
+Open your chat tool and find the model picker. Run the three inputs from
+the first section on the small model, each in a fresh chat, and then on the
+large model, again in fresh chats. For each of the six answers write down
+how long it took and whether you would use it as it is. This takes about
+ten minutes and leaves you with a six-cell table. A good result is a table
+where you can point at each "no" and say what was missing from the answer,
+and at each pair of "yes" cells and say how much longer the large model
+took. Where did your predictions from the first section turn out wrong,
+and what does that tell you about your default?
+</Exercise>
+
+<Recap>
+1. Say what a task needs before you name a model: reformatting, classification, multi-step reasoning, or fresh facts (@AEC-02).
+2. Model fit is tested, with a few representative inputs on each candidate, and not assumed from size.
+3. A small model is often good enough for reformatting and classification, and a large one pays off on an ambiguous request. Fresh facts need a model with a search tool, whatever its size.
+4. Cost and speed are per call. At the volume of a repeated task they become the whole budget, so measure before you schedule.
+5. Leaving the picker on the largest model is a choice too, and the table is how you check it.
+</Recap>
