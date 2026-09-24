@@ -4,7 +4,8 @@
  * them back. `checkBundles` reports a problem when
  *
  * - a lesson page has no bundle file, or a bundle file has no lesson page;
- * - a bundle is not JSON, its `version` is not 1, or its `id` is not its path;
+ * - a bundle is not JSON, its `version` is not `BUNDLE_VERSION`, its `id` is
+ *   not its path, or its `url` is not an absolute URL ending in `/<id>/`;
  * - a field S08 "Format" names is missing or has the wrong type, or `mode`
  *   is not `tutorial` or `explanation`;
  * - a fenced code block of the page (```` ``` ```` or `~~~`, three or more) is
@@ -20,6 +21,7 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { BUNDLE_VERSION } from '../../src/lib/bundle-version.ts';
 import { readAreaTree } from './area-tree.mjs';
 import { lessonPages, walk } from './data.mjs';
 
@@ -72,6 +74,15 @@ export function bundleIds(bundlesDir) {
 	return out;
 }
 
+/** Whether `url` is an absolute URL whose path ends in `/<id>/`, the lesson page under the site's origin and base. */
+export function isLessonUrl(url, id) {
+	try {
+		return new URL(url).pathname.endsWith(`/${id}/`);
+	} catch {
+		return false;
+	}
+}
+
 /** The problems of one bundle `id` at `file` against its page source `src`. */
 export function checkBundle(id, file, src) {
 	const errors = [];
@@ -88,8 +99,11 @@ export function checkBundle(id, file, src) {
 	for (const field of ARRAYS) {
 		if (!Array.isArray(bundle[field])) errors.push(`${id}: ${field} must be a list`);
 	}
-	if (bundle.version !== 1) errors.push(`${id}: version is ${JSON.stringify(bundle.version)}, expected 1`);
+	if (bundle.version !== BUNDLE_VERSION)
+		errors.push(`${id}: version is ${JSON.stringify(bundle.version)}, expected ${BUNDLE_VERSION}`);
 	if (typeof bundle.id === 'string' && bundle.id !== id) errors.push(`${id}: id is ${JSON.stringify(bundle.id)}`);
+	if (typeof bundle.url === 'string' && !isLessonUrl(bundle.url, id))
+		errors.push(`${id}: url is ${JSON.stringify(bundle.url)}, expected an absolute URL ending in /${id}/`);
 	if (typeof bundle.mode === 'string' && !MODES.has(bundle.mode))
 		errors.push(`${id}: mode is ${JSON.stringify(bundle.mode)}, expected tutorial or explanation`);
 	if (typeof bundle.prose === 'string') {
