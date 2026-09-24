@@ -1,10 +1,17 @@
 id: coding-with-agents/keeping-understanding
 title: Staying the engineer who understands the system
+description: >-
+  An agent that writes most of the code moves the understanding away from you unless you keep it.
+  Read agent code like a colleague's, explain the system from memory after each increment, and keep
+  the architecture decisions in a folder the project instructions point at.
 mode: explanation
 covers: coding-with-agents/workflow
 serves: [coding-with-agents/ships-with-agent/keeps-understanding]
 introduces: []
-assumes: []
+assumes:
+  - objective: coding-with-agents/ships-with-agent/works-in-increments
+    lesson: coding-with-agents/spec-driven-increments
+    section: land-the-first-increment
 after: [coding-with-agents/project-instructions, coding-with-agents/reversible-changes]
 shorts: []
 exercise:
@@ -20,4 +27,9 @@ notes: >-
   Introduces no concept: revisits plan-mode, commits-and-prs and project-instructions for the expert
   objective. Expert level. Kept as its own short explanation lesson because the objective has three
   behaviors of its own (Brilliant INC-3, INC-4) and none of the tutorial lessons above has room for
-  them without going past fifteen minutes.
+  them without going past fifteen minutes. The examples and the exercise use the spec-driven-increments
+  to-do fixture after its increments, so that lesson is the one assumes entry. Project instructions
+  are explained in a sentence on the page (AGENTS.md or CLAUDE.md, read at the start of every
+  session) with a link to customizing-agents/instructions, because coding-with-agents/project-instructions
+  was not live when this lesson was written. The transcript and the decision file on the page are
+  illustrative and the page says so. Source: Brilliant INC, paraphrased.

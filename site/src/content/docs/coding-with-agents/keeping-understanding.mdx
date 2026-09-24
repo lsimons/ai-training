@@ -1,0 +1,297 @@
+import { Choice, MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+
+In this lesson we look at what happens to your own understanding of a
+system when an agent writes most of the code. The earlier lessons in this
+course gave the agent a plan to follow, a spec to work from, and small
+increments to land. Each of those keeps the agent's output checkable. This
+lesson is about the other side: the engineer who does the checking has to
+understand the system, and that understanding is easy to lose when
+someone else types every line. We name where it leaks away, and the habits
+that keep it. The page has no code to run. The examples refer to the
+to-do fixture from *Working from a spec in small increments*, and the
+exercise uses that fixture after its increments are merged.
+
+The claim behind the lesson is plain. You can only review a change to a
+system you understand, and every agent change gets reviewed by you. An
+agent that produces more code than you can hold in your head has moved
+the review from you to nobody. Brilliant's skills map for coding with AI
+lists keeping your understanding and the coherence of the system as a
+skill of its own within incremental development, separate from getting
+the increments to land (@Brilliant INC).
+
+## Where understanding leaks
+
+Reading code and writing code build understanding in different ways, and
+an agent removes the second one entirely. When you wrote the `overdue`
+command yourself, you decided where today's date comes from. Your first
+try failed the test with the two `TODO_TODAY` dates, and you fixed it.
+The decision stayed with you because you made it. When the agent merges
+the same increment, the code arrives finished. The tests pass. The diff is
+small and the report is confident. Every reason to slow down and read it
+is gone, and so is the moment where the decision would have become yours.
+
+The leak is slow. After one increment you still know the program, because
+you wrote the spec. After ten, you know the spec and the agent knows the
+code. After a hundred, a colleague asks in a design review why the date is
+stored as a string and you open the transcript to find out. That's the
+point where the objective of this lesson has been missed: you can no
+longer explain how the parts fit or why they were built that way, and the
+agent's next change goes into a system nobody on the team can vouch for.
+
+<Choice id="who-reviews-now" objective="coding-with-agents/ships-with-agent/keeps-understanding"
+  concepts={['working-increments']}
+  context="An engineer has been landing a feature with a coding agent in small increments over several weeks. Each increment passed its tests and was merged after a quick look at the diff."
+  title="What did the small diffs cost?" hint="Who on the team can say why the code is the way it is, and what does a reviewer need for the next change?"
+  options={[
+    { text: 'Nothing. Small increments with passing tests are the point, and the engineer can read any part when needed.', why: 'Reading when needed finds what the code does today. It doesn\'t recover why it was built that way, and that\'s what the next review depends on.' },
+    { text: 'Some speed, because increments take longer than one large change would have.', why: 'Increments made each step checkable, and the time went into landing them. The cost here is elsewhere, in what the engineer skipped while landing them.' },
+    { text: 'The engineer\'s own model of the system, because passing tests replaced reading and the reasons stayed with the agent.', correct: true },
+    { text: 'The agent\'s context, which has to be rebuilt each session because the increments were small.', why: 'The agent starts every session from the files on disk in any case. Small increments don\'t change what it has to rebuild.' },
+  ]}>
+An engineer merged twenty increments with an agent over a month, each one
+tested and merged after a glance at the diff. Asked in a design review why
+the queue is in-process, the engineer has to look it up. What did the
+small, green diffs cost?
+</Choice>
+
+## Read it like a colleague wrote it
+
+The first habit is to read agent-written code with the attention you give
+a colleague's pull request. That's a lower bar than it sounds, because
+you already read colleagues' code for a living. It is also a higher bar
+than most engineers hold agent output to. A colleague's PR doesn't arrive
+with its tests already green and a paragraph saying it is done.
+
+Reading means the whole diff, at the speed it takes to follow it. You stop
+at anything you can't explain. A regular expression you can't parse, a
+`try` block whose exception you don't know, a helper whose name doesn't
+say what it does. At each stop, you have two moves. Ask the agent to
+explain the line in plain language, and ask it for a test that documents
+the behavior you couldn't see. The test stays in the suite after the explanation is forgotten, and it
+turns a line you took on faith into one the suite checks.
+
+<Prompt model="illustrative" recorded="illustrative">
+In `todo.py`, the `due` command validates the date with
+`datetime.date.fromisoformat(text)`. Explain in plain language which
+inputs that accepts and which it refuses, and add a test that documents
+one accepted and two refused inputs.
+</Prompt>
+<Response>
+`fromisoformat` accepts a date written as four digits, a dash, two digits,
+a dash and two digits, such as `2026-10-01`, and raises `ValueError` for
+the rest. So `tomorrow` is refused, and so is `2026-10-1`, because the day
+has one digit. The `due` command catches that error and prints
+`bad date: <input>`, as the spec says. I added `test_due_date_formats` in
+`test_due.py` with `2026-10-01` accepted and `tomorrow` and `2026-10-1`
+refused.
+</Response>
+
+This exchange is illustrative and shows the form of the question. The
+one-digit day is the kind of case you only learn by asking. Had you
+skimmed past the line, you would know that the command refuses `tomorrow`
+and nothing about what else it refuses, and the first user who types
+`2026-10-1` would find out for you.
+
+The habit costs minutes per increment, and small increments are what
+make it possible. A diff you can read in one sitting is a diff you can
+understand. The brief that asks for small increments is the same brief
+that keeps your reading possible.
+
+<Scenario id="the-line-you-cannot-parse" objective="coding-with-agents/ships-with-agent/keeps-understanding"
+  concepts={['working-increments', 'test-driven-change']}
+  context="An engineer reviews an increment a coding agent merged. The tests pass. One line in the diff is a regular expression the engineer cannot read."
+  title="A line you can't read" hint="After each option, could you explain that line in a design review next month, and would the suite catch a change to it?"
+  options={[
+    { text: 'Approve it. The tests pass, and the agent reads regular expressions better than you do.', consequence: 'The line is in the system and nobody on the team can say what it matches. When a user reports an input it refuses, the fix starts from zero.' },
+    { text: 'Ask the agent to explain the expression in plain language, and to add a test with inputs it accepts and refuses.', correct: true, consequence: 'You can now say what the line does, and a test pins it. The next agent that touches it breaks the test before it breaks a user.' },
+    { text: 'Ask the agent to rewrite it without a regular expression, since you can\'t read those.', consequence: 'The new version is longer and you still haven\'t asked what the input rule is. The rewrite may accept something the old line refused, and no test says which.' },
+    { text: 'Leave a comment above the line that says the agent wrote it.', consequence: 'The comment records authorship, which the commit already did. It says nothing about what the line matches or why.' },
+  ]}>
+The agent's increment for date validation includes a regular expression
+you can't parse. The suite is green. What do you do?
+</Scenario>
+
+## Explain it without looking
+
+Reading builds understanding, and the check that it worked is whether you
+can explain the system without looking at it. After an increment is merged,
+close the editor and say how the parts fit and why they were built that
+way. For the due-dates feature that's a few sentences: the date is a
+field on the item that some items have and some don't, `render.py` shows
+it when it is present, `store.py` didn't change because the JSON file
+takes whatever keys an item has, and `overdue` reads today from
+`TODO_TODAY` so a test can pick the day. Each of those sentences has a
+"because" in it, and the "because" is the part you lose first.
+
+Then open the code and check your explanation against it. Where the code
+does something your explanation didn't predict, you have found a gap in
+your model, and the increment isn't done until you close it. Either the
+code is right and you ask the agent why, or the code is wrong and it
+comes back to the spec. Both are the review working.
+
+This is also the point to notice when the answer to "why" is a guess.
+"The date is a string because that's what JSON has" is an explanation.
+"The date is a string, I think because the agent chose it" is a decision
+nobody made. A decision nobody made is a decision the next session can
+contradict, and that's the subject of the last section.
+
+<MultiChoice id="explanation-or-recall" objective="coding-with-agents/ships-with-agent/keeps-understanding"
+  concepts={['working-increments', 'spec-driven-change']}
+  context="After a coding agent merged an increment, an engineer closes the editor and tries to explain how the new code fits into the program and why it was built that way, before checking the explanation against the code."
+  title="Which of these show understanding?" hint="Does the sentence say why the part is the way it is, in a way you could defend to a colleague who asks a follow-up question?"
+  options={[
+    { text: 'The store module didn\'t change, because the JSON writer saves whatever keys an item has.', correct: true },
+    { text: 'The agent said the store module didn\'t need to change, and the tests passed after the increment was merged.', why: 'This repeats the agent\'s report. It says nothing about why the module could stay as it was, so a follow-up question sends you back to the transcript.' },
+    { text: 'Today\'s date comes from an environment variable when it is set, so the overdue test can pick the day.', correct: true },
+    { text: 'The diff for the overdue command touched one file and one test file, as the agent\'s increment list predicted it would.', why: 'The size of the diff is a fact about the change. It doesn\'t say what the command does or why today is read the way it is.' },
+  ]}>
+An engineer explains the due-dates feature from memory. Which of these
+sentences show the understanding this lesson asks for?
+</MultiChoice>
+
+## Keep the reasons where the agent reads them
+
+The third habit is about the team, and about the next session. An
+architecture decision that lives in your head is safe until the next
+person, or the next agent session, makes a different one. Agents start
+every session from the files in the repository. What they don't find
+there, they don't know, and a decision they don't know about is one they
+will cheerfully reverse when it gets in the way of the task in front of
+them.
+
+So the reasons go in the repository, in two places that point at each
+other. A decisions folder, often `docs/decisions/`, holds one short file
+per decision: what was decided, why, and what was considered and
+rejected. The project instructions point the agent at it. Project
+instructions are a file at the root of the repository that the agent
+reads at the start of every session. Claude Code reads `CLAUDE.md`, and
+many agents read `AGENTS.md`. The to-do fixture has one, and its
+lines say which commands must keep working and that `SPEC.md` is the
+source of truth while a change is in progress. If you want the full
+tutorial, *Project instructions* in the customizing-agents course is
+live at [/customizing-agents/instructions/](/customizing-agents/instructions/).
+
+A decision file for the fixture is short.
+
+```md
+# Due dates are stored as ISO strings
+
+Date: 2026-10-01
+
+## Decision
+
+An item's `due` field is a `YYYY-MM-DD` string in `todos.json`, parsed
+when it is compared and never at load time.
+
+## Why
+
+The JSON file has no date type. Parsing at load would make an item with a
+bad date impossible to load, and the spec says an item without a `due` field
+stays valid. Parsing at comparison keeps `list` working on any file that
+loads today.
+
+## Considered
+
+A Unix timestamp: harder to read in the file, and the spec shows the date
+in `list` as written. A separate dates file: two files to keep in step.
+```
+
+And one line in the instructions:
+
+```md
+- Architecture decisions are in `docs/decisions/`. Read the ones that
+  touch the files you change, and add one when you make a new decision.
+```
+
+The instructions line does two jobs. It tells the agent where the reasons
+are, so the next session that touches dates reads why they're strings
+before proposing timestamps. And it tells the agent to write a decision
+down when it makes one, which is how the folder stays current when the
+agent merges most of the increments. You still read every new decision
+file as part of the diff, because a decision the agent wrote and you
+didn't read is back in nobody's head.
+
+<Pitfall title="The decision that only lived in the transcript">
+A team merges a feature over three weeks of agent sessions. In the first
+week the engineer and the agent decide, after some back and forth, to keep
+the job queue in-process, because the deployment has one machine and a
+broker would be a second thing to run. The reasoning is in the transcript
+and nowhere else. In week three a fresh session, asked to make the queue
+survive a restart, adds a broker, its client library, and a configuration
+file, all correctly. The reviewer approves it because it works. The
+decision was reversed by an agent that never knew it had been made. A
+file in `docs/decisions/` and a line in the instructions pointing at it
+would have put the reason in front of that session before it typed a
+line.
+</Pitfall>
+
+<Sort id="where-the-reason-lives" objective="coding-with-agents/ships-with-agent/keeps-understanding"
+  concepts={['project-instructions', 'commits-and-prs']}
+  context="A team records why its system is built the way it is. A coding agent starts each session by reading the files in the repository and the project instructions file, and knows nothing else about past sessions."
+  title="Will the next session see it?" hint="At the start of a fresh session, which of these does the agent read without being told?"
+  buckets={['The next agent session reads it', 'The next agent session never sees it']}
+  items={[
+    { text: 'A file under docs/decisions/, with the folder named in the project instructions', bucket: 0 },
+    { text: 'The transcript of the session where the decision was made', bucket: 1 },
+    { text: 'A message in the team chat explaining the choice', bucket: 1 },
+    { text: 'The project instructions file itself', bucket: 0 },
+    { text: 'The engineer\'s memory of the discussion', bucket: 1 },
+  ]} />
+
+<Choice id="passing-tests-and-understanding" phase="review" objective="coding-with-agents/ships-with-agent/keeps-understanding"
+  concepts={['working-increments']}
+  context="An engineer works with a coding agent that merges increments with passing tests. The lesson holds that the engineer must keep their own understanding of the code as the agent produces more of it."
+  title="What do passing tests prove?" hint="Do the tests say why the code is built as it is, and who has to answer that question later?"
+  options={[
+    { text: 'That the increment does what its tests describe, and nothing about whether you understand it.', correct: true },
+    { text: 'That the increment is understood, because the agent could only make it pass by understanding it.', why: 'The agent\'s understanding ends with the session. Yours is what the next review runs on, and a green suite doesn\'t transfer it.' },
+    { text: 'That the increment can be merged without reading the diff, as long as the tests cover the criteria.', why: 'The tests check the criteria. Reading is where you learn how the parts fit, and skipping it skips that.' },
+    { text: 'That the design is sound, because a bad design would have made the tests hard to write.', why: 'Tests pass against many designs, including ones the team would never have chosen. The suite doesn\'t hold an opinion about the design.' },
+  ]}>
+An increment is merged and its tests pass. What does the green suite prove
+about your understanding of the system?
+</Choice>
+
+<Scenario id="fresh-session-contradicts" phase="review" objective="coding-with-agents/ships-with-agent/keeps-understanding"
+  concepts={['project-instructions']}
+  context="A team keeps architecture decisions and their reasons in the repository. A coding agent proposes a change in a fresh session that reverses one of those decisions."
+  title="The agent proposes to reverse a decision" hint="Where did the team put the reason, and did this session have any way to read it?"
+  options={[
+    { text: 'Tell the agent no and move on to the task. It read the repository, so it should know better.', consequence: 'The session backs off. The next session proposes the same change, because nothing in the repository says why it is wrong.' },
+    { text: 'Check whether the decision is in the decisions folder the instructions name. If it isn\'t, write it there now, then answer.', correct: true, consequence: 'The decision file exists from this day on. Later sessions read the reason before they propose a change to it, and when the reason stops holding, the file is where the team revisits it.' },
+    { text: 'Accept the proposal. A fresh look from the agent counts for more than a decision the team made months ago.', consequence: 'The reason the team chose the old design was never weighed, because this session never saw it. The change ships and the old problem comes back.' },
+    { text: 'Paste the old transcript into the session so the agent can read the discussion the team had back then.', consequence: 'This session knows. The next one starts from the files again, and the transcript isn\'t one of them.' },
+  ]}>
+A fresh agent session proposes replacing the in-process queue with a
+broker. You remember the team deciding against a broker months ago. What
+do you do?
+</Scenario>
+
+<Exercise stretch="Do the same after the third increment, date validation. Then compare your two decision files: does the second one contradict anything in the first, and if so, which of the two changes?">
+Take a copy of the to-do fixture from *Working from a spec in small
+increments* with its first two increments merged, as that lesson and its
+exercise leave it. Close your editor and write down, from memory, how the
+due date flows from the `due` command through the modules to `list` and
+`overdue`, and why the field is optional. Then open the code and mark
+every sentence right or wrong. For each wrong one, ask the agent to
+explain the line you misread. Finish by adding `docs/decisions/` with one
+file recording why dates are stored as strings and parsed late, and a
+line in the fixture's `AGENTS.md` that points the agent at the folder.
+Plan on ten minutes. This is the check you run after any increment you
+didn't type yourself.
+
+A good result: your explanation names the field, the three modules and
+which of them changed, and says why an old item without a date still
+loads. At most one sentence needed correcting after you read the code.
+The decision file says what was decided, why, and what was rejected, and
+the `AGENTS.md` line names the folder. Then answer one question: which
+sentence of your explanation would you have got wrong a week from now,
+and is the reason for it written down anywhere the agent reads?
+</Exercise>
+
+<Recap>
+1. Understanding leaks when the agent writes and you only run the tests. Passing tests check the change and say nothing about whether you can still explain the system (@Brilliant INC).
+2. Read agent code with the attention you give a colleague's pull request. Stop at every line you can't explain, and ask for a plain-language explanation and a test that documents it.
+3. After an increment is merged, explain from memory how the parts fit and why, then check the explanation against the code. A gap is a review finding.
+4. Architecture decisions and their reasons go in a decisions folder in the repository, and the project instructions point the agent at it, so the next session reads the reason before it proposes to reverse the decision.
+</Recap>
