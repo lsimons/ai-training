@@ -36,6 +36,8 @@ A row marked as the nits row is one issue that holds the cosmetic nits left open
 - In an `.astro` template, keep a link and the words next to it on one source line, because the compiler drops the newline at a tag's line edge and the words run together (#70 shipped two words run together this way).
 - A parser for a vendor file format names the vendor page for each rule it copies, such as how a repeated key merges.
 - When siblings are matched by a shared key (an objective), the builder checks the case where two items share one sibling.
+- A change that makes a parser see text it used to skip reruns that check over `origin/main` right before the push, since lessons merged meanwhile were never checked by it.
+- A builder that toggles `hidden` on an element with a `display` rule restates `[hidden] { display: none }` for it, as `.checkpoint [hidden]` does.
 
 Pass each builder the list that matches its issue. A list holds at most 15 bullets. At the cap, a new note replaces an old one or becomes a check, and your report says which.
 
