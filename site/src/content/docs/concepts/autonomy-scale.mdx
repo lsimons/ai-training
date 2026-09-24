@@ -1,0 +1,246 @@
+import { Choice, MultiChoice, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In the last lesson you learned to tell an assistant from an agent by
+asking what it can do without another prompt, and you saw that the
+harness holds a permission check between a tool request and the tool.
+This lesson puts that check on a scale. Agents with the same tools can be far apart on it, and one agent can
+move along it with a change of settings. By the end you can place any product or workflow on the
+scale by asking one question, and you can say what would move it one
+step up or down.
+
+## Three points on one scale
+
+The **degree of autonomy** of a workflow is how much the system may do
+before a person sees it. The scale has many points, and three of them
+are enough for most conversations.
+
+- **Suggests.** The system proposes, and a person does every action.
+  A drafted email that waits for you to press send, or a proposed code
+  change that waits for you to accept it, sits here.
+- **Acts, and asks before anything hard to undo.** The system takes the
+  ordinary steps on its own and stops for approval at the steps that
+  can't be taken back. An agent that edits files in a folder by itself
+  and asks before it deletes one sits here.
+- **Runs unattended.** The system finishes the whole task, and a person
+  looks at the result afterwards, if at all. A job that runs
+  overnight and posts its result to a channel sits here.
+
+The points share one question, and it isn't "how much did the
+model write". It is "who decided the next step". At the low end a
+person decides every step. In the middle the system decides most steps
+and a person decides the ones that matter most. At the high end the
+system decides every step (@DLAI-11).
+
+## Who decides the next step?
+
+The amount of text a system produces tells you nothing about its
+autonomy. Autocomplete in a code editor can write a whole function from
+one comment. It is still at the low end, because nothing goes into the
+file until the programmer presses a key to accept it. A person decided
+every step. A small job that renames one file every night with no one
+watching is at the high end, because nobody decided anything after it was
+set up.
+
+So when you place a workflow, ignore the size of the output and the name
+on the box. Follow one task from the prompt to the end, and at each step
+ask who chose it. The harness from the last lesson is where the answer
+is written down: the permission check either asks a person, or it lets
+the action through (@AEC-01). Count how often it asks, and at which
+steps, and you have the workflow's place on the scale.
+
+<Sort id="sort-six-workflows" objective="concepts/recognizes-agents/places-on-autonomy-scale"
+  concepts={['degree-of-autonomy']}
+  context="The lesson gives a three-point autonomy scale: suggests (a person does every action), acts and asks before anything hard to undo, and runs unattended. The place on the scale comes from who decides the next step, never from how much text the system produces."
+  title="Where does each workflow sit?" hint="For each one, follow the task to its end. Who decided the steps along the way, and at which steps did a person get asked?"
+  buckets={['Suggests', 'Acts, asks before the hard-to-undo step', 'Runs unattended']}
+  items={[
+    { text: 'Autocomplete in an editor writes a whole function, and the programmer presses a key to accept it', bucket: 0 },
+    { text: 'A mail assistant drafts a reply and waits for you to press send', bucket: 0 },
+    { text: 'A coding agent edits files on its own and stops to ask before it runs a command that deletes anything', bucket: 1 },
+    { text: 'A travel agent app books the flights it finds, and asks you before it pays', bucket: 1 },
+    { text: 'A nightly job reads the support inbox, files each ticket under a category and closes the duplicates', bucket: 2 },
+    { text: 'A research agent searches, reads and writes a report while you sleep, and you read it in the morning', bucket: 2 },
+  ]} />
+
+<Choice id="whole-function-low-autonomy" phase="review" objective="concepts/recognizes-agents/places-on-autonomy-scale"
+  concepts={['degree-of-autonomy']}
+  context="The autonomy scale runs from suggests, through acts and asks before anything hard to undo, to runs unattended. The place comes from who decides the next step, and the amount of text produced says nothing about it."
+  title="Where does the autocomplete sit?" hint="After the function appears on screen, who decides whether it goes into the file?"
+  options={[
+    { text: 'High, because it wrote a whole function from one comment.', why: 'The size of the output is the wrong measure. A long suggestion that a person has to accept is still a suggestion.' },
+    { text: 'In the middle, because it acts but the programmer can undo the edit.', why: 'Undo is available after the fact, but the autocomplete never acted on its own. It waited for a keypress before anything changed.' },
+    { text: 'Low, because the programmer accepts each suggestion before it goes in.', correct: true },
+  ]}>
+An editor's autocomplete writes a fifty-line function from a one-line
+comment. Where is that workflow on the autonomy scale?
+</Choice>
+
+## One agent, three settings
+
+Autonomy is a setting chosen for a task, and the same product can sit on
+each of the three points in turn. Take a coding agent that runs in a
+programmer's editor. Its vendor documents a set of permission modes, and
+the mode decides which actions the agent takes without asking
+(@Claude Code permission modes). Described in plain words:
+
+- In its manual mode, the agent may read files, and it stops and asks
+  before it edits a file, runs a command or reaches the network. Every
+  change waits for a yes. This is the low end of the scale.
+- In its accept-edits mode, the agent edits files inside the project
+  folder by itself and still asks before other commands. It acts, and it
+  asks before the steps that reach further than a file edit. This is the
+  middle.
+- In its skip-all-checks mode, the agent runs without permission prompts.
+  The vendor's page says to use this mode only inside an isolated
+  container or virtual machine, a place where a mistake can't reach the
+  rest of the computer. This is the high end.
+
+Same agent, same model, same tools, three places on the scale. What
+changed is one setting in the harness, so a product on its own can't be
+placed. A product page that says "agent" describes a range, and
+the place on the scale is fixed only once someone picks the setting for
+a task (@Claude Code permission modes).
+
+Two questions decide which setting fits a task. How costly is a
+mistake, and how easily can it be undone? Edits in a folder under
+version control are cheap to undo, so a person can let
+the agent make them and read the result afterwards. A command that
+deletes files, sends a message or spends money is costly or impossible
+to take back, so the agent should stop there. Where both answers are
+"cheap and easy", the high end is fine. Where either answer is "costly"
+or "hard", pick a setting that asks before that step.
+
+<Choice id="pick-the-setting" objective="concepts/recognizes-agents/places-on-autonomy-scale"
+  concepts={['degree-of-autonomy', 'harness']}
+  context="A coding agent has three permission settings: manual (asks before every edit and command), accept-edits (edits files in the project folder by itself and asks before other commands) and skip-all-checks (no prompts, for use inside an isolated container only). The right setting depends on how costly a mistake is and how easily it can be undone."
+  title="Which setting for this task?" hint="Which steps of this task are cheap to undo, and which one isn't?"
+  options={[
+    { text: 'Manual, so that she approves each of the many small edits by hand.', why: 'The edits are tracked by version control and cheap to undo. Approving each of them one by one costs her time and buys her nothing that reading the result afterwards would not.' },
+    { text: 'Accept-edits, so the edits run on their own and the agent asks before the publish command.', correct: true },
+    { text: 'Skip-all-checks, because the edits are tracked and the publish command is routine.', why: 'The edits can be undone, but a published site can\'t be unpublished by pressing undo, and in this mode nothing asks before that step. The vendor also limits this mode to an isolated container, which her laptop isn\'t.' },
+  ]}>
+A writer asks a coding agent to fix the spelling in forty documentation
+files that version control tracks, and then to run the command that
+publishes the site. She works on her own laptop. Which setting fits?
+</Choice>
+
+<Choice id="same-product-two-places" phase="review" objective="concepts/recognizes-agents/places-on-autonomy-scale"
+  concepts={['degree-of-autonomy', 'harness']}
+  context="The autonomy scale runs from suggests, through acts and asks before anything hard to undo, to runs unattended. One agent product can sit at different points depending on its permission setting, because the setting decides which actions the harness lets through without asking."
+  title="Same product, one report" hint="What is the report about: the product, or the product as each team runs it?"
+  options={[
+    { text: 'The report is right, because a product has one place on the scale and the second team is using it wrong.', why: 'A product describes a range. Where it sits is fixed by the setting a team picks, and two settings give two honest answers.' },
+    { text: 'The report needs one line per team, because the setting each team picked decides where its agent sits.', correct: true },
+    { text: 'The report should place the product at the high end, because that is the most it can do.', why: 'The most a product can do describes its reach. The scale is about who decides the next step in a given workflow, and in the first team a person decides every edit.' },
+  ]}>
+Two teams use the same coding agent. One runs it in manual mode, and the
+other in a mode that skips every prompt inside a container. A colleague
+writes "this product is a low-autonomy tool" in a report about it. What
+is wrong with that line?
+</Choice>
+
+## What moves a workflow a step
+
+Once a workflow has its place, ask what would move it. The answer is
+always a step where the decision changes hands, and naming it makes the
+design choice visible.
+
+Take an agent that fixes a bug and opens a pull request for a person to
+review and merge. It acts, and a person approves the step that changes
+the shared code. Let the same agent merge the pull request itself, and it
+moves up a point: the change reaches everyone without a person seeing
+it first. If the same agent is changed to display the proposed change without
+touching any file, it moves down a point, to suggests.
+
+The moves in the other examples work the same way. The mail assistant
+that drafts a reply moves up when it is given a send tool and permission
+to use it. The nightly job that closes duplicate tickets moves down when
+it is changed to list the duplicates for a person to close in the
+morning. In each case the tool list may not change at all. What changes
+is which step a person decides, and that is a choice someone made, or
+left to the product's default.
+
+<MultiChoice id="what-moves-it" objective="concepts/recognizes-agents/places-on-autonomy-scale"
+  concepts={['degree-of-autonomy', 'tool']}
+  context="A workflow moves up the autonomy scale when a step that a person decided is handed to the system, and down when a step the system decided is handed back to a person. The lesson's example is an agent that opens a pull request, which moves up if it also merges it."
+  title="Which changes move it up?" hint="For each change, ask whether a step a person used to decide now happens without them."
+  options={[
+    { text: 'The agent merges the pull request itself once the checks pass.', correct: true },
+    { text: 'The agent is given a faster model so the fix arrives in half the time.', why: 'Speed changes how long the work takes. A person still reviews and merges, so the same steps are decided by the same people.' },
+    { text: 'The agent also deploys the merged change to production without a prompt.', correct: true },
+    { text: 'The agent writes a longer description in the pull request.', why: 'More text in the description is more output, and output size says nothing about autonomy. The merge still waits for a person.' },
+  ]}>
+An agent fixes bugs and opens a pull request for a person to review and
+merge. Which of these changes move the workflow up the scale?
+</MultiChoice>
+
+<Choice id="one-step-down" phase="review" objective="concepts/recognizes-agents/places-on-autonomy-scale"
+  concepts={['degree-of-autonomy']}
+  context="A workflow moves down the autonomy scale when a step the system decided is handed back to a person, and up when a step a person decided is handed to the system. The tool list may stay the same."
+  title="Which change moves it down?" hint="Which change puts a person back in front of a step the job used to take on its own?"
+  options={[
+    { text: 'Run the job twice a night instead of once.', why: 'Running more often changes the schedule and nothing about who decides. Each run still closes tickets with nobody watching.' },
+    { text: 'Have the job list the duplicates it found and leave the closing to a person.', correct: true },
+    { text: 'Give the job a better model so it finds fewer false duplicates.', why: 'Fewer mistakes is a good change, and it doesn\'t move the workflow. The job still decides every close on its own.' },
+  ]}>
+A nightly job reads the support inbox and closes the tickets it judges
+to be duplicates. Which change moves it one step down the scale?
+</Choice>
+
+<Pitfall title="The default nobody looked at">
+A team lead installs a coding agent for her team and tells everyone it
+asks before it changes anything, because that is what she remembers from
+a demo a few months back. Nobody checks. On the plan the team is on, the
+vendor's built-in starting mode has changed since the demo, and a fresh
+session now starts in a mode where a second model approves actions
+instead of the person at the keyboard (@Claude Code permission modes).
+A week later a colleague finds that a run has rewritten files she meant
+to review first. Nothing went wrong that couldn't be undone, but the
+team had placed the product on the scale from memory, and the product
+had moved. The setting decides the place, so the first thing to read
+when you install an agent, and again after each big update, is which
+mode it starts in.
+</Pitfall>
+
+<Exercise stretch="Do the same for one agent product you use that isn't a coding agent, such as a mail assistant or a meeting notetaker. Find its permission settings on the settings screen, and write down which of the three points each setting lands on.">
+
+Pick one coding agent, either the one from this lesson or one your team
+uses. Read the vendor's page on its permission settings. For three of
+the settings, write one line each in a note: the name of the setting,
+which of the three points on the scale it lands on, and the one
+sentence that explains why (who decides which step). Then, for each
+line, add what would move that setting's workflow one step up and one
+step down. Fifteen minutes is enough.
+
+In a good result, each placement names a step and who decides it. "The
+agent edits by itself and asks before a command" is a placement, and
+"it is pretty autonomous" isn't. Each move names a step that changes
+hands, such as "let it merge" or "make it show the change instead of
+writing it". If two of your three settings landed on the same point,
+say what still separates them, because the scale has more points than
+the three named here.
+
+</Exercise>
+
+<Recap>
+
+1. The degree of autonomy of a workflow is how much the system may do
+   before a person sees it. Three points cover most conversations:
+   suggests, acts and asks before anything hard to undo, and runs
+   unattended (@DLAI-11).
+2. Place a workflow by asking who decides the next step, never by how
+   much text the system produces. Autocomplete that writes a whole
+   function is low autonomy, because a person accepts each suggestion.
+3. Autonomy is a setting chosen for a task. One coding agent lands on
+   three different points in three permission modes, and the choice
+   depends on how costly a mistake is and how easily it can be undone
+   (@Claude Code permission modes).
+4. To move a workflow one step, change which step a person decides. An
+   agent that merges its own pull request has moved up. An agent that
+   shows a change instead of writing it has moved down.
+5. The safety course's [human in the loop](/safety/agent-risk/#human-in-the-loop)
+   section picks the steps that need a person, and the using-agents
+   course's [choosing autonomy](/using-agents/delegating/#choosing-autonomy)
+   section applies the same scale to a task you delegate.
+
+</Recap>
