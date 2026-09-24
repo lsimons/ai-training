@@ -12,7 +12,8 @@ import os
 import shutil
 import subprocess
 import sys
-import tempfile
+from importlib.machinery import SourceFileLoader
+from types import ModuleType
 from typing import Callable
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -22,6 +23,24 @@ SPEC = os.path.join(SIBLING, "SPEC.md")
 DUE_TEST = os.path.join(SIBLING, "test_due.py")
 OVERDUE_TEST = os.path.join(HERE, "test_overdue.py")
 BAD_DATE_TEST = os.path.join(HERE, "test_bad_date.py")
+
+
+def _load_sibling_common() -> ModuleType:
+    """Loads the sibling's `_common.py` under another name, since this module is `_common` too."""
+    loader = SourceFileLoader("spec_driven_common", os.path.join(SIBLING, "_common.py"))
+    module = ModuleType(loader.name)
+    module.__file__ = loader.path
+    loader.exec_module(module)
+    return module
+
+
+# The first increment's text edits, the repo copy and the todo.py runner are the
+# sibling lesson's, so they are imported from there rather than kept in step.
+_spec_driven = _load_sibling_common()
+copy_repo = _spec_driven.copy_repo
+run_todo = _spec_driven.run_todo
+in_copy = _spec_driven.in_copy
+_replace = _spec_driven._replace
 
 # Variables that would point git at another repository than the copy's own.
 GIT_LOCATION_VARIABLES = (
@@ -43,48 +62,6 @@ GIT_ENV = dict(
     GIT_CONFIG_GLOBAL=os.devnull,
     GIT_CONFIG_SYSTEM=os.devnull,
 )
-
-# Increment 1: `due` sets the field and `list` shows it.
-
-TODO_USAGE_BEFORE = """    python3 todo.py done 1
-    python3 todo.py clear
-"""
-
-TODO_USAGE_AFTER = """    python3 todo.py done 1
-    python3 todo.py due 1 2026-10-01
-    python3 todo.py clear
-"""
-
-TODO_DONE_BEFORE = """    return f"done #{number}: {items[index]['text']}"
-"""
-
-TODO_DONE_AFTER = """    return f"done #{number}: {items[index]['text']}"
-
-
-def due(items, number, date):
-    index = number - 1
-    if index < 0 or index >= len(items):
-        return f"no item #{number}"
-    items[index]["due"] = date
-    return f"due #{number}: {items[index]['text']} by {date}"
-"""
-
-TODO_DISPATCH_BEFORE = """    elif command == "clear":
-"""
-
-TODO_DISPATCH_AFTER = """    elif command == "due" and len(argv) == 4 and argv[2].isdigit():
-        message = due(items, int(argv[2]), argv[3])
-    elif command == "clear":
-"""
-
-RENDER_BEFORE = """        lines.append(f"{number}. [{mark}] {item['text']}")
-"""
-
-RENDER_AFTER = """        line = f"{number}. [{mark}] {item['text']}"
-        if item.get("due"):
-            line += f" (due {item['due']})"
-        lines.append(line)
-"""
 
 # Increment 2: `overdue`, with today from TODO_TODAY or the clock.
 
@@ -147,35 +124,15 @@ BAD_DATE_DISPATCH_AFTER = """    elif command == "due" and len(argv) == 4 and ar
         message = due(items, int(argv[2]), argv[3])
 """
 
-COMMIT_SUBJECTS = [
-    "feat: due command and the date in list",
-    "feat: overdue command with TODO_TODAY",
-    "feat: refuse a malformed date",
-]
-
-
-def copy_repo(tmpdir: str) -> str:
-    copy = os.path.join(tmpdir, "fixture-repo")
-    shutil.copytree(REPO, copy)
-    return copy
-
-
-def _replace(repo: str, name: str, pairs: "list[tuple[str, str]]") -> None:
-    path = os.path.join(repo, name)
-    with open(path, encoding="utf-8") as handle:
-        source = handle.read()
-    for before, after in pairs:
-        if before not in source:
-            raise SystemExit(f"{name} no longer holds the text the lesson changes")
-        source = source.replace(before, after)
-    with open(path, "w", encoding="utf-8") as handle:
-        handle.write(source)
-
 
 def git(repo: str, *args: str) -> "subprocess.CompletedProcess[str]":
-    """Runs one git command in the copy, with a fixed identity and no user config."""
+    """Runs one git command in the copy, with a fixed identity and no user config.
+
+    GIT_CONFIG_GLOBAL and GIT_CONFIG_SYSTEM point at /dev/null, so no user setting
+    such as commit signing reaches the copy.
+    """
     result = subprocess.run(
-        ["git", "-c", "commit.gpgsign=false", *args],
+        ["git", *args],
         cwd=repo,
         env=GIT_ENV,
         capture_output=True,
@@ -204,12 +161,12 @@ def land_increment_1(repo: str) -> None:
         repo,
         "todo.py",
         [
-            (TODO_USAGE_BEFORE, TODO_USAGE_AFTER),
-            (TODO_DONE_BEFORE, TODO_DONE_AFTER),
-            (TODO_DISPATCH_BEFORE, TODO_DISPATCH_AFTER),
+            (_spec_driven.TODO_USAGE_BEFORE, _spec_driven.TODO_USAGE_AFTER),
+            (_spec_driven.TODO_DONE_BEFORE, _spec_driven.TODO_DONE_AFTER),
+            (_spec_driven.TODO_DISPATCH_BEFORE, _spec_driven.TODO_DISPATCH_AFTER),
         ],
     )
-    _replace(repo, "render.py", [(RENDER_BEFORE, RENDER_AFTER)])
+    _replace(repo, "render.py", [(_spec_driven.RENDER_BEFORE, _spec_driven.RENDER_AFTER)])
     shutil.copyfile(DUE_TEST, os.path.join(repo, "test_due.py"))
 
 
@@ -237,12 +194,17 @@ def land_increment_3(repo: str) -> None:
     shutil.copyfile(BAD_DATE_TEST, os.path.join(repo, "test_bad_date.py"))
 
 
-INCREMENTS: "list[Callable[[str], None]]" = [land_increment_1, land_increment_2, land_increment_3]
+# Each increment with its commit subject, in the order the branch lands them.
+INCREMENTS: "list[tuple[Callable[[str], None], str]]" = [
+    (land_increment_1, "feat: due command and the date in list"),
+    (land_increment_2, "feat: overdue command with TODO_TODAY"),
+    (land_increment_3, "feat: refuse a malformed date"),
+]
 
 
 def commit_each_increment(repo: str) -> None:
     """Lands the three increments as one commit each on the branch."""
-    for land, subject in zip(INCREMENTS, COMMIT_SUBJECTS):
+    for land, subject in INCREMENTS:
         land(repo)
         git(repo, "add", ".")
         git(repo, "commit", "-q", "-m", subject)
@@ -258,24 +220,8 @@ def print_log(repo: str) -> None:
     sys.stdout.write(git(repo, "log", "--format=%s", "main..HEAD").stdout)
 
 
-def run_todo(
-    repo: str, *args: str, today: "str | None" = None
-) -> "subprocess.CompletedProcess[str]":
-    """Runs a todo.py command against the copy's own todos.json and captures it."""
-    env = dict(os.environ, TODO_FILE=os.path.join(repo, "todos.json"))
-    if today is not None:
-        env["TODO_TODAY"] = today
-    return subprocess.run(
-        [sys.executable, "todo.py", *args],
-        cwd=repo,
-        env=env,
-        capture_output=True,
-        text=True,
-    )
-
-
-def print_test_verdict(repo: str) -> None:
-    """Runs the suite and prints only its last line, OK or FAILED."""
+def print_test_verdict(repo: str) -> int:
+    """Runs the suite, prints only its last line, OK or FAILED, and returns its exit status."""
     env = dict(os.environ, PYTHON_COLORS="0", NO_COLOR="1")
     result = subprocess.run(
         [sys.executable, "-m", "unittest", "-q"],
@@ -287,8 +233,4 @@ def print_test_verdict(repo: str) -> None:
     )
     lines = result.stdout.strip().splitlines()
     print(lines[-1] if lines else "")
-
-
-def in_copy(fn: Callable[[str], int]) -> int:
-    with tempfile.TemporaryDirectory() as tmpdir:
-        return fn(copy_repo(tmpdir))
+    return result.returncode

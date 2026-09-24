@@ -25,12 +25,12 @@ def main(repo: str) -> int:
     commit_each_increment(repo)
     revert_middle_increment(repo)
     print_log(repo)
-    print_test_verdict(repo)
+    status = print_test_verdict(repo)
     bad = run_todo(repo, "due", "1", "tomorrow")
     sys.stdout.write(bad.stdout)
     gone = run_todo(repo, "overdue", today="2026-10-02")
     print(f"overdue exits with status {gone.returncode}")
-    return 0
+    return status
 
 
 if __name__ == "__main__":

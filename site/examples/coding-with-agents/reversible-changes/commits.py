@@ -14,8 +14,7 @@ def main(repo: str) -> int:
     init_repo(repo)
     commit_each_increment(repo)
     print_log(repo)
-    print_test_verdict(repo)
-    return 0
+    return print_test_verdict(repo)
 
 
 if __name__ == "__main__":
