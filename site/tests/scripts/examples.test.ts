@@ -64,6 +64,22 @@ describe('predictTags', () => {
 		expect(propValue(many[1]?.attrs as Map<string, CheckpointAttr>, 'run')).toBe('x.py');
 		expect(many.map((t) => t.line)).toEqual([1, 3]);
 	});
+	it('skips a Predict quoted in a comment, a fence or a code span, which the page shows and does not run', () => {
+		const src = [
+			'{/* <Predict id="c" answer="x" run="in-comment.py" /> */}',
+			'',
+			'```mdx',
+			'<Predict id="f" answer="x" run="in-fence.py" />',
+			'```',
+			'',
+			'Write `<Predict id="s" answer="x" run="in-span.py" />` in the page.',
+			'',
+			'<Predict id="real" answer="hello" run="x.py" />',
+		].join('\n');
+		expect(predictTags(src, 'f.mdx').map((t) => propValue(t.attrs, 'run'))).toEqual(['x.py']);
+		const res = checkSource('f.mdx', src, () => ({ status: 0, stdout: 'hello', stderr: '' }));
+		expect(res).toEqual({ found: 1, checked: 1, failures: [] });
+	});
 	it('throws on a page that does not parse, naming the file', () => {
 		expect(() => predictTags('<Predict id="a" answer={`open', 'f.mdx')).toThrow(/^f\.mdx: /);
 	});
@@ -120,6 +136,11 @@ describe('checkSource', () => {
 	it('checks an ungraded example (no objective) like any other run', () => {
 		const res = checkSource('f.mdx', '<Predict id="e" title="T" answer="hello" run="x.py" />', ok);
 		expect(res).toEqual({ found: 1, checked: 1, failures: [] });
+	});
+	it('fails a tag with run="" instead of skipping it', () => {
+		const res = checkSource('f.mdx', '<Predict id="a" answer="x" run="" />', ok);
+		expect(res.found).toBe(1);
+		expect(res.failures[0]).toContain('unsupported fixture type');
 	});
 	it('ignores an honor-system predict', () => {
 		expect(checkSource('f.mdx', '<Predict id="a" title="t" />', ok)).toEqual({ found: 0, checked: 0, failures: [] });

@@ -285,8 +285,8 @@ that the learner checks it themselves.
 ````mdx
 <Predict id="run-list" title="Show the list"
   answer={`1. [ ] Buy milk
-2. [x] Call the plumber
-3. [ ] Water the plants`} run="coding-with-agents/first-session/list.py">
+  2. [x] Call the plumber
+  3. [ ] Water the plants`} run="coding-with-agents/first-session/list.py">
 Run this, and compare what you see with the output below.
 
 ```sh
@@ -375,9 +375,15 @@ review page uses (`site/src/lib/checkpoint-tags.ts`). A `{...}` prop must be
 a literal (a string, number, boolean, array or object, or a template
 literal without placeholders), because the reader takes the value from the
 parsed tree without running it, and a numeric or boolean prop is written
-as one (`revision={2}`, not `revision="2"`). The MDX compiler strips the indentation of
-the continuation lines in a multi-line template literal, and the export
-carries what the page shows. Each item has `id`, `lesson`, `kind`, `objective`,
+as one (`revision={2}`, not `revision="2"`). The MDX compiler removes up to
+two spaces from the start of every continuation line of a multi-line
+template literal, whatever the tag's own indentation, and the export carries
+what the page shows. So write every continuation line of a multi-line
+`answer` literal with a two-space margin, and paste the fixture's own
+indentation after it: a fixture line that starts with two spaces and
+`def f():` is written with four spaces and `def f():`. `mise run examples` compares what remains after the margin
+with the fixture output, and fails when an indented line was pasted at
+column 0. Each item has `id`, `lesson`, `kind`, `objective`,
 `concepts`, `context`, `stem`, `options`, `answer`, `hint`, `reviewable`,
 `revision` and `guessable`. S03 "Checkpoint export" gives the form of
 `options` and `answer` per kind. `mise run checkpoints` (part of
