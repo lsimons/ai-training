@@ -12,15 +12,21 @@ import {
 	applyStageAdjust,
 	dayOf,
 	describeWarning,
+	dueHabits,
 	dueReviewIdsOn,
 	dueReviewsOn,
 	emptyRecord,
 	exportJson,
+	HABIT_DAYS,
+	HABIT_HISTORY_LENGTH,
+	type HabitEntry,
 	HISTORY_LENGTH,
+	habitCardState,
 	initialDue,
 	initialStage,
 	migrate,
 	type NormalizeWarning,
+	nextOccurrence,
 	normalize,
 	OLDEST_MIGRATABLE_VERSION,
 	type ProgressRecord,
@@ -29,6 +35,7 @@ import {
 	pruneOrphanEntries,
 	REVIEW_CAP,
 	type ReviewEntry,
+	recordHabit,
 	resetOutdatedReviewEntries,
 	STORAGE_KEY,
 	scheduleReview,
@@ -48,6 +55,10 @@ function review(over: Partial<ReviewEntry> = {}): ReviewEntry {
 
 function record(over: Partial<ProgressRecord> = {}): ProgressRecord {
 	return { ...emptyRecord(), ...over };
+}
+
+function habit(over: Partial<HabitEntry> = {}): HabitEntry {
+	return { since: DAY, next: '2026-03-11', history: [], ...over };
 }
 
 describe('days', () => {
@@ -170,6 +181,90 @@ describe('normalize', () => {
 	});
 });
 
+describe('normalize habits (spec S07 "Storage")', () => {
+	it('reads a record without habits as empty, keeps well-formed entries and drops the rest', () => {
+		const warnings: NormalizeWarning[] = [];
+		expect(normalize({ version: VERSION }, warnings)?.habits).toEqual({});
+		expect(warnings).toEqual([]);
+		const retired = habit({ next: null, history: [{ at: DAY, result: 'done' }] });
+		const r = normalize(
+			{
+				version: VERSION,
+				habits: {
+					ok: habit(),
+					retired,
+					noSince: { next: null, history: [] },
+					badNext: habit({ next: 'soon' as never }),
+					badHistory: habit({ history: [{ at: DAY, result: 'pass' as never }] }),
+				},
+			},
+			warnings,
+		);
+		expect(r?.habits).toEqual({ ok: habit(), retired });
+		expect(warnings).toEqual([{ field: 'habits', kind: 'dropped', count: 3 }]);
+	});
+});
+
+describe('habits (spec S07 "Schedule")', () => {
+	it('falls due 1, 3 and 7 days after the finish day, then retires', () => {
+		expect(HABIT_DAYS).toEqual([1, 3, 7]);
+		expect(nextOccurrence(DAY, DAY)).toBe('2026-03-11');
+		expect(nextOccurrence(DAY, '2026-03-11')).toBe('2026-03-13');
+		expect(nextOccurrence(DAY, '2026-03-12')).toBe('2026-03-13');
+		expect(nextOccurrence(DAY, '2026-03-13')).toBe('2026-03-17');
+		// A late learner skips the occurrences that passed (the S07 late-learner row).
+		expect(nextOccurrence(DAY, '2026-03-15')).toBe('2026-03-17');
+		expect(nextOccurrence(DAY, '2026-03-17')).toBeNull();
+		expect(nextOccurrence(DAY, '2026-04-01')).toBeNull();
+	});
+	it('done and skipped both append a result and move next on; the third result retires the habit', () => {
+		const r = record({ habits: { h: habit() } });
+		expect(recordHabit(r, 'h', 'done', '2026-03-11')).toEqual({
+			since: DAY,
+			next: '2026-03-13',
+			history: [{ at: '2026-03-11', result: 'done' }],
+		});
+		// Two days late for the second occurrence: the next one is the 17th.
+		expect(recordHabit(r, 'h', 'skipped', '2026-03-15')?.next).toBe('2026-03-17');
+		const third = recordHabit(r, 'h', 'done', '2026-03-17');
+		expect(third?.next).toBeNull();
+		expect(third?.history).toEqual([
+			{ at: '2026-03-11', result: 'done' },
+			{ at: '2026-03-15', result: 'skipped' },
+			{ at: '2026-03-17', result: 'done' },
+		]);
+		expect(third?.history).toHaveLength(HABIT_HISTORY_LENGTH);
+		// A result after retirement keeps the cap and stays retired.
+		expect(recordHabit(r, 'h', 'done', '2026-03-18')?.history).toHaveLength(HABIT_HISTORY_LENGTH);
+		expect(r.habits.h?.next).toBeNull();
+		expect(recordHabit(r, 'missing', 'done', DAY)).toBeUndefined();
+	});
+	it('a result past the last occurrence retires the habit with fewer than three results', () => {
+		const r = record({ habits: { h: habit() } });
+		expect(recordHabit(r, 'h', 'done', '2026-03-20')).toMatchObject({ next: null, history: [{ at: '2026-03-20' }] });
+	});
+	it('lists the due habits, by prefix, never a retired one', () => {
+		const r = record({
+			habits: {
+				'b/y#late': habit({ next: '2026-03-01' }),
+				'a/x#today': habit({ next: DAY }),
+				'a/x#soon': habit({ next: '2026-03-11' }),
+				'a/x#retired': habit({ next: null }),
+			},
+		});
+		expect(dueHabits(r, DAY)).toEqual(['a/x#today', 'b/y#late']);
+		expect(dueHabits(r, DAY, 'a/')).toEqual(['a/x#today']);
+		expect(dueHabits(r, '2026-02-01')).toEqual([]);
+	});
+	it('names the card state from the entry and the day', () => {
+		expect(habitCardState(undefined, DAY)).toBe('unfinished');
+		expect(habitCardState(habit({ next: '2026-03-11' }), DAY)).toBe('waiting');
+		expect(habitCardState(habit({ next: DAY }), DAY)).toBe('due');
+		expect(habitCardState(habit({ next: '2026-03-01' }), DAY)).toBe('due');
+		expect(habitCardState(habit({ next: null }), DAY)).toBe('retired');
+	});
+});
+
 describe('content changes', () => {
 	it('prunes entries the build no longer knows', () => {
 		const r = record({
@@ -178,12 +273,17 @@ describe('content changes', () => {
 			reviews: { 'a/x#c1': review(), 'a/gone#c1': review() },
 		});
 		r.practice = { 'a/x#p1': { state: 'passed', attempts: 1 }, 'a/x#c1': { state: 'attempted', attempts: 1 } };
-		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'])).toBe(4);
+		r.habits = { 'a/x#h1': habit(), 'a/gone#h1': habit() };
+		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'], ['a/x#h1'])).toBe(5);
 		expect(Object.keys(r.lessons)).toEqual(['a/x']);
 		expect(Object.keys(r.checkpoints)).toEqual(['a/x#c1']);
 		expect(Object.keys(r.reviews)).toEqual(['a/x#c1']);
 		expect(Object.keys(r.practice)).toEqual(['a/x#p1']);
-		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'])).toBe(0);
+		expect(Object.keys(r.habits)).toEqual(['a/x#h1']);
+		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'], ['a/x#h1'])).toBe(0);
+		// Without a habit list every habit entry is an orphan.
+		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'])).toBe(1);
+		expect(r.habits).toEqual({});
 		// A checkpoint moved from `first` to `practice` keeps its practice entry and loses its review item.
 		r.reviews['a/x#p1'] = review();
 		expect(pruneOrphanEntries(r, ['a/x'], ['a/x#c1'], ['a/x#p1'])).toBe(1);
@@ -424,7 +524,7 @@ describe('export and import', () => {
 	it('the storage key carries the version, and the prior keys count down to the oldest migratable one', () => {
 		expect(STORAGE_KEY).toBe(`ai-training-progress-v${VERSION}`);
 		expect(storageKeyFor(1)).toBe('ai-training-progress-v1');
-		expect(priorStorageKeys()).toEqual(['ai-training-progress-v1']);
+		expect(priorStorageKeys()).toEqual(['ai-training-progress-v2', 'ai-training-progress-v1']);
 		expect(OLDEST_MIGRATABLE_VERSION).toBe(1);
 	});
 });
@@ -515,5 +615,36 @@ describe('migrate from version 1', () => {
 		expect(migrate('x')).toBe('x');
 		expect(normalize({ version: 0 })).toBeNull();
 		expect(parseImport('{"version":0}')).toMatchObject({ ok: false, message: expect.stringContaining('version 0') });
+	});
+});
+
+describe('migrate from version 2', () => {
+	it('copies the record and adds an empty habits map', () => {
+		const v2 = {
+			version: 2,
+			comfort: 'more',
+			lessons: { 'a/x': { state: 'finished', at: DAY } },
+			reviews: { 'a/x#c': { stage: 1, due: DAY, last: null, history: [], revision: 1 } },
+			practice: { 'a/x#p': { state: 'passed', attempts: 1 } },
+		};
+		expect(migrate(v2)).toEqual({ ...v2, version: 3, habits: {} });
+		expect(migrate(v2)).not.toBe(v2);
+	});
+	it('runs the chain from version 1 through 2 to 3', () => {
+		const out = migrate({
+			version: 1,
+			reviews: { c: { stage: 1, due: '2026-03-11', last: 'fail', history: ['fail'], revision: 1 } },
+		}) as { version: number; habits: unknown; reviews: Record<string, { history: unknown[] }> };
+		expect(out.version).toBe(VERSION);
+		expect(out.habits).toEqual({});
+		expect(out.reviews.c?.history).toEqual([{ at: '2026-03-10', result: 'fail' }]);
+	});
+	it('normalize and parseImport accept a version 2 file', () => {
+		const doc = { version: 2, lessons: { 'a/x': { state: 'finished', at: DAY } } };
+		const r = normalize(doc);
+		expect(r?.version).toBe(VERSION);
+		expect(r?.habits).toEqual({});
+		expect(r?.lessons).toEqual(doc.lessons);
+		expect(parseImport(JSON.stringify(doc))).toEqual({ ok: true, record: r, warnings: [] });
 	});
 });
