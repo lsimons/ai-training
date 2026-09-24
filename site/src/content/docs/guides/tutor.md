@@ -4,8 +4,8 @@ description: Install the tutor skill in Claude Code or opencode, open a lesson w
 ---
 
 The tutor is Claude acting as a study partner for one lesson of this site.
-It runs inside your own coding agent and reads the lesson you name. Its
-replies are hints, never answers. This page gets you from nothing installed
+It runs inside your own coding agent and reads the lesson you name, and it
+gives hints while keeping the answers back. This page gets you from nothing installed
 to a first session, and reading it doesn't count toward any course
 progress.
 
@@ -30,8 +30,8 @@ for each of them. Then check that it is listed:
 npx skills list -g
 ```
 
-The output includes a line for `tutor`. If the site's instructions change
-later, the tutor tells you to run the same install command again.
+The output includes a line for `tutor`. When the site's instructions need a
+newer skill, the tutor tells you to run the same install command again.
 
 ## First session
 
@@ -96,11 +96,14 @@ me" gets the same hint ladder.
 
 ## Recommended flags
 
-The tutor runs `curl` for its two fetches and nothing else. These settings
+The tutor runs one `curl` command per fetch and no other command. When your
+agent has no shell tool, it uses the agent's built-in fetch tool instead
+and tells you that the lesson text may be incomplete. These settings
 make each fetch one approval you see, and stop anything else. The tutor
 works without them too.
 
-For Claude Code, start in the mode that asks before every command:
+For Claude Code, start in the mode that asks before a command, unless your
+settings already allow that command:
 
 ```sh
 claude --permission-mode manual
