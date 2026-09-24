@@ -47,6 +47,25 @@ describe('createCitations with renderInline', () => {
 	});
 });
 
+describe('createCitations divergences from remark', () => {
+	// `renderInline` is regex Markdown, looser than remark on a lesson page. These pin the known differences
+	// on purpose, so a change to `renderProse` or to a behavior's text shows up here and not in a dist diff.
+	it('keeps a lone asterisk between spaces literal, as remark does', () => {
+		const c = createCitations(bibliography, 'test');
+		expect(c.render('2 * 3 * 4 (@AEC-02)')).toBe(
+			'2 * 3 * 4 <a class="citation" data-key="AEC-02" href="#ref-1" title="AEC-02">[1]</a>',
+		);
+	});
+	it('does not render a strong span that crosses a citation, nor underscore emphasis, nor a link with a title', () => {
+		const c = createCitations(bibliography, 'test');
+		expect(c.render('**bold (@AEC-02)**')).toBe(
+			'**bold <a class="citation" data-key="AEC-02" href="#ref-1" title="AEC-02">[1]</a>**',
+		);
+		expect(c.render('_under_')).toBe('_under_');
+		expect(c.render('[t](/x/ "title")')).toBe('[t](/x/ &quot;title&quot;)');
+	});
+});
+
 describe('referenceHtml', () => {
 	it('renders author, linked title, container, type and key, and skips what the entry lacks', () => {
 		expect(referenceHtml('AEC-02', bibliography['AEC-02'])).toBe(
