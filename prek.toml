@@ -39,13 +39,11 @@ repo = "https://github.com/pre-commit/pre-commit-hooks"
 rev = "3e8a8703264a2f4a69428a0aa4dcb512790b2c8c" # v6.0.0
 hooks = [
   { id = "trailing-whitespace", exclude = '\.mdx?$', additional_dependencies = ["ruamel.yaml==0.19.1"] },
-  { id = "end-of-file-fixer", exclude = '\.(svg|qmd)$', additional_dependencies = ["ruamel.yaml==0.19.1"] },
+  { id = "end-of-file-fixer", exclude = '\.svg$', additional_dependencies = ["ruamel.yaml==0.19.1"] },
   { id = "check-yaml", additional_dependencies = ["ruamel.yaml==0.19.1"] },
   { id = "check-toml", additional_dependencies = ["ruamel.yaml==0.19.1"] },
   { id = "check-merge-conflict", additional_dependencies = ["ruamel.yaml==0.19.1"] },
-  # rendered slide decks (public/presentations/*.html|pdf) can be large; the
-  # source .qmd is small, so allow the generated artifacts through.
-  { id = "check-added-large-files", args = ["--maxkb=10240"], additional_dependencies = ["ruamel.yaml==0.19.1"] },
+  { id = "check-added-large-files", additional_dependencies = ["ruamel.yaml==0.19.1"] },
 ]
 
 # Markdown formatting

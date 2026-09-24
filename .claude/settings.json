@@ -5,7 +5,6 @@
       "Bash(mise run site-build)",
       "Bash(mise run site-check)",
       "Bash(mise run site-clean)",
-      "Bash(mise run site-slides)",
       "Bash(mise run site-favicon)",
       "Bash(mise run lint)",
       "Bash(mise run prose)",

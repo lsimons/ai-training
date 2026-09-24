@@ -46,7 +46,6 @@ mise run site-install    # install the site dependencies (bun)
 mise run site-dev        # dev server at http://localhost:4321/ai-training/
 mise run site-build      # build the static site into site/dist
 mise run site-check      # Astro type/content check
-mise run site-slides     # render the example slide deck to HTML + PDF
 mise run lint            # prek hooks over every file + actionlint
 mise run ci              # full gate: install + lint + check + build
 mise run links           # lychee broken-link check (network; not in `ci`)
@@ -54,8 +53,8 @@ mise run audit           # zizmor audit of workflows + dependabot config
 mise run ci-watch        # watch GitHub Actions for the current branch
 ```
 
-`mise tasks` lists them all. Content is in `site/src/content/docs/`; static
-assets and slide decks in `site/public/`.
+`mise tasks` lists them all. Content is in `site/src/content/docs/`, and
+static assets are in `site/public/`.
 
 ## Project structure
 
@@ -70,7 +69,6 @@ ai-training/
 ├── site/                         # the Astro Starlight site
 │   ├── src/content/docs/         # the pages
 │   ├── src/styles/custom.css     # the LSD Warm theme
-│   ├── public/presentations/     # Quarto decks + committed HTML/PDF output
 │   ├── astro.config.mjs          # site, base path, sidebar, rehype plugin
 │   ├── package.json              # site dependencies (ranges; bun.lock pins them)
 │   └── bun.lock                  # committed; never gitignore this

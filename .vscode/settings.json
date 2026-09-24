@@ -3,10 +3,6 @@
         "Cascadia",
         "Merriweather",
         "mdformat",
-        "Quarto",
-        "reveal",
-        "revealjs",
-        "starlight",
-        "tinytex"
+        "starlight"
     ]
 }
