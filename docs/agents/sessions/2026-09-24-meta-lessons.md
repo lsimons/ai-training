@@ -26,3 +26,5 @@ Add to collision notes: A foundations lesson backed by a fixture pastes its outp
 Add to collision notes: A rewrap of lesson prose keeps every `(@key)` citation on one line, and the builder compares the built page's citation count with main.
 Add to collision notes: A plan title that says the learner runs something is checked against the foundations rule that the learner runs nothing.
 ```
+
+In flight: wave 15, branch wave/15-lessons, issues #143 #120 #164 #157 #159 #182 #149 #135 #168 #166, nits row #312
