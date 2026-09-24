@@ -1,6 +1,7 @@
 # Agent Instructions for ai-training
 
 > This file (`AGENTS.md`) is the canonical agent configuration. `CLAUDE.md` is a symlink to this file.
+> It is loaded automatically. Don't `cat` it.
 
 An open training suite for getting started with AI (concepts, safety, using
 agents, AI-assisted software engineering, customizing and building agents),
@@ -11,73 +12,16 @@ work is in GitHub issues (`docs/agents/issue-tracker.md`).
 
 ## Quick reference
 
-The repo tasks are defined in `.mise.toml`, and `mise tasks` lists them with
-a description each. Run `mise trust` and `mise install` once per clone, and
-`mise run setup` once per clone or worktree: it installs from the lockfiles
-and fetches the Vale packages when one is missing. A task that needs the
-install stops and names `setup` when it hasn't run.
+Run `mise trust` and `mise install` once per clone, and `mise run setup`
+once per clone or worktree. A task that needs the install stops and names
+`setup` when it hasn't run.
 
-`mise run ci` is the full gate and runs the same list the CI job runs, in the
-same order. Its last line says which task failed. `mise run fast` is the
-same list without the installs and the e2e walkthrough, and it is the check
-a builder runs before each push. `mise run links` (lychee, external URLs) and `mise run site-audit`
-(`bun audit`) are network calls that flake, so they're not part of `ci`. Run
-them now and then. `mise run vuln` (osv-scanner over `uv.lock` and
-`site/bun.lock`) is a network call too and stays out of `ci`, but the CI
-workflow runs it in its own `vuln` job, so a known advisory against a pinned
-version fails the pull request. `.github/workflows/vuln.yml` runs the same
-scan on `main` every Monday, so an advisory published while nobody pushes
-fails a scheduled run. No advisory is ever ignored.
-
-The site's own checks, in the order `ci` runs them after the prose tasks:
-
-| Task                     | What it does                                                                  |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| `mise run examples`      | Run every `<Predict run=...>` fixture and compare with the lesson             |
-| `mise run data`          | Check the data tree under `site/src/data` against itself and the lesson pages |
-| `mise run site-check`    | `astro check`: types, templates, content schemas                              |
-| `mise run site-lint`     | Biome lint and format check (`mise run site-format` rewrites)                 |
-| `mise run site-test`     | Vitest unit and component tests, 80% coverage floor                           |
-| `mise run site-build`    | Build `site/dist`, with the internal link check                               |
-| `mise run checkpoints`   | Check the built `checkpoints.json` export against the lesson pages            |
-| `mise run bundles`       | Check the built lesson bundles under `data/lessons/` against the lesson pages |
-| `mise run site-e2e-only` | The Playwright walkthrough in `site/e2e/` against the built `site/dist`       |
-
-`mise run site-e2e` builds first and then runs the walkthrough, the
-one-command form for local use. `ci` runs `site-e2e-only` after
-`site-build`, so the site is built once.
-
-`site-e2e` and `site-screenshot` need `mise run site-browser` once per
-machine. `docs/agents/testing.md` says which layer a new assertion belongs
-in. On a pull request the CI workflow skips the Playwright job when every
-changed file is under `docs/`, is a `.md` file outside `site/`, or is prose
-tooling config (`docs/agents/testing.md`, "When the browser suite runs").
-Lesson pages and `site/src/data` changes still run it. A push to `main`
-always runs it.
-
-The Python tasks are prefixed `py-`: `py-install-frozen` (uv sync from
-`uv.lock`), `py-lint` (ruff check and format check), `py-format` (ruff
-fixes), `py-typecheck` (basedpyright) and `py-test` (pytest with coverage).
-They cover `scripts/`, `tests/` and the Python fixtures under
-`site/examples/`, and `pyproject.toml` holds their config.
-
-### Astro 7 dev server
-
-`astro dev` (what `mise run site-dev` runs) detaches into a background
-daemon. Killing the shell that started it **doesn't** stop it, and a stale
-daemon keeps serving old content and old config, which looks like an edit
-"not taking". Manage it with the CLI, from `site/`:
-
-| Command                 | What it does                                  |
-| ----------------------- | --------------------------------------------- |
-| `bunx astro dev status` | Is a daemon running (and its port and pid)    |
-| `bunx astro dev logs`   | Its log                                       |
-| `bunx astro dev stop`   | Stop it; do this before restarting or leaving |
-
-Restart it (stop, then `mise run site-dev`) after changing
-`astro.config.mjs`, `content.config.ts`, or anything under `src/data/`.
-For a one-off check of the built site prefer `mise run site-preview` or
-`site-screenshot`. Neither leaves a daemon behind.
+- `mise run fast` is the check before each push.
+- `mise run ci` is the full gate, the same list the CI job runs. Its last
+  line says which task failed.
+- `mise tasks` lists the rest. `docs/agents/testing.md` says what each
+  check catches, which layer a new assertion belongs in, and how to run
+  the browser suite and the dev server.
 
 ## Structure
 
@@ -85,33 +29,23 @@ The layout is what the tree shows. The parts that aren't obvious from it:
 
 - This is a *project* site served under the `/ai-training` base path (set in
   `site/astro.config.mjs`). Write content links and image sources
-  root-relative (`/guides/foo/`, `/guides/foo.png`); a rehype plugin in the
-  config prepends the base at render time for Markdown `<a href>` and
-  `<img src>`. Raw HTML `<a>` tags and the landing page's hero actions are
-  used verbatim and must include the base path. Component-rendered links
-  must use `href()` from `site/src/lib/url.ts`, because the rehype plugin
-  only sees Markdown.
+  root-relative (`/guides/foo/`, `/guides/foo.png`); a rehype plugin
+  prepends the base for Markdown `<a href>` and `<img src>`. Raw HTML `<a>`
+  tags and the landing page's hero actions must include the base path.
+  Component-rendered links use `href()` from `site/src/lib/url.ts`.
 - Lessons are `site/src/content/docs/<area>/<lesson>.mdx` and course pages
-  are `<area>/index.mdx`. Neither has frontmatter: everything the site
-  knows about an area, a topic, a competency, a course or a lesson is YAML
-  under `site/src/data/areas/<area>/` (specs S09 to S11), and the build
-  copies a lesson's title, mode and the rest onto its page. Every lesson,
-  written or not, has a file under `lessons/`, and the course file orders
-  them, flat or in parts. `mise run data` checks the tree against itself
-  and the pages, and that no lesson in the `foundations` group shows code
-  or terminal work (spec S03 "Foundations audience").
+  are `<area>/index.mdx`, without frontmatter. What the site knows about an
+  area, topic, competency, course or lesson is YAML under
+  `site/src/data/areas/<area>/` (specs S09 to S11). `mise run data` checks
+  it, including that no `foundations` lesson shows code or terminal work.
   `docs/agents/writing-a-lesson.md` is the authoring guide.
 - `site/src/styles/lesson.css` is global on purpose: review pages clone
   checkpoint markup out of lesson pages.
 - `site/examples/` holds the runnable fixtures behind `<Predict run=...>`.
-- `docs/spec/` holds numbered specs (`SNN-title.md`, each with Purpose
-  and Status; `000-specs.md` is the index). S01 is the project dictionary;
-  use its terms everywhere. Specs are standalone. The early plan and the
-  source exploration notes were removed on 2026-09-20 once the specs and
-  issues held everything in them. `docs/agents/` holds agent-facing
-  process docs.
-- `docs/prose/README.md` records which Vale rule runs where and why, and
-  how to evaluate a new style package.
+- `docs/spec/` holds numbered specs (`000-specs.md` is the index). S01 is
+  the project dictionary. Use its terms everywhere. `docs/agents/` holds
+  the agent-facing process docs, and `docs/prose/README.md` says which
+  Vale rule runs where.
 
 ## Guidelines
 
@@ -119,23 +53,12 @@ The layout is what the tree shows. The parts that aren't obvious from it:
 
 - This is a public, open-content project. No company names, internal URLs or
   confidential material.
-- Content is CC BY-SA 4.0 (`LICENSE`) and code is Apache-2.0 (`LICENSE-CODE`).
-  Source material has different terms, and spec S02 "Source material" has
-  the per-source table for topic content. In short: `agent-engineer-course`
-  (Apache-2.0) and Diátaxis (CC BY-SA) content may be adapted with
-  attribution and an entry in `NOTICE.md`. CS50 (CC BY-NC-SA) may be cited
-  and its ideas used, but its text may not be adapted (verbatim inclusion
-  only, marked per page). Claude Academy (`academy.claude.com`, cited as
-  `Academy <slug>`) may be linked, and its concepts and ideas may be
-  paraphrased in our own words, but no text, quiz question, image or other
-  data is copied from it. DeepLearning.AI material may only be linked or
-  used as inspiration, never copied. Learn Prompting supplies vocabulary
-  only, and prompting concepts are written from the papers. The Schuberg
-  Philis AI wiki supplied ideas only, rewritten, and none of its text. Link
-  Anthropic courses at their public `academy.claude.com` URL.
-- Interactive widgets in lesson pages must sit in `class="not-content"`
+- Content is CC BY-SA 4.0 and code is Apache-2.0. Source material has its
+  own terms: follow `writing-a-lesson.md` "Source licenses" and spec S02.
+  Never copy text from Claude Academy, DeepLearning.AI or CS50.
+- Interactive widgets in lesson pages sit in `class="not-content"`
   containers. Never emit a literal `</script>` or `</pre>` inside widget JS
-  strings. It breaks mdformat and the renderer.
+  strings.
 - Learner progress is stored in browser local storage only. No backend, no
   telemetry.
 
@@ -146,174 +69,70 @@ professional level but the language simple: common words and plain sentence
 structure over native-speaker idiom, wordplay, or rare vocabulary. Expand an
 acronym on first use in a lesson.
 
-Nearly all the text here is written by agents, and agent prose has tells.
-The reader shouldn't be able to hear them. `mise run prose` flags the
-patterns below after the fact. Write so that it has nothing to say.
+Agent prose has tells, and `mise run prose` flags them. Write so that it
+has nothing to say.
 
 - Say what a thing does, not what it figuratively is. Content is *in* a
   directory, not *living* there; a file *contains* a value, a check
   *rejects* a change, a format is a format and not a `shape`.
 - No tacked-on clause after a semicolon. Two sentences, or a comma and a
   conjunction.
-- Don't announce a count and then list (`Three things matter: ...`). Give
-  the list, or make the count the point.
+- Don't announce a count and then list (`Three things matter: ...`).
 - Don't default to the rule of three. Name two things when there are two,
-  and four when there are four. A run of parallel verbs in threes is the
-  loudest tell there is.
-- No clipped mottos (`Hints, not answers.`, `One path, no choices.`).
-  Write the sentence.
+  and four when there are four.
+- No clipped mottos (`Hints, not answers.`). Write the sentence.
 - No `not X, but Y` or `a Y, not a Z` as the default way to make a
   point. State the positive claim.
 - No sentence-initial `Hence`, `Thus`, `Notably`, `Moreover`, `That's why`.
-  Join with `and`, `but`, or `so`, or start with the point. `For example`
-  is fine.
 - No `no X, no Y, no Z` stacks, no `Nothing here needs ...`, no "Every X
-  has ..." as a rhythm. Once is fine, but a run is the tell.
+  has ..." as a rhythm.
 - No `delve`, `robust`, `seamless`, `leverage`, `landscape`, `journey`,
-  no `It's worth noting`, no `In conclusion`, no `I hope this helps`.
-- Plain words for plain things: `use`, not `utilize`; `so`, not
-  `consequently`.
+  `It's worth noting`, `In conclusion`. Write `use`, not `utilize`, and
+  `so`, not `consequently`.
 
 **Quality:**
 
 - `mise run ci` must pass before you push.
-- Each check has its layer (`docs/agents/testing.md`): Biome for lint and
-  format, `astro check` for types and templates, Vitest for the logic in
-  `site/src/lib`, `site/src/scripts` and `site/scripts/lib` (80% coverage
-  floor in `site/vitest.config.ts`, never lowered), the Container API tests
-  in `site/tests/components/` for rendered markup, and Playwright in
-  `site/e2e/` for flows across pages. Browser code keeps its pure parts in
-  a module without DOM access (`progress-model.ts`, `checkpoint-logic.ts`)
-  so they can be tested under Node.
-- Biome is the one formatter for `site/` (`site/biome.json`: tabs, single
-  quotes, 120 columns; JSON keeps two spaces). Run `mise run site-format`
-  rather than hand-formatting. No `// biome-ignore` without the reason on
-  the same line. Biome skips the `.astro` template, so `astro check` stays
-  the check for that half.
-- Code examples in lessons are real and their shown output is asserted in
-  CI (spec S03, Examples): `<Predict run="..." answer="...">` names a fixture
-  under `site/examples/` and `mise run examples` fails on a mismatch. An
-  example that can't run says so in the page (the component prints this
-  when `run` is absent).
-- Internal links are root-relative. `starlight-links-validator` fails
-  `mise run site-build` on a dead one, so the build is the check. Don't
-  disable it.
-- Spelling is American English, checked by cspell (`mise run spell`). Add
-  names and jargon to `cspell-words.txt`, grouped, one per line; never a
-  British spelling. Inline code spans are skipped, so identifiers need no
-  entry.
-- Vale (`mise run prose`): errors fail the build, style warnings print and
-  are the house style. Fix a warning by rewriting unless the rewrite reads
-  worse. The style packages are gitignored, so a fresh clone or worktree
-  needs `mise run setup` (network) once, and `prose` stops with a
-  message naming that task when a package is missing. `prose` and `spell`
-  check untracked files too, so a new page is checked before `git add`. The vocabulary in
-  `.vale/styles/config/vocabularies/ai-training/accept.txt` holds the
-  canonical casing of names, and every entry has its casing enforced
-  everywhere, so common words never go in. `House.Quotes`: a comma or
-  period that isn't part of the quoted text goes *outside* the closing
-  quote, so a quoted prompt never seems to end in punctuation the learner
-  should type. `mise run prose-extended` adds passive-voice, first-person
-  and semicolon rules; most hits are idiom, so rewrite only what hides who
-  does what.
-- Python (`mise run py-lint`, `py-typecheck`, `py-test`): ruff check and
-  format are clean over every `.py` file, basedpyright is clean at `strict`
-  over `scripts/` and `tests/` and at `standard` (Python 3.9) over
-  `site/examples/`, and coverage of `scripts/` stays at or above 80%.
-  `scripts/` keeps its logic in functions that `tests/` imports, with a
-  thin `__main__` block. Prefer fixing the cause over a `# noqa` or a
-  `# type: ignore`. Where one stays, it names the rule and the reason on
-  the same line.
-- No unexplained rule disables in `.markdownlint-cli2.jsonc`; say which files
-  and why, on the same line.
+- Each check has its layer and its rules (`docs/agents/testing.md`): Biome
+  for `site/` formatting, `astro check`, Vitest with an 80% floor, pytest
+  and basedpyright for Python, cspell (American English, names in
+  `cspell-words.txt`), and Vale.
+- Code examples in lessons are real, and `mise run examples` asserts their
+  output.
 - Never weaken a control to make a check pass. That covers unpinning an
   action, dropping a `prek.toml` hook, excluding a really broken URL in
-  `.lychee.toml`, lowering the coverage floor, deleting a test, and adding
-  an `osv-scanner.toml` ignore for an advisory.
+  `.lychee.toml`, lowering a coverage floor, deleting a test, a rule
+  disable without its reason on the same line, and an `osv-scanner.toml`
+  ignore for an advisory.
 
-**Supply chain:**
+**Supply chain** (the procedures are in `docs/agents/supply-chain.md`):
 
-- `site/bun.lock` is committed and must stay in the tree. `mise run ci` and CI
-  install with `site-install-frozen`. Use `mise run site-install` when
-  deliberately changing dependencies, and commit the result.
-- In `site/package.json` every dependency is an exact version, tools and
-  libraries alike, and `bun.lock` pins the whole tree. An upgrade is a
-  deliberate choice: a dependabot pull request or `mise run site-install`
-  after editing the version, and never a range. The prek hooks and
-  `mise run spell` run `markdownlint-cli2`, `@commitlint/*` and `cspell`
-  from `site/node_modules/.bin`, so `site-install-frozen` (part of
-  `mise run setup`) comes before `lint` and `spell`. `@playwright/test` is the one
-  Playwright package (the screenshot script imports `chromium` from it
-  too).
-- `uv.lock` is committed and must stay in the tree. `mise run ci` and CI
-  install with `py-install-frozen`. The dev group in `pyproject.toml` is
-  exact-pinned. Use `mise run py-install` when deliberately changing it,
-  commit the result, and move the `ruff-pre-commit` rev in `prek.toml` to
-  the same ruff version.
-- `mise run site-audit` (`bun audit`) must be clean. Fix an advisory in a
-  *transitive* package with the `overrides` block in `site/package.json`.
-- `mise run vuln` (osv-scanner) must be clean. The task scans `uv.lock`
-  and `site/bun.lock` by name and fails when either is missing or does
-  not parse. A new lockfile goes in the list of the task in `.mise.toml`.
-  CI runs the task as the `vuln` job on every push and pull request.
-  `.github/workflows/vuln.yml` also runs it on `main` every Monday (cron
-  `17 6 * * 1`, and on `workflow_dispatch`). The weekly run is needed
-  because GitHub's dependency graph reads `package.json` and not
-  `site/bun.lock`, so dependabot alerts see only a small part of the npm
-  tree. GitHub emails the last person who changed the cron line when a
-  scheduled run fails, and there is no other notifier. In a public
-  repository GitHub also disables a scheduled workflow after 60 days
-  without repository activity. A Monday with no run under Actions is the
-  cue to re-enable it there, and a quiet quarter isn't a sign that the
-  scan is passing. Every advisory the scanner
-  reports counts. The repository has no `osv-scanner.toml`, and an
-  `IgnoredVulns` or `ignoreUntil` entry never goes in. An advisory
-  without a fix keeps the scan red until a fix ships or the dependency
-  is replaced. Fix a Python advisory by editing the `==` pin in
-  the `dev` group of `pyproject.toml` and running `mise run py-install`
-  (and moving the `ruff-pre-commit` rev in `prek.toml` when it is ruff, see
-  the `uv.lock` bullet above). For a transitive package, add a
-  `[tool.uv] constraint-dependencies` entry in `pyproject.toml` and run
-  `mise run py-install` again.
-- Pin GitHub Actions to full-length commit SHAs. `zizmor` enforces it.
-- Every `.mise.toml` tool is exact-pinned and invisible to dependabot.
-  Refresh with `mise up` and read the diff.
-- CI pins the mise version and its checksum on every `mise-action` step.
-  `docs/agents/mise-refresh.md` is the procedure for moving that pin.
-- `prek.toml` hook repos are pinned by commit SHA (tag in the comment),
-  and each Python hook lists its full transitive tree in
-  `additional_dependencies`, exact-pinned. Both are invisible to
-  dependabot. To bump one, move the SHA with `git ls-remote --tags` and
-  rerun the `uv pip compile` command in the comment next to the list.
-  Never add a hook that resolves packages at install time.
+- `site/bun.lock` and `uv.lock` are committed, and `ci` installs from them.
+- Every dependency in `site/package.json` and the `pyproject.toml` dev
+  group is an exact version. An upgrade is a deliberate change.
+- `mise run site-audit` and `mise run vuln` are clean, and no advisory is
+  ever ignored.
+- GitHub Actions are pinned to full commit SHAs, `.mise.toml` tools and the
+  mise pin in CI to exact versions, and `prek.toml` hooks by commit SHA
+  with their full dependency tree.
 
 ## Process
 
 - Git remote is GitHub, `lsimons/ai-training`. Use `gh`.
-- Issues and triage labels: `docs/agents/issue-tracker.md`. Running a triage
-  pass with the maintainer: `docs/agents/triage.md`.
-- Running many builder and reviewer agents in parallel against the issues,
-  from triage to merge queue: `docs/agents/orchestration.md`.
-- Running wave after wave from one long session, with a dispatcher that
-  spawns a wave lead per wave: `docs/agents/meta-orchestration.md`. The
-  `/wave` skill (`.claude/skills/wave/SKILL.md`) is that dispatcher.
-- Tutor mode (spec S08): `.claude/skills/tutor/SKILL.md` is a bootstrap
-  that fetches `/data/tutor.md` (source `site/src/tutor/instructions.md`)
-  and a lesson bundle from the published site. Install it with
-  `npx skills add lsimons/ai-training --skill tutor -g` and invoke
-  `/tutor <lesson URL>`.
+- Issues and labels: `docs/agents/issue-tracker.md`. Triage with the
+  maintainer: `docs/agents/triage.md`.
+- Many builders and reviewers in parallel: `docs/agents/orchestration.md`.
+  Wave after wave from one session: `docs/agents/meta-orchestration.md`,
+  run by the `/wave` skill.
 - A follow-up a review or a wave report names, and an improvement the
-  maintainer defers, become GitHub issues before the session ends, filed
-  and triaged as `docs/agents/triage.md` describes. A cosmetic nit left
-  open on a merged branch becomes a line in the one open `Cosmetic nits`
-  issue. In a bounded unattended run (`/wave --no-filing`) the leads write
-  the same issues in a comment on the run issue, and the dispatcher files
-  them when the run ends, after one check against `main`. Run issues,
-  session records and transcripts are never a place work waits.
+  maintainer defers, become GitHub issues before the session ends (or, in
+  `/wave --no-filing`, when the run ends). A cosmetic nit left open on a
+  merged branch becomes a line in the one open `Cosmetic nits` issue. Run
+  issues, session records and transcripts are never a place work waits.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`type(scope): description`), and commitlint enforces it.
-- A push to `main` deploys to GitHub Pages (`.github/workflows/deploy.yml`).
-  The site is pre-release and says so on the front page and in the README.
+- A push to `main` deploys to GitHub Pages. The site is pre-release and
+  says so on the front page and in the README.
 
 ## Asking the maintainer
 
@@ -331,11 +150,13 @@ patterns below after the fact. Write so that it has nothing to say.
 
 ## Session completion
 
-Work isn't complete until every change is committed, pushed, and CI passes.
+Work isn't complete until every change is committed, pushed, and CI
+passes. This is about your own branch: no agent pushes to `main`, and
+every change reaches it through a pull request.
 
-1. `mise run ci` (or the tasks that changed)
+1. `mise run fast` (or `mise run ci`)
 2. Commit everything; don't leave the working tree dirty
-3. `git pull --rebase && git push`
+3. `git pull --rebase origin main`, then `git push` your branch
 4. `mise run ci-watch`; on failure `gh run view --log-failed`, fix, repeat
 
 Never stop before CI is green.

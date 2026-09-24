@@ -17,6 +17,93 @@ changed file is prose or prose tooling (see "When the browser suite runs").
 | Bundles   | `mise run bundles`     | `site/scripts/check-bundles.mjs`, after `site-build`                 | A built `dist/data/lessons/<id>.json` missing for a page, without an S08 field, or with a fenced block changed      |
 | e2e       | `mise run site-e2e`    | Playwright, `site/e2e/*.spec.ts`, against the built site             | The scripts and the markup disagreeing, a page error, a console error, a flow that only works with real navigation  |
 
+## Tasks
+
+`mise tasks` lists every task with a description. `mise run ci` runs the
+same list the CI job runs, in the same order, and its last line says
+which task failed. `mise run fast` is that list without the installs and
+the e2e walkthrough. The site's checks run in the order of the table
+above, after the prose tasks. `mise run site-e2e` builds first and then
+runs the walkthrough, the one-command form for local use. `ci` runs
+`site-e2e-only` after `site-build`, so the site is built once.
+`site-e2e` and `site-screenshot` need `mise run site-browser` once per
+machine.
+
+The Python tasks are prefixed `py-`: `py-install-frozen` (uv sync from
+`uv.lock`), `py-lint` (ruff check and format check), `py-format` (ruff
+fixes), `py-typecheck` (basedpyright) and `py-test` (pytest with
+coverage). They cover `scripts/`, `tests/` and the Python fixtures under
+`site/examples/`, and `pyproject.toml` holds their config.
+
+## The rules of each check
+
+- **Biome** is the one formatter for `site/` (`site/biome.json`: tabs,
+  single quotes, 120 columns; JSON keeps two spaces). Run
+  `mise run site-format` rather than hand-formatting. No `// biome-ignore`
+  without the reason on the same line. Biome skips the `.astro` template,
+  so `astro check` stays the check for that half.
+- **Vitest** covers the logic in `site/src/lib`, `site/src/scripts` and
+  `site/scripts/lib`, with an 80% coverage floor in `site/vitest.config.ts`
+  that is never lowered. Browser code keeps its pure parts in a module
+  without DOM access (`progress-model.ts`, `checkpoint-logic.ts`) so they
+  can be tested under Node.
+- **Examples.** Code examples in lessons are real and their shown output is
+  asserted in CI (spec S03, Examples): `<Predict run="..." answer="...">`
+  names a fixture under `site/examples/` and `mise run examples` fails on a
+  mismatch. An example that can't run says so in the page (the component
+  prints this when `run` is absent).
+- **Links.** Internal links are root-relative. `starlight-links-validator`
+  fails `mise run site-build` on a dead one, so the build is the check.
+  Don't disable it.
+- **Spelling** is American English, checked by cspell (`mise run spell`).
+  Add names and jargon to `cspell-words.txt`, grouped, one per line, and
+  never a British spelling. Inline code spans are skipped, so identifiers
+  need no entry.
+- **Vale** (`mise run prose`): errors fail the build, style warnings print
+  and are the house style. Fix a warning by rewriting unless the rewrite
+  reads worse. The style packages are gitignored, so a fresh clone or
+  worktree needs `mise run setup` (network) once, and `prose` stops with a
+  message naming that task when a package is missing. `prose` and `spell`
+  check untracked files too, so a new page is checked before `git add`.
+  The vocabulary in
+  `.vale/styles/config/vocabularies/ai-training/accept.txt` holds the
+  canonical casing of names, and every entry has its casing enforced
+  everywhere, so common words never go in. `House.Quotes`: a comma or
+  period that isn't part of the quoted text goes *outside* the closing
+  quote, so a quoted prompt never seems to end in punctuation the learner
+  should type. `mise run prose-extended` adds passive-voice, first-person
+  and semicolon rules. Most hits are idiom, so rewrite only what hides who
+  does what.
+- **Python** (`mise run py-lint`, `py-typecheck`, `py-test`): ruff check
+  and format are clean over every `.py` file, basedpyright is clean at
+  `strict` over `scripts/` and `tests/` and at `standard` (Python 3.9)
+  over `site/examples/`, and coverage of `scripts/` stays at or above 80%.
+  `scripts/` keeps its logic in functions that `tests/` imports, with a
+  thin `__main__` block. Prefer fixing the cause over a `# noqa` or a
+  `# type: ignore`. Where one stays, it names the rule and the reason on
+  the same line.
+- **Markdownlint.** No unexplained rule disables in
+  `.markdownlint-cli2.jsonc`. Say which files and why, on the same line.
+
+## The Astro dev server
+
+Builders don't run `site-dev`. For anyone who does: `astro dev` (what
+`mise run site-dev` runs) detaches into a background daemon in Astro 7.
+Killing the shell that started it **doesn't** stop it, and a stale daemon
+keeps serving old content and old config, which looks like an edit "not
+taking". Manage it with the CLI, from `site/`:
+
+| Command                 | What it does                                  |
+| ----------------------- | --------------------------------------------- |
+| `bunx astro dev status` | Is a daemon running (and its port and pid)    |
+| `bunx astro dev logs`   | Its log                                       |
+| `bunx astro dev stop`   | Stop it; do this before restarting or leaving |
+
+Restart it (stop, then `mise run site-dev`) after changing
+`astro.config.mjs`, `content.config.ts`, or anything under `src/data/`.
+For a one-off check of the built site prefer `mise run site-preview` or
+`site-screenshot`. Neither leaves a daemon behind.
+
 ## Where a new assertion belongs
 
 - **A rule about the progress record or the review schedule** (a stage
@@ -154,10 +241,10 @@ serves the same files under the same `/ai-training` base path.
 run on the staged files. Before a push, the same hooks run again on the
 files the push changes, and so do `cspell` and Vale (the checks of
 `mise run spell` and `mise run prose`, with the same file rules). The push
-stage is there for commits that no pull request checks: the dispatcher's
-records go straight to `main`, and ten of the twelve red runs on `main`
-between 2026-09-20 and 2026-09-24 were spelling, Vale or mdformat hits in
-such commits (#344). Install all three hook types once per clone with
+stage is there for commits that no pull request checks, such as a direct
+push to `main`. Ten of the twelve red runs on `main` between 2026-09-20
+and 2026-09-24 were spelling, Vale or mdformat hits in such commits, the
+dispatcher's records before they moved to run issues (#344, #353). Install all three hook types once per clone with
 `prek install`. The `default_install_hook_types` line in `prek.toml` names
 them. `prek run --stage pre-push --from-ref origin/main` runs the push
 stage by hand.

@@ -564,7 +564,7 @@ The model never runs anything. Your loop does (@AEC-13).
 
 A bibliography entry has `type` (`book`, `course`, `paper`, `reference` or
 `video`, per S01), `title`, `container`, `author`, `license` and `url`. `url` is a
-public URL only where the licensing rules in `AGENTS.md` allow linking the
+public URL only where the source licenses below allow linking the
 source; otherwise `null`. A `paper` entry follows the key, author,
 container and url rules in S03 "Citations and terms". Add a new entry to
 the YAML and to the source table in S02 together.
@@ -582,13 +582,40 @@ To make a concept a term, use its exact name at its first mention. To keep
 a word plain, don't `cover` the topic it belongs to. A hand-written link
 to `/glossary/#<id>` must name a real concept id, or the build fails.
 
+### Source licenses
+
+Content is CC BY-SA 4.0 (`LICENSE`) and code is Apache-2.0
+(`LICENSE-CODE`). Source material has different terms, and spec S02
+"Source material" has the per-source table for topic content. In short:
+
+- `agent-engineer-course` (Apache-2.0) and Diátaxis (CC BY-SA) content may
+  be adapted with attribution and an entry in `NOTICE.md`.
+- CS50 (CC BY-NC-SA) may be cited and its ideas used, but its text may not
+  be adapted (verbatim inclusion only, marked per page).
+- Claude Academy (`academy.claude.com`, cited as `Academy <slug>`) may be
+  linked, and its concepts and ideas may be paraphrased in our own words,
+  but no text, quiz question, image or other data is copied from it. Link
+  Anthropic courses at their public `academy.claude.com` URL.
+- DeepLearning.AI material may only be linked or used as inspiration,
+  never copied.
+- Learn Prompting supplies vocabulary only, and prompting concepts are
+  written from the papers.
+- The Schuberg Philis AI wiki supplied ideas only, rewritten, and none of
+  its text.
+
 ## Rules that bite
 
 - **Voice.** The "Voice" list in `AGENTS.md` is the house's answer to
   agent prose: no figurative verbs on inanimate subjects, no tacked-on
   semicolon clause, no count-then-list, no rule of three, no clipped
-  motto, no "not X but Y", no sentence-initial transition word.
-  `mise run prose` reports every hit, and a lesson should read clean before
+  motto, no "not X but Y", no sentence-initial transition word. Nearly
+  all the text here is written by agents, and the reader shouldn't be
+  able to hear it. A run of parallel verbs in threes is the loudest tell.
+  Instead of a count and a list, give the list or make the count the
+  point. Instead of a transition word, join with `and`, `but` or `so`, or
+  start with the point (`For example` is fine). A single "Every X has"
+  or `no X, no Y` is fine, and a run of them is the tell. No
+  `I hope this helps`. `mise run prose` reports every hit, and a lesson should read clean before
   it is committed. In a fresh worktree run `mise run setup` first,
   because without the Vale packages `prose` stops and names that task.
 
@@ -631,7 +658,8 @@ to `/glossary/#<id>` must name a real concept id, or the build fails.
 
 - Backticks inside a prop string: use a template literal, as `Repair` does.
 
-- Never a literal `</script>` or `</pre>` in any string.
+- Never a literal `</script>` or `</pre>` in any string. It breaks mdformat
+  and the renderer.
 
 - Links are root-relative (`/using-agents/`); the build fails on a dead
   internal link, so link only to pages that exist, or use `extends-to`.

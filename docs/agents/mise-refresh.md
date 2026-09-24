@@ -1,7 +1,7 @@
 # Refreshing the mise pin
 
 How to move the pinned mise version and checksum in CI. `AGENTS.md` "Supply
-chain" states the rule and points here.
+chain" states the rule, and `supply-chain.md` holds the other procedures.
 
 CI pins the mise binary itself: `version` and `sha256` on every
 `mise-action` step in the workflows. `min_version` in `.mise.toml` is a
