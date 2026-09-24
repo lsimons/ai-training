@@ -1,12 +1,19 @@
 id: using-agents/reasoning-across-tool-levels
 title: Reasoning across tool levels
+description: >-
+  Read two before-and-after pairs, a summary and a filed folder, and name the check that stopped
+  working when a tool took over the level and the check that replaces it one level up.
 mode: explanation
 covers: using-agents/choosing-tools
 serves: [using-agents/chooses-tool-and-autonomy/reasons-across-levels]
 introduces: [reasoning-across-tool-levels]
 assumes:
   - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/thin-path
+    section: the-pair-behind-a-failure
   - objective: safety/verifies-output/calibrates-trust
+    lesson: safety/when-the-tool-is-usually-right
+    section: build-the-check-in
 after: [using-agents/steps-that-stay-human, using-agents/trying-two-models]
 shorts: [Going down a level when the number looks round]
 exercise:
@@ -15,9 +22,17 @@ exercise:
     For two supplied before-and-after pairs (a summary you wrote versus one an agent wrote, a folder
     you filed versus one an automation filed), name the check that stopped working and the check
     that replaces it.
-sources: []
+sources: [Brilliant ABS, Academy building-effective-human-agent-teams]
 issue: 168
 minutes: 15
 notes: >-
   The plan named the topic concepts/limits as assumed; taken as the objective
-  concepts/explains-models/names-failure-modes.
+  concepts/explains-models/names-failure-modes, served live by concepts/thin-path. The plan named
+  safety/checking-habits for calibrates-trust, which is not live, so the live
+  safety/when-the-tool-is-usually-right serves it instead. The page cites Brilliant ABS for the
+  ladder of abstraction (codes as facts, no text) and Academy building-effective-human-agent-teams
+  for the human step needing a new place when the level rises (ideas in our own words). AEC-12 and
+  Academy ai-fluency-for-builders from the plan are not cited, because the page is a foundations
+  lesson with no coding-agent content, so they are not in sources. The pairs use the calibration
+  team from the earlier lessons and nobody in them has a name. The dashboard numbers (500, 1,400,
+  1,000) are invented illustrations and no fixture produces them.

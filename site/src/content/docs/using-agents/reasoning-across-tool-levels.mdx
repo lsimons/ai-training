@@ -1,0 +1,289 @@
+import { Choice, MultiChoice, Match, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson we look at what happens to your checks when a tool takes
+over a level of your work. Two before-and-after pairs run through the
+lesson: a summary you wrote and one an agent wrote, and a folder you filed
+and one an automation filed. For each pair we find the check that stopped
+working when the tool took over, and the check that replaces it. You don't
+run anything in this lesson. The pairs are supplied, and the work is
+reading them and naming the checks.
+
+The earlier lessons of this course gave you four questions for picking a
+tool. Does the model fit the task, what do the cost and the speed buy, is
+this a job for a chat or an agent or an automation, and which steps stay
+human. This lesson is about what happens to those questions afterwards,
+because tools keep getting more capable, and a task you delegate today to
+an agent may run unattended next year, where the same four questions still
+need an answer from a different place.
+
+## The ladder of tools
+
+Tools for working with a model form a ladder, and each rung hides more
+of what happens below it (@Brilliant ABS).
+
+**Autocomplete** suggests the next few words. You see every suggestion and
+accept or reject each one, so you watched everything that happened.
+
+**Chat** produces a whole answer from one message. You no longer see the
+answer forming word by word, and you read it as a piece.
+
+**An agent** takes a brief and works through steps with tools, reading
+files and drafting and checking, and shows you the result. You see the
+result and a log, and you didn't watch the steps.
+
+**A system of agents**, or an automation, runs on a trigger without you
+present. One agent may hand pieces to others. You see a dashboard or a
+report afterwards, and often only when something goes wrong.
+
+At every rung the tool does what the rung below it did, and you stop
+looking there. That's the point of moving up: the work you stopped doing
+is work you no longer spend time on. The easy thing to miss is that the
+checks you did at the lower rung stop with the work. When you wrote the
+summary yourself, each sentence got compared with the source as you typed
+it. You never thought of that as a check. When an agent writes the
+summary, that check is gone unless you put something in its place.
+
+Here is the first pair. Both summaries are of the same two-page memo about
+moving the calibration team's weekly review from Thursday to Tuesday.
+
+```text
+Summary you wrote
+
+The weekly review moves from Thursday 10:00 to Tuesday 10:00 from
+6 October. The reason is the supplier's delivery day, which is now
+Wednesday, so a Thursday review saw orders that were a day old. The
+room stays the same. Anyone who cannot make Tuesdays should tell the
+team lead by 30 September.
+```
+
+```text
+Summary the agent wrote
+
+The memo announces that the weekly review will move to Tuesday at 10:00
+starting 6 October, to align the review with the supplier's new
+Wednesday delivery schedule. The meeting location is unchanged. Team
+members with a conflict are asked to contact the team lead by
+30 September.
+```
+
+Both summaries are correct. Read them once, and then read the next section
+with the question in mind: what did you do while writing the first one that
+nobody did for the second?
+
+## The questions move up
+
+When you wrote the summary, every sentence passed through your hands, and
+each one got compared with the memo as you typed it. That comparison was
+your check on the facts. It was cheap because it was part of the writing,
+and it is gone now, because the writing happened somewhere you weren't
+looking.
+
+The check that replaces it sits one level up. You stop checking sentences
+and start checking whether the summary answers the question its reader
+has. The people who read this summary want to know when the review is, why
+it moved and what they have to do. Read the agent's summary against those
+three questions, and read the memo once for anything the summary dropped.
+That's a different check from the one you did before. It is also a check
+you could have done on your own summary and probably didn't, because you
+trusted the sentences you had written. The agent's summary has one such
+gap: it says the review moves to Tuesday, and it doesn't say it moved from
+Thursday. A reader who had Thursday in their calendar has to work that out.
+
+The questions about fit, cost, risk and what to keep human work the same
+way. Picking an agent over a chat for a task meant asking whether it fit
+the task, what it cost, and which files and accounts it could touch. When
+that agent becomes an automation that runs every Monday, the same
+questions apply to the automation, and the answers change. The agent you
+briefed cost one session and could touch what you gave it. The weekly
+automation costs fifty-two sessions a year, on a morning when nobody is
+watching, and it can touch every account it is connected to. The
+step you kept human at the agent level,
+say the send button on an email, needs a new place in the automation, or it
+is gone (@Academy building-effective-human-agent-teams).
+
+Here is the second pair. Both are the state of a shared folder after the
+week's incoming documents were filed.
+
+```text
+Folder you filed
+
+  2026-09/
+    invoices/         14 files
+    delivery-notes/    9 files
+    certificates/      3 files
+    unsorted/          1 file   (a scanned letter, unreadable)
+```
+
+```text
+Folder the automation filed
+
+  2026-09/
+    invoices/         15 files
+    delivery-notes/    9 files
+    certificates/      3 files
+    unsorted/          0 files
+```
+
+When you filed the folder, the check was the act of filing. You opened
+every document to decide where it went, so a document that didn't belong
+anywhere ended up in `unsorted` with your eyes on it. The automation filed
+one document more, and its unsorted folder is empty. That could mean it read the
+scanned letter better than you did. It could also mean it put the letter in
+`invoices` because the letter had an amount on it. The new check is at the
+level of the outcome: does every folder contain only what its name says,
+and does an item that fits nowhere end up somewhere a person sees it?
+Opening the one extra invoice is the whole of that check this week.
+
+<Match id="check-that-moved" objective="using-agents/chooses-tool-and-autonomy/reasons-across-levels"
+  concepts={['reasoning-across-tool-levels', 'checking-results']}
+  context="The lesson shows two before-and-after pairs: a summary of a memo written by the learner and one written by an agent, and a folder of the week's documents filed by the learner and one filed by an automation. In each pair, a check the learner did without noticing stopped when the tool took over the work."
+  title="Which check replaces which?" hint="For each pair, what did the person do as part of the work that nobody does now, and what question about the result can still be asked?"
+  options={['Comparing each sentence with the source as it is written', 'Opening each document to decide where it goes', 'Reading the result against the questions its reader has', 'Checking that each folder holds only what its name says']}
+  rows={[
+    { statement: 'The check that stopped when the agent wrote the summary', option: 0, why: 'What happened to each sentence while you were writing, and where did the agent\'s sentences come from?' },
+    { statement: 'The check that replaces it for the agent\'s summary', option: 2, why: 'You can no longer watch sentences being written. What can you still ask about the finished summary?' },
+    { statement: 'The check that stopped when the automation filed the folder', option: 1, why: 'What did you do with every document before it landed in a folder?' },
+    { statement: 'The check that replaces it for the automation\'s folder', option: 3, why: 'You did not see the documents go in. What can you still look at afterwards?' },
+  ]}
+  rationale="Each tool took over the level where the old check lived, so the check that remains is one about the result, asked from the level above.">
+Match each line to the check it names.
+</Match>
+
+<Choice id="where-the-question-goes" phase="review" objective="using-agents/chooses-tool-and-autonomy/reasons-across-levels"
+  concepts={['reasoning-across-tool-levels']}
+  context="A learner used to write a weekly status update by hand and now has an agent draft it from the team's notes. They are deciding what to check in the draft."
+  title="What does the learner check now?" hint="Which check was part of writing by hand, and which one can still be asked of a finished draft?"
+  options={[
+    { text: 'Every sentence, one by one, against the notes it came from, as they did when writing by hand.', why: 'That check was cheap when it was part of writing. Done on someone else\'s draft, it is a full second reading, and it still misses what the draft left out.' },
+    { text: 'Whether the draft tells its readers what they need to know this week, and whether anything in the notes is missing from it.', correct: true },
+    { text: 'Nothing beyond a quick read, because the agent works from the same notes the learner used.', why: 'The notes are the same. The reading of them happened where the learner was not looking, and the questions about the result did not go away.' },
+  ]}>
+A learner who used to write the weekly status update by hand now has an
+agent draft it from the team's notes. Which check belongs at the new
+level?
+</Choice>
+
+## Going back down
+
+The higher-level check works because the lower level is sound. A summary
+that answers the reader's questions is only useful when the facts in it
+are right. A folder that looks tidy is only tidy when the documents are
+where the names say. Most weeks you check at the higher level and stop
+there, and that is what makes moving up worth it. Some weeks the
+higher-level signal doesn't add up, and then you go back down and look.
+
+The classic sign is a number that looks too neat. A dashboard reports that
+the automation processed exactly 1,000 documents this month. That may be
+true. It is also what a counter shows when it stops at a page size, or when
+a step failed and the report shows the number that was planned rather than
+the number that was done. A round number on a dashboard is a reason to open
+the folder and count, and so is a run that finished much faster than usual,
+or an "all clear" from a check that has never once found anything. Going
+down a level doesn't undo the move up. You still don't file the documents
+yourself. You look, once, at the level where the truth is, and then you go
+back to reading the dashboard, with a better idea of when to trust it.
+
+A more capable tool also changes what a mistake looks like. When you wrote
+summaries by hand, the mistakes were typos and a wrong date, and the fix
+was a second read. An agent rarely makes a typo. Its mistakes are a fact
+that reads well and isn't in the memo, or a point left out because it
+looked minor, and a second read for typos finds neither of those. When you
+filed by hand, the mistake was a document in the wrong folder because you
+were tired. An automation isn't tired, and it will file every document that
+mentions an amount under `invoices` on a rule it never questions, so its
+mistakes come in batches. The checks that catch a tired person catch
+neither. The check changes with the tool, and the way to find the new check
+is to ask what this tool gets wrong, rather than what you used to get
+wrong.
+
+<Scenario id="round-number" objective="using-agents/chooses-tool-and-autonomy/reasons-across-levels"
+  concepts={['reasoning-across-tool-levels', 'trust-but-verify-for-agents']}
+  context="A learner's monthly filing automation reports its results on a dashboard. This month it shows exactly 500 documents processed, 0 unsorted, and a run time of two minutes where past months took about fifteen."
+  title="The dashboard says 500" hint="Which parts of this report depend on the lower level being sound, and what is the cheapest way to look there once?"
+  options={[
+    { text: 'Accept the report. Zero unsorted and a fast run are both good news.', consequence: 'You find out in November that the run stopped after the first 500 of 1,400 documents, and the other 900 were never filed.' },
+    { text: 'Open the incoming folder and the filed folders, count what came in and what was filed, and compare with 500.', correct: true, consequence: 'The incoming folder had 1,400 documents and the filed folders hold 500. The run stopped early, and the dashboard reported the batch size it reached.' },
+    { text: 'Turn the automation off and go back to filing by hand until the vendor explains the number.', consequence: 'You spend the month filing 1,400 documents by hand. A ten-minute count would have told you what went wrong, and the automation, once fixed, would file the rest.' },
+    { text: 'Ask the automation, in its chat window, whether the number is right.', consequence: 'It says the run completed successfully, because from where it sits, the run did. The count it reports is the count it reached.' },
+  ]}>
+Your filing automation's dashboard shows exactly 500 documents processed,
+0 unsorted, and a two-minute run where past months took about fifteen.
+What do you do?
+</Scenario>
+
+<Pitfall title="Carrying the old check up a level">
+A learner who used to check summaries for typos and wrong dates keeps doing
+that on the agent's summaries, and the agent's summaries pass every time.
+The learner reads the pass as proof that the summaries are good. The check
+was written for a tired person's mistakes, and the agent doesn't make
+those. What it does get wrong, a plausible fact that isn't in the memo,
+goes past a typo check untouched. A check that always passes is a sign to
+ask what it is looking for, and whether the tool you now use can even make
+that kind of mistake.
+</Pitfall>
+
+<MultiChoice id="new-mistakes" phase="review" objective="using-agents/chooses-tool-and-autonomy/reasons-across-levels"
+  concepts={['reasoning-across-tool-levels']}
+  context="A learner has moved from writing meeting summaries by hand to having an agent write them, and is deciding which checks to keep and which to change."
+  title="Which mistakes belong to the new level?" hint="For each line, ask whether this is a mistake a person makes when tired or a mistake a tool makes when it reads well and knows nothing about the meeting."
+  options={[
+    { text: 'A sentence that reads well and says something nobody said.', correct: true },
+    { text: 'A typo in the name of the room where the meeting was held, on the first line of the summary.', why: 'That is a mistake of a tired hand. An agent rarely makes it, and a check for it passes without telling you much.' },
+    { text: 'A decision dropped because the notes gave it one line.', correct: true },
+    { text: 'A date written in the wrong month because the writer had last week\'s notes open beside this week\'s summary.', why: 'That is a slip of attention. An agent working from the notes it was given copies the date it sees.' },
+    { text: 'The same point misplaced in every summary this quarter.', correct: true },
+  ]}>
+Which of these are mistakes that an agent's summaries make and a hand-written
+summary rarely did, so the checks have to change to catch them?
+</MultiChoice>
+
+<Exercise stretch="Take one piece of your own work that a tool took over in the past year, from any rung of the ladder. Write down the check you stopped doing, the check you do now, and one signal that would send you back down a level.">
+Two more before-and-after pairs from the same fictional team follow.
+For each pair, write down the check that stopped working when the tool
+took over, the check that replaces it at the new level, and one signal in
+the result that would make you go back down and look. Ten minutes is
+enough.
+
+```text
+Pair 1: the action list
+
+Before: after each meeting you typed the action list from your own notes,
+  one line per action with an owner and a date.
+After: an agent listens to the meeting recording and produces the action
+  list. This week's list has six actions. Every one has an owner and a
+  date. Two are worded almost the same.
+```
+
+```text
+Pair 2: the supplier check
+
+Before: each new supplier's registration number was looked up by a person
+  in the public register before the first order.
+After: an automation looks up each new supplier on the day it is added
+  and marks it "verified" in the supplier list. This month it marked all
+  eleven new suppliers verified, on the same day, within one minute of
+  each other.
+```
+
+A good answer for Pair 1 says the old check was writing each line from
+your own memory of who agreed to what, and the new check is reading the
+list against the decisions you remember from the meeting and asking whether
+two near-identical lines are one action or two. The signal to go down is
+the two near-identical lines, and going down means playing that part of
+the recording. A good answer for Pair 2 says the old check was a person
+reading the register entry, and the new check is asking whether "verified"
+means the number was found and matched the supplier's name, and looking at
+what the automation does when a number isn't found. The signal is eleven
+verifications in one minute, which is the speed of a lookup that runs and
+also the speed of one that fails and marks the row anyway. Going down means
+opening the register for one or two of the eleven. Where your answer
+differs, write down which level you looked at instead. Which tool in your
+own work has climbed a rung since you last changed its checks?
+</Exercise>
+
+<Recap>
+1. Tools sit on a ladder, from autocomplete to chat to agents to systems of agents, and each rung hides more of what happens below it (@Brilliant ABS).
+2. The checks you did at the lower rung were part of the work, and they stop when the tool takes the work over. The questions about fit, cost, risk and what to keep human move to the level above, and you ask them there (@Academy building-effective-human-agent-teams).
+3. The higher-level check is only as good as the lower level under it, so a signal that doesn't add up (a round number, a fast run, a check that never fails) is the cue to go down one level and look once.
+4. A more capable tool makes different mistakes, and a check built for the old mistakes passes without telling you anything. Find the new check by asking what this tool gets wrong.
+</Recap>
