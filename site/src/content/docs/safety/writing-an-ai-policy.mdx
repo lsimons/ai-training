@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Sort, Scenario, Repair, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, MultiChoice, Sort, Scenario, Repair, Pitfall, Exercise, MorePractice, Recap } from '@components/lesson';
 
 An organization publishes its AI policy. It is one line: "Use AI
 responsibly." Three teams read it. The finance team decides it means "never
@@ -48,8 +48,8 @@ The "Before" lines answer none of them.
   concepts={['policy']}
   title="Which line can the team apply?" hint="Read each line as two different colleagues would. Do both make the same call?"
   options={[
-    { text: 'Agents are used only where they add value and never where they add risk.', why: 'Every task adds some value and some risk. Two readers weigh them differently and reach different calls.' },
     { text: 'Agents may draft replies to customers and may not send them. A named person sends each one.', correct: true },
+    { text: 'Agents are used only where they add value and never where they add risk.', why: 'Every task adds some value and some risk. Two readers weigh them differently and reach different calls.' },
     { text: 'Teams should apply good judgment before giving an agent access to customer data.', why: 'Good judgment is the thing the policy was supposed to replace. The line hands the decision back to each reader.' },
     { text: 'Agents may be used on customer data where the applicable guidelines and best practices allow.', why: 'Which guidelines? A line that points at another document nobody can find decides nothing.' },
   ]}>
@@ -60,7 +60,7 @@ Which line would two team members apply the same way?
 ## The one-page template
 
 A policy that fits on one page gets read. The claims team's page has five
-headings, and every organization we know of can fill the same five.
+headings, and any team can fill the same five.
 
 ```text
 AI policy: claims team                        Owner: team lead      Reviewed: quarterly
@@ -76,12 +76,12 @@ The owner and the review date are part of the template on purpose. A policy
 without an owner is nobody's job to update, and a policy without a review
 date is still describing last year's tools.
 
-Sections 1 to 3 are the questions from the previous lesson, written down
-once for the whole team. The blast radius of each allowed task sets what
+Sections 1 to 3 are the questions from the [agent risk lesson](/safety/agent-risk/),
+written down once for the whole team. The blast radius of each allowed task sets what
 goes in section 2. Least privilege sets how narrow section 1 is. The
 approval moments go in section 3. Section 4 is new. The agent's actions
 are recorded where a person can read them later, because the first time
-something goes wrong the log is the only witness. Recording is only half of
+something goes wrong the log is the only record. Recording is only half of
 it. The claims team names the team lead to read a sample every Friday, since
 a log nobody reads doesn't catch anything. A later lesson in this course goes
 into what a log needs to hold.
@@ -91,8 +91,8 @@ A department publishes a careful four-page AI policy. Nobody is named as its
 owner, and no line gives an example of an allowed use or a disallowed one.
 Six months later the tools have changed, three teams have each written their
 own interpretation, and a new hire finds all four documents and follows none.
-The rule: every section names a person, and every rule comes with one
-example of a use it allows and one it forbids.
+The rule: every section that grants or approves something names a person,
+and every rule comes with one example of a use it allows and one it forbids.
 </Pitfall>
 
 <MultiChoice id="what-the-template-needs" objective="safety/judges-agent-risk/sets-oversight"
@@ -103,7 +103,7 @@ example of a use it allows and one it forbids.
     { text: 'The name of the person who owns the policy and the date it is next reviewed.', correct: true },
     { text: 'A statement that the organization values innovation and trust in equal measure.', why: 'A value statement gives the reader nothing to apply. The line neither allows nor forbids anything.' },
     { text: 'Who reads the agent log, and how often.', correct: true },
-    { text: 'A list of every AI product a team might use, and whether each is approved.', why: 'The list is out of date the week it is published. Name the approved tools and the rule for asking about a new one.' },
+    { text: 'A verdict on every AI product that might reach the market this year.', why: 'The list is out of date the week it is published, and nobody can write it. Name the approved tools and the rule for asking about a new one.' },
   ]}>
 Which of these belong on the claims team's one page?
 </MultiChoice>
@@ -112,8 +112,8 @@ Which of these belong on the claims team's one page?
 
 The approvals section is where most policies get vague, because the
 decision feels like it has to be made per task forever. A framing from
-Anthropic's course on deploying Claude in an enterprise turns it into two
-rules, paraphrased here in our own words (@Academy deploying-claude-enterprise-with-confidence).
+Anthropic's course "Deploying Claude Enterprise with confidence" turns it
+into a rule, paraphrased here in our own words (@Academy deploying-claude-enterprise-with-confidence).
 
 Treat *read* access and *write* access as two separate levels of sign-off.
 An agent that can only read a system can get a fact wrong. An agent that
@@ -124,18 +124,19 @@ workflow when it goes wrong. The claims team's agent reads claim files from the 
 Writing a reply into the outbox is a separate grant, approved by the
 claims manager, and sending it is a grant the team hasn't made.
 
-The same course names a second point that many policies miss. When an
-agent reaches a system through a connector, it can inherit the
-permissions of the person who connected it. The agent can then see
-everything that person can see, including the folders they forgot they had
-access to. The policy line that follows is short: the agent runs under an
-account with the permissions the task needs, never under the account of the
-person with the most access.
+The same course states a fact about connectors that belongs in section 2.
+When an agent reaches a system through a connector, it acts as the person
+who connected it, and it sees what that person can see, no more and no less
+(@Academy deploying-claude-enterprise-with-confidence). The corollary is
+this lesson's own advice. The connecting person's access is the agent's
+ceiling. The claims team connects the agent from an account that has what
+the task needs, and never from the account of the person with the most
+access.
 
-The course also puts it plainly that an agent that doesn't keep an audit
-trail is the wrong tool for a workflow a regulator can ask about
-(@Academy deploying-claude-enterprise-with-confidence). The claims team
-writes that down under logging, as the rule for choosing a tool at all.
+The claims team adds one more line under logging, as its rule for choosing
+a tool at all. A tool that doesn't record what the agent did is the
+wrong tool for a workflow a regulator can ask about, because the team
+couldn't answer the question.
 
 <Sort id="read-or-write" objective="safety/judges-agent-risk/sets-oversight"
   concepts={['permissions-and-least-privilege', 'human-in-the-loop', 'policy']}
@@ -202,19 +203,19 @@ team's policy has no escalation section yet. What do you do in the next
 five minutes?
 </Scenario>
 
-<Scenario id="the-model-changed" phase="review" objective="safety/judges-agent-risk/sets-oversight"
-  concepts={['model-change-risk', 'escalation']}
-  context="The lesson treats a model update by the vendor as a change that needs a re-check of the agent's behavior before it goes back on live work, as part of a team's AI policy."
-  title="The vendor changed the model" hint="Which step finds out whether the agent still behaves the way the policy assumed, before a claimant does?"
+<Scenario id="a-file-left-the-building" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['escalation', 'logging-and-audit']}
+  context="The lesson gives a team's AI policy an escalation section that says what stops the agent, who is told, how fast, what is kept and who decides on a restart."
+  title="A file left the building" hint="Who needs to know in the next few minutes, and what must still be there for them to read?"
   options={[
-    { text: 'Nothing changes for the team: the vendor tested the new model.', consequence: 'The vendor tested it on their tasks. On yours, the new model starts adding a line about coverage to every reply. Three claimants quote it back.' },
-    { text: 'Rerun the agent on last month\'s claim files and compare the drafts with the ones a person sent.', correct: true, consequence: 'Twelve of the drafts differ. Two of the differences matter, the policy gains a line for them, and live work resumes on Wednesday.' },
-    { text: 'Ask the agent whether it behaves the same as before.', consequence: 'It says yes. It has no way to know, and the answer is a sentence generated by the model you were checking.' },
-    { text: 'Switch the agent to read-only for a week and see if anyone complains.', consequence: 'Read-only stops the writes, so nobody sees a wrong draft, and nobody learns anything about the new model either. The week ends with the same question.' },
+    { text: 'Write to the outside address and ask them to delete the file, then carry on with the day.', consequence: 'Nobody on the team knows it happened. The agent has the same access tomorrow, and the outside address has no reason to comply.' },
+    { text: 'Stop the agent, tell the person the policy names, and leave the log and the sent message untouched.', correct: true, consequence: 'The team lead reads the log the same afternoon and finds which line in a claim file the agent followed. The agent loses its send grant until the policy has a line for it.' },
+    { text: 'Ask the agent to explain itself and paste the reply into the incident ticket.', consequence: 'The explanation is generated by the same model that sent the file, and it has no view of its own log. The ticket holds a plausible story and no facts.' },
+    { text: 'Delete the log entry and the sent message so the file is not copied any further.', consequence: 'The file is already outside. The only record of how it got there is gone, and the next investigation starts from nothing.' },
   ]}>
-The vendor announces that the assistant behind the claims team's agent now
-runs on a newer model. Nothing else changed. What does the policy say
-happens before the agent goes back on live claims?
+An agent on your team sent a claim file to an address outside the company,
+and you spotted it in the outbox log. What does the escalation section of a
+usable policy have you do first?
 </Scenario>
 
 <Repair id="fix-the-escalation-line" objective="safety/judges-agent-risk/sets-oversight"
@@ -232,18 +233,18 @@ Many vendors sell the same assistant at a consumer tier and at a business or
 enterprise tier. The pitch of the higher tier is often the sections of this
 lesson as product features: central control over which tools and connectors
 are on, an admin's view of the log, and a promise about data handling.
-Those features make sections 2 and 4 of your page easier to enforce, and
-they don't write the page for you. The tier doesn't know which tasks your
-team may hand over, who owns the risk of each write grant, or who to call
-at nine on a Friday evening. Buy the tier if your organization needs it,
-and write the page either way.
+Those features make sections 2 and 4 of your page easier to enforce,
+but the tier has no way of knowing which tasks your team may hand over or
+who to call at nine on a Friday evening, and it doesn't write the page
+for you. Buy the tier if your organization needs it, and write the page
+either way.
 
 The questions to ask a vendor before buying are the ones from the
 [responsible use lesson](/safety/responsible-use/#questions-to-ask-your-organization-or-a-vendor).
-Bring the answers to the page, under data and logging.
+Put the answers on the page in the data and logging sections.
 
 <Exercise stretch="Show the page to one colleague on the team and ask them to apply section 1 to a task they did this week. Every question they ask is a line to sharpen.">
-Fill in the five-heading template for your own team, in a document or in a
+Fill in the five-heading template for your own team, in a document, or in a
 chat with an assistant that has no tools, using the claims team's page as
 the model. Name the allowed tasks and what the agent may not decide, the
 data that goes in and what is replaced first, the approvals with the
@@ -257,10 +258,28 @@ policy in more words. Which section was hardest to give a name to, and why
 is that the section you need most?
 </Exercise>
 
+<MorePractice>
+
+<Scenario id="the-model-changed" phase="practice" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['model-change-risk', 'escalation']}
+  title="The vendor changed the model" hint="Which step finds out whether the agent still behaves the way the policy assumed, before a claimant does?"
+  options={[
+    { text: 'Nothing changes for the team: the vendor tested the new model.', consequence: 'The vendor tested it on their tasks. On yours, the new model starts adding a line about coverage to every reply. Three claimants quote it back.' },
+    { text: 'Ask the agent whether it behaves the same as before.', consequence: 'It says yes. It has no way to know, and the answer is a sentence generated by the model you were checking.' },
+    { text: 'Switch the agent to read-only for a week and see if anyone complains.', consequence: 'Read-only stops the writes, so nobody sees a wrong draft, and nobody learns anything about the new model either. The week ends with the same question.' },
+    { text: 'Rerun the agent on last month\'s claim files and compare the drafts with the ones a person sent.', correct: true, consequence: 'Twelve of the drafts differ. Two of the differences matter, the policy gains a line for them, and live work resumes on Wednesday.' },
+  ]}>
+The vendor announces that the assistant behind the claims team's agent now
+runs on a newer model. Nothing else changed. What does the policy say
+happens before the agent goes back on live claims?
+</Scenario>
+
+</MorePractice>
+
 <Recap>
 1. A policy line is useful when two team members reading it alone make the same call. "Use AI responsibly" decides nothing, and every team then decides for itself.
 2. One page with five headings is enough: allowed tasks, data, approvals, logging and escalation, with an owner and a review date at the top.
-3. Start every agent read-only. Each kind of write access is a separate grant, approved by the person who owns the risk of that workflow (@Academy deploying-claude-enterprise-with-confidence).
+3. Start every agent read-only. Each kind of write access is a separate grant, approved by the person who answers for that workflow when it goes wrong (@Academy deploying-claude-enterprise-with-confidence).
 4. An agent that connects through a person's account inherits that person's access. Give it an account with what the task needs.
 5. The escalation section names what stops the agent, who is told, how fast, what is kept and who restarts it. The first incident is the wrong time to find out.
 6. A model update is a change to a tool you depend on. Rerun last month's work before the agent goes back on live work (@AEC-11).
