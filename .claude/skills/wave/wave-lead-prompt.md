@@ -88,6 +88,9 @@ If the line under the first paragraph says you are resuming, a previous lead for
 - An e2e selector for a component picks its element by structure (`pre code`) and not by position (`code` nth(1)), since a review fix can add an element above it.
 - A test that a module-level path doesn't depend on the working directory reloads the module after the `chdir`, or it passes against the bug.
 - When siblings are matched by a shared key (an objective), the builder checks the case where two items share one sibling.
+- A foundations lesson backed by a fixture pastes its output into a `text` fence and doesn't add a test or CI check of its own until #237 is merged (then see #311).
+- A rewrap of lesson prose keeps every `(@key)` citation on one line, and the builder compares the built page's citation count with main.
+- A plan title that says the learner runs something is checked against the foundations rule that the learner runs nothing.
 
 ## Filing
 
