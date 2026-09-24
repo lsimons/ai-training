@@ -26,11 +26,12 @@ step that moves the fact back into the window.
 **Short- and long-term memory** are the names for the two places
 (@AEC-05). Short-term memory is the context window itself: everything
 said and seen in this session, the instructions, your messages, the
-answers, the pasted documents and the tool results. It grows with every
+answers, the pasted documents, and the tool results. It grows with every
 turn and is gone when the session ends. Long-term memory is anything
 written down outside the window and read back later. A notes file the
 assistant keeps, a summary of last week's chat, a database the agent
-searches, or a document you paste again yourself all count. Each of
+searches, or a note you keep and paste in again at the start of each
+chat all count. Each of
 these is text in a place the model can't see until something reads it
 and puts it into the window.
 
@@ -39,9 +40,9 @@ colleague by name, the name was in some earlier session, a product
 feature wrote it to storage, and at the start of the new session the
 product read the storage and placed the name in the window before the
 first message. The model in the new session saw the name the way it sees
-any other text in the window. Nothing about the model changed between
-the two sessions (@Academy ai-capabilities-and-limitations). That is
-also why a colleague with the memory feature switched off gets no
+any other text in the window. A fresh session doesn't remember the last
+one (@Academy ai-capabilities-and-limitations), and nothing about the
+model changed between the two. That's also why a colleague with the memory feature switched off gets no
 greeting: the same model, and an empty place where the note would have
 been.
 
@@ -57,13 +58,13 @@ been.
     { text: 'A coding agent follows a rule from a notes file in the project folder', bucket: 1 },
     { text: 'The assistant quotes a line from the document you pasted at the start of this chat', bucket: 0 },
     { text: 'An assistant answers a policy question from a passage a search found in the company wiki', bucket: 1 },
-    { text: 'The assistant refers to the web search result it got two turns ago', bucket: 0 },
+    { text: 'The assistant repeats the total it calculated two turns ago', bucket: 0 },
   ]} />
 
 ## Where products keep the notes
 
 Products give long-term memory different names, and they all come down
-to text in storage that is read back at a known moment. Two examples
+to text in storage, read back at a known moment. Two examples
 show the pattern.
 
 A coding agent such as Claude Code reads instruction files at the start
@@ -71,8 +72,9 @@ of every session. A project can hold a file that the team writes, with
 build commands and conventions, and the agent also keeps notes of its
 own, written during earlier sessions from your corrections and
 preferences. Both are loaded into the context window at the start of
-each conversation, and the notes the agent writes itself are on by
-default (@Claude Code memory). The agent treats them as context, the
+each conversation, and of the notes the agent writes itself, only the
+first part of their index file is loaded at the start. Those notes are
+on by default (@Claude Code memory). The agent treats them as context, the
 same as a message you type, so an instruction in such a file is a strong
 default and never a guarantee. The [lesson on what tokens
 cost](/concepts/what-tokens-cost/#the-rule-that-got-buried) showed what
@@ -88,12 +90,12 @@ nothing else from the old chat.
 
 The third kind of long-term memory is the one from the [previous
 lesson](/concepts/retrieval/#search-first-then-answer). Retrieval is
-memory that is searched instead of loaded whole. The documents wait
+memory that gets searched instead of loaded whole. The documents wait
 outside the window, a search picks the passages that fit the question,
 and only those are pasted in. Retrieval and memory differ in what they
-hold, notes about you against shared documents, and share the mechanism:
-storage outside the window, and a step that reads part of it back in
-(@AEC-05).
+hold, notes about you against shared documents (@AEC-05). They share
+the mechanism: storage outside the window, and a step that reads part of
+it back in.
 
 <Choice id="what-it-remembered" phase="review" objective="concepts/explains-models/explains-grounding"
   concepts={['short-and-long-term-memory']}
@@ -128,9 +130,10 @@ one prompt or one file. Context rot is the session-level version. The
 competition is between everything in the window, and it grows with every
 turn, not only with the length of one file. A tool that returned a large
 result you never looked at takes up as much of the window as a page you
-wrote with care. A model's attention over a long window is uneven, and
-a fact in the middle of a long context is used less reliably than one at
-the start or the end (@Liu 2024). So a long session doesn't fail all at
+wrote with care. Liu and colleagues found that models use a fact in the
+middle of a long input less reliably than one at the start or the end
+(@Liu 2024), and a long session puts most of the window in the middle.
+So a long session doesn't fail all at
 once. It drifts.
 
 The signs are easy to name once you know them (@AEC-05). The assistant
@@ -142,9 +145,11 @@ window is, before you look for anything else.
 
 ## Summarize, start fresh, or retrieve
 
-The cure for context rot is to keep the window short and deliberate
-(@AEC-05). Summarize, start fresh, and retrieve are the ways to do that,
-and each one moves text out of the window or keeps it from getting in.
+The cure for context rot is to keep the window short and deliberate.
+The source course on agent memory lists more ways to manage a full
+window, for people who build agents (@AEC-05). This lesson keeps the three a knowledge worker can
+apply without tooling: summarize, start fresh, and retrieve. Each one
+moves text out of the window or keeps it from getting in.
 
 **Summarize.** Replace the old turns with a short summary of what
 matters, and go on from the summary. Products do this for you under
@@ -177,7 +182,7 @@ showed, so it trades a full window for a search you have to check.
   options={[
     { text: 'Tell the assistant it is wrong, and ask it to read the pasted policy again, more carefully this time.', consequence: 'The policy is still in the window, next to every meeting note and every old answer. The next answer is as uneven as the last, because nothing left the window.' },
     { text: 'Ask for a summary of the decisions so far, then start a new chat with that summary and one section of the policy.', correct: true, consequence: 'The new chat holds a few hundred words of decisions and one section, and the next answers describe the policy as it reads.' },
-    { text: 'Switch to a larger model in the same chat, because a stronger model keeps track of more text.', consequence: 'A larger model reads the same overfull window. The attention over a long context is uneven for every model, and the answers keep drifting.' },
+    { text: 'Switch to a larger model in the same chat, because a stronger model keeps track of more text.', consequence: 'A larger model reads the same overfull window. The drop for a fact in the middle of a long context was measured across models, and the answers keep drifting.' },
     { text: 'Paste the full policy again at the end of the chat, so the assistant has a fresh copy to read.', consequence: 'The window now holds the policy twice, with the notes and old answers in between. The window is fuller than before, and the drift continues.' },
   ]}>
 The assistant that summarized the policy well at two o'clock now says the
@@ -191,7 +196,7 @@ is for. You said so in your first message. What do you do?
   title="Which of these point at context rot?" hint="Context rot is about the window in one session. Which of these are about what is in the window, and which are about something else?"
   options={[
     { text: 'Deep into a session, the assistant asks for a deadline you stated in your first message.', correct: true },
-    { text: 'In a new chat, the assistant does not know the name you gave it yesterday.', why: 'A new chat starts with an empty window. Nothing rotted, because nothing from yesterday was there to begin with. That is a question of long-term memory, not of a full window.' },
+    { text: 'In a new chat, the assistant does not know the name you gave it yesterday.', why: 'A new chat starts with an empty window. Nothing rotted, because nothing from yesterday was there to begin with. The name would have to come from long-term memory, and the window is empty rather than full.' },
     { text: 'After many turns and several tool results, the assistant contradicts a decision it made an hour earlier.', correct: true },
     { text: 'The assistant gives a wrong date for a historical event in its first answer.', why: 'A wrong fact in a short window is a hallucination from training data. Context rot needs a window that has filled up over a session.' },
   ]}>
@@ -201,13 +206,13 @@ Which two of these are signs of context rot rather than something else?
 <Pitfall title="The report that pasted the whole handbook">
 A team lead pastes a 90-page staff handbook into a chat and asks for a
 one-page summary of the leave rules. The summary is good. They keep the
-chat open all afternoon. Three sets of meeting notes get pasted in, and
+chat open all afternoon. Meeting notes get pasted in three times, and
 forty more questions about other chapters get asked. By five o'clock the
 assistant states a notice period from the wrong chapter and, when
 corrected, apologizes and repeats a rule the handbook doesn't contain.
 The handbook never left the window, and neither did anything else. The
-rule: a large document pasted whole is the start of a long session, not
-one question. Ask what you need from it. Then open a new chat with the
+rule: a large document pasted whole is the start of a long session, and
+every later question about it reads a fuller window. Ask what you need from it. Then open a new chat with the
 answer and only the section the next question is about. When the
 document is one you ask about for weeks, a product that searches it
 for you beats pasting it every time.
@@ -272,13 +277,13 @@ what would you have carried into the new chat?
    window for this session, and long-term memory is anything written
    outside the window and read back in. "It remembered" always means
    something was stored and re-read (@AEC-05).
-2. Products keep long-term memory as text in storage that is loaded at
-   a known moment: instruction files and the agent's own notes at the
+2. Products keep long-term memory as text in storage, loaded at a known
+   moment: instruction files and the agent's own notes at the
    start of a coding session (@Claude Code memory), a chat product's
    memory notes, or documents that a search brings in one passage at a
    time.
 3. Context rot is the decline in a long session as the window fills
-   with old turns, tool output and stale instructions. The facts are
+   with old turns, tool output, and stale instructions. The facts are
    still there, and the answers drift, contradict, and ask for what you
    already gave (@AEC-05). A fact in the middle of a long context is
    used less reliably than one at the edges (@Liu 2024).
