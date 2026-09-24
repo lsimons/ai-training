@@ -5,9 +5,10 @@
  * the reader `mise run checkpoints` and the export use, so the menu and the
  * export cannot disagree. The examples are the `<Predict>` tags without an
  * `objective` (spec S03 "Examples"), which that reader skips on purpose, read
- * here from the same MDX source.
+ * here from the same MDX tree.
  */
 import type { CollectionEntry } from 'astro:content';
+import { attrsOf, jsxElements, type MdxNode, parseMdx, stringProp } from './checkpoint-tags';
 import { checkpointsOf, type Lesson } from './lessons';
 
 export interface TocEntry {
@@ -33,99 +34,42 @@ export function isLessonEntry(entry: CollectionEntry<'docs'>): entry is Lesson {
 	return Boolean(entry.data.mode);
 }
 
-const TAG_START = /<Predict(?=[\s/>])/g;
-
 /**
- * The ungraded examples of a lesson: every `<Predict>` tag without an
- * `objective`, with its `id` and `title`. String props may span lines and
- * contain `>`, so the tag is read prop by prop, not with one regular
- * expression. An expression prop (`{...}`) is skipped by brace depth, with
- * quoted text inside it left alone.
+ * The ungraded examples of a lesson: every `<Predict>` element without an
+ * `objective`, with its `id` and `title`, read from the MDX tree the way the
+ * checkpoint reader reads the checkpoints (`lib/checkpoint-tags.ts`). A tag
+ * in a fenced code block or a comment is text to the parser and so is no
+ * example, an entity in a prop is decoded, and `title={'Run it'}` reads as
+ * its string.
  */
 export function examplesOf(body: string, where: string): TocEntry[] {
+	let tree: MdxNode;
+	try {
+		tree = parseMdx(body);
+	} catch (e) {
+		throw new Error(`${where}: ${(e as Error).message}`);
+	}
 	const out: TocEntry[] = [];
-	for (const match of body.matchAll(TAG_START)) {
-		const attrs = readProps(body, match.index + match[0].length, where);
+	for (const node of jsxElements(tree)) {
+		if (node.name !== 'Predict') continue;
+		const attrs = attrsOf(node, where);
 		if (attrs.has('objective')) continue;
-		const id = attrs.get('id');
-		const title = attrs.get('title');
+		const id = stringProp(`${where} <Predict>`, attrs, 'id');
 		if (!id) throw new Error(`${where}: <Predict> without an id`);
-		out.push({ id, title: title ?? id });
+		out.push({ id, title: stringProp(`${where}#${id}`, attrs, 'title') ?? id });
 	}
 	return out;
 }
 
-/** Reads `name`, `name="text"`, `name='text'` and `name={expr}` until the closing `>` or `/>`. Expression values are stored as `{expr}`. */
-function readProps(src: string, start: number, where: string): Map<string, string> {
-	const props = new Map<string, string>();
-	let i = start;
-	const skipSpace = () => {
-		while (i < src.length && /\s/.test(src[i] as string)) i++;
-	};
-	for (;;) {
-		skipSpace();
-		if (i >= src.length) throw new Error(`${where}: unterminated <Predict> tag`);
-		if (src[i] === '>') return props;
-		if (src.startsWith('/>', i)) return props;
-		const name = /^[A-Za-z_][\w-]*/.exec(src.slice(i))?.[0];
-		if (!name) throw new Error(`${where}: unexpected ${JSON.stringify(src.slice(i, i + 20))} in a <Predict> tag`);
-		i += name.length;
-		skipSpace();
-		if (src[i] !== '=') {
-			props.set(name, '');
-			continue;
-		}
-		i++;
-		skipSpace();
-		const open = src[i];
-		if (open === '"' || open === "'") {
-			const end = src.indexOf(open, i + 1);
-			if (end < 0) throw new Error(`${where}: unterminated string for ${name} in a <Predict> tag`);
-			props.set(name, src.slice(i + 1, end));
-			i = end + 1;
-		} else if (open === '{') {
-			const end = closingBrace(src, i);
-			if (end < 0) throw new Error(`${where}: unterminated expression for ${name} in a <Predict> tag`);
-			props.set(name, src.slice(i, end + 1));
-			i = end + 1;
-		} else {
-			throw new Error(`${where}: unquoted value for ${name} in a <Predict> tag`);
-		}
-	}
-}
-
-/** The index of the `}` closing the `{` at `open`, skipping quoted text, or -1. */
-function closingBrace(src: string, open: number): number {
-	let depth = 0;
-	let quote: string | undefined;
-	for (let i = open; i < src.length; i++) {
-		const c = src[i];
-		if (quote) {
-			if (c === '\\') i++;
-			else if (c === quote) quote = undefined;
-		} else if (c === '"' || c === "'" || c === '`') quote = c;
-		else if (c === '{') depth++;
-		else if (c === '}') {
-			depth--;
-			if (depth === 0) return i;
-		}
-	}
-	return -1;
-}
-
 /**
  * The menu groups of a lesson, in the order the menu shows them, without the
- * empty ones. An id used twice on the page fails the build, because the
- * entries link by id.
+ * empty ones. The ids are unique across checkpoints and examples: the
+ * checkpoint reader rejects a repeated `id` on any tag it knows, ungraded
+ * `<Predict>` included, before this runs.
  */
 export function lessonTocGroups(lesson: Lesson): TocGroup[] {
 	const checkpoints = checkpointsOf(lesson).map(({ id, title }) => ({ id, title }));
 	const examples = examplesOf(lesson.body ?? '', lesson.id);
-	const seen = new Set<string>();
-	for (const { id } of [...checkpoints, ...examples]) {
-		if (seen.has(id)) throw new Error(`${lesson.id}: the id "${id}" is used by two checkpoints or examples`);
-		seen.add(id);
-	}
 	const groups: TocGroup[] = [
 		{ label: 'Checkpoints', slug: 'checkpoints', entries: checkpoints },
 		{ label: 'Examples', slug: 'examples', entries: examples },
