@@ -153,7 +153,7 @@ or you verify what came out.
   options={[
     { text: 'The model lied to cover a gap, so I ask it to be honest and try again.', consequence: 'Sometimes the model now declines, which is an improvement, and sometimes you get a second citation in the same confident form. The model produced the likely next tokens both times. Asking for honesty changes how often it declines, and it adds no paper to its training data.' },
     { text: 'Next-token prediction met a knowledge gap on a rare topic, so I paste in the papers I already have and ask it to work from those.', correct: true, consequence: 'The model summarizes and compares the papers you gave it, and every citation in the answer is one you can see in the prompt. Supplying the material closed the gap.' },
-    { text: 'Non-determinism produced a bad sample, so I ask the same question a few more times and keep the answer that repeats.', consequence: 'An invented citation on a thin path can repeat across runs, because the same weights are filling the same gap. Agreement between samples tells you the gap is stable, and nothing about whether the paper exists.' },
+    { text: 'Non-determinism produced a bad sample, so I ask about the same topic a few more times and keep the citation that repeats.', consequence: 'An invented citation on a thin path can repeat across runs, because the same weights are filling the same gap. Agreement between samples tells you the gap is stable, and nothing about whether the paper exists.' },
     { text: 'Instruction dilution let an earlier rule about citing sources fade, so I restate the rule.', consequence: 'The question was one message long, so nothing diluted. The restated rule produces the same citation with a sentence about how important sources are.' },
   ]}>
 

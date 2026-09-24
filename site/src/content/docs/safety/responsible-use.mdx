@@ -209,9 +209,9 @@ matter how useful it is.
   context="The lesson gives a checklist for trying a tool that nobody has assessed yet. Its first item: the tool only ever sees dummy, synthetic or public data, never real company or customer data."
   title="Still an experiment?" hint="Which item on the checklist stops being true the moment the recording goes in?"
   options={[
-    { text: 'Go ahead. It is still a trial, and the recording is only one file.', consequence: 'The recording holds the voices, names and plans of everyone in the meeting. A tool nobody has assessed now retains all of it, under terms nobody has read.' },
-    { text: 'Ask the customer for permission first, then upload.', consequence: 'Permission from the customer covers their side, but the tool itself has still not been assessed, and your own colleagues in the recording were not asked either.' },
-    { text: 'Stop the experiment here. Write down what you learned from the dummy tests and propose the tool for assessment, naming who would own it.', correct: true, consequence: 'The trial ends with a note and a proposal. If the tool is approved, the next recording can go in under known terms and with an owner.' },
+    { text: 'Go ahead. It is still a trial, the recording is only one file, and you can delete it from the tool afterwards.', consequence: 'The recording holds the voices, names and plans of everyone in the meeting. A tool nobody has assessed now retains all of it, under terms nobody has read.' },
+    { text: 'Ask the customer for permission at the start of the call, then upload the recording if they agree.', consequence: 'Permission from the customer covers their side, but the tool itself has still not been assessed, and your own colleagues in the recording were not asked either.' },
+    { text: 'Stop the experiment here. Write down what the dummy tests showed and propose the tool for assessment, naming who would own it.', correct: true, consequence: 'The trial ends with a note and a proposal. If the tool is approved, the next recording can go in under known terms and with an owner.' },
   ]}>
 You have been trying a meeting-summary tool with recordings of yourself
 reading a script. It works well. This afternoon you have a real call with a
@@ -313,9 +313,9 @@ as the source demands or replace it.
   concepts={['licensing-and-attribution']}
   title="The function that arrived finished" hint="What does the presence of someone else's comments tell you about where the text came from?"
   options={[
-    { text: 'Use it. The tool produced it, so the tool\'s license covers it.', why: 'A tool\'s terms cover your use of the tool. They cannot grant you rights to code the model reproduced from somewhere else.' },
+    { text: 'Use it as it is. The tool produced it, so the tool\'s license covers it, whatever the header comment says.', why: 'A tool\'s terms cover your use of the tool. They cannot grant you rights to code the model reproduced from somewhere else.' },
     { text: 'Search for a distinctive line from it. If it matches a public source, follow that source\'s license or write your own version.', correct: true },
-    { text: 'Delete the comments and use the code. Without the comments nobody can tell.', why: 'Removing the evidence of copying does not remove the obligation, and it makes the copy harder to trace when a reviewer asks.' },
+    { text: 'Delete the header comment and use the code. Without the comment nobody can tell where it came from.', why: 'Removing the evidence of copying does not remove the obligation, and it makes the copy harder to trace when a reviewer asks.' },
   ]}>
 A coding assistant returns a forty-line function in one go, including a
 header comment with an author name and a year that is not yours. It does
