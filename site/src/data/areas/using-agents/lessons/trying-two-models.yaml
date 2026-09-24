@@ -1,12 +1,20 @@
 id: using-agents/trying-two-models
 title: Trying two models on the same task
+description: >-
+  Run one reformatting task, one classification task and one ambiguous request on a small and a
+  large model, time each answer, and read a six-cell table to see where the large model earns its
+  price.
 mode: tutorial
 covers: using-agents/choosing-tools
 serves: [using-agents/chooses-tool-and-autonomy/picks-a-model-by-fit]
 introduces: [model-fit, cost-and-speed]
 assumes:
   - objective: concepts/explains-models/names-failure-modes
+    lesson: concepts/how-models-work
+    section: failure-modes-named
   - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
 after: [using-agents/chat-agent-or-automation]
 shorts: [When a small model is the right one]
 exercise:
@@ -15,11 +23,15 @@ exercise:
     Run the same three supplied inputs (one reformatting, one classification, one ambiguous request)
     on a small and a large model from the picker in your chat tool, time each answer, and fill a
     six-cell table with good enough or not.
-sources: []
+sources: [AEC-02, Academy ai-fluency-for-builders]
 issue: 161
 minutes: 15
 notes: >-
   The plan named the topic concepts/limits as assumed; taken as the objective
   concepts/explains-models/names-failure-modes. The plan named the topic concepts/how-models-work as
   assumed; taken as the objective concepts/explains-models/explains-generation. The served objective
-  picks-a-model-by-fit was added by #106.
+  picks-a-model-by-fit was added by #106. The page names no model version and no price, because
+  both change faster than a review interval. It says "a small and a large model from your tool's
+  model picker" and marks the six-cell table as one example run. No fixture: the learner runs the
+  three inputs in a chat tool. The lesson in after, chat-agent-or-automation, was planned and not
+  live when this page went live, so the page doesn't refer to it.
