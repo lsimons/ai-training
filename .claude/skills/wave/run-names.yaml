@@ -1,0 +1,61 @@
+# Names for dispatcher runs (/wave, #353), like hurricane names: the next
+# run takes the letter after the newest run's name, so the names sort in
+# the order the runs started. After Z the letters start again at A in the
+# second list, and after its Z at A in the first. One name per letter,
+# each easy to spell and to say. A run is never named after a machine.
+# site/scripts/lib/run-names.mjs picks the name, and its test checks this
+# file.
+first:
+  - Axolotl
+  - Badger
+  - Capybara
+  - Dingo
+  - Emu
+  - Ferret
+  - Gecko
+  - Heron
+  - Ibis
+  - Jackal
+  - Koala
+  - Lemur
+  - Marmot
+  - Narwhal
+  - Ocelot
+  - Panda
+  - Quokka
+  - Raven
+  - Seal
+  - Tapir
+  - Urchin
+  - Vole
+  - Walrus
+  - Xerus
+  - Yak
+  - Zebra
+second:
+  - Alpaca
+  - Bison
+  - Camel
+  - Dolphin
+  - Eagle
+  - Falcon
+  - Gibbon
+  - Hedgehog
+  - Iguana
+  - Jaguar
+  - Kiwi
+  - Llama
+  - Moose
+  - Newt
+  - Otter
+  - Puffin
+  - Quail
+  - Rabbit
+  - Sloth
+  - Toucan
+  - Umbrellabird
+  - Vulture
+  - Wombat
+  - Xenops
+  - Yellowjacket
+  - Zebu
