@@ -32,5 +32,8 @@ exercise:
   brief: >-
     Rewrite a one-line request into instruction, marked context, audience and format, and run both
     versions in a chat.
-sources: []
+sources:
+  - Academy ai-fluency-framework-foundations
+  - DLAI-1
+  - DLAI-3
 minutes: 15

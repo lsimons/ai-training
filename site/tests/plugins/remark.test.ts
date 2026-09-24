@@ -3,7 +3,7 @@ import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { describe, expect, it } from 'vitest';
 import { CODE_AND_COMPONENTS, CODE_ONLY, walkText } from '../../plugins/mdast-walk.mjs';
-import { remarkCitations } from '../../plugins/remark-citations.mjs';
+import { citationKeys, remarkCitations } from '../../plugins/remark-citations.mjs';
 import { remarkTerms } from '../../plugins/remark-terms.mjs';
 
 const topics = [
@@ -161,6 +161,13 @@ describe('remarkTerms', () => {
 });
 
 describe('remarkCitations', () => {
+	it('citationKeys lists each cited key once, trimmed, in order of first appearance', () => {
+		expect(citationKeys('One (@AEC-02). Two (@ Brilliant TAS ). One again (@AEC-02). Not (@) this.\n')).toEqual([
+			'AEC-02',
+			'Brilliant TAS',
+		]);
+		expect(citationKeys('No citation here.\n')).toEqual([]);
+	});
 	it('numbers citations by first appearance, links them page-absolute, and appends a References section', async () => {
 		const tree = await run('One (@AEC-02). Two (@Brilliant TAS). One again (@AEC-02).\n');
 		const cites = links(tree, 'citation');

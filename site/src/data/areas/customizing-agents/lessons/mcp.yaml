@@ -24,7 +24,10 @@ exercise:
   brief: >-
     Put a five-rule guardrail block in an agent's system prompt and test it against an injected
     instruction in a sandbox page.
-sources: []
+sources:
+  - Academy introduction-to-model-context-protocol
+  - Academy model-context-protocol-advanced-topics
+  - Academy claude-code-101
 minutes: 20
 notes: >-
   Delegated identity is the section "Whose identity does the agent act under?", which #17 asked for.
