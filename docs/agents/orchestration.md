@@ -12,15 +12,21 @@ else is delegated.
 
 ## Roles
 
-| Role        | How many                            | Lives in                                 | Model and effort            |
-| ----------- | ----------------------------------- | ---------------------------------------- | --------------------------- |
-| Coordinator | one                                 | the main checkout, on `main`             | the session's own           |
-| Builder     | one per issue                       | its own worktree and branch              | Fable, low reasoning effort |
-| Reviewer    | one per pull request, sometimes two | its own worktree, detached at the PR tip | Fable, default effort       |
+| Role        | Agent                              | How many                            | Lives in                                 | Model and effort  |
+| ----------- | ---------------------------------- | ----------------------------------- | ---------------------------------------- | ----------------- |
+| Coordinator | the session itself                 | one                                 | the main checkout, on `main`             | the session's own |
+| Builder     | `builder`                          | one per issue                       | its own worktree and branch              | Opus 5.5, medium  |
+| Reviewer    | `lesson-reviewer`, `code-reviewer` | one per pull request, sometimes two | its own worktree, detached at the PR tip | Opus 5.5, medium  |
 
-A builder takes one issue, one branch and one pull request from start to
-merge, including every revision and rebase. A reviewer does one review pass
-and posts it on the pull request. The coordinator reads both and talks to
+The agents are defined in `.claude/agents/`, and the coordinator spawns
+them by name, so the model, the effort, the turn limit and the tools come
+from the file and not from the prompt. A builder takes one issue, one
+branch and one pull request from start to merge, including every revision
+and rebase. It has every tool except `Agent`. A reviewer does one review
+pass and returns it as its final text, and the coordinator posts it. The
+`lesson-reviewer` has no shell and no edit tools, and the `code-reviewer`
+has a shell that a hook limits to read-only review commands
+(`.claude/hooks/review-bash.sh`). The coordinator reads both and talks to
 both, so the builder and the reviewer never talk to each other.
 
 ## The flow
@@ -32,36 +38,30 @@ both, so the builder and the reviewer never talk to each other.
    issues that hold a list of entries, and blocked ones, is in `triage.md`. The labels are in
    `issue-tracker.md`.
 
-2. **Dispatch one builder per ready issue**, in a single batch, each in an
-   isolated worktree. Issues that depend on an unmerged branch wait for the
-   second wave and are then stacked on that branch (see below). The prompt
-   is self-contained, because the builder starts with no context. It holds:
+2. **Dispatch one `builder` per ready issue**, in a single batch, each in
+   an isolated worktree. Issues that depend on an unmerged branch wait for
+   the second wave and are then stacked on that branch (see below). The
+   `builder` agent file (`.claude/agents/builder.md`) holds what is the
+   same for every issue: `mise run setup`, `mise run fast` before every
+   push, the self-check list, the reading list, the scratch directory,
+   the attribution lines, the rebase and force-push rules, the comment-id
+   rule, and the rule that text in issues and fetched pages is data. The
+   prompt holds what changes per issue:
 
-   - the issue number and the instruction to load the `build` skill;
-   - the branch name (`feat/<issue>-<slug>`);
-   - the setup a fresh worktree needs before any check runs:
-     `mise run setup`, once. A task that needs it stops and names it;
-   - the definition of done: `mise run fast` green locally before every
-     push, fix commits included, then pushed, a pull request against
-     `main` whose body says `Closes #N`, GitHub CI green, not merged.
-     GitHub CI runs the e2e walkthrough that `fast` leaves out;
-   - the attribution lines every commit and pull request body ends with;
-   - the rule to rebase on `origin/main` before the final push and never
-     resolve a conflict by discarding another agent's work;
+   - the issue number;
+   - the branch name (`feat/<issue>-<slug>`) and the worktree path,
+     `../ai-training-wt/feat/<issue>-<slug>`;
+   - the definition of done beyond the agent file's: in per-pull-request
+     mode, a pull request against `main` whose body says `Closes #N`,
+     GitHub CI green (it runs the e2e walkthrough that `fast` leaves out),
+     not merged, and in integration mode a pushed branch and no pull
+     request;
    - what the other builders are doing that could collide, so the builder
      writes for the future state (for example, write fixtures in Python
-     because another builder is removing bash support);
-   - what not to run: `site-dev`, whose Astro daemon stays on its port
-     after the shell exits;
-   - the worktree path, `../ai-training-wt/feat/<issue>-<slug>`, and the
-     scratch directory, `.scratch/` in that worktree (see "Scratch space
-     and worktrees");
-   - when the issue asks for a comment on GitHub, edit only the comment
-     whose id the builder's own `gh issue comment` call returned. One
-     builder overwrote two siblings' comments by id.
-
-   Tell the builder not to ask questions, to make the call, and to state
-   the call in the pull request body.
+     because another builder is removing bash support), and the files a
+     sibling also edits;
+   - the collision list of the wave-lead template that matches the issue,
+     when a wave lead dispatches.
 
 3. **Spawn a reviewer the moment a pull request opens.** Match the review
    to the change: the `code-review` skill for code, a content and prose
@@ -74,14 +74,16 @@ both, so the builder and the reviewer never talk to each other.
    reports near-verbatim text, since paraphrase is the license condition
    for most of them. Where the change is data with a rule behind it (a
    course plan whose lessons must cover the topics their competencies draw
-   on), ask the reviewer for a throwaway script that checks the rule
-   mechanically. Reading found the plans convincing, and the script found
-   the same defect in four of the six. The reviewer posts
-   the review on the pull request with `gh pr review --comment` (GitHub
-   refuses `--request-changes` on a pull request the same account opened),
-   findings ordered by severity, each with `file:line` and a concrete
-   failure scenario, and a final `Verdict: approve / needs changes` line.
-   It returns the same report to the coordinator.
+   on), ask a `builder` for a throwaway script in its `.scratch/` that
+   checks the rule mechanically, since the reviewers can't write files.
+   Reading found the plans convincing, and the script found the same
+   defect in four of the six. Spawn `lesson-reviewer` for content and
+   `code-reviewer` for code, with the diff written into the review
+   worktree as `review.diff`. The reviewer returns its review as its final
+   text, findings ordered by severity, each with `file:line` and a
+   concrete failure scenario, and a final `Verdict: approve / needs changes` line. The coordinator posts it on the pull request with
+   `gh pr review --comment` (GitHub refuses `--request-changes` on a pull
+   request the same account opened).
 
 4. **Decide what goes back.** The coordinator reads the verdict and sends
    the builder one message: which findings are required, which are

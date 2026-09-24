@@ -112,13 +112,14 @@ rejected.
    - `{{FILING}}`: one of the two paragraphs under "Filing paragraphs"
      below, as written.
    - `{{RESUME}}`: for a new wave, `This is a fresh wave.` For a resume
-     (step 3), these three sentences: `You are RESUMING wave <n> on branch <branch>.` `A previous lead stopped before reporting.` `Follow "Resuming a half-done wave" before anything else.`
+     (step 3), these three sentences: `You are RESUMING wave <n> on branch <branch>.` `A previous lead stopped before reporting.` `Follow "Resuming a half-done wave" in your agent file before anything else.`
 6. **Mark the wave in flight, then spawn the lead.** Write
    `In flight: wave <n>, branch <b>, issues #a #b ...` under `## Waves` in
    the meta record (on a resume the line is already there), and commit and
    push it as `docs(agents): meta record wave <n> in flight`, following
-   the commit steps above. Then spawn one `general-purpose` agent with the
-   filled text as its whole prompt. Wait for its notification and do
+   the commit steps above. Then spawn one `wave-lead` agent
+   (`.claude/agents/wave-lead.md`) with the filled text as its whole
+   prompt. Wait for its notification and do
    nothing else in the meantime: end your turn, and the notification
    wakes you. Never spawn a second lead for any reason while one runs.
    If a fallback `ScheduleWakeup` is armed for this wave, re-arm it when
