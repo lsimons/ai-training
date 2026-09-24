@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 import {
 	citationKeys,
 	createNumbering,
+	hasMultipleKeys,
+	multipleKeysMessage,
 	referenceParts,
 	splitCitations,
 	unknownKeyMessage,
@@ -285,6 +287,17 @@ describe('remarkCitations', () => {
 	it('adds no References section to a page without citations', async () => {
 		const tree = await run('Plain text.\n');
 		expect(tree.children?.map((c) => c.type)).toEqual(['paragraph']);
+	});
+
+	it('fails the build on a token with two keys, naming the file and the one-key rule', async () => {
+		expect(hasMultipleKeys('AEC-02, @Liu 2024')).toBe(true);
+		expect(hasMultipleKeys('Liu 2024')).toBe(false);
+		await expect(run('Body (@AEC-02,\n@Liu 2024).\n')).rejects.toThrow(
+			multipleKeysMessage(`${docsDir}concepts/how-models-work.mdx`, 'AEC-02, @Liu 2024'),
+		);
+		expect(multipleKeysMessage('here', 'a, @b')).toBe(
+			'here: citation key "a, @b" contains "@". Write one key per token: (@a) (@b).',
+		);
 	});
 
 	it('fails the build on an unknown key, and on a citation inside a heading or link', async () => {

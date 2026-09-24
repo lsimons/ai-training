@@ -60,8 +60,8 @@ TOOLS = {
 
 With a real model, the description is what the model reads to decide
 when to call the tool, and the passage goes back to the model as a
-`tool_result` block in the next user message (@Claude docs define-tools,
-@Claude docs handle-tool-calls). In this fixture the passage goes into a
+`tool_result` block in the next user message (@Claude docs define-tools)
+(@Claude docs handle-tool-calls). In this fixture the passage goes into a
 prompt built by `build_prompt`, with a frame above it, and the question
 below it. The frame tells the model where the text came from and what to
 do when it doesn't answer the question, and the last section of this
