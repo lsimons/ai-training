@@ -6,7 +6,8 @@
  * behaviors), so both resolve the same tokens the same way.
  */
 
-export const CITATION = /\(@([^()\n]+?)\)/g;
+// Module-private: a `/g` regex carries `lastIndex` state, so callers use the functions below.
+const CITATION = /\(@([^()\n]+?)\)/g;
 
 /**
  * @typedef {{ type: 'text', value: string } | { type: 'citation', key: string }} CitationPart
