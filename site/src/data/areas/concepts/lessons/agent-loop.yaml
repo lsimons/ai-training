@@ -1,17 +1,32 @@
 id: concepts/agent-loop
 title: Run a tiny agent
+description: >-
+  Read the transcript of a toy agent that lists a folder and reads a note, name each turn as observe,
+  think or act, see how a tool is described to the model, and learn the ways the loop ends.
 mode: tutorial
 covers: concepts/what-is-an-agent
 serves: [concepts/recognizes-agents/names-the-loop]
 introduces: [tool, agent-loop]
 assumes: []
+extends-to:
+  - label: Building your first agent
+    href: /building-agents/agent-loop/
 after: [concepts/iterating-on-a-prompt, concepts/thin-path]
 shorts: [how a tool is described to the model]
 exercise:
   kind: do
   brief: >-
-    Run the toy loop fixture (a scripted model with two tools), and list each turn as observe, think
-    or act with the tool it used.
-sources: []
+    Read the second transcript of the toy agent (a scripted model with two tools), and list each turn
+    as observe, think or act with the tool it used.
+sources: [AEC-01, DLAI-11, Academy claude-platform-101]
 issue: 140
 minutes: 15
+notes: >-
+  Foundations page, so the learner runs nothing. The toy loop is
+  site/examples/concepts/agent-loop/tiny_agent.py, a scripted model with two tools (list_dir,
+  read_file) over three committed notes. The page shows its three transcripts (find, count, limit)
+  in text fences, and tests/test_agent_loop_concepts.py asserts that every line the fixture prints is
+  on the page, the same pattern as concepts/what-tokens-cost. The engineering version with the code
+  is building-agents/agent-loop, linked from extends-to. The pitfall's half-written file is prose
+  about an agent with a write tool, which the toy doesn't have. AEC-01 is cited for ideas in our own
+  words, so NOTICE.md gets no new entry.
