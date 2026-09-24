@@ -227,7 +227,7 @@ guide.
 | `context`   | no       | One plain paragraph that makes the item readable outside its lesson. Hidden on the lesson page, shown above the stem on the review page, included in the export. |
 | `review`    | no       | `false` opts the checkpoint out of review (spec S05). Default `true`.                                                                                            |
 | `revision`  | no       | Bumped when the answer changes, which resets outdated review items (spec S05). Default 1.                                                                        |
-| `guessable` | no       | The reason a `choice`, `scenario` or `multi-choice` item may fail the guessability check. The check prints it and fails when no cue trips. It is not rendered.   |
+| `guessable` | no       | `"<cue>: reason"`: the cues a `choice`, `scenario` or `multi-choice` item may trip, and why. The check prints it and fails on a named cue that doesn't trip.     |
 
 Difficulty has no tag. The `objective` has a level in S02, so difficulty
 is derivable.

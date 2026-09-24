@@ -215,10 +215,10 @@ taught. The riders and cost pieces are unchanged while you do that.
   title="Which pieces are ready to brief?" hint="For each piece, find its input, its output and its check. Is one of the three missing, or written as a feeling?"
   options={[
     { text: 'Input: the survey note. Output: four bullets, each as "n of 41 replies". Check: every count is in the note and no percentage appears.', correct: true },
-    { text: 'Input: the survey note. Output: a short section on what riders think, in the tone of the rest of the report.', why: 'There is an output but no check. What would you tick when it comes back?' },
-    { text: 'Output: a cost paragraph with both amounts and the term. Check: the amounts match the quote we were sent.', why: 'Which source? Without an input the agent picks its own, and "the quote" could be either of the two options in the email.' },
-    { text: 'Input: the vendor email. Output: both options with price and what each includes, plus the minimum term. Check: both prices appear once and match the email.', correct: true },
-    { text: 'Input: the usage export. Output: the usage section. Check: it reads well, looks complete and matches the tone of the report.', why: 'The check is a feeling. Two readers can disagree about "reads well", so nothing here can be ticked.' },
+    { text: 'Input: the survey note. Output: a short section on what riders think, in the tone of the rest of the report, about half a page long.', why: 'There is an output but no check. What would you tick when it comes back?' },
+    { text: 'Output: a cost paragraph with both amounts and the minimum term. Check: the amounts match the quote we were sent and the term is stated.', why: 'Which source? Without an input the agent picks its own, and "the quote" could be either of the two options in the email.' },
+    { text: 'Input: the vendor email. Output: both options with price and what each includes, plus the minimum term. Check: both prices appear once and match the email, and the twelve-month term is stated.', correct: true },
+    { text: 'Input: the usage export. Output: the usage section, with the weekly counts. Check: it reads well, looks complete and matches the tone of the report.', why: 'The check is a feeling. Two readers can disagree about "reads well", so nothing here can be ticked.' },
   ]}>
 Which of these pieces are ready to have a brief written for them?
 </MultiChoice>

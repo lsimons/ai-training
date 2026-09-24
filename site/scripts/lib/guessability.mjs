@@ -7,26 +7,36 @@
  *
  * Four heuristics, each a failure:
  *
- * - `longest`: the correct option is more than 40 percent longer than the
- *   longest wrong option (for `multi-choice`, the mean length of the correct
- *   options against the mean of the wrong ones).
- * - `hedge`: the correct option is the only one with a hedge word from
- *   `HEDGES` (`usually`, `may`, `depends`, ...).
- * - `echo`: the correct option is the only one sharing a content word (four
- *   or more letters, not in `STOPWORDS`) with the stem.
+ * - `longest`: the correct option is more than 40 percent and at least
+ *   `LONGEST_MIN_GAP` characters longer than the longest wrong option (for
+ *   `multi-choice`, the mean length of the correct options against the mean
+ *   of the wrong ones). Lengths are counted with Markdown marks stripped.
+ * - `hedge`: a correct option has a hedge word from `HEDGES` (`usually`,
+ *   `may`, `depends`, ...) and no wrong option has one.
+ * - `echo`: a correct option shares a content word (four or more letters,
+ *   not in `STOPWORDS`) with the stem and no wrong option does.
  * - `fixed-position`: within one lesson, three or more `choice`/`scenario`
- *   items and the correct option sits at the same index in all of them.
+ *   items and the correct option is at the same index in all of them.
  *
- * An item with `guessable="reason"` is skipped and listed in `exemptions`
- * so the opt-out stays visible in the check output. A `guessable` on an
- * item that trips nothing is itself an error, so stale exemptions go.
+ * An item with `guessable="<cue>[, <cue>]: reason"` names the cues it is
+ * exempt from, in the repo's noqa form (the rule and the reason together).
+ * The item is listed in `exemptions` so the opt-out stays visible in the
+ * check output. A named cue that does not trip is an error (a stale
+ * exemption), and so is a cue that trips and is not named. An exemption
+ * for `fixed-position` takes that item out of the lesson's run; the count
+ * in the lesson message still includes every item.
  */
 
 /** Kinds the heuristics apply to. */
 export const GUESSABLE_KINDS = new Set(['choice', 'scenario', 'multi-choice']);
 
-/** The correct option is longer than the longest wrong one by more than this ratio. */
+/** The correct option is longer than the longest wrong one by more than this ratio ... */
 export const LONGEST_RATIO = 1.4;
+/** ... and by at least this many characters, so `Yes` against `No` is not a cue. */
+export const LONGEST_MIN_GAP = 12;
+
+/** The cue names, in the order the messages use. */
+export const CUES = ['longest', 'hedge', 'echo', 'fixed-position'];
 
 /** Hedge words and phrases; the key must not be the only option that hedges. */
 export const HEDGES = [
@@ -155,10 +165,41 @@ export function contentWords(text) {
 	return new Set(words.map((w) => w.replace(/^'+|['-]+$/g, '')).filter((w) => w.length >= 4 && !STOPWORDS.has(w)));
 }
 
-/** Whether `text` contains a hedge from `HEDGES` as a whole word or phrase. */
+/** `text` without Markdown marks: backticks, emphasis marks, and link targets (`[text](url)` keeps `text`). */
+export function plainLength(text) {
+	return text
+		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+		.replace(/[`*_]/g, '')
+		.trim().length;
+}
+
+/**
+ * Whether `text` contains a hedge from `HEDGES` as a whole word or phrase.
+ * `may` counts only in lower case, so the month does not.
+ */
 export function hasHedge(text) {
-	const t = ` ${text.toLowerCase().replace(/[^a-z]+/g, ' ')} `;
-	return HEDGES.some((h) => t.includes(` ${h} `));
+	const words = ` ${text.replace(/[^A-Za-z]+/g, ' ')} `;
+	const lower = words.toLowerCase();
+	return HEDGES.some((h) => (h === 'may' ? words.includes(' may ') : lower.includes(` ${h} `)));
+}
+
+/**
+ * Problems with the option data itself: a duplicate option text, or an
+ * answer that is not one of the options. `shapeOf` in the build derives
+ * the answer from the options, so these only appear in a hand-edited export.
+ */
+export function optionErrors(item) {
+	if (!GUESSABLE_KINDS.has(item?.kind) || !Array.isArray(item.options)) return [];
+	const errors = [];
+	const seen = new Set();
+	for (const o of item.options) {
+		if (seen.has(o)) errors.push(`option text appears twice: ${JSON.stringify(o)}`);
+		seen.add(o);
+	}
+	for (const a of Array.isArray(item.answer) ? item.answer : [item.answer]) {
+		if (!seen.has(a)) errors.push(`answer is not one of the options: ${JSON.stringify(a)}`);
+	}
+	return errors;
 }
 
 /** The correct and wrong option texts of one item, or null when the kind is out of scope or the data is not usable. */
@@ -174,7 +215,7 @@ export function splitOptions(item) {
 const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
 
 /**
- * The per-item heuristic names (`longest`, `hedge`, `echo`) an item trips.
+ * The per-item cue names (`longest`, `hedge`, `echo`) an item trips.
  * `fixed-position` needs the whole lesson; see `fixedPositionLessons`.
  */
 export function itemCues(item) {
@@ -182,73 +223,100 @@ export function itemCues(item) {
 	if (!split) return [];
 	const { correct, wrong } = split;
 	const cues = [];
-	const correctLength = mean(correct.map((o) => o.length));
-	const wrongLength =
-		item.kind === 'multi-choice' ? mean(wrong.map((o) => o.length)) : Math.max(...wrong.map((o) => o.length));
-	if (correctLength > wrongLength * LONGEST_RATIO) cues.push('longest');
-	if (correct.every(hasHedge) && !wrong.some(hasHedge)) cues.push('hedge');
+	const correctLength = mean(correct.map(plainLength));
+	const wrongLength = item.kind === 'multi-choice' ? mean(wrong.map(plainLength)) : Math.max(...wrong.map(plainLength));
+	if (correctLength > wrongLength * LONGEST_RATIO && correctLength - wrongLength >= LONGEST_MIN_GAP)
+		cues.push('longest');
+	if (correct.some(hasHedge) && !wrong.some(hasHedge)) cues.push('hedge');
 	const stemWords = contentWords(item.stem ?? '');
 	const echoes = (o) => [...contentWords(o)].some((w) => stemWords.has(w));
-	if (stemWords.size > 0 && correct.every(echoes) && !wrong.some(echoes)) cues.push('echo');
+	if (stemWords.size > 0 && correct.some(echoes) && !wrong.some(echoes)) cues.push('echo');
 	return cues;
 }
 
 /**
- * The lessons in which three or more `choice`/`scenario` items all have the
- * correct option at the same index, with that index. Exempted items are
- * skipped when `skipExempt` is true.
+ * The cues named in a `guessable` reason (`"longest, fixed-position: why"`),
+ * and the reason after the colon. `cues` is null when the text has no
+ * `<cue>: ` prefix or names something that is not a cue.
  */
-export function fixedPositionLessons(items, skipExempt = true) {
+export function parseGuessable(text) {
+	const m = /^([a-z, -]+):\s*(.*)$/s.exec(text.trim());
+	if (!m) return { cues: null, reason: text.trim() };
+	const cues = m[1].split(',').map((c) => c.trim());
+	if (cues.some((c) => !CUES.includes(c))) return { cues: null, reason: text.trim() };
+	return { cues, reason: m[2].trim() };
+}
+
+/**
+ * The lessons in which three or more `choice`/`scenario` items all have the
+ * correct option at the same index, with that index and the item count.
+ * `exempt(item)` says which items to leave out of the run; the count still
+ * includes them.
+ *
+ * @param {Array<Record<string, unknown>>} items
+ * @param {(item: Record<string, unknown>) => boolean} [exempt]
+ */
+export function fixedPositionLessons(items, exempt = () => false) {
 	const byLesson = new Map();
 	for (const item of items) {
 		if (item.kind !== 'choice' && item.kind !== 'scenario') continue;
-		if (skipExempt && typeof item.guessable === 'string') continue;
 		if (!Array.isArray(item.options)) continue;
 		const index = item.options.indexOf(item.answer);
 		if (index === -1) continue;
-		if (!byLesson.has(item.lesson)) byLesson.set(item.lesson, []);
-		byLesson.get(item.lesson).push(index);
+		if (!byLesson.has(item.lesson)) byLesson.set(item.lesson, { run: [], count: 0 });
+		const entry = byLesson.get(item.lesson);
+		entry.count++;
+		if (!exempt(item)) entry.run.push(index);
 	}
 	const out = [];
-	for (const [lesson, indexes] of byLesson) {
-		if (indexes.length >= 3 && indexes.every((i) => i === indexes[0]))
-			out.push({ lesson, index: indexes[0], count: indexes.length });
+	for (const [lesson, { run, count }] of byLesson) {
+		if (run.length >= 3 && run.every((i) => i === run[0])) out.push({ lesson, index: run[0], count });
 	}
 	return out;
 }
 
 /**
  * Check every item. Returns `{ errors, exemptions }`: `errors` are the
- * messages for items that trip a heuristic and for stale exemptions, and
- * `exemptions` one line per `guessable` item with its reason.
+ * messages for items that trip a cue, for bad option data and for
+ * exemptions that name a cue that does not trip or miss one that does, and
+ * `exemptions` one line per `guessable` item with its cues and reason.
  */
 export function checkGuessability(items) {
 	const errors = [];
 	const exemptions = [];
-	const positionAll = new Set(fixedPositionLessons(items, false).map((p) => p.lesson));
+	const positionAll = new Set(fixedPositionLessons(items).map((p) => p.lesson));
+	const exemptFromPosition = (item) =>
+		typeof item.guessable === 'string' && (parseGuessable(item.guessable).cues ?? []).includes('fixed-position');
 	for (const item of items) {
 		const where = `${item.lesson}#${item.id}`;
+		for (const e of optionErrors(item)) errors.push(`${where}: ${e}`);
 		const guessable = item.guessable;
-		if (guessable !== undefined && guessable !== null && typeof guessable !== 'string') {
-			errors.push(`${where}: guessable must be a string reason`);
+		if (guessable === undefined || guessable === null) {
+			for (const cue of itemCues(item)) errors.push(`${where}: ${describe(cue)}`);
 			continue;
 		}
-		const cues = itemCues(item);
-		if (typeof guessable === 'string') {
-			const position = (item.kind === 'choice' || item.kind === 'scenario') && positionAll.has(item.lesson);
-			if (guessable.trim() === '') errors.push(`${where}: guessable needs a reason`);
-			else if (cues.length === 0 && !position) errors.push(`${where}: guessable, but no heuristic trips; remove it`);
-			else
-				exemptions.push(
-					`${where}: guessable (${[...cues, ...(position ? ['fixed-position'] : [])].join(', ')}): ${guessable}`,
-				);
+		if (typeof guessable !== 'string') {
+			errors.push(`${where}: guessable must be a string in the form "<cue>: reason"`);
 			continue;
 		}
-		for (const cue of cues) errors.push(`${where}: ${describe(cue)}`);
+		const { cues: named, reason } = parseGuessable(guessable);
+		if (!named || reason === '') {
+			errors.push(
+				`${where}: guessable must name its cue and a reason, as "<cue>[, <cue>]: reason" (cues: ${CUES.join(', ')})`,
+			);
+			continue;
+		}
+		const inPositionRun = (item.kind === 'choice' || item.kind === 'scenario') && positionAll.has(item.lesson);
+		const tripped = [...itemCues(item), ...(inPositionRun ? ['fixed-position'] : [])];
+		for (const cue of named)
+			if (!tripped.includes(cue)) errors.push(`${where}: guessable names ${cue}, which does not trip; remove it`);
+		for (const cue of tripped)
+			if (!named.includes(cue)) errors.push(`${where}: ${describe(cue)} (guessable does not name it)`);
+		exemptions.push(`${where}: guessable (${named.join(', ')}): ${reason}`);
 	}
-	for (const { lesson, index, count } of fixedPositionLessons(items)) {
+	for (const { lesson, index, count } of fixedPositionLessons(items, exemptFromPosition)) {
 		errors.push(
-			`${lesson}: fixed-position: the correct option is option ${index + 1} in all ${count} choice/scenario checkpoints; move some`,
+			`${lesson}: fixed-position: the correct option is option ${index + 1} in every one of the ${count} choice/scenario checkpoints; move some`,
 		);
 	}
 	return { errors, exemptions };
@@ -259,9 +327,11 @@ function describe(cue) {
 		case 'longest':
 			return 'longest: the correct option is more than 40 percent longer than the longest wrong one; tighten it or lengthen the distractors';
 		case 'hedge':
-			return `hedge: only the correct option hedges (${HEDGES.join(', ')}); drop the hedge or give a distractor one`;
+			return `hedge: only a correct option hedges (${HEDGES.join(', ')}); drop the hedge or give a distractor one`;
 		case 'echo':
-			return 'echo: only the correct option repeats a content word from the stem; reword it or let a distractor share the word';
+			return 'echo: only a correct option repeats a content word from the stem; reword it or let a distractor share the word';
+		case 'fixed-position':
+			return 'fixed-position: every choice/scenario key in this lesson is at the same index';
 		default:
 			return cue;
 	}

@@ -22,7 +22,7 @@ export interface CheckpointItem {
 	hint: string;
 	reviewable: boolean;
 	revision: number;
-	/** The `guessable` opt-out reason, or null. The surface-cue check in `mise run checkpoints` reads it. */
+	/** The `guessable` opt-out (`"<cue>: reason"`), or null. The guessability check in `mise run checkpoints` reads it. */
 	guessable: string | null;
 }
 

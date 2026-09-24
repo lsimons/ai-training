@@ -126,7 +126,7 @@ source and say what must be copied exactly. Give the model a way to say
   context="The lesson turns a screenshot of a six-row stock count table into rows for a spreadsheet, and the learner can attach the screenshot to the chat."
   title="Which ask gets the table?" hint="Which ask gives the model the values, and which asks give it room to invent them?"
   options={[
-    { text: 'I have a stock count with six rows and six columns, items like a torque wrench and two calipers. Give me the rows for a spreadsheet, please.', why: 'The model has the shape of the table and none of its values, so every number it returns is a placeholder or a guess.' },
+    { text: 'I have a stock count with six rows and six columns, items like a torque wrench and two calipers. Give me the rows for a spreadsheet, codes included.', why: 'The model has the shape of the table and none of its values, so every number it returns is a placeholder or a guess.' },
     { text: 'What is in this image?', why: 'The file is there, but the ask has no format, no limits and nothing you can check. You get a paragraph about a table, and the rows are still to do.' },
     { text: 'Attached is a screenshot of a stock count. Give me every row as tab-separated values, header first, codes and numbers exactly as shown. Write a question mark for any cell you cannot read.', correct: true },
     { text: 'Type up the attached table for me and make sure it is accurate.', why: 'Asking for accuracy changes nothing you can check, and "type up" leaves the format to the model. Say what exact means: the codes, the numbers, the sign.' },

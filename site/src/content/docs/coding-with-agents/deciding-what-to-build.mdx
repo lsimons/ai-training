@@ -155,8 +155,8 @@ that would have added `dueparse` reads that line and doesn't.
   context="A coding agent is about to add a stored due date to a small command-line to-do program, and the author is writing the success criteria before the work starts."
   title="Which criterion can a reviewer check alone?" hint="Could two reviewers who never spoke to the author check this line and reach the same yes or no?"
   options={[
-    { text: 'Due dates work well for the team, and nobody complains about them after the release.', why: 'Which team member checks what, and how would two of them agree?' },
-    { text: 'A bad date such as `2026-13-45` is handled gracefully, and the user gets a helpful message.', why: 'Handled how? One reviewer expects an error message and another expects the date to be ignored, and both call their reading graceful.' },
+    { text: 'Due dates work well for the team, and the team lead agrees with that when asked.', why: 'Which team member checks what, and how would two of them agree?' },
+    { text: 'A bad date such as `2026-13-45` is handled gracefully by the date parser.', why: 'Handled how? One reviewer expects an error message and another expects the date to be ignored, and both call their reading graceful.' },
     { text: 'After `todo add "Pay rent" due 2026-10-01`, `todo list` prints `1. [ ] Pay rent (due 2026-10-01)`.', correct: true },
     { text: 'The date handling code is clean, well commented, and easy to extend when reminders come later.', why: 'Clean is a taste, and easy to extend is a prediction. A reviewer can hold an opinion on either and cannot tick it.' },
   ]}>
