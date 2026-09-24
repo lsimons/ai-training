@@ -71,6 +71,29 @@ the e2e suite see them. When one of them grows logic worth a unit test,
 move that logic into `site/src/scripts/*.ts` and import it, which puts it
 under Biome, the strict tsconfig flags and the coverage include set.
 
+## Timeouts
+
+`site/vitest.config.ts` sets no `testTimeout`. Every test gets Vitest's
+default of 5000 ms, and unit and component tests keep it: a test that
+needs longer is doing too much. The one case for a per-test timeout is a
+sweep over external processes, where the time goes to subprocesses the
+test can't make faster. The pattern is the last test in
+`site/tests/scripts/examples.test.ts`, which runs every `<Predict run=...>`
+fixture on both interpreters and passes `120_000` as the third argument to
+`it()`, with a comment above it saying why. Give the timeout to that one
+test, and leave the default for the rest of the file.
+
+## A second build needs a second worktree
+
+`mise run site-build` writes to `site/.astro/` (the content collection
+types and modules) and `site/node_modules/.vite/deps` (Vite's dependency
+cache) while it runs. A build started in a worktree where another build is
+running writes to the same files, and one of them fails or builds from the
+other's half-written output. A test that runs builds at the same time, such
+as a load or concurrency check, runs each build in its own worktree, and
+this covers `site-build` next to `site-e2e` too, since `site-e2e` builds
+first.
+
 ## Running the browser suite
 
 `mise run site-browser` installs Chromium once. `mise run site-e2e` builds
