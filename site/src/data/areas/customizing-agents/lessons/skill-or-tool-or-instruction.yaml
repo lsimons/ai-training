@@ -13,7 +13,7 @@ assumes:
     section: a-model-in-a-loop-with-two-tools
   - objective: customizing-agents/configures-agent/writes-project-instructions
     lesson: customizing-agents/instructions
-    section: when-instructions-arent-enough
+    section: what-belongs-in-it
 after: [customizing-agents/instructions]
 shorts:
   - A skill that wraps a CLI as the middle way between a CLI and a server (Academy claude-code-101)
@@ -24,6 +24,8 @@ exercise:
     the one-line reason next to each.
 sources:
   - AEC-17
+  - Claude Code skills
+  - Claude Code mcp
   - Academy claude-code-101
   - Academy introduction-to-agent-skills
 issue: 159
