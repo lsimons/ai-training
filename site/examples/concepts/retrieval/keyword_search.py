@@ -21,7 +21,6 @@ STOPWORDS = {
     "an",
     "and",
     "are",
-    "away",
     "can",
     "do",
     "for",
@@ -57,11 +56,7 @@ def keywords(question: str) -> list[str]:
 
 
 def load_policies() -> dict[str, str]:
-    return {
-        p.name: p.read_text(encoding="utf-8").strip()
-        for p in sorted(POLICIES.iterdir())
-        if p.is_file()
-    }
+    return {p.name: p.read_text(encoding="utf-8").strip() for p in sorted(POLICIES.glob("*.txt"))}
 
 
 def score(document: str, terms: list[str]) -> int:
