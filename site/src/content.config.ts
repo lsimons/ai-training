@@ -24,7 +24,7 @@ const assumesSchema = z
 const extendsToSchema = z
 	.object({
 		label: z.string(),
-		href: z.string().regex(/^(\/|https:\/\/)/, 'a root-relative path or an https:// URL'),
+		href: z.string().regex(/^(\/(?!\/)|https:\/\/)/, 'a root-relative path or an https:// URL'),
 	})
 	.strict();
 
