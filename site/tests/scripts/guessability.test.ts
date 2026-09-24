@@ -201,7 +201,7 @@ describe('fixedPositionLessons', () => {
 			]),
 		).toEqual([]);
 	});
-	it('leaves exempt items out of the run and keeps them in the count', () => {
+	it('counts every item in the denominator and never counts an exempt item as a hit', () => {
 		const items = [
 			at('a/x', 'p', 1),
 			at('a/x', 'q', 1),
@@ -212,6 +212,14 @@ describe('fixedPositionLessons', () => {
 		expect(fixedPositionLessons(items)).toEqual([{ lesson: 'a/x', index: 1, hits: 5, count: 5 }]);
 		expect(fixedPositionLessons(items, (i) => i.id === 't')).toEqual([{ lesson: 'a/x', index: 1, hits: 4, count: 5 }]);
 		expect(fixedPositionLessons(items, (i) => i.id === 't' || i.id === 's')).toEqual([]);
+		// Six items, four at one index, two exempt elsewhere: 4 of 6 is not more than three quarters.
+		const six = [...items.slice(0, 4), at('a/x', 'u', 0, { guessable: 'x' }), at('a/x', 'v', 2, { guessable: 'x' })];
+		expect(fixedPositionLessons(six)).toEqual([]);
+		expect(fixedPositionLessons(six, (i) => i.id === 'u' || i.id === 'v')).toEqual([]);
+		// Five items with two exempt: the lesson still has five items, and 3 of 5 passes.
+		const five = [...items.slice(0, 3), at('a/x', 'u', 1, { guessable: 'x' }), at('a/x', 'v', 1, { guessable: 'x' })];
+		expect(fixedPositionLessons(five)).toEqual([{ lesson: 'a/x', index: 1, hits: 5, count: 5 }]);
+		expect(fixedPositionLessons(five, (i) => i.id === 'u' || i.id === 'v')).toEqual([]);
 	});
 });
 
@@ -287,6 +295,15 @@ describe('checkGuessability', () => {
 		];
 		expect(checkGuessability(five).errors).toEqual([
 			'a/x: fixed-position: the correct option is option 2 in 4 of the 5 choice/scenario checkpoints (more than three quarters); move some',
+		]);
+		const sixWithTwoExemptElsewhere = [
+			...four(),
+			item({ id: 't', options: ['one', 'two', 'three'], answer: 'one', guessable: 'fixed-position: r' }),
+			item({ id: 'u', options: ['one', 'two', 'three'], answer: 'three', guessable: 'fixed-position: r' }),
+		];
+		expect(checkGuessability(sixWithTwoExemptElsewhere).errors).toEqual([
+			'a/x#t: guessable names fixed-position, which does not trip; remove it',
+			'a/x#u: guessable names fixed-position, which does not trip; remove it',
 		]);
 	});
 });

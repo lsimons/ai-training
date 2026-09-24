@@ -18,15 +18,17 @@
  * - `fixed-position`: within one lesson with `FIXED_POSITION_MIN_ITEMS` or
  *   more `choice`/`scenario` items, one index holds the correct option in
  *   more than `FIXED_POSITION_MAX_SHARE` of them (three quarters). Four
- *   items with the same key index fail, and three of four pass.
+ *   items with the same key index fail, and three of four pass. Every
+ *   item in the lesson counts toward the minimum and the denominator; an
+ *   exempt item is never a hit.
  *
  * An item with `guessable="<cue>[, <cue>]: reason"` names the cues it is
  * exempt from, in the repo's noqa form (the rule and the reason together).
  * The item is listed in `exemptions` so the opt-out stays visible in the
  * check output. A named cue that does not trip is an error (a stale
  * exemption), and so is a cue that trips and is not named. An exemption
- * for `fixed-position` takes that item out of the lesson's run; the count
- * in the lesson message still includes every item.
+ * for `fixed-position` means that item never counts as a hit, while the
+ * lesson's item count still includes it.
  */
 
 /** Kinds the heuristics apply to. */
@@ -259,9 +261,9 @@ export function parseGuessable(text) {
  * `FIXED_POSITION_MAX_SHARE` of the `choice`/`scenario` items, among lessons
  * with at least `FIXED_POSITION_MIN_ITEMS` such items. Each entry has that
  * index, how many items (`hits`) have the key there, and the lesson's item
- * count. `exempt(item)` says which items to leave out of the run: they count
- * toward neither the minimum nor the share, and the `count` still includes
- * them.
+ * count. Every item counts toward the minimum and toward `count`, the
+ * denominator of the share. An item for which `exempt(item)` is true is
+ * never a hit, so an exemption can only make a lesson pass.
  *
  * @param {Array<Record<string, unknown>>} items
  * @param {(item: Record<string, unknown>) => boolean} [exempt]
@@ -273,18 +275,16 @@ export function fixedPositionLessons(items, exempt = () => false) {
 		if (!Array.isArray(item.options)) continue;
 		const index = item.options.indexOf(item.answer);
 		if (index === -1) continue;
-		if (!byLesson.has(item.lesson)) byLesson.set(item.lesson, { run: [], count: 0 });
+		if (!byLesson.has(item.lesson)) byLesson.set(item.lesson, { hitsByIndex: new Map(), count: 0 });
 		const entry = byLesson.get(item.lesson);
 		entry.count++;
-		if (!exempt(item)) entry.run.push(index);
+		if (!exempt(item)) entry.hitsByIndex.set(index, (entry.hitsByIndex.get(index) ?? 0) + 1);
 	}
 	const out = [];
-	for (const [lesson, { run, count }] of byLesson) {
-		if (run.length < FIXED_POSITION_MIN_ITEMS) continue;
-		const hitsByIndex = new Map();
-		for (const i of run) hitsByIndex.set(i, (hitsByIndex.get(i) ?? 0) + 1);
+	for (const [lesson, { hitsByIndex, count }] of byLesson) {
+		if (count < FIXED_POSITION_MIN_ITEMS) continue;
 		for (const [index, hits] of hitsByIndex) {
-			if (hits > run.length * FIXED_POSITION_MAX_SHARE) out.push({ lesson, index, hits, count });
+			if (hits > count * FIXED_POSITION_MAX_SHARE) out.push({ lesson, index, hits, count });
 		}
 	}
 	return out;
