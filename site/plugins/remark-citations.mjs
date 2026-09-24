@@ -11,7 +11,7 @@
  * checkpoint stem still resolves when a review page clones it. Only code is
  * left alone.
  */
-import { CITATION, splitCitations } from './citation-syntax.mjs';
+import { splitCitations } from './citation-syntax.mjs';
 import { CODE_ONLY, walkText } from './mdast-walk.mjs';
 
 const DOCS_DIR = /[\\/]src[\\/]content[\\/]docs[\\/]/;
@@ -61,11 +61,10 @@ export function remarkCitations({ bibliography }) {
 			frozen: CODE_ONLY,
 			onText: (node) => splitText(node, numberOf, page),
 			onGuardedText: (node, parent) => {
-				const m = CITATION.exec(node.value);
-				CITATION.lastIndex = 0;
-				if (m) {
+				const cited = splitCitations(node.value).find((p) => p.type === 'citation');
+				if (cited) {
 					throw new Error(
-						`${file.path}: citation ${m[0]} inside a ${parent.type}. Cite in the paragraph text instead; a reference link cannot render there.`,
+						`${file.path}: citation (@${cited.key}) inside a ${parent.type}. Cite in the paragraph text instead; a reference link cannot render there.`,
 					);
 				}
 			},

@@ -10,12 +10,14 @@ import CourseGraph from '@components/CourseGraph.astro';
 import CoursePlan from '@components/CoursePlan.astro';
 import LearnersReference from '@components/LearnersReference.astro';
 import OverallProgress from '@components/OverallProgress.astro';
+import References from '@components/References.astro';
 import Settings from '@components/Settings.astro';
 import TopicMap from '@components/TopicMap.astro';
 import TopicReference from '@components/TopicReference.astro';
+import { createCitations, renderObjectives } from '@lib/citations';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { competencies } from '../lib/content';
+import { bibliography, competencies } from '../lib/content';
 
 vi.mock('astro:content', async () => (await import('../lib/content')).mockContent());
 
@@ -67,18 +69,27 @@ describe('CourseGraph', () => {
 	});
 });
 
-describe('CompetencyObjectives', () => {
-	const competency = (id: string) => competencies.find((c) => c.data.id === id)?.data;
-	it('renders citations in behaviors as numbered links, code spans as code, and a References list', async () => {
-		const html = await container.renderToString(CompetencyObjectives, {
-			props: { competency: competency('safety/judges-output') },
-		});
+describe('CompetencyObjectives and References', () => {
+	const bib = Object.fromEntries(bibliography.map((e) => [e.id, e.data]));
+	const objectivesOf = (id: string) => competencies.find((c) => c.data.id === id)?.data.objectives ?? [];
+	it('renders citations in behaviors as numbered links and code spans as code, with no raw token', async () => {
+		const citations = createCitations(bib, 'test');
+		const objectives = renderObjectives(objectivesOf('safety/judges-output'), citations);
+		const html = await container.renderToString(CompetencyObjectives, { props: { objectives } });
 		expect(html).not.toContain('(@');
 		expect(html).toContain(
 			'Reads the diff before <code>git push</code> <a class="citation" data-key="AEC-02" href="#ref-1" title="AEC-02">[1]</a>.',
 		);
 		expect(html).toContain('href="#ref-2" title="Brilliant TAS">[2]</a>');
+		// The list is the page's, rendered after Alignment, so the component emits no h2 of its own.
+		expect(html).not.toContain('<h2');
+	});
+	it('renders the References list with the lesson-page markup and entry format', async () => {
+		const citations = createCitations(bib, 'test');
+		renderObjectives(objectivesOf('safety/judges-output'), citations);
+		const html = await container.renderToString(References, { props: { references: citations.references() } });
 		expect(html).toContain('<h2 id="references">References</h2>');
+		expect(html).toContain('<ol class="references">');
 		expect(html).toContain(
 			'<li id="ref-1">A. Osmani. <a href="https://example.com/aec"><em>How agents think</em></a>.',
 		);
@@ -87,22 +98,12 @@ describe('CompetencyObjectives', () => {
 		expect(html.match(/<li id="ref-/g)).toHaveLength(2);
 	});
 	it('renders no References section when nothing cites', async () => {
-		const html = await container.renderToString(CompetencyObjectives, {
-			props: { competency: competency('concepts/explains-models') },
-		});
+		const citations = createCitations(bib, 'test');
+		const objectives = renderObjectives(objectivesOf('concepts/explains-models'), citations);
+		const html = await container.renderToString(CompetencyObjectives, { props: { objectives } });
 		expect(html).toContain('Behaviors not written yet.');
-		expect(html).not.toContain('References');
-	});
-	it('rejects an unknown citation key', async () => {
-		const bad = {
-			id: 'x/y',
-			objectives: [
-				{ id: 'o', statement: 'S', level: 'base', behaviors: [{ claim: 'See (@Nope).', why: '', example: '' }] },
-			],
-		};
-		await expect(container.renderToString(CompetencyObjectives, { props: { competency: bad } })).rejects.toThrow(
-			/competency x\/y: unknown citation key "Nope"/,
-		);
+		const refs = await container.renderToString(References, { props: { references: citations.references() } });
+		expect(refs.trim()).toBe('');
 	});
 });
 
