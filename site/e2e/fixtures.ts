@@ -7,7 +7,12 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
-import { liveCourseLessonIds, liveTopicLessonIds, pageCheckpoints } from '../scripts/lib/live-lessons.mjs';
+import {
+	liveCourseLessonIds,
+	liveLessons as liveLessonList,
+	liveTopicLessonIds,
+	pageCheckpoints,
+} from '../scripts/lib/live-lessons.mjs';
 import { STORAGE_KEY, storageKeyFor, VERSION } from '../src/scripts/progress-model';
 
 export { STORAGE_KEY, storageKeyFor, VERSION };
@@ -23,6 +28,11 @@ const CONTENT_DIR = join(SITE, 'src/content/docs');
  */
 export function liveCourseLessons(area: string): string[] {
 	return liveCourseLessonIds(DATA_DIR, CONTENT_DIR, area);
+}
+
+/** The live lesson ids of every area, in area and course order. */
+export function liveLessons(): string[] {
+	return liveLessonList(DATA_DIR, CONTENT_DIR).map((l) => l.id);
 }
 
 /** The live lesson ids that cover `topic`. */

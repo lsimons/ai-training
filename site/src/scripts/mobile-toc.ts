@@ -18,12 +18,15 @@ export const GROUPS_SELECTOR = '[data-lesson-toc-mobile]';
  * menu under `root`, unhides it, and closes the menu when one of its links is
  * clicked. Returns false, and changes nothing, when either element is missing
  * (a page without lesson groups, or a Starlight release with other markup).
+ * Returns true and changes nothing when the groups are already in the panel,
+ * so a second call binds no second set of click handlers.
  */
 export function mountMobileTocGroups(root: ParentNode): boolean {
 	const groups = root.querySelector<HTMLElement>(GROUPS_SELECTOR);
 	const details = root.querySelector<HTMLDetailsElement>('mobile-starlight-toc details');
 	const panel = details?.querySelector<HTMLElement>('.dropdown');
 	if (!groups || !details || !panel) return false;
+	if (panel.contains(groups)) return true;
 	panel.appendChild(groups);
 	groups.hidden = false;
 	for (const link of groups.querySelectorAll('a')) {

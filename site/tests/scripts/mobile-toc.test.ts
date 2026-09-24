@@ -39,6 +39,24 @@ describe('mountMobileTocGroups', () => {
 		(root.querySelector('a[href="#cp"]') as HTMLAnchorElement).click();
 		expect(details.open).toBe(false);
 	});
+	it('leaves a mounted page as it is on a second call, and binds no second click handler', () => {
+		const root = page(dropdown + groups);
+		mountMobileTocGroups(root);
+		const details = root.querySelector('details') as HTMLDetailsElement;
+		expect(mountMobileTocGroups(root)).toBe(true);
+		expect(root.querySelectorAll(GROUPS_SELECTOR)).toHaveLength(1);
+		expect(root.querySelector('.dropdown')?.lastElementChild).toBe(root.querySelector(GROUPS_SELECTOR));
+		// Each handler sets `open`, so the number of assignments per click is the number of handlers.
+		let closes = 0;
+		Object.defineProperty(details, 'open', {
+			set: () => {
+				closes++;
+			},
+			get: () => true,
+		});
+		(root.querySelector('a[href="#cp"]') as HTMLAnchorElement).click();
+		expect(closes).toBe(1);
+	});
 	it('does nothing without groups, or without the dropdown', () => {
 		expect(mountMobileTocGroups(page(dropdown))).toBe(false);
 		const root = page(groups);
