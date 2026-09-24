@@ -356,7 +356,8 @@ self-grade (pass, partial, retry). Only pass counts. Not reviewed later.
 review page uses (`site/src/lib/checkpoint-tags.ts`). A `{...}` prop must be
 a literal (a string, number, boolean, array or object, or a template
 literal without placeholders), because the reader takes the value from the
-parsed tree without running it. The MDX compiler strips the indentation of
+parsed tree without running it, and a numeric or boolean prop is written
+as one (`revision={2}`, not `revision="2"`). The MDX compiler strips the indentation of
 the continuation lines in a multi-line template literal, and the export
 carries what the page shows. Each item has `id`, `lesson`, `kind`, `objective`,
 `concepts`, `context`, `stem`, `options`, `answer`, `hint`, `reviewable`,

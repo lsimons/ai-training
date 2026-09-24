@@ -195,10 +195,9 @@ function promptOf(lesson: Lesson, block: Block, blocks: Block[]): PromptExample 
 	const recorded = stringProp(lesson.id, attrs, 'recorded') ?? '';
 	const illustrative = model === 'illustrative' || recorded === 'illustrative';
 	const out: PromptExample = { kind: 'prompt', model, recorded, illustrative, prompt: segmentsOf(body) };
-	const next = blocks[blocks.indexOf(block) + 1];
-	if (next?.name === 'Response' && next.parent === block.parent && next.index === block.index + 1) {
-		out.response = segmentsOf(next.body);
-	}
+	// The next sibling in the tree, not the next block in reading order: a JSX child of the Prompt comes first there.
+	const next = blocks.find((b) => b.parent === block.parent && b.index === block.index + 1);
+	if (next?.name === 'Response') out.response = segmentsOf(next.body);
 	return out;
 }
 

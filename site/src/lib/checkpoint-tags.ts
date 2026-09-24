@@ -84,15 +84,18 @@ export function parseMdx(src: string): MdxNode {
  * time cannot slip into the export as something else.
  */
 export function literalOf(node: EstreeNode | null | undefined): unknown {
-	if (!node) throw new Error('a hole in an array literal');
+	if (node === undefined) throw new Error('an empty expression');
+	if (node === null) throw new Error('a hole in an array literal');
 	switch (node.type) {
 		case 'Literal':
+			if (node.value instanceof RegExp || typeof node.value === 'bigint')
+				throw new Error(`a ${typeof node.value === 'bigint' ? 'BigInt' : 'RegExp'} literal`);
 			return node.value;
 		case 'TemplateLiteral':
 			if ((node.expressions ?? []).length > 0) throw new Error('a template literal with placeholders');
 			return (node.quasis ?? []).map((q) => q.value.cooked ?? '').join('');
 		case 'ArrayExpression':
-			return (node.elements ?? []).map(literalOf);
+			return (node.elements ?? []).map((e) => literalOf(e));
 		case 'ObjectExpression': {
 			const out: Record<string, unknown> = {};
 			for (const p of node.properties ?? []) {
@@ -190,9 +193,15 @@ export function checkpointTagsIn(tree: MdxNode, src: string, where: string): Che
 	return out;
 }
 
-/** The checkpoint tags of one MDX source, parsed and read in one call. */
+/** The checkpoint tags of one MDX source, parsed and read in one call. A parse error names `where`. */
 export function checkpointTagsOfSource(src: string, where: string): CheckpointTagInfo[] {
-	return checkpointTagsIn(parseMdx(src), src, where);
+	let tree: MdxNode;
+	try {
+		tree = parseMdx(src);
+	} catch (e) {
+		throw new Error(`${where}: ${(e as Error).message}`);
+	}
+	return checkpointTagsIn(tree, src, where);
 }
 
 /** A prop's value: the string text, or the literal the expression holds. `undefined` when absent. */
