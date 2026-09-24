@@ -1,56 +1,97 @@
 # Configuration file for `prek`, a git hook framework written in Rust.
 # See https://prek.j178.dev for more information.
 #:schema https://www.schemastore.org/prek.json
+#
+# Supply chain, same rule as `.mise.toml`: nothing a hook executes may be
+# resolved from a registry at install time. So:
+#
+# - Every remote hook repo is pinned to a full commit SHA, not a tag,
+#   because a tag can be moved. The tag it was taken from is in the
+#   comment; refresh both together (`git ls-remote --tags <repo>`, and
+#   take the `^{}` line for an annotated tag).
+# - Python hooks list their whole transitive tree in
+#   `additional_dependencies`, exact-pinned. prek builds a hook's
+#   environment from the hook repo's own metadata, which is ranges, so
+#   with only the direct plugins listed everything underneath them would
+#   float. `uv pip compile` over the direct pins produces the list; the
+#   rerun command is next to each list.
+# - Node tools (markdownlint-cli2, commitlint) are not installed by prek.
+#   They are devDependencies in `site/package.json`, locked by
+#   `site/bun.lock`, and run from `site/node_modules/.bin` as `system`
+#   hooks. `mise run site-install-frozen` (or `site-install`) has to have
+#   run first; `mise run ci` and CI already do it in that order.
 
 minimum_prek_version = "0.3.0"
 default_stages = ["pre-commit"]
 
+# pre-commit-hooks 6.0.0 has one runtime dependency, ruamel.yaml. It is
+# pinned on every hook so they share one environment and none of them
+# resolves it from PyPI. Rerun to refresh:
+#   echo 'pre-commit-hooks==6.0.0' | uv pip compile --python-version 3.14 --exclude-newer <7 days ago> -
 [[repos]]
 repo = "https://github.com/pre-commit/pre-commit-hooks"
-rev = "v6.0.0"
+rev = "3e8a8703264a2f4a69428a0aa4dcb512790b2c8c" # v6.0.0
 hooks = [
-  { id = "trailing-whitespace", exclude = '\.mdx?$' },
-  { id = "end-of-file-fixer", exclude = '\.(svg|qmd)$' },
-  { id = "check-yaml" },
-  { id = "check-toml" },
-  { id = "check-merge-conflict" },
+  { id = "trailing-whitespace", exclude = '\.mdx?$', additional_dependencies = ["ruamel.yaml==0.19.1"] },
+  { id = "end-of-file-fixer", exclude = '\.(svg|qmd)$', additional_dependencies = ["ruamel.yaml==0.19.1"] },
+  { id = "check-yaml", additional_dependencies = ["ruamel.yaml==0.19.1"] },
+  { id = "check-toml", additional_dependencies = ["ruamel.yaml==0.19.1"] },
+  { id = "check-merge-conflict", additional_dependencies = ["ruamel.yaml==0.19.1"] },
   # rendered slide decks (public/presentations/*.html|pdf) can be large; the
   # source .qmd is small, so allow the generated artifacts through.
-  { id = "check-added-large-files", args = ["--maxkb=10240"] },
+  { id = "check-added-large-files", args = ["--maxkb=10240"], additional_dependencies = ["ruamel.yaml==0.19.1"] },
 ]
 
 # Markdown formatting
 [[repos]]
 repo = "https://github.com/hukkin/mdformat"
-rev = "1.0.0"
+rev = "82912cdaea4fb830f751504486a7879c70526547" # 1.0.0
 hooks = [
   {
     id = "mdformat",
-    # Pinned exactly, like everything in `.mise.toml`'s [tools]: an
-    # unpinned additional_dependency is resolved from PyPI at hook-install
-    # time, so a compromised release would arrive by auto-download.
-    additional_dependencies = ["mdformat-gfm==1.0.0", "mdformat-frontmatter==2.1.2"],
+    # The two plugins, then their full transitive tree (see the header).
+    # Rerun to refresh, and keep the mdformat line equal to the rev above:
+    #   printf 'mdformat==1.0.0\nmdformat-gfm==1.0.0\nmdformat-frontmatter==2.1.2\n' | uv pip compile --python-version 3.14 --exclude-newer <7 days ago> -
+    additional_dependencies = [
+      "mdformat-gfm==1.0.0",
+      "mdformat-frontmatter==2.1.2",
+      "markdown-it-py==4.2.0",
+      "mdit-py-plugins==0.6.1",
+      "mdurl==0.1.2",
+      "ruamel.yaml==0.19.1",
+      "wcwidth==0.8.3",
+    ],
     # .mdx uses JSX-flavoured markdown that mdformat mangles; skip it.
     exclude = '\.mdx$'
   }
 ]
 
 # Python lint and format. The rev is the pin: the ruff-pre-commit repo at
-# tag vX.Y.Z depends on ruff==X.Y.Z exactly, so no additional_dependencies
-# entry is needed. Keep it equal to `ruff` in pyproject.toml's dev group.
+# the commit tagged vX.Y.Z depends on ruff==X.Y.Z exactly, so no
+# additional_dependencies entry is needed. Keep the tag equal to `ruff` in
+# pyproject.toml's dev group.
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.16.7"
+rev = "e8f7d69b957a30acb2c875078d5fd012de24b64c" # v0.16.7
 hooks = [
   { id = "ruff-check", args = ["--fix"] },
   { id = "ruff-format" },
 ]
 
-# Markdown linting
+# Markdown linting, from the bun-locked install in site/ (see the header).
+# Config: .markdownlint-cli2.jsonc at the repo root.
 [[repos]]
-repo = "https://github.com/DavidAnson/markdownlint-cli2"
-rev = "v0.23.2"
-hooks = [{ id = "markdownlint-cli2", exclude = '\.mdx$' }]
+repo = "local"
+hooks = [
+  {
+    id = "markdownlint-cli2",
+    name = "markdownlint-cli2",
+    entry = "site/node_modules/.bin/markdownlint-cli2",
+    language = "system",
+    types = ["markdown"],
+    exclude = '\.mdx$',
+  }
+]
 
 # Broken link checking (uses locally installed lychee)
 [[repos]]
@@ -78,18 +119,19 @@ hooks = [
   }
 ]
 
-# Commit message linting
+# Commit message linting, from the bun-locked install in site/ (see the
+# header). The config sits next to the install because commitlint resolves
+# its `extends` from the config file's directory.
 [[repos]]
-repo = "https://github.com/alessandrojcm/commitlint-pre-commit-hook"
-rev = "v9.26.0"
+repo = "local"
 hooks = [
   {
     id = "commitlint",
+    name = "commitlint",
+    entry = "site/node_modules/.bin/commitlint --config site/commitlint.config.mjs --edit",
+    language = "system",
     stages = ["commit-msg"],
-    # Pinned exactly, for the same reason as the mdformat plugins above.
-    additional_dependencies = [
-      "@commitlint/cli@21.2.1",
-      "@commitlint/config-conventional@21.2.0"
-    ]
+    pass_filenames = false,
+    always_run = true,
   }
 ]

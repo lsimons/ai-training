@@ -215,7 +215,11 @@ patterns below after the fact. Write so that it has nothing to say.
   install with `site-install-frozen`. Use `mise run site-install` when
   deliberately changing dependencies, and commit the result.
 - Dependencies in `site/package.json` stay as ranges; `bun.lock` is the pin,
-  and dependabot moves the constraint.
+  and dependabot moves the constraint. The exception is tools: `playwright`,
+  `typescript`, `markdownlint-cli2`, `@commitlint/*` and `cspell` are
+  exact, and the prek hooks and `mise run spell` run the last three from
+  `site/node_modules/.bin`, so `site-install-frozen` comes before `lint`
+  and `spell`.
 - `uv.lock` is committed and must stay in the tree. `mise run ci` and CI
   install with `py-install-frozen`. The dev group in `pyproject.toml` is
   exact-pinned. Use `mise run py-install` when deliberately changing it,
@@ -224,9 +228,14 @@ patterns below after the fact. Write so that it has nothing to say.
 - `mise run site-audit` (`bun audit`) must be clean. Fix an advisory in a
   *transitive* package with the `overrides` block in `site/package.json`.
 - Pin GitHub Actions to full-length commit SHAs. `zizmor` enforces it.
-- Every `.mise.toml` tool and every `prek.toml` `additional_dependencies`
-  entry is exact-pinned and invisible to dependabot. Refresh with `mise up`
-  and read the diff.
+- Every `.mise.toml` tool is exact-pinned and invisible to dependabot.
+  Refresh with `mise up` and read the diff.
+- `prek.toml` hook repos are pinned by commit SHA (tag in the comment),
+  and each Python hook lists its full transitive tree in
+  `additional_dependencies`, exact-pinned. Both are invisible to
+  dependabot. To bump one, move the SHA with `git ls-remote --tags` and
+  rerun the `uv pip compile` command in the comment next to the list.
+  Never add a hook that resolves packages at install time.
 
 ## Process
 

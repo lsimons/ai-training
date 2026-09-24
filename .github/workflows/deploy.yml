@@ -30,6 +30,10 @@ jobs:
       - name: Set up mise
         uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
+          # This job only builds the site, so install only bun. The lint
+          # tools in [tools] are not needed on the runner that produces the
+          # Pages artifact; ci.yml keeps the full install.
+          install_args: bun
           install: true
           cache: true
 

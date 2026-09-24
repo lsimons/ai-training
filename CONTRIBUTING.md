@@ -50,9 +50,10 @@ The presentations change so rarely that we commit their rendered outputs to git.
 
 Follow [Conventional Commits](https://conventionalcommits.org/): `type(scope): description`.
 
-Git hooks (formatting, linting, link checking, secret scanning, commit-message linting) are managed with [prek](https://prek.j178.dev). Install them once per clone:
+Git hooks (formatting, linting, link checking, secret scanning, commit-message linting) are managed with [prek](https://prek.j178.dev). The markdownlint and commitlint hooks run from the site's bun install, so install that first, then the hooks, once per clone:
 
 ```bash
+mise run site-install-frozen
 prek install -t pre-commit -t commit-msg
 ```
 
