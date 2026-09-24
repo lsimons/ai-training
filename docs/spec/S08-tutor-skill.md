@@ -206,17 +206,19 @@ Every lesson page ends with an "Open in tutor" block, after the recap and
 before the footer. It is a `not-content` container and contains, in this
 order:
 
-1. The install command, once, in a fenced code block with a copy button.
-2. The paste-ready line for this lesson, in a fenced code block with a copy
-   button: `/tutor https://lsimons.github.io/ai-training/<area>/<lesson>/`.
-   Under it, one line for opencode: `In opencode, ask: Use the tutor skill on <the same URL>`.
+1. The install command, once, as a code line with a copy button.
+2. The paste-ready line for this lesson, as a code line with a copy button:
+   `/tutor https://lsimons.github.io/ai-training/<area>/<lesson>/`. Under
+   it, one line for opencode: `In opencode, ask: Use the tutor skill on <the same URL>`.
 3. One sentence: the tutor can't read the progress stored in this browser,
    so export it from the settings page and paste the file if a recall
    question is wanted.
 4. A link to the getting-started page.
 
-The block is the same component on every lesson, and it takes the lesson
-URL from the page. It never shows on course pages, guides or reference
+The block is the same component (`TutorBlock.astro`) on every lesson, and
+the MarkdownContent override passes it the lesson URL built from Astro's
+`site` and the base path. The code lines are the component's own markup
+with a small copy script, so the block needs no Markdown rendering. It never shows on course pages, guides or reference
 pages.
 
 ## Getting-started page

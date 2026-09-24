@@ -1,0 +1,54 @@
+---
+/**
+ * The "Open in tutor" block (spec S08 "Lesson page block"). The
+ * MarkdownContent override renders it on every lesson page after the lesson
+ * body. It shows the install command and the paste-ready `/tutor` line for
+ * this lesson, each with a copy button, says that the tutor can't read the
+ * progress in this browser, and links the getting-started guide. The
+ * absolute lesson URL comes from the page, built with `absoluteUrl()`.
+ */
+import { href } from '@lib/url';
+
+interface Props {
+	/** The absolute URL of the lesson page, `https://lsimons.github.io/ai-training/<area>/<lesson>/`. */
+	lessonUrl: string;
+}
+
+const { lessonUrl } = Astro.props;
+const install = 'npx skills add lsimons/ai-training --skill tutor -g';
+const command = `/tutor ${lessonUrl}`;
+const opencodeRequest = `Use the tutor skill on ${lessonUrl}`;
+---
+
+<aside class="route-card tutor-block not-content" data-tutor-block>
+	<p class="route-title">Open in tutor</p>
+	<p>
+		Work through this lesson with a coding agent that gives hints instead of answers. Install the tutor skill once,
+		then paste the second line into Claude Code.
+	</p>
+	<pre class="tutor-line"><code>{install}</code><button type="button" class="tutor-copy" data-copy={install}>Copy</button></pre>
+	<pre class="tutor-line"><code>{command}</code><button type="button" class="tutor-copy" data-copy={command}>Copy</button></pre>
+	<p class="route-where">In opencode, ask: <code>{opencodeRequest}</code></p>
+	<p>
+		The tutor can't read the progress stored in this browser. Export it on the <a href={href('/settings/')}>settings</a>
+		page and paste the file into the session if you want a recall question first.
+	</p>
+	<p><a href={href('/guides/tutor/')}>How the tutor works and how to install it</a></p>
+</aside>
+
+<script>
+	for (const button of document.querySelectorAll<HTMLButtonElement>('[data-tutor-block] .tutor-copy')) {
+		button.addEventListener('click', async () => {
+			const label = button.textContent;
+			try {
+				await navigator.clipboard.writeText(button.dataset.copy ?? '');
+				button.textContent = 'Copied';
+			} catch {
+				button.textContent = 'Select and copy';
+			}
+			window.setTimeout(() => {
+				button.textContent = label;
+			}, 1500);
+		});
+	}
+</script>
