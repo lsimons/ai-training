@@ -158,11 +158,21 @@ dir = "site"
 run = ["bun run build", "bun run e2e"]
 
 [tasks.site-slides]
-description = "Render a Quarto slide deck to HTML + PDF (arg: [deck])"
+description = "Render a Quarto slide deck to HTML + PDF, postMessage API off (arg: [deck])"
 usage = '''
 arg "[deck]" help="Path to the .qmd deck" default="site/public/presentations/example.qmd"
+flag "--html-only" help="Render only the reveal.js HTML and skip the Beamer PDF (no LaTeX needed)"
 '''
-run = 'quarto render "$usage_deck"'
+# The script runs `quarto render` and then turns off the reveal.js postMessage
+# API in the HTML (site/scripts/lib/render-slides.mjs says why). mise sets
+# $usage_html_only to "true" when the flag is given and leaves it unset otherwise.
+run = '''
+if [ "${usage_html_only:-false}" = "true" ]; then
+  bun site/scripts/render-slides.mjs "$usage_deck" --html-only
+else
+  bun site/scripts/render-slides.mjs "$usage_deck"
+fi
+'''
 
 [tasks.site-favicon]
 description = "Regenerate the favicon + apple-touch-icon from the palette"

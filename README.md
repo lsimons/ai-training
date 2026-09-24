@@ -46,7 +46,7 @@ mise run site-install    # install the site dependencies (bun)
 mise run site-dev        # dev server at http://localhost:4321/ai-training/
 mise run site-build      # build the static site into site/dist
 mise run site-check      # Astro type/content check
-mise run site-slides     # render the example slide deck to HTML + PDF
+mise run site-slides     # render the example slide deck to HTML + PDF, postMessage API off
 mise run lint            # prek hooks over every file + actionlint
 mise run ci              # full gate: install + lint + check + build
 mise run links           # lychee broken-link check (network; not in `ci`)

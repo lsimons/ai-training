@@ -2138,6 +2138,9 @@ window.QuartoSupport = function () {
       // Full list of configuration options available at:
       // https://revealjs.com/config/
       Reveal.initialize({
+        // Added by site/scripts/render-slides.mjs (not Quarto): the cross-window
+        // postMessage API checks no origin, so it stays off.
+        postMessage: false,
 'controlsAuto': true,
 'previewLinksAuto': true,
 'pdfSeparateFragments': false,
