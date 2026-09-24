@@ -81,7 +81,7 @@ of its own. The table describes the fields as the components see them.
 | `serves`     | The learning objective ids the lesson teaches toward; each gets at least one checkpoint                                                                                                                                                                                  |
 | `assumes`    | The learning objective ids the lesson relies on, each pointing at the lesson section that teaches it                                                                                                                                                                     |
 | `extends-to` | Where a confident learner goes next: the next lesson, a specialization topic, or a short                                                                                                                                                                                 |
-| `review-by`  | Optional. The date by which the sources must be checked again, for a lesson whose facts move (a law, a product). The page shows it as a review line, with Starlight's `lastUpdated` date (`sources-checked` in the lesson file) as the day the sources were last checked |
+| `review-by`  | Optional. The date by which the sources must be checked again, for a lesson whose facts move (a law, a product). The page shows it as a review line with `sources-checked`, the day the sources were last checked. The pair moves together, and never with `lastUpdated` |
 
 ## Tutorial mode
 
