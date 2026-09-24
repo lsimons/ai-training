@@ -156,9 +156,12 @@ The MDX page has no frontmatter. At build the docs loader
 `covers`, `serves`, `assumes`, `extends-to`, `sources-checked` and
 `review-by` from the lesson file onto the page's docs entry, so every
 component that read the page frontmatter before reads the same names now.
-The lesson file doesn't set Starlight's `lastUpdated`. That field describes
-the page, and the site leaves it off. The footer has no date line. The course page `<area>/index.mdx` gets its `title` and
-`description` from `area.yaml` the same way (S09).
+Until #112 the loader copied `sources-checked` onto Starlight's
+`lastUpdated`, so a prose fix that moved the footer date also moved the
+review line. Since #112 `lastUpdated: true` in `astro.config.mjs` makes
+the footer date the page's last git commit, and the review line reads
+`sources-checked`. The course page `<area>/index.mdx`
+gets its `title` and `description` from `area.yaml` the same way (S09).
 
 A page that sets one of those fields in its own frontmatter fails
 `mise run data`. The S03 "Frontmatter" table describes the fields as the
