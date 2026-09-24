@@ -11,6 +11,10 @@ and #342. `.claude/settings.json` registers them.
   `sleep` over 60 seconds, and a shell loop that calls `gh`. A role sets
   `AI_TRAINING_ROLE` in the environment or as a prefix on the command
   (`AI_TRAINING_ROLE=wave-lead gh pr merge`).
+- `review-bash.sh`, PreToolUse on Bash in the `code-reviewer` agent only,
+  registered in that agent's frontmatter. It allows the read-only review
+  commands and rejects everything else, and any redirect to a file but
+  `/dev/null`.
 - `format-file.sh`, PostToolUse on Edit and Write. It runs Biome on an
   edited file under `site/` and ruff on an edited `.py` file, in the
   worktree that holds the file, and never fails the tool call.

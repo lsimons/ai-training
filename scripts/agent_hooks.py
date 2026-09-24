@@ -9,8 +9,8 @@ Three entry points, each reading the hook's JSON event on stdin:
 - `review-bash` (PreToolUse on Bash in the `code-reviewer` agent,
   `.claude/agents/code-reviewer.md`, #348) allows only the read-only
   commands a review needs: `git diff|log|show|status`, `gh pr diff|view`,
-  `gh issue view`, `mise run <task>`, `cd`, and `head`, `tail`, `grep` and
-  `wc` to filter their output. Anything else exits 2.
+  `gh issue view`, `mise run <task>`, `cd`, `ls`, `grep`, and `head`,
+  `tail` and `wc`, with no redirect to a file. Anything else exits 2.
 - `format` (PostToolUse on Edit and Write) runs Biome on an edited file
   under `site/` and ruff on an edited `.py` file. It never fails the tool
   call: a formatter that is missing or errors is skipped.
@@ -326,7 +326,62 @@ REVIEW_COMMANDS = (
     ("tail",),
     ("grep",),
     ("wc",),
+    ("ls",),
 )
+
+
+REDIRECT_END = frozenset(" \t\n;|&<>()")
+
+
+def output_redirects(command: str) -> list[str]:
+    """The targets of the unquoted `>` redirects in a command, as written.
+
+    `2>&1` gives `&1`, and `>> f`, `>| f` and `&> f` give `f`. Text inside
+    quotes or after a backslash is not a redirect.
+    """
+    targets: list[str] = []
+    quote = ""
+    i = 0
+    while i < len(command):
+        char = command[i]
+        if quote:
+            if char == "\\" and quote == '"':
+                i += 1
+            elif char == quote:
+                quote = ""
+        elif char == "\\":
+            i += 1
+        elif char in "'\"":
+            quote = char
+        elif char == ">":
+            j = i + 1
+            if j < len(command) and command[j] in ">|":
+                j += 1
+            if j < len(command) and command[j] == "&":
+                k = j + 1
+                while k < len(command) and (command[k].isdigit() or command[k] == "-"):
+                    k += 1
+                targets.append(command[j:k])
+                i = k
+                continue
+            while j < len(command) and command[j] in " \t":
+                j += 1
+            k = j
+            while k < len(command) and command[k] not in REDIRECT_END:
+                k += 1
+            targets.append(command[j:k])
+            i = k
+            continue
+        i += 1
+    return targets
+
+
+def writes_a_file(command: str) -> bool:
+    """True when a redirect writes somewhere other than /dev/null or another descriptor."""
+    return any(
+        target != "/dev/null" and not re.fullmatch(r"&(\d+|-)", target)
+        for target in output_redirects(command)
+    )
 
 
 def review_allows(words: Sequence[str]) -> bool:
@@ -346,7 +401,15 @@ def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
     command = tool_input.get("command")
     if not isinstance(command, str):
         return 0, ""
-    for segment in split_segments(command, "."):
+    if writes_a_file(command):
+        return 2, (
+            "Blocked by the code-reviewer hook: the command redirects output to a file. "
+            "A reviewer never writes files. Read the output instead, or send it to /dev/null."
+        )
+    # The splitter reads the `&` of `2>&1` as an operator, so drop the
+    # redirects writes_a_file allows before splitting.
+    harmless = re.sub(r"(\d*|&)>>?(&(\d+|-)|\s*/dev/null)", " ", command)
+    for segment in split_segments(harmless, "."):
         if segment.role is not None or not review_allows(segment.words):
             allowed = ", ".join(" ".join(c) for c in REVIEW_COMMANDS)
             return 2, (
