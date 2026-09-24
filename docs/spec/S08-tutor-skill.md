@@ -77,6 +77,10 @@ The installed `SKILL.md` is the bootstrap. It contains, and only contains:
 | Base             | Both fetches use the base of the pasted lesson URL (everything through `/ai-training/`), so a `localhost` URL from `mise run site-dev` or `site-preview` fetches the local instruction file and bundle. Without a pasted URL the base is the published site. |
 | Offline message  | If either fetch fails, say so in one sentence, name the URL that failed, and offer to continue from the lesson page the learner has open, as a plain conversation without the verbs. Never invent lesson content when the fetch fails.                       |
 
+On a local base the fetched files still cite the published origin, because
+the absolute URLs in the instruction file's frontmatter and in the bundle
+come from Astro's `site`, and a local build has the same `site`.
+
 The bootstrap has no ground rules, no verbs and no dialogues. Those are in
 the published instruction file, so a rule change reaches every installed
 skill on the next deploy.
