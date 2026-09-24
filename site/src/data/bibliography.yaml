@@ -671,6 +671,13 @@ Claude Code custom tools:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/agent-sdk/custom-tools
+Git docs git-reset:
+  type: reference
+  title: git-reset
+  container: Git reference documentation
+  author: The Git project
+  license: GPL-2.0
+  url: https://git-scm.com/docs/git-reset
 Claude Code skills:
   type: reference
   title: Extend Claude with skills

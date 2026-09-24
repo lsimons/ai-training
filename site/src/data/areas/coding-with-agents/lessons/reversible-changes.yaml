@@ -20,7 +20,7 @@ exercise:
   brief: >-
     Have the agent land the fixture increments as one commit each on a branch, revert the middle
     one, and write the PR description that names the spec and what was verified.
-sources: [Brilliant INC, DLAI-5]
+sources: [Brilliant INC, DLAI-5, Git docs git-reset]
 issue: 157
 minutes: 15
 notes: >-
@@ -32,4 +32,6 @@ notes: >-
   are this lesson's own text, with their tests test_overdue.py and test_bad_date.py next to the
   scripts), and revert.py reverts HEAD~1. The increments keep their hunks apart in todo.py so the
   revert applies without conflict. The page leans on the spec and the first increment from
-  spec-driven-increments, so that lesson is the one assumes entry.
+  spec-driven-increments, so that lesson is the one assumes entry. The fixtures need git 2.32 or
+  newer on the learner's machine, and they strip GIT_DIR and the other location variables from
+  the environment so an exported GIT_DIR can't point them at another repository.

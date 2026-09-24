@@ -7,6 +7,7 @@ names.
 
 import os
 import unittest
+from unittest import mock
 
 import todo  # pyright: ignore[reportMissingImports]  # todo.py is in fixture-repo, where this file is copied before it runs
 
@@ -21,12 +22,12 @@ def sample():
 
 class OverdueTests(unittest.TestCase):
     def test_open_item_with_a_past_date_is_overdue(self):
-        os.environ["TODO_TODAY"] = "2026-10-02"
-        self.assertEqual(todo.overdue(sample()), "1. [ ] Buy milk (due 2026-10-01)")
+        with mock.patch.dict(os.environ, {"TODO_TODAY": "2026-10-02"}):
+            self.assertEqual(todo.overdue(sample()), "1. [ ] Buy milk (due 2026-10-01)")
 
     def test_nothing_overdue_before_the_date(self):
-        os.environ["TODO_TODAY"] = "2026-09-30"
-        self.assertEqual(todo.overdue(sample()), "nothing overdue")
+        with mock.patch.dict(os.environ, {"TODO_TODAY": "2026-09-30"}):
+            self.assertEqual(todo.overdue(sample()), "nothing overdue")
 
 
 if __name__ == "__main__":

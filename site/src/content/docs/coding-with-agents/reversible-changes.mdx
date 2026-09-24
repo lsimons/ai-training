@@ -136,11 +136,18 @@ possible?
 Everything so far is reversible because it is text in a repository. A
 revert undoes it, and the branch bounds it. Some steps an agent can take
 have no undo, and those are the ones to find in the plan before they run.
-In a code repository they're the git commands that discard history:
-`push --force`, `branch -D`, `reset --hard`, and `clean -f`. Outside the
-repository they're a deleted file that isn't tracked, a dropped table, an
-email sent, a payment made, a deploy to a system other people use. The
-brief above rules out the git commands by name. The rule in general is
+In a code repository they're the git commands that throw work away.
+`reset --hard` discards every uncommitted change to a tracked file, and
+`clean -f` deletes the untracked files. Neither has a way back, because
+nothing was ever committed. The commits that `reset --hard` or
+`branch -D` move away from are less lost than they look: git keeps them
+for a while, under `ORIG_HEAD` and in the reflog, and the documentation
+of `reset` shows the way back (@Git docs git-reset). `push --force`
+overwrites a branch on the remote, where no reflog of yours applies.
+Outside the repository the steps with no undo are a deleted file that
+isn't tracked, a dropped table, an email sent, a payment made, a deploy to
+a system other people use. The brief above rules out the git commands by
+name. The rule in general is
 that a step with no way back is the step you read before it runs, and
 the agent runs everything else without waiting for you (@DLAI-5).
 
@@ -223,7 +230,7 @@ removed later, in its own commit, once the old path has no callers.
   options={[
     { text: 'Accept it as proposed. The migration is one file, the model change is small, and the tests pass.', consequence: 'The migration runs, the rollout fails halfway, and the code revert fails against the renamed column. The way back is written under pressure.' },
     { text: 'Ask the agent to split it: add and backfill the new column now, and drop the old one in a later change.', correct: true, consequence: 'Each step leaves the previous code working. A revert at any point is a code revert, and the drop waits until nothing reads the old column.' },
-    { text: 'Ask the agent to write a second migration that reverses the rename, and keep it ready.', consequence: 'A down migration helps, and it still fails when the old code has already written rows the reversal doesn\'t know about. Adding before removing avoids the question.' },
+    { text: 'Ask the agent to write a second migration that reverses the rename, and keep it ready.', consequence: 'A down migration helps once someone runs it. The outage during the rollout comes first, while the old code meets the renamed column. Adding before removing avoids the question.' },
     { text: 'Do the rename by hand in the database console instead, so that no migration file is needed at all.', consequence: 'The change is now recorded nowhere, and the next deploy runs a migration set that doesn\'t match the table.' },
   ]}>
 The agent proposes a migration that renames the `email` column to
@@ -236,7 +243,7 @@ do?
   context="A learner compares ways to undo a change a coding agent ships: a code revert with a redeploy, a feature flag that is off by default, a database restore."
   title="The cheapest undo" hint="How long does each undo take, and who has to be awake for it?"
   options={[
-    { text: 'A code revert, because git keeps the whole history and nothing is ever lost.', why: 'A revert needs a deploy to take effect, and a revert of code that changed data meets data in the new form.' },
+    { text: 'A code revert, because git keeps the whole history and nothing is ever lost.', why: 'A revert needs a deploy to take effect, and someone has to be awake to run it.' },
     { text: 'A switch that turns the new behavior off, because it reverses in seconds and without a deploy.', correct: true },
     { text: 'A restore from the last backup, because it puts everything back exactly as it was.', why: 'A restore loses every write since the backup and takes the longest of the three. It is the way back of last resort.' },
     { text: 'A second migration that reverses the first, because a migration is the tool for schema changes.', why: 'A down migration reverses the schema and knows nothing about the rows the new code wrote in between. It is a partial answer.' },
@@ -262,9 +269,9 @@ the same document the agent worked from. It says what was verified and
 how, criterion by criterion. The reviewer then knows what has been
 checked and what's left to them. And it says what the agent did and what
 you did, because a reviewer reads a diff differently when they know a
-machine wrote it and a person checked the criteria. That last line isn't
-a confession. It is the information the reviewer needs to spend their
-time where a human hasn't looked yet. Ask the agent to draft it from the
+machine wrote it and a person checked the criteria. That last line is
+the information the reviewer needs to spend their time where a human
+hasn't looked yet. Ask the agent to draft it from the
 commits and the spec, and then read it against what you did.
 
 <Prompt model="illustrative" recorded="illustrative">
