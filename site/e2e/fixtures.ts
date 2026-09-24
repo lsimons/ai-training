@@ -139,12 +139,16 @@ export async function orderByButtons(cp: Locator) {
  * says so instead of failing on a later assertion.
  */
 export async function passRemaining(page: Page) {
-	// Ids first: a locator over the unpassed checkpoints would shift as each one passes.
-	const ids = await page
-		.locator('[data-checkpoint]:not([data-state="passed"])')
-		.evaluateAll((els) => els.map((el) => el.id));
+	// Wait for hydration: a checkpoint has no `data-state` until the script binds it, and a seeded pass
+	// would look open before that.
+	await expect(page.locator('[data-checkpoint]:not([data-state])')).toHaveCount(0);
+	// Ids first: a locator over the unpassed checkpoints would shift as each one passes. A skills-check
+	// clone keeps `data-checkpoint` but has no id, so those are left out.
+	const ids = (
+		await page.locator('[data-checkpoint]:not([data-state="passed"])').evaluateAll((els) => els.map((el) => el.id))
+	).filter((id) => id !== '');
 	for (const id of ids) {
-		const cp = page.locator(`#${id}`);
+		const cp = page.locator(`[data-checkpoint][id="${id}"]`);
 		const kind = await cp.getAttribute('data-kind');
 		if (kind === 'predict') {
 			const answer = await cp.locator('.cp-predict').getAttribute('data-answer');
