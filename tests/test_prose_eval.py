@@ -9,6 +9,9 @@ import pytest
 
 import prose_eval
 
+# The tests run from any cwd, so the real config is found from this file.
+REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+
 HITS: prose_eval.Hits = {
     "docs/spec/S01-dictionary.md": [
         {"Check": "ai-tells.Delve", "Message": "Avoid 'delve'.", "Line": 3},
@@ -138,16 +141,15 @@ def test_pinned_packages_reads_names_and_skips_comments(tmp_path: pathlib.Path) 
 
 
 def test_pinned_packages_reads_the_real_eval_ini() -> None:
-    names = prose_eval.pinned_packages(prose_eval.EVAL_INI)
+    names = prose_eval.pinned_packages(REPO_ROOT / ".vale-eval.ini")
     assert "write-good" in names
     assert "ai-tells" in names
 
 
 def test_missing_packages_names_only_the_unsynced(tmp_path: pathlib.Path) -> None:
-    ini = write_ini(tmp_path)
     styles = tmp_path / "styles"
     (styles / "write-good").mkdir(parents=True)
-    assert prose_eval.missing_packages(ini, styles) == ["ai-tells"]
+    assert prose_eval.missing_packages(["write-good", "ai-tells"], styles) == ["ai-tells"]
 
 
 def test_check_packages_synced_passes_when_all_present(tmp_path: pathlib.Path) -> None:

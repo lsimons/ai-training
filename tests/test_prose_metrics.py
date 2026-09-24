@@ -7,6 +7,9 @@ import pytest
 
 import prose_metrics
 
+# The tests run from any cwd, so the real config is found from this file.
+REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+
 HITS = {
     "docs/spec/S01-dictionary.md": [
         {"Check": "Readability.FleschKincaid", "Message": "Grade level too high (12.4)."},
@@ -113,6 +116,7 @@ def test_main_writes_scores(
 def test_main_stops_when_eval_packages_not_synced(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    monkeypatch.setattr(prose_metrics.prose_eval, "EVAL_INI", REPO_ROOT / ".vale-eval.ini")
     monkeypatch.setattr(prose_metrics, "STYLES", tmp_path / "styles")
     out_dir = tmp_path / "out"
     with pytest.raises(SystemExit) as exc:
