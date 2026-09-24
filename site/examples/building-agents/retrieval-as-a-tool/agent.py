@@ -57,7 +57,8 @@ STOPWORDS = {
 # The prompt frame around the retrieved passages. A real model reads this
 # text; the fake model below obeys it through the `covers` check.
 FRAME = (
-    "Answer from the passages below. Quote the sentence you relied on. "
+    "The passages below were retrieved from the company handbook for this question. "
+    "Answer from them. Quote the sentence you relied on. "
     "If the passages do not cover the question, answer exactly: not found."
 )
 
@@ -97,6 +98,8 @@ def search_docs(query: str, skip: Optional[list[str]] = None) -> dict:
         for name, text in CORPUS.items()
         if name not in (skip or [])
     }
+    if not scores:  # every document was skipped, or docs/ is empty
+        return {"ok": True, "name": None, "passage": ""}
     best = max(scores, key=lambda name: scores[name])  # the first document wins a tie
     if scores[best] == 0:
         return {"ok": True, "name": None, "passage": ""}
@@ -106,7 +109,10 @@ def search_docs(query: str, skip: Optional[list[str]] = None) -> dict:
 TOOLS = {
     "search_docs": {
         "fn": search_docs,
-        "description": "Search the handbook. Returns the best-matching passage. Args: query (str).",
+        "description": (
+            "Search the handbook. Returns the best-matching passage. "
+            "Args: query (str), skip (list of str, optional): names of documents already read."
+        ),
     },
 }
 
