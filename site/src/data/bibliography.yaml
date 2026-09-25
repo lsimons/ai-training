@@ -1098,3 +1098,17 @@ Git docs git-merge:
   author: The Git project
   license: GPL-2.0
   url: https://git-scm.com/docs/git-merge
+AI Training AGENTS:
+  type: reference
+  title: Agent Instructions for ai-training
+  container: AI Training repository, AGENTS.md
+  author: The AI Training contributors
+  license: CC BY-SA 4.0
+  url: https://github.com/lsimons/ai-training/blob/main/AGENTS.md
+AI Training wave lead prompt:
+  type: reference
+  title: Wave lead prompt
+  container: AI Training repository, .claude/skills/wave/wave-lead-prompt.md
+  author: The AI Training contributors
+  license: CC BY-SA 4.0
+  url: https://github.com/lsimons/ai-training/blob/main/.claude/skills/wave/wave-lead-prompt.md
