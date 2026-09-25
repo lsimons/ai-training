@@ -55,6 +55,11 @@ Review finds these in almost every first pass. Check each one yourself.
 
 - Keep scratch files in `.scratch/` in your worktree, never under `/tmp`.
 
+- Never run `git stash`, in any worktree. Every worktree of the clone
+  shares one stash (`refs/stash`), so a pop can return another builder's
+  changes. To compare with the base, commit work in progress, use
+  `git diff > .scratch/x.patch` and `git apply`, or `git worktree add --detach` a separate checkout under `../ai-training-wt/`.
+
 - Don't run `site-dev`. The wave's `mise run ci` is the one e2e run.
 
 - Rebase on `origin/main` before the final push, and push your own branch
