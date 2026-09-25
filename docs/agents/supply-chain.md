@@ -64,7 +64,8 @@ nobody pushes fails a scheduled run. No advisory is ever ignored.
 - Every `.mise.toml` tool is exact-pinned and invisible to dependabot.
   Refresh with `mise up` and read the diff.
 - CI pins the mise version and its checksum on every `mise-action` step.
-  `docs/agents/mise-refresh.md` is the procedure for moving that pin.
+  `docs/agents/mise-refresh.md` is the procedure for moving that pin, and
+  `mise run mise-refresh <version>` does its download, verify and hash steps.
 - `prek.toml` hook repos are pinned by commit SHA (tag in the comment),
   and each Python hook lists its full transitive tree in
   `additional_dependencies`, exact-pinned. Both are invisible to
