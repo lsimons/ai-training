@@ -29,6 +29,8 @@
  *   lacks, or its lesson file has no `description` or an `assumes` entry
  *   without `lesson` and `section`; a course page (`<area>/index.mdx`)
  *   carries `title` or `description`;
+ * - a lesson or course page has a citation token (`(@`) in a component prop
+ *   string, which the citation plugin never renders (`propCitations`);
  * - a lesson page in the `foundations` group shows a surface that needs a
  *   programmer (spec S03 "Foundations audience"): a `<Predict run=...>`, a
  *   fenced block tagged `sh`, `bash`, `shell`, `python` or `json`, or the
@@ -46,7 +48,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { citationKeys, hasMultipleKeys, multipleKeysMessage } from '../../plugins/citation-syntax.mjs';
-import { propValue } from '../../src/lib/checkpoint-tags.ts';
+import { jsxElements, literalOf, parseMdx, propValue } from '../../src/lib/checkpoint-tags.ts';
 import { checkExtendsToHref, checkExternalSourceHref } from '../../src/lib/extends-to.ts';
 import { unsupportedInline } from '../../src/lib/inline-markdown.ts';
 import { allTopics, courseLessonIds, readAreaTree } from './area-tree.mjs';
@@ -231,6 +233,91 @@ export function reviewDatePairError(lesson) {
 	if (Number.isNaN(checked) || Number.isNaN(due)) return null;
 	if (due <= checked) return `review-by ${dueRaw} is not after sources-checked ${checkedRaw}`;
 	return null;
+}
+
+/**
+ * Props whose text a component renders as code, so a `(@` in one is what the
+ * reader should see: the expected output of a `<Predict>` (spec S03
+ * "Examples").
+ */
+export const CODE_PROPS = new Map([['Predict', new Set(['answer'])]]);
+
+/**
+ * Every string inside a prop value, with its path from the prop name
+ * (`options[2].why`), depth first in source order.
+ * @param {unknown} value
+ * @param {string} path
+ * @returns {Array<{ path: string, text: string }>}
+ */
+function propStrings(value, path) {
+	if (typeof value === 'string') return [{ path, text: value }];
+	if (Array.isArray(value)) return value.flatMap((v, i) => propStrings(v, `${path}[${i}]`));
+	if (value && typeof value === 'object') {
+		return Object.entries(value).flatMap(([k, v]) => propStrings(v, `${path}.${k}`));
+	}
+	return [];
+}
+
+/**
+ * The citation tokens (`(@`) in the component prop strings of an MDX page.
+ * The citation remark plugin rewrites text nodes only, and a prop is never a
+ * text node (`plugins/mdast-walk.mjs`), so a token in a checkpoint option's
+ * `why`, a `hint`, a `title` or any other prop reaches the page as literal
+ * text (#378). A prop string is a quoted prop (`title="..."`) or a string
+ * anywhere in a literal expression prop (`options={[{ why: '...' }]}`), on a
+ * component or a raw HTML element. Exempt are text inside a code span in the
+ * string, the props in `CODE_PROPS`, and an expression prop that is not a
+ * literal, which no reader can see before render time (the checkpoint reader
+ * rejects one on a checkpoint tag). Tags inside a fence or a code span are
+ * not JSX in the MDX tree, so they are skipped too. A page that does not
+ * parse throws, naming `where`.
+ * @param {string} src
+ * @param {string} where
+ * @returns {Array<{ line: number, tag: string, prop: string, token: string }>}
+ */
+export function propCitations(src, where = 'lesson') {
+	let tree;
+	try {
+		tree = parseMdx(src);
+	} catch (e) {
+		throw new Error(`${where}: ${e.message}`);
+	}
+	const out = [];
+	for (const node of jsxElements(tree)) {
+		const tag = node.name ?? 'fragment';
+		for (const a of node.attributes) {
+			if (a.type !== 'mdxJsxAttribute' || !a.name) continue;
+			if (CODE_PROPS.get(tag)?.has(a.name)) continue;
+			let value;
+			if (typeof a.value === 'string') value = a.value;
+			else if (a.value && typeof a.value === 'object') {
+				try {
+					value = literalOf(a.value.data?.estree?.body[0]?.expression);
+				} catch {
+					continue;
+				}
+			} else continue;
+			for (const { path, text } of propStrings(value, a.name)) {
+				const plain = text.replace(/`[^`]*`/g, '');
+				const at = plain.indexOf('(@');
+				if (at === -1) continue;
+				const close = plain.indexOf(')', at);
+				const token = (close === -1 ? plain.slice(at, at + 40) : plain.slice(at, close + 1)).replace(/\s+/g, ' ');
+				out.push({ line: a.position?.start.line ?? node.position?.start.line ?? 0, tag, prop: path, token });
+			}
+		}
+	}
+	return out;
+}
+
+/**
+ * The error for a citation token in a prop string, in the format `checkData`
+ * uses.
+ * @param {string} where
+ * @param {{ line: number, tag: string, prop: string, token: string }} found
+ */
+export function propCitationMessage(where, { line, tag, prop, token }) {
+	return `${where}:${line}: <${tag}> prop ${prop} holds the citation ${token}, which the page shows as literal text because citations in props are not rendered. Name the source in words, or cite it in the page text`;
 }
 
 /**
@@ -504,6 +591,9 @@ export function checkData(dataDir, contentDir, { foundationsExempt = FOUNDATIONS
 			if (hasMultipleKeys(key)) fail(multipleKeysMessage(where, key));
 			else if (!sourcesOf.get(id).has(key)) fail(`${where}: cites "${key}", which its plan file's sources list lacks`);
 		}
+		for (const found of propCitations(readFileSync(join(contentDir, `${id}.mdx`), 'utf8'), where)) {
+			fail(propCitationMessage(where, found));
+		}
 	}
 	for (const e of checkBehaviorMarkdown(tree, rel)) fail(e);
 	for (const e of checkBehaviorCitations(tree, rel)) fail(e);
@@ -515,6 +605,9 @@ export function checkData(dataDir, contentDir, { foundationsExempt = FOUNDATIONS
 		const owned = ['title', 'description'].filter((k) => k in frontmatter(readFileSync(index, 'utf8')));
 		if (owned.length)
 			fail(`src/content/docs/${a.dir}/index.mdx: frontmatter sets ${owned.join(', ')}, which area.yaml owns`);
+		for (const found of propCitations(readFileSync(index, 'utf8'), `src/content/docs/${a.dir}/index.mdx`)) {
+			fail(propCitationMessage(`src/content/docs/${a.dir}/index.mdx`, found));
+		}
 	}
 
 	return { errors, warnings, lessons: lessonIds.size, pages: pages.size };
