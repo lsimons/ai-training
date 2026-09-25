@@ -28,8 +28,8 @@ remembered" always means that something was stored and read back
 
 For a builder, that read-back step is a design decision. The agent can
 load a store whole at the start of every session, or it can look up the
-part it needs when it needs it. Loading whole is simple, and every fact
-is always there. Looking up keeps the window small, but the agent has to
+part it needs when it needs it. Loading whole is simple and puts each fact
+in the window. Looking up keeps the window small, but the agent has to
 know that a fact exists and ask for it, and a lookup can miss. The rest
 of this lesson is about which store makes that choice easy for each
 kind of use.
@@ -91,8 +91,8 @@ The first version of an agent's memory is a plain text file that the
 harness reads whole at the start of each session. A person can open it,
 see what the agent believes, and delete a wrong line. When the file is
 in version control, each change the agent makes shows up in a diff. When the agent gets
-something wrong because of a note, you can find the note. None of the
-other stores gives you that for free, and at the start that visibility
+something wrong because of a note, you can find the note. With the
+other stores you have to build that yourself, and at the start that visibility
 matters more than scale.
 
 The worked case is a preferences file for one user. It holds twenty

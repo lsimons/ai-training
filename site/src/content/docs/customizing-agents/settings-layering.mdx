@@ -20,7 +20,7 @@ a layered configuration transfers, and the exact files may not.
 can come from override each other. Claude Code reads four settings files,
 and an organization can add a fifth source above them. When the same key
 is set in more than one place, the value from the highest level that sets
-it wins (@Claude Code settings).
+it applies (@Claude Code settings).
 
 | Level              | Where it comes from                                                  | Who it affects                        |
 | ------------------ | -------------------------------------------------------------------- | ------------------------------------- |
@@ -46,7 +46,7 @@ then `allow`, and the first match decides. A deny rule in any file blocks
 a tool call that an allow rule in any other file would have approved,
 because the deny rules of every file are checked before the allow rules
 of any (@Claude Code permissions). So for a rule the question "which
-layer won?" has a different answer than for `defaultMode`: the layer that
+layer decides?" has a different answer than for `defaultMode`: the layer that
 holds the first matching rule in deny, ask, allow order, at whatever
 level that's at.
 
@@ -120,8 +120,8 @@ def decide(layers, action):
 
 Work through the first two calls before you reveal the answer. The push
 matches an allow rule in your local file and a deny rule in the committed
-file. Deny is read first, from every file. The committed deny decides,
-and the local allow never gets a turn. The `python3 todo.py add` command
+file. Deny is read first, from every file. The committed deny decides
+before the local allow is checked. The `python3 todo.py add` command
 matches no rule in the committed file, where the only `python3` rule
 needs `-m unittest` after it, and matches the wide `Bash(python3 *)` in
 your local file. The local layer decides. Now derive the other three.
@@ -153,9 +153,9 @@ for action in ACTIONS:
 
 </Predict>
 
-Read the last line again. The commit matches no rule anywhere, so the
-rules say nothing and the mode decides whether it prompts. The mode is a
-single value, the committed file sets it, and the committed file is
+Read the last line again. The commit matches no rule anywhere. The
+rules say nothing, and the mode decides whether it prompts. The mode is
+one value, the committed file sets it, and the committed file is
 above your user file, so your `acceptEdits` doesn't apply in this
 project. That's the setting that "seems ignored". It was set, and a
 higher layer set it too.

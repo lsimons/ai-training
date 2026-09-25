@@ -25,7 +25,7 @@ never run. In Claude Code they are three lists in a settings file,
 `allow`, `ask` and `deny`, each holding rules of the form `Tool` or
 `Tool(specifier)`. Claude Code checks a tool call against `deny` first,
 then `ask`, then `allow`, and the first match decides. A narrow allow rule
-never wins against a broader deny rule, whichever came first in the file
+never overrides a broader deny rule, whichever came first in the file
 (@Claude Code permissions).
 
 Make a fresh copy of the fixture directory,
@@ -123,7 +123,7 @@ makes, and it isn't a wall around the file.
 
 Before the run, hold three rules of growing width against three commands.
 `matches` below is a small model of the vendor's matching for the two
-shapes this lesson uses, an exact rule and a rule with one trailing `*`.
+kinds of rule this lesson uses, an exact rule and a rule with one trailing `*`.
 The complete file is `site/examples/customizing-agents/allowlists/width.py`
 in the repository.
 
@@ -239,7 +239,7 @@ task: open `/permissions`, and for each rule ask which prompt it was for.
 The user-level file, `~/.claude/settings.json`, holds the rules you want
 in every project, and the project's `.claude/settings.json` holds the
 ones a team shares through the repository. A deny rule in any of those
-files wins over an allow rule in any other, because Claude Code
+files overrides an allow rule in any other, because Claude Code
 evaluates the deny rules of every file before the allow rules of any
 (@Claude Code permissions).
 

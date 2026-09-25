@@ -292,8 +292,8 @@ agent they're enough. The cost shows up when you have many agents and
 many tools. Each agent has its own loop that turns a `tool_use` block
 into a function call, and each tool (a calendar, a ticket system, a
 database) has its own way of being called. With N agents and M tools you
-write N x M adapters, and a change to one tool means a change in every
-agent that uses it. This is the **N x M integration problem**
+write N x M adapters, and a change to one tool means a change in all the
+agents that use it. This is the **N x M integration problem**
 (@Academy introduction-to-model-context-protocol). A shared protocol
 between agents and tools turns N x M into N plus M: each agent speaks the
 protocol once, and each tool is wrapped once. The last lesson in this

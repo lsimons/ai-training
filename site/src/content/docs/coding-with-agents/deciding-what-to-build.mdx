@@ -62,7 +62,7 @@ Two more questions belong in the same weighing. What does the change
 displace? A program with `add`, `list` and `done` fits in one screen, and
 its README fits in ten lines. Each feature makes the next one a little
 harder to add and the whole a little harder to hand to a new colleague.
-And what happens if it is never built? Say it out loud. Often the honest
+And what happens if it is never built? Say it out loud. Often the
 answer is "nothing much", and that answer ends the discussion.
 
 <Pitfall title="A package for one date format">
@@ -97,8 +97,8 @@ part that solves the stated problem. Or it can be answered without code,
 with a line in the README, a change to a default, or a pointer to a tool
 the team already has. Shrinking is the outcome that gets missed most. The
 colleague who asked for `due friday` and a late list may be served by a
-date that is stored and shown. That version doesn't parse weekday names
-and doesn't know what late means. It is a dozen lines with one format,
+date that is stored and shown. That version has no weekday parsing
+and no rule for what late means. It is a dozen lines with one format,
 and it can grow later if the second request ever comes.
 
 <Scenario id="undo-request" objective="coding-with-agents/specifies-work/judges-worth-building"
@@ -182,8 +182,8 @@ change?
 
 <Exercise stretch="For the request you shrank, write the one-paragraph note to the person who asked, saying what you are building instead and why.">
 Three requests have come in for the to-do program from the first lesson.
-One asks for due dates with phrases like `next friday` and `in 3 days`.
-One asks for done items to be shown in green. One asks for the list to
+The first asks for due dates with phrases like `next friday` and `in 3 days`.
+The second asks for done items to be shown in green. The third asks for the list to
 be shared between a laptop and a desktop. For each, write the problem
 behind it and who has it. Name at least one alternative, including doing
 nothing, and then decide: build, shrink or answer without code. Reject or
@@ -197,7 +197,7 @@ A good result names a concrete problem for each request or says that
 none was found, has a decision with a reason that a colleague could
 disagree with on the facts, and has criteria where every line is a yes
 or no that does not need you in the room. Reflect: for the request that
-cost the most to own, how much of that cost would have shown in the
+cost the most to maintain, how much of that cost would have shown in the
 agent's diff?
 </Exercise>
 

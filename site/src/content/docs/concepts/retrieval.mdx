@@ -45,8 +45,8 @@ how it searches.
 
 The simplest search matches words. The question is split into words,
 common words such as "how" and "the" are dropped, and each document is
-scored by how many of the remaining words it contains. The best score
-wins and becomes the passage in the prompt. Products also use
+scored by how many of the remaining words it contains. The best-scoring document
+becomes the passage in the prompt. Products also use
 similarity search, which scores meaning instead of exact words, on its
 own or combined with keywords. The keyword version is the one you can
 check by eye, so it is the one this lesson uses.
@@ -85,7 +85,7 @@ retrieved: nothing, no document contains any of the keywords
 ```
 
 The answer is in the leave policy, the same as before. The policy says
-"annual leave" and the colleague said "holiday", so the keyword search
+"annual leave" and the colleague said "holiday". The keyword search
 scores every document at zero and retrieves nothing. What happens next
 depends on the product. A careful assistant says the documents don't
 cover the question. Without that care, the model has an empty prompt
@@ -139,7 +139,7 @@ retrieved: remote-work.txt
 passage: Remote work. Staff may work from home up to three days per week. A home office allowance of 30 euros per month is paid with salary. Equipment stays company property.
 ```
 
-The expenses policy says "per day", and the question said "daily", so
+The expenses policy says "per day", and the question said "daily". With no shared word,
 the expenses policy scores zero. The remote work policy contains
 "office" and wins with one match. A model that grounds its answer in
 this passage might say the daily rate is 30 euros, and cite the remote

@@ -143,8 +143,8 @@ phrases things differently, and its plan may have four steps or six.
 
 Read the plan the way you read a diff. Steps 1 and 2 follow from the cause
 the agent named, and step 3 has no cause behind it. The agent found the cause in
-`store.py`, and then proposed a change to `render.py` anyway, because that
-is where the symptom showed. Hiding done items in `list` would make the bug
+`store.py`, and then proposed a change to `render.py` anyway, because the
+symptom showed there. Hiding done items in `list` would make the bug
 invisible without fixing it, and it would change what `list` means for
 every user who has a done item they haven't cleared yet.
 
@@ -196,8 +196,8 @@ and the prompts let you check that those are the two you get.
 
 <Pitfall title="A confident change in the wrong module">
 An engineer skips the plan and briefs the agent to "make `clear` remove all
-the done items". The agent reads `render.py` first, because that is where
-the output comes from, and changes `list_items` to leave done items out.
+the done items". The agent reads `render.py` first, because
+the output comes from there, and changes `list_items` to leave done items out.
 The symptom is gone, and `list` after `clear` doesn't show a done item. The bug is
 still in `store.py`, the file still holds the item, and the numbers `list`
 shows no longer match the positions in the file, so `done 3` marks whatever
