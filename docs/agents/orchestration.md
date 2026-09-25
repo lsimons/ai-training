@@ -278,10 +278,11 @@ directory.
 Agents never run `git stash` in any worktree. Every worktree of one clone
 shares one stash (`refs/stash`), so a `git stash pop` in one worktree can
 return the changes another agent stashed in its own worktree. To compare
-with the base, an agent commits its work in progress, saves it with
-`git diff > .scratch/x.patch` and restores it with `git apply`, or runs
-`git worktree add --detach` for a separate checkout under
-`../ai-training-wt/`.
+with the base, an agent commits its work in progress. It can also save
+the work with `git diff HEAD > .scratch/x.patch` and restore it with
+`git apply`, or run `git worktree add --detach` for a separate checkout
+under `../ai-training-wt/`. Untracked files aren't in that patch unless
+`git add -N` marks them first.
 
 The Bash guard hook (`.claude/hooks/README.md`) rejects a force push, any
 push to `main`, `gh pr merge` from anyone but the wave lead, the
