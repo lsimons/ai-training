@@ -59,27 +59,51 @@ def run(items: list[dict[str, str]], prompt_lines: list[str]) -> list[str]:
     return failed
 
 
-def show_failed(items: list[dict[str, str]], failed: list[str], prompt_lines: list[str]) -> None:
+def show_failed(
+    items: list[dict[str, str]], failed: list[str], prompt_lines: list[str], with_answers: bool
+) -> None:
+    """One line per failed item, and with `with_answers` its question and answer too."""
     for item in items:
-        if item["id"] in failed:
-            result = agent.answer(item["question"], prompt_lines)
-            print(f"failed {item['id']}: {item['question']}")
-            print(f"  answer: {result['answer']}")
+        if item["id"] not in failed:
+            continue
+        if not with_answers:
+            print(f"failed {item['id']}")
+            continue
+        result = agent.answer(item["question"], prompt_lines)
+        print(f"failed {item['id']}: {item['question']}")
+        print(f"  answer: {result['answer']}")
+
+
+def development_items() -> list[dict[str, str]]:
+    """The items that run after every change: the held-out items stay out."""
+    return [item for item in load_set() if item["held_out"] != "yes"]
 
 
 def step_run() -> None:
-    """The run the team does after every change: the held-out items stay out."""
-    items = [item for item in load_set() if item["held_out"] != "yes"]
+    """The run the team does after every change."""
+    items = development_items()
     failed = run(items, agent.PROMPT_LINES)
-    show_failed(items, failed, agent.PROMPT_LINES)
+    show_failed(items, failed, agent.PROMPT_LINES, with_answers=False)
 
 
 def step_changed() -> None:
     """The same run with the last line of the prompt removed."""
-    items = [item for item in load_set() if item["held_out"] != "yes"]
+    items = development_items()
     prompt_lines = agent.PROMPT_LINES[:-1]
     failed = run(items, prompt_lines)
-    show_failed(items, failed, prompt_lines)
+    show_failed(items, failed, prompt_lines, with_answers=False)
+
+
+def step_answers() -> None:
+    """The failed items of the `changed` run, with each question and the answer the agent gave."""
+    items = development_items()
+    prompt_lines = agent.PROMPT_LINES[:-1]
+    failed = [
+        item["id"]
+        for item in items
+        if not passes(item, agent.answer(item["question"], prompt_lines))
+    ]
+    show_failed(items, failed, prompt_lines, with_answers=True)
 
 
 def step_release() -> None:
@@ -89,12 +113,13 @@ def step_release() -> None:
     held_out = [item for item in items if item["held_out"] == "yes"]
     held_out_passed = sum(1 for item in held_out if item["id"] not in failed)
     print(f"held out: {held_out_passed} of {len(held_out)}")
-    show_failed(items, failed, agent.PROMPT_LINES)
+    show_failed(items, failed, agent.PROMPT_LINES, with_answers=True)
 
 
 STEPS = {
     "run": step_run,
     "changed": step_changed,
+    "answers": step_answers,
     "release": step_release,
 }
 
