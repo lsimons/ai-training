@@ -7,8 +7,8 @@ and #342. `.claude/settings.json` registers them.
 - `guard-bash.sh`, PreToolUse on Bash. It exits 2 with a reason that names
   the alternative for a force push, any push to `main`, `gh pr merge`
   outside the wave lead, the dispatcher or a coordinator, `git stash` in
-  every worktree (all but `list` and `show`), `git reset --hard` or
-  `git checkout -- .` in the main checkout, a
+  every worktree (all but `list` and `show`), `git reset --hard`,
+  `git checkout -- .` or `git restore .` in the main checkout, a
   `sleep` over 60 seconds, and a loop that polls `gh`
   (`while` or `until`, or a `for` loop that sleeps). A role sets
   `AI_TRAINING_ROLE` in the environment or as a prefix on the command
