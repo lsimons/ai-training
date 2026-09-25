@@ -2,8 +2,8 @@ id: customizing-agents/repeated-work
 title: Turning repeated work into something the agent keeps
 description: >-
   Read three coding sessions that each work out how to regenerate an API client, place each
-  repeated explanation in the instructions, a skill, a hook or a context file, and delete the
-  instruction lines a hook now enforces.
+  repeated explanation in the instructions, a skill, a hook or a context file, and cut the
+  instruction lines that a hook and a skill now cover.
 mode: explanation
 covers: customizing-agents/memory
 serves:
@@ -22,7 +22,8 @@ exercise:
   brief: >-
     Read three session transcripts that each work out how to regenerate the API client and repeat
     two corrections, decide for each repeated step whether it becomes an instruction, a skill, a
-    hook or a context file entry, and delete the instruction lines a hook now enforces.
+    hook or a context file entry, and delete or shorten the instruction lines that a hook and a
+    skill now cover.
 sources:
   - AEC-05
   - Claude Code features
@@ -42,7 +43,10 @@ notes: >-
   (not named AGENTS.md, so no agent working in this repository loads it as instructions),
   `find_repeats.py`, which lists the user messages that recur across sessions (the share of shared
   words at least 0.5) and the commands run in every session, and one answer to the exercise in
-  `model-answer/`. The page describes the hook in prose and doesn't ship hook code, because
+  `model-answer/`. On these logs the matching pairs score 0.69 to 0.94 and the highest other pair
+  0.33. The hook matches `Edit|Write` and doesn't see a shell write, so the page keeps a short line
+  for the generated-files rule and deletes only the regeneration paragraph. The page describes the
+  hook in prose and doesn't ship hook code, because
   first-hook builds one. The lesson keeps skills for procedures and context files for examples and
   says so, because Claude Code also allows reference skills. The page doesn't link to or mention
   session-handoff, which may go live after this lesson. The Academy courses named in the short and
