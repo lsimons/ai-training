@@ -223,6 +223,15 @@ def step_revise() -> None:
     show_revision(KETTLE)
 
 
+def step_revise_only() -> None:
+    """Runs the first three steps and prints only the plan the model returns."""
+    plan = write_plan(KETTLE)
+    results = [TOOLS[s["tool"]](**s["args"]) for s in plan[:3]]
+    new_plan = revise_plan(plan, results)
+    if new_plan is not None:
+        show_plan(new_plan, 3, 2)
+
+
 def step_cost() -> None:
     """Model calls and tool calls for the kettle goal, per way of running the plan."""
     for name, run in (("follow", follow(KETTLE, quiet=True)), ("work", work(KETTLE, quiet=True))):
@@ -239,6 +248,7 @@ STEPS = {
     "plan": step_plan,
     "progress": step_progress,
     "follow": step_follow,
+    "revise_only": step_revise_only,
     "revise": step_revise,
     "cost": step_cost,
     "exercise": step_exercise,
