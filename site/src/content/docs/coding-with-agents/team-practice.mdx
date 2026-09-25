@@ -144,10 +144,10 @@ the agent follows it less well (@Claude Code memory).
 
 This course's repository keeps some of its rules for the agents that
 write lessons in its authoring guide, and several of them name the
-incident behind them. The rule that every number a fixture prints is
-pasted from the fixture's output, and never worked out by hand, gives its
-reason: in one group of agent branches, several had a number worked out
-by hand that the fixture contradicted. The rule to check every invented
+incident behind them. The rule that every number in the prose that a
+fixture can produce is pasted from its output has its reason next to
+it: in one group of agent branches, several had a number worked out by
+hand that the fixture contradicted. The rule to check every invented
 name comes from a made-up freight company that turned out to be real
 (@AI Training writing-a-lesson).
 
@@ -196,8 +196,9 @@ guidance and that nothing in them is enforced. For an action that must
 never happen, it recommends a `PreToolUse` hook, which runs before the
 tool call and can stop it (@Claude Code memory). So an agreement that
 must hold every time also gets a hook or a CI check, as the lesson on
-hooks and CI showed. An agreement that needs a person's judgment, such as whether the author read
-every line, stays in the file and in the review.
+hooks and CI showed. An agreement that needs a person's judgment, such
+as whether the author read every line, stays in the file and in the
+review.
 
 This course's repository does both for the stash. Its page on
 orchestration says that agents never run `git stash` in any worktree and
@@ -313,7 +314,7 @@ would happen if you took it out?
 <Recap>
 1. Write the team's practice for agent use in the project instructions file, where every person and every agent session reads it (@Claude Code memory). It says what agents may do and what every change passes, how agent work is attributed and reviewed, and which directories and commands are off limits.
 2. Make the gate and the attribution form decisions at the start. Write every other rule from an incident the team has seen, and name the incident next to the rule.
-3. Add a rule when a mistake comes back. Remove a rule when its reason is gone or no incident or day-one decision is behind it, and read the file again from time to time to find those rules (@Claude Code memory).
+3. Add a rule when a mistake comes back. Read the file again from time to time (@Claude Code memory), and remove a rule when its reason is gone or no incident or day-one decision is behind it.
 4. The file states each agreement and its reason. An agreement that must hold every time also gets a hook or a CI check, and one that needs a person's judgment stays with the review.
 </Recap>
 

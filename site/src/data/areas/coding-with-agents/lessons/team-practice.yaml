@@ -41,18 +41,18 @@ review-by: 2027-03-25
 notes: >-
   Introduces no concept: draws the six team concepts together for the expert objective. Expert level
   and the last lesson in the course. Explanation mode because the deliverable is a document, and the
-  judge exercise keeps it concrete. This repository's own practice is the worked example:
-  AGENTS.md for the gate, the push rule and the attribution lines, writing-a-lesson.md "Rules that
-  bite" for rules that name their incident, and orchestration.md for the stash rule backed by a
-  hook. The AGENTS.md and writing-a-lesson.md entries are pinned to a commit, because the page
-  describes text that changes; the wave lead prompt was dropped as a source, because LICENSE
-  doesn't clearly cover .claude/ and its collision notes change every wave. Claude Code memory gives the session-start load, sharing through
-  version control, instructions as unenforced context with a PreToolUse hook to block, and the
-  advice to prune old rules and keep the file short, all checked on 2026-09-25. The Academy
-  playbook is cited at the level of its public course page (a lesson on CLAUDE.md, knowledge kept
-  in versioned files). The outline asked for a Scenario on three incidents; a Match of incidents to
+  judge exercise keeps it concrete. This repository's own practice is the worked example: AGENTS.md
+  for the gate, the push rule and the attribution lines, writing-a-lesson.md "Rules that bite" for
+  rules that name their incident, and orchestration.md for the stash rule backed by a hook. The
+  AGENTS.md and writing-a-lesson.md entries are pinned to a commit, because the page describes text
+  that changes; the wave lead prompt was dropped as a source, because LICENSE doesn't clearly cover
+  .claude/ and its collision notes change every wave. Claude Code memory gives the session-start load,
+  sharing through version control, instructions as unenforced context with a PreToolUse hook to block,
+  and the advice to prune old rules and keep the file short, all checked on 2026-09-25. The Academy
+  playbook is cited at the level of its public course page (a lesson on CLAUDE.md, knowledge kept in
+  versioned files). The outline asked for a Scenario on three incidents; a Match of incidents to
   rules, with a fourth rule no incident supports, tests the same thing and is the natural form. The
-  assumes entries name project-instructions and the three team lessons the page links and builds on. The fixture
-  site/examples/coding-with-agents/team-practice/history.py builds the history with an allow-list
-  git environment and fixed dates, and copies agents-draft.md in as AGENTS.md (the draft is not
-  named AGENTS.md in the course repository, so no agent loads it as instructions).
+  assumes entries name project-instructions and the three team lessons the page links and builds on.
+  The fixture site/examples/coding-with-agents/team-practice/history.py builds the history with an
+  allow-list git environment and fixed dates, and copies agents-draft.md in as AGENTS.md (the draft is
+  not named AGENTS.md in the course repository, so no agent loads it as instructions).
