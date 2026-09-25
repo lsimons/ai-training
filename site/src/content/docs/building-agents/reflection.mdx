@@ -5,13 +5,13 @@ returns a list of revision requests, and the first call revises. We
 count the rounds on a draft with two faults, remove the round cap and
 give the critic a vague criterion, and then put concrete criteria and a
 cap of two back. At the end we look at what the second pass costs and
-at the tasks where it pays.
+at the tasks where it helps.
 
 The drafts are answers of the handbook assistant from
 [Turning good into a rubric](/building-agents/rubrics/). Each one comes
 with the question and the passage its search returned. The critic and
-the reviser are fake model calls written by hand, so the runs show how
-the loop behaves, and they don't show how well a real model critiques.
+the reviser are fake model calls written by hand. The runs show how the
+loop behaves, and they don't show how well a real model critiques.
 The complete program is
 `site/examples/building-agents/reflection/agent.py` in the repository.
 Copy the `reflection` folder, and each step below is
@@ -94,7 +94,7 @@ python3 agent.py two_faults
 </Predict>
 
 The first critique finds both faults, and the reviser fixes both in one
-revision. The second critique finds nothing, so the loop stops. The
+revision. The second critique finds nothing, and the loop stops. The
 draft needed a second round only to confirm the fix, and that round is
 a model call too. The count of four model calls is the first draft, two
 critiques and one revision.
@@ -145,9 +145,9 @@ python3 agent.py no_cap
 
 </Predict>
 
-The critic never returns an empty list, so the only stop that is left
-is the budget. Seven rounds and fifteen model calls later, the final
-draft is the first draft with two words in front of it. No round
+The critic never returns an empty list, and the budget is the only stop
+left. After 7 rounds and 15 model calls, the final draft is the first
+draft with two words in front of it. No round
 changed a fact, and every round cost a critique and a revision.
 
 The fixture's critic is written to show this, and research on real
@@ -161,8 +161,8 @@ decide when to stop, and a real agent doesn't have that answer
 
 ## Concrete criteria and a cap of two
 
-Two changes repair the loop. A cap ends the run whatever the critic
-says, and the Agent Engineer Course advises a maximum of two or three
+The first repair is a cap, which ends the run whatever the critic
+says. The Agent Engineer Course advises at most two or three
 rounds, because more rounds give less and less (@AEC-04). Here is the
 vague critic with `max_rounds=2`.
 
@@ -183,8 +183,8 @@ python3 agent.py vague_capped
 </Predict>
 
 The cap bounds the cost, and the critic still has nothing useful to
-say. The second change is the one that makes the rounds worth their
-cost: a critic with criteria that a draft either meets or doesn't. The
+say. The second repair gives the rounds something to fix: a critic
+with criteria that a draft either meets or doesn't. The
 `checks_capped` step runs `critic_checks` with a cap of two on all four
 drafts, and prints the stop, the rounds and the final draft of each.
 
@@ -218,17 +218,17 @@ that named a concrete problem, the refined outputs scored higher than
 with generic feedback, for example 43.2 against 31.2 on a task that
 rewrites a review from negative to positive (@Madaan 2023).
 
-## What reflection costs, and where it pays
+## What reflection costs, and where it helps
 
 Every round adds at least one model call. In the fixture a draft that
-passes at once costs two calls instead of one, and the draft with two
-faults costs four. The Agent Engineer Course rates the cost of
+passes at once takes two calls instead of one, and the draft with two
+faults takes four. The Agent Engineer Course rates the cost of
 reflection as high and says it doesn't suit real-time replies in a
 conversation, where speed matters more than a better answer (@AEC-04).
 The calls also run one after the other, because each critique needs the
-draft before it, so each round adds its full time to the wait.
+draft before it. Each round adds its full time to the wait.
 
-The second pass pays where a critic can tell right from wrong. Code has
+The second pass helps where a critic can tell right from wrong. Code has
 tests and a compiler, a format has rules a check can apply, and an
 argument can be checked for each claim against its sources. Across seven
 tasks, Self-Refine improved results by about 20 percentage points on
@@ -244,18 +244,19 @@ output exists, and it fits when that output can be checked.
 
 <Scenario id="twelve-steps-latency" objective="building-agents/orchestrates-agents/picks-a-pattern"
   concepts={['reflection']}
-  context="A team builds an agent for a flow that a user waits on in a chat window. Each request runs twelve steps in a row, one model call per step, and the whole reply must arrive within a few seconds. Only the last step writes the reply in a fixed format with rules a check can apply."
+  context="A team builds an agent for a flow that a user waits on in a chat window. Each request runs twelve steps in a row, one model call of about a third of a second per step, so the reply takes about four seconds, and it must arrive within five. Only the last step writes the reply in a fixed format with rules a check can apply."
   title="Twelve steps and a latency budget"
   hint="How many calls does one critique round add per step, and which steps have output a critic can check?"
   options={[
-    { text: 'Add a critique round after every step, so each step output is checked before the next step uses it.', consequence: 'Each step now takes at least two calls in a row, so the flow makes 24 or more calls where it made 12. The reply misses the latency budget, and most of the critiques read steps that have nothing to check.' },
-    { text: 'Add one capped critique round on the last step only, with the format rules as its criteria.', correct: true, consequence: 'The flow makes one more call, or two when the reply needs a revision. The critic checks the output with rules it can apply, and the reply stays close to its latency budget.' },
+    { text: 'Add a critique round after every step, so each step output is checked before the next step uses it.', consequence: 'Each step now takes at least two calls in a row, so the flow makes 24 or more calls where it made 12. The reply takes eight seconds or more and misses the budget, and most of the critiques read steps that have nothing to check.' },
+    { text: 'Add one capped critique round on the last step only, with the format rules as its criteria.', correct: true, consequence: 'The flow makes one more call, or two when the reply needs a revision, and the reply stays under five seconds. The critic checks the output with rules it can apply.' },
     { text: 'Add a critique round after every step, with the question "is this good" and no cap.', consequence: 'The calls double, and a critic without criteria can keep asking for changes. Some requests never end within the budget, and the edits do not fix facts.' },
-    { text: 'Leave reflection out of the whole flow, and let the user report a wrong format.', consequence: 'The flow stays fast, and every reply with a broken format reaches the user. A cheap check on the one step with rules was available and was not used.' },
+    { text: 'Leave reflection out of the whole flow, and let the user report a wrong format.', consequence: 'The flow stays at four seconds, and every reply with a broken format reaches the user. The budget had room for a capped check on the one step with rules.' },
   ]}>
 
-The flow has twelve steps and a user waits for its reply. Where does
-reflection fit, if anywhere?
+The flow has twelve steps of about a third of a second each, and the
+reply must arrive within five seconds. Where does reflection fit, if
+anywhere?
 
 </Scenario>
 
@@ -305,7 +306,7 @@ critic asked "is this good" have found it?
 3. Criteria a draft passes or fails and a cap of two or three rounds keep
    the loop useful and bounded (@AEC-04), and specific feedback beats
    generic feedback (@Madaan 2023).
-4. Every round adds model calls that run in sequence. Reflection pays on
+4. Every round adds model calls that run in sequence. Reflection helps on
    outputs a critic can check, such as code, formats with rules and
    claims with sources, and it doesn't suit a flow that must answer fast.
 
@@ -349,7 +350,7 @@ from the first drafts only in wording. What causes the long runs?
 <MultiChoice id="what-makes-a-critique-pay" phase="review" objective="building-agents/orchestrates-agents/picks-a-pattern"
   concepts={['reflection']}
   context="A team adds a critique round to an agent that writes database queries: a second model call reads each query and returns revision requests, and the agent revises. They want the round to fix real errors at a bounded cost."
-  title="What makes the critique round pay?"
+  title="What makes the critique round fix errors?"
   hint="Which changes give the critic something it can check, or bound what the round costs?"
   options={[
     { text: 'The critic runs each query on a test database and reports the queries that fail.', correct: true },
