@@ -1,0 +1,283 @@
+import { Choice, Predict, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+
+In this lesson the fake model writes one line of reasoning before each
+tool request, and the loop prints that line in the trace. We run one task
+with the model that writes the line and with one that doesn't, and compare
+the traces. After that we look at a task where the line changes which tool
+the model asks for, and at what the line costs.
+
+The loop is the one from
+[Stopping the loop on purpose](/building-agents/stopping-the-loop/),
+with the same `run` and the same stop rules. Its `show` prints one more
+line, the thought, when a request has one. The complete
+program is `site/examples/building-agents/react/agent.py` in the
+repository. The tools belong to a small shop. `get_order` returns the
+item and the days since delivery, `get_policy` returns the text of a shop
+policy, and `issue_refund` refunds an order in full.
+
+## One line of reasoning before each call
+
+The pattern has a name, ReAct, from the paper that tested it: the model
+alternates a short written reasoning step with an action, reads the
+result, and reasons again (@Yao 2022). In the paper, the reasoning lets
+the model form a plan, revise it as results come in and deal with
+exceptions, and the actions fetch the facts that the reasoning needs
+(@Yao 2022). The lesson on agentic design patterns in the Agent
+Engineer Course presents it as a loop of think, act, observe (@AEC-04).
+
+In the fixture, the reasoning is one more field in the reply. The fake
+model `model_reasons` writes a `thought`, then asks for the tool that
+follows from it. Here is its first round:
+
+```python
+if len(done) == 0:
+    if question.startswith("Refund"):
+        thought = "A refund is allowed only inside the return window, so I check the order first."
+    else:
+        thought = "A return depends on when the order arrived, so I look up the order."
+    return {"thought": thought, "tool": "get_order", "args": {"order_id": order_id}}
+```
+
+In the second round it reads the days since delivery from the result and
+asks for the return policy. After that it compares the two numbers and
+answers. `show` prints `thought:` and the text before the round line of
+every request that has one.
+
+<Predict id="predict-reasoned-trace" objective="building-agents/orchestrates-agents/picks-a-pattern"
+  concepts={['react']}
+  context="In the lesson, a fake model writes a one-line thought before each tool request, and the trace prints it before the round line. The task is a customer asking whether order 1042 can still be returned. The order tool reports a kettle delivered 12 days ago, and the policy tool returns: Returns and refunds within 30 days of delivery. The model asks for the order first, then the policy, then answers."
+  title="Predict the trace with thoughts" hint="Which thought comes before which round, and what number does the second thought take from the first result?"
+  answer={`user: 'Can I still return order 1042?'
+thought: A return depends on when the order arrived, so I look up the order.
+round 1: get_order(order_id='1042') -> {'ok': True, 'item': 'kettle', 'days_since_delivery': 12}
+thought: It arrived 12 days ago. I need the return window to compare.
+round 2: get_policy(topic='returns') -> {'ok': True, 'text': 'Returns and refunds within 30 days of delivery.'}
+stop: end_turn
+answer: Yes. The kettle arrived 12 days ago, inside the 30-day window.`} run="building-agents/react/return_reasons.py">
+
+What does this print?
+
+```python
+show(run("Can I still return order 1042?", model=model_reasons))
+```
+
+</Predict>
+
+Two rounds, each with the reason written before it. The final reply is
+an answer with no tool request, so `run` returns before a third round and
+the answer has no thought line in front of it.
+
+## The same run without the reasoning
+
+`model_acts` is the kind of model the loop had before this lesson. It
+replies with a tool request only, and it picks the tool from the words of
+the question. Run it on the same task.
+
+<Predict id="run-plain-trace" title="The plain loop on the same task"
+  answer={`user: 'Can I still return order 1042?'
+round 1: get_order(order_id='1042') -> {'ok': True, 'item': 'kettle', 'days_since_delivery': 12}
+round 2: get_policy(topic='returns') -> {'ok': True, 'text': 'Returns and refunds within 30 days of delivery.'}
+stop: end_turn
+answer: Yes. The kettle arrived 12 days ago, inside the 30-day window.`} run="building-agents/react/return_acts.py">
+
+Run this, and compare what you see with the output below.
+
+```python
+show(run("Can I still return order 1042?", model=model_acts))
+```
+
+</Predict>
+
+The calls, their order, their results and the answer are all the same.
+The trace with thoughts adds one thing, a reason you can read for each
+call. On this task, a person who debugs the run learns why the
+agent looked up the order, and the agent does nothing different.
+
+## When the reasoning changes the call
+
+The second task asks for a refund of order 1077, a lamp delivered 45 days
+ago. `model_acts` sees the word "Refund" and asks for the refund tool.
+
+<Predict id="run-refund-plain" title="A refund without reasoning"
+  answer={`user: 'Refund order 1077.'
+round 1: issue_refund(order_id='1077') -> {'ok': True, 'refunded': '1077'}
+stop: end_turn
+answer: Done. Order 1077 is refunded.`} run="building-agents/react/refund_acts.py">
+
+Run this, and compare what you see with the output below.
+
+```python
+show(run("Refund order 1077.", model=model_acts))
+```
+
+</Predict>
+
+The refund went through for an order outside the 30-day window, and the
+model didn't read the policy. `model_reasons` writes
+its first thought about what a refund depends on, and that thought leads
+to a different first call.
+
+<Predict id="run-refund-reasoned" title="A refund with reasoning"
+  answer={`user: 'Refund order 1077.'
+thought: A refund is allowed only inside the return window, so I check the order first.
+round 1: get_order(order_id='1077') -> {'ok': True, 'item': 'lamp', 'days_since_delivery': 45}
+thought: It arrived 45 days ago. I need the return window to compare.
+round 2: get_policy(topic='returns') -> {'ok': True, 'text': 'Returns and refunds within 30 days of delivery.'}
+stop: end_turn
+answer: The lamp arrived 45 days ago, outside the 30-day window. I did not refund it.`} run="building-agents/react/refund_reasons.py">
+
+Run this, and compare what you see with the output below.
+
+```python
+show(run("Refund order 1077.", model=model_reasons))
+```
+
+</Predict>
+
+Both fake models are written by hand to show the difference, so the
+fixture proves nothing about real models. The paper measured it: across
+question answering, fact checking and two interactive tasks, prompting
+with reasoning steps between the actions did better than the baselines
+it compared (@Yao 2022).
+
+The line has a price. The thoughts stay in the message list, and the
+loop sends the whole list to the model again in every round. The `cost`
+step runs the return task with each model and prints the size of the
+message list after the last round.
+
+<Predict id="run-cost" title="The size of the message list"
+  answer={`model_acts: 466 characters
+model_reasons: 623 characters`} run="building-agents/react/cost.py">
+
+Run this, and compare what you see with the output below.
+
+```python
+for name, model in (("model_acts", model_acts), ("model_reasons", model_reasons)):
+    messages = run("Can I still return order 1042?", model=model)["messages"]
+    print(f"{name}: {len(str(messages))} characters")
+```
+
+</Predict>
+
+The calls and the answer are the same, and the list is longer by the two
+thoughts. A real model writes each line as output tokens, and the loop
+sends the line back as input in every later round of the run.
+
+## Most loops already do this
+
+The loops in this course already alternate a model decision with an
+action and its result: the model decides on an action, the loop runs it,
+and the model decides the next action from the result. The pattern adds the written reason between the
+result and the next decision. Some models write that reason on their own.
+On Claude, a model that supports interleaved thinking can write its
+reasoning after each tool result and before the next call. The API
+returns that reasoning as a summary, or as an empty field when the
+`display` setting is `omitted`, and it bills the full reasoning in both
+cases (@Claude docs thinking). The choice you make as the builder is
+whether the reasoning appears in a form you can read and keep.
+
+The property of a task that pays for the extra tokens is a next step
+that depends on what an earlier result said. The agent then chooses
+between tools as it goes. The refund is such a task: the order decides
+whether the refund tool is right. When the calls are the same whatever
+the results say, as with one export per table every night, the line
+doesn't change a call, and a fixed script or a plan fits the job
+better. People who review or debug the runs have a second reason to keep the line,
+because it shows them where the agent went wrong.
+
+<Choice id="which-task-gains" objective="building-agents/orchestrates-agents/picks-a-pattern"
+  concepts={['react']}
+  context="The lesson shows a fake model that writes one line of reasoning before each tool request, and compares its trace with a model that asks for tools without reasoning. On a task whose next call depends on an earlier result, the reasoning changed which tool the model asked for first."
+  title="Which task gains from the reasoning line?" hint="In which task does the result of one call decide which tool comes next?"
+  options={[
+    { text: 'Rename 300 photos by the same date rule, with one tool call per photo.', why: 'Every call follows from the rule, and no result changes the next call. The line would repeat 300 times and change nothing.' },
+    { text: 'Read a customer\'s plan and payment history, then choose a refund, a credit or a handover to a person.', correct: true },
+    { text: 'Translate a product description into French, with no tools at all.', why: 'There is no action between the reasoning steps, so there is no tool choice for a line to explain.' },
+    { text: 'Report the stock level of one item from one tool that is always the only call.', why: 'One fixed call has nothing to choose. The line adds tokens to a run whose path is known before it starts.' },
+  ]}>
+
+Which of these tasks gains the most from one line of reasoning before
+each tool call?
+
+</Choice>
+
+<Pitfall title="Reading the thought as a record of what happened">
+A reviewer sees "I check the order first" in a trace and concludes that
+the agent checked the order. The thought is text the model wrote. In the
+fixture's `run`, the loop runs `reply["tool"]` with `reply["args"]` and
+never reads `reply["thought"]`, so a thought and a call can disagree and
+the loop runs the call. Research on written reasoning found that models
+leave out factors that changed their answer and write plausible reasons
+for answers they were pushed toward (@Turpin 2023). On Claude, the
+thinking you get back is a summary and never the raw reasoning
+(@Claude docs thinking). Rule: check what the agent did in the round
+lines, the calls and their results, and read the thought as the model's
+explanation of them.
+</Pitfall>
+
+<Exercise stretch="Give model_alternates a thought that names the fix it tried last and the result it saw, and check whether a reader of that trace could spot the alternation before the step limit.">
+
+Copy `site/examples/building-agents/stopping-the-loop/agent.py` from the
+repository. Add a `thought` field to the replies of its three fake
+models, `model_never_answers`, `model_retries_forever` and
+`model_alternates`, and change its `show` to print the thought before
+each round line, the way this lesson's `show` does. Run the
+`never_answers`, `retries` and `alternates` steps, and put each trace
+next to the one the original file prints. Doing it once on a loop you
+already know shows how little the pattern changes in the code.
+
+A good result: three pairs of traces with the same rounds and the same
+stop reasons, where the new trace of each pair has a thought line before
+every round. Give `model_retries_forever` the same thought in every round
+for that. Then put the round number in its thought and run `retries`
+again. Which rule ends the run now, and what in `repeated` did the
+thought change?
+
+</Exercise>
+
+<Recap>
+
+1. ReAct alternates a short reasoning step with an action and reads the
+   result before it reasons again (@Yao 2022).
+2. On a task with a fixed path, the reasoning line adds a readable reason
+   for each call and leaves the calls the same.
+3. When the next tool depends on an earlier result, the reasoning step can
+   change which tool the model asks for, at the cost of one more line per
+   step that the loop sends back in every round.
+4. A tool-using loop already alternates decisions and actions, and on
+   Claude a thinking model can reason between tool calls whether or not
+   the loop shows it (@Claude docs thinking). A shown thought is the model's own
+   account, and the round lines are the record of what the loop ran
+   (@Turpin 2023).
+
+</Recap>
+
+<Sort id="sort-show-the-reasoning" phase="review" objective="building-agents/orchestrates-agents/picks-a-pattern"
+  concepts={['react']}
+  context="The lesson says that a written reasoning line before each tool call is worth its tokens when the next step depends on what an earlier result said, and when a person has to review or debug the runs. A task whose calls are the same whatever the results say gains nothing from it."
+  title="Show the reasoning, or leave it out?"
+  hint="Does the result of one call change which call comes next?"
+  buckets={['Show a reasoning line before each call', 'Leave the line out']}
+  items={[
+    { text: 'An agent that reads a support ticket with one tool, then picks one of five tools from what the ticket says', bucket: 0 },
+    { text: 'A nightly job that calls the same export tool once for each of 40 tables', bucket: 1 },
+    { text: 'An agent that checks an order and a policy before it decides whether to move money', bucket: 0 },
+    { text: 'A lookup that makes one fixed call for a stock level and prints it', bucket: 1 },
+  ]} />
+
+<Choice id="what-the-line-adds" phase="review" objective="building-agents/orchestrates-agents/picks-a-pattern"
+  concepts={['react']}
+  context="A team's agent loop runs the same two tool calls in the same order on every task: look up a record, then fetch a policy. They change the model's replies so that each tool request carries a one-line thought, and the loop prints it before each round."
+  title="What does the thought line add here?"
+  hint="Does any result in this loop change which call comes next?"
+  options={[
+    { text: 'Better tool choices, because a written reason makes each call more likely to be right.', why: 'The two calls are fixed, so there is no choice for the reason to improve. The reasoning changes a call only when a result can change the next step.' },
+    { text: 'Fewer calls per run, because the model now plans the steps before it starts.', why: 'A thought before each call is reasoning step by step. Planning all the steps up front is a different pattern, and it does not remove calls from this loop.' },
+    { text: 'The same calls with a reason for each, and a longer message list every round.', correct: true },
+    { text: 'A record of why each call was made that a reviewer can trust as proof.', why: 'The thought is text the model wrote, and the loop never reads it. What ran is in the calls and their results.' },
+  ]}>
+
+A team adds a one-line thought before each tool request in the loop
+described above. What changes in their runs?
+
+</Choice>
