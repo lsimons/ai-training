@@ -51,4 +51,6 @@ notes: >-
   (code.claude.com/docs/en/plugins/security), hook firing and namespaced skill names
   (plugins/components), auto-update defaults (plugins/install), the `version` pin
   (plugins/manifest-reference), matchers (hooks) and the default tool list of a subagent
-  (sub-agents). The Academy course named in the short is not cited on the page.
+  (sub-agents). The Academy course named in the short is not cited on the page. Whether the
+  lesson should serve `chooses-skill-over-tool`, of which it exercises only the cost weighing, is
+  open in #409.

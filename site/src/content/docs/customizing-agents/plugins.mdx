@@ -2,9 +2,9 @@ import { Choice, Match, MultiChoice, Predict, Sort, Scenario, Pitfall, Exercise,
 
 A colleague shares a plugin called `release-kit` with you. It lists one
 skill, `release`, which cuts a release the same way in every repository,
-and that skill is what you want. The plugin directory holds four parts:
-the skill, a subagent that writes release notes, a hook that runs before
-each shell command the agent runs, and a connection to the team's issue
+and that skill is what you want. Next to the skill, the plugin directory
+holds a subagent that writes release notes, a hook that runs before each
+shell command the agent runs, and a connection to the team's issue
 tracker. In this lesson we read that plugin one part at a time and say
 what each part does in your sessions. The lesson ends with a decision
 between installing it, copying the one skill out of it and leaving it.
@@ -13,8 +13,9 @@ The plugin is invented for the course. It is in the course repository at
 `site/examples/customizing-agents/plugins/release-kit/`, next to a short
 Python script, `inventory.py`, that lists what a plugin directory holds.
 The script only reads files, and nothing in this lesson installs the
-plugin or runs its hook. Run the commands from that directory, and replace
-`<course-repo>` with the path to your copy of the course repository.
+plugin or runs its hook. Run the commands from that directory, and
+replace `<course-repo>` with the path to your copy of the course
+repository.
 
 ```sh
 cd <course-repo>/site/examples/customizing-agents/plugins
@@ -22,50 +23,50 @@ cd <course-repo>/site/examples/customizing-agents/plugins
 
 ## What a plugin bundles
 
-In Claude Code, a **plugin** is one directory that holds different kinds
-of customization, and Claude Code installs it and loads it as one
-package (@Claude Code plugins). A manifest
-file at `.claude-plugin/plugin.json` gives it a name, and it can add a
-version and a description. The components are what the plugin adds to
-your sessions: skills, subagent definitions, hooks and Model Context
-Protocol (MCP) servers, plus a few rarer kinds. Each of these also works
-without a plugin, and a skill in `~/.claude/skills/` is available in all
-your projects. A plugin puts a set of them into one package that you
-install with one command and that gets its updates from one place
-(@Claude Code plugins).
+Skills, subagents, hooks and Model Context Protocol (MCP) servers each
+work on their own in Claude Code, and a skill in `~/.claude/skills/`
+already reaches all your projects. A **plugin** is how Claude Code ships
+a set of them together (@Claude Code plugins). You get the whole set with
+one install command, and later updates come from the same source. On
+disk a plugin is a directory. A manifest file in it,
+`.claude-plugin/plugin.json`, holds the plugin's name and can hold a
+version and a description. Plugins can also carry other kinds of
+component besides the four this lesson reads.
 
-Most plugins come from a **marketplace**, which is a catalog. It is a
-repository or a folder whose `.claude-plugin/marketplace.json` file names
-its plugins and says where Claude Code gets each of them. You add a marketplace once and then
-install plugins from it by name, in the form `plugin@marketplace`. Claude
-Code adds Anthropic's official marketplace the first time you start an
-interactive session, and it doesn't add any other marketplace by itself
-(@Claude Code plugins). A marketplace that a colleague or your own
-organization publishes counts as third-party. The name of a marketplace
-says who runs the catalog, and you still review each plugin in it
-yourself (@Claude Code plugin security).
+To install a plugin, Claude Code needs to know where to fetch it from,
+and a **marketplace** tells it. That is a git repository or a local
+folder with a `.claude-plugin/marketplace.json` file, which lists
+plugins and their sources. After you register a marketplace, you name a
+plugin from it as `plugin@marketplace` to install it. The only
+marketplace Claude Code registers by itself is Anthropic's official one,
+on your first interactive session (@Claude Code plugins). A catalog that
+your colleagues or your employer run is a third-party one. Knowing who
+runs a catalog doesn't tell you what one of its plugins does, so you
+review each plugin yourself (@Claude Code plugin security).
 
-When you install a plugin you choose a scope. User scope enables it for
-you in every project on the computer. Project scope enables it for
-everyone who works in the repository, through the committed
-`.claude/settings.json`. Local scope enables it for you in one repository
-only (@Claude Code plugins). When the author sets `version` in the
-manifest, installs stay on that version until the author sets a new one
-(@Claude Code plugin manifest).
-When auto-update is on for a marketplace, Claude Code updates the plugins
-from it in the background. The files you read before the install
-can then change on disk later (@Claude Code plugin security). Auto-update
-is on by default for most of Anthropic's official marketplaces and off for
-third-party ones (@Claude Code plugin install).
+The scope you pick at install time sets where the plugin is on. With
+user scope it is on in all your projects on this computer. Local scope
+keeps it to you, in one repository. Project scope writes it into the
+repository's committed `.claude/settings.json`, and that turns it on for
+the whole team in that repository (@Claude Code plugins).
 
-Once a plugin is enabled, Claude Code loads it into each session, whether
-or not that session uses it (@Claude Code plugins). The name and description of each
-skill, subagent and command that Claude may use on its own are in context
-on every turn, as the previous lesson measured for one skill. The full
-text of a skill or a subagent loads only when it is used. The MCP servers
-of the plugin run alongside each session, and its hooks run at their
-events. And whatever the plugin runs, it runs with your user account's
-permissions.
+Whether the installed files stay the ones you read depends on the author
+and on the marketplace. An author who sets `version` in the manifest
+holds every install at that version until they set a new one
+(@Claude Code plugin manifest). A marketplace with auto-update turned on
+replaces the installed files in the background after a session starts
+(@Claude Code plugin security). Most of Anthropic's official marketplaces
+have auto-update on by default, and third-party ones have it off
+(@Claude Code plugin install).
+
+What a plugin costs you doesn't depend on whether you use it. As long as
+it is enabled, Claude Code loads it into every session
+(@Claude Code plugins). Each turn contains the names and descriptions of
+the skills, commands and subagents that Claude may pick by itself, which
+is the stage the previous lesson measured for one skill. The full text of
+a skill or a subagent waits until Claude uses it. The plugin's servers
+are running in each session, its hooks act on each of their events, and
+that code has your user account's rights.
 
 <Sort id="when-each-part-acts" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
   concepts={['plugins']}
@@ -82,16 +83,17 @@ permissions.
 
 ## Read one plugin, part by part
 
-Claude Code shows a list of what a plugin will install before you install
-it. For a hook, that list shows that the hook exists and not what it runs,
-so Anthropic's own review steps say to read the plugin's files
-(@Claude Code plugin security). The same page names a command,
-`claude --plugin-dir <directory> plugin details <name>`, that prints the
-components Claude Code finds in a plugin directory without starting a
-session. `inventory.py` does a similar job for the parts this lesson
-reads, and it also prints each hook's command and each server's address.
-Its last line estimates the tokens that the names and descriptions add to
-every turn, with the same rule as `measure.py` in the previous lesson.
+Before an install, the `/plugin` menu in Claude Code shows what a plugin
+will add. That list tells you a hook is there but not the command behind
+it, and that is why Anthropic's review steps send you to the plugin's own
+files (@Claude Code plugin security). For a plugin directory you have
+cloned, the same page gives the command
+`claude --plugin-dir <directory> plugin details <name>`, which lists its
+components without starting a session. `inventory.py` does a similar job
+for the parts this lesson reads, and it also prints each hook's command
+and each server's address. Its last line estimates the tokens that the
+names and descriptions add to every turn, with the same rule as
+`measure.py` in the previous lesson.
 
 <Predict id="list-release-kit" title="List what release-kit holds"
   answer={`plugin release-kit 1.4.0
@@ -119,47 +121,53 @@ Now read each part in the plugin's directory, and write down what it
 does in a session.
 
 **The skill,** `skills/release/SKILL.md`, has the five release steps and
-a check that says when the release is done. In a plugin, a skill's
-command name starts with the plugin's name, so this one is
-`/release-kit:release` (@Claude Code plugin parts). The last line of the
-inventory puts the skill and the subagent at about 50 tokens per turn
-together, which is small.
+a check that says when the release is done. Its steps read and edit the
+repository's `CHANGELOG.md`. In a plugin, a skill's command name starts
+with the plugin's name, so this one is `/release-kit:release`
+(@Claude Code plugin parts). The last line of the inventory puts the
+skill and the subagent at about 50 tokens per turn together, which is
+small.
 
-**The subagent,** `agents/release-notes.md`, writes release notes from
-`git log`. Its front matter lists `Read`, `Grep` and `Bash`, so it can run
-shell commands. A subagent file with no `tools` line gets every tool that
-subagents can use (@Claude Code subagents). Read that line in every
-subagent a plugin brings.
+**The subagent,** `agents/release-notes.md`, is a helper agent. Claude
+gives it a task, and it works on that task with its own instructions and
+its own context. This one writes release notes from `git log`. Its
+front matter lists `Read`, `Grep` and `Bash`, so it can run shell
+commands. Leave the `tools` line out, and a subagent may use every tool
+that subagents are allowed (@Claude Code subagents). Read that line in
+every subagent a plugin brings.
 
-**The hook** is in `hooks/hooks.json`. It acts whether anyone uses the
-release skill or not. From the moment a session loads the plugin, each of
-its hooks runs on the event it names (@Claude Code plugin parts). This one runs on `PreToolUse`, before a tool
-call, and its matcher `Bash` limits it to shell commands. A hook with no
-matcher runs on every occurrence of its event, and a `PreToolUse` hook
-can block the tool call (@Claude Code hooks). The inventory shows the
-command and not what the script does, so open
+**The hook** is in `hooks/hooks.json`. Nobody has to run the release
+skill for it to act, because it is active from the moment a session
+loads the plugin (@Claude Code plugin parts). Its event is `PreToolUse`,
+the moment before Claude Code runs a tool call. Its matcher, a pattern
+on the tool name, is `Bash`, so it runs before shell commands only.
+Without a matcher, a hook runs on every occurrence of its event, and a
+`PreToolUse` hook can stop the call (@Claude Code hooks). The
+inventory shows the command and not what the script does, so open
 `scripts/changelog_guard.py`. It blocks every `git commit` that doesn't
 stage `CHANGELOG.md`, in every repository where the plugin is enabled.
 
 **The server** is in `.mcp.json`. It is an MCP server at
 `tracker.example.com` that gets the value of the `TRACKER_TOKEN`
-environment variable as a bearer token. When the plugin is enabled,
-Claude Code opens a connection to each server it lists and offers the
-server's tools to Claude. A server with a `command` in place of a `url`
-runs as a process that Claude Code starts on your own machine
+environment variable as a bearer token. While the plugin is enabled,
+Claude has this server's tools, and Claude Code talks to the server for
+it. If an entry has a `command` and no `url`, Claude Code starts that
+command as a process on your own machine
 (@Claude Code plugin security). The server can do on the tracker what
 that token allows, so the token's access is the access you grant.
 
-**The `bin/` directory** is missing from this plugin. When a plugin has
-one, Claude Code puts it on the `PATH` of the agent's shell, and the
-review steps say to read every file in it (@Claude Code plugin security).
+**This plugin has no `bin/` directory.** In a plugin that has one, the
+agent's shell can run every file in it by name, because Claude Code adds
+the directory to that shell's `PATH`. Anthropic's review steps say to
+read all of those files (@Claude Code plugin security).
 
-Some of these parts are under your permission rules and some aren't. The
-rules and the sandbox cover the tool calls Claude makes, including a call
-to a plugin's MCP tool and a shell command that runs a file from `bin/`.
-Hooks and server processes run outside the sandbox with your full user
-permissions, and the permission rules don't check them
-(@Claude Code plugin security).
+Your permission rules are the allow and deny rules in your settings that
+decide which tool calls Claude may make. They check a call to one of the
+plugin's MCP tools, and they check a shell command that runs a file from
+`bin/`. Claude Code's sandbox for shell commands covers only the second
+of those, because the server behind an MCP tool runs outside it. Hooks
+and server processes are outside both. They run with your full user
+rights, and no permission rule sees them (@Claude Code plugin security).
 
 <MultiChoice id="what-the-rules-check" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
   concepts={['plugins']}
@@ -167,7 +175,7 @@ permissions, and the permission rules don't check them
   title="What do your permission rules check?" hint="Which of these is a call that Claude makes, and which does Claude Code run by itself?"
   options={[
     { text: 'Claude calling one of the plugin server\'s tools', correct: true },
-    { text: 'The hook script that runs before each shell command', why: 'Claude Code runs a hook by itself, outside the sandbox and with your user permissions. The permission rules don\'t check it.' },
+    { text: 'The hook script that runs before each shell command', why: 'Claude Code runs a hook by itself, with your user permissions. The permission rules don\'t check it.' },
     { text: 'Claude running the file in bin/ with a shell command', correct: true },
     { text: 'The local server process that Claude Code starts', why: 'Claude Code starts a local server by itself, outside the sandbox. Only the calls Claude makes to its tools are checked.' },
   ]}>
@@ -185,33 +193,34 @@ way [Instruction, skill or tool?](/customizing-agents/skill-or-tool-or-instructi
 weighed each option: by what it adds to the context window on every
 turn, and by what it adds to the things that can act in your sessions.
 
-The decision has three outcomes.
-
 - **Install it** when you want what most of its parts do. Choose the
   narrowest scope that fits, and read the plugin again when an update
   arrives.
 - **Copy one skill out of it** when a skill is all you want and the
   plugin's license lets you copy it. A skill works without a plugin
   (@Claude Code plugins). The copy goes into your project's
-  `.claude/skills/` and doesn't get updates. You own it from then on. A skill
-  that calls a script from elsewhere in the plugin needs that script too.
+  `.claude/skills/` and doesn't get updates. You own it from then on. A
+  skill that calls a script from elsewhere in the plugin needs that
+  script too.
 - **Leave it** when what the parts cost is more than what they do for
   you, or when you can't read what a part runs.
 
-For `release-kit`, you wanted one skill. The hook would change how every
-commit works in every repository where the plugin is enabled. The tracker
-server needs a token, and you don't use that tracker. The skill's text
-doesn't name a file outside its own directory. So copy the skill. If your team
-does want the changelog rule, that's a separate decision, made for the
-repository as a hook in its own settings.
+For `release-kit`, you wanted one skill. Your team updates
+`CHANGELOG.md` only when it cuts a release. The hook would block all the
+other commits in each repository where the plugin is enabled.
+The tracker server needs a token, and you don't use that tracker. The
+skill doesn't call a script or read a file from elsewhere in the plugin.
+So copy the skill. If the team decides later that every commit needs a
+changelog entry, that's a rule for the repository, and it goes into a
+hook in the repository's own settings.
 
 <Choice id="what-to-do-with-release-kit" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
   concepts={['plugins']}
-  context="The release-kit plugin holds a release skill, a release-notes subagent, a PreToolUse hook on Bash that blocks any git commit without a staged CHANGELOG.md, and an MCP server for an issue tracker. The learner's team doesn't keep a changelog and doesn't use that tracker. The plugin's license lets them copy files from it."
+  context="The release-kit plugin holds a release skill that edits CHANGELOG.md, a release-notes subagent, a PreToolUse hook on Bash that blocks any git commit without a staged CHANGELOG.md, and an MCP server for an issue tracker. The learner's team updates CHANGELOG.md only when it cuts a release, and doesn't use that tracker. The plugin's license lets them copy files from it."
   title="What do you do with release-kit?" hint="Which parts do you want, and which parts would run in sessions that have nothing to do with a release?"
   options={[
     { text: 'Install it at user scope, and add a permission rule that denies the hook script.', why: 'Permission rules check the tool calls Claude makes. A hook runs outside them, so the rule doesn\'t stop it, and every commit in every project gets the check.' },
-    { text: 'Install it at project scope, so only this one repository gets the hook.', why: 'The hook then blocks every commit without a changelog entry for everyone on the team, in a repository that has no changelog. The tracker server comes too.' },
+    { text: 'Install it at project scope, so only this one repository gets the hook.', why: 'The hook then blocks every everyday commit without a changelog entry, for everyone on the team, in a repository that updates its changelog only at release time. The tracker server comes too.' },
     { text: 'Install it and keep it, since the hook runs only on release commits.', why: 'The hook runs before every shell command and blocks every git commit without a staged CHANGELOG.md, release or not.' },
     { text: 'Copy the release skill into the repository\'s skills and don\'t install the plugin.', correct: true },
   ]}>
@@ -220,54 +229,55 @@ Which of these is the right decision for `release-kit`?
 
 <Match id="when-it-acts" phase="review" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
   concepts={['plugins']}
-  context="A Claude Code plugin is enabled at user scope. It holds a skill, a subagent and a PreToolUse hook with no matcher. Each row is one part of the plugin, and the options say when that part acts in a session."
-  title="When does each part act?" hint="Which part does Claude need in order to know the skill exists, which part needs an event, and which part needs Claude to use it?"
-  options={['On every turn, as a few tokens of context', 'At its event, in every session', 'Only when Claude uses that skill or subagent']}
+  context="A Claude Code plugin is enabled at user scope. It holds a skill, a PreToolUse hook with no matcher, and an MCP server with tools. Each row is one part of the plugin, and the options say when that part acts and whether your permission rules check it."
+  title="When does each part act, and who checks it?" hint="Does the part need Claude to use it, and is it a call that Claude makes or code that Claude Code runs by itself?"
+  options={['In every session, and no permission rule checks it', 'Only when Claude calls it, and your permission rules check the call', 'Only when Claude uses the skill it belongs to']}
   rows={[
-    { statement: 'The name and description of the skill', option: 0, why: 'What does Claude read to decide whether a task matches the skill?' },
-    { statement: 'The PreToolUse hook', option: 1, why: 'Does a hook wait for one of the plugin\'s skills to run?' },
+    { statement: 'The PreToolUse hook', option: 0, why: 'Does a hook wait for one of the plugin\'s skills to run, and is it a call that Claude makes?' },
+    { statement: 'A tool of the MCP server', option: 1, why: 'Who makes a call to an MCP tool, and what checks calls that Claude makes?' },
     { statement: 'The body of the skill', option: 2, why: 'When does the full text of a skill load?' },
-    { statement: 'The instructions of the subagent', option: 2, why: 'When does Claude read a subagent\'s instructions?' },
   ]}
-  rationale="Claude Code loads an enabled plugin into each session. Its descriptions cost context on every turn, and its hooks run at their events whether you use the plugin or not.">
-Match each part of the plugin to when it acts.
+  rationale="The hook acts in sessions that never use the plugin, and your permission rules don't gate it. So a plugin you install for one part brings the rest into every session.">
+Match each part of the plugin to when it acts and what checks it.
 </Match>
 
 <Choice id="what-stops-the-hook" phase="review" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
   concepts={['plugins']}
-  context="A plugin installed at user scope has a hook that runs a script before each shell command the agent runs. The script blocks commits in a way the user doesn't want, and the user looks for a way to stop the hook."
-  title="What stops the plugin's hook?" hint="Which of these controls covers code that Claude Code runs by itself, and which cover only the calls Claude makes?"
+  context="A user installed a plugin at user scope for one skill. The plugin also has a hook that runs a script before each shell command the agent runs, and the script blocks commits in a way the user doesn't want. The plugin's license lets them copy its files."
+  title="Keep the skill, stop the hook" hint="Does the hook depend on the skill being used, and does a rule for Claude's calls reach code that Claude Code runs by itself?"
   options={[
-    { text: 'A permission rule that denies the script\'s path in your settings.', why: 'Permission rules check the tool calls Claude makes. Claude Code runs the hook by itself, so the rule never sees it.' },
-    { text: 'Disabling or uninstalling the plugin that brought it into the session.', correct: true },
-    { text: 'Turning on the sandbox for the shell commands of the session.', why: 'Claude Code runs hooks outside the sandbox, so the sandbox doesn\'t limit what the script does.' },
+    { text: 'Add a permission rule that denies the script\'s path in your settings.', why: 'Permission rules check the tool calls Claude makes. Claude Code runs the hook by itself, so the rule never sees it.' },
+    { text: 'Stop using the plugin\'s skill, so that the hook has no reason to run.', why: 'A plugin\'s hooks run on their events from the moment a session loads the plugin, whether or not the skill is used.' },
+    { text: 'Copy the skill into the project, then uninstall the plugin.', correct: true },
   ]}>
-Which of these stops the hook from running?
+The user wants to keep the one skill and stop the hook. What do they
+do?
 </Choice>
 
 <Scenario id="a-plugin-for-one-skill" phase="review" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
   concepts={['plugins']}
-  context="A plugin called docs-kit holds a skill that drafts architecture decision records, a hook with no matcher on the Stop event that runs a script from the plugin, and a local MCP server that the plugin starts from its bin directory. The team wants only the drafting skill, and the plugin's license lets them copy its files."
-  title="The docs plugin" hint="Which parts would run in sessions that never draft a decision record?"
+  context="A plugin called docs-kit holds a skill that drafts architecture decision records, a hook with no matcher on the Stop event that runs a script from the plugin, and a local MCP server that Claude Code starts from a file in the plugin. The team wants only the drafting skill, and the plugin's license lets them copy its files."
+  title="The docs plugin" hint="Which parts would run in sessions that never draft a decision record, and which of them do your permission rules check?"
   options={[
-    { text: 'Install docs-kit at user scope for the one skill.', consequence: 'The Stop hook runs its script every time Claude stops, and the server process starts in each session, in every project on the computer.' },
+    { text: 'Install docs-kit at user scope for the one skill.', consequence: 'The Stop hook runs its script every time Claude stops, and the server process starts in each session, in every project on the computer. No permission rule checks either of them.' },
     { text: 'Copy the drafting skill into the project\'s skills.', correct: true, consequence: 'The team gets the one skill it wanted. No hook runs and no server starts, and the team keeps the copy up to date itself.' },
-    { text: 'Install docs-kit at local scope in the one repository.', consequence: 'The hook and the server now run only in that repository, but they still run in every session there, for a skill the team uses now and then.' },
+    { text: 'Install docs-kit at local scope in the one repository.', consequence: 'The hook and the server now run only in that repository, but they still run in every session there, outside your permission rules, for a skill the team uses now and then.' },
   ]}>
 The team wants the decision-record skill from `docs-kit`. What should
 it do?
 </Scenario>
 
 <Pitfall title="The hook that came with the release skill">
-A developer installs `release-kit` at user scope to get the release skill.
-A week later, in a repository that has no changelog, the agent's commits
-start to fail with a message about `CHANGELOG.md`, and the agent creates
-the file to get past the check. The developer looks for the cause in the
-release skill and finds nothing there, because the cause is the hook,
-which runs before each shell command in every project. The plugin was
-installed for one part and brought all four. Read `hooks/hooks.json` and
-the scripts it names before you install a plugin, and don't install a
-plugin for one skill that you can copy.
+A developer installs `release-kit` at user scope to get the release
+skill. Their team updates `CHANGELOG.md` only when it cuts a release. A
+week later, the agent's everyday commits start to fail with a message
+about `CHANGELOG.md`, and the agent adds a changelog entry to each commit
+to get past the check. The developer looks for the cause in the release
+skill and finds nothing there, because the cause is the hook, which runs
+before each shell command in every project. The plugin was installed for
+one part and brought all of them. Read `hooks/hooks.json` and the scripts
+it names before you install a plugin, and don't install a plugin for one
+skill that you can copy.
 </Pitfall>
 
 <Exercise stretch="Run the same read on a second public plugin that declares an MCP server, and say what access the server asks for.">
@@ -276,11 +286,16 @@ Read the `hookify` plugin in Anthropic's public
 at the commit the link names, and decide what to do with it. Know what
 it can change before you start. Its hooks run on every tool call, before
 and after, on every prompt you submit and every time Claude stops. They
-can block a tool call and keep Claude from stopping, and its `/hookify`
-command has Claude write rule files into the project's `.claude/`
-directory. The exercise is a read, so it doesn't install the plugin. If
-you decide after the read to try it, install it at local scope in a
-scratch repository, never where you have real work.
+can block a tool call and keep Claude from stopping, and its
+`/hookify:hookify` command has Claude write rule files into the
+project's `.claude/` directory. The exercise is a read, so it doesn't
+install the plugin. If you decide after the read to try it, install it
+at local scope in a scratch repository, never where you have real work.
+An install comes from the marketplace, `claude-code-plugins`, so it gets
+that marketplace's current hookify and not the commit you read. That
+marketplace has an official name, and those have auto-update on by
+default (@Claude Code plugin install). Read the installed copy again
+before you use it, or turn off auto-update for that marketplace first.
 
 These commands fetch only the plugin's directory, into `~/plugin-read`,
 and run the inventory on it. The first line deletes `~/plugin-read`, so
@@ -314,14 +329,15 @@ you have no rules at all?
 </Exercise>
 
 <Recap>
-1. A plugin bundles skills, subagents, hooks and MCP servers into one
-   unit that Claude Code installs and loads, usually from a marketplace
-   that lists it (@Claude Code plugins).
-2. Claude Code loads an enabled plugin into each session. Its
-   descriptions cost context on every turn, and its hooks run at their
-   events whether you use the plugin or not (@Claude Code plugin parts).
-3. Hooks and server processes run with your user permissions, outside
-   the sandbox and the permission rules (@Claude Code plugin security).
+1. A plugin ships skills, subagents, hooks and MCP servers together, and
+   you usually install it by name from a marketplace
+   (@Claude Code plugins).
+2. An enabled plugin costs context on every turn and runs its hooks on
+   their events, also in sessions that never use it
+   (@Claude Code plugins) (@Claude Code plugin parts).
+3. Your permission rules check the calls Claude makes to a plugin's
+   tools. Hooks and server processes run with your user rights, outside
+   both the rules and the sandbox (@Claude Code plugin security).
 4. Read `hooks/hooks.json`, the scripts it names, `.mcp.json` and `bin/`
    before you install. The list Claude Code shows says that a hook exists
    and not what it runs (@Claude Code plugin security).
