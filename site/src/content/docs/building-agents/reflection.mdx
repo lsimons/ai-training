@@ -9,8 +9,11 @@ at the tasks where it helps.
 
 The drafts are answers of the handbook assistant from
 [Turning good into a rubric](/building-agents/rubrics/). Each one comes
-with the question and the passage its search returned. The critic and
-the reviser are fake model calls written by hand. The runs show how the
+with the question and the passage its search returned, and the critic
+reads the reply before the loop runs any action the reply proposes. The
+laptop draft is adapted from run five of that lesson, so that it
+proposes a ticket instead of opening one. The critic and the reviser are
+fake model calls written by hand. The runs show how the
 loop behaves, and they don't show how well a real model critiques.
 The complete program is
 `site/examples/building-agents/reflection/agent.py` in the repository.
@@ -73,19 +76,14 @@ The first draft answers a question about flights. The passage says
 flights are booked at least 14 days ahead. The draft says 10 days and
 quotes nothing, so it has two faults that both checks can see.
 
-<Predict id="predict-two-faults" objective="building-agents/orchestrates-agents/picks-a-pattern"
-  concepts={['reflection']}
-  context="In the lesson, a fake critic runs two checks on a draft answer: every number must be in the retrieved passage, and the answer must quote a passage sentence word for word. Each failed check becomes one revision request, and a fake reviser applies every request in the list. The loop stops when the critic returns no requests, with a cap of four rounds. The draft has a wrong number and no quote."
-  title="Predict the rounds"
-  hint="How many requests does the first critique return, and does the reviser handle them one at a time or all at once?"
+<Predict id="predict-two-faults" title="Two faults in one draft"
   answer={`draft: Book flights at least 10 days ahead, through the travel desk.
   round 1: critic -> ['Use only numbers the passage states. 10 is not in it.', 'Quote the sentence you relied on, word for word.']
   revised: Book flights at least 14 days ahead, through the travel desk. "Flights are booked through the travel desk at least 14 days ahead."
   round 2: critic -> []
   stop: passed after 2 rounds, 4 model calls`} run="building-agents/reflection/two_faults.py">
 
-How many rounds does this run take, and how does it stop? Predict the
-output, then run it.
+Run this, and compare what you see with the output below.
 
 ```sh
 python3 agent.py two_faults
@@ -106,6 +104,10 @@ only whether the answer is good, and `max_rounds` is `None`, so the
 round cap is gone. The draft is the answer about annual leave, which
 already passes both checks. The fake critic behaves like a reviewer with
 nothing concrete to check: it always finds one more thing to change.
+The budget is the loop's last stop. At every critique, `reflect` adds
+the length of the question, the passage and the draft to `spent`, and
+after the revision it stops with `budget_spent` once `spent` is over
+2000 characters.
 
 ```python
 def critic_is_it_good(item: dict, draft: str) -> list[str]:
@@ -136,8 +138,8 @@ def critic_is_it_good(item: dict, draft: str) -> list[str]:
   revised: Good question! You get 25 days per year. "Every employee accrues 25 days of annual leave per year."
   stop: budget_spent after 7 rounds, 15 model calls`} run="building-agents/reflection/no_cap.py">
 
-What does the loop do with a draft that was already right? Predict how
-the run ends, then run it.
+The draft was already right. Predict how this run ends and why, then
+run it and compare the stop line.
 
 ```sh
 python3 agent.py no_cap
@@ -147,8 +149,8 @@ python3 agent.py no_cap
 
 The critic never returns an empty list, and the budget is the only stop
 left. After 7 rounds and 15 model calls, the final draft is the first
-draft with two words in front of it. No round
-changed a fact, and every round cost a critique and a revision.
+draft with two words in front of it. No round changed a fact, and every
+round cost a critique and a revision.
 
 The fixture's critic is written to show this, and research on real
 models points the same way. In one study, models that were asked to
@@ -194,7 +196,7 @@ drafts, and prints the stop, the rounds and the final draft of each.
   leave: passed after 1 round, 2 model calls
     final: You get 25 days per year. "Every employee accrues 25 days of annual leave per year."
   laptop: passed after 1 round, 2 model calls
-    final: Report it to the service desk the same day. "Report a lost laptop to the service desk the same day." I have opened a ticket for you.
+    final: Report it to the service desk the same day. "Report a lost laptop to the service desk the same day." I will open a ticket for you.
   dog: passed after 1 round, 2 model calls
     final: Yes, during core hours. "Core hours, when everyone in the office is reachable, are 10 to 15."`} run="building-agents/reflection/checks_capped.py">
 
@@ -207,16 +209,16 @@ python3 agent.py checks_capped
 </Predict>
 
 The draft about leave now passes in one round and stays as it was. The
-last two results show the limit of this critic. The laptop answer opens
-a ticket the user didn't ask for, and the dog answer says yes from a
-passage about opening hours. Both pass, because the critic checks
+last two results show the limit of this critic. The laptop answer
+proposes a ticket the user didn't ask for, and the dog answer says yes
+from a passage about opening hours. Both pass, because the critic checks
 numbers and quotes and nothing else. A critic finds only the faults its
 criteria name, and the exercise gives it the rest.
 
 Self-Refine measured the same difference on real models. With feedback
 that named a concrete problem, the refined outputs scored higher than
 with generic feedback, for example 43.2 against 31.2 on a task that
-rewrites a review from negative to positive (@Madaan 2023).
+reverses the sentiment of a review (@Madaan 2023).
 
 ## What reflection costs, and where it helps
 
@@ -229,14 +231,21 @@ The calls also run one after the other, because each critique needs the
 draft before it. Each round adds its full time to the wait.
 
 The second pass helps where a critic can tell right from wrong. Code has
-tests and a compiler, a format has rules a check can apply, and an
-argument can be checked for each claim against its sources. Across seven
-tasks, Self-Refine improved results by about 20 percentage points on
-average over one pass of the same model (@Madaan 2023). On math
-reasoning the gain was small, because the models couldn't tell whether
-a solution had an error. In most cases ChatGPT's feedback said that
-everything looked good (@Madaan 2023). A critic that can't find an
-error adds calls and doesn't fix anything.
+tests and a compiler, and a format has rules a check can apply. Across
+seven tasks, Self-Refine improved results by about 20 percentage points
+on average over one pass of the same model, and the largest gains were
+on tasks that people or a model scored by preference, such as dialogue
+replies (@Madaan 2023). On math reasoning the gain was small, because
+the models couldn't tell whether a solution had an error. In most cases
+ChatGPT's feedback said that everything looked good (@Madaan 2023). A
+critic that can't find an error adds calls and doesn't fix anything.
+
+Part of a measured gain can also come from a weak first prompt. On one
+Self-Refine task, a better single prompt scored higher than the
+original prompt after self-correction, 81.8 against 75.1, in one call
+against seven (@Huang 2023). Before you add a
+second pass, check whether a better first prompt does the same job in
+one call.
 
 [Reasoning before each action](/building-agents/react/) added one line
 per step inside the same call. Reflection adds whole calls after an
@@ -250,7 +259,7 @@ output exists, and it fits when that output can be checked.
   options={[
     { text: 'Add a critique round after every step, so each step output is checked before the next step uses it.', consequence: 'Each step now takes at least two calls in a row, so the flow makes 24 or more calls where it made 12. The reply takes eight seconds or more and misses the budget, and most of the critiques read steps that have nothing to check.' },
     { text: 'Add one capped critique round on the last step only, with the format rules as its criteria.', correct: true, consequence: 'The flow makes one more call, or two when the reply needs a revision, and the reply stays under five seconds. The critic checks the output with rules it can apply.' },
-    { text: 'Add a critique round after every step, with the question "is this good" and no cap.', consequence: 'The calls double, and a critic without criteria can keep asking for changes. Some requests never end within the budget, and the edits do not fix facts.' },
+    { text: 'Add a critique round after every step, with the question "is this good" and no cap.', consequence: 'The calls double, and a critic without criteria can keep asking for changes. Some user requests never end within the budget, and the edits do not fix facts.' },
     { text: 'Leave reflection out of the whole flow, and let the user report a wrong format.', consequence: 'The flow stays at four seconds, and every reply with a broken format reaches the user. The budget had room for a capped check on the one step with rules.' },
   ]}>
 
@@ -267,29 +276,39 @@ longer and friendlier, and the loop stops only at the cap or the budget.
 Without an outside signal, models that critique their own answers can
 change right answers into wrong ones (@Huang 2023). Rule: write the
 critic's criteria as checks a draft passes or fails, such as the
-criteria of a rubric, cap the rounds, and leave reflection out where no
-criterion can be checked.
+criteria of a rubric, and cap the rounds. Where no criterion can be
+checked, leave reflection out.
 </Pitfall>
 
 <Exercise stretch="Give the critic a criterion that the reviser has no edit for, and run the four drafts again. Which stop rule ends the run for that draft, and what does the final draft still contain?">
 
-Give the fixture critic the three criteria from the model answer of
-[Turning good into a rubric](/building-agents/rubrics/) in place of "is
-this good": Correct, Asked-for actions and Answer format. In your copy of
-the `reflection` folder, write a new critic next to `critic_checks` with
-one check per criterion. `check_numbers` and `check_quote` already cover
-half of Correct and all of Answer format. Add a check that the passage
-covers the question, using the draft's `subject`, and one that rejects
-a ticket the question didn't ask for. The reviser knows two requests for
-these, one that starts with "Answer exactly: not found." and one that
-starts with "Remove the ticket.". Cap the rounds at two, and run
-`show_table` with your critic on the four drafts. The output is the
-round count and the final draft of each. Writing the critic yourself
-shows how much of its work is the criteria.
+Give the fixture critic three criteria in place of "is this good". They
+come from the model answer of
+[Turning good into a rubric](/building-agents/rubrics/), in
+`site/examples/building-agents/rubrics/model-answer.txt`:
+
+- **Correct**: every part of the answer matches the handbook, and when
+  the handbook has no answer, the reply says so.
+- **Asked-for actions**: the agent opens a ticket only when the question
+  asks for one.
+- **Answer format**: the reply quotes the sentence it relied on, word for
+  word, or answers exactly "not found".
+
+In your copy of the `reflection` folder, write a new critic next to
+`critic_checks` with one or more checks per criterion. `check_numbers`
+covers half of Correct, and `check_quote` covers Answer format. Add a
+check that the passage covers the question, using the item's `subject`,
+and one that rejects a ticket the question didn't ask for. The reviser
+knows two requests for these, one that starts with "Answer exactly: not
+found" and one that starts with "Remove the ticket". To run it, add a
+step to `STEPS` that calls `show_table(your_critic, max_rounds=2)`, and
+run that step. The output is the round count and the final draft of each
+of the four drafts. Writing the critic yourself shows how much of its
+work is the criteria.
 
 A good result: flights passes after 2 rounds and leave after 1, as
-before. Laptop now passes after 2 rounds with the ticket sentence gone,
-and dog passes after 2 rounds with the final draft "not found". Compare
+before. Laptop now passes after 2 rounds with the ticket proposal gone,
+so the loop never opens the ticket, and dog passes after 2 rounds with the final draft "not found". Compare
 with `python3 model_answer.py` in the same folder. Which of your three
 criteria did a draft fail that `critic_checks` passed, and could a
 critic asked "is this good" have found it?
@@ -307,8 +326,8 @@ critic asked "is this good" have found it?
    the loop useful and bounded (@AEC-04), and specific feedback beats
    generic feedback (@Madaan 2023).
 4. Every round adds model calls that run in sequence. Reflection helps on
-   outputs a critic can check, such as code, formats with rules and
-   claims with sources, and it doesn't suit a flow that must answer fast.
+   outputs a critic can check, such as code and formats with rules, and
+   it doesn't suit a flow that must answer fast.
 
 </Recap>
 
@@ -337,7 +356,7 @@ its own work, write down the criteria it checks and the round cap first.
   hint="What would make the critic return an empty list?"
   options={[
     { text: 'The critic model is too weak, so a larger model as critic ends the loop.', why: 'A larger model can find more to improve. Nothing in the prompt says when an answer is good enough, whatever the model.' },
-    { text: 'The drafts start too weak, so a better first prompt ends the loop.', why: 'The team saw this on drafts that were already right. A critic asked what would make a draft better can always suggest something.' },
+    { text: 'The drafts start too weak, so a better first prompt ends the loop.', why: 'The final answers differ from the first drafts only in wording, so the drafts were not what kept the loop going.' },
     { text: 'The critic has no criterion a draft can pass, and the loop has no round cap.', correct: true },
     { text: 'The reviser ignores the requests, so a stricter reviser prompt ends the loop.', why: 'The drafts change every round, so the reviser follows the requests. The requests themselves never run out.' },
   ]}>
