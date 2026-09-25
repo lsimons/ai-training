@@ -3,11 +3,11 @@ import { Choice, Match, Predict, Sort, Scenario, Pitfall, Exercise, Recap, Habit
 In this lesson we put the patterns of this part of the course side by
 side and choose between them for a task. We place two ways of deciding
 the steps at the ends of one spectrum and compare a fixed workflow with
-an agent. Then we count the calls of five ways to run a task of twelve
+an agent. Then we count the calls of six ways to run a task of twelve
 steps. At the end we split a large goal into levels of plans and look
 at what gets lost where two patterns meet.
 
-The patterns come from three earlier lessons.
+The patterns come from the earlier lessons of this part.
 [Reasoning before each action](/building-agents/react/) decided one step
 at a time from the result of the step before.
 [A second pass that critiques the first](/building-agents/reflection/)
@@ -38,14 +38,16 @@ the work is wasted than in a loop that adapts as it goes (@AEC-04).
 
 The reactive end adapts well. Each decision sees the result of the step
 before it. A surprise changes the next step with no extra machinery, and
-there is no call that writes a plan first. The weakness is that the run is hard to
-bound. Before it starts, nobody knows how many steps it takes or which
-tools it calls. The Agent Engineer Course adds that a reactive agent has
-no view of its progress as a whole, can miss a step that a plan would have
-listed, and can drift away from the goal without a plan to keep it on
-track (@AEC-06). The step limits from
-[Stopping the loop on purpose](/building-agents/stopping-the-loop/) are one
-way to put a bound on it.
+there is no call that writes a plan first. The weakness is that the run
+is hard to bound. Before it starts, nobody knows how many steps it takes
+or which tools it calls. The Agent Engineer Course lists more weaknesses
+of the reactive end. A reactive agent has no view of its progress as a
+whole, and it can miss a step that a plan would have listed. Its steps
+are hard to run in parallel, because each one waits for the result
+before it, and without a plan the agent can drift away from the goal
+(@AEC-06). The step limits from
+[Stopping the loop on purpose](/building-agents/stopping-the-loop/) are
+one way to put a bound on the run.
 
 ## A fixed workflow or an agent
 
@@ -70,9 +72,10 @@ most production agents write a short plan of a few high-level steps and
 make ReAct-style decisions inside each step. They look at the plan again
 after each large step (@AEC-06). Its lesson on design patterns gives the
 same advice, a rough plan first and then reasoning step by step while
-the plan runs (@AEC-04). The kettle run of the planning lesson was
-close to this. The plan had five steps, and the model looked at the plan
-again after each one.
+the plan runs (@AEC-04). The `work` run of the planning lesson had the
+re-planning half of this pattern, with a new look at its five-step plan
+after each step. Code ran each step there, so no decision was made
+inside a step.
 
 The same course lists when to lean to each end (@AEC-06). Lean to the
 plan when the task is well understood, splits into independent parts,
@@ -85,12 +88,14 @@ task has fewer than three steps.
 
 The cost of a pattern is in its calls. The program
 `site/examples/building-agents/plan-or-react/costs.py` counts the model
-calls and tool calls of five ways to run a task of twelve tool steps.
+calls and tool calls of six ways to run a task of twelve tool steps.
 It adds up the time when every call runs after the one before it, with
 3 seconds per model call and 1 second per tool call. The seconds are
 assumptions written by hand, to compare the patterns with each other,
 and no model is called.
 
+- **fixed workflow**: code that a person wrote runs the twelve steps,
+  and no model call decides them.
 - **plan then execute**: one model call writes the plan, and code runs
   its steps, as `follow` did in the planning lesson.
 - **plan, check after each step**: the plan, and one model call after
@@ -103,9 +108,13 @@ and no model is called.
 - **reactive with a critic**: the reactive loop, and a critic call that
   reads the result of each step.
 
-<Predict id="run-costs" title="The calls of five patterns"
+To run it yourself, copy the `plan-or-react` folder from the repository
+and run the command below inside your copy.
+
+<Predict id="run-costs" title="The calls of six patterns"
   answer={`12 tool steps, 3 s per model call, 1 s per tool call
   pattern                      model  tool  seconds
+  fixed workflow                   0    12       12
   plan then execute                1    12       15
   plan, check after each step     13    12       51
   reactive                        13    12       51
@@ -121,20 +130,21 @@ python3 costs.py
 </Predict>
 
 Every pattern makes the same 12 tool calls. The differences are in the
-model calls. Plan then execute makes 1 model call and finishes in 15
-seconds, and nothing in it can react to a surprise. A check after each
-step costs as many model calls as the reactive loop, 13 against 13, so
-the price of adapting is about the same at both ends. The plan adds a
-list of steps that a person can read first. The critic makes
-the run the slowest in the table, 87 seconds against 51 for the same
-loop without it.
+model calls. The fixed workflow makes 0 model calls and finishes in 12
+seconds, and plan then execute makes 1 model call and finishes in 15.
+Neither can react to a surprise. A check after each step costs as many
+model calls as the reactive loop, 13 against 13, so adapting costs
+about the same whether a plan comes first or not. The plan adds a list
+of steps that a person can read first. The critic makes the run the
+slowest in the table, 87 seconds against 51 for the same loop without
+it.
 
 The reactive row has one more catch. Its 13 calls are true only if the
 task takes twelve steps, and a reactive loop learns the number of steps
 at the end of the run. The rows with a plan know their count before the
-first step. Copy the `plan-or-react` folder, change `STEPS`,
-`MODEL_SECONDS` or `TOOL_SECONDS` at the top of `costs.py`, and run it
-again for the numbers of your own task.
+first step. In your copy, change `STEPS`, `MODEL_SECONDS` or
+`TOOL_SECONDS` at the top of `costs.py`, and run it again for the
+numbers of your own task.
 
 <Scenario id="ten-dependent-steps" objective="building-agents/orchestrates-agents/picks-a-pattern"
   concepts={['plan-then-execute-vs-reactive']}
@@ -145,7 +155,7 @@ again for the numbers of your own task.
     { text: 'Decide each step from the last result, with no plan, and stop when the move is done.', consequence: 'The agent adapts to the large mailbox, but nobody sees step two before it runs. The wrong domain setting shows up at step six, after mail has gone to the wrong place.' },
     { text: 'Write all ten steps first, let the person approve them, and run them in order with no further model call.', consequence: 'The person fixes the domain in step two. Step four then finds a mailbox that is too large, and the steps after it run as planned and import only part of that mailbox.' },
     { text: 'Write all ten steps first, let the person approve them, and have the model check the plan after each step.', correct: true, consequence: 'The person fixes the domain in step two before anything changes. After step four the model sees the large mailbox and adds a step that splits it. The run costs one model call per step more than a plan that only runs.' },
-    { text: 'Decide each step from the last result, and add a critic call that reads the result of each step.', consequence: 'The critic reads the wrong domain setting after step two has run and mail has started to go astray. The run makes about twice the model calls of a loop without a critic.' },
+    { text: 'Decide each step from the last result, and add a critic call that reads the result of each step.', consequence: 'The critic reads the wrong domain setting after step two has run and mail has started to go to the wrong place. The run makes about twice the model calls of a loop without a critic.' },
   ]}>
 
 A wrong early step would waste every step after it. Where on the
@@ -162,17 +172,20 @@ large phases of work, the tasks, and the steps. An agent usually
 plans at the level of subgoals and tasks, and ReAct-style decisions
 handle the steps inside a task (@AEC-06).
 
-Each subgoal often runs in its own agent call with a fresh context. In
+Each subgoal can run in its own agent call with a fresh context. In
 Claude Code a subagent starts with a context of its own and doesn't see
 the main conversation. It gets its own system prompt and a task message
-that the main agent writes for it. It does its work in that context and
+that the main agent writes for it. Claude Code also loads parts of the
+project setup for it, such as the CLAUDE.md files. A fork is the exception, and it starts with the
+parent conversation. A subagent does its work in its own context and
 returns a summary to the main conversation (@Claude Code subagents). The
 top level then keeps the list of subgoals and the status of each one,
 and the detail stays in the context of the level below.
 
 That keeps each context small and on one subject. The cost is at the
 line between two levels. The level below knows only what the task
-message says, and the level above knows only what the summary says. Say
+message and its own setup give it, and the level above knows only what
+the summary says. Say
 a top-level agent writes release notes for three services, one subagent
 per service, and the team's rule is that the notes list only changes a
 customer can see. If the rule stays in the top level's context and
@@ -202,22 +215,22 @@ alone:
   reflector sends and nothing sets a limit on the rounds, so the two
   loop. The reflection lesson capped the rounds at two for this reason.
 
-Each added pattern also adds model calls, time and parts that can break,
-so a composition should do the task better than the simpler system it
-replaces (@AEC-04). A
-failure can also pass from one part to the next. A step that fails early makes the
-steps after it fail, and the agent can report the last failure as the
-cause instead of the first one (@AEC-06). To find these problems before
-the users do, write down at each handoff what passes across and what
-doesn't, and test the composition with a fault at each handoff, such as an
-empty plan or a tool that returns an error.
+Each added pattern also adds model calls, time and parts that can break
+(@AEC-04). Keep a composition only when it shows better results on the
+task than the simpler system (@Anthropic effective agents). A failure
+can also pass from one part to the next. A step that fails early makes
+the steps after it fail, and the agent can report the last failure as
+the cause instead of the first one (@AEC-06). To find these problems
+before the users do, write down at each handoff what passes across and
+what doesn't. Then test the composition with a fault at each handoff,
+such as an empty plan or a tool that returns an error.
 
 <Match id="four-seams" objective="building-agents/orchestrates-agents/composes-patterns"
-  concepts={['hierarchical-planning']}
+  concepts={['planning', 'reflection']}
   context="A travel agent is built from a planner, an executor and a reflector. The request is a trip to Oslo that arrives before Monday and costs at most 800 euros. The planner reads the request and writes the steps, the executor books, and the reflector critiques the itinerary before the executor sends it."
   title="What is lost at each handoff?"
   hint="For each handoff, compare what the receiving part gets with what it would need to do its job."
-  options={['The budget that the planner read in the request', 'The facts that a step returned after the plan was written', 'The goal that the itinerary has to meet', 'A limit on the number of rounds of changes']}
+  options={['The budget that the planner read in the request', 'The facts that a step returned after the plan was written', 'The part of the request that the itinerary is not checked against', 'A limit on the number of rounds of changes']}
   rows={[
     { statement: 'The planner passes the executor the list of steps and the travel dates, and nothing else.', option: 0, why: 'What did the request say that is neither a step nor a date?' },
     { statement: 'The executor tells the planner "done" for each step, and not what the booking site returned.', option: 1, why: 'What did the executor learn that the planner never hears?' },
@@ -233,14 +246,13 @@ at it.
 
 <Pitfall title="Choosing the adaptable end because it is interesting">
 A team builds a reactive agent with a critic for a monthly report whose
-twelve steps are the same every month. The demo goes well. In use the
-agent makes 25 model calls per run where plan then execute makes 1, and
-it takes 87 seconds in the cost table instead of 15. On a quiet month it
-skips a step that a fixed list would have run. The task never needed
-the freedom. Rule: start with the simplest pattern that could do the
-task, which is a fixed workflow when the steps are known. Move toward
-the reactive end only when an evaluation shows where the simpler
-version fails.
+twelve steps never change. In the cost table that design makes 25 model
+calls and takes 87 seconds, where a fixed workflow makes 0 and takes 12.
+On a quiet month the agent also skips a step that a fixed list would
+have run. Rule: start with the simplest pattern that could do the task,
+which is a fixed workflow when the steps are known, and move toward the
+reactive end only when an evaluation shows where the simpler version
+fails.
 </Pitfall>
 
 <Exercise stretch="Pick one of the four tasks and change costs.py so that its rows match your design, with the number of phases or the steps with a critic that you chose. Run it and compare the numbers with your estimate.">
@@ -264,17 +276,16 @@ before any code exists.
    and recommend one.
 
 A good result names a property of each task and a pattern that follows
-from it. Task one has known steps, so it is a fixed workflow, which
-makes fewer model calls than the first row of the table because no model
-writes the plan. Task two is exploratory and belongs at the reactive
+from it. Task one has known steps, so it is a fixed workflow, at 0
+model calls and 12 seconds. Task two is exploratory and belongs at the reactive
 end, at 13 model calls and 51 seconds if it takes twelve steps, with a
 step limit because nobody knows the count in advance. Task three has
 dependent steps that change accounts and a result that can change the
 rest. It gets a plan that a person reads and a check after each step,
-at 13 model calls and 51 seconds. Task four splits into subgoals, one
-per competitor and one to compare. It gets a coarse plan with decisions
-inside each phase, at 16 model calls and 60 seconds. Each of its
-subgoals can run in a fresh context. Which of your four would you move
+at 13 model calls and 51 seconds. Task four fits a coarse plan of 3
+phases: research on the five competitors, a comparison, and the
+recommendation. The model decides the steps inside each phase, at 16
+model calls and 60 seconds, and each phase can run in a fresh context. Which of your four would you move
 one place toward the reactive end first if an evaluation showed it
 failing, and what would you measure before you move it?
 
@@ -282,20 +293,21 @@ failing, and what would you measure before you move it?
 
 <Recap>
 
-1. Plan-then-execute decides every step first and is predictable, cheap
-   to review and brittle when a step surprises. The reactive end
-   decides each step from the result before it, adapts, and is hard to
-   bound (@AEC-06).
+1. Plan-then-execute decides every step first. It is predictable and
+   easy to review, and a step that surprises can make it wrong. The
+   reactive end decides each step from the result before it, so it
+   adapts, and its length is hard to bound (@AEC-06).
 2. Use a fixed workflow when the steps are known and an agent when the
    task needs decisions by the model, and start with the simplest that
    works (@Anthropic effective agents). Most agents plan coarsely and
    react inside each step (@AEC-06).
-3. At twelve steps a plan that only runs makes 1 model call, a check
-   after each step or a reactive loop makes 13, and a critic on each
-   step raises it to 25.
-4. Hierarchical planning gives each subgoal its own plan and often a
-   fresh context (@Claude Code subagents). Each level knows only the
-   task message or the summary. Write down what passes at each handoff
+3. At twelve steps a fixed workflow makes 0 model calls and a plan that
+   only runs makes 1. A check after each step or a reactive loop makes
+   13, and a critic on each step raises it to 25.
+4. Hierarchical planning gives each subgoal its own plan, and a subgoal
+   can run in a fresh context, as a Claude Code subagent does
+   (@Claude Code subagents). Each level knows only what the handoff
+   gives it. Write down what passes at each handoff
    of a composition, and test each handoff with a fault.
 
 </Recap>
@@ -316,24 +328,24 @@ it does better that pays for its extra calls.
     { text: 'Every night, copy the orders of the day to the accounting system with the same four steps', bucket: 0 },
     { text: 'Find why a web page loads slowly on some phones, in code nobody on the team knows', bucket: 1 },
     { text: 'Resize each uploaded photo, add a watermark and store it in the archive', bucket: 0 },
-    { text: 'Answer a question from a customer about their account, where the tools needed depend on what they ask', bucket: 1 },
+    { text: 'Answer a question about a failed payment, where each lookup decides which record to check next and the number of lookups differs each time', bucket: 1 },
     { text: 'Send a reminder email to each customer whose invoice is 30 days overdue', bucket: 0 },
     { text: 'Explore a new data set and report which questions it can answer', bucket: 1 },
   ]} />
 
-<Choice id="release-notes-seam" phase="review" objective="building-agents/orchestrates-agents/composes-patterns"
+<Choice id="migration-summary" phase="review" objective="building-agents/orchestrates-agents/composes-patterns"
   concepts={['hierarchical-planning']}
-  context="A top-level agent writes release notes for three services. It starts one subagent per service, each with a fresh context, and gives each the task message: summarize the changes in this service since the last release. The team told the top-level agent that the notes list only changes a customer can see. Each subagent returns a summary, and the top level joins them."
-  title="What was lost between the levels?"
-  hint="What did each subagent receive, and what did the top level know that it didn't pass on?"
+  context="A top-level agent moves four databases to new servers. It starts one subagent per database, each with a fresh context and a task message that names its database. The subagent for database C hits an error halfway, restores the old version, and returns the summary: migration finished. The top level reads the four summaries, marks all four as moved and shuts down the old servers."
+  title="What was lost on the way up?"
+  hint="Which fact did the subagent know that the top level never saw?"
   options={[
-    { text: 'The subagent context was too small to hold every change in the service since the last release.', why: 'The subagent listed every change it found, so the changes fit. The problem is which changes belong in the notes.' },
-    { text: 'The summary that the subagent returned left out the changes that a customer can see.', why: 'The notes list more changes than they should. Every change a customer can see is in them.' },
-    { text: 'The rule to list only changes a customer can see stayed with the top level and never reached the task message.', correct: true },
-    { text: 'The top level lost track of which of the three subagents had finished and which were still running.', why: 'All three subagents finished and returned a summary. The status is right, and the content is wrong.' },
+    { text: 'The fact that database C was restored to its old version, which the summary left out.', correct: true },
+    { text: 'The name of database C, which the task message for that subagent did not include.', why: 'The task message named the database, and the subagent worked on the right one until the error.' },
+    { text: 'The room in the top-level context, which was too small to hold four summaries.', why: 'Four short summaries fit. The top level read all four, and one of them was wrong.' },
+    { text: 'A plan for each subagent, which the top level should have written before it started them.', why: 'Each subagent had a task and did it until the error. A plan written above would not have seen the error either.' },
   ]}>
 
-The notes for one service list internal code changes that the team never
-shows customers. What was lost, and where?
+The old server of database C is shut down while C still runs on it.
+What was lost, and at which handoff?
 
 </Choice>
