@@ -293,8 +293,8 @@ The Bash guard hook (`.claude/hooks/README.md`) rejects a force push, any
 push to `main`, `gh pr merge` from anyone but the wave lead, the
 dispatcher or a coordinator, and `git stash` in every worktree except
 `git stash list` and `git stash show`. It rejects `git reset --hard`,
-`git checkout -- .` or `git restore .` only in the main checkout. The wave lead and a coordinator
-prefix a merge with `AI_TRAINING_ROLE=<role>`.
+`git checkout -- .` or `git restore .` only in the main checkout. The
+wave lead and a coordinator prefix a merge with `AI_TRAINING_ROLE=<role>`.
 
 ## What a builder prompt says about history
 
