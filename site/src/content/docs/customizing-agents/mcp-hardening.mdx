@@ -1,11 +1,12 @@
 import { Choice, Match, Predict, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
 
-In this lesson we harden one tool connection and then try to break it.
-The connection is a small Model Context Protocol (MCP) server that serves a folder of team notes. First we replace its token with one
-that can only read and that expires in an hour. Then we turn on its log of
-tool calls. Last, we plant an instruction in one note that asks the agent
-to send the note out. After an ordinary summary task, the log shows which
-control stopped the send.
+In this lesson we harden one tool connection and then try to break it. The
+connection is a small Model Context Protocol (MCP) server that serves a
+folder of team notes. First we replace its token with one that can only
+read and that expires in an hour. Then we turn on its log of tool calls.
+Last, we plant an instruction in one note that asks the agent to send the
+note out. After an ordinary summary task, the log shows which control
+stopped the send.
 
 The controls in this lesson are the ones that hold when the model does the
 wrong thing. A model that reads a planted instruction may follow it, and
@@ -327,11 +328,10 @@ folder, where you added it (@Claude Code mcp). Then ask yourself: with a
    need. The line tells you which control acted: the token, the folder,
    or nothing, when the call was allowed.
 4. Claude Code v2.1.199 or later asks before every call of a tool its
-   server marks with `anthropic/requiresUserInteraction` (@Claude Code mcp),
-   and no permission mode approves it for you
+   server marks with `anthropic/requiresUserInteraction`
+   (@Claude Code mcp), and no permission mode approves it for you
    (@Claude Code permission modes). A hostile server can leave that flag
-   off. The token is checked by the service,
-   whatever the server declares.
+   off. The token is checked by the service, whatever the server declares.
 5. Start the agent inside the folder it may touch, in Manual mode. There
    it asks before every edit (@Claude Code permission modes), and a
    change above that folder needs your explicit permission
