@@ -14,7 +14,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from clones import Repo, author_repo
+from clones import Repo, author_repo, python_env
 
 NEW_VERSION = "0.4.0"
 
@@ -42,6 +42,7 @@ def release_check(repo: Repo) -> str:
     result = subprocess.run(
         [sys.executable, "release_check.py"],
         cwd=repo.path,
+        env=python_env(),
         capture_output=True,
         text=True,
         check=False,

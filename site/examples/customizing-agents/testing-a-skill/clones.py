@@ -7,6 +7,13 @@ the tag `v0.3.0` on that commit, and one change after it. The clean clone is
 what a colleague has after copying the package and committing it: one commit
 and no tag.
 
+The copy holds the package as it is committed in the course repository, so
+a local edit or an untracked file in `fixture-package` (left by a learner
+who ran the first-skill exercise in place) doesn't change what the fixtures
+print. Where the package isn't in a git checkout, as in a download of the
+examples without `.git`, there is no committed version to read: the copy
+takes the files as they are, and a note on stderr says so.
+
 Every git command runs with an allow-list environment: PATH, a temporary
 HOME, LC_ALL=C, a fixed identity and date, and the global and system config
 at /dev/null. No setting or hook from the machine that runs the fixture
@@ -16,6 +23,7 @@ reaches the repositories, so the output is the same everywhere.
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -42,6 +50,22 @@ def git_env(home: Path) -> dict[str, str]:
         "GIT_COMMITTER_NAME": "Learner",
         "GIT_COMMITTER_EMAIL": "learner@example.com",
         "GIT_COMMITTER_DATE": FIXED_DATE,
+    }
+
+
+def python_env() -> dict[str, str]:
+    """The only variables the package's release check sees.
+
+    An allow-list like `git_env`, so a PYTHONPATH, PYTHONSAFEPATH or color
+    setting in the caller's environment can't change what the check prints.
+    The same list is `python_env` in first-skill's `check.py`: keep the two
+    in step.
+    """
+    return {
+        "PATH": os.environ.get("PATH", os.defpath),
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "NO_COLOR": "1",
+        "PYTHON_COLORS": "0",
     }
 
 
@@ -76,11 +100,58 @@ class Repo:
         return self.git("log", "--format=%s", *revisions).stdout.splitlines()
 
 
+def _git_bytes(cwd: Path, env: dict[str, str], *args: str) -> Optional[bytes]:
+    """What a git command prints, as bytes, or None when it fails."""
+    result = subprocess.run(["git", *args], cwd=cwd, env=env, capture_output=True, check=False)
+    return result.stdout if result.returncode == 0 else None
+
+
+def copy_tracked(source: Path, dest: Path, env: dict[str, str]) -> bool:
+    """Writes the files committed at HEAD under `source` into `dest`.
+
+    Returns False, and writes nothing, when `source` isn't committed in a git
+    checkout. Local edits and untracked files in `source` never reach `dest`.
+    """
+    prefix = _git_bytes(source, env, "rev-parse", "--show-prefix")
+    if prefix is None:
+        return False
+    # `--full-tree` because ls-tree run in a subdirectory otherwise also
+    # filters the listing by that subdirectory, and prints nothing here.
+    tree = "HEAD:" + prefix.decode("utf-8").strip()
+    listing = _git_bytes(source, env, "ls-tree", "--full-tree", "-r", "-z", tree)
+    if not listing:
+        return False
+    for entry in listing.decode("utf-8").split("\0"):
+        if not entry:
+            continue
+        meta, name = entry.split("\t", 1)
+        mode, kind, obj = meta.split(" ")
+        if "__pycache__" in name.split("/"):
+            continue
+        if kind != "blob" or mode not in ("100644", "100755"):
+            raise SystemExit(f"{source / name}: mode {mode} {kind} is not a plain file")
+        content = _git_bytes(source, env, "cat-file", "blob", obj)
+        if content is None:
+            raise SystemExit(f"git cat-file blob {obj} failed for {source / name}")
+        target = dest / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(content)
+        if mode == "100755":
+            target.chmod(0o755)
+    return True
+
+
 def _copy_package(root: Path, name: str) -> Repo:
     home = root / f"{name}-home"
     home.mkdir(parents=True)
     path = root / name
-    shutil.copytree(PACKAGE, path, ignore=shutil.ignore_patterns("__pycache__"))
+    if not copy_tracked(PACKAGE, path, git_env(home)):
+        print(
+            f"note: {PACKAGE} is not committed in a git checkout, so the copy"
+            " takes its files as they are, local edits included",
+            file=sys.stderr,
+        )
+        shutil.copytree(PACKAGE, path, ignore=shutil.ignore_patterns(".git", "__pycache__"))
     repo = Repo(path, home)
     repo.git("init", "-q", "--initial-branch=main")
     return repo
