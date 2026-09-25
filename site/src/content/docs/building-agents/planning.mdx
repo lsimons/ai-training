@@ -1,8 +1,8 @@
-import { Choice, Predict, Order, Sort, Scenario, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
 
 In this lesson the fake model writes a numbered plan for a goal before
-any tool runs. We print the plan, work through it step by step and mark
-each step done. Then step three returns a fact the plan didn't expect,
+any tool runs. We print the plan and tick off each step as it runs.
+Then step three returns a fact the plan didn't expect,
 and we compare a run that follows the old plan with a run where the
 model revisits the plan after each step. At the end we look at what the
 written plan gives a person who reads it before the first step, and at
@@ -103,7 +103,8 @@ replaced the prompt "Let's think step by step" with one that asked the
 model to understand the problem, write a plan and then carry it out.
 The authors wanted fewer answers that skip a reasoning step. With GPT-3
 the plan-first prompt did better on every set of math word problems they
-tested, and its average accuracy was 2.5 percent higher (@Wang 2023). In
+tested, and its average accuracy was 2.5 percentage points higher, 72.9 against
+70.4 (@Wang 2023). In
 a sample of 100 problems, the wrong answers that skipped a step went
 from 12 with the old prompt to 10 with the plan-first prompt, and to 7
 with a longer version of it (@Wang 2023). That plan was written and
@@ -168,14 +169,41 @@ if "in_stock" in latest and latest["in_stock"] == 0:
 return None
 ```
 
-The `revise` step runs the first three steps, prints the plan, gives the
-model the results and prints the plan it gets back.
+When the model returns a changed plan, `work` gives it the next version
+number, so the first plan is v1 and the first revision is v2.
+`show_plan` prints a `plan vN:` line and then one numbered line per
+step, with `[x]` for a step that has run and `[ ]` for an open one. The
+`revise_only` step runs the first three steps, gives the model the
+results and prints only the plan it gets back.
 
 <Predict id="predict-revised-plan" objective="building-agents/orchestrates-agents/picks-a-pattern"
   concepts={['planning']}
-  context="In the lesson, a fake model writes a five-step plan to replace a broken kettle from order 1042: look up the order, read the returns policy, check the stock, send a replacement, and email the customer that a new kettle has shipped. After each step the model gets the plan and the results back. When a stock result says the shop has none in stock, it keeps the steps that have run and replaces the rest with a refund of the order and an email that the item is refunded. Step three returns in_stock 0 and restock_days 21."
+  context="In the lesson, a fake model writes a five-step plan to replace a broken kettle from order 1042: look up the order, read the returns policy, check the stock, send a replacement, and email the customer that a new kettle has shipped. After each step the model gets the plan and the results back. When a stock result says the shop has none in stock, it keeps the steps that have run and replaces the rest with a refund of the order and an email that the item is refunded. Step three returns in_stock 0 and restock_days 21. The output is the plan the model returns: a line plan vN: with the next version number after v1, then one line per step with its number, [x] for a step that has run or [ ] for an open one, and the step text."
   title="Predict the revised plan"
   hint="Which steps have run and stay as they are, and which rule in the reply matches the result of step three?"
+  answer={`plan v2:
+    1. [x] Look up order 1042
+    2. [x] Read the returns policy
+    3. [x] Check that a kettle is in stock
+    4. [ ] Refund order 1042
+    5. [ ] Email the customer that the kettle is refunded`} run="building-agents/planning/revise_only.py">
+
+What is the plan after the model revisits it? Predict the output, then
+run it.
+
+```sh
+python3 agent.py revise_only
+```
+
+</Predict>
+
+The first three steps keep their `x`, and the version number tells a
+reader that the plan changed. Steps four and five of plan v2 run next,
+and the customer gets a refund and a message that says why. The
+`revise` step prints the plan before and after, with the result of step
+three between them.
+
+<Predict id="run-revise" title="The plan before and after"
   answer={`before:
   plan v1:
     1. [x] Look up order 1042
@@ -192,18 +220,13 @@ model the results and prints the plan it gets back.
     4. [ ] Refund order 1042
     5. [ ] Email the customer that the kettle is refunded`} run="building-agents/planning/revise.py">
 
-What is the plan after the model revisits it? Predict the output, then
-run it.
+Run this, and compare what you see with the output below.
 
 ```sh
 python3 agent.py revise
 ```
 
 </Predict>
-
-The first three steps keep their `x`, and the plan gets a version number
-so a reader can see that it changed. Steps four and five of plan v2 run
-next, and the customer gets a refund and a message that says why.
 
 The revised run has a cost. The `cost` step runs the kettle goal with
 `follow` and with `work` and counts the calls.
@@ -228,12 +251,6 @@ run step by step, with a check of the plan after each major step
 result isn't what the plan expected, and the exercise asks for that as
 a stretch.
 
-<Order id="order-a-planning-round" objective="building-agents/orchestrates-agents/picks-a-pattern"
-  concepts={['planning']}
-  context="The lesson has a fake model that writes a numbered plan before any tool runs, and code that runs the plan one step at a time and gives the model the plan and the results back after each step."
-  title="Order one planning round"
-  hint="Which move needs the result of another move before it can happen?"
-  steps={['The model writes the numbered plan', 'The code runs the tool of the next open step', 'The code keeps the result and marks the step done', 'The model reads the result and keeps or changes the open steps']} />
 
 ## The moment to correct the plan
 
@@ -242,22 +259,40 @@ unchanged. A person who reads it then can fix it for the price of
 reading it. Say the customer's message said "I want my money back". The
 person reads step four, "Send a replacement kettle", and changes it
 before any tool runs. After a run of `follow`, the same fix means a
-recall of the back order and a second email that corrects the first.
+cancelled back order and a second email that corrects the first.
 
-Some agent products stop at this moment on purpose. In Claude Code's
-plan mode, the agent reads files and runs commands to explore, then
-writes a plan. Claude Code blocks its edits until you approve the plan, except
-in a terminal session where bypass permissions are available. You can
+Some agent products stop at this moment on purpose. Claude Code has a
+plan mode for it. In that mode the agent may look around the project
+first, and it may not change your files until you accept the plan it
+shows you. The one exception is an interactive terminal session in
+which bypass permissions are available. You can
 also reply that it should keep planning and say what to change
 (@Claude Code permission modes). The written plan is what makes that
 stop useful: a person can say no to a step while saying no costs
 nothing.
 
+<Choice id="when-to-correct-the-plan" objective="building-agents/orchestrates-agents/picks-a-pattern"
+  concepts={['planning']}
+  context="An agent that sends a monthly newsletter writes a plan of three steps before it starts: pick the list of all customers as the audience, send the newsletter to that audience in batches of 1,000, and report how many were sent. The team wanted it sent to subscribers only, and a person on the team can read the plan and the progress of each step."
+  title="When is the fix cheapest?"
+  hint="At which point has nobody received the newsletter yet?"
+  options={[
+    { text: 'After the first batch of step two, from the progress of the run.', why: 'The progress shows the wrong audience, and 1,000 customers who did not subscribe already have the newsletter.' },
+    { text: 'After the run, from the trace of tool calls and their results.', why: 'The trace shows the send to all customers after it happened. The fix is now an apology to every customer who got it.' },
+    { text: 'At the next evaluation run, when the team reviews last month\'s sends.', why: 'The evaluation finds the wrong audience weeks later, after every customer has the newsletter.' },
+    { text: 'Before step one runs, by changing the audience in the written plan.', correct: true },
+  ]}>
+
+The plan's first step picks the wrong audience. When can the person fix
+it at the lowest cost?
+
+</Choice>
+
 ## When to write the plan first
 
-A written plan pays when the task has several steps that depend on each
-other, when a wrong early step wastes the steps after it, and when a
-person or code should read the steps before they run. The kettle goal is
+Write the plan first for a task with steps that depend on each other,
+where a wrong early step wastes the steps after it. A plan also helps
+when a person or code should read the steps before they run. The kettle goal is
 such a task: five steps, two of them change things for the customer,
 and a person may want to approve them. The Agent Engineer Course advises
 against a plan for a simple task. Its lesson on design patterns names
@@ -268,9 +303,9 @@ first call would have done anyway.
 
 A written list is also one choice among several for keeping track.
 Claude Code has tools for a task list, and on newer models it leaves
-them out by default. Its documentation says that those models track
-work of many steps without a written list, and that the definitions of
-the tools use up context space (@Claude Code tools reference). The plan in this lesson is written for
+them out by default. The documentation gives two reasons: a newer model
+can follow long work without the list, and the tool definitions cost
+context (@Claude Code tools reference). The plan in this lesson is written for
 someone to read it: the person who approves it, and the code that runs
 it step by step.
 
@@ -302,12 +337,36 @@ the facts, give the model the plan and the results, and let it change
 the steps that haven't run.
 </Pitfall>
 
+The exercise uses a second goal, "Replace the broken toaster from order
+1090.", with the same plan. Its step three returns a fact that
+`revise_plan` has no rule for. The `exercise` step prints the plan before
+and after the model revisits it.
+
+<Predict id="run-exercise" title="The toaster before the exercise"
+  answer={`before:
+  plan v1:
+    1. [x] Look up order 1090
+    2. [x] Read the returns policy
+    3. [x] Check that a toaster is in stock
+    4. [ ] Send a replacement toaster
+    5. [ ] Email the customer that a new toaster has shipped
+  step 3 returned: {'ok': True, 'item': 'toaster', 'in_stock': 6, 'recalled': True}
+  after:
+    the model kept plan v1`} run="building-agents/planning/exercise.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 agent.py exercise
+```
+
+</Predict>
+
 <Exercise stretch="Give each step an expected result, such as in_stock above 0 for the stock check, and change work so that it calls the model again only when a result differs from what the step expected. Run cost again and compare the model calls.">
 
-The goal "Replace the broken toaster from order 1090." has the same
-plan. Its step three returns `in_stock: 6` and `recalled: True`, and the
-`exercise` step shows that the model keeps plan v1, so step four would
-send the customer another recalled toaster. In your copy of the
+The toaster's step three returns `in_stock: 6` and `recalled: True`, and
+the model keeps plan v1, so step four would send the customer another
+recalled toaster. In your copy of the
 `planning` folder, change `revise_plan` so that a recalled item replaces
 steps four and five with a refund and an email that names the recall,
 and keep the rule for an item that is out of stock. Run
@@ -320,7 +379,8 @@ refund of order 1090 as step four and an email about the recall as step
 five, and `python3 agent.py revise` prints the same kettle plans as
 before. Compare with `python3 model_answer.py` in the same folder. Which
 other result of step three should change the rest of the plan, and
-which step would it change?
+which step would it change? The opening comment of `model_answer.py`
+gives one answer.
 
 </Exercise>
 
@@ -382,7 +442,7 @@ it. Every step reported success. What is the cause?
   title="When does the person read the plan?"
   hint="At which point has nothing on the drive changed yet?"
   options={[
-    { text: 'Read the plan before step one runs, and remove or change the step that deletes large files.', correct: true, consequence: 'The person sees that step five deletes files that were only archived a step before, and removes it. Nothing on the drive had changed, so the fix cost the time to read six lines.' },
+    { text: 'Read the plan before step one runs, and check the two delete steps.', correct: true, consequence: 'The person sees that step five deletes files that were only archived a step before, and removes it. Nothing on the drive had changed, so the fix cost the time to read six lines.' },
     { text: 'Let the agent run and read the email summary at the end.', consequence: 'The summary reports that the large files were deleted. Getting them back now needs a restore from a backup, if one exists.' },
     { text: 'Read the plan after step three, once the archive folder holds the files.', consequence: 'The files are moved already, and the step that deletes them is two steps away. The fix is still possible, and the person now has to check what the move changed.' },
     { text: 'Skip the plan and read the trace of tool calls after the run.', consequence: 'The trace shows each delete call and its result. It tells the person what happened, after the files are gone.' },
