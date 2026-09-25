@@ -1,0 +1,265 @@
+import { Choice, MultiChoice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+An agent fixed a bug in the nightly sales import, the tests pass, and you
+are about to open a pull request. A reviewer reads what you send this
+week and decides how closely to look. Someone who reads the history a
+year from now wants to know who made the change and who checked it. In this lesson we write the commit message and the
+pull request for both readers. The first half covers the team's review
+agreements, and the second half covers how the commit says that an agent
+helped, and what only a person may add to it.
+
+The [lesson on saying that AI helped](/safety/saying-ai-helped/) gave a
+disclosure line three parts: what the AI did, what the person checked, and
+who is accountable. A pull request needs the same three parts, and a
+commit holds them in a form that tools can read.
+
+## Before you ask for a review
+
+Review norms are the agreements a team makes on how agent-assisted
+changes are reviewed. Teams write them down in different words, and most
+lists have four points.
+
+**The author reads every line first.** You asked for the change, and you
+are its first reviewer. The steps are the ones from
+[reviewing the diff](/coding-with-agents/reviewing-the-diff/). When you
+request a review, you tell the reviewer that you understand the change
+and think it is right. If they find a line you never read, they learn
+that your request meant less than that.
+
+**The description says what the agent did and what you verified.** Name
+the part the agent wrote, the checks you ran yourself, and what you did
+not check. "The agent ran the tests" reports what the agent said. "I ran
+the tests, and the new one fails on `main` and passes here" reports what
+you saw.
+
+**The reviewer reads the diff.** The description tells the reviewer where
+to look, and the diff is what gets merged. A description written by an
+agent can describe the change it meant to make and not the one it made.
+An agent's change goes through the same gates as any other change: the
+CI run and a reviewer's approval. "The agent tested it" doesn't replace either, because the
+agent's tests are part of the change under review.
+
+**The change is small enough to read.** An agent can produce a thousand
+lines in the time a person reviews fifty. A diff that is too large to
+read gets skimmed or blocked. Split it before you ask. Put a mechanical
+rename in its own pull request, and keep each change to one purpose. A
+tidy-up the agent made on the side belongs in a separate pull request, or
+at least in the description.
+
+Your team may have its own list, often in the project's agent
+instructions file or in `CONTRIBUTING`. Where the two differ, follow the
+team's list. When you disagree with one of its rules, propose a change
+to the file and keep to the rule until the team agrees.
+
+<Scenario id="the-3000-line-diff" objective="coding-with-agents/works-in-team/follows-team-norms"
+  concepts={['review-norms']}
+  context="An agent was asked to add one report to a service. Its branch also renames the logging calls in forty files. The diff has about 3000 changed lines and CI passes."
+  title="A 3000-line agent diff" hint="What can a reviewer do with 3000 lines, and which part of the work is yours to do before you ask?"
+  options={[
+    { text: 'Open the pull request as it is, with the note "agent-generated, CI is green" so the reviewer knows what to expect.', consequence: 'The reviewer scrolls through the rename, approves the part they could follow, and misses a changed default in the report code. The note said who wrote it and nothing about what anyone checked.' },
+    { text: 'Merge it yourself. CI passed, the agent ran the tests, and a review of 3000 lines would take a colleague a whole day.', consequence: 'The change skips the one gate that a person holds. The team finds the changed default in production, and the next rule it writes is that you may no longer merge.' },
+    { text: 'Split it into a rename pull request and a report pull request, read both, and say in each what the agent did and what you checked.', correct: true, consequence: 'The rename is quick to review because it is only a rename. The report change is 200 lines, and the reviewer reads every one. They ask about the changed default, and you fix it before the merge.' },
+    { text: 'Ask two reviewers to take half of the files each, so the review of the 3000 lines is shared and goes faster.', consequence: 'Each reviewer sees half of each part and neither sees the whole report change. The review takes longer than two small pull requests would, and the changed default is in the half that got skimmed.' },
+  ]}>
+You asked an agent to add a monthly report to a service. The branch it
+produced also renames the logging calls in forty files, "for
+consistency". The diff has about 3000 changed lines and CI passes. What
+do you do before anyone reviews it?
+</Scenario>
+
+<MultiChoice id="before-you-request-review" phase="review" objective="coding-with-agents/works-in-team/follows-team-norms"
+  concepts={['review-norms']}
+  context="You are about to request a review of a pull request in which a coding agent wrote most of the change."
+  title="Ready for review?" hint="Which of these did you do yourself, and which only repeat what the agent reported?"
+  options={[
+    { text: 'You read every changed line and can explain each one.', correct: true },
+    { text: 'The description quotes the agent\'s summary that all tests pass.', why: 'That is what the agent said. The description should say what you ran and what you saw.' },
+    { text: 'The description names what the agent wrote and what you checked.', correct: true },
+    { text: 'You skipped the CI run because the agent ran the full suite locally.', why: 'The agent\'s run is part of the change under review. CI is the gate for every change, whoever wrote it.' },
+    { text: 'You moved the agent\'s side tidy-up into its own pull request.', correct: true },
+  ]}>
+Which of these belong to a pull request that is ready for review?
+</MultiChoice>
+
+<Pitfall title="The agent wrote that part">
+A reviewer asked why a new function caught every exception and returned
+an empty list. The author replied: "The agent wrote that, I didn't touch
+it." The reply tells the reviewer that nobody read the function, and it
+leaves the question open. The tool can't answer for the change, so the
+person who opened the pull request answers for all of it. Reply as the
+author: "I missed that. It should fail loudly, and I'll fix it and add a
+test."
+</Pitfall>
+
+## Saying it in the commit
+
+Attribution means recording in the change itself that an agent
+contributed, next to the person who directed and checked the work. In a
+commit it goes in a **trailer**. Git reads trailers from the last
+paragraph of a commit message, after a blank line, as lines in the form
+`Key: value` (@Git docs git-interpret-trailers). Tools read them from
+there, so a line in the middle of the body that looks like a trailer is
+only text.
+
+Several forms are in use. GitHub shows a commit as written by more than
+one person when the message ends with a `Co-authored-by: name <email>`
+line for each of them (@GitHub docs creating-a-commit-with-multiple-authors).
+The Linux kernel asks for an `Assisted-by` tag that names the AI help, in
+a format its guideline gives (@Linux coding assistants). Claude Code adds
+a `Co-Authored-By` trailer to its commits by default, and a project can
+change or remove it with the `attribution` setting. Its documentation
+also says that your own instructions about attribution, in a file such as
+`CLAUDE.md`, come before that default (@Claude Code all settings). Check
+the form the project asks for, and check that the agent writes it.
+
+The commit's author is still you. Git records an author for every commit,
+the identity of the person who made it unless someone sets another one
+(@Git docs git-commit). The trailer adds the agent. It doesn't take your
+name off.
+
+The fixture for this lesson is in the course repository under
+`site/examples/coding-with-agents/attribution-and-review-norms/`. The
+agent wrote `commit-message.txt`, and `trailers.py` runs
+`git interpret-trailers --parse` on it, which prints only the lines git
+reads as trailers.
+
+```text
+fix: read quoted amounts in the nightly import
+
+The importer split "1,250.00" into two fields. It now reads each row
+with the csv module, so a quoted amount stays one field.
+Assisted-by: Claude:claude-sonnet-4-6
+I also tidied up the date parsing while I was in the file.
+
+Signed-off-by: Coding Agent <agent@example.com>
+```
+
+<Predict id="predict-the-trailers" objective="coding-with-agents/works-in-team/attributes-honestly"
+  concepts={['attribution']}
+  context="An agent wrote a commit message with an Assisted-by line in the middle of the body and a Signed-off-by line with its own name as the last paragraph. A script prints the lines git reads as trailers."
+  title="Which lines are trailers?" hint="Git reads trailers only from the last paragraph. Which lines are in it?"
+  answer="Signed-off-by: Coding Agent <agent@example.com>" run="coding-with-agents/attribution-and-review-norms/trailers.py">
+What does the script print for the agent's message? Copy the directory,
+run the script, and type the output.
+
+```sh
+python3 trailers.py
+```
+
+</Predict>
+
+The only trailer git finds is the one line the agent must not write. The
+`Assisted-by` line is in the body, so a tool that counts agent-assisted
+commits misses this one.
+
+## The sign-off only a person gives
+
+The `Signed-off-by` trailer is older than coding agents. `git commit -s`
+adds one with the committer's name, and the git documentation says that
+what it means depends on the project. In many projects it certifies the
+Developer Certificate of Origin (DCO) (@Git docs git-commit). The DCO is
+a short statement in four parts. In our words: I wrote the contribution,
+or it is based on work I may submit under the project's license, or
+someone who could certify one of those gave it to me unchanged, and I
+agree that a public record of the contribution and of my sign-off is
+kept (@DCO).
+
+Each part is a statement about a person's rights and knowledge, and an
+agent has neither. The Linux kernel guideline says it directly: an AI
+agent must not add a `Signed-off-by` tag, and the human who submits the
+change reviews the code, checks the licensing, adds their own sign-off
+and takes responsibility for the contribution (@Linux coding assistants).
+Sign off yourself only after you have read the change, because the
+sign-off says you know where the code came from.
+
+This course's own repository is a worked example. Its agents end every
+commit with the same two trailers, and no agent writes a sign-off. The
+last commit on `main` when this lesson was written ended like this:
+
+```text
+Co-Authored-By: lsimons-bot <bot@leosimons.com>
+Assisted-by: Claude:claude-opus-5-5
+```
+
+The `Co-Authored-By` line names a bot account that the maintainer owns,
+so the agent's work shows up under one account on GitHub. The
+`Assisted-by` line names the agent and the model. The maintainer is the
+author of record, and every change reaches `main` through a pull request.
+
+<Choice id="honest-attribution" objective="coding-with-agents/works-in-team/attributes-honestly"
+  concepts={['attribution']}
+  context="A project requires a DCO sign-off on every commit and asks for an Assisted-by trailer when AI helped. An agent wrote a change, and the developer, Ana Costa, read the whole diff and ran the tests."
+  title="Which trailer block?" hint="Which of these lines can the agent truthfully certify, and which only a person can?"
+  options={[
+    { text: '`Signed-off-by: Ana Costa <ana@example.com>` and nothing else, since she read the diff and is the author of record.', why: 'The sign-off is right, and the project also asked for the Assisted-by trailer. Leaving it out hides the agent from the reviewer and from the history.' },
+    { text: '`Assisted-by: Claude:claude-sonnet-4-6` and `Signed-off-by: Claude <agent@example.com>`, since the agent wrote the code.', why: 'Writing the code does not give the agent the rights and knowledge the DCO asks about. A tool cannot certify it.' },
+    { text: '`Assisted-by: Claude:claude-sonnet-4-6` and `Signed-off-by: Ana Costa <ana@example.com>`, added after she read it.', correct: true },
+    { text: '`Assisted-by: Claude:claude-sonnet-4-6` alone, since a person signing off on code she did not type would be dishonest.', why: 'The project requires a sign-off, and a person may give one for code she read and may submit. Without it the commit is refused.' },
+  ]}>
+An agent wrote the change and Ana read every line and ran the tests. Which
+trailer block does the commit end with?
+</Choice>
+
+<Sort id="sort-the-trailer-lines" phase="review" objective="coding-with-agents/works-in-team/attributes-honestly"
+  concepts={['attribution']}
+  context="A project asks for an Assisted-by trailer when AI helped and a DCO sign-off from the person who submits the change. Each item is a line an agent-assisted commit might end with."
+  title="Keep it or drop it?" hint="Who can truthfully give each line, and does the project ask for it?"
+  buckets={['Keep in the commit', 'Drop it']}
+  items={[
+    { text: 'Assisted-by with the agent and model', bucket: 0 },
+    { text: 'Signed-off-by with the agent\'s name', bucket: 1 },
+    { text: 'Signed-off-by with your name, added after you read the diff', bucket: 0 },
+    { text: 'Signed-off-by with your name, added before you read the diff', bucket: 1 },
+    { text: 'Signed-off-by with the name of the colleague who wrote the brief', bucket: 1 },
+  ]} />
+
+<Choice id="where-the-trailer-goes" phase="review" objective="coding-with-agents/works-in-team/attributes-honestly"
+  concepts={['attribution']}
+  context="A commit message has a subject line, a body paragraph, and room for more. The author wants tools that read git trailers to count the commit as agent-assisted."
+  title="Where does the line go?" hint="Where does git look for trailers in a commit message?"
+  options={[
+    { text: 'In the subject line, after the summary, so it shows in every one-line log.', why: 'Git does not read trailers from the subject. A one-line log shows it, and a tool that reads trailers does not.' },
+    { text: 'In the last paragraph of the message, after a blank line, as `Assisted-by: ...`.', correct: true },
+    { text: 'Anywhere in the body, as long as the line starts with `Assisted-by:`.', why: 'A line in the middle of the body is text. Git reads trailers only from the last paragraph.' },
+    { text: 'In the pull request description only, because the commit history is not the place for tool names.', why: 'The pull request is for the reviewer. The commit carries the record into the history, where the description does not follow.' },
+  ]}>
+Where in the commit message does the `Assisted-by` line go so that git
+reads it as a trailer?
+</Choice>
+
+<Exercise stretch="Look at the last ten commits in a repository your team uses with agents. Count how many name the agent in a trailer, and how many say so only in the body or not at all.">
+Rewrite the agent's commit message and pull request description from the
+fixture directory, `commit-message.txt` and `pr-description.md`. The
+pull request says only that "the agent fixed the bug" and that the agent
+ran the tests. Write both as you would send them, in a copy of the
+directory. Then run `python3 trailers.py` with your message file as its
+argument to see which trailers git finds.
+
+Take out the agent's sign-off. If your project asks for one, add your own
+with `git commit -s` once you have read the change, and not before.
+Decide what to do with the date-parsing tidy-up: take it out of this
+change, or name it in both texts.
+
+A good result: the message says what changed and why, and ends with one
+trailer paragraph that `trailers.py` prints in full, `Assisted-by` in the
+form this lesson used or the form your team uses. The pull request says
+what the agent wrote, what you ran yourself and what you saw, and what
+you did not check. A reviewer could tell from it where to look hardest.
+
+Reflect: which sentence in your pull request would you have left out if
+this exercise had not asked for it, and what would the reviewer have
+assumed without it?
+</Exercise>
+
+<Recap>
+1. Before you ask for review, read every line yourself and split a change that is too large to read. The pull request says what the agent did and what you checked, and the change goes through the same review and CI gates as any other.
+2. Reviewers read the diff, and the description tells them where to look. Answer for the whole change as its author, including the parts the agent wrote.
+3. Put the attribution in a trailer in the last paragraph of the commit message, in the form the project asks for, such as `Assisted-by` or `Co-authored-by` (@Git docs git-interpret-trailers).
+4. A `Signed-off-by` line often certifies the Developer Certificate of Origin, which only a person can give. An agent never signs off, and you sign off only after you have read the change (@Linux coding assistants).
+</Recap>
+
+<Habit id="read-the-trailer-block">
+Before you push a commit that an agent wrote, read the last paragraph of
+its message. It should name the agent the way your team asks, and it
+shouldn't contain a sign-off that you didn't give.
+</Habit>

@@ -1,5 +1,8 @@
 id: coding-with-agents/attribution-and-review-norms
 title: Saying what the agent did, in the commit and the review
+description: >-
+  Get an agent's change ready for review, say in the pull request what the agent did and what you
+  checked, and attribute it in a commit trailer with no sign-off the agent cannot give.
 mode: explanation
 covers: coding-with-agents/team
 serves:
@@ -8,6 +11,8 @@ serves:
 introduces: [review-norms, attribution]
 assumes:
   - objective: safety/handles-data-safely/discloses-ai-use
+    lesson: safety/saying-ai-helped
+    section: the-three-parts-of-a-disclosure-line
 after:
   - coding-with-agents/reversible-changes
   - coding-with-agents/reviewing-the-diff
@@ -18,9 +23,20 @@ exercise:
   brief: >-
     Rewrite a commit message and a PR description from the fixture so they carry the agent trailer
     and say what was verified, with no sign-off, because only a person may give one.
-sources: [DLAI-5]
-issue: 183
+sources:
+  - DLAI-5
+  - Git docs git-interpret-trailers
+  - Git docs git-commit
+  - GitHub docs creating-a-commit-with-multiple-authors
+  - Linux coding assistants
+  - Claude Code all settings
+  - DCO
 minutes: 10
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 notes: >-
   Explanation mode because the material is agreements, and the judge exercise keeps it concrete.
-  This repository's own practice is the worked example. Sources: DLAI-5 as inspiration.
+  This repository's own practice is the worked example, and the DCO and trailer claims come from
+  their public sources. The assumed objective is served by responsible-use too; saying-ai-helped is
+  named because its three-part disclosure line is what the pull request section builds on. Sources:
+  DLAI-5 as inspiration.
