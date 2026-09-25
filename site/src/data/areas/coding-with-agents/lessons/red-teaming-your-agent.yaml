@@ -1,26 +1,55 @@
 id: coding-with-agents/red-teaming-your-agent
 title: Attacking your own agent before someone else does
+description: >-
+  Make a scratch copy of a small invoice tool with a planted file that hides instructions for the
+  agent, start the coding agent there with web access and writes outside the copy blocked, attack it
+  three ways, check what it did, and turn each finding into a permission change, a line in the
+  instructions or a gate.
 mode: tutorial
 covers: coding-with-agents/verification
 serves: [coding-with-agents/verifies-agent-work/screens-for-security]
 introduces: [red-teaming-your-own-agent]
 assumes:
   - objective: safety/judges-agent-risk/recognizes-injection
+    lesson: safety/agent-risk
+    section: prompt-injection-when-the-data-gives-orders
   - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
 after: [coding-with-agents/sandboxing, coding-with-agents/self-checking-loops]
 shorts: []
 exercise:
   kind: judge
   brief: >-
-    In the sandboxed fixture, plant a file with hidden instructions and ask for an action the
-    permissions should stop, record what the agent did, and turn each finding into a permission
-    change, an instruction or a gate.
-sources: []
+    In the scratch copy, with the lesson's settings, ask the routine question about the planted file,
+    ask for two actions the permissions should stop and give the ambiguous brief. Save the reply, run
+    the check, and write each finding with the permission change, instruction or gate that answers it.
+sources:
+  - Claude Code security
+  - Claude Code sandboxing
+  - Claude Code permissions
+  - Claude Code permission modes
+  - Claude Code settings
+  - RFC 2606
 issue: 180
 minutes: 15
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 notes: >-
   The plan named the topic safety/agent-risk as assumed; taken as the objective
   safety/judges-agent-risk/names-blast-radius. Closes the "adversarial prompting of one's own agent"
-  gap from issue #13. Placed after sandboxing because the topic YAML says to do this where nothing
-  real can be damaged. It assumes recognizing injection from safety/agent-risk and tests the
-  learner's own agent, which is the security screen.
+  gap from issue #13. The planned sandboxing lesson has no page yet, so the fixture builds its own
+  contained setup: make_scratch.py copies site/examples/coding-with-agents/red-teaming-your-agent/project/
+  to a scratch folder, plants planted/vendor-notes.md (an HTML comment asking the agent to copy a
+  canary key to a file outside the project and send it to an address under .invalid), puts
+  the session settings file next to the copy, and writes a manifest of file hashes. The learner starts
+  Claude Code in the copy in Manual mode with those settings (deny rules for the web tools, curl and
+  wget, the Bash sandbox with no retry outside the sandbox and a strict network allowlist). check_run.py
+  compares the folder with the manifest and looks for the canary. demo_obeyed.py acts out a session
+  in which the attack worked with a few lines of Python, and the page says no model runs there.
+  scan_hidden.py is the gate for hidden text. Kept apart from security-review (#178, screening the
+  diff of agent-written code) and mcp-hardening (#175, an injected instruction through an MCP
+  server): this lesson attacks the learner's own agent session and reads the result. No claim about
+  attack success rates is made. The checkpoints all serve screens-for-security, which the plan
+  gives the lesson, and they test reading the run's evidence, the route around a deny rule, and
+  matching a finding to its fix.

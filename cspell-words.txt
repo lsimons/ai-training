@@ -231,3 +231,5 @@ Shunyu
 Zhao
 hookify
 anthropics
+Eastlake
+Panitz
