@@ -43,7 +43,7 @@ Spawn agents by name and by nothing else:
   prompt is the issue, the branch, that worktree and the risks to probe.
 
 A reviewer returns its review as its final text, ending in a `Verdict:`
-line. Post that text on the ISSUE yourself with `gh issue comment`, then
+line and the attribution lines. Post that text on the ISSUE yourself with `gh issue comment`, then
 send the builder one message: the required findings, the suggested
 rewrites to apply unless they read worse, and the findings to skip. The
 builder makes one commit, runs `mise run fast`, pushes and replies on the
