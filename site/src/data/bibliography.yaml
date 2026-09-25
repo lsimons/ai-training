@@ -1126,3 +1126,17 @@ Anthropic effective agents:
   author: Erik S., Barry Zhang
   license: Proprietary
   url: https://www.anthropic.com/engineering/building-effective-agents
+Claude Code setup:
+  type: reference
+  title: Advanced setup
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/setup
+Claude Code cli reference:
+  type: reference
+  title: CLI reference
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/cli-reference

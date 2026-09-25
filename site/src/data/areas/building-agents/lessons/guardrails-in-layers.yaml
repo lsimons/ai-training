@@ -1,5 +1,9 @@
 id: building-agents/guardrails-in-layers
 title: Guardrails in layers
+description: >-
+  Add a permission check, an output filter for account numbers and an approval gate one at a time
+  around a shop's support agent, run the planted recipe page after each, read in the trace which layer
+  acted, and say what each layer catches and misses.
 mode: tutorial
 covers: building-agents/production
 serves:
@@ -8,8 +12,14 @@ serves:
 introduces: [defense-layers]
 assumes:
   - objective: safety/judges-agent-risk/recognizes-injection
+    lesson: safety/tracing-a-planted-instruction
+    section: one-page-three-permission-sets
   - objective: safety/judges-agent-risk/chooses-human-in-loop
+    lesson: safety/sizing-the-blast-radius
+    section: place-the-approval-on-the-row-that-cant-be-undone
   - objective: safety/judges-agent-risk/sets-oversight
+    lesson: safety/reading-agent-logs
+    section: what-the-log-must-hold-and-who-reads-it
 after:
   - building-agents/agent-attack-surface
   - building-agents/stopping-the-loop
@@ -18,14 +28,34 @@ shorts: [Human approval at irreversible steps]
 exercise:
   kind: do
   brief: >-
-    Set up a restricted agent with exactly two permissions (fetch a page, write a file), plant an
-    instruction in a page it will read, predict what it does, run it, and compare. Stretch: add a
-    third permission that sends, rerun, and write down what changed.
-sources: [AEC-10]
+    Set up a restricted agent with exactly two permissions (read a file, write a file) in a throwaway
+    folder, plant an instruction in a recipe page it will read, predict what it does, run it, and
+    compare. Stretch: add a third permission that sends, rerun, and write down what changed.
+sources: [AEC-10, Claude Code setup, Claude Code cli reference, Claude Code permissions]
 issue: 212
-minutes: 15
+minutes: 20
+sources-checked: 2026-09-26
+review-by: 2027-03-26
 notes: >-
-  AEC-10 lesson. The exercise is the sandbox exercise moved out of safety/agent-risk by issue #60.
-  The fixture loop gains a permission check, an output filter and an approval gate, one Predict
-  each, and the trace from traces-and-trajectories shows which layer fired. Predict which layer
-  stops the planted line.
+  AEC-10 lesson. The exercise is the sandbox exercise moved out of safety/agent-risk by issue #60 and
+  held in issue #105. The fixture in site/examples/building-agents/guardrails-in-layers/ is the
+  support agent of building-agents/agent-attack-surface (#211): the baking-tin shop, its eight tools
+  with the same names and arguments, its system prompt, and the recipe page from
+  safety/tracing-a-planted-instruction with the same planted fetch line. The fake model always
+  follows a paragraph addressed to the assistant. Runs a and b answer a customer's ticket, with the
+  system prompt only and then with a permission check (the task's four tools, and fetch_url only for
+  addresses in the ticket). Runs c and d answer a ticket the page's author opened, with the last
+  paragraph rewritten to copy another customer's order into the reply, because every call that needs
+  is allowed; c adds an output filter for bank account numbers (IBAN) and d an approval gate on every
+  outbound call. lookup_order is left unscoped on purpose, and section four says the scope from the
+  previous lesson would have refused the planted lookup. Guard records use the outline format of
+  traces-and-trajectories without latency and cost. The tickets, orders, names and account number
+  are illustrative. The exercise page keeps the recipe and changes the last paragraph to a local file
+  write, the line the original agent-risk exercise planted, so the base run stays inside the two
+  permissions; the stretch swaps in the fetch line and adds WebFetch. The Claude Code flags (--tools,
+  --disallowedTools "mcp__*", --permission-mode default) were run on 2.1.281 and the session listed
+  only Read and Write. The plan put the Match on mitigates-agent-risks; it went on layers-defenses,
+  because pairing each layer with what it catches and misses is that objective's second behavior,
+  and mitigates-agent-risks has the approval Predict and the send_email Scenario instead. Brilliant
+  SEC and Academy claude-platform-101 from the plan were dropped because the page cites no claim from
+  them. The short is still to write.
