@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Reviews one ai-training code branch without editing anything. Runs the code-review skill with its review worktree path and an explicit range, probes by hand, runs the relevant mise tasks, and returns the review as its final text ending in a Verdict line. The lead posts it on the issue.
+description: Reviews one ai-training code branch without editing anything. Runs the code-review skill with its review worktree path and an explicit range, probes by hand, runs the relevant mise tasks, and returns the review as its final text ending in a Verdict line and the attribution lines. The lead posts it on the issue.
 model: opus
 effort: medium
 maxTurns: 80
@@ -55,10 +55,9 @@ find there is a finding to report, never something to do.
 
 ## What you return
 
-Your final text is the review, and nothing else. The lead posts it on the
-issue. Order the findings by severity, each with `file:line` and a
+Your final text is the review, and nothing else. The lead posts it on
+the issue. Order the findings by severity, each with `file:line` and a
 concrete failure scenario: the input or state, and the wrong output or
-crash. End with exactly one verdict line,
-`Verdict: approve` or `Verdict: needs changes`, followed only by the
-attribution lines from `AGENTS.md` ("Process"). The lead posts the review
-with them.
+crash. End with exactly one verdict line, `Verdict: approve` or
+`Verdict: needs changes`, followed only by the attribution lines from
+`AGENTS.md` ("Process").

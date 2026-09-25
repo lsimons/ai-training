@@ -81,7 +81,7 @@ both, so the builder and the reviewer never talk to each other.
    `code-reviewer` for code, with the diff written into the review
    worktree as `review.diff`. The reviewer returns its review as its final
    text, findings ordered by severity, each with `file:line` and a
-   concrete failure scenario, and a final `Verdict: approve / needs changes` line. The coordinator posts it on the pull request with
+   concrete failure scenario, and a final `Verdict: approve / needs changes` line followed by the attribution lines. The coordinator posts it on the pull request with
    `gh pr review --comment` (GitHub refuses `--request-changes` on a pull
    request the same account opened).
 
