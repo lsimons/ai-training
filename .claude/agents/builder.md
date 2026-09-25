@@ -75,7 +75,8 @@ Review finds these in almost every first pass. Check each one yourself.
 
 - Past about 150 turns, or after a context compaction, stop. Commit, run
   `mise run fast`, push even when it fails, and hand back with its result
-  and a list of what is left (#418). The lead spawns a fresh builder for the rest.
+  and a list of what is left. The lead spawns a fresh builder for the
+  rest.
 
 - Rebase on `origin/main` before the final push, and push your own branch
   with `git push --force-with-lease` only. Never discard another agent's

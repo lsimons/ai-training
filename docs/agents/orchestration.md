@@ -142,7 +142,8 @@ Code work that changes shared modules or adds gates gets a separate pull
 request, because its review and its CI run are what protect the other
 branches.
 
-Builders work as before: one issue (or one half of a split issue), one branch from `origin/main`, pushed
+Builders work as before: one issue (or one half of a split issue), one
+branch from `origin/main`, pushed
 when its local checks pass, and without a pull request. Reviewers check
 the branch out in their own worktree and review it as before. The review
 goes on the issue as a comment, because the pull request doesn't exist
