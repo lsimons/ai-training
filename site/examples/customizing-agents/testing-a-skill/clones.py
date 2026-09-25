@@ -8,11 +8,12 @@ what a colleague has after copying the package and committing it: one commit
 and no tag.
 
 The copy holds the package as it is committed in the course repository, so
-a local edit or an untracked file in `fixture-package` (left by a learner
-who ran the first-skill exercise in place) doesn't change what the fixtures
-print. Where the package isn't in a git checkout, as in a download of the
-examples without `.git`, there is no committed version to read: the copy
-takes the files as they are, and a note on stderr says so.
+a local edit, an untracked file or a `.git` of its own in `fixture-package`
+(left by a learner who ran the first-skill exercise in place) doesn't change
+what the fixtures print, and a note on stderr says the edits were left out.
+Where the course repository can't be read, as in a download of the examples
+without `.git`, there is no committed version: the copy takes the files as
+they are, and a note on stderr says so and gives git's error.
 
 Every git command runs with an allow-list environment: PATH, a temporary
 HOME, LC_ALL=C, a fixed identity and date, and the global and system config
@@ -63,6 +64,8 @@ def python_env() -> dict[str, str]:
     """
     return {
         "PATH": os.environ.get("PATH", os.defpath),
+        "LANG": "C",
+        "LC_ALL": "C",
         "PYTHONDONTWRITEBYTECODE": "1",
         "NO_COLOR": "1",
         "PYTHON_COLORS": "0",
@@ -100,28 +103,41 @@ class Repo:
         return self.git("log", "--format=%s", *revisions).stdout.splitlines()
 
 
-def _git_bytes(cwd: Path, env: dict[str, str], *args: str) -> Optional[bytes]:
-    """What a git command prints, as bytes, or None when it fails."""
-    result = subprocess.run(["git", *args], cwd=cwd, env=env, capture_output=True, check=False)
-    return result.stdout if result.returncode == 0 else None
+def _git_bytes(cwd: Path, env: dict[str, str], *args: str) -> "subprocess.CompletedProcess[bytes]":
+    """Runs a git command and keeps its output as bytes, with its stderr and return code."""
+    return subprocess.run(["git", *args], cwd=cwd, env=env, capture_output=True, check=False)
 
 
-def copy_tracked(source: Path, dest: Path, env: dict[str, str]) -> bool:
-    """Writes the files committed at HEAD under `source` into `dest`.
+def _failure(result: "subprocess.CompletedProcess[bytes]") -> str:
+    """git's error message, for the note that says why the copy fell back."""
+    message = result.stderr.decode("utf-8", "replace").strip()
+    return message or f"git exited with {result.returncode}"
 
-    Returns False, and writes nothing, when `source` isn't committed in a git
-    checkout. Local edits and untracked files in `source` never reach `dest`.
+
+def copy_committed(source: Path, dest: Path, env: dict[str, str], course: Path) -> Optional[str]:
+    """Writes the files under `source` committed at HEAD of the course repository into `dest`.
+
+    The course repository is the one that holds the directory `course`. git
+    runs from its top level and reads `source` as a path in that repository,
+    so a `.git` a learner made inside `source` is never the one read. Local
+    edits and untracked files in `source` never reach `dest`, and a note on
+    stderr says when there are some. Returns None when the copy is written,
+    or, writing nothing, why it couldn't be: git's own error where git failed.
     """
-    prefix = _git_bytes(source, env, "rev-parse", "--show-prefix")
-    if prefix is None:
-        return False
-    # `--full-tree` because ls-tree run in a subdirectory otherwise also
-    # filters the listing by that subdirectory, and prints nothing here.
-    tree = "HEAD:" + prefix.decode("utf-8").strip()
-    listing = _git_bytes(source, env, "ls-tree", "--full-tree", "-r", "-z", tree)
-    if not listing:
-        return False
-    for entry in listing.decode("utf-8").split("\0"):
+    top = _git_bytes(course, env, "rev-parse", "--show-toplevel")
+    if top.returncode != 0:
+        return _failure(top)
+    toplevel = Path(top.stdout.decode("utf-8").strip()).resolve()
+    try:
+        prefix = source.resolve().relative_to(toplevel).as_posix()
+    except ValueError:
+        return f"{source} is outside the repository at {toplevel}"
+    listing = _git_bytes(toplevel, env, "ls-tree", "-r", "-z", f"HEAD:{prefix}")
+    if listing.returncode != 0:
+        return _failure(listing)
+    if not listing.stdout:
+        return f"HEAD:{prefix} holds no files"
+    for entry in listing.stdout.decode("utf-8").split("\0"):
         if not entry:
             continue
         meta, name = entry.split("\t", 1)
@@ -130,25 +146,35 @@ def copy_tracked(source: Path, dest: Path, env: dict[str, str]) -> bool:
             continue
         if kind != "blob" or mode not in ("100644", "100755"):
             raise SystemExit(f"{source / name}: mode {mode} {kind} is not a plain file")
-        content = _git_bytes(source, env, "cat-file", "blob", obj)
-        if content is None:
-            raise SystemExit(f"git cat-file blob {obj} failed for {source / name}")
+        content = _git_bytes(toplevel, env, "cat-file", "blob", obj)
+        if content.returncode != 0:
+            raise SystemExit(
+                f"git cat-file blob {obj} failed for {source / name}: {_failure(content)}"
+            )
         target = dest / name
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(content)
+        target.write_bytes(content.stdout)
         if mode == "100755":
             target.chmod(0o755)
-    return True
+    status = _git_bytes(toplevel, env, "--no-optional-locks", "status", "--porcelain", "--", prefix)
+    if status.returncode == 0 and status.stdout.strip():
+        print(
+            f"note: {source} has uncommitted changes, and the copy takes the"
+            " committed version without them",
+            file=sys.stderr,
+        )
+    return None
 
 
 def _copy_package(root: Path, name: str) -> Repo:
     home = root / f"{name}-home"
     home.mkdir(parents=True)
     path = root / name
-    if not copy_tracked(PACKAGE, path, git_env(home)):
+    reason = copy_committed(PACKAGE, path, git_env(home), HERE)
+    if reason is not None:
         print(
-            f"note: {PACKAGE} is not committed in a git checkout, so the copy"
-            " takes its files as they are, local edits included",
+            f"note: no committed version of {PACKAGE} to read ({reason}), so the"
+            " copy takes its files as they are, local edits included",
             file=sys.stderr,
         )
         shutil.copytree(PACKAGE, path, ignore=shutil.ignore_patterns(".git", "__pycache__"))
