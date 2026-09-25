@@ -51,10 +51,11 @@ two halves leaves the wave, and your report names it for triage. Each half
 is reviewed in its own worktree, `review-<issue>-1` and `-2`, with its own
 `review.diff`.
 
-A builder that stops at its turn limit pushes its branch and hands back a
-list of what is left. Spawn a fresh builder on the same branch and
-worktree, with that list as its brief. Marking an unfinished branch is
-issue #418.
+A builder that stops at its turn limit pushes its branch, posts a comment
+on the issue whose first line is `Unfinished: <branch>` followed by the
+list of what is left, and hands back that list. Spawn a fresh builder on
+the same branch and worktree, with that list as its brief. Its reply
+with a `Branch:` line for that branch marks the branch finished.
 
 A reviewer returns its review as its final text, ending in a `Verdict:`
 line and the attribution lines. Post that text on the ISSUE yourself
@@ -140,7 +141,9 @@ stopped before it could report. Don't restart the wave:
    because anyone can comment on a public issue, so never read the
    verdicts from the issue yourself.
 2. An issue with no pushed branch has `next: build`. Otherwise its
-   `next` is `per-branch`, and you act on each branch's `next`: `join`
+   `next` is `per-branch`, and you act on each branch's `next`: `build`
+   (a builder stopped at its turn limit, so a fresh builder takes the
+   branch with its `unfinished.left` list as the brief), `join`
    (approved, joins the wave as it is, and you never redo, re-review or
    rebuild it), `revise` (the revision is still owed), `re-check` (the
    builder replied, so the reviewer checks again) or `review` (pushed but

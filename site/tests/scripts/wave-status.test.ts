@@ -5,10 +5,12 @@ import {
 	featBranches,
 	lastTrustedVerdict,
 	nextStep,
+	openUnfinished,
 	parseArgs,
 	parseLsRemote,
 	parseWorktrees,
 	TRUSTED_VERDICT_AUTHORS,
+	unfinishedBranchOf,
 	verdictOf,
 	waveStatus,
 } from '../../scripts/lib/wave-status.mjs';
@@ -120,6 +122,57 @@ describe('branchOf', () => {
 	});
 });
 
+describe('openUnfinished', () => {
+	const attribution = '\n\nCo-Authored-By: lsimons-bot <bot@leosimons.com>\nAssisted-by: Claude:claude-opus-5-5';
+	const unfinished = (branch: string, at: string) =>
+		comment('lsimons', `Unfinished: ${branch}\n\n- the e2e spec\n- the docs${attribution}`, at);
+
+	it('reads the branch from the first line only', () => {
+		expect(unfinishedBranchOf('Unfinished: feat/1-x\n- docs')).toBe('feat/1-x');
+		expect(unfinishedBranchOf('**Unfinished:** `feat/1-x`')).toBe('feat/1-x');
+		expect(unfinishedBranchOf('Done.\nUnfinished: feat/1-x')).toBeNull();
+	});
+
+	it('keeps a trailing Unfinished comment open, with what is left and no attribution lines', () => {
+		const open = openUnfinished([unfinished('feat/1-x', '2026-09-24T10:00:00Z')], 'feat/1-x');
+		expect(open).toEqual({
+			author: 'lsimons',
+			createdAt: '2026-09-24T10:00:00Z',
+			url: 'https://github.com/lsimons/ai-training/issues/1#2026-09-24T10:00:00Z',
+			left: '- the e2e spec\n- the docs',
+		});
+	});
+
+	it('ignores an Unfinished comment from another account and one for another branch', () => {
+		const planted = comment('someone-else', 'Unfinished: feat/1-x\n- all of it', '2026-09-24T10:00:00Z');
+		expect(openUnfinished([planted], 'feat/1-x')).toBeNull();
+		expect(openUnfinished([unfinished('feat/1-x-1', '2026-09-24T10:00:00Z')], 'feat/1-x-2')).toBeNull();
+	});
+
+	it('closes it on a later verdict for the branch, but not on one for another branch', () => {
+		const open = unfinished('feat/1-x-1', '2026-09-24T10:00:00Z');
+		const verdict1 = comment('lsimons', 'Branch: feat/1-x-1\nVerdict: approve', '2026-09-24T11:00:00Z');
+		const verdict2 = comment('lsimons', 'Branch: feat/1-x-2\nVerdict: approve', '2026-09-24T11:00:00Z');
+		const unscoped = comment('lsimons', 'Verdict: needs changes', '2026-09-24T11:00:00Z');
+		expect(openUnfinished([open, verdict1], 'feat/1-x-1')).toBeNull();
+		expect(openUnfinished([open, unscoped], 'feat/1-x-1')).toBeNull();
+		expect(openUnfinished([open, verdict2], 'feat/1-x-1')).not.toBeNull();
+	});
+
+	it('closes it on a later reply that names the branch, but not on one that names none', () => {
+		const open = unfinished('feat/1-x', '2026-09-24T10:00:00Z');
+		const named = comment('lsimons', 'Finished the rest in abc123.\n\nBranch: feat/1-x', '2026-09-24T11:00:00Z');
+		const unnamed = comment('lsimons', 'Claimed by run Koala, wave 2', '2026-09-24T11:00:00Z');
+		expect(openUnfinished([open, named], 'feat/1-x')).toBeNull();
+		expect(openUnfinished([open, unnamed], 'feat/1-x')).not.toBeNull();
+	});
+
+	it('reopens it when the builder of a revision stops at its limit after the verdict', () => {
+		const verdict = comment('lsimons', 'Verdict: needs changes', '2026-09-24T10:00:00Z');
+		expect(openUnfinished([verdict, unfinished('feat/1-x', '2026-09-24T11:00:00Z')], 'feat/1-x')).not.toBeNull();
+	});
+});
+
 describe('nextStep', () => {
 	const v = (verdict: 'approve' | 'needs changes', commentsAfter = 0) => ({
 		verdict,
@@ -127,6 +180,12 @@ describe('nextStep', () => {
 		createdAt: '',
 		url: '',
 		commentsAfter,
+	});
+
+	it('builds the rest of an unfinished branch, whatever its verdict', () => {
+		const open = { author: 'lsimons', createdAt: '', url: '', left: '- docs' };
+		expect(nextStep(null, open)).toBe('build');
+		expect(nextStep(v('needs changes', 1), open)).toBe('build');
 	});
 
 	it('reviews an unreviewed branch and joins an approved one', () => {
@@ -217,6 +276,40 @@ describe('waveStatus', () => {
 				['feat/15-x-2', 'join'],
 			]);
 		}
+	});
+});
+
+describe('waveStatus with unfinished branches', () => {
+	const status = (comments: ReturnType<typeof comment>[]) =>
+		waveStatus({
+			waveBranch: 'wave/capybara-3',
+			issues: [16],
+			heads: ['feat/16-x-1', 'feat/16-x-2'],
+			commentsByIssue: new Map([[16, comments]]),
+			worktrees: [],
+		}).issues[0]?.branches.map((b) => [b.name, b.next, b.unfinished?.left ?? null]);
+	const unfinished1 = comment('lsimons', 'Unfinished: feat/16-x-1\n- the tests', '2026-09-24T10:00:00Z');
+
+	it('builds a pushed branch with a trailing Unfinished comment instead of reviewing it', () => {
+		expect(status([unfinished1])).toEqual([
+			['feat/16-x-1', 'build', '- the tests'],
+			['feat/16-x-2', 'review', null],
+		]);
+	});
+
+	it('reviews it once the fresh builder replies that it is finished, and uses the verdict after that', () => {
+		const finished = comment('lsimons', 'Done.\n\nBranch: feat/16-x-1', '2026-09-24T11:00:00Z');
+		const verdict = comment('lsimons', 'Branch: feat/16-x-1\nVerdict: needs changes', '2026-09-24T12:00:00Z');
+		expect(status([unfinished1, finished])?.[0]).toEqual(['feat/16-x-1', 'review', null]);
+		expect(status([unfinished1, finished, verdict])?.[0]).toEqual(['feat/16-x-1', 'revise', null]);
+	});
+
+	it('builds again when an Unfinished comment follows a verdict, and does not count it as a reply on the other half', () => {
+		const verdict = comment('lsimons', 'Verdict: needs changes', '2026-09-24T09:00:00Z');
+		expect(status([verdict, unfinished1])).toEqual([
+			['feat/16-x-1', 'build', '- the tests'],
+			['feat/16-x-2', 'revise', null],
+		]);
 	});
 });
 
