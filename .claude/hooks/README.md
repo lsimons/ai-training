@@ -30,9 +30,9 @@ JSON has no comments, so this file says what each layer covers:
 
 - The deny rules in `settings.json` stop the forms they spell out:
   `Edit` on `settings.json` itself, `gh repo delete`, and a `gh api` call
-  with `-X DELETE`, `-XDELETE`, `--method DELETE` or `--method=DELETE`
-  anywhere after `api`. They miss `-X=DELETE`, a lowercase method and a
-  quoted method, such as `gh api <path> -X 'DELETE'`. They also deny a
+  with `-X DELETE`, `-XDELETE`, `-X=DELETE`, `--method DELETE` or
+  `--method=DELETE` anywhere after `api`. They miss a lowercase method and
+  a quoted method, such as `gh api <path> -X 'DELETE'`. They also deny a
   call whose text only mentions one of those forms, such as a comment body
   that contains `-X DELETE`. A deny rule stops only the command text it
   matches (<https://code.claude.com/docs/en/permissions>, "What a Bash
