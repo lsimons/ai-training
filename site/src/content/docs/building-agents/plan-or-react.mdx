@@ -176,11 +176,12 @@ Each subgoal can run in its own agent call with a fresh context. In
 Claude Code a subagent starts with a context of its own and doesn't see
 the main conversation. It gets its own system prompt and a task message
 that the main agent writes for it. Claude Code also loads parts of the
-project setup for it, such as the CLAUDE.md files. A fork is the exception, and it starts with the
-parent conversation. A subagent does its work in its own context and
-returns a summary to the main conversation (@Claude Code subagents). The
-top level then keeps the list of subgoals and the status of each one,
-and the detail stays in the context of the level below.
+project setup for it, such as the CLAUDE.md files. A fork is the
+exception, and it starts with the parent conversation. A subagent does
+its work in its own context and returns a summary to the main
+conversation (@Claude Code subagents). The top level then keeps the list
+of subgoals and the status of each one, and the detail stays in the
+context of the level below.
 
 That keeps each context small and on one subject. The cost is at the
 line between two levels. The level below knows only what the task
@@ -285,9 +286,10 @@ rest. It gets a plan that a person reads and a check after each step,
 at 13 model calls and 51 seconds. Task four fits a coarse plan of 3
 phases: research on the five competitors, a comparison, and the
 recommendation. The model decides the steps inside each phase, at 16
-model calls and 60 seconds, and each phase can run in a fresh context. Which of your four would you move
-one place toward the reactive end first if an evaluation showed it
-failing, and what would you measure before you move it?
+model calls and 60 seconds, and each phase can run in a fresh context.
+Which of your four would you move one place toward the reactive end
+first if an evaluation showed it failing, and what would you measure
+before you move it?
 
 </Exercise>
 
