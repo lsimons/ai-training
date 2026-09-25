@@ -182,6 +182,11 @@ run stops, with a last comment that names the stop condition.
    - Under `--only`: remove the `Merged issues` and the `Left out` numbers
      from `Remaining --only`, and add the `Left out` ones to `## Parked`
      with their reason.
+   - When the report's `For the maintainer` or `Filed` line names an
+     issue that waits on the maintainer's decision, your status update
+     quotes that issue's options and its recommendation (`triage.md`,
+     "What a maintainer decision needs"). An issue number alone is never
+     the question.
    - Then act on the status.
    - `merged`: play `afplay /System/Library/Sounds/Glass.aiff` and go to
      step 1.
@@ -197,7 +202,8 @@ Default (no `--no-filing`):
 > Before you report, file a GitHub issue (per `docs/agents/triage.md`,
 > labeled `code` or `content` plus `ready-for-agent` when every decision is
 > made, or `ready-for-human` when one is the maintainer's) for every
-> follow-up a review named. Fix cheap nits in the branch. Every cosmetic nit
+> follow-up a review named. A `ready-for-human` body holds what
+> `triage.md`, "What a maintainer decision needs", lists. Fix cheap nits in the branch. Every cosmetic nit
 > you leave open on a merged branch becomes one line, naming the file and
 > the change, appended to the body of the one open issue titled
 > `Cosmetic nits` (`gh issue view <n> --json body`, then
@@ -215,7 +221,9 @@ Under `--no-filing`:
 > change, in their final report to you. For every follow-up a review named
 > or a builder reported, write the issue you would have filed, as a
 > `## <title>` heading with the body and labels under it, in ONE comment
-> on the run issue #<run>, headed `Follow-ups from <NAME> wave <k>`.
+> on the run issue #<run>, headed `Follow-ups from <NAME> wave <k>`. The
+> body of one that needs the maintainer's decision holds what
+> `triage.md`, "What a maintainer decision needs", lists.
 > Put the cosmetic nits you left open in the same comment under one
 > `## Cosmetic nits` heading, one line each. Put the comment's link on the
 > `Follow-ups:` line of your report. The `Filed` line is `none`.

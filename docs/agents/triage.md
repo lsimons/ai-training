@@ -92,6 +92,26 @@ again in later sessions unless asked. Some of these are "when I get to
 it" items for the maintainer, and that is a fine state for an issue to be
 in.
 
+## What a maintainer decision needs
+
+An agent that files an issue for a decision only the maintainer can make
+(`ready-for-human`, or a question on a report's maintainer line) writes the
+body so the maintainer can decide from it alone. The body holds:
+
+- The problem, in plain words.
+- What already exists that overlaps: tools, settings, other issues and
+  their state, with links. Look these up before filing, so the maintainer
+  doesn't have to.
+- The options, each with its cost in time, money or upkeep.
+- One recommendation, with its reason.
+
+A body that holds only "the one action" is fine for a step such as a
+network trace, where nothing is left to decide. In the review of
+2026-09-25, a `ready-for-human` issue without this material (#278) cost the
+maintainer a second session to find out what an existing tool already
+covered, while a question that held the background, the options and a plan
+took about a minute.
+
 ## Writing the comments
 
 - Date every decision comment. Relative words ("today", "last week") go

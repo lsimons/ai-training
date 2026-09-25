@@ -21,7 +21,8 @@ run `git stash`, `git checkout -- .` or `git reset` in it. Don't run
 one stash (`refs/stash`). You coordinate and never write lesson content
 yourself. Don't ask questions. Make the call, state it in the pull request
 body, and put anything that needs the maintainer on your report's
-maintainer line.
+maintainer line. An issue you file for a maintainer decision holds what
+`docs/agents/triage.md`, "What a maintainer decision needs", lists.
 
 ## The roles you spawn
 
