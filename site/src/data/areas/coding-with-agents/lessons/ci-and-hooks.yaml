@@ -1,5 +1,9 @@
 id: coding-with-agents/ci-and-hooks
 title: Enforcing the team's rules with hooks and CI
+description: >-
+  Make two team rules run without anyone remembering them: a Claude Code hook that blocks agent
+  edits to the nightly import's test and data, and a pinned CI job that runs the deterministic gates
+  on every pull request, with the agent fixing the failing job from its log within a bound.
 mode: tutorial
 covers: coding-with-agents/team
 serves:
@@ -8,6 +12,11 @@ serves:
 introduces: [ci-integration, team-hooks]
 assumes:
   - objective: safety/judges-agent-risk/chooses-human-in-loop
+    lesson: safety/agent-risk
+    section: human-in-the-loop
+  - objective: coding-with-agents/verifies-agent-work/automates-the-check
+    lesson: coding-with-agents/self-checking-loops
+    section: brief-the-loop-with-a-limit
 after: [coding-with-agents/self-checking-loops]
 shorts:
   - an agent review pass in CI with a security lane, evals in CI (a pointer to
@@ -17,11 +26,31 @@ exercise:
   brief: >-
     Add a hook to the fixture that blocks an edit to a protected path and a CI job that runs the
     deterministic gates, then have the agent hit both and fix the CI failure within a bound.
-sources: [Academy ai-native-sdlc-playbook]
+sources:
+  - Academy ai-native-sdlc-playbook
+  - Claude Code best practices
+  - Claude Code hooks
+  - GitHub docs workflow-syntax
+  - GitHub docs events-that-trigger-workflows
 issue: 186
 minutes: 15
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 notes: >-
   Takes the material the #65 Academy pass left for this topic: hooks as approval gates, a CI review
   pass with ranked findings, review findings fed back into the project instructions on the second
-  occurrence, and a cold second opinion from a fresh session, all cited as Academy ai-native-sdlc-playbook and paraphrased. Evals in CI are named and pointed at
-  building-agents/evaluation instead of taught here.
+  occurrence, and a cold second opinion from a fresh session. The Academy course is cited for the
+  first two only at the level of its public lesson titles, and the rest is paraphrased from Claude
+  Code best practices (hooks against advisory instructions, `claude -p` in CI, a fresh session as
+  reviewer, turning an instruction into a hook). Claude Code hooks gives the PreToolUse input, exit
+  status 2 as the block, exit status 1 as a non-blocking error, the tool-name matcher and the `ask`
+  decision, all checked on 2026-09-25. GitHub docs gives the `.github/workflows` location, step
+  status from the exit code, the commit SHA as the safest pin and minimum `permissions`, and the
+  default `pull_request` activity types. The concept team-hooks is named "Team hooks" so its
+  glossary entry stays distinct from the hooks concept of customizing-agents/hooks-permissions.
+  The assumes entry on automates-the-check is added because the page opens from the
+  self-checking-loops fixture and bound. The fixtures under
+  site/examples/coding-with-agents/ci-and-hooks/ load self-checking-loops/_common.py with importlib
+  for the copy and the fix, add the hook, its settings and checks.yml, feed the hook three tool
+  calls, and run the `run` lines of checks.yml before and after the fix. They run no git. Evals in
+  CI point at building-agents/rubrics, the live lesson that covers building-agents/evaluation.

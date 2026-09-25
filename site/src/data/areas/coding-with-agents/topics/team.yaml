@@ -35,7 +35,7 @@ concepts:
       target. Agents can also be given CI results to fix, within the same
       bounds as any self-checking loop.
   - id: team-hooks
-    name: Hooks
+    name: Team hooks
     definition: >-
       Scripts that run automatically at fixed points, before a commit, after
       an agent edits a file, before a command runs, to enforce a rule
@@ -65,4 +65,4 @@ links:
   prerequisites: [coding-with-agents/quality]
   related: []
   specializations: []
-sources: [DLAI-5, Academy claude-code-in-action, Academy ai-native-sdlc-playbook]
+sources: [DLAI-5, Academy claude-code-in-action, Academy ai-native-sdlc-playbook, Claude Code hooks, GitHub docs workflow-syntax]

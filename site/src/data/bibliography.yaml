@@ -867,3 +867,17 @@ Claude Code hooks:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/hooks
+GitHub docs workflow-syntax:
+  type: reference
+  title: Workflow syntax for GitHub Actions
+  container: GitHub documentation
+  author: GitHub
+  license: CC BY 4.0
+  url: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
+GitHub docs events-that-trigger-workflows:
+  type: reference
+  title: Events that trigger workflows
+  container: GitHub documentation
+  author: GitHub
+  license: CC BY 4.0
+  url: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
