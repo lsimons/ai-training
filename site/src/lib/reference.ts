@@ -6,6 +6,7 @@
  * lessons. Pure: no DOM, no Astro.
  */
 
+import { splitCitations } from '../../plugins/citation-syntax.mjs';
 import { DEFAULT_PHASE } from './checkpoint-rules';
 import {
 	attrsOf,
@@ -94,9 +95,31 @@ function linkHref(url: string): string {
 	return url.startsWith('/') && !url.startsWith('//') ? href(url) : url;
 }
 
+/**
+ * `md` without its `(@key)` citations, found with the syntax the remark
+ * plugin uses (`plugins/citation-syntax.mjs`), so a key with spaces is
+ * dropped too. The whitespace before a token goes with it, so `a (@k).`
+ * reads `a.` and `a (@k) (@j) b` reads `a b`. When `atStart` is set (the
+ * run begins the text, no code span before it), a token with nothing before
+ * it also takes the whitespace after it, so `(@k) b` reads `b`.
+ */
+export function dropCitations(md: string, atStart = true): string {
+	let out = '';
+	let trimNext = false;
+	for (const part of splitCitations(md)) {
+		if (part.type === 'text') {
+			out += trimNext ? part.value.trimStart() : part.value;
+			trimNext = false;
+		} else {
+			out = out.trimEnd();
+			trimNext = atStart && out === '';
+		}
+	}
+	return out;
+}
+
 function renderProse(md: string): string {
 	return escapeHtml(md)
-		.replace(/\s*\(@[A-Za-z0-9-]+\)/g, '')
 		.replace(STRONG, '<strong>$1</strong>')
 		.replace(EMPHASIS, '<em>$1</em>')
 		.replace(LINK, (_, text: string, url: string) => `<a href="${linkHref(url)}">${text}</a>`);
@@ -112,11 +135,11 @@ export function renderInline(md: string): string {
 	const parts: string[] = [];
 	let last = 0;
 	for (const m of md.matchAll(CODE_SPAN)) {
-		parts.push(renderProse(md.slice(last, m.index)));
+		parts.push(renderProse(dropCitations(md.slice(last, m.index), last === 0)));
 		parts.push(`<code>${escapeHtml(m[1] ?? '')}</code>`);
 		last = m.index + m[0].length;
 	}
-	parts.push(renderProse(md.slice(last)));
+	parts.push(renderProse(dropCitations(md.slice(last), last === 0)));
 	return parts.join('');
 }
 

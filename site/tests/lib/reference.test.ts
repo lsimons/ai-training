@@ -1,5 +1,13 @@
 import type { Lesson } from '@lib/lessons';
-import { canonicalExampleOf, referenceOf, renderBlocks, renderInline, segmentsOf, takeawaysOf } from '@lib/reference';
+import {
+	canonicalExampleOf,
+	dropCitations,
+	referenceOf,
+	renderBlocks,
+	renderInline,
+	segmentsOf,
+	takeawaysOf,
+} from '@lib/reference';
 import { describe, expect, it } from 'vitest';
 
 const lesson = (body?: string): Lesson => ({ id: 'x/y', data: { title: 'X' }, body }) as unknown as Lesson;
@@ -15,6 +23,23 @@ describe('renderInline', () => {
 			'<a href="https://example.org/x">docs</a> and <a href="#anchor">here</a>',
 		);
 		expect(renderInline('a `**not bold**` b')).toBe('a <code>**not bold**</code> b');
+	});
+});
+
+describe('dropCitations', () => {
+	it('drops tokens of any key the citation syntax accepts, with the whitespace before them', () => {
+		expect(dropCitations('Ask first (@Claude Code permissions).')).toBe('Ask first.');
+		expect(dropCitations('A (@a) (@b) b.')).toBe('A b.');
+		expect(dropCitations('A (@a), then (@b.c v2).')).toBe('A, then.');
+		expect(dropCitations('(@a) Starts here.')).toBe('Starts here.');
+		// A key split over a soft line break is one token, as in the remark plugin.
+		expect(dropCitations('Wrapped (@Claude\n  Code).')).toBe('Wrapped.');
+		expect(dropCitations('No tokens (here).')).toBe('No tokens (here).');
+	});
+	it('keeps the space after a token that follows a code span', () => {
+		expect(dropCitations(' (@a) then', false)).toBe(' then');
+		expect(renderInline('Run `ls` (@a) then `pwd` (@b).')).toBe('Run <code>ls</code> then <code>pwd</code>.');
+		expect(renderInline('Keep `(@a)` as code (@b).')).toBe('Keep <code>(@a)</code> as code.');
 	});
 });
 
@@ -45,8 +70,9 @@ describe('segmentsOf', () => {
 
 describe('takeawaysOf', () => {
 	it('reads the numbered items inside Recap, joining wrapped lines', () => {
-		const body = 'Text.\n\n<Recap>\n\n1. First **one**.\n2. Second\n   continues (@K-1).\n\n</Recap>\n';
-		expect(takeawaysOf(lesson(body))).toEqual(['First <strong>one</strong>.', 'Second continues.']);
+		const body =
+			'Text.\n\n<Recap>\n\n1. First **one**.\n2. Second\n   continues (@K-1).\n3. Two keys (@Claude Code\n   permissions) (@AEC-02).\n\n</Recap>\n';
+		expect(takeawaysOf(lesson(body))).toEqual(['First <strong>one</strong>.', 'Second continues.', 'Two keys.']);
 	});
 	it('is empty without a Recap or a body, and rejects an unclosed Recap', () => {
 		expect(takeawaysOf(lesson('no recap'))).toEqual([]);
