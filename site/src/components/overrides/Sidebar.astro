@@ -31,42 +31,7 @@ const courses = (await getAreas()).map((a) => ({ area: a.slug, title: a.name }))
 <script is:inline type="application/json" data-sidebar-courses set:html={JSON.stringify(courses)} />
 
 <script>
-	import { dueByCourse, dueCountLabel } from '@scripts/due-counts';
-	import * as progress from '@scripts/progress';
+	import { mountSidebarDueCounts } from '@scripts/sidebar';
 
-	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-	const courses: { area: string; title: string }[] = JSON.parse(
-		document.querySelector('[data-sidebar-courses]')?.textContent ?? '[]'
-	);
-
-	/** The course links in the sidebar. The count element exists only while something is due. */
-	const links = new Map<string, HTMLAnchorElement>();
-	for (const c of courses) {
-		const link = document.querySelector<HTMLAnchorElement>(`.sidebar-content a[href="${base}/${c.area}/"]`);
-		if (link) links.set(c.area, link);
-	}
-
-	function draw() {
-		const due = new Map(dueByCourse(courses, progress.load(), progress.today()).map((c) => [c.area, c.due]));
-		for (const [area, link] of links) {
-			const n = due.get(area) ?? 0;
-			let count = link.querySelector<HTMLElement>('[data-due-count]');
-			if (n === 0) {
-				count?.remove();
-				continue;
-			}
-			if (!count) {
-				count = document.createElement('span');
-				count.className = 'due-count not-content';
-				count.dataset.dueCount = area;
-				link.appendChild(count);
-			}
-			const label = document.createElement('span');
-			label.className = 'sr-only';
-			label.textContent = dueCountLabel(n);
-			count.replaceChildren(String(n), label);
-		}
-	}
-	draw();
-	document.addEventListener(progress.EVENT, draw);
+	mountSidebarDueCounts(document);
 </script>
