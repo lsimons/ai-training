@@ -1,20 +1,29 @@
 id: building-agents/agent-attack-surface
 title: How a running agent gets attacked
+description: >-
+  Name the four risks that appear once a model can act, count the outbound channels in a support
+  agent's permission list, see what a planted line does when the system prompt is the only layer,
+  and cut the agent down to what its task needs.
 mode: explanation
 covers: building-agents/production
 serves: [building-agents/runs-in-production/mitigates-agent-risks]
 introduces: [agent-specific-security-risks]
 assumes:
   - objective: safety/judges-agent-risk/recognizes-injection
+    lesson: safety/tracing-a-planted-instruction
+    section: the-path-runs-from-read-to-send
   - objective: safety/judges-agent-risk/sets-oversight
+    lesson: safety/reading-agent-logs
+    section: what-the-log-must-hold-and-who-reads-it
 after: [building-agents/tool-errors, building-agents/traces-and-trajectories]
 shorts: [Confused deputy]
 exercise:
   kind: judge
   brief: >-
-    For the fixture support agent's permission list, name every outbound channel, write the injected
-    line that would use each one, and cross out the permissions that are not needed for the task.
-sources: []
+    For the returns agent's permission list on the page, name every outbound channel, write the
+    injected line that would use each one, and cross out the permissions that are not needed for the
+    task.
+sources: [AEC-10, Hardy 1988]
 issue: 211
 minutes: 12
 notes: >-
@@ -22,3 +31,12 @@ notes: >-
   confused deputy. Engineering-level follow-on to the Foundations agent-risk lesson, with the same
   planted-instruction example. A scenario asks what happens when the system prompt is the only
   layer, which sets up the next lesson. Checkpoints are scenario and match.
+  The planted recipe page and its last paragraph are the ones from safety/tracing-a-planted-instruction,
+  and guardrails-in-layers reuses them with this lesson's support agent and its eight tools
+  (read_ticket, search_tickets, lookup_order, read_file, fetch_url, post_reply, send_email,
+  issue_refund). The exercise uses a second list, the same shop's returns agent, so the learner
+  does the enumeration on tools the page has not already sorted. The shop, the tickets and the
+  address are invented. Brilliant SEC and Academy claude-platform-101 from the issue were dropped:
+  the page cites no claim from either, and Claude Platform 101 has no section on agent security.
+  Hardy 1988 backs the confused deputy, which AEC-10 does not name. The short on the confused
+  deputy is still to write.
