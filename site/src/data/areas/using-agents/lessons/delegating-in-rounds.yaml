@@ -1,5 +1,8 @@
 id: using-agents/delegating-in-rounds
 title: Delegating in rounds
+description: >-
+  Delegate one piece of a split report, check the result line by line, change the brief with what
+  the miss showed, and carry the change into the next piece, with a two-line log per round.
 mode: tutorial
 covers: using-agents/decomposition
 serves:
@@ -8,6 +11,8 @@ serves:
 introduces: [task-iteration]
 assumes:
   - objective: safety/verifies-output/keeps-a-check-habit
+    lesson: safety/marking-what-a-person-checked
+    section: put-the-mark-in-the-process
 after: [using-agents/breaking-work-into-pieces, using-agents/adjusting-the-brief]
 shorts: [Keeping rounds short]
 exercise:
@@ -16,6 +21,14 @@ exercise:
     Delegate the supplied first piece and its criteria (a model answer to the previous exercise;
     your own split works too), check the result against the criteria, change the brief with what the
     result showed, and delegate the second piece. Keep a two-line log per round.
-sources: []
-issue: 154
+sources: [Academy ai-fluency-framework-foundations, DLAI-11]
 minutes: 15
+notes: >-
+  The supplied first piece is the riders piece of the bike pilot report from
+  breaking-work-into-pieces, whose exercise asks for the riders and cost briefs. The page gives both
+  as model answers, with the criteria from that lesson's table. The miss is a count the agent works
+  out from two counts in the note, which the brief's limits never ruled out. Each piece runs in a
+  fresh conversation so that only the brief carries a change forward. No fixture: every exchange is
+  illustrative and the learner uses a chat assistant. Academy ai-fluency-framework-foundations is
+  cited for its Description-Discernment loop and DLAI-11 for error analysis (M4), both as ideas in
+  our own words. Neither is a vendor product claim, so the plan has no sources-checked date.
