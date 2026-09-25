@@ -16,10 +16,9 @@ and `docs/agents/meta-orchestration.md` once before you start.
 
 The main checkout is `/Users/lsimons/git/lsimons/ai-training`, on `main`.
 Never edit files there, don't leave changes of your own there, and never
-run `git stash`, `git checkout -- .` or `git reset` in it. Never run
-`git stash` in a worktree either, because every worktree of the clone
-shares one stash (`refs/stash`). You coordinate
-and never write lesson content yourself. Don't ask questions. Make the
+run `git stash`, `git checkout -- .` or `git reset` in it. Don't run
+`git stash` in any worktree, because every worktree of the clone shares
+one stash (`refs/stash`). You coordinate and never write lesson content yourself. Don't ask questions. Make the
 call, state it in the pull request body, and put anything that needs the
 maintainer on your report's maintainer line.
 
