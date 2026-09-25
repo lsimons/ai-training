@@ -63,14 +63,15 @@ def note_path(folder, name):
     """Return (path, problem) for note `name`. `problem` is None for a note the server may serve.
 
     The name must be a plain file name, the real path (after symbolic links)
-    must be directly in the folder, and the file must be a Markdown note.
+    must be directly in the folder, and both the name and the real path
+    must end in .md.
     """
     if not isinstance(name, str) or name != os.path.basename(name) or name in ("", ".", ".."):
         return None, "Refused: name outside the notes folder"
     path = os.path.realpath(os.path.join(folder, name))
     if os.path.dirname(path) != folder:
         return None, "Refused: name outside the notes folder"
-    if not name.endswith(".md"):
+    if not name.endswith(".md") or not path.endswith(".md"):
         return None, "Refused: not a Markdown note"
     return path, None
 
