@@ -1,5 +1,5 @@
 import { parseMdx } from '@lib/checkpoint-tags';
-import { assumedSectionError, sectionSlugs } from '@lib/section-slugs';
+import { assumedSectionError, headingSlugs, sectionSlugs } from '@lib/section-slugs';
 import { describe, expect, it } from 'vitest';
 
 const slugs = (src: string) => sectionSlugs(parseMdx(src));
@@ -27,6 +27,29 @@ describe('sectionSlugs', () => {
 	});
 	it('ignores a heading inside a fence', () => {
 		expect(slugs('```markdown\n## Not a heading\n```\n\n## Real\n')).toEqual(['real']);
+	});
+});
+
+describe('headingSlugs', () => {
+	const all = (src: string) => headingSlugs(parseMdx(src));
+	it('slugs the headings at every depth, in page order', () => {
+		expect(all('# Title\n\n## One two\n\n### Three\n\nText\n\n## Four')).toEqual(['title', 'one-two', 'three', 'four']);
+	});
+	it('numbers a repeated heading, maps each space to a hyphen and slugs the link text only', () => {
+		expect(all('## Review\n\n### Review\n\n## A  b\n\n## See [docs](https://example.com/x)\n')).toEqual([
+			'review',
+			'review-1',
+			'a--b',
+			'see-docs',
+		]);
+	});
+	it('applies the smart punctuation dash rule, as sectionSlugs does', () => {
+		expect(all('### Plan -- then act\n')).toEqual(['plan--then-act']);
+	});
+	it('agrees with sectionSlugs on the ## headings', () => {
+		const src = '## Recap\n\n### Recap\n\n## Recap\n\n#### Recap\n';
+		expect(all(src)).toEqual(['recap', 'recap-1', 'recap-2', 'recap-3']);
+		expect(slugs(src)).toEqual(['recap', 'recap-2']);
 	});
 });
 
