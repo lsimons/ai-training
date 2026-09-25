@@ -63,6 +63,13 @@ SHAs
 # defined term (spec S01), "multiple choice" is a checkpoint kind, and
 # evaluate, implement, monitor, advise and demonstrate are what the
 # material is about. "it is" and "it was" are ordinary English.
+#
+# A multi-word entry is written with `\s` between its words, never a
+# literal space: Vale keeps the line breaks of a wrapped paragraph, and
+# `\s` matches a space or a line break, so the entry applies wherever the
+# paragraph wraps (issue #453, docs/prose/README.md "Line breaks inside a
+# paragraph"). Vale.Terms then quotes the entry with its `\s` when it
+# reports a miscased use.
 [Oo]bjective
 [Oo]bjectives
 [Mm]ultiple
@@ -71,8 +78,8 @@ SHAs
 [Mm]onitor
 [Aa]dvise
 [Dd]emonstrate
-[Ii]t is
-[Ii]t was
+[Ii]t\sis
+[Ii]t\swas
 
 # Google.Acronyms exemptions (lessons): acronyms this audience reads without
 # a definition. MCP, RAG and LLM are deliberately absent so the lesson that
@@ -100,5 +107,5 @@ S03
 S04
 S05
 S06
-Learn Prompting
-Execute Program
+Learn\sPrompting
+Execute\sProgram
