@@ -1,0 +1,347 @@
+import { Choice, MultiChoice, Sort, Scenario, Repair, Pitfall, Exercise, Recap, Habit, Prompt, Response } from '@components/lesson';
+
+In this lesson we ask a chat assistant for a short email twice, first with
+one line and then with a brief. Then we hand the result back and ask what
+it thinks, and we get praise. The second time we give it criteria we
+wrote before the draft existed, and the assistant finds the weak point. By the end you have one brief for a draft and one for a critique.
+
+You need any chat assistant you already have access to. Every exchange on
+this page is illustrative. The author wrote it to show the pattern, and
+your assistant gives different words.
+
+## A one-line request
+
+Suppose your team of twelve changes how it claims travel expenses. From
+1 November everyone uses a new online form. You want to tell them in a
+short email, and you ask for one.
+
+<Prompt model="illustrative" recorded="illustrative">
+Write an email to my team about the new expense process.
+</Prompt>
+<Response>
+
+```text
+Subject: Important update to our expense process
+
+Dear team,
+
+I am writing to let you know about some upcoming changes to the way we
+submit expenses. Starting next month, we will move to a new system that
+makes submitting claims faster and easier for everyone.
+
+The new process will simplify approvals and reduce paperwork. Please
+review the attached guidelines before you submit your next claim, and
+contact [Name] in Finance if you have any questions.
+
+Thank you for your cooperation.
+
+Best regards,
+[Your name]
+```
+
+</Response>
+
+The email reads well, and you can't send it. It doesn't give a date or a
+link, and it doesn't tell anyone what to do. It mentions guidelines that aren't attached,
+because there are none, and it says the new system is faster, which you
+never said. The model knew only that there is a team and an expense
+process. It filled everything else with the text that fits most emails of
+this kind.
+
+In the [prompt-anatomy lesson](/concepts/prompt-anatomy/#audience-and-purpose),
+a summary asked for in one line was written for nobody in particular,
+until the prompt named the reader and the purpose. A draft has the same
+problem, and it also adds facts to fill the gaps.
+
+<Choice id="what-the-draft-needs" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['drafting']}
+  context="A learner asked a chat assistant in one line for an email to their team about a new expense process. The draft was polite, gave no date or steps, and mentioned guidelines that do not exist."
+  title="What do you add first?" hint="What did the model have to guess, and which guesses ended up in the email as facts?"
+  options={[
+    { text: 'A line asking for a shorter and friendlier email that sounds more like you usually write.', why: 'Tone and length change the words. The date and the steps are still missing, and the model still has to invent them.' },
+    { text: 'A line saying the email is important, so the model takes more care with the wording this time.', why: 'Saying it is important gives the model no new facts, so the gaps are still filled with guesses.' },
+    { text: 'An example email from another team, so the model can copy its layout and its tone.', why: 'An example shows a layout. It does not tell the model your date, your form or what your team has to do.' },
+    { text: 'Who reads it, what they must do after reading, and the facts that must appear in it.', correct: true },
+  ]}>
+The one-line request got a polite email with no date and an invented
+attachment. What is the most useful thing to add before you ask again?
+</Choice>
+
+## A brief for the draft
+
+Write the request as a brief. It names the audience and the purpose. It
+lists the two points that must appear, in your words, because they are
+facts only you know. It sets the tone and the length. Last, it says when
+the draft is done, in criteria you can tick. You write those criteria now,
+before you see any draft, so that you judge the draft by them later and
+not by how well it reads.
+
+<Prompt model="illustrative" recorded="illustrative">
+Write a short email to the twelve people in my team, who all claim travel
+expenses a few times a year. The purpose is that each of them uses the new
+online expense form from 1 November and knows what to do with receipts.
+
+These two points must appear:
+1. The old paper form is accepted until 31 October, and not after.
+2. Receipts are photos attached to the new form. We no longer accept
+   paper receipts.
+
+Tone: friendly and plain, in everyday words. Length: under 120 words. Put a
+placeholder where the link to the form goes.
+
+The email is done when:
+- someone who reads only the first sentence knows what changes and from
+  when,
+- both points appear, with the dates as I gave them,
+- it contains no fact that is not in this message.
+</Prompt>
+<Response>
+
+```text
+Subject: New expense form from 1 November
+
+Hi all,
+
+Finance has moved to a new online system to make expense claims quicker
+to process. From 1 November, please claim your travel expenses with the
+new online form: [link to the form].
+
+The old paper form is accepted until 31 October, and not after.
+
+Receipts now go in as photos attached to the form. We no longer accept
+paper receipts, so take a photo before you throw one away.
+
+Finance aims to pay approved claims within five working days.
+
+Thanks, and let me know if anything is unclear.
+```
+
+</Response>
+
+This is a usable draft. It is raw material for your email, and three kinds
+of text in it need different handling before it goes anywhere.
+
+- The two points and the dates came from your brief. Check that they are
+  copied correctly, which they are.
+- The placeholder is yours to fill. The model can't know the link.
+- The line about five working days came from the model. You never said it,
+  and your Finance team may promise nothing of the kind. Check it or
+  delete it.
+
+The first sentence came from the model too. You never said why the form
+changed or that claims get quicker. Your brief said the email may contain
+no fact that is not in your message, and the draft broke that criterion
+twice. A draft reads as finished whether its facts are right or not, so
+read it against the list you wrote and not for how it sounds.
+
+<Sort id="yours-or-added" objective="using-agents/delegates-and-checks/reviews-against-brief"
+  concepts={['drafting']}
+  context="A learner briefed a chat assistant for an email announcing a new expense form from 1 November, with two points that must appear: the old paper form is accepted until 31 October, and receipts are photos attached to the new form. The brief said the email may contain no fact that is not in the brief."
+  title="From the brief, or added?" hint="For each line, can you point to the words in your brief that it came from?"
+  buckets={['Came from the brief', 'Added by the model: check it or delete it']}
+  items={[
+    { text: 'The old paper form is accepted until 31 October, and not after.', bucket: 0 },
+    { text: 'We no longer accept paper receipts.', bucket: 0 },
+    { text: 'Finance aims to pay approved claims within five working days.', bucket: 1 },
+    { text: 'Finance has moved to a new system to make claims quicker to process.', bucket: 1 },
+    { text: 'From 1 November, please claim your travel expenses with the new online form.', bucket: 0 },
+  ]}>
+Sort these lines from the draft.
+</Sort>
+
+## Ask what it thinks
+
+You delete the line about five working days. Finance confirms that it
+moved to a new online system, but not that claims get quicker. You cut
+that part, and the first sentence now reads "Finance has moved to a new
+online system." The draft still starts with the reason for the change.
+Before you send it, you want a second opinion. The easy
+question is the one most people ask.
+
+<Prompt model="illustrative" recorded="illustrative">
+Here is my email to the team about the new expense form. What do you
+think?
+
+[the draft]
+</Prompt>
+<Response>
+This is a clear, friendly email that covers everything your team needs to
+know. The subject line is specific, the dates stand out, and the tip about
+taking a photo before throwing a receipt away is a nice practical touch.
+You might add a short thank-you for their patience during the change, but
+overall it is ready to send.
+</Response>
+
+The answer is praise with one small suggestion. It says the email covers
+everything. You can't check that claim, because nobody defined
+"everything". The question gave the model no criteria to test the email
+against, and it said the text was yours. Assistants give more positive
+feedback on a text when the user says they wrote it or like it, and more
+negative feedback when the user says they didn't write it (@Sharma 2023).
+
+## Ask for problems against criteria
+
+Ask again, and change what the request says. Say the text is a
+colleague's, so that nothing in the request tells the model you wrote it.
+Give the criteria, and take them from your brief: the first done-criterion,
+the two points and the tone. You wrote them before the draft existed, for
+this check. Ask for problems only, one criterion at a time. Open a fresh
+chat for it, so the model isn't reviewing a text it can see it wrote
+itself.
+
+<Prompt model="illustrative" recorded="illustrative">
+A colleague wrote the email below for their team. Check it against these
+three criteria, one at a time. For each, say pass or fail and quote the
+sentence that decides it. List problems only. Don't rewrite the email and
+don't tell me what is good about it.
+
+1. Someone who reads only the first sentence knows what changes and from
+   when.
+2. It says the old paper form is accepted until 31 October, and that
+   receipts are photos attached to the new form.
+3. It is friendly and plain, in everyday words.
+
+[the draft]
+</Prompt>
+<Response>
+
+```text
+1. Fail. The first sentence gives the reason for the change: "Finance
+   has moved to a new online system." The date and the action come only
+   in the second sentence. A reader who stops after one sentence knows
+   that something changed, but not what to do or from when.
+2. Pass. "The old paper form is accepted until 31 October, and not after."
+   and "Receipts now go in as photos attached to the form."
+3. Pass, with one note. "We no longer accept paper receipts" is plain,
+   but a reader may ask what happens to a paper receipt they already
+   have.
+```
+
+</Response>
+
+This answer has one fail and one question you hadn't thought about. The
+fail is the weak point the praise missed: the reader meets a reason nobody
+asked for before the action. Now you are the judge. Walk the criteria yourself, one
+by one, and decide for each finding whether it holds. You may agree with
+the first finding and move the action to the top. You may also decide
+the note on old receipts doesn't need a sentence. The decision stays with
+you. When the model is wrong about a finding, you reject that finding and
+nothing else changes.
+
+<Choice id="praise-or-problems" objective="using-agents/delegates-and-checks/reviews-against-brief"
+  concepts={['critique', 'sycophancy']}
+  context="The lesson shows a chat assistant praising a draft email when asked what it thinks, and finding a weak point when asked a different way."
+  title="Which request finds the problems?" hint="Which request tells the model what to test, and which one tells it whose text it is?"
+  options={[
+    { text: 'I wrote this report and I am quite proud of it. Please be completely honest with me: what do you think?', why: 'Saying you wrote it and like it is the signal that makes feedback more positive, and a request for honesty leaves that signal in the prompt.' },
+    { text: 'A colleague wrote this report. Check it against the three criteria below, say pass or fail for each, and list problems only.', correct: true },
+    { text: 'Act as a strict senior editor with high standards. Here is my report, and I would like your overall opinion of it.', why: 'A role changes the style. The request still asks for an opinion on your own text, with nothing to test it against.' },
+    { text: 'Here is my report. Rate it from 1 to 10 and tell me what you would improve to make it even better than it is.', why: 'A score without criteria gives you nothing to check, and "even better" tells the model you expect it to be good already.' },
+  ]}>
+You want an assistant's critique of a report before you send it. Which
+request is most likely to get you the problems in it?
+</Choice>
+
+<Pitfall title="Sending it because the assistant liked it">
+A project lead asks an assistant what it thinks of a status report for
+the steering group. The assistant calls it clear and well structured, and
+the lead sends it. In the meeting, the first question is when the delay
+in the report will end, and the report doesn't say. The praise answered a
+question with no criteria in it, about a text the model was told was the
+lead's own. Before you ask for feedback, write down what the text must
+do. Then ask the assistant whether it does each of those things.
+</Pitfall>
+
+## Rules for drafts and critique
+
+The draft is raw material, and the final voice is yours. The model gives
+you a structure and sentences to start from, and it fills every gap in the
+brief with something plausible. The facts in it are yours to supply and
+to check, and the words that go out under your name should sound like
+you.
+
+Critique against stated criteria is one of the safest everyday uses,
+because you stay the author and the judge. You wrote the criteria before
+the draft existed, and you decide about every finding. The model can only
+point at a sentence, and you read that sentence yourself. The
+[safety course](/safety/asking-a-model-to-disagree/#habits-on-the-prompt-side)
+taught you to take your own opinion out of a question when you want an
+assessment. Calling the text a colleague's does the same for a critique.
+
+<Repair id="fix-the-drafting-brief" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['drafting']}
+  title="Fix the brief" hint="Who reads the email, what must they do after reading it, which facts must be in it, and how will you know the draft is done?"
+  broken={`Write a nice email to the office about the kitchen.`}
+  model={`Write a short email to the 30 people on our office floor. The purpose is that everyone empties their food from the kitchen fridge by Friday 12:00, because the cleaners empty it that afternoon. These points must appear: anything left after 12:00 is thrown away, and the empty containers wait on the counter until Monday. Tone: friendly, no blame. Under 80 words. The email is done when the first sentence gives the deadline, both points appear, and it adds no fact that is not in this message.`}>
+A colleague sends this to an assistant and gets a cheerful email about
+keeping the kitchen tidy, with no date in it. Rewrite the request as a
+brief.
+</Repair>
+
+<MultiChoice id="lines-a-brief-needs" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['drafting']}
+  context="The lesson shows a one-line request for a team email that got a polite draft with no date and an invented attachment, and a brief that got a usable draft."
+  title="Which lines belong in a drafting brief?" hint="Which lines give the model a fact it cannot guess, or give you a way to judge the draft later?"
+  options={[
+    { text: 'The email goes to the twelve people who claim travel expenses.', correct: true },
+    { text: 'These two points must appear, with the dates as I give them.', correct: true },
+    { text: 'The email is done when the first sentence says what changes.', correct: true },
+    { text: 'Please write the email as well as you can, because it matters.', why: 'A request for effort gives the model no fact and gives you nothing to check the draft against.' },
+    { text: 'Use your own knowledge to add useful details about the form.', why: 'This asks the model to add facts, and every fact it adds is one you have to check or delete.' },
+  ]}>
+Which of these lines from a brief for a team email help you get a draft
+you can use?
+</MultiChoice>
+
+<Scenario id="after-the-praise" phase="review" objective="using-agents/delegates-and-checks/reviews-against-brief"
+  concepts={['critique']}
+  context="A learner wrote a short email with an assistant's help and then asked the assistant what it thought of the email. The assistant said the email was clear, covered everything and was ready to send."
+  title="The assistant says it is ready" hint="What would you need to know to agree that the email covers everything?"
+  options={[
+    { text: 'Ask again in a fresh chat, calling it a colleague\'s email, with your criteria, and ask for pass or fail on each.', correct: true, consequence: 'The answer fails one criterion: the action is in the second sentence and the reason is in the first. You move the action up and send it.' },
+    { text: 'Send it, because the assistant read the whole email and found nothing wrong with it.', consequence: 'The first reader stops after one sentence and asks you what they have to do. The praise had no criteria behind it.' },
+    { text: 'Ask the same chat whether it is sure the email is ready to send as it is.', consequence: 'The model says yes again. Its earlier praise is part of the chat, and nothing in the question gives it anything to test.' },
+  ]}>
+You asked an assistant what it thought of your email, and it said the
+email is ready. What do you do next?
+</Scenario>
+
+<MultiChoice id="criteria-you-can-check" phase="review" objective="using-agents/delegates-and-checks/reviews-against-brief"
+  concepts={['critique']}
+  context="The lesson shows a critique request that gives an assistant three criteria and asks for pass or fail on each, with the sentence that decides it."
+  title="Which criteria can get a pass or fail?" hint="For each line, could two readers agree whether a given email passes it?"
+  options={[
+    { text: 'The first sentence says what changes and from when.', correct: true },
+    { text: 'The deadline of 31 October appears exactly as written.', correct: true },
+    { text: 'The email is good enough to send to the whole team.', why: 'Good enough by whose measure? This asks for a feeling, and a feeling is where the praise came from.' },
+    { text: 'The email feels professional and makes a strong impression.', why: 'Two readers can disagree about a strong impression, so a pass or fail on it tells you little.' },
+  ]}>
+You are writing criteria for an assistant to check a colleague's email
+against. Which lines can get a clear pass or fail?
+</MultiChoice>
+
+<Exercise stretch="Paste the same draft into a fresh chat, say you wrote it and are proud of it, and ask what the assistant thinks. Compare that answer with the one you got against criteria.">
+Pick a short email you have to write this week, at work or outside it.
+Leave out names and numbers you couldn't share outside your team. Write a
+brief with the audience, the purpose, the two points that must appear and
+the tone, and write two or three done-criteria at the end before you send
+it. Mark every fact in the draft you get: from your brief, a placeholder,
+or added by the model. Then open a fresh chat, paste the draft as a
+colleague's text with your criteria, and ask for problems only, pass or
+fail per criterion. This takes about fifteen minutes. A good result is a
+draft where you checked or deleted every added fact, and at least one
+finding you agreed with and acted on. Which of the findings did you
+reject, and why?
+</Exercise>
+
+<Recap>
+1. A one-line request gets a draft for nobody in particular, and the model fills the gaps with invented facts.
+2. A drafting brief names the audience and purpose, the points that must appear, the tone and the length, and it ends with done-criteria written before the draft exists.
+3. The draft is raw material. Every fact in it is yours to supply or check, and the final voice is yours.
+4. Asked what it thinks of your text, an assistant tends to praise it. Feedback is more positive when the user says they wrote the text (@Sharma 2023).
+5. Ask for problems only, against stated criteria, and call the text a colleague's. You stay the judge of every finding.
+</Recap>
+
+<Habit id="criteria-before-feedback">
+The next time you ask an assistant for feedback on something you wrote, write down two or three things the text must do first, and ask for pass or fail on each.
+</Habit>
