@@ -35,7 +35,10 @@ def imports_in(path: Path) -> list:
 
 
 def load(start: Path) -> list:
-    """Each loaded file with the file that imported it, in load order."""
+    """Each loaded file with the file that imported it, in the order found.
+
+    The vendor states no order for imports. This one is breadth-first.
+    """
     order: list[tuple[Path, Optional[Path]]] = [(start.resolve(), None)]
     seen = {start.resolve()}
     position = 0

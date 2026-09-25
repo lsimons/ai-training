@@ -24,8 +24,7 @@ exercise:
 sources:
   - Claude Code memory
   - Claude Code context window
-  - Claude Code all settings
-  - Claude Code CLI reference
+  - Claude Code settings
   - AEC-05
 issue: 189
 minutes: 15
@@ -39,6 +38,8 @@ notes: >-
   the MEMORY.md index and topic files, the four note types, the 200-line or 25KB load limit, topic
   files read on demand, `/memory`, `/context` and the `@path` rules come from
   code.claude.com/docs/en/memory. The load limit is also on code.claude.com/docs/en/context-window.
-  `autoMemoryDirectory` is from code.claude.com/docs/en/settings-reference and `--settings` from
-  code.claude.com/docs/en/cli-reference. The import depth limit is not quoted, because only the memory
+  `autoMemoryDirectory` with `--settings` and the `~/` form is from the memory page, and `--settings`
+  lasting one session and writing no file is from code.claude.com/docs/en/settings. The learner edits
+  `~/memory-review-notes` directly, because no page says the `/memory` folder option follows
+  `autoMemoryDirectory`. The import depth limit is not quoted, because only the memory
   page states it. The prompt response is illustrative and the page says so.

@@ -16,34 +16,37 @@ way there.
 
 ## Where the notes are
 
-**Auto-memory** is the set of notes an agent writes for itself during a
-session and reads back in later sessions. Claude Code calls its version
-auto memory, and it is on by default. Claude writes the notes itself,
-from your corrections and preferences and from facts about the project
-that it can't work out from the code. A person writes the instruction
-file, `CLAUDE.md` or `AGENTS.md`. Both kinds of file are loaded at the
-start of every session, and Claude treats them as context, the same way
-it treats a message you type. The model weighs them as it weighs any
-other text, and Claude Code doesn't enforce them (@Claude Code memory).
+**Auto-memory** is the set of notes an agent writes for itself in one
+session and reads again in later ones. Claude Code's version is called
+auto memory, and it is switched on unless you turn it off. The agent
+picks what to save: your corrections, your preferences, and facts about
+the project that the code doesn't show. The instruction file, `CLAUDE.md`
+or `AGENTS.md`, is the other kind of memory, and a person writes that
+one. A new session starts with both in its context window. To the model
+they are text like your own messages, and Claude Code doesn't enforce
+anything they say (@Claude Code memory).
 
-Each project gets one memory folder, `~/.claude/projects/<project>/memory/`
-on your machine. Claude Code derives `<project>` from the git repository,
-so every worktree and subfolder of one repository shares the folder. The
-folder is on your machine only. A colleague's machine has a folder of its
-own, and the notes aren't shared between machines (@Claude Code memory). Inside are an index
-file, `MEMORY.md`, with one line per note, and one topic file per note.
-Each topic file is Markdown with a short header, and its `type` field
-names one of four kinds: `user` for your role and preferences, `feedback`
-for corrections you gave, `project` for ongoing work and decisions, and
-`reference` for where to find things outside the project
-(@Claude Code memory).
+In Claude Code the notes for a project are in
+`~/.claude/projects/<project>/memory/`. The `<project>` part comes from
+the git repository, so two worktrees of one repository, or two of its
+subfolders, read and write the same notes. The folder is on your own
+machine. A colleague who clones the repository has a folder of their
+own, with their own notes (@Claude Code memory).
 
-A session doesn't read the whole folder at the start. It loads the first
-200 lines of `MEMORY.md` or its first 25KB, whichever limit comes first,
-and it reads a topic file only later, when the work needs it
-(@Claude Code memory) (@Claude Code context window). So the index line is
-what every session sees, and a wrong index line is wrong in every
-session.
+The folder holds an index file, `MEMORY.md`, with a line for each note,
+and next to it one Markdown file per note, which the vendor calls a topic
+file. A header at the top of each topic file has a `type` field that says
+what kind of note it is. There are four values: `user` (who you are and
+how you like to work), `feedback` (a correction you made), `project`
+(work in progress, deadlines and decisions) and `reference` (a pointer to
+a tracker or a dashboard outside the repository) (@Claude Code memory).
+
+At launch the session reads the start of the index file and no other
+file from the folder. The start is the first 200 lines, or fewer when
+those lines are more than 25KB. A topic file stays on disk until the work calls
+for it and the agent opens it (@Claude Code memory)
+(@Claude Code context window). So the index line is what every session
+sees, and a wrong index line is wrong in every session.
 
 The planted notes are in the course repository at
 `site/examples/customizing-agents/memory-review/notes/`. The program
@@ -77,38 +80,44 @@ the project sees it:
 ```
 
 Now put the notes where an agent reads them. Make a fresh copy of the
-fixture directory, `site/examples/coding-with-agents/first-session/fixture-repo/`,
-outside the course repository, change into it, and give it a first
-commit, as in the earlier lessons of this course.
+fixture directory,
+`site/examples/coding-with-agents/first-session/fixture-repo/`, outside
+the course repository, change into it, and give it a first commit, as in
+the earlier lessons of this course. Put the copy in a folder with no
+`CLAUDE.md` in it or above it, such as your home folder. The last step of
+the lesson needs the agent to read the copy's `AGENTS.md`, and a
+`CLAUDE.md` above the copy stops that (@Claude Code memory).
 
 ```sh
 git init -q && git add -A && git commit -q -m "fixture"
 ```
 
 Then copy the planted notes to a folder of their own in your home
-directory. Replace `<course>` with the path of your copy of the course
-repository.
+folder. Replace `<course>` with the path of your copy of the course
+repository. The same command puts the four notes back if you try the
+lesson a second time.
 
 ```sh
-cp -R <course>/site/examples/customizing-agents/memory-review/notes ~/memory-review-notes
+mkdir -p ~/memory-review-notes && cp <course>/site/examples/customizing-agents/memory-review/notes/*.md ~/memory-review-notes/
 ```
 
-The setting `autoMemoryDirectory` moves auto memory to a folder you
-choose, given as an absolute path or one that starts with `~/`
-(@Claude Code all settings). The `--settings` flag takes settings as an
-inline JSON string and applies them to one session only
-(@Claude Code CLI reference). So this command starts the agent in your
-copy with the planted notes as its memory, and your own memory folders
-stay as they are:
+Claude Code's `autoMemoryDirectory` setting points auto memory at a
+folder you pick, written as a full path or as a path that starts with
+`~/`, and the `--settings` flag may set it (@Claude Code memory). A key
+you pass with `--settings` as inline JSON counts for that session only,
+and Claude Code writes it to no file (@Claude Code settings). So this
+command starts the agent in your copy with the planted notes as its
+memory, and your own memory folders stay as they are:
 
 ```sh
 claude --settings '{"autoMemoryDirectory": "~/memory-review-notes"}'
 ```
 
-Type `/memory`. The list shows the memory files the session knows about,
-and it has an option that opens the auto memory folder
-(@Claude Code memory). Open it and read the four topic files. Then ask
-the agent what the notes mean for a task, before it does any work.
+Type `/memory` to see the memory files the session knows about. The
+list also has an option that opens the auto memory folder
+(@Claude Code memory). For this lesson, open `~/memory-review-notes` in
+your editor yourself and read the four topic files. Then ask the agent
+what the notes mean for a task, before it does any work.
 
 ```text
 Before you change anything: if I ask you to fix the bug in the done
@@ -136,8 +145,8 @@ Three notes apply.
 
 </Response>
 
-The agent says all of this with the same confidence. It has no way to
-know that two of the three facts stopped being true.
+The agent says all of this with the same confidence. It can't see from
+its window that two of the three facts stopped being true.
 
 ## Delete what has gone stale
 
@@ -147,8 +156,8 @@ feature does that for you. The index line is in the window at the start
 of every session, and the model reads it as context like anything else
 there. A note that was right in June and wrong in September is applied
 in September as firmly as in June, in every session, until someone edits
-it. Claude Code keeps the notes until you or Claude change or delete them
-(@Claude Code memory).
+it. Claude Code's cleanup of old session transcripts leaves the memory
+folder alone, so a note doesn't expire by itself (@Claude Code memory).
 
 So check each note against the thing it describes. The two `project`
 notes about `done()` and the tests make claims the copy can confirm or
@@ -166,17 +175,34 @@ write `todos.json`.
 grep -c todos.json test_todo.py
 ```
 
-It prints `0`. The tests build their items in memory and never open the
-file, and `AGENTS.md` says as much: "the tests use a temporary file". Both
+It prints `0`. The tests build their items as lists and never open the
+file, and `AGENTS.md` says not to edit `todos.json`. Both
 notes were true once, before plans changed, and both now make the agent
 do the wrong thing. One makes it refuse a bug fix, and the other makes it
 copy a file the instructions say to leave alone.
 
-Delete both topic files, `project_done_rewrite.md` and
-`project_tests_touch_data.md`, in the folder `/memory` opened, and delete
-their two lines from `MEMORY.md`. The notes are plain Markdown that you
-may edit or delete at any time (@Claude Code memory). Delete the index
-line as well as the file, because the index line is the part that loads.
+Delete both topic files in `~/memory-review-notes`:
+
+```sh
+rm ~/memory-review-notes/project_done_rewrite.md ~/memory-review-notes/project_tests_touch_data.md
+```
+
+Then open `~/memory-review-notes/MEMORY.md` in your editor and delete
+the two lines that point at those files. The notes are ordinary Markdown
+files, and the vendor expects you to read and change them by hand
+(@Claude Code memory). Remove the index line too, since the index is the
+part that loads.
+
+<Pitfall title="The note that skipped the tests">
+A team's test suite once took ten minutes, because it ran against a
+shared database. A developer told the agent to run only the test for the
+function it changed, and the agent saved that as a memory note. Months
+later the tests used an in-memory database and finished in two seconds,
+and nobody edited the note. The agent kept running one test per change,
+and a change to one command broke another command's test. Any note that
+lets the agent skip a check deserves a check of its own at every review,
+and a date inside the note tells a reviewer how old the claim is.
+</Pitfall>
 
 <Choice id="why-the-stale-note-wins" objective="customizing-agents/configures-agent/manages-memory"
   concepts={['auto-memory']}
@@ -184,7 +210,7 @@ line as well as the file, because the index line is the part that loads.
   title="Why does the old note win?" hint="Where is the note when the session starts, and what else in that session would tell the model the note is out of date?"
   options={[
     { text: 'The model learned the note in an earlier session, and its weights still hold the rewrite plan.', why: 'Using a model never changes its weights. The note is text in a file, and the session reads it into the window.' },
-    { text: 'Notes in auto memory outrank the instruction file, so the agent has to follow them.', why: 'The vendor loads both as context, and neither is enforced configuration. Nothing ranks one above the other.' },
+    { text: 'Notes in auto memory outrank the instruction file, so the agent has to follow them.', why: 'Nothing in Claude Code ranks the two. Both are text in the window, and the model weighs them like any other text.' },
     { text: 'The note is loaded as context in every session, and nothing in the window says it is out of date.', correct: true },
     { text: 'The agent listed the branches, found done-v2 still open, and decided to wait for it.', why: 'The copy has no done-v2 branch. The agent took the note at its word and ran no check.' },
   ]}>
@@ -195,35 +221,36 @@ ago. Why does the agent still follow the note?
 
 ## Move a team fact into a context file
 
-The diff note and the item length note are left. "Show the diff before explaining a change" is one
-person's working preference, and a personal note is what auto memory is
-for. "Keep item text at 80 characters or fewer" is different. It is a
-decision about the product, because the phone widget cuts longer text
-for everyone. Each person on the team needs it in each session, on each
-machine. In auto memory it reaches only the agent on this one
-machine, and nobody reviews it.
+The diff note and the item length note are left. "Show the diff before
+explaining a change" is one person's working preference, and a personal
+note is what auto memory is for. "Keep item text at 80 characters or
+fewer" is different. It is a decision about the product, because the
+phone widget cuts longer text for everyone. Each person on the team
+needs it in each session, on each machine. In auto memory it reaches
+only the agent on this one machine, and nobody reviews it.
 
 **Context files** are the files a person keeps for the agent to read:
 project instructions, design notes, a plan, a glossary. They are in the
 repository, so a change to one is a commit that someone can review, and
 every clone has the same text. The team fact belongs in one. The fixture
-has an `AGENTS.md` and no `CLAUDE.md`, and in that case Claude Code
-reads `AGENTS.md` as the project instructions (@Claude Code memory).
+has an `AGENTS.md`, and neither the copy nor a folder above it has a
+`CLAUDE.md`. In that case Claude Code, from version 2.1.277, reads
+`AGENTS.md` as the project's instructions (@Claude Code memory).
 You could add the rule to `AGENTS.md` directly. For a decision that has a
 reason and a date, a notes file of its own keeps `AGENTS.md` short, and
 the import syntax loads it with `AGENTS.md`.
 
-To import another file, an instruction file names its path after an `@`
-sign, for example `@docs/decisions.md`. Claude Code expands the imported
-file and loads it into context at launch, together with the file that
-imports it. A relative path is
-resolved from the folder of the file that holds the import, not from the
-folder you started the agent in. An imported file may import further
-files. Claude Code skips an `@path` inside a code span or a fenced code
-block. Writing `` `@README` `` in backticks mentions the file and doesn't
-load it
-(@Claude Code memory). Imports also work inside an `AGENTS.md` that
-Claude Code reads directly (@Claude Code memory).
+The import syntax is an `@` sign directly in front of a path. A line in
+`AGENTS.md` that ends in `@docs/decisions.md` puts the whole of
+`docs/decisions.md` into the session's context at launch, next to
+`AGENTS.md` itself. A path that doesn't start with `/` starts from the
+folder of the file that contains it. So an `@glossary.md` inside
+`docs/decisions.md` means `docs/glossary.md`, whichever folder you
+launched the agent from. An imported file may contain imports of its own,
+and the session follows those too. Inside backticks the `@` does nothing:
+`` `@CHANGELOG.md` `` names the changelog and loads nothing. An
+`AGENTS.md` that Claude Code reads directly follows the same rules
+(@Claude Code memory).
 
 Here are those rules as a small program, applied to a sample project in
 `site/examples/customizing-agents/memory-review/imports/`. The complete
@@ -267,11 +294,13 @@ for path, parent in load(ROOT / "AGENTS.md"):
 `CHANGELOG.md` isn't loaded, because its `@` is inside backticks. That
 line only names the file. The glossary that loads is the one in `docs/`,
 because `@glossary.md` is in `docs/decisions.md` and resolves from
-`docs/`. Imported files load at launch and take room in the context
-window like the file that imports them. An import organizes the files,
-and it doesn't save context (@Claude Code memory).
+`docs/`. Moving text into an imported file doesn't make the session any
+lighter. The imported file enters the window at launch with the rest, so
+what you gain is a shorter `AGENTS.md` to read and review, and the
+context used stays the same (@Claude Code memory).
 
-Now do the move in your copy. Create `docs/decisions.md`:
+Now do the move in your copy. Make the folder with `mkdir docs`, and
+create `docs/decisions.md` in it:
 
 ```markdown
 # Decisions
@@ -295,10 +324,11 @@ git add AGENTS.md docs/decisions.md && git commit -q -m "Record the item length 
 ```
 
 Quit the session and start a new one with the same `claude --settings`
-command. Run `/context` and look at the list of memory files, which shows
-the instruction and memory files the session loaded (@Claude Code memory).
-Then ask the agent the limit on item text and which file states it. The
-answer names `docs/decisions.md`, and the notes folder holds `MEMORY.md`
+command. Run `/context`: its list of memory files shows the instruction
+files the session loaded, and `AGENTS.md` is in it (@Claude Code memory).
+The list may leave out `docs/decisions.md`, so the real check is a
+question. Ask the agent the limit on item text and which file states it.
+The answer names `docs/decisions.md`, and the notes folder holds `MEMORY.md`
 with one line and `user_diff_first.md`. Memory notes and context files
 keep facts from one session for the next. The next lesson covers what
 happens inside one long session when it is compacted.
@@ -334,18 +364,20 @@ Place each memory note where it belongs.
 Which two of these results show that a memory note has gone stale?
 </MultiChoice>
 
-<Choice id="which-glossary-loads" phase="review"
+<Choice id="note-after-the-check" phase="review"
   objective="customizing-agents/configures-agent/manages-memory"
-  concepts={['context-files']}
-  context="A project's AGENTS.md contains the line @docs/rules.md, and docs/rules.md contains the line @style.md. The project has a style.md at the top and a docs/style.md. The agent is started at the top of the project."
-  title="Which style file loads?" hint="Which folder does a relative path in an imported file start from?"
+  concepts={['auto-memory']}
+  context="A coding agent's auto-memory has an index file that loads at the start of every session and one topic file per note. One note says to run only the fast tests, because the full run needs a staging server that is down. The developer checks and finds the server is up and the full run takes 30 seconds."
+  title="What do you do with the note?" hint="Is the claim still true, and which part of the memory folder does every session load?"
   options={[
-    { text: 'The top `style.md`, because paths start from the folder where the agent was started', why: 'The vendor resolves a relative path from the file that holds the import, and that file is in docs/.' },
-    { text: 'Neither, because a file that was itself imported cannot import any further files', why: 'Imported files can import further files. The vendor sets a maximum depth, and one extra step is well inside it.' },
-    { text: 'Both, because the agent loads each file whose name matches the import', why: 'An import names one path. The agent loads the file at that path and no others.' },
-    { text: 'Only `docs/style.md`, because the path starts from the folder of `docs/rules.md`', correct: true },
+    { text: 'Keep it, because the agent will see the server is up and ignore the note.', why: 'Nothing in the window tells the agent the server is back. It follows the note in every session.' },
+    { text: 'Delete the topic file, and keep its line in the index as a record.', why: 'The index line is the part that loads, so the stale claim still reaches every session.' },
+    { text: 'Delete the topic file and its line in the index.', correct: true },
+    { text: 'Move it into the team context file, so colleagues can correct it.', why: 'The claim is false today. Moving it spreads a wrong fact to every clone.' },
   ]}>
-Which style file does the session load at launch (@Claude Code memory)?
+A memory note says "run only the fast tests, the full run needs the
+staging server and it is down". The server is up again, and the full run
+takes 30 seconds. What do you do?
 </Choice>
 
 <Match id="note-to-action" phase="review"
@@ -355,7 +387,7 @@ Which style file does the session load at launch (@Claude Code memory)?
   title="What do you do with each note?" hint="Is the note still true, and does it describe one person or the whole team?"
   options={['Keep it in auto memory', 'Delete it', 'Move it to a context file']}
   rows={[
-    { statement: 'The API tests need a local database, which every developer runs the same way', option: 2, why: 'Is this true for one person, or for everyone who runs the tests?' },
+    { statement: 'Every developer must start the mail stub before running the API tests', option: 2, why: 'Is this true for one person, or for everyone who runs the tests?' },
     { statement: 'I prefer answers without tables', option: 0, why: 'Whose preference is this, and would the team review it?' },
     { statement: 'The deploy is blocked until the audit, which ended last month', option: 1, why: 'Is the claim still true today?' },
   ]}
@@ -363,23 +395,11 @@ Which style file does the session load at launch (@Claude Code memory)?
 Match each memory note to what you do with it.
 </Match>
 
-<Pitfall title="The note that skipped the tests">
-A team's test suite once took ten minutes, because it ran against a
-shared database. A developer told the agent to run only the test for the
-function it changed, and the agent saved that as a memory note. Months
-later the tests used an in-memory database and finished in two seconds,
-and nobody edited the note. The agent kept running one test per change,
-and a change to one command broke another command's test. CI caught it a
-day later. Any note that lets the agent skip a check deserves a check of
-its own at every review, and a date inside the note tells a reviewer how
-old the claim is.
-</Pitfall>
-
-<Exercise stretch="Run `python3 startup.py` with the folder that `/memory` opens for one of your own projects as its argument. It only reads the folder. Then read every note the index points to and mark each one keep, delete or move.">
+<Exercise stretch="Run `python3 startup.py` with the memory folder of one of your own projects as its argument, a folder under `~/.claude/projects/` that has a `MEMORY.md`. It only reads the folder. Then read every note the index points to and mark each one keep, delete or move.">
 In a fresh copy of the fixture with its own first commit, copy the
 planted notes to `~/memory-review-notes`, start the agent with
 `claude --settings '{"autoMemoryDirectory": "~/memory-review-notes"}'`,
-and open the notes folder through `/memory`. Check each `project` note
+and open `~/memory-review-notes` in your editor. Check each `project` note
 against the copy, delete the two stale notes and their index lines, move
 the item length rule into `docs/decisions.md` with an import from
 `AGENTS.md`, delete that note too, and commit. The work is about ten
@@ -412,8 +432,8 @@ once and never wrote down anywhere a colleague could read?
    a path in backticks stays text (@Claude Code memory).
 </Recap>
 
-<Habit id="read-the-memory-index">
-Once a week, open the memory index of the project you work in most and
-read every line. Delete what has gone stale, and move each team fact
-into a file in the repository.
+<Habit id="check-a-cited-note">
+The next time an agent follows a memory note you didn't expect, open
+that note and check what it claims against the code. Delete it if it is
+stale, and move it into the repository if the team needs it.
 </Habit>

@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 MAX_LINES = 200
+# The vendor says 25KB. This script assumes 1KB is 1024 bytes.
 MAX_BYTES = 25 * 1024
 
 
@@ -39,6 +40,9 @@ if __name__ == "__main__":
     here = Path(__file__).resolve().parent
     notes = Path(sys.argv[1]) if len(sys.argv) > 1 else here / "notes"
     index = notes / "MEMORY.md"
+    if not index.is_file():
+        print(f"no MEMORY.md in {notes}, so a session loads no auto memory from it")
+        sys.exit(0)
     total = len(index.read_text(encoding="utf-8").splitlines())
     print(f"loaded at start: MEMORY.md, {len(loaded_index(index))} of {total} lines")
     for topic in sorted(notes.glob("*.md")):
