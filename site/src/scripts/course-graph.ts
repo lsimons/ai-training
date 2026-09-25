@@ -12,9 +12,9 @@ import {
 	reviewableItems,
 	stopReached,
 } from './course-graph-model';
+import { reviewDueLabel } from './due-counts';
 import { progressPercent } from './overview';
 import * as progress from './progress';
-import { reviewDueLabel } from './progress-overview-model';
 import { requiredData } from './required-element';
 
 function bindCourse(root: HTMLElement) {
