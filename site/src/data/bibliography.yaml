@@ -1112,3 +1112,10 @@ AI Training writing-a-lesson:
   author: The AI Training contributors
   license: CC BY-SA 4.0
   url: https://github.com/lsimons/ai-training/blob/cb658ad1859c1931f36b58fe8315e1883a927643/docs/agents/writing-a-lesson.md
+Anthropic effective agents:
+  type: reference
+  title: Building effective agents
+  container: Anthropic Engineering
+  author: Erik S., Barry Zhang
+  license: Proprietary
+  url: https://www.anthropic.com/engineering/building-effective-agents
