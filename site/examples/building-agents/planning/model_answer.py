@@ -7,11 +7,10 @@ and adds one for a recalled item: a replacement of the same model would
 send the customer another recalled toaster, so the rest of the plan
 becomes a refund and an email that names the recall.
 
-One answer to the closing question: a short wait is another result of
-step three that should change the plan. With restock_days at 2, a
-refund is more than the customer may want, so step four would become an
-email that asks whether they want to wait two days or take a refund,
-and step five would wait for the reply.
+One answer to the closing question refines the rule for an item that is
+out of stock. With restock_days at 2, the customer may prefer to wait,
+so step four would become an email that asks whether they want to wait
+two days or take a refund, and step five would wait for the reply.
 """
 
 import os
