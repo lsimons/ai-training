@@ -43,8 +43,8 @@ a tracker or a dashboard outside the repository) (@Claude Code memory).
 
 At launch the session reads the start of the index file and no other
 file from the folder. The start is the first 200 lines, or fewer when
-those lines are more than 25KB. A topic file stays on disk until the work calls
-for it and the agent opens it (@Claude Code memory)
+those lines are more than 25KB. A topic file stays on disk until the
+work calls for it and the agent opens it (@Claude Code memory)
 (@Claude Code context window). So the index line is what every session
 sees, and a wrong index line is wrong in every session.
 
@@ -161,7 +161,8 @@ folder alone, so a note doesn't expire by itself (@Claude Code memory).
 
 So check each note against the thing it describes. The two `project`
 notes about `done()` and the tests make claims the copy can confirm or
-contradict. The rewrite note names a branch.
+contradict. Leave the session open, and run the shell commands from here
+on in a second terminal in your copy. The rewrite note names a branch.
 
 ```sh
 git branch --list done-v2
@@ -189,7 +190,7 @@ rm ~/memory-review-notes/project_done_rewrite.md ~/memory-review-notes/project_t
 
 Then open `~/memory-review-notes/MEMORY.md` in your editor and delete
 the two lines that point at those files. The notes are ordinary Markdown
-files, and the vendor expects you to read and change them by hand
+files, and the vendor says you may read and change them by hand
 (@Claude Code memory). Remove the index line too, since the index is the
 part that loads.
 
@@ -315,7 +316,8 @@ Add this line at the end of `AGENTS.md`, with nothing after the path:
 - Team decisions that the code doesn't show: @docs/decisions.md
 ```
 
-Then delete `project_item_length.md` and its line from `MEMORY.md`, so
+Then delete `~/memory-review-notes/project_item_length.md` and its line
+from `MEMORY.md`, so
 the fact is in one place. Commit the two repository files, which is the
 step that makes the fact reviewed and shared.
 
@@ -328,8 +330,8 @@ command. Run `/context`: its list of memory files shows the instruction
 files the session loaded, and `AGENTS.md` is in it (@Claude Code memory).
 The list may leave out `docs/decisions.md`, so the real check is a
 question. Ask the agent the limit on item text and which file states it.
-The answer names `docs/decisions.md`, and the notes folder holds `MEMORY.md`
-with one line and `user_diff_first.md`. Memory notes and context files
+The answer names `docs/decisions.md`. The notes folder holds `MEMORY.md`
+and `user_diff_first.md`, plus any note the agent saved this session. Memory notes and context files
 keep facts from one session for the next. The next lesson covers what
 happens inside one long session when it is compacted.
 
@@ -407,9 +409,10 @@ minutes and touches one memory folder and two repository files. Doing it
 once by hand shows you what a review of an agent's memory looks like, and
 which facts should never have been left in it.
 
-A good result: `MEMORY.md` has one line, for the diff note, and the notes
-folder holds `MEMORY.md` and `user_diff_first.md` only. `git log --oneline`
-shows your commit above `fixture`. A new session names
+A good result: the notes folder holds `MEMORY.md` and
+`user_diff_first.md`, plus any note the agent saved this session, and
+`MEMORY.md` has a line for each of those notes and no other.
+`git log --oneline` shows your commit above `fixture`. A new session names
 `docs/decisions.md` when you ask where the item length rule comes from.
 Reflection: which fact does your agent rely on today that you told it
 once and never wrote down anywhere a colleague could read?
