@@ -1,11 +1,21 @@
 id: customizing-agents/mcp-tool-cost
 title: Measuring what a tool server costs
+description: >-
+  Count what a twenty-tool server's definitions take from the context window, run one query through the
+  server and through a CLI, and decide which tools and servers stay connected.
 mode: tutorial
 covers: customizing-agents/mcp
 serves: [customizing-agents/connects-tools-safely/weighs-tool-cost]
 introduces: []
 assumes:
   - objective: concepts/explains-models/explains-generation
+    lesson: concepts/what-tokens-cost
+    section: what-a-token-costs
+  - objective: customizing-agents/connects-tools-safely/adds-a-tool
+    lesson: customizing-agents/mcp-first-server
+    section: connect-the-real-server
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 after: [customizing-agents/mcp-first-server]
 shorts:
   - On-demand tool loading and why disabling unused servers is still the control (Academy claude-code-101)
@@ -15,7 +25,28 @@ exercise:
     Connect a server with many tools, read the token count of its definitions from the client, then
     compare one query through the server with the same query through the CLI, and record both costs
     in a short table.
-sources: []
+sources:
+  - MCP specification
+  - MCP filesystem server
+  - AEC-16
+  - Claude Code mcp
+  - Claude Code costs
+  - Claude Code context window
+  - Claude Code commands
+  - Claude Code permissions
+  - Claude docs tool-search-tool
 issue: 173
 minutes: 15
-notes: "Introduces no concept: hands-on for tool-cost and mcp-vs-cli."
+notes: >-
+  Introduces no concept: hands-on for tool-cost and mcp-vs-cli. The fixtures under
+  site/examples/customizing-agents/mcp-tool-cost/ are a stdlib stand-in issue-tracker server over stdio
+  with twenty tools (only search_issues and get_issue answer), a CLI over the same the issues file, and
+  three measurement scripts that estimate tokens at four characters per token, the rule of thumb from
+  concepts/context-window. The second assumes entry is there because the page names the previous
+  lesson and its exercise reuses that lesson's handbook copy and server command. The tool search
+  default, its upfront fallbacks and ENABLE_TOOL_SEARCH come from code.claude.com/docs/en/mcp; that a
+  loaded definition stays in the conversation and counts as input tokens from the API's tool search
+  page; /context from the context-window and commands pages; /clear from the commands page; prefer the
+  CLI and disable unused servers, and prompt caching, from code.claude.com/docs/en/costs; the bare
+  deny rule that removes a tool from context from code.claude.com/docs/en/permissions. All must be
+  re-checked by review-by.

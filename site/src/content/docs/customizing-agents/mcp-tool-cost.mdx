@@ -1,0 +1,347 @@
+import { Choice, Match, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+In this lesson we put a number on a tool server. We count what the tool
+definitions of a stand-in issue tracker with twenty tools take from the
+context window. Then we run one query through the server, and the same
+query through a command-line tool (CLI). The numbers decide
+what to keep connected. The exercise repeats the measurement with a real
+server in your own agent and ends in a short table.
+
+The previous lesson connected the reference file-system server to a copy
+of a small directory and read every call in the transcript. Here the
+question is what that connection costs on each turn, before the agent
+uses it and after. The lesson on [what a token costs](/concepts/what-tokens-cost/#what-a-token-costs)
+showed that a model reads its whole input again on every call. A tool
+definition is part of that input.
+
+## What the tool list costs
+
+When a client connects a server, it asks for `tools/list`, and each tool
+comes back with a name, a description and a parameter schema (@MCP specification).
+Each definition takes tokens of context before any work begins (@AEC-16).
+Without on-demand loading, the client passes the definitions to the
+model with each request. The model reads them on every turn, whether
+the turn uses a tool or not.
+
+The fixture for this lesson is at
+`site/examples/customizing-agents/mcp-tool-cost/`. `tracker_server.py` is
+a stand-in issue-tracker server over stdio with twenty tools, from
+`search_issues` and `get_issue` to `create_milestone` and
+`subscribe_to_issue`. Each has a description of two or three sentences
+and a schema with one to seven parameters, and each parameter has its own
+one-line description. The definitions of a real tracker server are
+about this size.
+Before you run the measurement, estimate it.
+
+<Choice id="how-big-is-the-list" objective="customizing-agents/connects-tools-safely/weighs-tool-cost"
+  concepts={['tool-cost', 'server']}
+  context="The lesson's stand-in issue-tracker MCP server has twenty tools. Each has a description of two or three sentences and a parameter schema with one to seven parameters, and each parameter has a one-line description of its own."
+  title="How big is the tool list?" hint="How many characters does one tool's description and schema take, how many characters make a token, and how many tools are there?"
+  options={[
+    { text: 'A few dozen tokens, about one line of text for the whole server.', why: 'The twenty tool names alone take more than that. Each description and each parameter adds a line of its own.' },
+    { text: 'A few hundred tokens, about the length of a short email.', why: 'That is about one sentence per tool. Each tool also carries a schema, and every parameter in it has a description.' },
+    { text: 'A few thousand tokens, about the length of a long article.', correct: true },
+    { text: 'A few tens of thousands of tokens, about the length of a short book.', why: 'That would be pages of text for every tool. A description of two or three sentences and a short schema are far less.' },
+  ]}>
+Before the task starts, how many tokens do the twenty tool definitions
+of the tracker server take?
+</Choice>
+
+`definitions.py` asks the stand-in for `tools/list` and counts the
+result with the rule of thumb from the lesson on
+[what the model can see](/concepts/context-window/#count-the-tokens-of-a-page),
+about four characters per token. It counts the names alone too, in the
+`mcp__<server>__<tool>` form that Claude Code shows the model
+(@Claude Code permissions).
+
+<Predict id="measure-the-definitions" title="Measure the definitions"
+  answer={`tools: 20
+  definitions: 13,788 characters, about 3,447 tokens
+  names only: 553 characters, about 138 tokens`} run="customizing-agents/mcp-tool-cost/definitions.py">
+Run `definitions.py` in the fixture directory, and compare with the
+output below.
+
+```python
+tools = measure.list_tools()
+definitions = measure.definitions_text(tools)
+names = measure.names_text(tools)
+print(f"tools: {len(tools)}")
+size = f"{len(definitions):,} characters, about {measure.tokens(definitions):,} tokens"
+print(f"definitions: {size}")
+print(f"names only: {len(names):,} characters, about {measure.tokens(names):,} tokens")
+```
+
+</Predict>
+
+The count is an estimate. A client counts with the model's own
+tokenizer, and in Claude Code the `/context` command shows what fills
+the window, by category (@Claude Code context window). The size is what
+matters here: about 3,447 tokens for the full definitions and about 138
+for the names.
+
+Claude Code doesn't send the full definitions by default. Its *tool
+search* holds them back, so only the tool names and each server's
+instructions enter the context when the session starts, and the model
+searches for a tool's definition when it needs that tool
+(@Claude Code mcp). The same page lists the cases where Claude Code
+loads every definition upfront instead: `ENABLE_TOOL_SEARCH=false`, an
+`ANTHROPIC_BASE_URL` that points to a proxy, and some older models on
+some cloud platforms (@Claude Code mcp). A definition that search loads
+stays in the conversation for later turns, and it counts as input tokens
+like any other definition (@Claude docs tool-search-tool).
+
+## One query, two ways
+
+Now the query. We want the open bugs about login. The server has
+`search_issues`, and the tracker also has a CLI, which the agent would
+run in its shell. `one_query.py` runs the same search both ways and
+counts both sides of each: the call the model writes and the result it
+reads back.
+
+<Predict id="one-query-two-ways" title="One query, two ways"
+  answer={`#104  Session cookie is not cleared on logout  (rivera)
+  #101  Login page times out behind the office proxy  (rivera)
+  #106  Single sign-on button missing on mobile  (-)
+  #102  Password reset email arrives twice  (-)
+
+  server: call 24 tokens, result 535 tokens
+  cli: call 13 tokens, result 54 tokens`} run="customizing-agents/mcp-tool-cost/one_query.py">
+Run `one_query.py` in the fixture directory, and compare with the output
+below. The CLI's listing comes first.
+
+```python
+call, result = measure.server_query({"state": "open", "labels": ["bug", "login"]})
+command, output = measure.cli_query(["list", "--label", "bug", "--label", "login"])
+print(output, end="")
+print()
+print(f"server: call {measure.tokens(call)} tokens, result {measure.tokens(result)} tokens")
+print(f"cli: call {measure.tokens(command)} tokens, result {measure.tokens(output)} tokens")
+```
+
+</Predict>
+
+The calls are about the same size. The results differ, and the
+difference comes from how each one was written. `search_issues` returns
+the full record of each issue as JSON, with the body, the timestamps, the
+reporter and the URL. The CLI prints one line per issue, which is what a
+tracker's CLI does by default. The result has to fit the task. The one-line
+list answers "which login bugs are open", and the model reads the 535
+tokens of full records without needing them. A server with a
+`fields` parameter, or a CLI asked for JSON output, moves those numbers.
+So measure the server you have, and don't go by what servers in general
+return.
+
+## The same query over a session
+
+One query happens once, and the context it adds stays. The call and its
+result remain in the conversation, and the definitions arrive with every
+request. The model reads both again on every later turn.
+`session.py` adds that up over a ten-turn session with the query on the
+first turn, for four setups. The first is the server with all twenty
+definitions loaded. The second is tool search: the names on every turn,
+plus the one definition that search loads for `search_issues`. The third
+loads only three definitions, the tools the task uses. The last is the
+CLI. It runs through the agent's shell tool. That tool is in every setup
+anyway, and the CLI doesn't bring a definition of its own.
+
+<Predict id="ten-turns" title="Ten turns"
+  answer={`tokens read over 10 turns
+  server, all 20 tools loaded   40,060
+  server, tool search           10,150
+  server, 3 tools loaded        11,650
+  cli                              670`} run="customizing-agents/mcp-tool-cost/session.py">
+Run `session.py` in the fixture directory, and compare with the output
+below.
+
+```python
+for label, per_turn, query in setups:
+    print(f"{label:<28} {TURNS * (per_turn + query):>7,}")
+```
+
+</Predict>
+
+Read the table from the top. With the full list the model reads 40,060
+tokens over the session. Tool search brings the server down to 10,150,
+and most of what is left is the 535-token result, read again on every turn. Keeping three
+tools gets close to the same number without tool search. The CLI reads
+670, because it has no definitions and a short result.
+
+Prompt caching makes a repeated part of the input cheaper to read again
+(@Claude Code costs). It doesn't make that part smaller, so the
+definitions still take the same share of the window, and the window is
+where the rest of the task has to fit.
+
+A second cost doesn't show in any count. Every tool in the list is
+something the model can call, and so is every tool that search can find.
+An instruction injected into a web page or an issue body can ask for
+`delete_comment` as easily as the task asks for `search_issues`. A tool
+the task never uses costs tokens and adds a way to do damage. A deny
+rule that names a whole tool, such as `mcp__tracker__delete_comment`,
+removes it from what Claude sees (@Claude Code permissions).
+
+## What to keep
+
+The measurement gives four decisions:
+
+- **Keep only the tools the task uses.** A server with twenty tools and a
+  task that needs three is seventeen tools of cost and risk. Deny the rest
+  by name, or pick a server with fewer tools.
+- **Use the CLI for occasional queries.** When the system has a good CLI
+  and the agent needs it a few times in a session, the CLI costs no
+  definitions and returns what you asked for. Claude Code's page on costs
+  recommends CLIs such as `gh` and `aws` for the same reason: running a
+  command doesn't put tool descriptions in the context (@Claude Code costs).
+- **Use the server for constant, structured calls.** When the agent calls
+  the system on most turns and needs typed inputs and structured results,
+  the definitions are paid once per turn and used on most of them, and
+  typed inputs and structured results are more reliable than text the
+  model has to parse (@AEC-16).
+- **Disable the servers the project doesn't use.** Tool search lowers the
+  per-turn cost of a connected server. It doesn't remove it: the names
+  still load on every turn, some setups load every definition upfront, and
+  every tool is still one search away for an injected instruction. In
+  Claude Code, `/mcp` lets you turn a server off without removing its
+  configuration (@Claude Code mcp), and the cost page names disabling
+  unused servers as one of its controls (@Claude Code costs).
+
+<Match id="which-connection-to-keep" objective="customizing-agents/connects-tools-safely/weighs-tool-cost"
+  concepts={['mcp-vs-cli', 'tool-cost']}
+  context="The lesson measured an issue-tracker MCP server with twenty tools against the tracker's CLI, and ended with decisions about when to use the CLI, when to use a trimmed server, and when no tool is needed."
+  title="What do you connect?" hint="How often does the agent call the system, does the task need typed input, and could the agent read the information from a file instead?"
+  options={['The CLI', 'The server, with only the tools the task uses', 'No tool: a file in the repository']}
+  rows={[
+    { statement: 'Check the status of one issue about twice a week while fixing bugs', option: 0, why: 'A few calls a session: which connection costs nothing on the turns in between?' },
+    { statement: 'A triage agent that searches, labels and comments on issues on almost every turn', option: 1, why: 'The agent uses the system on most turns and needs typed input. Which option pays for definitions that are used?' },
+    { statement: 'Give the agent the team\'s coding conventions, which change once a quarter', option: 2, why: 'Does this information need a live system at all?' },
+    { statement: 'Look up which milestone a release goes out in, once, at the start of a task', option: 0, why: 'One call in a session: what would tool definitions on every turn buy you?' },
+  ]}
+  rationale="Each connection costs on every turn it is present. A tool earns that cost when the agent uses it on most turns, and a file or a CLI costs nothing until the moment it is used.">
+Match each need to what you connect for it. The tracker has an MCP server
+and a CLI, and the CLI can list and show issues but can't change them.
+</Match>
+
+<Choice id="tool-search-is-on" objective="customizing-agents/connects-tools-safely/weighs-tool-cost"
+  concepts={['tool-cost', 'mcp-security']}
+  context="Claude Code's tool search is on by default, so only tool names and server instructions load at the start of a session, and the model loads a tool's definition when it needs it."
+  title="Tool search is on" hint="What does tool search still load on every turn, and which tools can the model still reach?"
+  options={[
+    { text: 'Agree: with tool search on, an unused server adds no tokens at all to a turn.', why: 'The names and the server instructions of every connected server still load on every turn.' },
+    { text: 'Agree about the tokens: the five servers matter only once someone calls one of their tools.', why: 'Any search can find a connected server\'s tools, including a search that an injected instruction asks for.' },
+    { text: 'Disagree: tool search loads every definition on the first turn, so the five cost as much as before.', why: 'Tool search holds definitions back until the model needs one. The cost it leaves is smaller than that, and it isn\'t zero.' },
+    { text: 'Disagree: their names still load on every turn, and a search can still reach their tools.', correct: true },
+  ]}>
+A project has six MCP servers connected and uses one. A colleague says:
+"Tool search is on, so the other five are free. There's no reason to
+disable them." What do you answer?
+</Choice>
+
+<Pitfall title="Six servers, one in use">
+A team's project file connects six servers: the tracker, the wiki, chat,
+the monitoring system, a browser and a database. Over a month the work
+uses the tracker. Nobody removed the others, because each was added for
+one task and tool search keeps their definitions out of the window. Then
+someone points the agent at a proxy for cost reporting, the client loads
+every definition upfront, and each session starts with thousands of
+tokens of tools nobody calls. A web page the agent reads during a task
+asks it to post a summary to chat, and the chat server is still there to
+do it. The rule: a server stays connected only while a task uses it, and
+tool search is no reason to keep one.
+</Pitfall>
+
+<Exercise stretch="Deny every write tool of the server by name in your settings, then run /context again and see how the count for MCP tools changes.">
+Measure a real server in your own agent, on a copy. Copy the `handbook`
+directory from `site/examples/customizing-agents/mcp-first-server/` to a
+place you can delete, change into the copy, and add the reference
+file-system server there as in the previous lesson. It has thirteen
+tools, and four of them write (@MCP filesystem server). Claude Code gives
+the server the directory it was started in as its root, so start the
+agent inside the copy every time (@Claude Code mcp).
+
+```sh
+cp -r site/examples/customizing-agents/mcp-first-server/handbook /tmp/handbook
+cd /tmp/handbook
+claude mcp add handbook -- npx -y @modelcontextprotocol/server-filesystem@2026.8.31 /tmp/handbook
+```
+
+1. Start Claude Code with every definition loaded, `ENABLE_TOOL_SEARCH=false claude`
+   (@Claude Code mcp), run `/context`, and write down the tokens it shows
+   for the MCP tools. Quit, start `claude` without the variable, and write
+   down the same number with tool search on.
+2. In the second session, run `/context` and note the tokens in use. Ask:
+   "Use the handbook server to list this directory. Answer with the
+   listing only." Run `/context` again.
+3. Run `/clear` (@Claude Code commands), run `/context`, and ask: "Run
+   `ls` in your shell to list this directory. Answer with the listing
+   only." Approve the one command, and run `/context` again.
+
+Put the four numbers in a short table: the definitions with and without
+tool search, and the tokens each query added. A good result has all four
+from your own `/context` output, and says in one line which connection
+you would keep for a task that lists a directory twice a week. Remove the
+server with `claude mcp remove handbook` when you are done
+(@Claude Code mcp). Then ask yourself: at how many calls a session would
+the server be the better choice?
+</Exercise>
+
+<Scenario id="review-a-forty-tool-server" phase="review" objective="customizing-agents/connects-tools-safely/weighs-tool-cost"
+  concepts={['tool-cost', 'mcp-vs-cli']}
+  context="A team is about to add a monitoring system's MCP server to a coding agent. The system also has a CLI that the developers already use."
+  title="A forty-tool server" hint="How often will the agent use the system, and what does it cost on the turns it doesn't?"
+  options={[
+    { text: 'Add the server with all forty tools, because tool search keeps the cost low.', consequence: 'The names load on every turn, the agent calls the system twice a week, and a delete_alert tool sits one search away from any page the agent reads.' },
+    { text: 'Add the server and allow only the tools that read alerts.', consequence: 'Cheaper and safer than all forty. The team still pays definitions on every turn for a system the agent queries twice a week.' },
+    { text: 'Let the agent run the CLI for alert lookups, and allow only its read commands.', correct: true, consequence: 'The agent adds no definitions to any turn, runs two commands a week, and the permission policy names each command it may run.' },
+    { text: 'Give the agent no access, and paste alert text into the chat when it is needed.', consequence: 'No cost and no risk, and a developer now copies alerts by hand for a lookup the agent could do with one read command.' },
+  ]}>
+The agent needs to look up an alert about twice a week. The monitoring
+server has forty tools. What do you set up?
+</Scenario>
+
+<Sort id="review-what-costs-each-turn" phase="review" objective="customizing-agents/connects-tools-safely/weighs-tool-cost"
+  concepts={['tool-cost', 'mcp-vs-cli']}
+  context="An agent client with tool search on connects one MCP server. The agent ran one query through that server on the first turn of a ten-turn session, and one CLI command on the second turn."
+  title="What does the model read again?" hint="Which of these are in the conversation or the request once they have appeared, and which exist only when the model asks for them?"
+  buckets={['Read again on every later turn', 'Not in the context until it is used']}
+  items={[
+    { text: 'The names of the server\'s tools', bucket: 0 },
+    { text: 'The result of the query on the first turn', bucket: 0 },
+    { text: 'The definition of a tool the model never searched for', bucket: 1 },
+    { text: 'The output of the CLI command on the second turn', bucket: 0 },
+    { text: 'The help text of a CLI command the agent never ran', bucket: 1 },
+  ]}>
+Place each item by when the model reads it.
+</Sort>
+
+<Choice id="review-reading-the-table" phase="review" objective="customizing-agents/connects-tools-safely/weighs-tool-cost"
+  concepts={['tool-cost']}
+  context="A ten-turn session table from the lesson: a server with all twenty tools loaded read 40,060 tokens, the same server with tool search 10,150, with three tools loaded 11,650, and the CLI 670. The server's one query returned a 535-token result."
+  title="Read the session table" hint="With tool search on, what is left in each turn, and which part of it came from the query?"
+  options={[
+    { text: 'The full records the query returned, which the model reads again on every turn.', correct: true },
+    { text: 'The names of the twenty tools, which tool search still loads on every turn.', why: 'The names are about 138 tokens a turn. Most of what is left comes from somewhere else.' },
+    { text: 'The definition of search_issues, which stays in the conversation once it is loaded.', why: 'It is one tool\'s definition. Compare its size with the size of the result.' },
+    { text: 'The call the model wrote to search_issues, which it repeats on every later turn.', why: 'The call is about 24 tokens, and the model writes it once. It stays in the conversation, and it is the smallest part.' },
+  ]}>
+With tool search on, the server still reads 10,150 tokens over ten
+turns. Which part of that is the largest?
+</Choice>
+
+<Recap>
+1. A connected server's tool definitions are part of the model's input.
+   Without on-demand loading, the model reads all of them on every turn,
+   and twenty tools of a normal size come to a few thousand tokens.
+2. A query costs its call and its result, and both stay in the
+   conversation. A verbose result is read again on every later turn, so
+   measure what your server returns and not only what it lists.
+3. Claude Code's tool search is on by default and loads only the names and
+   server instructions at the start (@Claude Code mcp). It lowers the
+   per-turn cost, and the names, the upfront fallbacks and the reach of
+   every tool remain.
+4. Keep only the tools a task uses, use the CLI for occasional queries and
+   the server for constant structured calls, and turn off the servers the
+   project doesn't use (@Claude Code costs).
+</Recap>
+
+<Habit id="count-before-you-connect">
+The next time you add a tool server to an agent, run your client's context view before and after, and write the number next to the task that needs it.
+</Habit>
