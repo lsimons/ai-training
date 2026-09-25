@@ -67,16 +67,16 @@ and a question that asks for a verdict doesn't ask for that.
 
 <Choice id="where-the-verdict-came-from" objective="using-agents/delegates-and-checks/writes-a-brief"
   concepts={['thought-partner', 'sycophancy']}
-  context="A learner described two job offers to a chat assistant in a few lines, the way they felt about them that day, and asked which to take. The assistant recommended the startup."
-  title="What would you change before asking again?" hint="Which words show which offer you prefer, and does each offer get the same kinds of facts?"
+  context="A learner described two job offers, Offer A at a startup and Offer B at an insurance company, to a chat assistant in a few lines, the way they felt about them that day, and asked which to take. The assistant recommended the startup."
+  title="What would you change before asking again?" hint="Which words in the description tell the model which offer you prefer?"
   options={[
     { text: 'Add a few lines on why Offer A appeals to you, so the model understands your reasons better.', why: 'More reasons for Offer A give the model more of your own view to hand back as advice.' },
     { text: 'Keep the description, and add a line asking the model to be honest and objective about both.', why: 'A request for objectivity leaves the facts as they were, and the model can only work from those facts.' },
     { text: 'Give both offers the same kinds of facts, and drop words such as "exciting" or "slow and formal".', correct: true },
     { text: 'Put Offer B first, so that the model gives the startup less weight than it did this time.', why: 'The reasons in the answer match the words used for each offer, which the order of the offers does not explain.' },
   ]}>
-The description got back its own framing as advice. Before you ask the
-assistant again, what is the best change to the description?
+You got your own framing back as advice. Before you ask the assistant
+again, what is the best change to the description?
 </Choice>
 
 ## Ask for help thinking
@@ -84,7 +84,7 @@ assistant again, what is the best change to the description?
 Now write the request as a brief for a thinking session. It says what you
 want from the conversation, which is help with your own thinking and no
 decision. It gives the facts without the adjectives. It names your lean
-as a lean, so the model knows which option to test. Then it asks for the
+as a lean. Then it asks for the
 case against that option, for the questions your facts leave open, and
 for what each option costs. In the safety course you took your opinion
 out of the question to get an assessment. Here you name your lean on
@@ -207,7 +207,7 @@ think the choice through.
 <Sort id="challenge-or-agreement" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
   concepts={['thought-partner']}
   context="The lesson shows a brief that asks a chat assistant to help think a decision through, and a plain request for a verdict that the assistant answered by repeating the description."
-  title="Challenge or agreement?" hint="Does the line help you think the choice through, or does it tell the model which answer you want or ask it to decide?"
+  title="Thinking session or verdict?" hint="Does the line help you think the choice through, or does it tell the model which answer you want or ask it to decide?"
   buckets={['Sets up a thinking session', 'Invites agreement or a verdict']}
   items={[
     { text: 'Give me the strongest case against the option I lean toward.', bucket: 0 },
