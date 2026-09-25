@@ -228,6 +228,20 @@ def sleep_seconds(words: Sequence[str]) -> float:
     return total
 
 
+def stash_reason(sub: str, rest: list[str], args: list[str]) -> str | None:
+    """The reason a `git stash` that changes the stash is rejected, in any directory."""
+    if sub != "stash" or (rest and rest[0] in {"list", "show"}):
+        return None
+    return (
+        f"`git {' '.join(args)}`: every worktree of the clone shares one stash "
+        "(`refs/stash`), so a `git stash pop` can return another agent's changes. Commit "
+        "your work in progress instead. You can also save it with "
+        "`git diff HEAD > .scratch/x.patch` and restore it with `git apply` (run "
+        "`git add -N` first for untracked files), or run `git worktree add --detach` "
+        "for a separate checkout under `../ai-training-wt/`."
+    )
+
+
 def check_segment(
     segment: Segment,
     env: Mapping[str, str],
@@ -269,9 +283,11 @@ def check_segment(
                 "a pull request. A dispatcher keeps its record in its run issue, not in git."
             )
         return None
+    stash = stash_reason(sub, rest, args)
+    if stash is not None:
+        return stash
     destructive = (
-        (sub == "stash" and (not rest or rest[0] not in {"list", "show"}))
-        or (sub == "reset" and "--hard" in rest)
+        (sub == "reset" and "--hard" in rest)
         or (sub == "checkout" and "--" in rest and "." in rest[rest.index("--") :])
         or (sub == "checkout" and rest == ["."])
         or (sub == "restore" and "." in rest)
