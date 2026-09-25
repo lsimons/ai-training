@@ -62,8 +62,8 @@ concepts:
       Risks that appear when a model can act: prompt injection through
       content the agent reads, exfiltration through tools that send data
       outward, over-permissioned tools that turn a wrong decision into real
-      damage, and confused-deputy situations where the agent uses the
-      user's authority on an attacker's behalf. They are mitigated by
+      damage, and confused-deputy situations where the agent spends its own
+      authority for whoever wrote the text it acts on. They are mitigated by
       limiting capability and reviewing actions, not by better prompts.
   - id: protocols-mcp-a2a
     name: Protocols (MCP, A2A)
