@@ -119,6 +119,12 @@ jobs:
       - name: Install Python tools
         run: mise run py-install-frozen
 
+      # The synced Vale styles are gitignored. Fetch them before the Python
+      # tests, which run Vale on the synced rules (tests/test_vale_linebreaks.py),
+      # and before the prose lint.
+      - name: Fetch Vale styles
+        run: mise run prose-sync
+
       - name: Lint
         run: mise run lint
 
@@ -130,10 +136,6 @@ jobs:
 
       - name: Python tests (pytest)
         run: mise run py-test
-
-      # The synced `write-good` style is gitignored; fetch it before linting.
-      - name: Fetch Vale styles
-        run: mise run prose-sync
 
       - name: Prose lint
         run: mise run prose
