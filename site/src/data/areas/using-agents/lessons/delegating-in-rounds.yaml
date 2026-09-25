@@ -13,6 +13,9 @@ assumes:
   - objective: safety/verifies-output/keeps-a-check-habit
     lesson: safety/marking-what-a-person-checked
     section: put-the-mark-in-the-process
+  - objective: using-agents/delegates-and-checks/writes-a-brief
+    lesson: using-agents/breaking-work-into-pieces
+    section: briefing-and-running-the-first-piece
 after: [using-agents/breaking-work-into-pieces, using-agents/adjusting-the-brief]
 shorts: [Keeping rounds short]
 exercise:
@@ -22,12 +25,16 @@ exercise:
     your own split works too), check the result against the criteria, change the brief with what the
     result showed, and delegate the second piece. Keep a two-line log per round.
 sources: [Academy ai-fluency-framework-foundations, DLAI-11]
+issue: 154
 minutes: 15
 notes: >-
   The supplied first piece is the riders piece of the bike pilot report from
   breaking-work-into-pieces, whose exercise asks for the riders and cost briefs. The page gives both
-  as model answers, with the criteria from that lesson's table. The miss is a count the agent works
-  out from two counts in the note, which the brief's limits never ruled out. Each piece runs in a
+  as model answers, with the criteria from that lesson's table plus one riders criterion (no
+  commentary or recommendation) and two cost criteria (each option says what it includes, every
+  amount is in the email). The miss is a count the agent works
+  out from two counts in the note: the check rules it out, and the looser limit allows it. The
+  riders piece is re-sent with the tightened limit before the cost piece runs. Each piece runs in a
   fresh conversation so that only the brief carries a change forward. No fixture: every exchange is
   illustrative and the learner uses a chat assistant. Academy ai-fluency-framework-foundations is
   cited for its Description-Discernment loop and DLAI-11 for error analysis (M4), both as ideas in
