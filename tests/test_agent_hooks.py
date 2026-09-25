@@ -241,6 +241,134 @@ def test_main_rejects_a_bad_mode_and_ignores_bad_json(capsys: pytest.CaptureFixt
     assert agent_hooks.main(["agent_hooks.py", "guard-bash"], "[1]", {}) == 0
 
 
+# Polling a background command, skipped git hooks, deletes on GitHub, and
+# `rm` out of `.scratch` (#391).
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "sleep 55 && tail -5 .scratch/fast.txt",
+        "sleep 30; cat /private/tmp/task.output",
+        "sleep 50\nls -la .scratch",
+        "mise run fast > .scratch/f.txt 2>&1 & sleep 55; tail .scratch/f.txt",
+    ],
+)
+def test_sleep_then_read_is_polling_and_names_the_foreground_run(command: str) -> None:
+    reason = check(command)
+    assert reason is not None
+    assert "foreground" in reason
+    assert "600000" in reason
+
+
+def test_reading_without_a_sleep_before_it_passes() -> None:
+    assert check("tail -5 .scratch/fast.txt") is None
+    assert check("cat a.txt && sleep 5") is None
+    assert check("ls .scratch; sleep 1") is None
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git commit --no-verify -m x",
+        "git add -A && git commit --amend --no-verify",
+        "git commit -n -m x",
+        "git commit -anm x",
+        "git commit --no-veri -m x",
+        "git push --no-verify origin feat/1-x",
+        "git -C ../other push --no-verify",
+        "mise run fast; git commit -m x --no-verify",
+    ],
+)
+def test_skipping_the_git_hooks_is_rejected(command: str) -> None:
+    reason = check(command)
+    assert reason is not None
+    assert "--no-verify" in reason
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git commit -m x",
+        "git commit -m --no-verify",
+        "git commit -mnote",
+        'git commit -m "fix: mention --no-verify"',
+        "git commit -am x -- -n",
+        "git push -n origin feat/1-x",
+        "git log --no-verify",
+        "git commit -F - <<'EOF'\ngit commit --no-verify\nEOF",
+    ],
+)
+def test_commits_and_pushes_that_keep_the_hooks_pass(command: str) -> None:
+    assert check(command) is None
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "gh repo delete lsimons/ai-training --yes",
+        "gh api -X DELETE repos/o/r/git/refs/heads/x",
+        "gh api repos/o/r/issues/comments/1 -X DELETE",
+        "gh api repos/o/r/issues/comments/1 -XDELETE",
+        "gh api repos/o/r/issues/comments/1 -X=DELETE",
+        "gh api --method DELETE repos/o/r/releases/1",
+        "gh api repos/o/r/releases/1 --method=delete",
+        "gh issue view 1 && gh api repos/o/r/labels/x --method DELETE",
+    ],
+)
+def test_deletes_on_github_are_rejected(command: str) -> None:
+    reason = check(command)
+    assert reason is not None
+    assert "DELETE" in reason
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "gh api repos/o/r/pulls/1",
+        "gh api -X PATCH repos/o/r/issues/comments/1 -f body=x",
+        "gh api --method POST repos/o/r/issues/1/comments -f body=DELETE",
+        "gh api repos/o/r/issues -X",
+        "gh repo view",
+    ],
+)
+def test_other_gh_calls_pass(command: str) -> None:
+    assert check(command) is None
+
+
+@pytest.mark.parametrize(
+    ("command", "outside"),
+    [
+        ("rm -rf .scratch/x ../other", "../other"),
+        ("rm -rf .scratch/../..", ".scratch/../.."),
+        ("rm -rf .scratch/..", ".scratch/.."),
+        ("rm -rf .scratch/x /", "/"),
+        ("rm -rf .scratch/x $HOME", "$HOME"),
+        ("rm -rf -- .scratch/x site", "site"),
+    ],
+)
+def test_rm_with_a_scratch_target_must_stay_inside_scratch(command: str, outside: str) -> None:
+    reason = check(command)
+    assert reason is not None
+    assert f"`{outside}`" in reason
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "rm -rf .scratch",
+        "rm -rf .scratch/",
+        "rm -rf .scratch/x .scratch/y/z",
+        "rm -rf .scratch/*",
+        "cd site && rm -rf ../.scratch/x",
+        "rm -rf site/dist",
+        "rm a.txt",
+    ],
+)
+def test_rm_inside_scratch_or_without_a_scratch_target_passes(command: str) -> None:
+    assert check(command) is None
+
+
 def git(*args: str, cwd: Path) -> None:
     env = {**os.environ, "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull}
     subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, env=env)
