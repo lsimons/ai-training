@@ -4,8 +4,9 @@ You ask an assistant for a short version of a recipe page. The page is an
 ordinary lemon cake recipe, and its last paragraph is a sentence written
 for the assistant rather than for you. In this lesson we follow that one
 planted line through three versions of the same agent, each with a
-different set of tools. The trace shows where the reader's data goes. The previous lesson said
-that prompt injection needs hands to do harm. This one shows which hand.
+different set of tools. The trace shows where the reader's data goes. The lesson
+[Why agent safety is different](/safety/agent-risk/) said that prompt
+injection needs hands to do harm. This one shows which hand.
 
 Here is the page, as the agent reads it. The site is invented, the address
 goes nowhere, and `contacts.txt` is a file on the reader's computer that the
@@ -110,7 +111,8 @@ had a way to move it. Take away one link and the chain breaks, and the
 program shows two of the three breaks: with no file access, the agent has
 nothing to send, and with no fetch tool, it has no way to send it.
 
-The lesson before this one put it as "only the combination is the attack".
+[Why agent safety is different](/safety/agent-risk/#exfiltration-the-quiet-way-out)
+put it as "only the combination is the attack".
 The trace adds the order of the links. Reading is the first link, and you
 can't remove it, because reading is the task. Having private data nearby is
 the second, and it is often part of the task too. Sending is the last link,

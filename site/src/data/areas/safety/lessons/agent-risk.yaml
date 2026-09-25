@@ -23,8 +23,8 @@ assumes:
     lesson: safety/checking-what-an-agent-changed
     section: pause-before-the-step-you-cant-undo
 extends-to:
-  - label: Introduction to the EU AI Act
-    href: /safety/eu-ai-act/
+  - label: Sizing an agent's blast radius
+    href: /safety/sizing-the-blast-radius/
 after: []
 shorts:
   - Agents that are only saved prompts
@@ -38,6 +38,4 @@ sources:
 minutes: 20
 notes: >-
   The plan also assumed concepts/recognizes-agents/tells-agent-from-assistant, which the page does
-  not name. The calibrates-trust assumes entry points at checking-what-an-agent-changed (#128). One
-  entry is a stand-in: extends-to points at eu-ai-act until sizing-the-blast-radius (#130) is live,
-  and the builder of #130 points it at that lesson.
+  not name. The calibrates-trust assumes entry points at checking-what-an-agent-changed (#128).
