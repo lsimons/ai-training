@@ -119,34 +119,29 @@ has nothing to say.
 ## Process
 
 - Git remote is GitHub, `lsimons/ai-training`. Use `gh`.
-
 - Issues and labels: `docs/agents/issue-tracker.md`. Triage with the
   maintainer: `docs/agents/triage.md`.
-
 - Many builders and reviewers in parallel: `docs/agents/orchestration.md`.
   Wave after wave from one session: `docs/agents/meta-orchestration.md`,
   run by the `/wave` skill.
-
 - A follow-up a review or a wave report names, and an improvement the
   maintainer defers, become GitHub issues before the session ends (or, in
   `/wave --no-filing`, when the run ends). A cosmetic nit left open on a
   merged branch becomes a line in the one open `Cosmetic nits` issue. Run
   issues, session records and transcripts are never a place work waits.
-
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`type(scope): description`), and commitlint enforces it.
-
-- Every commit message, PR body and issue comment an agent writes ends
-  with these two lines, with the model you are running in `Assisted-by`
-  and no `Signed-off-by`. A review puts them after its `Verdict:` line.
-
-  ```text
-  Co-Authored-By: lsimons-bot <bot@leosimons.com>
-  Assisted-by: Claude:<model>
-  ```
-
 - A push to `main` deploys to GitHub Pages. The site is pre-release and
   says so on the front page and in the README.
+- Every commit message, PR body and issue comment an agent writes ends
+  with the two attribution lines below, with the model you are running in
+  `Assisted-by` and no `Signed-off-by`. A review puts them after its
+  `Verdict:` line.
+
+```text
+Co-Authored-By: lsimons-bot <bot@leosimons.com>
+Assisted-by: Claude:<model>
+```
 
 ## Asking the maintainer
 

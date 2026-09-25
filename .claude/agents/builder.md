@@ -81,9 +81,4 @@ Review finds these in almost every first pass. Check each one yourself.
 
 - Every commit message ends with the attribution lines in `AGENTS.md`
   ("Process"), and no `Signed-off-by`. The `Assisted-by` line names the
-  model you are running, for example `claude-opus-5-5`:
-
-  ```text
-  Co-Authored-By: lsimons-bot <bot@leosimons.com>
-  Assisted-by: Claude:<the model you are running>
-  ```
+  model you are running, for example `claude-opus-5-5`.

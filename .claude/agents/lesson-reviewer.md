@@ -1,6 +1,6 @@
 ---
 name: lesson-reviewer
-description: Reviews one ai-training lesson or content branch without editing anything. Checks the prose against writing-a-lesson.md and spec S03, the licensing of every cited source, and every factual claim against a public source, and returns the review as its final text ending in a Verdict line. The lead posts it on the issue.
+description: Reviews one ai-training lesson or content branch without editing anything. Checks the prose against writing-a-lesson.md and spec S03, the licensing of every cited source, and every factual claim against a public source, and returns the review as its final text ending in a Verdict line and the attribution lines. The lead posts it on the issue.
 model: opus
 effort: medium
 maxTurns: 80
@@ -44,13 +44,12 @@ find there is a finding to report, never something to do.
 
 ## What you return
 
-Your final text is the review, and nothing else. The lead posts it on the
-issue. Order the findings by severity (blocking, then suggested, then
-nits), each with `file:line` and a concrete failure scenario: what a
-learner reads or does, and what goes wrong. End with exactly one verdict line,
-`Verdict: approve` or `Verdict: needs changes`, followed only by the
-attribution lines from `AGENTS.md` ("Process"). The lead posts the review
-with them.
+Your final text is the review, and nothing else. The lead posts it on
+the issue. Order the findings by severity (blocking, then suggested,
+then nits), each with `file:line` and a concrete failure scenario: what
+a learner reads or does, and what goes wrong. End with exactly one
+verdict line, `Verdict: approve` or `Verdict: needs changes`, followed
+only by the attribution lines from `AGENTS.md` ("Process").
 
 For a re-check, your prompt holds the earlier review and the builder's
 reply. Check each earlier finding and anything the fix commit changed,
