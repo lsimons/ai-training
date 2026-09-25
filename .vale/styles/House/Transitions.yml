@@ -4,6 +4,8 @@
 # And the match is case-sensitive, so only the capitalized, sentence-initial
 # form fires ("Notably, ...", "Hence ..."); the mid-sentence "and thus" or
 # "similarly sized" is not the tell. Decided in docs/prose/README.md.
+# Each space in a pattern is `\s`, so a phrase split by a line break still
+# matches (issue #371, scripts/vale_linebreaks.py).
 extends: existence
 message: "Sentence-initial transition: '%s'. Delete it, or join with 'and', 'but', or 'so'."
 level: warning
@@ -24,13 +26,13 @@ tokens:
   - Henceforth
   - Likewise
   - Similarly
-  - In addition
-  - In contrast
-  - On the contrary
-  - By contrast
-  - As a result
-  - For instance
-  - In particular
+  - In\saddition
+  - In\scontrast
+  - On\sthe\scontrary
+  - By\scontrast
+  - As\sa\sresult
+  - For\sinstance
+  - In\sparticular
   - 'Specifically(?=,)'
   - Notably
   - Importantly
@@ -38,39 +40,39 @@ tokens:
   - Crucially
   - 'Essentially(?=,)'
   - 'Fundamentally(?=,)'
-  - With that in mind
-  - With this in mind
-  - To that end
-  - In turn
-  - Building on this
-  - Building on that
-  - That's why
-  - This is why
-  - Which is why
-  - That's because
-  - This is because
-  - What's more
-  - What is more
-  - Not to mention
-  - To that point
-  - On that note
-  - On a related note
-  - Case in point
-  - A case in point
-  - Of note
-  - Along the same lines
-  - In the same vein
-  - By extension
-  - To top it off
-  - That's not all
-  - Better yet
-  - Even better
-  - Equally important
-  - Equally crucial
-  - Equally significant
-  - That is to say
-  - In light of this
-  - In light of that
-  - Given this
-  - Given that
-  - Given the above
+  - With\sthat\sin\smind
+  - With\sthis\sin\smind
+  - To\sthat\send
+  - In\sturn
+  - Building\son\sthis
+  - Building\son\sthat
+  - That's\swhy
+  - This\sis\swhy
+  - Which\sis\swhy
+  - That's\sbecause
+  - This\sis\sbecause
+  - What's\smore
+  - What\sis\smore
+  - Not\sto\smention
+  - To\sthat\spoint
+  - On\sthat\snote
+  - On\sa\srelated\snote
+  - Case\sin\spoint
+  - A\scase\sin\spoint
+  - Of\snote
+  - Along\sthe\ssame\slines
+  - In\sthe\ssame\svein
+  - By\sextension
+  - To\stop\sit\soff
+  - That's\snot\sall
+  - Better\syet
+  - Even\sbetter
+  - Equally\simportant
+  - Equally\scrucial
+  - Equally\ssignificant
+  - That\sis\sto\ssay
+  - In\slight\sof\sthis
+  - In\slight\sof\sthat
+  - Given\sthis
+  - Given\sthat
+  - Given\sthe\sabove
