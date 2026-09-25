@@ -40,6 +40,8 @@ class ReadmeRunner(doctest.DocTestRunner):
 
     def report_failure(self, out, test, example, got) -> None:
         shown = got.strip() or "no output"
+        if example.exc_msg is not None:
+            shown = shown.splitlines()[-1]
         self.problems.append(
             f"  {example.source.strip()}: expected {expected(example)}, got {shown}"
         )
