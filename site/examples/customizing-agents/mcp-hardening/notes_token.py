@@ -41,7 +41,7 @@ def check(token):
     body = f"{scope}.{expires}.{owner}"
     if scope not in SCOPES or not expires.isdigit():
         return None, None, "no valid token"
-    if not hmac.compare_digest(signature, _signature(body)):
+    if not hmac.compare_digest(signature.encode(), _signature(body).encode()):
         return None, None, "no valid token"
     if time.time() >= int(expires):
         return scope, owner, "token expired"
