@@ -360,6 +360,10 @@ run = "scripts/vale_linebreaks.py .vale.ini .vale-extended.ini"
 # is not supported, and an empty list is a failure rather than a pass.
 # Local (no network) and cheap. It does not detect a stale unpack: after
 # moving a pin in the ini, run `prose-sync` again yourself.
+# It also fails when .vale/styles/.vale-config/ exists, and names
+# `scripts/prose_eval.py --clear-config-dir` and `prose-sync`: with that
+# directory present `vale sync` writes the packages under it and the old
+# ones stay, so the missing-package check alone would pass (issue #450).
 [tasks.prose-check-packages]
 description = "Fail when a Vale package pinned in .vale.ini or .vale-extended.ini is not under .vale/styles/"
 hide = true
@@ -432,9 +436,17 @@ vale --no-exit --config .vale-extended.ini --ext=.md $yaml
 # Both scripts read .vale-eval.ini, whose packages `prose-sync` does not
 # fetch, and stop with a message naming `prose-eval-sync` when one is not
 # under .vale/styles/ (the eval side of #103, issues #276 and #295).
+# The last step removes .vale/styles/.vale-config/, which the Harper zip
+# ships and which would redirect the next `prose-sync` into
+# .vale/styles/.vale-config/styles/ (issue #450). It removes that one
+# directory and nothing else (`clear_config_dir` in scripts/prose_eval.py).
 [tasks.prose-eval-sync]
 description = "Fetch the Vale packages pinned in .vale-eval.ini, for prose-eval and prose-metrics (network)"
-run = ["vale sync --config .vale-eval.ini", "scripts/vale_linebreaks.py .vale-eval.ini"]
+run = [
+  "vale sync --config .vale-eval.ini",
+  "scripts/vale_linebreaks.py .vale-eval.ini",
+  "scripts/prose_eval.py --clear-config-dir",
+]
 
 # The eval side of `prose-widen`, for a package synced before
 # scripts/vale_linebreaks.py existed.
