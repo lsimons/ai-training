@@ -252,3 +252,5 @@ Baleegh
 venv
 nosec
 fetchall
+Eastlake
+Panitz

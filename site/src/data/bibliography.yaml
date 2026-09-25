@@ -1000,3 +1000,17 @@ Python sqlite3:
   author: Python Software Foundation
   license: PSF License Version 2
   url: https://docs.python.org/3/library/sqlite3.html
+Claude Code sandboxing:
+  type: reference
+  title: Configure the sandboxed Bash tool
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/sandboxing
+RFC 2606:
+  type: reference
+  title: Reserved Top Level DNS Names
+  container: IETF RFC 2606 (BCP 32)
+  author: Eastlake and Panitz
+  license: Copyright Internet Society
+  url: https://www.rfc-editor.org/rfc/rfc2606
