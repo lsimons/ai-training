@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	appliesTo,
 	branchOf,
+	commentKind,
 	featBranches,
 	lastTrustedVerdict,
 	nextStep,
@@ -73,6 +74,7 @@ describe('lastTrustedVerdict', () => {
 			createdAt: '2026-09-24T12:00:00Z',
 			url: 'https://github.com/lsimons/ai-training/issues/1#2026-09-24T12:00:00Z',
 			commentsAfter: 1,
+			leadReCheck: null,
 		});
 	});
 
@@ -104,6 +106,23 @@ describe('lastTrustedVerdict', () => {
 
 	it('trusts exactly the maintainer and the bot account', () => {
 		expect([...TRUSTED_VERDICT_AUTHORS]).toEqual(['lsimons', 'lsimons-bot']);
+	});
+});
+
+describe('commentKind', () => {
+	it('tells the kinds apart by their text, since every agent posts as the same accounts', () => {
+		expect(commentKind('Findings.\n\nBranch: feat/1-x\nVerdict: approve')).toBe('verdict');
+		expect(commentKind('Unfinished: feat/1-x\n- docs')).toBe('unfinished');
+		expect(commentKind('re-checked by lead: https://github.com/lsimons/ai-training/commit/abc123')).toBe(
+			'lead-re-check',
+		);
+		expect(commentKind('Re-checked by lead: abc123\n\nBranch: feat/1-x')).toBe('lead-re-check');
+		expect(commentKind('Fixed in abc123.\n\nBranch: feat/1-x')).toBe('reply');
+		expect(commentKind('The fix was re-checked by lead, see above.')).toBe('reply');
+	});
+
+	it('reads a review that quotes a lead re-check as a verdict', () => {
+		expect(commentKind('re-checked by lead: abc\n\nVerdict: needs changes')).toBe('verdict');
 	});
 });
 
@@ -174,12 +193,13 @@ describe('openUnfinished', () => {
 });
 
 describe('nextStep', () => {
-	const v = (verdict: 'approve' | 'needs changes', commentsAfter = 0) => ({
+	const v = (verdict: 'approve' | 'needs changes', commentsAfter = 0, leadReCheck: string | null = null) => ({
 		verdict,
 		author: 'lsimons',
 		createdAt: '',
 		url: '',
 		commentsAfter,
+		leadReCheck,
 	});
 
 	it('builds the rest of an unfinished branch, whatever its verdict', () => {
@@ -191,6 +211,11 @@ describe('nextStep', () => {
 	it('reviews an unreviewed branch and joins an approved one', () => {
 		expect(nextStep(null)).toBe('review');
 		expect(nextStep(v('approve'))).toBe('join');
+	});
+
+	it('sends an approve the builder replied on to the lead, and joins it once the lead re-checked', () => {
+		expect(nextStep(v('approve', 1))).toBe('lead-re-check');
+		expect(nextStep(v('approve', 1, 'https://example.test/c'))).toBe('join');
 	});
 
 	it('revises a needs-changes branch, and re-checks one the builder replied on', () => {
@@ -309,6 +334,71 @@ describe('waveStatus with unfinished branches', () => {
 		expect(status([verdict, unfinished1])).toEqual([
 			['feat/16-x-1', 'build', '- the tests'],
 			['feat/16-x-2', 'revise', null],
+		]);
+	});
+});
+
+describe('waveStatus with an approve and its fix commit', () => {
+	const next = (comments: ReturnType<typeof comment>[], heads = ['feat/17-x']) =>
+		waveStatus({
+			waveBranch: 'wave/capybara-3',
+			issues: [17],
+			heads,
+			commentsByIssue: new Map([[17, comments]]),
+			worktrees: [],
+		}).issues[0]?.branches.map((b) => [b.name, b.next]);
+	const approve = comment('lsimons', 'Nit: a typo.\n\nVerdict: approve', '2026-09-24T10:00:00Z');
+	const reply = comment('lsimons-bot', 'Fixed in abc123.\n\nBranch: feat/17-x', '2026-09-24T11:00:00Z');
+	const reCheck = comment('lsimons', 're-checked by lead: https://example.test/commit/abc123', '2026-09-24T12:00:00Z');
+
+	it('joins an approve with no reply after it', () => {
+		expect(next([approve])).toEqual([['feat/17-x', 'join']]);
+	});
+
+	it('sends an approve with a builder reply after it to the lead', () => {
+		expect(next([approve, reply])).toEqual([['feat/17-x', 'lead-re-check']]);
+	});
+
+	it('joins an approve once the lead re-checked the reply', () => {
+		expect(next([approve, reply, reCheck])).toEqual([['feat/17-x', 'join']]);
+	});
+
+	it('sends it to the lead again when a second reply follows the re-check', () => {
+		const second = comment('lsimons', 'One more nit fixed in def456.', '2026-09-24T13:00:00Z');
+		expect(next([approve, reply, reCheck, second])).toEqual([['feat/17-x', 'lead-re-check']]);
+	});
+
+	it('ignores a re-check from another account', () => {
+		const planted = comment('someone-else', 're-checked by lead: https://example.test/x', '2026-09-24T12:00:00Z');
+		expect(next([approve, reply, planted])).toEqual([['feat/17-x', 'lead-re-check']]);
+	});
+
+	it('keeps a re-check on one half of a split issue off the other half', () => {
+		const heads = ['feat/17-x-1', 'feat/17-x-2'];
+		const reply2 = comment('lsimons', 'Fixed in abc.\n\nBranch: feat/17-x-2', '2026-09-24T11:00:00Z');
+		const reply1 = comment('lsimons', 'Fixed in def.\n\nBranch: feat/17-x-1', '2026-09-24T11:30:00Z');
+		const reCheck1 = comment('lsimons', 're-checked by lead: def\n\nBranch: feat/17-x-1', '2026-09-24T12:00:00Z');
+		expect(next([approve, reply2, reply1, reCheck1], heads)).toEqual([
+			['feat/17-x-1', 'join'],
+			['feat/17-x-2', 'lead-re-check'],
+		]);
+	});
+
+	it('does not count a lead re-check as a reply to a needs changes, or as the end of an unfinished branch', () => {
+		const needsChanges = comment('lsimons', 'Verdict: needs changes', '2026-09-24T10:00:00Z');
+		const unfinished = comment('lsimons', 'Unfinished: feat/17-x\n- tests', '2026-09-24T11:00:00Z');
+		const reCheckNamed = comment('lsimons', 're-checked by lead: abc\n\nBranch: feat/17-x', '2026-09-24T12:00:00Z');
+		expect(next([needsChanges, reCheck])).toEqual([['feat/17-x', 'revise']]);
+		expect(next([needsChanges, unfinished, reCheckNamed])).toEqual([['feat/17-x', 'build']]);
+	});
+
+	it('builds an approved branch whose fix builder stopped at its limit, then sends the finished fix to the lead', () => {
+		const unfinished = comment('lsimons', 'Unfinished: feat/17-x\n- the typo', '2026-09-24T11:00:00Z');
+		const finished = comment('lsimons', 'Fixed.\n\nBranch: feat/17-x', '2026-09-24T12:00:00Z');
+		expect(next([approve, unfinished])).toEqual([['feat/17-x', 'build']]);
+		expect(next([approve, unfinished, finished])).toEqual([['feat/17-x', 'lead-re-check']]);
+		expect(next([approve, unfinished, finished, { ...reCheck, createdAt: '2026-09-24T13:00:00Z' }])).toEqual([
+			['feat/17-x', 'join'],
 		]);
 	});
 });

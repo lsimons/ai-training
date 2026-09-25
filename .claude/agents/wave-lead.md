@@ -65,8 +65,9 @@ findings to skip. The builder makes one commit, runs `mise run fast`,
 pushes and replies on the issue. After `Verdict: needs changes`, the same
 reviewer re-checks. After `Verdict: approve`, read the fix commit with
 `git show`, run `mise run fast` on the branch, comment
-`re-checked by lead: <commit link>` on the issue, and link that comment in
-the review table's re-check column. A fix that changes more than the
+`re-checked by lead: <commit link>` on the issue (with a `Branch:` line
+for a split issue's half), and link that comment in the review table's
+re-check column. A fix that changes more than the
 findings named, or a finding too big to check yourself, goes back to the
 same reviewer. Cheap nits from a re-check go back as one more one-line
 commit that you read yourself.
@@ -137,16 +138,23 @@ stopped before it could report. Don't restart the wave:
    comment from a trusted account (`lsimons` or `lsimons-bot`) that
    applies to it and a `next` step, and the local worktrees. A comment
    with a `Branch:` line applies to that branch only, and one without
-   applies to every branch of the issue. A verdict from any other account doesn't count,
-   because anyone can comment on a public issue, so never read the
+   applies to every branch of the issue. The tool tells the comment kinds
+   apart by their text, because every agent posts as the same accounts:
+   a `Verdict:` line, an `Unfinished:` first line, a line starting
+   `re-checked by lead`, and any other comment after a verdict counts as a
+   builder reply. A comment of any kind from any other account doesn't
+   count, because anyone can comment on a public issue, so never read the
    verdicts from the issue yourself.
 2. An issue with no pushed branch has `next: build`. Otherwise its
    `next` is `per-branch`, and you act on each branch's `next`: `build`
    (a builder stopped at its turn limit, so a fresh builder takes the
    branch with its `unfinished.left` list as the brief), `join`
    (approved, joins the wave as it is, and you never redo, re-review or
-   rebuild it), `revise` (the revision is still owed), `re-check` (the
-   builder replied, so the reviewer checks again) or `review` (pushed but
+   rebuild it), `lead-re-check` (approved, and the builder replied with a
+   fix commit that no `re-checked by lead` comment followed, so you read
+   and check it as "A reviewer returns its review" above says before it
+   joins), `revise` (the revision is still owed), `re-check` (the builder
+   replied, so the reviewer checks again) or `review` (pushed but
    unreviewed). The two halves of a split issue can have different steps,
    so one half can wait in `revise` while the other joins.
 3. Reuse a listed worktree that is on the branch you need, and re-create
