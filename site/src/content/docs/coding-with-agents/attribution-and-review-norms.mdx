@@ -5,9 +5,9 @@ are about to open a pull request. A reviewer reads what you send this
 week and decides how closely to look. Someone who reads the history a
 year from now wants to know who made the change and who checked it. In
 this lesson we write the commit message and the pull request for both
-readers. The first half covers the team's review
-agreements, and the second half covers how the commit says that an agent
-helped, and what only a person may add to it.
+readers. The first half covers the team's review agreements, and the
+second half covers how the commit says that an agent helped, and what
+only a person may add to it.
 
 The [lesson on saying that AI helped](/safety/saying-ai-helped/) gave a
 disclosure line three parts: what the AI did, what the person checked, and
@@ -41,11 +41,11 @@ CI run and a reviewer's approval. "The agent tested it" doesn't replace
 either, because the agent's tests are part of the change under review.
 
 **The change is small enough to read.** An agent writes code much faster
-than a person can review it. A diff that's too large to
-read gets skimmed or blocked. Split it before you ask. Put a mechanical
-rename in its own pull request, and keep each change to one purpose. A
-tidy-up the agent made on the side belongs in a separate pull request, or
-at least in the description.
+than a person can review it. A diff that's too large to read gets
+skimmed or blocked. Split it before you ask. Put a mechanical rename in
+its own pull request, and keep each change to one purpose. A tidy-up the
+agent made on the side belongs in a separate pull request, or at least
+in the description.
 
 Your team may have its own list, often in the project's agent
 instructions file or in `CONTRIBUTING`. Where the two differ, follow the
@@ -110,7 +110,7 @@ a format its guideline gives (@Linux coding assistants). Claude Code adds
 a `Co-Authored-By` trailer to its commits by default. Its
 `attribution.commit` setting changes that trailer to the one the project
 asks for, and an empty value removes it (@Claude Code all settings).
-Whatever the agent is, check the form the project asks for, and read the
+Whichever agent you use, check the form the project asks for, and read the
 trailer block of each commit before you push it.
 
 The commit's author is still you. Git records an author for every commit,
@@ -171,7 +171,7 @@ that the contribution and my sign-off are kept on public record (@DCO).
 Each part is a statement about a person's rights and knowledge, and an
 agent has neither. The Linux kernel guideline says it directly: an AI
 agent must not add a `Signed-off-by` tag. The person who submits the
-change reads the code, makes sure its license allows it, signs off in
+change reads the code, makes sure its license fits the project, signs off in
 their own name and answers for the result (@Linux coding assistants).
 Sign off yourself only after you have read the change, because the
 sign-off says you know where the code came from.
@@ -207,7 +207,7 @@ end with?
 <Sort id="sort-the-trailer-blocks" phase="review" objective="coding-with-agents/works-in-team/attributes-honestly"
   concepts={['attribution']}
   context="A project requires a DCO sign-off from the person who submits a change and asks for an Assisted-by trailer when AI helped. Each item describes how an agent-assisted commit message ends. You read the diff before you signed off."
-  title="Push it or fix it?" hint="For each ending, does git read the Assisted-by line as a trailer, and could the person named in the sign-off truthfully give it?"
+  title="Push it or fix it?" hint="For each ending, does git read the Assisted-by line as a trailer, and could the person named in the sign-off truthfully give it, and is every line the project asks for there?"
   buckets={['Ready to push', 'Fix it first']}
   items={[
     { text: 'A last paragraph with Assisted-by for the agent and your own Signed-off-by', bucket: 0 },
