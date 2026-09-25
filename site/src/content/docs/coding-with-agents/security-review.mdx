@@ -2,8 +2,8 @@ import { Choice, MultiChoice, Predict, Sort, Scenario, Pitfall, Exercise, Recap,
 
 A coding agent added a search box to a small notes app. The brief was
 short: a user types part of a title and sees their own notes that match.
-The agent wrote one new function, the tests it wrote pass, and the search
-works when you try it. In this lesson we read that change the way an
+The agent wrote a search function and a small admin check, and the
+search works when you try it. In this lesson we read that change the way an
 attacker would. A static analyzer finds part of what is wrong with it,
 and we read the code for the rest. Then we brief the agent for a fix,
 with a test that proves it.
@@ -150,8 +150,8 @@ severity, and it exits with status 1 because it found issues.
 Bandit found two of the classic mistakes. B105 is a password in the
 source, which Bandit spots because the variable name contains `password`. B608 is the query
 built from strings. Bandit rates its confidence in that finding as Low.
-It reads one file and can't know where `owner` and `term` come from. You
-can, and here `term` comes from a user, so the finding is real.
+A pattern check can't see where `owner` and `term` come from. You can,
+and here `term` comes from a user, so the finding is real.
 
 Bandit didn't report the `except sqlite3.Error: return []`. Its check for
 swallowed exceptions, B110, looks for an `except` block whose only
