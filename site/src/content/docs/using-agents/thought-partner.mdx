@@ -1,0 +1,252 @@
+import { Choice, Sort, Scenario, Repair, Pitfall, Exercise, Recap, Habit, Prompt, Response } from '@components/lesson';
+
+In this lesson we bring a chat assistant a decision and ask it what to do.
+Then we ask again, this time for help with our own thinking. We ask for
+the case against the option we lean toward and for the questions we
+haven't answered. By the end you have a short brief you can use
+whenever you want an assistant as a thought partner rather than as a
+source of answers.
+
+The safety course showed that a model often agrees with a plan you have
+shown you prefer, and it taught you to [ask for the case against first](/safety/asking-a-model-to-disagree/#habits-on-the-prompt-side).
+This lesson uses that habit for a different job. The goal is to think a
+choice through, before you have made it.
+
+You need any chat assistant you already have access to. Every exchange on
+this page is illustrative. The author wrote it to show the pattern, and
+your assistant gives different words.
+
+## The decision
+
+Suppose you have two job offers and must answer both by Friday. You write
+the situation down the way most people would, in a few lines, as it feels
+to you today.
+
+> Offer A is a product analyst job at a software startup with about 40
+> people. The product is exciting, I clicked with the team in the
+> interview, and the salary is 10 percent above my current salary. The work
+> is mostly remote.
+>
+> Offer B is a data analyst job at a large insurance company. It is
+> stable, but the interviews felt slow and formal, and the office is 50
+> minutes away by train, three days a week. The salary is the same as now.
+
+Before you read on, predict what an assistant says when you paste those
+lines and ask which offer to take. Which offer does it pick, and where do
+its reasons come from?
+
+## Ask what to do
+
+<Prompt model="illustrative" recorded="illustrative">
+I have two job offers and need to answer by Friday. Which one should I
+take?
+
+[the two offers, as written above]
+</Prompt>
+<Response>
+Based on what you describe, Offer A sounds like the better fit. You
+clicked with the team, the product excites you, and a 10 percent raise
+with mostly remote work is a real improvement. Offer B is stable, but a
+long commute three days a week and a slow, formal culture can wear you
+down over time. Go with Offer A, and ask the startup a few questions
+about its plans before you sign.
+</Response>
+
+Read the reasons in the answer and look for them in the description.
+Every one is there, most of them in your own words: "clicked", "exciting",
+"slow and formal". The question didn't say "I've decided" or "right?",
+and the description still led the model. It gave Offer A the warm words
+and Offer B the costs, and the answer handed that selection back to you
+as advice. The model knows only what you wrote, and assistants often give
+feedback that matches the view the user has shown (@Sharma 2023).
+
+The answer also told you nothing new. You already knew you liked the
+startup. You needed the part of the decision you hadn't looked at yet,
+and a question that asks for a verdict doesn't ask for that.
+
+<Choice id="where-the-verdict-came-from" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['thought-partner', 'sycophancy']}
+  context="A learner described two job offers to a chat assistant, a startup job in warm words and an insurance job mostly through its costs, and asked which to take. The assistant recommended the startup, with reasons in the learner's own words."
+  title="Where did the verdict come from?" hint="What did the model have in front of it, and whose words are in its reasons?"
+  options={[
+    { text: 'The model compared the two offers and found that a startup job suits most people better.', why: 'The model had only the description, and it compared nothing the description left out, such as pay beyond salary or the risk of a small company.' },
+    { text: 'The model knows that startups pay more, so it picked the offer with the higher salary.', why: 'The salary difference came from the description too. The answer repeats every point the description made for Offer A.' },
+    { text: 'The description gave one offer the warm words and the other the costs, and the model repeated that as advice.', correct: true },
+    { text: 'The model picked Offer A because it was listed first, and a model always favors the first option.', why: 'The reasons in the answer match the words of the description, which a rule about order does not explain.' },
+  ]}>
+A colleague reads the exchange and says the model must have good
+judgment about careers. What is the better explanation of the
+recommendation?
+</Choice>
+
+## Ask for help thinking
+
+Now write the request as a brief for a thinking session. It says what you
+want from the conversation, which is help with your own thinking and no
+decision. It gives the facts without the adjectives. It names your lean
+as a lean, so the model knows which option to test. Then it asks for the
+case against that option, for the questions your facts leave open, and
+for what each option costs. In the safety course you took your opinion
+out of the question to get an assessment. Here you state it on purpose,
+as a target, and ask for no verdict, so the model has nothing to agree
+with.
+
+<Prompt model="illustrative" recorded="illustrative">
+I have two job offers and need to answer by Friday. I want help thinking
+this through, and I don't want you to decide for me.
+
+Offer A: product analyst at a software startup with about 40 people.
+Salary 10 percent above my current one. Mostly remote.
+
+Offer B: data analyst at a large insurance company. Salary the same as
+now. Office three days a week, 50 minutes each way by train.
+
+I lean toward Offer A. First, give me the strongest case against Offer A.
+Then list the questions my description doesn't answer that would matter
+for this choice. Then lay out what each offer costs me. Don't tell me
+which one to pick.
+</Prompt>
+<Response>
+
+```text
+The case against Offer A
+A company of 40 people can run short of money, and a 10 percent raise
+is worth little if the job ends within a year. Liking the team after one
+interview is weak evidence, because the people you met were selling the
+job. Remote work in a small team can mean less structure and fewer
+people to learn from.
+
+Questions your description doesn't answer
+- How long can the startup pay its staff with the money it has now?
+- How do pension, paid leave and sick pay compare between the two?
+- Is there a probation period, and what happens if either job ends early?
+- Where does each role lead in two or three years?
+- Can you work on the train, so that part of the commute counts as work?
+- Why do you want to leave your current job, and which offer fixes that?
+
+What each offer costs
+Offer A: job security, and possibly pension and other benefits.
+Offer B: about five hours of travel a week, and no raise now.
+```
+
+</Response>
+
+The second answer ends without a verdict, because the brief said not to
+give one. Its useful part is the list of questions, and you answer them
+yourself. Some you can answer at once. Some you can't, such as how long the startup can pay its staff, and those tell you what to ask
+before Friday. The last question may matter most. If you want to leave
+your current job because you have nothing more to learn there, the
+question of who you learn from matters more than the salary.
+
+The value of the session is in your own clearer thinking, and the model's
+text is the material for it. The challenge came because the brief asked
+for it. The first prompt got none, because it asked for none.
+
+<Choice id="open-a-thinking-session" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['thought-partner']}
+  context="The learner wants a chat assistant to help them think through a choice between two venues for a team event, and is about to write the first message."
+  title="Which opening sets up a thinking session?" hint="Which request says what you want from the conversation and asks for something you can't already see yourself?"
+  options={[
+    { text: 'I want help thinking, not a verdict. I lean toward the new venue. Give me the case against it and what I have not told you.', correct: true },
+    { text: 'Here are the two venues with their prices. Please be honest and objective, and tell me which one you would book for us.', why: 'Asking for honesty still asks for a verdict, and the verdict follows whatever the description stressed.' },
+    { text: 'Here are the two venues. I lean toward the new one, and I would like you to confirm that it is the better choice for us.', why: 'Naming the lean is fine. Asking the model to confirm it gets you back your own view, with reasons attached.' },
+    { text: 'Act as an event planner with twenty years of experience. Here are the two venues, so tell me which one to choose.', why: 'A role changes the style of the answer, and the request is still for a decision based on your own description.' },
+  ]}>
+You are choosing between two venues for a team event. Which first
+message makes the assistant a thought partner?
+</Choice>
+
+<Pitfall title="Your own description, returned as advice">
+A team lead describes two suppliers to an assistant. One gets a
+paragraph of praise, copied from its sales call, and the other gets a
+line about its price. The assistant recommends the first, and the team
+lead forwards the reply to their manager as "I also checked with the AI".
+The recommendation was the team lead's own framing with reasons attached,
+and nobody had looked at what the description left out. Before you send
+a decision to an assistant, read your description as if you favored the
+other option. Take out the adjectives, and ask for the questions it
+doesn't answer.
+</Pitfall>
+
+## A brief for thinking out loud
+
+The brief from the second exchange works for any decision you face, at
+work or outside it. State the problem, with the deadline and the facts as
+plainly as you can write them. State your lean, and call it a lean. Ask
+for the opposite case and for the questions you haven't answered, and
+say that you don't want a verdict. It fits in five lines.
+
+The prompt-anatomy lesson in the concepts course showed that naming the
+[audience and purpose](/concepts/prompt-anatomy/#audience-and-purpose)
+changes what the model keeps. The first line of this brief does the same
+job. "Help me think, don't decide" is the purpose, and the rest of the
+answer follows from it.
+
+After the session, write down the one point that changed your view, or
+the one question you now have to go and answer. If there is none, the
+session has still told you something: the best case the model could make
+against your lean didn't change it.
+
+<Repair id="fix-the-thinking-brief" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['thought-partner']}
+  title="Fix the brief" hint="Which words tell the model which answer you hope for, and what does the brief ask for that you can't already see?"
+  broken={`Should we move our team event from the hotel we always use to the new conference center downtown? The new place looks great and the hotel has gotten tired.`}
+  model={`I have to choose a venue for our team event and want help thinking it through, not a decision. The options are the hotel we have used for three years and a new conference center downtown. I lean toward the conference center. Give me the strongest case against it, then list what I haven't told you that would matter for this choice. Don't tell me which one to pick.`}>
+A colleague sends this to an assistant and gets back "Yes, the new venue
+sounds like a great choice". Rewrite it so that the assistant helps them
+think the choice through.
+</Repair>
+
+<Sort id="challenge-or-agreement" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['thought-partner']}
+  context="The lesson shows a brief that asks a chat assistant to help think a decision through, and a plain request for a verdict that the assistant answered by repeating the description."
+  title="Challenge or agreement?" hint="Does the line ask for something you can't see yet, or does it tell the model which answer you want?"
+  buckets={['Asks for challenge', 'Invites agreement or a verdict']}
+  items={[
+    { text: 'Give me the strongest case against the option I lean toward.', bucket: 0 },
+    { text: 'List what I have not told you that would matter for this choice.', bucket: 0 },
+    { text: 'Do not tell me which one to pick.', bucket: 0 },
+    { text: 'The new place looks great, and the hotel has gotten tired.', bucket: 1 },
+    { text: 'Which one would you book if you were me?', bucket: 1 },
+  ]}>
+Sort these lines from briefs a colleague wrote about choosing a venue.
+</Sort>
+
+<Scenario id="after-the-echo" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['thought-partner']}
+  context="A learner described two options for a decision to a chat assistant and asked which to choose. The answer recommended the option the learner already preferred, with reasons in the learner's own words."
+  title="The answer sounds like you" hint="What did the first question ask for, and what would you need from the model to learn something new?"
+  options={[
+    { text: 'Take the recommendation, since the model came to the same view as you did on its own.', consequence: 'The model came to your view because your description held it. You decide with nothing you didn\'t already know.' },
+    { text: 'Ask again, saying you want help thinking, naming your lean, and asking for the case against it and what you have not said.', correct: true, consequence: 'The answer lists three questions your description skipped. One of them you can\'t answer yet, and it tells you what to find out before you decide.' },
+    { text: 'Ask the same question in a fresh chat, and take the answer if the second chat agrees with the first.', consequence: 'The second chat reads the same description and gives the same recommendation. Two echoes of your framing are still your framing.' },
+  ]}>
+You asked an assistant which of two options to choose. The answer picked
+the one you liked, in words that sound like yours. What do you do
+next?
+</Scenario>
+
+<Exercise stretch="Rewrite your five lines so they favor the other option, and send them in a fresh chat with a plain 'which should I pick?'. See whether the verdict follows the description.">
+Pick an open decision you face now, at work or outside it.
+Describe it in five lines without names or numbers you couldn't share
+outside your team. Open a fresh chat and send the brief from this lesson.
+Say that you want help thinking and no verdict, and state your lean. Ask
+for the strongest case against it and for what you haven't mentioned. Then
+write down the one point in the answer that changed your view, or the
+one question you now have to answer before you decide. This takes about
+ten minutes. A good result is one written sentence that you didn't have
+before the session. If no point changed your view, what does that tell
+you about your lean?
+</Exercise>
+
+<Recap>
+1. A thought partner helps you think a choice through, and the value of the session is in your own clearer thinking.
+2. A request for a verdict gets your own framing back. The description decides which reasons the model can give, and assistants often match the view you have shown (@Sharma 2023).
+3. A brief for thinking out loud states the problem and the facts without adjectives, names your lean as a lean, and asks for the case against it and for the questions you haven't answered.
+4. Ask for no verdict. The challenge comes only when the brief asks for it.
+5. Close the session by writing down the one point that changed your view, or the one question you still have to answer.
+</Recap>
+
+<Habit id="ask-against-your-lean">
+The next time you ask an assistant about a choice you face, say which way you lean and ask for the case against it before you ask for anything else.
+</Habit>
