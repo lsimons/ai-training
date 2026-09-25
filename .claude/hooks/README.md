@@ -30,9 +30,12 @@ and #342. `.claude/settings.json` registers them.
   `${~X}`, any other unquoted `(` or `)` (zsh glob qualifiers such as
   `*(e:...:)` run code), and an unquoted brace expansion such as
   `{-o,out.txt}`. In a `sed -n` script a `$` is only the last-line address
-  or the anchor before a regex's closing `/`. The hook catches mistakes
-  and isn't a sandbox, since the branch under review defines the tasks it
-  runs.
+  or the anchor before a regex's closing `/`. It also rejects `git -c` and
+  `git --config-env`, `--output` on `git diff`, `git log` and `git show`,
+  and any `NAME=value` assignment, on its own or as a prefix, since a git
+  config value or an environment variable such as `GIT_EXTERNAL_DIFF` can
+  run a program. The hook catches mistakes and isn't a sandbox, since the
+  branch under review defines the tasks it runs.
 - `format-file.sh`, PostToolUse on Edit and Write. It runs Biome on an
   edited file under `site/` and ruff on an edited `.py` file, in the
   worktree that holds the file, and never fails the tool call.

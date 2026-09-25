@@ -755,3 +755,56 @@ def test_extract_substitutions_returns_the_outer_and_inner_commands() -> None:
     )
     assert outer == "for f in \x01; do cat \x01; done"
     assert inner == ["echo a", 'git ls-files "\x01"', "echo b", "head \x01"]
+
+
+# git config options, assignment prefixes and git --output (#415).
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git diff",
+        "git log -p",
+        "git show",
+        "git -C ../ai-training-wt/feat/1-x --no-pager log --oneline -3",
+        "git log --oneline --output-indicator-new=+ -1",
+        "git diff -- output.txt",
+        "cd site && ls",
+    ],
+)
+def test_review_bash_allows_git_reads_without_config_or_output(command: str) -> None:
+    assert agent_hooks.review_bash({"tool_input": {"command": command}}) == (0, "")
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git -c core.fsmonitor='touch x' status",
+        "git -ccore.fsmonitor=x status",
+        "git -C site -c diff.external=sh diff",
+        "git --config-env=core.fsmonitor=CMD status",
+        "git --config-env core.fsmonitor=CMD status",
+        "GIT_EXTERNAL_DIFF=sh git diff",
+        "CMD='touch x' git --config-env=core.fsmonitor=CMD status",
+        "PATH=/tmp/x ls",
+        "PATH=/tmp/x; ls",
+        "for f in a; do GIT_PAGER=sh git log; done",
+        "git diff --output=f",
+        "git diff --output f",
+        "git log --output=f",
+        "git log -p --outp=f",
+        "git show --out f",
+        "git show --o=f",
+    ],
+)
+def test_review_bash_rejects_git_config_assignments_and_git_output(command: str) -> None:
+    code, message = agent_hooks.review_bash({"tool_input": {"command": command}})
+    assert code == 2
+    assert "not a review command" in message
+
+
+def test_split_segments_keeps_assignments_only_when_asked() -> None:
+    kept = agent_hooks.split_segments("X=1 git diff", ".", keep_assignments=True)
+    assert kept[0].words == ["X=1", "git", "diff"]
+    dropped = agent_hooks.split_segments("X=1 git diff", ".")
+    assert dropped[0].words == ["git", "diff"]
