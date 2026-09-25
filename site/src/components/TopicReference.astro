@@ -88,22 +88,7 @@ const lang = (s: Segment & { kind: 'code' }) => s.lang || 'text';
 </div>
 
 <script>
-	import * as progress from '@scripts/progress';
-	import { isUnlocked } from '@scripts/reference';
+	import { mountTopicReference } from '@scripts/topic-reference';
 
-	const root = document.querySelector<HTMLElement>('[data-reference]');
-	if (root) {
-		const sections = root.querySelectorAll<HTMLElement>('[data-reference-lesson]');
-		function draw() {
-			const record = progress.load();
-			for (const section of sections) {
-				const unlocked = isUnlocked(record, section.dataset.referenceLesson ?? '');
-				section.dataset.unlocked = String(unlocked);
-				section.querySelector<HTMLElement>('[data-reference-locked]')!.hidden = unlocked;
-				section.querySelector<HTMLElement>('[data-reference-body]')!.hidden = !unlocked;
-			}
-		}
-		draw();
-		document.addEventListener(progress.EVENT, draw);
-	}
+	mountTopicReference(document);
 </script>
