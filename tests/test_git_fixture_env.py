@@ -2,7 +2,10 @@
 
 Each of these fixtures builds a fresh repository and runs git in it with an
 allow-list environment: `GIT_ENV_BASE` in the coding-with-agents fixtures'
-`_common.py`, and `git_env` in testing-a-skill's `clones.py`. This runs every
+`_common.py`, and `git_env` in testing-a-skill's `clones.py` and in
+attribution-and-review-norms' `trailers.py`, which runs
+`git interpret-trailers` in an empty directory and builds no repository.
+This runs every
 one of them twice, once plainly and once with variables that change what git
 does: a template directory whose pre-commit hook fails, extra config through
 GIT_CONFIG_PARAMETERS, an external diff program and GIT_DIFF_OPTS. The output
@@ -28,6 +31,7 @@ import pytest
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 EXAMPLES = REPO_ROOT / "site" / "examples"
 GIT_FIXTURE_DIRS = [
+    "coding-with-agents/attribution-and-review-norms",
     "coding-with-agents/project-instructions",
     "coding-with-agents/reversible-changes",
     "coding-with-agents/reviewing-the-diff",
