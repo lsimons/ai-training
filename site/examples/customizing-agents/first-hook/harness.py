@@ -58,6 +58,12 @@ class Repo:
         self.path = path
         self.env = git_env(home)
 
+    def write(self, name: str, text: str) -> None:
+        """Create or overwrite one file, making its directory if needed."""
+        path = self.path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+
     def git(self, *args: str) -> None:
         result = subprocess.run(
             ["git", *args],
@@ -95,13 +101,16 @@ def fresh_repo(root: Path) -> Repo:
     return repo
 
 
-def run_hook(repo: Repo, command: str) -> "tuple[int, str]":
-    """Run the hook on one Bash command. Returns the exit code and stderr."""
+def run_hook(repo: Repo, command: str, subdir: str = "") -> "tuple[int, str]":
+    """Run the hook on one Bash command, with `cwd` at the root or in `subdir`.
+
+    Returns the exit code and stderr.
+    """
     call = {
         "hook_event_name": "PreToolUse",
         "tool_name": "Bash",
         "tool_input": {"command": command},
-        "cwd": str(repo.path),
+        "cwd": str(repo.path / subdir),
     }
     return run_hook_raw(repo, json.dumps(call))
 

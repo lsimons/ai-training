@@ -52,16 +52,22 @@ def git_lines(cwd: str, *args: str) -> Optional[list[str]]:
 def changed_files(cwd: str) -> Optional[set[str]]:
     """Paths that differ from the last commit, untracked ones included.
 
-    Returns None when git can't answer. Before the first commit there is no
-    HEAD, and every file counts as changed.
+    Every path is relative to the root of the repository, whatever directory
+    inside it `cwd` is: each git command runs from the root. Returns None when
+    git can't answer. Before the first commit there is no HEAD, and every file
+    counts as changed.
     """
-    untracked = git_lines(cwd, "ls-files", "--others", "--exclude-standard")
+    top = git_lines(cwd, "rev-parse", "--show-toplevel")
+    if not top:
+        return None
+    root = top[0]
+    untracked = git_lines(root, "ls-files", "--others", "--exclude-standard")
     if untracked is None:
         return None
-    if git_lines(cwd, "rev-parse", "--verify", "--quiet", "HEAD") is None:
-        tracked = git_lines(cwd, "ls-files", "--cached")
+    if git_lines(root, "rev-parse", "--verify", "--quiet", "HEAD") is None:
+        tracked = git_lines(root, "ls-files", "--cached")
     else:
-        tracked = git_lines(cwd, "diff", "--name-only", "HEAD")
+        tracked = git_lines(root, "diff", "--no-relative", "--name-only", "HEAD")
     if tracked is None:
         return None
     return set(tracked) | set(untracked)
@@ -94,7 +100,9 @@ def main() -> int:
             raise TypeError("command and cwd must be strings")
     except (ValueError, KeyError, TypeError, AttributeError):
         print(
-            "Blocked: the lockfile hook couldn't read the tool call it was given.", file=sys.stderr
+            "Blocked: the lockfile hook couldn't read the tool call it was given.\n"
+            "Check the hook's entry in .claude/settings.local.json.",
+            file=sys.stderr,
         )
         return 2
     if not COMMIT.search(command):
