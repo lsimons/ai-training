@@ -114,7 +114,7 @@ three answers yourself.
 <Predict id="predict-which-cross" objective="safety/judges-agent-risk/sets-oversight"
   concepts={['risk-assessment']}
   context="A program scores three proposed AI use cases in this order: a meeting summarizer rated impact 3 and likelihood 3, a newsletter drafter rated impact 2 and likelihood 2, and a customer mail agent rated impact 4 and likelihood 3. The level is impact times likelihood, and the threshold is 8. For each use case the program prints whether the level is at or above the threshold, as yes or no. A yes means the team lead cannot approve it alone."
-  title="Which proposals can the team lead not approve alone?" hint="Multiply the two ratings for each proposal, then compare each level with 8."
+  title="Which proposals can't the team lead approve alone?" hint="Multiply the two ratings for each proposal, then compare each level with 8."
   answer="yes no yes">
 Which proposals need extra controls or the risk owner's written acceptance
 before they start? The program prints one `at or above threshold:` line
@@ -189,10 +189,9 @@ below the threshold. Rare holds only while a person really reads each
 draft. The support team already read and answered every message by hand,
 so reading a draft is less work than they did before. If the drafts arrive
 faster than people can read them, the approvals stop being read, and the
-rating goes back up. The approval sits right before
-the step that can't be undone, as the
-[human in the loop](/safety/agent-risk/#human-in-the-loop) section of the
-agent risk lesson describes. The rating is only as good as that control,
+rating goes back up. The approval sits right before the step that can't be
+undone, as the [human in the loop](/safety/agent-risk/#human-in-the-loop)
+section of the agent risk lesson describes. The rating is only as good as that control,
 so the record names it.
 
 The second is **acceptance in writing** by a person with the authority to
@@ -206,8 +205,8 @@ carries that person's name.
 
 For the meeting summarizer the team lead picks a control that shrinks the
 list of affected people. The assistant stays out of one-to-ones, and each
-summary goes only to the people who were in the meeting. The team lead rates it again with
-the smaller list, and the new ratings go in the record.
+summary goes only to the people who were in the meeting. The team lead
+rates it again with the smaller list, and the new ratings go in the record.
 
 Whichever decision is made, the record holds the same lines.
 
