@@ -252,13 +252,13 @@ is the cheapest proof.
 
 <Scenario id="brief-the-fix" objective="coding-with-agents/verifies-agent-work/screens-for-security"
   concepts={['security-review-of-agent-output']}
-  context="An agent-written search function for a notes app builds its SQL from the search text with an f-string, and catches database errors by returning an empty list. You have found both problems and are writing the brief for the fix."
+  context="An agent-written search function for a notes app builds its SQL from the search text with an f-string, and catches database errors by returning an empty list. A hostile search term shows other users' notes, and a search for O'Brien finds nothing. You are writing the brief for the fix."
   title="Brief the fix" hint="Which brief leaves you with evidence that the hostile term and the apostrophe now work, and nothing silenced?"
   options={[
-    { text: 'Ask the agent to escape single quotes in term before it goes into the query.', consequence: 'The agent doubles every quote in term and the two searches work. The owner value is still pasted in unescaped, the except block still hides errors, and the next change to the query has to remember the escaping.' },
+    { text: 'Ask the agent to escape every single quote in term before it goes into the query, and to keep the rest.', consequence: 'The agent doubles every quote in term and the two searches work. The owner value is still pasted in unescaped, the except block still hides errors, and the next change to the query has to remember the escaping.' },
     { text: 'Ask the agent to add a # nosec comment on the query line, because the route only passes logged-in users.', consequence: 'Bandit stops reporting B608. The query is as injectable as before, and the comment tells the next reviewer that someone checked it.' },
-    { text: 'Ask the agent to make the search secure and to fix anything else it notices.', consequence: 'The agent adds quote escaping, reformats three files and adds a dependency. You now review a larger diff with no test that shows the injection is gone.' },
-    { text: 'Ask for placeholders for both values, errors raised to the caller, and a test with the hostile term and the apostrophe that fails on the current code.', correct: true, consequence: 'The agent changes one function and adds one test file. You run the test on the old code and see it fail, then on the new code and see it pass.' },
+    { text: 'Ask the agent to make the search secure, and to fix anything else it notices in the files it reads.', consequence: 'The agent adds quote escaping, reformats three files and adds a dependency. You now review a larger diff with no test that shows the injection is gone.' },
+    { text: 'Ask for placeholders for both values, errors raised to the caller, and a test with the hostile term and O\'Brien that fails on the old code.', correct: true, consequence: 'The agent changes one function and adds one test file. You run the test on the old code and see it fail, then on the new code and see it pass.' },
   ]}>
 Which brief do you give the agent?
 </Scenario>
