@@ -165,8 +165,8 @@ One tick:
    lead never finished. The dispatcher then spawns a lead for that wave
    and branch with the resuming line filled in, and the lead follows
    "Resuming a half-done wave" in its agent file: run
-   `mise run wave-status`, which reads each issue's last review verdict
-   from the trusted accounts only, reuse the worktrees that exist, spawn
+   `mise run wave-status`, which reads the last review verdict for each
+   pushed branch from the trusted accounts only, reuse the worktrees that exist, spawn
    only what is missing, and never redo a branch with an approve verdict.
    Only the issues on the `In flight` line count for
    `origin/feat/<issue>-*` branches, so a stale branch from an earlier
