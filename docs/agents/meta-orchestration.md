@@ -246,11 +246,11 @@ The maintainer gives standing approval, up front, for a green wave pull
 request: `mise run ci` green on the wave branch, GitHub CI green, every
 branch in it approved on its re-check, and no open finding. A branch
 approved on its first review whose fix commit the lead re-checked itself
-(the `re-checked by lead` comment) meets the re-check condition. The wave lead
-merges such a pull request itself with
+(the `re-checked by lead` comment) meets the re-check condition. The
+wave lead merges such a pull request itself with
 `AI_TRAINING_ROLE=wave-lead gh pr merge <n> --rebase`, without a round
-trip. A wave that doesn't meet every condition stays open, and the
-lead returns `open` with the reason. A review finding that needs the
+trip. A wave that doesn't meet every condition stays open, and the lead
+returns `open` with the reason. A review finding that needs the
 maintainer's decision (strike a spec feature, choose between two designs)
 always goes to them instead of being merged, and so does any change to a
 spec, a gate, or shared tooling that a lesson branch drags along.

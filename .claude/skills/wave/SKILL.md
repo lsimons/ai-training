@@ -203,14 +203,15 @@ Default (no `--no-filing`):
 > labeled `code` or `content` plus `ready-for-agent` when every decision is
 > made, or `ready-for-human` when one is the maintainer's) for every
 > follow-up a review named. A `ready-for-human` body holds what
-> `triage.md`, "What a maintainer decision needs", lists. Fix cheap nits in the branch. Every cosmetic nit
-> you leave open on a merged branch becomes one line, naming the file and
-> the change, appended to the body of the one open issue titled
-> `Cosmetic nits` (`gh issue view <n> --json body`, then
-> `gh issue edit <n> --body-file`). Create that issue, labeled `content`
-> and `ready-for-agent`, only when none is open. Never file a nits issue
-> per wave or per lesson. Link every filed issue from the session record
-> and list them on the `Filed` line. The `Follow-ups` line is `none`.
+> `triage.md`, "What a maintainer decision needs", lists. Fix cheap nits
+> in the branch. Every cosmetic nit you leave open on a merged branch
+> becomes one line, naming the file and the change, appended to the body
+> of the one open issue titled `Cosmetic nits`
+> (`gh issue view <n> --json body`, then `gh issue edit <n> --body-file`).
+> Create that issue, labeled `content` and `ready-for-agent`, only when
+> none is open. Never file a nits issue per wave or per lesson. Link every
+> filed issue from the session record and list them on the `Filed` line.
+> The `Follow-ups` line is `none`.
 
 Under `--no-filing`:
 
@@ -236,8 +237,10 @@ against `main` as it is now, and drop the ones already done or made
 obsolete, saying which and why. File each remaining entry as the issue it
 describes, per `docs/agents/triage.md`, and append the nit lines to the
 open `Cosmetic nits` issue (create it only when none is open). List the
-filed numbers in the final report. Nothing is left in a record for the
-maintainer to reconcile by hand.
+filed numbers in the final report. For each filed issue that waits on the
+maintainer's decision, the final report quotes its options and its
+recommendation (`triage.md`, "What a maintainer decision needs").
+Nothing is left in a record for the maintainer to reconcile by hand.
 
 Then, on every stop but `failed`, comment the stop condition on the run
 issue and close it (`gh issue close <run> --comment ...`). Your final
