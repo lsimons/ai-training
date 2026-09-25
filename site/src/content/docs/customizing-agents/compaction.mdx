@@ -1,11 +1,11 @@
 import { Choice, Match, MultiChoice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
 
-An earlier lesson in this part covered the agent's memory notes and the
-context files it reads at the start of every session. This lesson is about
-what happens inside one long session, when the conversation gets too long
-for the window and the agent replaces it with a summary. We load a session log with three facts planted
-in it and compact it on command, with instructions for what the summary
-must keep. Then we check which facts are still there.
+The previous lesson covered the agent's memory notes and the context files
+it reads at the start of every session. This lesson is about what happens
+inside one long session, when the conversation gets too long for the window
+and the agent replaces it with a summary. We load a session log with three
+facts planted in it and compact it on command, with instructions for what
+the summary must keep. Then we check which facts are still there.
 
 The lesson uses Claude Code, and the files are in the course repository at
 `site/examples/customizing-agents/compaction/`. `transcript.md` is the
@@ -28,10 +28,9 @@ file the agent reads and every test run adds to the window.
 
 **Compaction** is the way out that keeps you in the same session. The agent
 replaces the conversation so far with a summary and goes on from the
-summary. The summary is much shorter than the turns it replaces, and it
-keeps the goal and the recent state. The raw detail is gone, and so is
-anything else the summary leaves out. The model that writes the summary can
-miss something important (@AEC-05).
+summary. The summary is much shorter than the turns it replaces. The raw
+detail is gone, and so is anything else the summary leaves out. The model
+that writes the summary can miss something important (@AEC-05).
 
 In Claude Code, compaction happens in two ways. It runs by itself as the
 window gets close to its limit, and the session goes on after it
@@ -40,6 +39,11 @@ window gets close to its limit, and the session goes on after it
 `/compact keep the decisions about the export route` (@Claude Code commands).
 The instructions tell the summary what to keep. Without them, the automatic
 pass decides for itself what matters (@Claude Code context window).
+According to the overview of how Claude Code works, it keeps what you asked
+for and the important code, and detailed instructions given early in the
+session can be lost (@Claude Code how it works). The page of best
+practices says that the pass keeps code patterns, the state of files and
+key decisions (@Claude Code best practices).
 
 ## What the summary replaces, and what comes back
 
@@ -47,17 +51,17 @@ Some of what the agent knows doesn't depend on the summary. Claude Code
 keeps these outside the conversation and puts them back after a compaction
 (@Claude Code context window):
 
-- the project-root `CLAUDE.md` and the auto memory notes, read again from
+- the project-root `CLAUDE.md` and the auto-memory notes, read again from
   disk
 - the plan the agent wrote in plan mode, read again from disk
 - up to five of the files the agent read or edited, the most recently
   modified first
 
 Everything that was said in the conversation goes into the summary, and
-that includes a rule you typed in the chat. Claude Code's memory page says
-that an instruction that disappeared after compaction was given only in the
-conversation, and that a rule you want to keep belongs in `CLAUDE.md`
-(@Claude Code memory). A rule with `paths:` in its front matter, or a
+that includes a rule you typed in the chat. One cause the memory page names
+for an instruction that disappeared after compaction is that it was given
+only in the conversation, and the page says to put such a rule in
+`CLAUDE.md` (@Claude Code memory). A rule with `paths:` in its front matter, or a
 `CLAUDE.md` in a subdirectory, is loaded into the conversation when the
 agent reads a matching file. So it is summarized away too, and comes back
 only when the agent reads such a file again (@Claude Code context window).
@@ -69,15 +73,15 @@ open item that nobody wrote down. The log plants one of each.
 <MultiChoice id="what-comes-back" objective="customizing-agents/configures-agent/manages-memory"
   concepts={['compaction']}
   context="In Claude Code, a compaction replaces the conversation with a summary. Some content is kept outside the conversation and put back afterwards, and the rest is only in the summary."
-  title="What is back after the compaction?" hint="Which of these did Claude Code load from a file on disk, and which of them reached the agent only through the conversation?"
+  title="What is back after the compaction?" hint="Which of these does Claude Code load when a session starts, before the agent reads any file?"
   options={[
     { text: 'The instructions in the project-root CLAUDE.md', correct: true },
     { text: 'A rule you typed in the chat an hour ago, word for word', why: 'The rule is part of the conversation, and the conversation is replaced by the summary. It is there after the compaction only if the summary states it.' },
-    { text: 'The notes in the auto memory', correct: true },
+    { text: 'The notes in the auto-memory', correct: true },
     { text: 'A rule with paths: in its front matter that loaded when the agent read a file', why: 'That rule loaded into the conversation, so it is summarized away with the rest. It loads again only when the agent reads a matching file.' },
   ]}>
-You run `/compact` with nothing after it. Which two of these come back in
-full afterwards, whatever the summary says?
+You run `/compact` with nothing after it. Which two of these come back
+from disk afterwards, whatever the summary says?
 </MultiChoice>
 
 <Sort id="back-or-summarized" phase="review" objective="customizing-agents/configures-agent/manages-memory"
@@ -87,7 +91,7 @@ full afterwards, whatever the summary says?
   buckets={['Read again from disk after the compaction', 'There only if the summary states it']}
   items={[
     { text: 'The instructions in the project-root CLAUDE.md', bucket: 0 },
-    { text: 'The notes in the auto memory', bucket: 0 },
+    { text: 'The notes in the auto-memory', bucket: 0 },
     { text: 'The plan the agent wrote in plan mode', bucket: 0 },
     { text: 'A rule you typed in the chat at the start of the session', bucket: 1 },
     { text: 'A decision you made in the chat, and its reason', bucket: 1 },
@@ -105,24 +109,34 @@ written for this lesson. Read it once. It plants three facts:
 - an open item from later on: the test `test_export_timezone` fails, and
   the user wants it fixed after the release
 
-Make an empty folder for the practice session and start Claude Code in it.
-The folder has no project files, so the agent has nothing to change and
-answers only from the conversation.
+Make an empty folder for the practice session and start Claude Code in it
+with auto-memory turned off. The folder has no project files, so the agent
+has nothing to change. Auto-memory is on by default, and the environment
+variable `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` turns it off
+(@Claude Code memory). With auto-memory on, the agent could save the
+decision from the log as a memory note. That note comes back after a
+compaction whatever the summary says, so the check would no longer test
+the summary. A message
+such as "Saved 1 memory" means the agent wrote a memory note
+(@Claude Code memory). If you see one, auto-memory is still on, so start
+again in a new folder with the command below.
 
 ```sh
 mkdir -p ~/compaction-practice
 cd ~/compaction-practice
-claude
+CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 claude
 ```
 
-Open `transcript.md` in an editor, copy the whole file, and paste it as your
-first message. Then ask one or two questions about it, such as "What does
-`to_json()` do?" and "Which test did the agent add?". Paste the log and
+Open `transcript.md` in an editor, copy from the first `**User:**` line to
+the end, and paste it as your first message. Then ask one or two questions
+about it, such as "What does `to_json()` do?" and "Which test did the agent
+add?". Paste the log and
 don't ask the agent to read the file, because after a compaction Claude
 Code reads recently used files again (@Claude Code context window), and a
-file the agent read would bring all three facts back. In a session with
-too little history, `/compact` answers `Not enough messages to compact.`
-(@Claude Code costs). If you see that, ask another question.
+file the agent read would bring all three facts back. In a fresh session
+with no history, `/compact` answers `Not enough messages to compact.`
+(@Claude Code costs). If you see that after pasting the log, ask one more
+question and try again.
 
 Before you compact, write down which of the three facts you expect a
 summary without instructions to keep. Then look at the file
@@ -146,11 +160,11 @@ python3 check_summary.py samples/unguided.md
 
 </Predict>
 
-The sample is accurate about the work. It names every file that changed,
-the new test and the next step. It keeps the open item, which came late in
-the log and shows up again in the last test run. It drops the rule and the
-decision. Both came before most of the work and were said once, and nothing that
-followed repeated them.
+The sample shows one way a summary can go wrong. Everything in it about
+the work is correct, down to the changed files and the next step.
+It keeps the open item, which comes late in the log and again in the last
+test run. It drops the rule and the decision, which come up only in the
+first part of the log.
 
 ## Compact on command, and check
 
@@ -161,10 +175,10 @@ practice session, type:
 /compact Keep every decision with its reason, every open item, and every rule I set for this work. Drop the tool output.
 ```
 
-Claude Code writes the summary without showing it and prints a message
-that the conversation was compacted (@Claude Code context window). You
-can't read the summary itself, so you check it by asking. Work on this
-project goes on in another session, so have the agent write the answer
+When the summary is written, Claude Code prints a message that the
+conversation was compacted, and the summary itself isn't shown in the
+terminal (@Claude Code context window). So you check it by asking. Work on
+this project goes on in another session, so have the agent write the answer
 to a file:
 
 ```text
@@ -181,9 +195,10 @@ cd <course-repo>/site/examples/customizing-agents/compaction
 python3 check_summary.py ~/compaction-practice/summary.md
 ```
 
-The course repository has a summary written for the lesson with the same
-instructions, in `samples/directed.md`. Run the script on it to see the
-output that a summary with all three facts gives.
+The course repository has a summary made for the same instructions, in
+`samples/directed.md`. The course wrote it for the lesson, and no model
+produced it. Run the script on it to see the output that a summary with all
+three facts gives.
 
 <Predict id="check-the-directed-summary" title="Check the summary with instructions"
   answer={`samples/directed.md
@@ -211,7 +226,7 @@ which facts to state again.
   context="A long coding session is near the limit of its context window. Early in the session the user set a rule and made a decision in the chat, and neither is in any file."
   title="Which instruction protects the decision?" hint="Which of these names the kind of fact that is at risk, and which only changes how long the summary is or which turns it copies?"
   options={[
-    { text: '/compact with no instructions, because the automatic pass already keeps the facts that matter most.', why: 'Without instructions the automatic pass decides for itself what matters. A rule and a decision said once, early in the session, are easy to miss.' },
+    { text: '/compact with no instructions, because the automatic pass already keeps the facts that matter most.', why: 'The automatic pass keeps your requests and the important code, and detailed instructions from early in a session may be lost. A rule said once, early on, is that kind of detail.' },
     { text: '/compact Keep it short, under a hundred words, so that the next task has room in the window.', why: 'A word limit tells the summary to drop more, and it names nothing that must stay.' },
     { text: '/compact Keep every decision with its reason, every open item, and every rule I set for this work.', correct: true },
     { text: '/compact Keep the last ten messages word for word, and summarize everything before them.', why: 'The rule and the decision are in the early messages. Keeping the recent turns keeps the part that was least at risk.' },
@@ -220,7 +235,7 @@ You are about to compact the session. Which command gives the best chance
 that the summary still has the rule and the decision?
 </Choice>
 
-<Choice id="how-to-check" phase="review" objective="customizing-agents/configures-agent/manages-memory"
+<Choice id="how-to-check" objective="customizing-agents/configures-agent/manages-memory"
   concepts={['compaction']}
   context="A user ran /compact in Claude Code with instructions to keep decisions, open items and rules. The session had a decision, made in the chat, to keep an old route until March 31."
   title="How do you find out what survived?" hint="Where can you see what the summary holds, and who can tell you?"
@@ -233,6 +248,20 @@ that the summary still has the rule and the decision?
 You compacted with instructions. How do you find out whether the decision
 about the old route is still in the agent's context?
 </Choice>
+
+<MultiChoice id="which-checks-work" phase="review" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['compaction']}
+  context="A user compacted a long Claude Code session and wants to know whether a rule and a decision from early in the session are still in the agent's context. Claude Code does not show the summary in the terminal."
+  title="Which checks tell you?" hint="Which of these asks the agent what the summary holds, and which only measures or assumes?"
+  options={[
+    { text: 'Ask the agent to list every rule and decision it knows of for this work.', correct: true },
+    { text: 'Look at how many tokens /context says the conversation takes up now.', why: 'A smaller window says the compaction ran. It says nothing about which facts the summary kept.' },
+    { text: 'Have the agent write the decisions and rules to a file, and read the file.', correct: true },
+    { text: 'Assume the rule and the decision are kept, because the automatic pass keeps key decisions.', why: 'The vendor pages describe what the pass aims to keep. Only a check shows what this summary kept.' },
+  ]}>
+Which two of these tell you whether the summary kept the rule and the
+decision?
+</MultiChoice>
 
 ## Where a fact belongs
 
@@ -258,11 +287,26 @@ read. The next lesson in this part turns that file into a full handoff.
     { text: 'Stop it, state the decision and its reason again, and add the decision to summary.md.', correct: true, consequence: 'The agent leaves /v1/export in place. The decision is back in the conversation, and summary.md has it for the next session on this work.' },
     { text: 'Approve the change. If the route is still needed, one of the tests will fail.', consequence: 'No test calls the route the way the mobile app does. The tests pass, the route is removed, and version 4.2 of the app stops exporting.' },
     { text: 'Run /compact again, this time with instructions to keep every decision.', consequence: 'The decision was dropped by the first summary. A second summary is made from the first, so it can\'t bring the decision back.' },
-    { text: 'Ask the agent whether the team decided anything about /v1/export earlier in the session.', consequence: 'The agent answers from the summary, which doesn\'t mention the route. It says it knows of no decision, and it still plans to remove the route.' },
+    { text: 'Ask the agent whether a decision about /v1/export was made, and approve if it knows of none.', consequence: 'The agent answers from the summary, which doesn\'t mention the route, so it knows of no decision. You approve, and version 4.2 of the app stops exporting.' },
   ]}>
 After a compaction without instructions, the agent writes: "Next I'll clean
 up. `/v1/export` is unused, so I'll remove it." You remember deciding to
 keep it. What do you do?
+</Scenario>
+
+<Scenario id="the-rule-comes-back" phase="review" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['compaction']}
+  context="In a long Claude Code session the user said once, in the first message, that no change may touch the migrations/ folder, which another team owns. The session was compacted without instructions, and the rule is in no file."
+  title="The agent wants to edit a migration" hint="Where is the rule now, and which place does every later session and every compaction read again?"
+  options={[
+    { text: 'Approve it, because the rule was only for the first part of the session.', consequence: 'The rule was for all of the work. The agent edits a migration that the database team owns, and their review finds a change they never asked for.' },
+    { text: 'Stop it, state the rule again, and add the rule to the project-root CLAUDE.md.', correct: true, consequence: 'The agent leaves migrations/ alone. The rule is now in a file that Claude Code reads again after each compaction and in each new session.' },
+    { text: 'Run /compact again with instructions to keep every rule you set.', consequence: 'The first summary dropped the rule. A new summary is made from what is left, so the rule is still missing, and the agent goes on with the edit.' },
+    { text: 'Tell the agent to be careful with migrations, and let it go on.', consequence: 'The agent still doesn\'t know the folder is off limits. It makes the edit with care, and the change is still one the other team must undo.' },
+  ]}>
+After a compaction without instructions, the agent writes: "To make the
+export faster I'll add an index in `migrations/0042_reports_index.sql`."
+You said at the start that nobody changes that folder. What do you do?
 </Scenario>
 
 <Match id="where-it-goes" phase="review" objective="customizing-agents/configures-agent/manages-memory"
@@ -294,11 +338,17 @@ the agent afterwards what it still knows.
 If you followed the steps above, your `~/compaction-practice/summary.md`
 is the exercise, and you can go to the result below. Otherwise do them
 now: paste `transcript.md` into a new Claude Code session in an empty
-folder, ask one or two questions, and compact with the instructions from
-the last section. Then have the agent write `summary.md` and run
+folder with auto-memory off, ask one or two questions, and compact with
+the instructions from the section "Compact on command, and check". Then have the agent write `summary.md` and run
 `check_summary.py` on it. The folder is empty, so the agent has no project
 files to change. The steps show you what survives a compaction you
 directed, in about ten minutes.
+
+A short practice session like this one may keep all three facts even
+without instructions. The whole log arrived as one message of yours, and
+Claude Code keeps your requests (@Claude Code how it works). You can't know
+which facts survived until you check, and that holds for the stretch goal
+too.
 
 A good result: the script reports `kept 3 of 3`, or you read `summary.md`
 and find each fact the script reported as `lost` stated in other words.
@@ -308,18 +358,19 @@ said only in the chat?
 </Exercise>
 
 <Recap>
-1. Compaction replaces a long conversation with a summary that keeps the
-   goal and the recent state and drops the detail. What the summary leaves
-   out is gone (@AEC-05).
+1. Compaction replaces a long conversation with a summary. The detail and
+   anything else the summary leaves out are gone, and the model that
+   writes it can miss something important (@AEC-05).
 2. In Claude Code, `/compact` takes instructions for the summary, and the
    automatic pass near the window's limit guesses what to keep without
    them (@Claude Code commands) (@Claude Code context window).
-3. The project-root `CLAUDE.md` and the auto memory come back after a
+3. The project-root `CLAUDE.md` and the auto-memory come back after a
    compaction. A rule or a decision given only in the chat survives only
    if the summary states it (@Claude Code memory)
    (@Claude Code context window).
-4. You can't read the summary, so ask the agent what it knows after a
-   compaction, and compare with the facts you planted or decided.
+4. Claude Code doesn't show the summary in the terminal, so ask the agent
+   what it knows after a compaction, and compare with the facts you
+   planted or decided (@Claude Code context window).
 5. Save what the next session needs to a file, and move a rule every
    session needs into `CLAUDE.md`.
 </Recap>

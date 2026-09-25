@@ -1049,3 +1049,10 @@ Linux coding assistants:
   author: The kernel development community
   license: GPL-2.0
   url: https://docs.kernel.org/process/coding-assistants.html
+Claude Code how it works:
+  type: reference
+  title: How Claude Code works
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/how-claude-code-works
