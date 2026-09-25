@@ -1056,3 +1056,10 @@ Claude Code how it works:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/how-claude-code-works
+OpenTelemetry GenAI spans:
+  type: reference
+  title: Semantic conventions for generative client AI spans
+  container: OpenTelemetry GenAI semantic conventions
+  author: OpenTelemetry Authors
+  license: Apache-2.0
+  url: https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-spans.md
