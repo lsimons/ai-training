@@ -98,15 +98,15 @@ and you never edit its body.
 
 The maintainer has given standing approval for a green wave: `mise run ci`
 green on the wave branch, GitHub CI green, every branch approved on its
-re-check (a lead re-check counts), no open finding. When every condition holds, merge it with
-`AI_TRAINING_ROLE=wave-lead gh pr merge <n> --rebase` (the prefix tells the
-Bash guard hook you are the lead), then wait for CI on `main` with
-`gh run watch` on the newest run and report its result. If any condition
-fails, leave the pull request open and report `open` with the reason. A
-finding that needs the maintainer's decision (strike a spec feature,
-choose between designs) always goes to them instead of being merged, and
-so does any change to a spec, a gate, or shared tooling that a lesson
-branch drags along.
+re-check (a lead re-check counts), no open finding. When every condition
+holds, merge it with `AI_TRAINING_ROLE=wave-lead gh pr merge <n> --rebase`
+(the prefix tells the Bash guard hook you are the lead), then wait for CI
+on `main` with `gh run watch` on the newest run and report its result. If
+any condition fails, leave the pull request open and report `open` with
+the reason. A finding that needs the maintainer's decision (strike a spec
+feature, choose between designs) always goes to them instead of being
+merged, and so does any change to a spec, a gate, or shared tooling that a
+lesson branch drags along.
 
 ## Waiting
 
