@@ -81,8 +81,6 @@ Precalculus
 pset
 psets
 
-# Section slugs named in lesson data (`assumes[].section`)
-
 # Jargon
 distractor
 distractors

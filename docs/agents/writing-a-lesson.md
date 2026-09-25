@@ -636,10 +636,9 @@ Content is CC BY-SA 4.0 (`LICENSE`) and code is Apache-2.0
   plan had it (spec S11 step 3), and change only `assumes`. Each
   `assumes` entry names the `lesson` and `section` that teach the
   objective, and that lesson must be live on `main`. `mise run data`
-  checks that the `section` is the slug of a level-two heading on that page.
-  A page that says "as
-  the last lesson taught" needs an `assumes` entry for that lesson, even
-  when the plan arrived with `assumes: []`.
+  checks that the `section` is the slug of a level-two heading on that
+  page. A page that says "as the last lesson taught" needs an `assumes`
+  entry for that lesson, even when the plan arrived with `assumes: []`.
 
 - **Vendor claims.** A sentence about vendor behavior (a CLI flag, a
   GitHub notification, how an agent product loads skills, MCP tools or
