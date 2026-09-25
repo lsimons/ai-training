@@ -26,6 +26,7 @@ sources:
   - Claude Code memory
   - Claude Code costs
   - Claude Code best practices
+  - Claude Code how it works
 sources-checked: 2026-09-25
 review-by: 2027-03-25
 issue: 192
@@ -38,10 +39,12 @@ notes: >-
   Which facts a real compaction keeps can't be asserted, so the page has the learner check their own
   `summary.md` and says the samples are not model output. The learner pastes the log instead of
   having the agent read the file, because Claude Code re-reads recently used files after a
-  compaction. Vendor facts to re-check by review-by: `/compact [instructions]` (commands page),
+  compaction, and starts Claude Code with CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 so a memory note can't
+  carry a planted fact past the summary. Vendor facts to re-check by review-by: `/compact [instructions]` (commands page),
   automatic compaction near the limit and the focus instructions (context-window page), what is
   re-injected after compaction (context-window table and memory troubleshooting), `Not enough
   messages to compact.` in a fresh session (costs page), and compaction instructions in CLAUDE.md
-  (best-practices and costs pages). Minutes raised from 10 to 15 for the hands-on session. The
+  (best-practices and costs pages), what the automatic pass keeps (how-claude-code-works and
+  best-practices pages), and the auto-memory switch (memory page). Minutes raised from 10 to 15 for the hands-on session. The
   Academy course named in the short is not cited, and none of its text is used. memory-review was
-  not on main when this page was written, so the opener mentions it in plain words without a link.
+  built in the same wave, so the opener names it as the previous lesson without a link.
