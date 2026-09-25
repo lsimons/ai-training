@@ -1,0 +1,11 @@
+Complete (correctness)
+  2  Answers every part of the question, as the reference answer lists
+     the parts. When the handbook has no answer, says exactly: not found.
+  1  Answers at least one part of the question, and misses at least one.
+  0  Answers no part of the question.
+
+Quoted (adherence)
+  2  Quotes a sentence from the result of this run, word for word, or
+     answers exactly: not found.
+  1  Says in other words that the handbook has no answer.
+  0  Answers without a quoted sentence from the result.

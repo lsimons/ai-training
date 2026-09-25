@@ -1,0 +1,4 @@
+question: How far ahead do I request leave?
+call: search_docs(query='request leave ahead')
+result: leave.txt: Annual leave. Every employee accrues 25 days of annual leave per year. Unused days carry over until 31 March. Requests go to your manager at least two weeks ahead.
+answer: At least two weeks ahead. "Requests go to your manager at least two weeks ahead."

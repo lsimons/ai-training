@@ -1,0 +1,4 @@
+question: When do I get my accounts as a new starter, and how long does the onboarding checklist take?
+call: search_docs(query='new starter accounts onboarding checklist')
+result: onboarding.txt: Onboarding. New starters get their accounts on day one from the service desk. The onboarding checklist takes two weeks and ends with a review with your manager.
+answer: You get them on day one. "New starters get their accounts on day one from the service desk."
