@@ -30,6 +30,27 @@ first) and fails naming the file, section, and key that drifted. A rule
 that runs only in the extended pass is listed in `EXTENDED_ONLY` in that
 script with its reason, so add the entry when you add the rule.
 
+## Line breaks inside a paragraph
+
+Vale keeps the line breaks of a wrapped paragraph in the text it matches.
+A rule pattern with a literal space (`, and for`) misses the same words
+when the wrap puts a line break at that space, so a page passed or failed
+depending on where its lines wrapped (issue #371).
+`scripts/vale_linebreaks.py` rewrites each literal space in the patterns
+of the synced packages to `\s`, which matches a space or a line break.
+`mise run prose-sync` and `prose-eval-sync` run it after the fetch, and
+`prose`, `prose-extended`, `prose-eval` and `prose-metrics` run it first,
+so a package synced earlier gets the rewrite too. It changes the
+`tokens`, `exceptions` and `raw` lists of `existence` rules and the
+`swap` keys and `exceptions` of `substitution` rules. The House rules
+are written with `\s` from the start, and
+`tests/test_vale_linebreaks.py` checks that they stay so and that each
+rule fires on a hit split over two lines.
+
+Vale itself drops a match that crosses into an indented continuation
+line of a list item or a `>` line of a block quote, with `\s` or without
+it, so a phrase split there still passes.
+
 ## Process for a package
 
 1. Add the package to `.vale-eval.ini` by its release `.zip` URL (a bare

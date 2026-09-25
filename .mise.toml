@@ -326,9 +326,24 @@ run = "lychee --no-progress --config .lychee.toml ."
 
 # The synced `write-good` style is gitignored; this fetches it from the
 # release URL pinned in .vale.ini. Network, like `site-install-frozen`.
+#
+# After the fetch, scripts/vale_linebreaks.py rewrites each literal space in
+# the synced patterns to `\s`, so a rule matches a phrase that a line break
+# splits (issue #371). The same step runs before every `prose` run
+# (`prose-widen`), so a package synced before the script existed is
+# rewritten too.
 [tasks.prose-sync]
 description = "Fetch the pinned Vale style packages (network)"
-run = "vale sync"
+run = ["vale sync", "scripts/vale_linebreaks.py .vale.ini .vale-extended.ini"]
+
+# Rewrites the literal spaces in the synced Vale patterns to `\s`
+# (scripts/vale_linebreaks.py, issue #371). Local, and a second run changes
+# nothing. A package that is not synced is skipped, and
+# `prose-check-packages` reports it.
+[tasks.prose-widen]
+description = "Make the synced Vale rules match across a line break"
+hide = true
+run = "scripts/vale_linebreaks.py .vale.ini .vale-extended.ini"
 
 # Runs before `prose` and `prose-extended` (`depends`). The synced styles
 # are gitignored, and in a fresh clone or worktree Vale otherwise runs with
@@ -378,7 +393,7 @@ run = "scripts/vale_configs.py"
 # The `[*.{yaml,yml}]` section still selects the rules by file name.
 [tasks.prose]
 description = "Vale prose lint over Markdown, MDX and the site data YAML. Errors gate; warnings advise."
-depends = ["prose-check-packages", "prose-check-configs"]
+depends = ["prose-check-packages", "prose-check-configs", "prose-widen"]
 run = """
 set -e
 files=$(git ls-files --cached --others --exclude-standard -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
@@ -398,7 +413,7 @@ vale --minAlertLevel=error --ext=.md $yaml
 # Run it every so often and rewrite the sentences that hide who does what.
 [tasks.prose-extended]
 description = "Vale prose lint with the extended (passive-voice) rules; advisory only"
-depends = ["prose-check-packages", "prose-check-configs"]
+depends = ["prose-check-packages", "prose-check-configs", "prose-widen"]
 run = """
 set -e
 files=$(git ls-files --cached --others --exclude-standard -- '*.md' '*.mdx' ':!site/examples/**' ':!docs/prose/reports/**' ':!CLAUDE.md' ':!CODE_OF_CONDUCT.md')
@@ -417,14 +432,23 @@ vale --no-exit --config .vale-extended.ini --ext=.md $yaml
 # under .vale/styles/ (the eval side of #103, issues #276 and #295).
 [tasks.prose-eval-sync]
 description = "Fetch the Vale packages pinned in .vale-eval.ini, for prose-eval and prose-metrics (network)"
-run = "vale sync --config .vale-eval.ini"
+run = ["vale sync --config .vale-eval.ini", "scripts/vale_linebreaks.py .vale-eval.ini"]
+
+# The eval side of `prose-widen`, for a package synced before
+# scripts/vale_linebreaks.py existed.
+[tasks.prose-widen-eval]
+description = "Make the synced Vale eval rules match across a line break"
+hide = true
+run = "scripts/vale_linebreaks.py .vale-eval.ini"
 
 [tasks.prose-eval]
 description = "Collect every hit of a Vale package for review: mise run prose-eval -- <package>"
+depends = ["prose-widen-eval"]
 run = "scripts/prose_eval.py"
 
 [tasks.prose-metrics]
 description = "Score every file on a Vale metric package (Readability) for docs/prose/reports"
+depends = ["prose-widen-eval"]
 run = "scripts/prose_metrics.py"
 
 # Python quality tools (ruff, basedpyright, pytest) for scripts/, tests/ and
@@ -494,7 +518,7 @@ bun site/node_modules/.bin/cspell --no-progress $files
 description = "Full CI gate: install + lint + Python lint/typecheck/test + prose + spell + examples + course plans + Astro check + Biome + unit tests + build + checkpoint export + lesson bundles + e2e"
 run = """
 set -u
-for task in site-install-frozen py-install-frozen lint py-lint py-typecheck py-test prose-sync prose spell examples data site-check site-lint site-test site-build checkpoints bundles site-e2e-only; do
+for task in site-install-frozen py-install-frozen prose-sync lint py-lint py-typecheck py-test prose spell examples data site-check site-lint site-test site-build checkpoints bundles site-e2e-only; do
   if ! mise run "$task"; then
     echo "ci: FAILED in task '$task'. Rerun it with 'mise run $task'."
     exit 1
