@@ -298,7 +298,7 @@ A text match has limits. A commit run through a shell alias, a script
 such as `./release.sh`, or a spelling the pattern doesn't know gets past
 it. The hook reads the command, and it can't see what a script does
 inside. So this hook catches a mistake, the kind an agent makes while it
-works as asked. It doesn't stop a determined command. The vendor's advice for a hard allow or
+works as asked. It doesn't stop a commit made another way. The vendor's advice for a hard allow or
 deny is a permission rule (@Claude Code hooks), and for a rule the
 project can't do without, add a check in CI (continuous integration)
 that runs on every push, whatever made the commit. The hook tells the
