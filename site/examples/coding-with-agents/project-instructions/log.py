@@ -16,6 +16,8 @@ HEADER_LINES = 3
 def main() -> int:
     with open(os.path.join(SESSIONS, "session-2.txt"), encoding="utf-8") as handle:
         lines = handle.readlines()
+    if len(lines) <= HEADER_LINES:
+        raise SystemExit("session-2.txt has no log lines after its header")
     if not lines[0].startswith("# Session 2.") or lines[HEADER_LINES - 1].strip():
         raise SystemExit("session-2.txt no longer starts with the header the page skips")
     sys.stdout.write("".join(lines[HEADER_LINES:]))
