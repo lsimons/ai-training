@@ -19,6 +19,10 @@ where this repo overrides that skill.
 
 1. Create the worktree from `origin/main` at the path you were given, or
    check out the branch there if it exists, and run `mise run setup` once.
+   Start every Bash command after that with `cd <worktree> && <command>`, or name
+   the worktree in it (`git -C <worktree> ...`, absolute paths): in a
+   subagent a `cd` doesn't carry over to the next Bash call
+   (`docs/agents/orchestration.md`, "Working with the platform").
 2. Read only what your issue needs: `docs/agents/writing-a-lesson.md` for
    a lesson or other content, `docs/agents/testing.md` for code, and
    nothing else unless the issue names it.
