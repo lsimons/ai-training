@@ -40,7 +40,7 @@ minutes: 15
 notes: >-
   Introduces no concept: hands-on for tool-cost and mcp-vs-cli. The fixtures under
   site/examples/customizing-agents/mcp-tool-cost/ are a stdlib stand-in issue-tracker server over stdio
-  with twenty tools (only search_issues and get_issue answer), a CLI over the same the issues file, and
+  with twenty tools (only search_issues and get_issue answer), a CLI over the same issues file, and
   three measurement scripts that estimate tokens at four characters per token, the rule of thumb from
   concepts/context-window. The second assumes entry is there because the page names the previous
   lesson and its exercise reuses that lesson's handbook copy and server command. The tool search
