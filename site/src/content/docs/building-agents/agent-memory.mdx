@@ -104,7 +104,7 @@ into the system prompt, and the model reads it with every request.
   answer={`preferences.txt: 20 lines
   read whole into the prompt: 509 characters`} run="building-agents/agent-memory/whole.py">
 
-Run `python3 memory.py whole`, which runs the code below, and compare what you see with the output below.
+Run `python3 memory.py whole` (the code is shown here) and compare what you see with the output.
 
 ```python
 lines = load()
@@ -134,7 +134,7 @@ with a search tool that returns only the lines a question needs.
   search_notes('project 0412'): 1 line, 49 characters
     project 0412: send the status update on Wednesday`} run="building-agents/agent-memory/grown.py">
 
-Run `python3 memory.py grown`, which runs the code below, and compare what you see with the output below.
+Run `python3 memory.py grown` (the code is shown here) and compare what you see with the output.
 
 ```python
 lines = grown_notes(load())
