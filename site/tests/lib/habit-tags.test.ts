@@ -1,4 +1,4 @@
-import { assertHabitId, HABIT_ID, habitTagsOfSource, MAX_HABITS } from '@lib/habit-tags';
+import { assertHabitId, HABIT_ID, habitTagsOfSource, MAX_HABITS, RESERVED_IDS } from '@lib/habit-tags';
 import { describe, expect, it } from 'vitest';
 
 const page = (habits: string, before = '') =>
@@ -48,6 +48,51 @@ describe('habitTagsOfSource (spec S07 "Authoring")', () => {
 		expect(() => habitTagsOfSource(repeated, 'x/y')).toThrow(/habit id "review-1" is also a heading slug/);
 		const withCheckpoint = page('<Habit id="pick-one">\nT.\n</Habit>', '<Choice id="pick-one" />\n\n');
 		expect(() => habitTagsOfSource(withCheckpoint, 'x/y')).toThrow(/habit id "pick-one" is also a checkpoint id/);
+	});
+	it('rejects an id the build adds to a lesson page, because the lesson source never shows it (issue #458)', () => {
+		const fixed = [
+			'references',
+			'lesson-toc-checkpoints',
+			'lesson-toc-examples',
+			'lesson-toc-mobile-checkpoints',
+			'lesson-toc-mobile-examples',
+			'recap',
+			'exercise',
+			'more-practice',
+			'theme-icons',
+		];
+		expect([...RESERVED_IDS].sort()).toEqual([...fixed].sort());
+		for (const id of [...fixed, 'ref-1', 'ref-12']) {
+			expect(() => habitTagsOfSource(page(`<Habit id="${id}">\nT.\n</Habit>`), 'x/y')).toThrow(
+				new RegExp(`habit id "${id}" is also an id the build adds to the lesson page`),
+			);
+		}
+		expect(habitTagsOfSource(page('<Habit id="ref-check">\nT.\n</Habit>'), 'x/y')).toHaveLength(1);
+	});
+	it("rejects Starlight's fixed ids through the slug rule", () => {
+		for (const id of [
+			'_top',
+			'starlight__sidebar',
+			'starlight__search',
+			'starlight__on-this-page',
+			'starlight__mobile-toc',
+			'starlight__on-this-page--mobile',
+		]) {
+			expect(() => habitTagsOfSource(page(`<Habit id="${id}">\nT.\n</Habit>`), 'x/y')).toThrow(
+				/is not a lowercase kebab-case slug/,
+			);
+		}
+	});
+	it('rejects the id of a row of a <Match> on the page, and allows the same form without that Match', () => {
+		const withMatch = (id: string) => page(`<Habit id="${id}">\nT.\n</Habit>`, '<Match id="pair-up" />\n\n');
+		for (const id of ['pair-up-row-0', 'pair-up-row-3-fb']) {
+			expect(() => habitTagsOfSource(withMatch(id), 'x/y')).toThrow(
+				new RegExp(`habit id "${id}" is also the id of a row of <Match id="pair-up">`),
+			);
+		}
+		expect(habitTagsOfSource(withMatch('other-row-0'), 'x/y')).toHaveLength(1);
+		const withChoice = page('<Habit id="pair-up-row-0">\nT.\n</Habit>', '<Choice id="pair-up" />\n\n');
+		expect(habitTagsOfSource(withChoice, 'x/y')).toHaveLength(1);
 	});
 	it('rejects a habit before the recap, or without a recap, and one without text', () => {
 		expect(() => habitTagsOfSource(page('', '<Habit id="a">\nT.\n</Habit>\n\n'), 'x/y')).toThrow(

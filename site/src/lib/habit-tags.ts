@@ -17,6 +17,42 @@ export const MAX_HABITS = 2;
 /** A habit id is a lowercase kebab-case slug. */
 export const HABIT_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+/**
+ * The DOM ids the build puts on a lesson page that the lesson source doesn't
+ * spell out, so a habit id must differ from each (issue #458). Starlight's own
+ * fixed ids (`_top` from `constants.js` via `PageTitle.astro`,
+ * `starlight__sidebar` from `PageFrame.astro`, `starlight__search` from
+ * `Search.astro`, `starlight__on-this-page` from `TableOfContents.astro`,
+ * `starlight__mobile-toc` and `starlight__on-this-page--mobile` from
+ * `MobileTableOfContents.astro`) aren't here, because `HABIT_ID` already
+ * rejects an id with `_` or `--`.
+ */
+export const RESERVED_IDS: ReadonlySet<string> = new Set([
+	// The heading `plugins/remark-citations.mjs` appends when the lesson cites a source; Starlight slugs it.
+	'references',
+	// The group headings of the lesson table of contents, one per group in `lib/lesson-toc.ts`:
+	// `overrides/TableOfContents.astro` emits `lesson-toc-<group>`.
+	'lesson-toc-checkpoints',
+	'lesson-toc-examples',
+	// `overrides/MobileTableOfContents.astro` emits `lesson-toc-mobile-<group>`.
+	'lesson-toc-mobile-checkpoints',
+	'lesson-toc-mobile-examples',
+	// The sections `<Recap>` (`lesson/Recap.astro`), `<Exercise>` (`lesson/Exercise.astro`) and
+	// `<MorePractice>` (`lesson/MorePractice.astro`) render, with an id the tag doesn't carry.
+	'recap',
+	'exercise',
+	'more-practice',
+	// The `<template>` of theme icons Starlight's `ThemeProvider.astro` puts on every page.
+	'theme-icons',
+]);
+/** The id of the n-th entry of the references list `plugins/remark-citations.mjs` appends. */
+export const REFERENCE_ID = /^ref-\d+$/;
+/**
+ * The ids `lesson/Match.astro` gives the rows of a `<Match>`: `<id>-row-<i>` on each
+ * select and `<id>-row-<i>-fb` on its feedback. Group 1 is the checkpoint id.
+ */
+export const MATCH_ROW_ID = /^(.+)-row-\d+(?:-fb)?$/;
+
 export interface HabitInfo {
 	/** The id within the lesson; the progress id is `<lesson id>#<id>`. */
 	id: string;
@@ -34,7 +70,8 @@ export function assertHabitId(where: string, id: string | undefined): string {
 /**
  * The habits in `tree`, parsed from `src`, in source order, after the rules:
  * at most `MAX_HABITS`, each with a kebab-case `id` unique in the lesson that
- * is not a heading slug or a checkpoint id, each after the `<Recap>`, and
+ * is not a heading slug, a checkpoint id, the id of a `<Match>` row or an id
+ * the build adds (`RESERVED_IDS`, `REFERENCE_ID`), each after the `<Recap>`, and
  * each with text.
  * Throws on the first break, naming `where`.
  */
@@ -53,6 +90,13 @@ export function habitTagsIn(tree: MdxNode, src: string, where: string): HabitInf
 			.map((n) => attrsOf(n, where).get('id')?.value)
 			.filter((v): v is string => typeof v === 'string'),
 	);
+	// A `<Match>` also gives each of its rows ids (`MATCH_ROW_ID`).
+	const matchIds = new Set(
+		elements
+			.filter((n) => n.name === 'Match')
+			.map((n) => attrsOf(n, where).get('id')?.value)
+			.filter((v): v is string => typeof v === 'string'),
+	);
 	const ids = new Set<string>();
 	return habits.map((node) => {
 		const attrs = attrsOf(node, where);
@@ -61,6 +105,11 @@ export function habitTagsIn(tree: MdxNode, src: string, where: string): HabitInf
 		ids.add(id);
 		if (slugs.has(id)) throw new Error(`${where}: habit id "${id}" is also a heading slug; pick another id`);
 		if (checkpointIds.has(id)) throw new Error(`${where}: habit id "${id}" is also a checkpoint id; pick another id`);
+		if (RESERVED_IDS.has(id) || REFERENCE_ID.test(id))
+			throw new Error(`${where}: habit id "${id}" is also an id the build adds to the lesson page; pick another id`);
+		const row = MATCH_ROW_ID.exec(id);
+		if (row && matchIds.has(row[1] ?? ''))
+			throw new Error(`${where}: habit id "${id}" is also the id of a row of <Match id="${row[1]}">; pick another id`);
 		const start = node.position?.start.offset ?? -1;
 		if (recapEnd < 0 || start < recapEnd) throw new Error(`${where}#${id}: <${HABIT_TAG}> must come after the <Recap>`);
 		const text = childrenSource(node, src);
