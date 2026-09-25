@@ -15,6 +15,12 @@
  * two halves of a split issue (`feat/<issue>-<slug>-1` and `-2`) each get
  * their own verdict. A comment without one applies to every branch of the
  * issue.
+ *
+ * A builder that stops at its turn limit posts a comment whose first line is
+ * `Unfinished: <branch>`, then the list of what is left (#418). The branch is
+ * `build` again, with that list as the brief, until a later trusted comment
+ * finishes it: a verdict that applies to the branch, or a builder reply that
+ * names the branch on a `Branch:` line.
  */
 
 /** The accounts whose `Verdict:` comments a lead acts on. */
@@ -26,10 +32,17 @@ const VERDICT_LINE = /^\s*\**Verdict:?\**:?\s*\**\s*(approve|needs changes)\b/im
 /** A `Branch:` line, as the reviewers write it next to their `Verdict:` line. */
 const BRANCH_LINE = /^\s*\**Branch:?\**:?\s*\**\s*`?([^\s`*]+)`?/im;
 
+/** The first line of a builder's hand-back at its turn limit. */
+const UNFINISHED_LINE = /^\s*\**Unfinished:?\**:?\s*\**\s*`?([^\s`*]+)`?/i;
+
+/** The attribution lines at the end of every agent comment. */
+const ATTRIBUTION_LINE = /^\s*(Co-Authored-By|Assisted-by):/i;
+
 /**
  * @typedef {{ author: string, body: string, createdAt: string, url: string }} IssueComment
  * @typedef {{ verdict: 'approve' | 'needs changes', author: string, createdAt: string, url: string,
  *   commentsAfter: number }} Verdict
+ * @typedef {{ author: string, createdAt: string, url: string, left: string }} Unfinished
  * @typedef {{ path: string, branch: string | null, head: string | null }} Worktree
  */
 
@@ -53,13 +66,63 @@ export function branchOf(body) {
 }
 
 /**
- * Whether a comment applies to a branch: it names that branch, or none.
+ * The branch an `Unfinished: <branch>` first line names, or null when the
+ * comment doesn't start with one.
+ * @param {string} body
+ */
+export function unfinishedBranchOf(body) {
+	const first = body.split('\n', 1)[0] ?? '';
+	return UNFINISHED_LINE.exec(first)?.[1] ?? null;
+}
+
+/**
+ * Whether a comment applies to a branch: it names that branch on its
+ * `Unfinished:` or `Branch:` line, or names none.
  * @param {string} body
  * @param {string} branch
  */
 export function appliesTo(body, branch) {
-	const named = branchOf(body);
+	const named = unfinishedBranchOf(body) ?? branchOf(body);
 	return named === null || named === branch;
+}
+
+/**
+ * What is left, from an `Unfinished:` comment: the lines after the first,
+ * without the attribution lines.
+ * @param {string} body
+ */
+function leftOf(body) {
+	return body
+		.split('\n')
+		.slice(1)
+		.filter((line) => !ATTRIBUTION_LINE.test(line))
+		.join('\n')
+		.trim();
+}
+
+/**
+ * The last trusted `Unfinished:` comment for a branch, or null when there is
+ * none or a later trusted comment finished the branch: a verdict that applies
+ * to it, or a reply that names it on a `Branch:` line. A reply that names no
+ * branch leaves it unfinished, so a stray note can't send a half-built branch
+ * to review.
+ * @param {IssueComment[]} comments
+ * @param {string} branch
+ * @param {readonly string[]} [trusted]
+ * @returns {Unfinished | null}
+ */
+export function openUnfinished(comments, branch, trusted = TRUSTED_VERDICT_AUTHORS) {
+	/** @type {Unfinished | null} */
+	let open = null;
+	for (const c of trustedInOrder(comments, trusted)) {
+		const unfinished = unfinishedBranchOf(c.body);
+		if (unfinished !== null) {
+			if (unfinished === branch) open = { author: c.author, createdAt: c.createdAt, url: c.url, left: leftOf(c.body) };
+		} else if (verdictOf(c.body) ? appliesTo(c.body, branch) : branchOf(c.body) === branch) {
+			open = null;
+		}
+	}
+	return open;
 }
 
 /**
@@ -135,11 +198,14 @@ export function parseWorktrees(output) {
 
 /**
  * What a resuming lead does with a pushed branch, in the words of
- * "Resuming a half-done wave" in .claude/agents/wave-lead.md: join as it
- * is, revise, re-check or review. An issue without a pushed branch is `build`.
+ * "Resuming a half-done wave" in .claude/agents/wave-lead.md: build the rest,
+ * join as it is, revise, re-check or review. An issue without a pushed
+ * branch is `build` too.
  * @param {Verdict | null} verdict the last verdict that applies to the branch
+ * @param {Unfinished | null} [unfinished] the branch's open `Unfinished:` comment
  */
-export function nextStep(verdict) {
+export function nextStep(verdict, unfinished = null) {
+	if (unfinished) return 'build';
 	if (!verdict) return 'review';
 	if (verdict.verdict === 'approve') return 'join';
 	return verdict.commentsAfter > 0 ? 're-check' : 'revise';
@@ -158,7 +224,8 @@ export function waveStatus({ waveBranch, issues, heads, commentsByIssue, worktre
 			const comments = commentsByIssue.get(issue) ?? [];
 			const branches = featBranches(heads, issue).map((name) => {
 				const verdict = lastTrustedVerdict(comments, name);
-				return { name, verdict, next: nextStep(verdict) };
+				const unfinished = openUnfinished(comments, name);
+				return { name, verdict, unfinished, next: nextStep(verdict, unfinished) };
 			});
 			return { issue, next: branches.length === 0 ? 'build' : 'per-branch', branches };
 		}),
