@@ -3,17 +3,40 @@
     python3 show_log.py notes-log.jsonl
 
 Each line gives who the token names, the tool, its arguments, and what
-the server did with the call.
+the server did with the call. The tool name and the argument values come
+from the model, so a planted instruction chooses them. Every argument
+value is printed as a JSON string, and a tool name, owner or key that
+isn't a plain word is too, so no text in a call can end its line early or
+write a line of its own.
 """
 
 import json
 import os
+import re
 import sys
+
+PLAIN_WORD = re.compile(r"[A-Za-z0-9_+-]+")
+PLAIN_OUTCOME = re.compile(r"[A-Za-z0-9_+ .,:-]+")
+
+
+def word(text):
+    """Return `text` as it is when it is a plain word, and as a JSON string otherwise."""
+    text = str(text)
+    return text if PLAIN_WORD.fullmatch(text) else json.dumps(text)
+
+
+def format_arguments(arguments):
+    if not isinstance(arguments, dict):
+        return json.dumps(json.dumps(arguments))
+    return ", ".join(f"{word(key)}={json.dumps(value)}" for key, value in arguments.items())
 
 
 def format_entry(entry):
-    arguments = ", ".join(f'{key}="{value}"' for key, value in entry["arguments"].items())
-    return f"{entry['owner']} {entry['tool']}({arguments}) -> {entry['outcome']}"
+    outcome = str(entry["outcome"])
+    if not PLAIN_OUTCOME.fullmatch(outcome):
+        outcome = json.dumps(outcome)
+    arguments = format_arguments(entry["arguments"])
+    return f"{word(entry['owner'])} {word(entry['tool'])}({arguments}) -> {outcome}"
 
 
 def show(path):

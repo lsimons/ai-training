@@ -16,4 +16,7 @@ if __name__ == "__main__":
     parser.add_argument("--hours", type=float, required=True)
     parser.add_argument("--owner", required=True)
     options = parser.parse_args()
-    print(notes_token.issue(options.scope, options.hours, options.owner))
+    try:
+        print(notes_token.issue(options.scope, options.hours, options.owner))
+    except ValueError as error:
+        parser.error(str(error))
