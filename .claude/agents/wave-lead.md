@@ -47,13 +47,13 @@ line. Post that text on the ISSUE yourself with `gh issue comment`, then
 send the builder one message: the required findings, the suggested
 rewrites to apply unless they read worse, and the findings to skip. The
 builder makes one commit, runs `mise run fast`, pushes and replies on the
-issue. After `Verdict: needs changes`, the same reviewer re-checks.
-After `Verdict: approve` that lists only should-fix or nit items, spawn no
-second reviewer: read the fix commit with `git show`, run the one `mise`
-task that covers its files, and write `re-checked by lead` with a link to
-the fix commit in the re-check column of the review table. Cheap nits from
-a re-check also go back as one more one-line commit that you read
-yourself.
+issue. After `Verdict: needs changes`, the same reviewer re-checks. After
+`Verdict: approve`, read the fix commit with `git show`, run `mise run fast`
+on the branch, comment `re-checked by lead: <commit link>` on the issue,
+and link that comment in the review table's re-check column. A fix that
+changes more than the findings named, or a finding too big to check
+yourself, goes back to the same reviewer. Cheap nits from a re-check go
+back as one more one-line commit that you read yourself.
 
 A branch gets at most two revision rounds. After the second
 `Verdict: needs changes`, leave the branch out of the wave and report it
@@ -85,7 +85,7 @@ and you never edit its body.
 
 The maintainer has given standing approval for a green wave: `mise run ci`
 green on the wave branch, GitHub CI green, every branch approved on its
-re-check, no open finding. When every condition holds, merge it with
+re-check (a lead re-check counts), no open finding. When every condition holds, merge it with
 `AI_TRAINING_ROLE=wave-lead gh pr merge <n> --rebase` (the prefix tells the
 Bash guard hook you are the lead), then wait for CI on `main` with
 `gh run watch` on the newest run and report its result. If any condition
