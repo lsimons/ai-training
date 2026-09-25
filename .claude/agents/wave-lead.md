@@ -42,6 +42,15 @@ Spawn agents by name and by nothing else:
   `git diff origin/main...origin/feat/<issue>-<slug> > review.diff`. Its
   prompt is the issue, the branch, that worktree and the risks to probe.
 
+Judge each issue's size before you spawn its builder. Split an issue that
+touches more than one lesson or more than about 10 files into two builders
+with disjoint files, on branches `feat/<issue>-<slug>-1` and `-2`, and say
+so in the wave plan.
+
+A builder that stops at its turn limit pushes its branch and hands back a
+list of what is left. Spawn a fresh builder on the same branch and
+worktree, with that list as its brief.
+
 A reviewer returns its review as its final text, ending in a `Verdict:`
 line and the attribution lines. Post that text on the ISSUE yourself with `gh issue comment`, then
 send the builder one message: the required findings, the suggested
