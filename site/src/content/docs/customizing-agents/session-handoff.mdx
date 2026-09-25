@@ -12,9 +12,9 @@ of a session that stopped halfway, written for this lesson.
 `setup_practice.py` builds a practice repository in the state that session
 left behind, and `check_handoff.py` checks a handoff file. Both are short
 Python scripts. The first builds its repository in a new directory that
-you name, and the second only reads the file you give it. Run the commands in this lesson
-from that directory. In the `cd` line, replace `<course-repo>` with the
-path to your copy of the course repository.
+you name, and the second only reads the file you give it. Run the commands
+in this lesson from that directory. In the `cd` line, replace
+`<course-repo>` with the path to your copy of the course repository.
 
 ```sh
 cd <course-repo>/site/examples/customizing-agents/session-handoff
@@ -28,7 +28,7 @@ At its start it loads `CLAUDE.md` and the auto-memory notes
 (@Claude Code memory). Everything else it learns from the repository, and
 that includes the changes that aren't committed yet.
 
-The agent course draws the line between a session and its state. The
+The Agent Engineer Course draws the line between a session and its state. The
 session is the full history of messages, tool calls and results. The state
 is a short summary of the facts that matter, which is quicker to use than
 the history (@AEC-05). A **session handoff** is that state, written to a
@@ -37,7 +37,7 @@ and why, what was tried and ruled out, and where the files are. The next
 session reads the file and starts from it.
 
 Claude Code can also reopen an old conversation. `claude --continue` picks
-up the most recent one, and `claude --resume` lets you choose one from a
+up where you left off, and `claude --resume` lets you choose one from a
 list (@Claude Code best practices). That helps when you continue the same
 work on the same computer, because the conversations are saved on your own
 machine, under `~/.claude/projects/` (@Claude Code how it works). A
