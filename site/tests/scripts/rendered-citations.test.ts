@@ -28,7 +28,7 @@ function dist(files: Record<string, string>) {
 describe('unresolvedCitations', () => {
 	it('finds a raw token in paragraph text', () => {
 		expect(unresolvedCitations(page('<p>The act applies (@EC AI Act) here.</p>'), window)).toEqual([
-			'The act applies (@EC AI Act) here.',
+			{ where: 'text', snippet: 'The act applies (@EC AI Act) here.' },
 		]);
 	});
 
@@ -37,7 +37,9 @@ describe('unresolvedCitations', () => {
 	});
 
 	it('finds a token whose key a line break splits', () => {
-		expect(unresolvedCitations(page('<p>It shows (@EC AI\nAct).</p>'), window)).toEqual(['It shows (@EC AI Act).']);
+		expect(unresolvedCitations(page('<p>It shows (@EC AI\nAct).</p>'), window)).toEqual([
+			{ where: 'text', snippet: 'It shows (@EC AI Act).' },
+		]);
 	});
 
 	it('finds a token written with character references', () => {
@@ -66,8 +68,37 @@ describe('unresolvedCitations', () => {
 		expect(unresolvedCitations(html, window)).toEqual([]);
 	});
 
-	it('passes a resolved citation link and a token in an attribute', () => {
-		const html = page('<p>Runs <a href="#ref-1" title="(@k)" class="citation">[1]</a>.</p>');
+	it('passes a resolved citation link, whose key is in its title and data-key', () => {
+		const html = page(
+			'<p>Runs <a href="#ref-1" title="(@k)" data-key="(@k)" class="citation">[1]</a>.</p><div data-x="(@k)"></div>',
+		);
+		expect(unresolvedCitations(html, window)).toEqual([]);
+	});
+
+	it('finds a token in a meta description and an og:description', () => {
+		const html = `<html><head><meta name="description" content="Covers (@Some page)."><meta property="og:description" content="Covers (@Some page)."></head><body></body></html>`;
+		expect(unresolvedCitations(html, window)).toEqual([
+			{ where: 'content attribute of <meta>', snippet: 'Covers (@Some page).' },
+			{ where: 'content attribute of <meta>', snippet: 'Covers (@Some page).' },
+		]);
+	});
+
+	it('finds a token in an alt and an aria-label', () => {
+		const html = page('<img src="x.png" alt="A chart (@key)"><button aria-label="Open (@key)">o</button>');
+		expect(unresolvedCitations(html, window).map((f) => f.where)).toEqual([
+			'alt attribute of <img>',
+			'aria-label attribute of <button>',
+		]);
+	});
+
+	it('passes a meta tag that is not a description', () => {
+		const html = `<html><head><meta name="keywords" content="(@k)"></head><body></body></html>`;
+		expect(unresolvedCitations(html, window)).toEqual([]);
+	});
+
+	it('does not join the text of two block elements into a token', () => {
+		const html = page('<ul><li>see (</li><li>@team on chat</li></ul><p>a (</p><p>@b</p>');
+		expect(pageText(html, window)).toContain('see ( @team');
 		expect(unresolvedCitations(html, window)).toEqual([]);
 	});
 
@@ -85,7 +116,7 @@ describe('checkRenderedCitations', () => {
 			'data/lessons/a/x.json': '{"prose": "(@not html)"}',
 		});
 		expect(checkRenderedCitations(root)).toEqual({
-			errors: ['topics/a/t/index.html: unresolved citation "Behavior (@Vendor page)."'],
+			errors: ['topics/a/t/index.html: unresolved citation in text: "Behavior (@Vendor page)."'],
 			pages: 2,
 		});
 	});
