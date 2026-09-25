@@ -1,9 +1,12 @@
 /**
  * The inline Markdown patterns `renderInline` (`lib/reference.ts`) renders,
  * and the detector for the forms the competency page renderer
- * (`lib/citations.ts`) leaves literal. This module imports nothing, so
- * `scripts/lib/data.mjs` can run it under bun outside Astro.
+ * (`lib/citations.ts`) leaves literal. Its one import,
+ * `plugins/citation-syntax.mjs`, imports nothing, so `scripts/lib/data.mjs`
+ * can run this module under bun outside Astro.
  */
+
+import { citationSpans } from '../../plugins/citation-syntax.mjs';
 
 /** A code span, with its text as group 1. */
 export const CODE_SPAN = /`([^`]+)`/g;
@@ -14,8 +17,6 @@ export const EMPHASIS = /\*(\S(?:[^*]*\S)?)\*/g;
 /** `[text](url)` with no title, text as group 1 and url as group 2. */
 export const LINK = /\[([^\]]+)\]\(([^)\s]+)\)/g;
 
-/** A `(@key)` citation token, for the `unsupportedInline` check only. It is narrower than `plugins/citation-syntax.mjs` (#379). */
-const CITATION = /\(@[A-Za-z0-9-]+\)/;
 /**
  * `_x_` or `__x__` at a word edge, so `snake_case`, a URL path segment and a lone `_` stay out.
  * A name such as `__init__.py` or a path such as `/x/_y_/` is flagged outside a code span, on purpose:
@@ -39,7 +40,7 @@ export function unsupportedInline(md: string): string[] {
 	const found: string[] = [];
 	if (UNDERSCORE_EMPHASIS.test(prose)) found.push('underscore emphasis');
 	const spans = [...prose.matchAll(STRONG), ...prose.matchAll(EMPHASIS)];
-	if (spans.some((m) => CITATION.test(m[1] ?? ''))) found.push('strong or emphasis around a citation');
+	if (spans.some((m) => citationSpans(m[1] ?? '').length > 0)) found.push('strong or emphasis around a citation');
 	if (LINK_WITH_TITLE.test(prose)) found.push('link with a title');
 	return found;
 }
