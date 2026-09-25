@@ -734,3 +734,24 @@ MCP filesystem server:
   author: Anthropic and the MCP contributors
   license: MIT
   url: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+Claude docs memory-tool:
+  type: reference
+  title: Memory tool
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool
+Claude docs context-editing:
+  type: reference
+  title: Context editing
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/build-with-claude/context-editing
+Claude docs compaction:
+  type: reference
+  title: Compaction overview
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/build-with-claude/compaction

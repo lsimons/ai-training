@@ -1,11 +1,20 @@
 id: building-agents/agent-memory
 title: Where an agent's memory lives
+description: >-
+  Compare five places an agent can keep what it should know tomorrow, start with a notes file a
+  person can read, see what changes when that file grows to ten thousand lines, and see how memory
+  files and compaction keep an agent's context window small.
 mode: explanation
 covers: building-agents/retrieval-memory
 serves: [building-agents/builds-agent-loop/adds-retrieval]
 introduces: [memory-storage-choices]
 assumes:
   - objective: concepts/explains-models/explains-grounding
+    lesson: concepts/memory
+    section: two-places-a-fact-can-be
+  - objective: building-agents/builds-agent-loop/defines-a-tool
+    lesson: building-agents/agent-loop
+    section: a-tool-is-a-function-plus-a-description
 after: [building-agents/retrieval-as-a-tool]
 shorts: [Compaction and context rot]
 exercise:
@@ -14,10 +23,21 @@ exercise:
     For four memory uses (twenty user preferences, ten thousand support tickets, a running task
     list, facts learned this session) pick a store from the lesson's table and write one line on why
     the others cost more than they give.
-sources: [Academy claude-platform-101]
+sources:
+  - AEC-05
+  - Claude docs memory-tool
+  - Claude docs context-editing
+  - Claude docs compaction
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 issue: 199
 minutes: 12
 notes: >-
-  Files, key-value notes, an index, a database behind a tool, a summary in the system prompt. Start
-  with a file the human can read. Covers the Academy's memory and compaction patterns as ways to
-  keep the context small (Academy claude-platform-101).
+  Explanation mode. The fixture site/examples/building-agents/agent-memory/memory.py reads a
+  committed twenty-line preferences.txt whole, then builds a ten-thousand-line copy in memory and
+  compares reading it whole with a substring search tool; the page's numbers are pasted from its
+  output. The memory tool, context editing and compaction claims were checked against the three
+  Claude Platform pages on 2026-09-25, and no vendor limit is quoted. The plan's Academy
+  claude-platform-101 source was replaced by those public vendor pages, and no Academy text is used.
+  AEC-05 is cited for ideas in our own words, so NOTICE.md gets no new entry. The assumes entry for
+  defines-a-tool covers the search tool the page gives the agent.
