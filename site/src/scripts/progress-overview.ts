@@ -3,15 +3,10 @@
  * record, the export, import and reset buttons, and the raw record. Redraws
  * on every progress write. The labels are in `progress-overview-model.ts`.
  */
+import { reviewDueLabel } from './due-counts';
 import { activeHabits, habitSummary } from './overview';
 import * as progress from './progress';
-import {
-	type CatalogCourse,
-	type CatalogLesson,
-	checkpointTitle,
-	knownIds,
-	reviewDueLabel,
-} from './progress-overview-model';
+import { type CatalogCourse, type CatalogLesson, checkpointTitle, knownIds } from './progress-overview-model';
 import { requiredData, requiredElement } from './required-element';
 
 /** Binds the progress page under `doc`; returns false when the page has no progress block. */

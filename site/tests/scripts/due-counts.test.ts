@@ -1,4 +1,4 @@
-import { dueByCourse, dueCountLabel, dueLine } from '@scripts/due-counts';
+import { dueByCourse, dueCountLabel, dueLine, reviewDueLabel } from '@scripts/due-counts';
 import { applyLessonFinished, emptyRecord, type ProgressRecord } from '@scripts/progress-model';
 import { describe, expect, it } from 'vitest';
 
@@ -57,5 +57,13 @@ describe('dueCountLabel', () => {
 	it('uses the singular for one item', () => {
 		expect(dueCountLabel(1)).toBe(' review item due');
 		expect(dueCountLabel(2)).toBe(' review items due');
+	});
+});
+
+describe('reviewDueLabel', () => {
+	it('counts due items with the right plural, and says when none is due', () => {
+		expect(reviewDueLabel(0)).toBe('Review: nothing due yet');
+		expect(reviewDueLabel(1)).toBe('Review due: 1 item');
+		expect(reviewDueLabel(3)).toBe('Review due: 3 items');
 	});
 });
