@@ -72,11 +72,18 @@ describe('mountInstructionsBuilders', () => {
 		expect(field('.ib-notouch').disabled).toBe(true);
 		expect(field('.ib-mistake').disabled).toBe(true);
 	});
-	it('mounts every instance on the page and returns 0 on a page without one', () => {
+	it('mounts every instance on the page, each drawing from its own form, and returns 0 on a page without one', () => {
 		document.body.innerHTML = markup + markup;
 		expect(mountInstructionsBuilders(document)).toBe(2);
-		for (const el of document.querySelectorAll(`${ROOT_SELECTOR} .ib-code`))
-			expect(el.textContent).toContain('# my-project');
+		const [first, second] = document.querySelectorAll(ROOT_SELECTOR);
+		const firstCode = first?.querySelector('.ib-code');
+		const before = firstCode?.textContent;
+		expect(before).toContain('# my-project');
+		const name = second?.querySelector('.ib-name') as HTMLInputElement;
+		name.value = 'second-project';
+		name.dispatchEvent(new window.Event('input', { bubbles: true }) as unknown as Event);
+		expect(second?.querySelector('.ib-code')?.textContent).toContain('# second-project');
+		expect(firstCode?.textContent).toBe(before);
 		document.body.innerHTML = '<p>no builder</p>';
 		expect(mountInstructionsBuilders(document)).toBe(0);
 	});
@@ -125,7 +132,8 @@ describe('mountInstructionsBuilder', () => {
 		vi.advanceTimersByTime(COPY_LABEL_MS);
 		expect(copy.textContent).toBe('Copy');
 	});
-	it('asks the learner to select and copy when the clipboard refuses', async () => {
+	it('asks the learner to select and copy when the clipboard refuses, then restores the label', async () => {
+		vi.useFakeTimers();
 		const writeText = vi.fn(async (_text: string) => {
 			throw new Error('denied');
 		});
@@ -133,6 +141,8 @@ describe('mountInstructionsBuilder', () => {
 		const copy = builder().querySelector('.ib-copy') as HTMLButtonElement;
 		copy.click();
 		await vi.waitFor(() => expect(copy.textContent).toBe('Select and copy'));
+		vi.advanceTimersByTime(COPY_LABEL_MS);
+		expect(copy.textContent).toBe('Copy');
 	});
 	it('uses the browser clipboard by default', async () => {
 		const writeText = vi.fn(async (_text: string) => {});
