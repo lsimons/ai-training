@@ -86,9 +86,10 @@ python3 errors.py show a03
 The model chose the right tool first. The tool couldn't read
 "24 December", so the model searched the handbook and answered with the
 usual hours it found there. On 24 December the office closes at 14:00,
-and the handbook page doesn't say so. The calendar does. The search and the answer did what they
-could with what they had, and the run went wrong at its first step, the
-date argument. The model reads this description of the tool:
+and the handbook page doesn't say so. The calendar does. The search and
+the answer used the information they got, and the run went wrong at its
+first step, the date argument. The model reads this description of the
+tool:
 
 ```python
 "opening_hours": {
@@ -147,7 +148,7 @@ the reply and the request that never ran. The fault is in the loop's
 stop rule, which should end the run only when the reply has no tool
 request.
 
-Here is the whole week, by the first step that went wrong:
+The table lists the whole week by the first step that went wrong.
 
 | Run | First step that went wrong                          | Kind                        |
 | --- | --------------------------------------------------- | --------------------------- |
@@ -164,8 +165,8 @@ Here is the whole week, by the first step that went wrong:
 
 Five of the ten failures are one kind, a date the tool couldn't read.
 Searches that missed the page with the answer come next with three, and
-the stop rule caused two. Your names for the kinds may differ from these, and the
-count is what matters. With categories named after where the run went
+the stop rule caused two. Your names for the kinds may differ from
+these, and the count is what matters. With categories named after where the run went
 wrong, one of them is five of ten.
 
 <Match id="classify-the-failures" objective="building-agents/evaluates-agents/grades-trajectories"
@@ -177,7 +178,7 @@ wrong, one of them is five of ten.
   rows={[
     { statement: 'The calendar returned "closed (public holiday)", and the reply said the office is open.', option: 3, why: 'The tool returned the right hours. Which step turned them into the wrong reply?' },
     { statement: 'The reply is "Let me check that for you.", and the transcript shows a tool request that never ran.', option: 2, why: 'The model asked for a tool. Which part decided not to run it?' },
-    { statement: 'The search for "holiday days" returned the training page, and the reply quoted the training budget.', option: 1, why: 'The model answered from the page it got. Was it the page with the answer?' },
+    { statement: 'The search for "day off" returned the expenses page, which says "per day", and the reply quoted the meal allowance.', option: 1, why: 'The model answered from the page it got. Was it the page with the answer?' },
     { statement: 'The calendar returned "cannot read the date \'next Friday\'", and the reply gave the weekday hours.', option: 0, why: 'The tool needs YYYY-MM-DD. Where would the model have learned that?' },
     { statement: 'The search for "guest wifi" found no page, and the handbook has a page about the network for guests.', option: 1, why: 'The handbook has the answer. Which step failed to bring it back?' },
   ]}
@@ -234,11 +235,12 @@ Which change do you make first?
 
 <Pitfall title="Fixing the latest failure">
 
-On Friday evening a user gets "I will look that up for you." as the whole
-answer, from run a29, and the team lead forwards it to the team. On
-Monday the team fixes the stop rule, which is a real fault, and ships
-the fix. It reaches two of the ten failures. The five date failures keep
-happening for another week, because nobody counted. The latest failure
+Suppose that on Friday evening a user gets "I will look that up for
+you." as the whole answer, from run a29, and the team lead forwards it
+to the team. On Monday the team fixes the stop rule instead of the date
+parameter. The stop rule is a real fault, and its fix reaches two of the
+ten failures. The five date failures keep happening for another week,
+because nobody counted. The latest failure
 is the one people remember. Count the failures of the week by kind before
 you choose what to fix.
 
@@ -252,7 +254,7 @@ you choose what to fix.
   buckets={['A tool argument', 'The search', 'The stop rule']}
   items={[
     { text: 'opening_hours got "Boxing Day" and returned an error', bucket: 0 },
-    { text: 'The search for "sick day" returned the training page', bucket: 1 },
+    { text: 'The search for "work laptop" returned the expenses page about work trips', bucket: 1 },
     { text: 'The answer is "One moment." and a tool request never ran', bucket: 2 },
     { text: 'opening_hours got "26/12" and returned an error', bucket: 0 },
     { text: 'The search for "bicycle" found no page, and a page covers bikes', bucket: 1 },
@@ -265,7 +267,7 @@ you choose what to fix.
   hint="What do you need to know before you can say which fix helps the most runs?"
   options={[
     { text: 'Fix what went wrong in the forwarded run today, then look at the others.', consequence: 'The forwarded run was one of two with that cause. The team ships the fix, and the seven failures of the most common kind go on for another week.' },
-    { text: 'Switch to a larger model today, which should improve every kind of failure.', consequence: 'Most of the week\'s failures come from a tool that rejects the arguments it gets, and a larger model sends the same arguments. Some runs that passed now fail.' },
+    { text: 'Switch to a larger model today, which should improve every kind of failure.', consequence: 'Most of the week\'s failures come from a tool that rejects the arguments it gets, and a larger model can send the same arguments, because the schema still doesn\'t say the format. Some runs that passed now fail.' },
     { text: 'Read the 12 transcripts, name where each went wrong, and count the kinds first.', correct: true, consequence: 'Seven of the 12 come from one parameter description. The team fixes that first, and fixes the forwarded run\'s cause next.' },
     { text: 'Add the forwarded question to the system prompt with the right answer written out.', consequence: 'That one question now gets the right answer. The other eleven failures are unchanged, and the prompt holds an answer that goes out of date.' },
   ]}>
@@ -281,11 +283,12 @@ you do first?
 A failure that reached a user shows a case the tests didn't have, and it
 goes into the test set (@AEC-09). In
 [A golden set is the agent's regression suite](/building-agents/golden-sets/)
-an item records the qualities a good answer has, not one exact reply. So
+an item records the qualities a good answer has, so a correct reply
+worded differently still passes. So
 each of the ten failures adds one item: the question as the user asked
 it, what a correct answer must say, what it must not say when there is a
-wrong answer to rule out, and the run it came from. Here are the items
-from a03 and a11:
+wrong answer to rule out, and the run it came from. The items from a03
+and a11 are:
 
 ```text
 question: Is the office open on 24 December?
@@ -301,9 +304,9 @@ origin: run a11, week of 30 November, the loop ended on a note
 The a03 item keeps the question in the words the user wrote, "24
 December". Run a02 asked the same question with `2026-12-24` and
 passed (`python3 errors.py show a02`), so an item written that way would
-never have caught this failure. After the fix to the date parameter the five date items pass.
-They stay in the set, and a later edit that shortens the description
-again fails them before users see it.
+never have caught this failure. After the fix to the date parameter the
+five date items pass. They stay in the set, and a later edit that
+shortens the description again fails them before users see it.
 
 <Scenario id="holiday-closure" objective="building-agents/evaluates-agents/builds-a-golden-set"
   concepts={['error-analysis', 'golden-sets']}
@@ -325,7 +328,7 @@ into the golden set, and what does the item record?
 
 <MultiChoice id="what-the-item-records" phase="review" objective="building-agents/evaluates-agents/builds-a-golden-set"
   concepts={['golden-sets', 'error-analysis']}
-  context="A handbook assistant answered Can I expense a taxi? with The handbook does not cover taxis, so I cannot say. The expenses page says that taxis are reimbursed when no train or bus goes there, and the keyword search missed it because the query said taxi and the page says Taxis. The team adds the run to its golden set."
+  context="A handbook assistant answered 'Can I expense a taxi?' with 'The handbook does not cover taxis, so I cannot say.' The expenses page says that taxis are reimbursed when no train or bus goes there, and the keyword search missed it because the query said 'taxi' and the page says 'Taxis'. The team adds the run to its golden set."
   title="What goes into the taxi item?"
   hint="Which lines would still grade the item correctly after the search is fixed and the reply is worded differently?"
   options={[
@@ -375,27 +378,40 @@ python3 errors.py week2
 
 </Predict>
 
-<Exercise stretch="Change search_handbook in agent.py so that it finds the right page for the most common kind you found, without changing the scripted runs, and run week2 again. Check which runs of week 1 and week 2 now pass, and whether any run that passed before now fails.">
+<Exercise stretch="Change search_handbook in agent.py so that it finds the page with the answer for the most common kind you found. The answers in the fixture are scripted, so the grades in week2 don't change. Check the tool results instead: run python3 errors.py show b15 and the other runs of that kind, and check that the search now returns the page with the answer. Then run show a01 and show a04, two runs that passed, and check that they still get their page.">
 
 Read the ten transcripts of week 2 with `python3 errors.py show b02` and
 the other run ids. For each run, write one line with the first step that
 went wrong and a name for its kind that you choose. Count the kinds, and
 say which single fix would change the most runs. Then write the golden-set
 item each failure adds: the question in the user's words, what a correct
-answer must say, and the run it came from. The count, not the most
-recent run, is what picks the fix.
+answer must say, and the run it came from. The count picks the fix, and
+the most recent run is only one of ten.
 
 A good result has five search misses as the largest kind: b02, b09, b15,
 b23 and b33. The words in each question ("working remotely", "wifi",
 "taxi", "leave", "badge") aren't the words on the page that has the
-answer, or they match another page. So one change to the search reaches
-five runs. Two runs, b12 and b38, ended on a note, the stop rule that
+answer, or they match another page. In b15 only the word form differs
+("taxi" and "taxis"). b23 has two problems: "leave" matches the wrong
+page, and "bike" misses "bikes". The other three use another word for
+the same thing. So one change to the
+search can reach at most five runs, if it handles both word forms and
+other words. Two runs, b12 and b38, ended on a note, the stop rule that
 nobody fixed after week 1. Two more, b05 and b27, sent a date in the
 right format and the wrong year. In b19 the calendar said closed, and the
 model answered that the office is open. Your names may differ. Check that
-each one names a step, and that the search is still the largest. Which of
-the ten would a team lead have forwarded on Friday, and would it have
-been a search miss?
+each one names a step, and that the search is still the largest. The
+item from b23 is a good example:
+
+```text
+question: Where can I leave my bike?
+must say: rack
+origin: run b23, week of 7 December, "leave" found the annual leave page
+```
+
+Which of the ten would a team lead have forwarded on Friday, and would
+it have been a search miss? The last one on Friday is b38, a stop-rule
+failure, so a fix picked from it would reach two runs out of ten.
 
 </Exercise>
 

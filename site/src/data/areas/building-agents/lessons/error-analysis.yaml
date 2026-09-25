@@ -1,8 +1,9 @@
 id: building-agents/error-analysis
 title: Reading failures one by one
 description: >-
-  Read the ten failed runs of a handbook assistant's week one at a time, name the step where each went
-  wrong, count the kinds, fix the most common one first, and turn every failure into a golden-set item.
+  Read a handbook assistant's ten failed runs of one week, one at a time, name the step where each
+  went wrong, count the kinds, fix the most common one first, and turn every failure into a
+  golden-set item.
 mode: explanation
 covers: building-agents/evaluation
 serves:
