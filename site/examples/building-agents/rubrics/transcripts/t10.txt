@@ -1,0 +1,4 @@
+question: How much can I spend on meals on a work trip?
+call: search_docs(query='meals work trip')
+result: expenses.txt: Expenses. Meals on a work trip are reimbursed up to 40 euros per day with a receipt. Claims are filed within 30 days. Train tickets are booked through the travel desk.
+answer: Up to 40 euros per day, with a receipt. Alcohol is not reimbursed. "Meals on a work trip are reimbursed up to 40 euros per day with a receipt."

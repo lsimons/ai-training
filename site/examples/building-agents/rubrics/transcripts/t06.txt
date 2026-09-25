@@ -1,0 +1,4 @@
+question: How many days ahead are flights booked?
+call: search_docs(query='flights booked days ahead')
+result: travel.txt: Travel. Flights are booked through the travel desk at least 14 days ahead. Economy class is the default for flights under six hours.
+answer: Book your flight through the travel desk at least two weeks before you travel.

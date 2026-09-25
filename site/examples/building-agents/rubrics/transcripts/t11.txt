@@ -1,0 +1,4 @@
+question: What do I do with a phishing email?
+call: search_docs(query='phishing email')
+result: security.txt: Security. Passwords are kept in the company password manager. Forward a phishing email to the security team and delete it afterwards.
+answer: Delete it, then tell the security team. "Forward a phishing email to the security team and delete it afterwards."

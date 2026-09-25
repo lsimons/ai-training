@@ -1,0 +1,4 @@
+question: Is there a company gym?
+call: search_docs(query='company gym')
+result: nothing retrieved
+answer: I could not find anything about a gym in the handbook, sorry!
