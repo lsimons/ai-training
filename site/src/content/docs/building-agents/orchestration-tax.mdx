@@ -1,12 +1,13 @@
 import { Choice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
 
 In this lesson we count what a second and a third agent cost, and we
-decide when a design with more agents should replace one agent. The
-previous lesson built two ways to coordinate agents: a pipeline, in
-which code runs three agents one after another, and a manager model that
-calls two workers as tools. Both answer a task that one agent can also
-do. Here we run the two arrangements from the previous lesson next to
-one agent that does the same work alone, and count the difference.
+decide when a design with more agents should replace one agent. In a
+pipeline, code runs three agents one after another, and each one gets
+what the one before it wrote. In a manager design, a model calls two workers as tools and
+decides when each one runs. The previous lesson builds both in code.
+Here both answer a task that one agent can also do, and we run them
+next to one agent that does the same work alone and count the
+difference.
 
 The difference is called the **orchestration tax**: the cost that each
 extra agent adds. Handoffs and context sent again take more tokens. The
@@ -24,9 +25,9 @@ items. The one-agent design has three tools, `get_order`, `get_policy` and
 the email, looks the order up and writes notes, then a `writer` that
 writes the reply from those notes, then a `checker` that checks the
 reply against the notes. The `manager` calls the same `lookup` and
-`writer` agents as tools. Every model is fake: a
-function that reads its prompt and its input and writes text back. Every
-run prints the same result. The orders, the policy and the emails
+`writer` agents as tools. Each model is fake: a
+function that reads its prompt and its input and writes text back. The
+runs print the same result each time. The orders, the policy and the emails
 are illustrative, written by the author. The files are in
 `site/examples/building-agents/orchestration-tax/`. Copy the
 `orchestration-tax` folder and `cd` into the copy. Each step below is
@@ -70,9 +71,9 @@ pipeline starts with the same 59-token description of the shop, and
 each agent reads it again. The manager has three calls of its own, and
 each one reads the manager's whole conversation so far, the email
 included. The manager also copies the notes of `lookup` into its call to
-the writer, and it returns the writer's reply as its own answer, so it
-writes that reply a second time. That's how 718 of its 1225 tokens are
-repeats.
+the writer, and it writes the writer's reply again as its own answer.
+Each of its calls re-reads the email, its own earlier calls and the
+worker results, so 718 of its 1225 tokens are repeats.
 
 The pipeline costs only 1.4 times the one-agent design here, partly
 because the writer and the checker never read the email. The next
@@ -120,7 +121,7 @@ of notes and not the whole conversation of `lookup`, which is why the
 pipeline was cheap. A handoff that summarizes
 saves tokens and can drop what a later step needs. Passing the whole
 conversation to every agent keeps it, and the Agent Engineer Course
-names that as its own mistake, because the contexts grow fast
+lists that as a mistake too, because the contexts grow fast
 (@AEC-18). The same course advises checking each agent's output before
 the next agent gets it, because a bad result early in a pipeline goes
 on through every later step (@AEC-18). A check like that only finds
@@ -130,8 +131,8 @@ what its input holds, and this checker never saw the email.
 wait for each other and never finish, send a task back and forth, or
 change the same thing in opposite ways (@AEC-07). The fixture has none
 of these, because code or the manager decides who runs, one at a time.
-Each new agent that can start work on its own adds a way to fail that
-one agent on its own doesn't have.
+Each new agent that can start work by itself adds a way to fail that
+a design with one agent doesn't have.
 
 **Harder debugging.** The g06 failure shows in the writer's reply. It
 started one call earlier in another agent, in the notes of `lookup`,
@@ -155,9 +156,10 @@ is a fix inside one agent to try first.
 window holds, or the context is full of old tool results before the
 agent reaches the question. The agent can load text just in time: it
 reads a file or searches when it needs a fact, and it doesn't take
-everything in at the start. Compaction replaces the older turns of a
-conversation with a summary, and that keeps a long agent task inside the
-context window (@Claude docs compaction). Claude Platform 101 teaches
+everything in at the start. With compaction, the API writes a
+summary of the early part of a conversation and sends that summary in
+place of those turns. A long agent task then uses fewer tokens and
+still fits in the window (@Claude docs compaction). Claude Platform 101 teaches
 more patterns for managing the context of a long-running agent
 (@Academy claude-platform-101). When the work is still too large after
 you try those patterns, a second agent can read a large part of it in
@@ -241,26 +243,27 @@ against the tax.
   title="Three points more at twice the cost"
   hint="What would you need to know about the three points before you pay for them on every run?"
   options={[
-    { text: 'Keep the three agents, because three more passes on 40 items is a clear gain.', consequence: 'The three items needed a lookup rule that is in one worker\'s prompt. The team pays twice per run for a line that the single agent could have had.' },
-    { text: 'Keep the single agent, because twice the cost is too much for three points.', consequence: 'The three items needed a file set larger than one context. The team ships the single agent, and those questions keep failing.' },
+    { text: 'Keep the three agents, because three more passes on 40 items is a clear gain.', consequence: 'Two of the three items needed a line from one worker\'s prompt. The team pays twice per run for a line that the single agent could have had.' },
+    { text: 'Keep the single agent, because twice the cost is too much for three points.', consequence: 'One of the three items needs a context larger than one agent has. The team ships the single agent, and that question keeps failing.' },
     { text: 'Run both designs on a new set of 40 items and keep the one that scores higher.', consequence: 'The new set gives a similar result, and the team still doesn\'t know why the three agents do better.' },
     { text: 'Find which items differ and why, and give the single agent what it lacked, if it can take it.', correct: true, consequence: 'Two of the items needed a prompt line, which the single agent now has. The third needs a context that doesn\'t fit, and that one result is what the team weighs against the cost.' },
   ]}>
 
 On a golden set of 40 items, the design with three agents passes 34 and
 the single agent passes 31. The design with three agents uses twice the
-tokens per run. Which do you keep?
+tokens per run. What do you do with these two totals?
 
 </Scenario>
 
 <Pitfall title="A design that was never measured">
 
 A team splits its support agent into an agent that sorts the tickets,
-an agent that looks things up and a writer, because each role now has a short and clear prompt. The
-new design reads better, and every trace the team looks at seems
-reasonable, so it ships. Nobody runs the old single agent on the same
-golden set, so nobody sees the questions that the first agent's note now drops, or
-that the bill for each run went up. A design with more agents is a
+an agent that looks things up and a writer, because each role now has a
+short and clear prompt. The new design reads better, and every trace
+the team looks at seems reasonable, so it ships. Nobody runs the old
+single agent on the same golden set, so nobody sees the questions that
+the first agent's note now drops, or that the bill for each run went
+up. A design with more agents is a
 claim to test like any other change. Run the single agent on the same
 golden set, and keep the extra agents only when they win by more than
 they cost.
@@ -297,7 +300,7 @@ What does the team do next?
 
 </Choice>
 
-<Exercise stretch="Add the stock line to SINGLE_PROMPT in tax.py and run python3 tax.py compare again. Compare the new score and tokens with the pipeline's.">
+<Exercise stretch="Add the sentence 'Check the stock before you offer a replacement.' word for word to SINGLE_PROMPT in tax.py (the fake model looks for that exact text) and run python3 tax.py compare again. Compare the new score and tokens with the pipeline's.">
 
 Run `python3 tax.py items` to see which of the twelve emails each design
 passes. For each email where the two differ, run
@@ -339,8 +342,9 @@ to meet it?
    fixes inside one context first: loading just in time, compaction
    (@Claude docs compaction), tool search (@Claude docs tool-search-tool)
    and skills (@Claude docs agent-skills-overview).
-5. Compare the design with the single agent on the same golden set, and
-   read the items that differ before you decide (@AEC-18).
+5. Add an agent only when one agent is shown to fail at the task
+   (@AEC-18). Compare the design with the single agent on the same
+   golden set, and read the items that differ before you decide.
 
 </Recap>
 
