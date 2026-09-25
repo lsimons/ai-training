@@ -15,13 +15,13 @@ to, `get_payments` lists the payments on one account, and
 `send_reminder` emails a customer about an unpaid invoice. The loop is
 the one from [Building your first agent](/building-agents/agent-loop/).
 A real model takes a different path on different runs, while a fake
-model repeats one path. So each of the fixture's eight runs has its
-own scripted model, the list of requests that run makes, while the
-tools are real functions over a small table of invoices and payments.
-The files are in `site/examples/building-agents/traces-and-trajectories/`.
-Copy the `traces-and-trajectories` folder and `cd` into the copy. Each
-step below is `python3 trajectory.py <step>`, run from there. No application programming interface
-(API) key is needed.
+model repeats one path. So each of the fixture's eight runs has its own
+scripted model, the list of requests that run makes, while the tools are
+real functions over a small table of invoices and payments. The files
+are in `site/examples/building-agents/traces-and-trajectories/`. Copy
+the `traces-and-trajectories` folder and `cd` into the copy. Each step
+below is `python3 trajectory.py <step>`, run from there. No application
+programming interface (API) key is needed.
 
 ## Give the loop a trace
 
@@ -316,12 +316,13 @@ python3 trajectory.py show_r7
 
 </Predict>
 
-By its two grades, r7 took a good path and gave a wrong answer.
-Reading the transcript shows where it went wrong: the payments list has invoice 2207,
-paid on 2026-09-02, and the model answered that it was not paid. The
-tools and the path worked, so a fix to the tools or to the path rules
-won't help. The fault is in how the model read the result. The second
-transcript is r8, which passed both graders.
+By its two grades, r7 took a good path and gave a wrong answer. Reading
+the transcript shows where it went wrong. The payments list shows
+invoice 2207 as paid on 2026-09-02, and the model still answered that it
+was not paid.
+The tools and the path worked, so a fix to the tools or to the path
+rules won't help. The fault is in how the model read the result. The
+second transcript is r8, which passed both graders.
 
 <Predict id="transcript-r8" title="The transcript of run r8"
   answer={`transcript r8
@@ -343,15 +344,15 @@ python3 trajectory.py show_r8
 
 </Predict>
 
-No tool returned a due date. The invoice record has a number, an
-account and an amount, and the payments list is empty. The model made
-up "due on 2026-09-30", and a colleague who reads the answer may tell
-the customer that date. Both graders passed r8, because the answer
-contains `has not been paid` and the path is the expected one with one
-retry. The trace also shows a cost that neither grade reports: r8
-took 5819 ms, and the timeout was 3000 ms of that. Turn the failure you found by reading into a
-new check, for example that every date in the answer appears in
-a tool result. Add the question to the golden set too.
+No tool returned a due date. The invoice record has a number, an account
+and an amount, and the payments list is empty. The model made up "due on
+2026-09-30", and a colleague who reads the answer may tell the customer
+that date. Both graders passed r8, because the answer contains
+`has not been paid` and the path is the expected one with one retry. The
+trace also shows a delay that neither grade reports: r8 took 5819 ms,
+and the timeout was 3000 ms of that. Turn the failure you found by
+reading into a new check, for example that every date in the answer
+appears in a tool result. Add the question to the golden set too.
 
 <Scenario id="scores-unchanged" objective="building-agents/evaluates-agents/grades-trajectories"
   concepts={['trajectory-evaluation', 'observability']}
@@ -406,7 +407,7 @@ time. How do you grade the two runs?
 
 <Order id="order-the-grading" phase="review" objective="building-agents/evaluates-agents/grades-trajectories"
   concepts={['trajectory-evaluation', 'observability']}
-  context="A team builds the evaluation of an agent that looks up invoices. It has written the expected path for the lookup task: which tools, in what order, which tools never, and a limit on the number of tool calls."
+  context="A team builds the evaluation of an agent that looks up invoices. It has written the expected path for the lookup task: which tools, in what order, which tools never, and a limit on the number of tool calls, and an answer grader that checks each reply for a phrase."
   title="Order the grading of the runs"
   hint="Which step needs the output of the one before it?"
   steps={['Record a trace of every model call and tool call for each run', 'Grade each trace against the expected path, and each answer against its phrase', 'Read the full transcripts of a sample of the runs that passed both grades', 'Write a new check for the failure the reading found', 'Run the new check over every recorded trace']} />
@@ -445,9 +446,10 @@ list you can check from the trace alone.
 A good result fails four runs and passes four. Run r2 fails for the
 wrong account and for five tool calls, r4 for `send_reminder`, r5 for
 not searching first and for a lookup on an account it never searched
-for, and r6 for searching twice. Runs r1, r3, r7 and r8 pass. If r8 fails, your rule counts the retry after the timeout as a
-wasted step. Which of the four runs that pass your rule would you still
-not ship, and what would have told you?
+for, and r6 for searching twice. Runs r1, r3, r7 and r8 pass. If r8
+fails, your rule counts the retry after the timeout as a wasted step.
+Which of the four runs that pass your rule would you still not ship, and
+what would have told you?
 
 </Exercise>
 
