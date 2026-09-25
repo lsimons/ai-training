@@ -29,11 +29,12 @@ notes: >-
   Explanation mode with no fixture and no widget. The CS50 facts come from Liu 2024b, read on
   2026-09-25 from the authors' PDF on the Harvard publications page: every answer the CS50 Duck
   posts on the course forum can be endorsed, amended or deleted by a staff member, and in Fall 2023
-  staff endorsed 70 of its 180 answers, which the authors say understates its accuracy. The paper
+  staff endorsed 70 of its 180 answers, which the authors suspect understates its accuracy. The paper
   is the source for the endorsement claims, because the CS50x course page does not describe the
   forum. The key is Liu 2024b because Liu 2024 is already the lost-in-the-middle paper. CS50 text
   is not adapted, and no sentence is quoted. The earlier lessons checking-habits and
-  following-the-source each mention the CS50 marks in one sentence and point here. The assumes
+  following-the-source each mention the CS50 marks in one sentence, and checking-habits says a
+  later lesson covers making the difference visible. The assumes
   entries name following-the-source for marking a claim unverified and when-the-tool-is-usually-right
   for building the check into the process, the two ideas this lesson extends to a team. The team,
   the template and the help page answer are invented. The Academy course is linked and its
