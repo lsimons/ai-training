@@ -69,6 +69,27 @@ describe('habitTagsOfSource (spec S07 "Authoring")', () => {
 		}
 		expect(habitTagsOfSource(page('<Habit id="ref-check">\nT.\n</Habit>'), 'x/y')).toHaveLength(1);
 	});
+	it('rejects the slug the appended References heading gets after a source heading took `references`', () => {
+		const one = page('<Habit id="references-1">\nT.\n</Habit>', '## References\n\nText.\n\n');
+		expect(() => habitTagsOfSource(one, 'x/y')).toThrow(
+			/habit id "references-1" is also an id the build adds to the lesson page/,
+		);
+		const two = page('<Habit id="references-2">\nT.\n</Habit>', '## References\n\nText.\n\n## References\n\nText.\n\n');
+		expect(() => habitTagsOfSource(two, 'x/y')).toThrow(
+			/habit id "references-2" is also an id the build adds to the lesson page/,
+		);
+		expect(habitTagsOfSource(page('<Habit id="references-1">\nT.\n</Habit>'), 'x/y')).toHaveLength(1);
+	});
+	it("rejects the ids Starlight's <Tabs> gives its tabs and panels", () => {
+		for (const id of ['tab-0-0', 'tab-2-11', 'tab-panel-0-0', 'tab-panel-3-1']) {
+			expect(() => habitTagsOfSource(page(`<Habit id="${id}">\nT.\n</Habit>`), 'x/y')).toThrow(
+				new RegExp(`habit id "${id}" is also an id the build adds to the lesson page`),
+			);
+		}
+		for (const id of ['tab-order', 'tab-0', 'tab-panel-0']) {
+			expect(habitTagsOfSource(page(`<Habit id="${id}">\nT.\n</Habit>`), 'x/y')).toHaveLength(1);
+		}
+	});
 	it("rejects Starlight's fixed ids through the slug rule", () => {
 		for (const id of [
 			'_top',

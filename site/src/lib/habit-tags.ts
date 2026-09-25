@@ -48,6 +48,11 @@ export const RESERVED_IDS: ReadonlySet<string> = new Set([
 /** The id of the n-th entry of the references list `plugins/remark-citations.mjs` appends. */
 export const REFERENCE_ID = /^ref-\d+$/;
 /**
+ * The ids Starlight's `<Tabs>` gives its tabs and panels, `tab-<i>-<n>` and
+ * `tab-panel-<i>-<n>` (`@astrojs/starlight/dist/user-components/tabs-processor.js`).
+ */
+export const TAB_ID = /^tab-(?:panel-)?\d+-\d+$/;
+/**
  * The ids `lesson/Match.astro` gives the rows of a `<Match>`: `<id>-row-<i>` on each
  * select and `<id>-row-<i>-fb` on its feedback. Group 1 is the checkpoint id.
  */
@@ -71,8 +76,8 @@ export function assertHabitId(where: string, id: string | undefined): string {
  * The habits in `tree`, parsed from `src`, in source order, after the rules:
  * at most `MAX_HABITS`, each with a kebab-case `id` unique in the lesson that
  * is not a heading slug, a checkpoint id, the id of a `<Match>` row or an id
- * the build adds (`RESERVED_IDS`, `REFERENCE_ID`), each after the `<Recap>`, and
- * each with text.
+ * the build adds (`RESERVED_IDS`, `REFERENCE_ID`, `TAB_ID`, the slug of the
+ * appended `References` heading), each after the `<Recap>`, and each with text.
  * Throws on the first break, naming `where`.
  */
 export function habitTagsIn(tree: MdxNode, src: string, where: string): HabitInfo[] {
@@ -83,6 +88,11 @@ export function habitTagsIn(tree: MdxNode, src: string, where: string): HabitInf
 	const recapEnd = Math.max(-1, ...elements.filter((n) => n.name === 'Recap').map((n) => n.position?.end.offset ?? -1));
 	// The ids the build gives the headings (`lib/section-slugs.ts`), so a repeated heading's `-1` counts too.
 	const slugs = new Set(headingSlugs(tree));
+	// The page-wide slugger slugs the `References` heading `plugins/remark-citations.mjs` appends
+	// after the source headings, so when a source heading has taken `references` it becomes the next
+	// free `references-<n>`.
+	let referencesSlug = 'references';
+	for (let n = 1; slugs.has(referencesSlug); n++) referencesSlug = `references-${n}`;
 	// A checkpoint's section id is its `id` too (`CheckpointShell.astro`), so a habit id must differ from those as well.
 	const checkpointIds = new Set(
 		elements
@@ -105,7 +115,7 @@ export function habitTagsIn(tree: MdxNode, src: string, where: string): HabitInf
 		ids.add(id);
 		if (slugs.has(id)) throw new Error(`${where}: habit id "${id}" is also a heading slug; pick another id`);
 		if (checkpointIds.has(id)) throw new Error(`${where}: habit id "${id}" is also a checkpoint id; pick another id`);
-		if (RESERVED_IDS.has(id) || REFERENCE_ID.test(id))
+		if (RESERVED_IDS.has(id) || id === referencesSlug || REFERENCE_ID.test(id) || TAB_ID.test(id))
 			throw new Error(`${where}: habit id "${id}" is also an id the build adds to the lesson page; pick another id`);
 		const row = MATCH_ROW_ID.exec(id);
 		if (row && matchIds.has(row[1] ?? ''))
