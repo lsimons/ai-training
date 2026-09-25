@@ -241,11 +241,11 @@ ChatGPT's feedback said that everything looked good (@Madaan 2023). A
 critic that can't find an error adds calls and doesn't fix anything.
 
 Part of a measured gain can also come from a weak first prompt. On one
-Self-Refine task, a better single prompt scored higher than the
-original prompt after self-correction, 81.8 against 75.1, in one call
-against seven (@Huang 2023). Before you add a
-second pass, check whether a better first prompt does the same job in
-one call.
+Self-Refine task, a better single prompt scored 81.8 in one call, above
+the 67.0 reported for the original prompt after self-correction.
+Self-correction on top of the better prompt, in seven calls, lowered the
+score to 75.1 (@Huang 2023). Before you add a second pass, check whether
+a better first prompt does the same job in one call.
 
 [Reasoning before each action](/building-agents/react/) added one line
 per step inside the same call. Reflection adds whole calls after an
@@ -308,10 +308,11 @@ work is the criteria.
 
 A good result: flights passes after 2 rounds and leave after 1, as
 before. Laptop now passes after 2 rounds with the ticket proposal gone,
-so the loop never opens the ticket, and dog passes after 2 rounds with the final draft "not found". Compare
-with `python3 model_answer.py` in the same folder. Which of your three
-criteria did a draft fail that `critic_checks` passed, and could a
-critic asked "is this good" have found it?
+so the loop never opens the ticket, and dog passes after 2 rounds with
+the final draft "not found". Compare with `python3 model_answer.py` in
+the same folder. Which of your three criteria did a draft fail that
+`critic_checks` passed, and could a critic asked "is this good" have
+found it?
 
 </Exercise>
 
