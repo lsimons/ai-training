@@ -246,7 +246,16 @@ export function checkExamples(
  */
 const FOUNDATIONS =
 	'foundations page: `mise run data` rejects `<Predict run=...>` there, so the page states the output in prose until #237 picks the proof mechanism';
+const MODEL_ANSWER =
+	'a model answer the learner runs to compare with their own; the page shows the command and none of its output';
+const RED_TEAM_TOOL =
+	'a tool the learner runs on their own scratch folder; a demo_*.py Predict runs the same _common.py function and checks the output the page shows';
 export const UNRUN_EXEMPT = new Map([
+	['building-agents/planning/model_answer.py', MODEL_ANSWER],
+	['building-agents/reflection/model_answer.py', MODEL_ANSWER],
+	['coding-with-agents/red-teaming-your-agent/check_run.py', RED_TEAM_TOOL],
+	['coding-with-agents/red-teaming-your-agent/make_scratch.py', RED_TEAM_TOOL],
+	['coding-with-agents/red-teaming-your-agent/scan_hidden.py', RED_TEAM_TOOL],
 	[
 		'coding-with-agents/reviewing-the-diff/build.py',
 		'a setup tool the learner runs with a directory of their own; the page shows the command and none of its output',
@@ -254,6 +263,10 @@ export const UNRUN_EXEMPT = new Map([
 	['concepts/agent-loop/tiny_agent.py', FOUNDATIONS],
 	['concepts/retrieval/keyword_search.py', FOUNDATIONS],
 	['concepts/what-tokens-cost/price_prompts.py', FOUNDATIONS],
+	[
+		'customizing-agents/mcp-hardening/issue_token.py',
+		'the learner runs it to make a token for their own session; its output holds the current time, and the page shows the command and none of its output',
+	],
 	['safety/assessing-a-use-case/score_use_cases.py', FOUNDATIONS],
 	['safety/checking-habits/totals.py', FOUNDATIONS],
 	['safety/checking-what-an-agent-changed/replay.py', FOUNDATIONS],
