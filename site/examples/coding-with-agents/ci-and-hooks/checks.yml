@@ -1,0 +1,18 @@
+# The deterministic gates of the nightly import, on every pull request and
+# on every push to main. Copy it to .github/workflows/checks.yml.
+name: checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Compile the Python files
+        run: python3 -m py_compile importer.py test_nights.py
+      - name: Run the nightly test
+        run: python3 test_nights.py
