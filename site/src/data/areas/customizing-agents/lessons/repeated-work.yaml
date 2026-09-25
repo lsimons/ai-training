@@ -40,8 +40,8 @@ notes: >-
   time. The fixtures are in `site/examples/customizing-agents/repeated-work/`: three session logs
   written for the lesson in `sessions/`, the project's instructions file as `instructions-before.md`
   (not named AGENTS.md, so no agent working in this repository loads it as instructions),
-  `find_repeats.py`, which lists the user messages that recur across sessions (Jaccard index of
-  word sets at least 0.5) and the commands run in every session, and one answer to the exercise in
+  `find_repeats.py`, which lists the user messages that recur across sessions (the share of shared
+  words at least 0.5) and the commands run in every session, and one answer to the exercise in
   `model-answer/`. The page describes the hook in prose and doesn't ship hook code, because
   first-hook builds one. The lesson keeps skills for procedures and context files for examples and
   says so, because Claude Code also allows reference skills. The page doesn't link to or mention
