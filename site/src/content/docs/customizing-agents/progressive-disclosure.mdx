@@ -11,7 +11,12 @@ The measuring is done by a short Python script that only reads files, and
 the course checks its output on every build. It is in the course repository
 at `site/examples/customizing-agents/progressive-disclosure/`, next to two
 versions of the release skill. Run the commands in this lesson from that
-directory.
+directory. In the `cd` line, replace `<course-repo>` with the path to your
+copy of the course repository.
+
+```sh
+cd <course-repo>/site/examples/customizing-agents/progressive-disclosure
+```
 
 ## What the agent reads, and when
 
@@ -28,8 +33,9 @@ needs at that point (@AEC-17).
 
 Each stage has its own cost. The name and description are in context on
 every turn of every session, whether the skill runs or not. Both
-documents put that stage at about 100 tokens per skill, and for the body
-they recommend staying under 5000 tokens (@Agent Skills spec)
+documents put that stage at about 100 tokens per skill. The specification
+recommends keeping the body under 5000 tokens, and Anthropic's overview
+gives the same figure for the body (@Agent Skills spec)
 (@Claude docs agent-skills-overview). In Claude Code, the body stays in the
 conversation on the turns after the skill runs (@Claude Code skills). As
 [How a language model works](/concepts/how-models-work/) showed, the model
@@ -53,10 +59,9 @@ doesn't cost any tokens (@Claude docs agent-skills-overview).
 
 The directory `grown/release/` holds the release skill from the previous
 lesson with the new section added. It is called "When a release goes
-wrong" and has five numbered steps. It covers two cases: a release nobody
-has pushed yet, which the agent undoes with `git tag -d` and a reset, and
-one that was pushed, where the agent makes a new fix release and leaves the
-remote tag to you. The section is between the release steps and "Done
+wrong" and has five numbered steps. A release that nobody has pushed yet
+is undone with `git tag -d` and a reset. For a release that was pushed, the
+agent leaves the remote tag alone and makes a new fix release. The section is between the release steps and "Done
 when". The agent reads it on every release.
 
 The script `measure.py` prints one line per stage. For the first stage it
@@ -71,8 +76,9 @@ per token. A word of up to six characters counts as one token and a longer
 word as one token per four characters. Each punctuation mark counts as a
 token of its own. Markdown has a lot of punctuation, and the rule gives a
 higher count for a skill than for plain prose of the same length. The exact
-count for a model comes from the vendor's own tokenizer. The rule is the same for both
-versions of the skill, so the difference between them is what matters here.
+count for a model comes from the vendor's own tokenizer. The rule is the
+same for both versions of the skill, so the difference between them is what
+matters here.
 
 Before you run it, guess the second line. The file is about two pages of
 Markdown, and the counter from the concepts lesson gave 115 tokens for half
@@ -81,10 +87,10 @@ a page of notes.
 <Predict id="measure-the-grown-skill" title="Measure the skill as it stands"
   answer={`grown/release
     always loaded, name and description: 39
-    when the skill runs, SKILL.md: 1288
+    when the skill runs, SKILL.md: 1256
     when a step reads it: no other files
-    total, SKILL.md read: 1327
-    total, every file read: 1327`}
+    total, SKILL.md read: 1295
+    total, every file read: 1295`}
   run="customizing-agents/progressive-disclosure/before.py">
 Run this, and compare with the output below.
 
@@ -94,9 +100,9 @@ python3 measure.py grown/release
 
 </Predict>
 
-The first line is small, and it should be. A description of one sentence
-is far below the figure of about 100 tokens. The second line is the one to
-read. A release loads all 1288 tokens of `SKILL.md`, and the rollback
+The first line is small, and it should be. A description of two short
+sentences is far below the figure of about 100 tokens. The second line is
+the one to read. A release loads all 1256 tokens of `SKILL.md`, and the rollback
 steps are part of them even when the release goes right.
 
 ## Move the rollback into a reference file
@@ -132,7 +138,7 @@ The release skill sends you here. Use these steps only when the user
 asks you to undo a release, or when a check after the tag shows that the
 release is wrong. Undo nothing else.
 
-1. Run `git describe --tags` and `git log --format='%h %s' -n 3`. ...
+1. Run `git describe --tags`, `git log --format='%h %s' -n 3` and ...
 ```
 
 Then leave the heading in `SKILL.md` and replace the text under it with a
@@ -151,26 +157,37 @@ that says only "see `rollback.md`" gives the agent no way to tell whether
 this run needs the file, so it may read it every time, or never.
 Anthropic's guide says to watch for this when you test a skill: an agent
 that never opens a bundled file may be missing a clear enough signal in
-`SKILL.md` (@Claude docs best-practices).
+`SKILL.md` (@Claude docs best-practices). The agent reads the pointer only in
+a run where the skill has loaded. An undo asked for in a new session loads
+the skill only if its description names that request.
 
 The course repository has the result in `split/release/`. Measure it, and
 then measure your copy with `python3 measure.py ~/skill-copy/release`. If
 you moved the text as shown, your copy gives the same numbers. Its first
 line is your path.
 
-<Predict id="measure-the-split-skill" objective="customizing-agents/writes-skill/discloses-progressively"
+<Choice id="which-line-drops" objective="customizing-agents/writes-skill/discloses-progressively"
   concepts={['progressive-disclosure']}
-  context="A release skill had a rollback section in its SKILL.md. The section was moved into a rollback.md file in the same directory, and a four-line pointer that says when to read it was left in its place. A script prints an estimated token count for the name and description, for SKILL.md, and for each other file, then the total when only SKILL.md is read and the total when every file is read. Before the move it printed 39, 1288, no other files, 1327 and 1327."
-  title="What changes after the move?" hint="Which part of SKILL.md did you leave as it was? What does a run that needs the undo steps read now?"
+  context="A release skill had a rollback section in its SKILL.md. The section was moved into a rollback.md file in the same directory, and a three-line pointer that says when to read it was left in its place. A script prints an estimated token count for the name and description, for SKILL.md and for each other file, then the total when only SKILL.md is read and the total when every file is read."
+  title="Which line drops?" hint="Which file lost the undo steps, and which parts of the skill did the move leave as they were?"
+  options={[
+    { text: 'The line for the name and description, since the skill now has less text in it.', why: 'The move left the front matter as it was, so the name and description cost the same.' },
+    { text: 'The line for SKILL.md, since the undo steps are no longer in that file.', correct: true },
+    { text: 'The total when every file is read, since the undo steps are now read only on demand.', why: 'A run that reads every file reads the undo steps as well as the pointer, so this total doesn\'t drop.' },
+  ]}>
+Before you run the script on the split skill, predict which line drops
+compared with the grown skill.
+</Choice>
+
+<Predict id="measure-the-split-skill" title="Measure the split skill"
   answer={`split/release
     always loaded, name and description: 39
     when the skill runs, SKILL.md: 813
-    when a step reads it, rollback.md: 548
+    when a step reads it, rollback.md: 516
     total, SKILL.md read: 852
-    total, every file read: 1400`}
+    total, every file read: 1368`}
   run="customizing-agents/progressive-disclosure/after.py">
-Predict which lines change from the grown skill and in which direction.
-Then run it.
+Run this, and compare with the output below.
 
 ```sh
 python3 measure.py split/release
@@ -179,9 +196,9 @@ python3 measure.py split/release
 </Predict>
 
 The description didn't change, so the first line is still 39. A release
-that goes right now loads 852 tokens where it loaded 1327. A rollback reads
-both files and loads 1400, a little more than before, because the agent
-reads the pointer as well as the steps. The split makes the common run
+that goes right now loads 852 tokens where it loaded 1295. A rollback reads
+both files and loads 1368, a little more than before, because the agent
+reads the pointer and the new file's heading as well as the steps. The split makes the common run
 cheaper, and the rare run pays a small amount extra.
 
 <Choice id="where-the-table-goes" objective="customizing-agents/writes-skill/discloses-progressively"
@@ -217,20 +234,20 @@ Which two parts should move into files the body points to?
   options={[
     { text: 'If the user asks to undo a release, or a check after the tag fails, read rollback.md.', correct: true },
     { text: 'See rollback.md for more information about releases and what can go wrong.', why: 'This names no situation, so the agent can\'t tell whether this run needs the file. It may read it every time, or never.' },
-    { text: 'Read rollback.md before you start, so you know what to do if something fails.', why: 'This loads the file on every run, which costs the same as keeping the steps in the body.' },
+    { text: 'Read rollback.md before you start, so you know what to do if something fails.', why: 'This loads the file on every run, which costs at least as much as keeping the steps in the body.' },
   ]}>
 Which line should `SKILL.md` have in place of the moved steps?
 </Choice>
 
 <Match id="cost-of-each-part" phase="review" objective="customizing-agents/writes-skill/discloses-progressively"
   concepts={['progressive-disclosure']}
-  context="A release skill has a one-sentence description, a SKILL.md body with the release steps and a pointer line, and a rollback.md file the pointer names. Each row is a kind of session, and the options say which parts of the skill it loads."
+  context="A release skill has a two-sentence description that names requests to release, bump the version or tag, a SKILL.md body with the release steps and a pointer line, and a rollback.md file the pointer names. Each row is a kind of session, and the options say which parts of the skill it loads."
   title="What does each session load?" hint="Which part is loaded for every skill, which when the skill runs, and which only when a step sends the agent there?"
   options={['The description only', 'The description and SKILL.md', 'The description, SKILL.md and rollback.md']}
   rows={[
     { statement: 'A session that fixes a typo in the README', option: 0, why: 'Does a typo fix match the release skill\'s description?' },
     { statement: 'A session that cuts release 0.4.0, and every check passes', option: 1, why: 'Does anything in a good release send the agent to the undo steps?' },
-    { statement: 'A session in which the user asks the agent to undo release 0.4.0', option: 2, why: 'Which line in SKILL.md names this request?' },
+    { statement: 'A session that cuts release 0.4.0, and the check after the tag shows the tag is on the wrong commit', option: 2, why: 'Which line in SKILL.md names this situation, and where does it send the agent?' },
   ]}
   rationale="Only the description is paid for in every session. The body is paid for when the skill runs, and rollback.md only on the run that needs it.">
 Match each session to what it loads of the release skill.
@@ -239,24 +256,40 @@ Match each session to what it loads of the release skill.
 <Pitfall title="The skill that grew one section at a time">
 A team's release skill starts at forty lines. Over six months people add
 a note on urgent fixes and a table of past incidents. Later come the
-rollback steps and a paragraph on the old release tool. Each change is small enough
-that nobody objects in review. The body ends up three times its first
-size, and a release loads all of it, although most runs need only the
-first forty lines. Someone also adds trigger words for each new case to the
+rollback steps and a paragraph on the old release tool. Each change is
+small enough that nobody objects in review. The body ends up three times
+its first size, and a release loads all of it, although most runs need
+only the first forty lines. Someone also adds trigger words for each new case to the
 description, which every session pays for. Each change looked cheap, and
 nobody measured the sum. Measure the skill each time you add to it, and
 keep in the body only what every run needs.
 </Pitfall>
 
-<Exercise stretch="Put your split skill into the clean clone from the last lesson, commit it, and in a new session ask the agent for the next fix release. Did it open rollback.md? Then ask it to undo that release, and check whether it opens the file now. The skill edits files and makes commits and tags, and its undo steps may reset the branch. Run it only in that clone, which has no remote.">
+<Exercise stretch="After the commands above, type /release 0.4.1 in a new session in ~/notes-clean, and check in the transcript whether the agent opened rollback.md.">
 If you followed the walkthrough, your `~/skill-copy/release/` is the
 exercise. Go to the result below. Otherwise make the copy
 with the commands in the last section. Measure it with `measure.py`, move
 the "When a release goes wrong" section into `rollback.md` with a pointer
 that says when to read it, and measure again. The script only reads files,
-and you change only the copy.
+and you change only the copy. Afterwards you can check any skill you write
+for a rare case that every run pays for.
 
-A good result: the first line didn't change, the second dropped from 1288
+For the stretch, these commands put your split skill into the clean clone
+from the last lesson and commit it, then make one change for the release to
+list. The skill edits files and makes commits and tags, so run it only in
+that clone, which has no remote.
+
+```sh
+rm -rf ~/notes-clean/.claude/skills/release
+cp -R ~/skill-copy/release ~/notes-clean/.claude/skills/release
+cd ~/notes-clean
+git add .claude/skills/release
+git commit -q -m "Split the release skill"
+echo 'Run `python3 notes.py list` to see your notes.' >> README.md
+git commit -q -a -m "Document the list command"
+```
+
+A good result: the first line didn't change, the second dropped from 1256
 to 813 if you moved the text as shown, and `rollback.md` appears as its own
 line. The pointer in `SKILL.md` names the requests that need the file.
 Read the body that is left. Is there another part that only some runs
