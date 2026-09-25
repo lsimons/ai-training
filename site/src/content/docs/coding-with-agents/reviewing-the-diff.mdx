@@ -287,7 +287,8 @@ do you do before approving?
 Build the branch into a directory of your own with the course's
 `build.py`, from `site/examples/coding-with-agents/reviewing-the-diff/`,
 and review it as if a colleague had asked you to. The copy stays until
-you delete it.
+you delete it. Running the program in the copy can leave new files there,
+and `git status` lists them as untracked.
 
 ```sh
 python3 build.py ~/review-me
