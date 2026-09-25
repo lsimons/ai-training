@@ -1,12 +1,25 @@
 id: using-agents/choosing-autonomy
 title: How much the agent may do before it asks
+description: >-
+  Pick draft only, act and ask before anything that can't be undone, or run to completion from what
+  a wrong step costs, add check-ins on a first run, and write the setting as one sentence.
 mode: explanation
 covers: using-agents/delegating
 serves: [using-agents/delegates-and-checks/chooses-autonomy]
 introduces: []
 assumes:
   - objective: concepts/recognizes-agents/places-on-autonomy-scale
+    lesson: concepts/autonomy-scale
+    section: three-points-on-one-scale
   - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
+  - objective: using-agents/delegates-and-checks/writes-a-brief
+    lesson: using-agents/delegating
+    section: writing-the-brief
+extends-to:
+  - label: Sizing the blast radius
+    href: /safety/sizing-the-blast-radius/
 after: [using-agents/delegating]
 shorts: [Widening autonomy as results pass]
 exercise:
@@ -14,8 +27,20 @@ exercise:
   brief: >-
     Sort six supplied tasks into draft only, ask before anything irreversible, or run to completion,
     and write the one-sentence boundary for two of them.
-sources: []
+sources: [DLAI-11, Academy introduction-to-claude-cowork]
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 issue: 145
 minutes: 10
 notes: >-
-  Introduces no concept: deepens choosing-a-degree-of-autonomy from the live lesson.
+  Introduces no concept: deepens choosing-a-degree-of-autonomy from the live lesson. Foundations page
+  with no fixture and no vendor product claims. The page opens on the lesson on delegating and uses
+  its brief, so assumes names writes-a-brief with its writing-the-brief section. The
+  names-blast-radius entry points at safety/agent-risk, the live lesson that teaches it; the planned
+  safety/assessing-a-use-case (#141) also serves it. The draft-only setting is defined as a choice
+  only the person may make, which is how the delegating lesson and the concepts lesson describe the
+  low end of the scale. DLAI-11 is cited for the degrees-of-autonomy framing and the Academy Cowork
+  course for widening autonomy as results pass, both as ideas in our own words. Ng from the issue is
+  not cited, because its bibliography entry has no URL to check the "calibrated autonomy" framing
+  against, and Academy ai-fluency-framework-foundations is not cited because the page uses nothing
+  from it.
