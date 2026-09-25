@@ -198,6 +198,26 @@ describe('checkData', () => {
 			'src/data/areas/a/lessons/x.yaml: assumes a/c/o without the lesson and section that teach it, which a live lesson needs',
 		]);
 	});
+	it('checks an assumes section against the slugs of the named page, for a planned lesson too', () => {
+		const planned = PLANNED.replace(
+			'[{objective: a/c/o}]',
+			'[{objective: a/c/o, lesson: a/x, section: what-it-doesnt-fix}]',
+		);
+		// The frontmatter is not a heading, so the sections listed in the error are the two `## ` ones.
+		const front = '---\nsidebar:\n  order: 1\n---\n';
+		const good = `${front}## Intro\n\n## What it doesn't fix\n`;
+		expect(check(tree({ 'data/areas/a/lessons/p.yaml': planned, 'content/a/x.mdx': good })).errors).toEqual([]);
+		const bad = check(
+			tree({ 'data/areas/a/lessons/p.yaml': planned, 'content/a/x.mdx': `${front}## Intro\n\n## What it fixes\n` }),
+		);
+		expect(bad.errors).toEqual([
+			'src/data/areas/a/lessons/p.yaml: assumes section "what-it-doesnt-fix", which is not a "## " heading of a/x; its sections are: intro, what-it-fixes',
+		]);
+	});
+	it('skips an assumes section whose lesson has no page yet', () => {
+		// The fixture's live a/x assumes section s of a/p, which has no page.
+		expect(check(tree()).errors).toEqual([]);
+	});
 	it('reports a lesson that sets sources-checked or review-by without the other, and passes both or neither', () => {
 		const both = `${LIVE}sources-checked: 2026-09-20\nreview-by: 2027-03-20\n`;
 		expect(check(tree({ 'data/areas/a/lessons/x.yaml': both })).errors).toEqual([]);

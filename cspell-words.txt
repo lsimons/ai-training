@@ -82,8 +82,6 @@ pset
 psets
 
 # Section slugs named in lesson data (`assumes[].section`)
-arent
-doesnt
 
 # Jargon
 distractor
