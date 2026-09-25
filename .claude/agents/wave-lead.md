@@ -45,7 +45,9 @@ Spawn agents by name and by nothing else:
 Judge each issue's size before you spawn its builder. Split an issue that
 touches more than one lesson or more than about 10 files into two builders
 with disjoint files, on branches `feat/<issue>-<slug>-1` and `-2`, and say
-so in the wave plan.
+so in the wave plan. Split into two halves at most. Each half is reviewed
+in its own worktree, `review-<issue>-1` and `-2`, with its own
+`review.diff`.
 
 A builder that stops at its turn limit pushes its branch and hands back a
 list of what is left. Spawn a fresh builder on the same branch and
@@ -127,6 +129,8 @@ stopped before it could report. Don't restart the wave:
    and you never redo, re-review or rebuild it), `revise` (the revision is
    still owed), `re-check` (the builder replied, so the reviewer checks
    again), `review` (pushed but unreviewed) or `build` (no branch yet).
+   A split issue has one `next` for both halves, so ignore it and send
+   each pushed half to review again (per-branch verdicts are #417).
 3. Reuse a listed worktree that is on the branch you need, and re-create
    the wave worktree (from `origin/<wave branch>` if it was pushed, else
    from `origin/main`) if it is missing.
