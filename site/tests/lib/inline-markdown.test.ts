@@ -10,6 +10,15 @@ describe('unsupportedInline', () => {
 		expect(unsupportedInline("[t](/x/ 'title')")).toEqual(['link with a title']);
 		expect(unsupportedInline('_a_ **b (@K)** [t](/x/ "t")')).toHaveLength(3);
 	});
+	it('finds a citation whose key has spaces or a dot, as the remark plugin does', () => {
+		expect(unsupportedInline('**x (@Key with spaces)**')).toEqual(['strong or emphasis around a citation']);
+		expect(unsupportedInline('*x (@Claude Code permissions)*')).toEqual(['strong or emphasis around a citation']);
+		expect(unsupportedInline('**x (@a.b v2)**')).toEqual(['strong or emphasis around a citation']);
+		expect(unsupportedInline('**x (@Key with spaces)** and *y* (@Another key)')).toEqual([
+			'strong or emphasis around a citation',
+		]);
+		expect(unsupportedInline('**x** (@Key with spaces) *y*')).toEqual([]);
+	});
 	it('accepts the supported subset and the underscores that are not emphasis', () => {
 		expect(unsupportedInline('**b** *e* `c` [t](/x/) (@AEC-02) **b** (@AEC-02)')).toEqual([]);
 		expect(unsupportedInline('`search_customers` and `_private_`')).toEqual([]);
