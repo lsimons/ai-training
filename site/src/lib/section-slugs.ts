@@ -1,5 +1,5 @@
 /**
- * The section slugs of a lesson page and the check of an `assumes[].section`
+ * The heading and section slugs of a lesson page and the check of an `assumes[].section`
  * against them (spec S11). A lesson file's `assumes` entry names the lesson
  * and the `## ` section that teach an objective, and the page links to
  * `/<lesson>/#<section>`, so the section must be the id the build gives
@@ -39,24 +39,38 @@ function textOf(node: MdxNode): string {
 	return (node.children ?? []).map(textOf).join('');
 }
 
-/**
- * The slug of every `## ` heading in `tree`, in page order. Headings of
- * every depth go through the slugger, because a `### ` heading with the
- * same text moves the `-1` suffix to the next one.
- */
-export function sectionSlugs(tree: MdxNode): string[] {
+/** The depth and the slug of every heading in `tree`, in page order, from one slugger as the build uses. */
+function headings(tree: MdxNode): { depth: number | undefined; slug: string }[] {
 	const slugger = new GithubSlugger();
-	const out: string[] = [];
+	const out: { depth: number | undefined; slug: string }[] = [];
 	const walk = (node: MdxNode) => {
 		if (node.type === 'heading') {
-			const slug = slugger.slug(textOf(node));
-			if ((node as MdxNode & { depth?: number }).depth === 2) out.push(slug);
+			out.push({ depth: (node as MdxNode & { depth?: number }).depth, slug: slugger.slug(textOf(node)) });
 			return;
 		}
 		for (const child of node.children ?? []) walk(child);
 	};
 	walk(tree);
 	return out;
+}
+
+/**
+ * The slug of every `## ` heading in `tree`, in page order. Headings of
+ * every depth go through the slugger, because a `### ` heading with the
+ * same text moves the `-1` suffix to the next one.
+ */
+export function sectionSlugs(tree: MdxNode): string[] {
+	return headings(tree)
+		.filter((h) => h.depth === 2)
+		.map((h) => h.slug);
+}
+
+/**
+ * The slug of every heading in `tree`, at any depth, in page order. Each one
+ * is a DOM id on the page, so `lib/habit-tags.ts` keeps a habit id off them.
+ */
+export function headingSlugs(tree: MdxNode): string[] {
+	return headings(tree).map((h) => h.slug);
 }
 
 /**
