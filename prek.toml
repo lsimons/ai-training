@@ -161,14 +161,15 @@ hooks = [
 # `prose-check-packages` stops when a package is not synced, and
 # `prose-widen` (scripts/vale_linebreaks.py) rewrites the synced rules to
 # match across a line break (issue #454). They don't run
-# `prose-check-configs`. The rewrite is local, takes well under a second
-# and changes nothing on a second run, so a checkout synced by a bare
-# `vale sync` gets the same result here as from `mise run prose`. The rewritten files are gitignored, so the push
-# sees no change to the tree. The scripts are called directly, as the
-# package check already is, rather than through mise. Both hooks set
-# `require_serial`, so prek runs one copy of each at a time instead of one
-# per batch of files, and the rewrite replaces each rule file in one step,
-# so a Vale run in the other hook never reads a half-written rule.
+# `prose-check-configs`. The rewrite is local, takes well under a second and
+# changes nothing on a second run, so a checkout synced by a bare
+# `vale sync` gets the same result here as from `mise run prose`. The
+# rewritten files are gitignored, so the push sees no change to the tree.
+# The scripts are called directly, as the package check already is, rather
+# than through mise. Both hooks set `require_serial`, so prek runs one copy
+# of each at a time instead of one per batch of files, and the rewrite
+# replaces each rule file in one step, so a Vale run in the other hook never
+# reads a half-written rule.
 [[repos]]
 repo = "local"
 hooks = [
