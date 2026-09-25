@@ -1,15 +1,16 @@
 import { Choice, MultiChoice, Match, Scenario, Pitfall, Exercise, Recap, Habit, Prompt, Response } from '@components/lesson';
 
 In this lesson we delegate one piece of a split task and check the
-result line by line. Then we change the brief with what the check showed. Then we
-delegate the next piece with the change in its brief, and we keep a short
-log of both rounds. The task is the bike pilot report from the previous
+result line by line. Then we change the brief with what the check showed,
+send the piece again, and delegate the next piece with the change in its
+brief. We keep a short log of every round. The task is the bike pilot report from the previous
 lesson, so the sources are already familiar.
 
 You need any chat-capable agent you already have access to. Start each
 piece in a fresh conversation. The next piece then sees only what you
-write into its brief, and the lesson is about what goes into it. Every exchange on this page is illustrative. The author
-wrote it to show the pattern, and your agent gives a different text.
+write into its brief, and the lesson is about what goes into it. Every
+exchange on this page is illustrative. The author wrote it to show the
+pattern, and your agent's text will differ.
 
 ## The first piece and its criteria
 
@@ -58,7 +59,9 @@ Send the brief with only the survey note pasted underneath. Here is the
 kind of result that comes back.
 
 <Response>
-**Riders**
+
+```text
+Riders
 
 - 33 of 41 replies would keep using the bikes if the scheme continues,
   and 8 of 41 replies would not.
@@ -67,6 +70,8 @@ kind of result that comes back.
 - 12 of 41 replies asked for helmets at the docking station.
 - 6 of 41 replies said in the free-text box that the docking station is
   too far from the east entrance.
+```
+
 </Response>
 
 It reads well, and it looks like what you asked for. Check it before you
@@ -102,19 +107,25 @@ and one fail, and the fail names the exact bullet to look at.
 ## Reading the miss as feedback on the brief
 
 The easy reading of the miss is that the agent made a mistake. The more
-useful reading is that the brief left a constraint unsaid. It told the
-agent which source to use and how to write each count. It never said that
-every count is copied from the note as it stands and that no count is
-worked out from others. "Use only the survey note as your source" allows
-a number computed from the note, and the agent read it that way.
+useful reading is that the limit in the brief was looser than its check.
+The check says every count is in the note, and the brief states that rule
+only at the end, as something to tick. Its limit, "Use only the survey
+note as your source", allows more, because a number computed from the
+note still uses only the note. When two lines of a brief can be read two
+ways, the agent may take either reading.
 
-So the fix goes in the brief, as a limit the agent reads before it
-starts. Add this line to the limits of the riders brief:
+So the fix goes in the brief, as a limit that says what the check tests.
+Add this line to the limits of the riders brief:
 
 ```text
 Copy each count as the note gives it. Don't add, subtract or combine
 counts.
 ```
+
+Then re-send the riders brief with the new line, in a fresh conversation,
+and tick the four lines again. This is round two. The first bullet now
+ends after "if the scheme continues". All four lines pass. The riders
+section is done.
 
 Working this way, one piece at a time with the brief changed after each
 check, is iteration. Each result is feedback on the brief, and the next
@@ -123,8 +134,8 @@ Academy describes the same back and forth between describing a task and
 judging what comes back, and it treats the judging as the source of the
 next description (@Academy ai-fluency-framework-foundations).
 
-The cost piece needs the change too, because it has the same gap. The vendor email has two monthly prices and a twelve-month term, and
-an agent with no limit on computed numbers may add a yearly total or the
+The cost piece needs the change too, because it has the same gap. The
+vendor email has two monthly prices and a twelve-month term, and an agent with no limit on computed numbers may add a yearly total or the
 difference between the two options. Neither number is in the email, and
 the manager reads it as if the vendor had quoted it. Put the change into
 the cost brief before you send it.
@@ -135,7 +146,7 @@ the cost brief before you send it.
   title="Where does the fix go?" hint="Which of these will the cost piece, in its own fresh conversation, still see?"
   options={[
     { text: 'Reply in this conversation that counts are copied, never worked out, and ask for the riders section again.', why: 'This section gets fixed. The cost piece starts in a fresh conversation that never sees the reply, so it has the same gap.' },
-    { text: 'Send the riders brief again, unchanged, in a fresh conversation, since the next result may be different.', why: 'The brief still allows a computed count, so the same kind of miss can come back. Nothing about the gap has changed.' },
+    { text: 'Send the riders brief again, unchanged, in a fresh conversation, since the next result may be different.', why: 'The brief still has the loose limit that allowed a computed count, so the same kind of miss can come back.' },
     { text: 'Delete the computed count from the bullet by hand, and send the cost brief as you had written it.', why: 'The riders section is right now. The cost brief has the same gap, and a yearly total or a price difference can appear there.' },
     { text: 'Add a limit on computed numbers to the riders brief, and put the same limit in the cost brief before sending it.', correct: true },
   ]}>
@@ -144,7 +155,7 @@ agent worked it out by subtracting two numbers in the note. You are about
 to delegate the cost piece. Where does the fix go?
 </Choice>
 
-## Round two: the next piece with the change
+## Round three: the next piece with the change
 
 Here is the cost brief, a model answer to the other half of the previous
 exercise, with the change from round one in its limits. Open a fresh
@@ -167,7 +178,9 @@ the email.
 [vendor email follows]
 </Prompt>
 <Response>
-**Cost**
+
+```text
+Cost
 
 - Option A: 1,800 per month for the bikes and the docking station. Your
   facilities team does the maintenance.
@@ -176,33 +189,42 @@ the email.
 
 Both options have a minimum term of twelve months. Both prices exclude
 tax.
+```
+
 </Response>
 
 Walk the four lines again. Both prices appear once, and they match the
 email. Each option says what it includes. The term is stated. Every amount
 in the section is in the email, and there is no yearly total and no
-difference between the two prices. All four pass. The limit you added after
-round one kept computed numbers out of a piece the miss never touched.
+difference between the two prices. All four pass. The section has no computed
+numbers, and the log records the change that went in before it ran.
 
 ## A two-line log per round
 
 Keep a log while you work, two lines per round: what changed in the brief,
-and what the result showed. After the two rounds above it reads like this.
+and what the result showed. After the three rounds above it reads like
+this.
 
 ```text
 Round 1, riders piece
   Changed: nothing, this is the first brief from the split.
   Showed: "8 of 41 replies would not" is a count the note never
-    gives. The brief never said to copy counts and not work them out.
+    gives. The limit was looser than the check, and allowed a
+    worked-out count.
 
-Round 2, cost piece
+Round 2, riders piece again
+  Changed: added "Copy each count as the note gives it. Don't add,
+    subtract or combine counts."
+  Showed: all four lines pass. The first bullet ends after "continues".
+
+Round 3, cost piece
   Changed: added "Copy each amount as the email gives it. Don't add,
     subtract or multiply amounts."
   Showed: all four lines pass. No yearly total or price difference.
 ```
 
-Read the log after two rounds and look at what the miss cost. It cost one
-section of four bullets and a minute of checking. The fix was in the next
+Read the log and look at what the miss cost. It cost one section of four
+bullets, a minute of checking and one re-send. The fix was in the next
 brief before the next piece ran. Now picture the same gap in the one-prompt
 report from the previous lesson. The computed 8 would sit in a paragraph
 next to a yearly total, and both would read as findings. You would find
@@ -211,8 +233,8 @@ keeps each mistake small because it is found in one piece, while the
 piece is still the only thing that depends on it.
 
 The log is also the lightest record of what you checked. It has one line
-for what changed, and one for what the check found. A check that is light
-enough gets done on a busy day, and the log is a check of that size. The
+for what changed, and one for what the check found. A record that is light
+enough gets kept on a busy day, and the log is light enough for that. The
 safety course makes the same point about a checked-by line in a team
 template ([Marking what a person
 checked](/safety/marking-what-a-person-checked/#put-the-mark-in-the-process)).
@@ -220,10 +242,11 @@ checked](/safety/marking-what-a-person-checked/#put-the-mark-in-the-process)).
 <Pitfall title="Sending the same brief again">
 A learner sees the computed count in the riders section, opens a fresh
 conversation and sends the same brief again, expecting a better result.
-The new result has "and 8 of 41 replies did not say so" in the first bullet, which is
-the same computed count with new wording. The brief is the same, so
-the gap that produced the miss is still there, and the agent fills it
-the same way. A second run of an unchanged brief only asks for another guess.
+The new result has "and 8 of 41 replies did not say so" in the first
+bullet, which is the same computed count with new wording. The brief is
+the same, so the loose limit that allowed the miss is still there, and
+the agent reads it the same way. A second run of an unchanged brief only
+asks for another guess.
 When a round misses, change the brief first, and write the change in the
 log.
 </Pitfall>
@@ -234,7 +257,7 @@ log.
   title="Before the second section" hint="What does the second section's conversation have to go on, apart from its brief?"
   options={[
     { text: 'Tell the agent in the first conversation to use the dates from the notes, then open a fresh conversation for the second section with its brief as written.', consequence: 'The first section is fixed. The second conversation never saw the reply, and its dates come back as next Friday and in two weeks.' },
-    { text: 'Add "write every date as it appears in the notes" to the limits of both briefs, and send the second one.', correct: true, consequence: 'The second section comes back with the dates as the notes give them. The log shows the change in round two and a pass on the date line.' },
+    { text: 'Add "write every date as it appears in the notes" to the limits of both briefs, re-send the first, and send the second.', correct: true, consequence: 'The first section comes back with the 14th, and the second with its dates as the notes give them. The log shows the change and a pass on the date line in both rounds.' },
     { text: 'Send the first brief again in a fresh conversation, since a second run often reads the notes more carefully.', consequence: 'The brief has the same gap, and the date comes back as this Tuesday. The second section has not started yet.' },
     { text: 'Correct the date by hand and move on to the second section with its brief as written, to keep the rounds short.', consequence: 'The first section is right. The second section has two relative dates, and you correct those by hand too.' },
   ]}>
@@ -254,9 +277,10 @@ What do you do?
     { text: 'Each option says what it includes.', why: 'Read each bullet for what the option covers. Both say it.' },
   ]}>
 The cost section comes back as two bullets: "Option A: 1,800 per month
-for the bikes and the docking station, your team does the maintenance" and "Option B: 2,400 per month, with
-maintenance and replacement of damaged bikes, 600 more than Option A".
-The section has nothing else in it. Which of the criteria does it
+for the bikes and the docking station, your team does the maintenance"
+and "Option B: 2,400 per month, with maintenance and replacement of
+damaged bikes, 600 more than Option A". The section has nothing else in
+it. Which of the criteria does it
 fail?
 </MultiChoice>
 
@@ -264,9 +288,8 @@ fail?
 
 A round is one brief, one result, one check, and one change to the brief.
 The previous lesson made the pieces small enough to check. In this lesson
-you planned and counted the work in rounds, and each round ended with a
-log entry. Most pieces take one or two
-rounds. The next lesson is about the piece that keeps needing more, and
+you worked in rounds, and each round ended with a log entry. A piece
+often takes one or two rounds. The next lesson is about the piece that keeps needing more, and
 how to see from the log when it is time to do the step yourself.
 
 Improving work step by step from its failures is also how DeepLearning.AI
@@ -274,24 +297,26 @@ teaches builders to improve an agent workflow. They look at where the
 output goes wrong, and they fix that step first (@DLAI-11). You do the
 same at a smaller size, one piece and one brief at a time.
 
-<Exercise stretch="Run the usage piece from the previous lesson again with the change from round one in its brief, and add a third round to your log. Did the change hold on a piece with a total in it?">
+<Exercise stretch="Run the usage piece from the previous lesson again with the change from round one in its brief, and word the limit so it still allows the one total the brief asks for. Add the round to your log. Did your wording hold?">
 Delegate the riders piece with the brief above, or with the first piece of
 your own split and its criteria. Check the result against the criteria,
 one line at a time, and write pass or fail next to each line. Change the
-brief with what the result showed, put the same change into the brief for
-the cost piece, and delegate the cost piece in a fresh conversation. Keep
-a two-line log per round, in the format above. The whole exercise fits in
-fifteen minutes. A good result is a log of two rounds, with a pass or fail
-for every criterion in each round and a round two brief that holds the
-change from round one. If your first round passed every line, write
-"Changed: nothing" for round two and say what the result showed anyway.
+brief with what the result showed, re-send the riders piece with the
+change in a fresh conversation, and tick its lines again. Then put the
+same change into the brief for the cost piece, and delegate the cost
+piece in a fresh conversation. Keep a two-line log per round, in the
+format above. It takes about ten minutes. A good result is a log with a
+pass or fail for every criterion in each round, and a cost brief that
+holds the change from round one. If your first round passed every line,
+skip the re-send, write "Changed: nothing" for the cost piece and say
+what the result showed anyway.
 Which line of your log would you want to read before you start the next
 report of this kind?
 </Exercise>
 
 <Recap>
 1. Delegate one piece at a time, and check each result line by line against its criteria, pass or fail per line. A read of the whole result gives a feeling, and the lines give you the failing bullet.
-2. Read a miss as feedback on the brief. Most misses come from a constraint the brief left unsaid, such as a count worked out from other counts when the brief never said to copy them (@Academy ai-fluency-framework-foundations).
+2. Read a miss as feedback on the brief. A miss often shows a limit that was looser than the check, such as a limit that allowed a count worked out from other counts. Change the description of the task with what the judging of the result showed (@Academy ai-fluency-framework-foundations).
 3. The fix goes into the brief as a limit, and into the brief of every later piece with the same gap. A reply in the chat stays in that conversation.
 4. Keep a log of two lines per round: what changed in the brief, and what the result showed. It is light enough to keep on a busy day.
 5. Short rounds keep mistakes cheap, because a miss is found in one small piece before anything else depends on it.
