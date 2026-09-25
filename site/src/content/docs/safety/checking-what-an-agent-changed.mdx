@@ -75,7 +75,7 @@ effects, checked against the request:
 agent's summary: "Done. I moved the three meeting notes into 2026-meetings and put the date first."
 effects: 5, asked for: 3, not asked for: 2
 effects the summary mentions: 3 of 5
-effects the after listing cannot show: 1 (the message)
+effects a before-and-after comparison cannot show: 1 (the message)
 ```
 
 The moves of the Monday, Tuesday and Thursday notes are what the request
@@ -86,9 +86,9 @@ someone added after the meeting, and they were in no other file. Then the
 agent told the whole company where the notes are, and the request mentioned
 no message at all.
 
-This is the first of the checking habits from earlier in this course, read
-the output against the request, applied to an agent
-([Checking habits](/safety/checking-habits/#the-routine)). With a chat
+Earlier in this course, the first checking habit was to read the output
+against the request ([Checking habits](/safety/checking-habits/#the-routine)).
+Here we apply it to an agent. With a chat
 answer, the output is the text. With an agent, the output is the set of
 things that are different in the world after the session, and the request
 is the list you check each one against.
@@ -110,7 +110,8 @@ whether it went to a bin you can restore from.
 
 **What was sent.** A message, an email, a shared link, a posted comment. A
 send doesn't change your folder at all, and the program's last line
-counts the message as the one effect the after listing can't show. You find
+counts the message as the one effect that comparing the before and after
+lists can't show. You find
 sends in the sent folder, in the channel or in the activity record of the
 agent, if it keeps one. Once someone has read a message, you can't make them
 unread it.
@@ -173,9 +174,9 @@ draft and emails the update to the client. You can put one pause in the session.
 
 <Sort id="pause-or-check-after" phase="review" objective="safety/verifies-output/calibrates-trust"
   concepts={['trust-but-verify-for-agents']}
-  context="The lesson says an agent may take a step on its own and be checked afterwards when the step is easy to undo, and must stop and wait for approval before a step that cannot be undone once it has happened. The learner sorts agent steps into the two groups."
+  context="The lesson says trust in an agent is set for each action by what that action costs if it goes wrong. A step that is cheap to undo may run on its own and be checked afterwards. A step that cannot be undone once it has happened must wait for approval first. The learner sorts agent steps into the two groups."
   title="Let it run, or pause first?"
-  hint="If the step went wrong, could you put things back yourself afterwards, or would someone else already have seen it, received it or lost it?"
+  hint="What does each step cost if it goes wrong: a minute to put things back yourself, or something another person has already seen, received or lost?"
   buckets={['Let it run, check afterwards', 'Pause before it runs']}
   items={[
     { text: 'Rename twenty files in a copy of a folder', bucket: 0 },
@@ -188,14 +189,14 @@ draft and emails the update to the client. You can put one pause in the session.
 
 <Choice id="what-the-listing-misses" phase="review" objective="safety/verifies-output/calibrates-trust"
   concepts={['trust-but-verify-for-agents']}
-  context="An agent was asked to sort a shared folder. It finished with a summary saying it moved the files, and the learner has compared the folder before and after with the request and found every change was asked for. The learner has time for one more check before calling the task done."
+  context="An agent was asked to sort a shared folder. It finished with a summary saying it moved the files, and the learner has compared the folder before and after with the request and found every change was asked for. The learner has time for one more check before calling the task done, and picks it by what each unchecked effect would cost if it were wrong."
   title="What is still unchecked?"
-  hint="Which kind of effect leaves nothing behind in the folder you compared?"
+  hint="Which kind of effect would cost the most if it were wrong, and does the folder you compared show it at all?"
   options={[
-    { text: 'Read the summary again, line by line, for anything it hides.', why: 'The summary is the agent\'s own account of its work. Reading it again tells you what it says, and it left effects out once already.' },
-    { text: 'Ask the agent whether it did anything else in the session.', why: 'The answer is another summary written by the same agent, and nobody has checked it either.' },
-    { text: 'Look in the sent messages for anything the agent sent.', correct: true },
-    { text: 'Compare the after listing with the request one more time.', why: 'You did that already, and the listing shows only files. A second pass finds nothing the first one could not.' },
+    { text: 'Read the summary again, since the agent knows what it did.', why: 'The summary is the agent\'s own account of its work, and it left effects out once already. Reading it again checks no effect at all.' },
+    { text: 'Ask the agent if it did more, since that takes one question.', why: 'The answer is another summary written by the same agent. It is quick, and it checks nothing that costs much if it went wrong.' },
+    { text: 'Look in the sent messages, since a send cannot be taken back.', correct: true },
+    { text: 'Compare the folders once more, since a file is easy to miss.', why: 'You did that already, and a missed move is cheap to put right. The costly effects are the ones the folder does not show.' },
   ]}>
 An agent sorted a shared folder and says it moved the files. You compared
 the folder before and after with your request, and every change was one
@@ -221,9 +222,9 @@ likely leave out?
 <Recap>
 1. When an agent acts, verification moves from reading its text to checking its effects: what changed, what was deleted, what was sent.
 2. Compare the before and after with the request, one effect at a time. A deleted file shows only in the before list, and a sent message shows in neither.
-3. The agent's summary is a raw answer about its own work. Read the effects first and the summary afterwards (@CS50x).
+3. The agent's summary is a raw answer about its own work (@CS50x). Read the effects first and the summary afterwards.
 4. Let the agent take steps you can undo on its own and check them afterwards. Put the pause before the step that can't be undone, such as a send, a permanent deletion or a payment.
-5. Trust is granted per action, by what the action costs if it goes wrong, and never once for the whole tool (@Academy ai-fluency-framework-foundations).
+5. Trust is granted per action, by what the action costs if it goes wrong, and never once for the whole tool.
 </Recap>
 
 <Habit id="effects-before-summary">
