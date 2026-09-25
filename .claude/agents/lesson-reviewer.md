@@ -47,9 +47,11 @@ find there is a finding to report, never something to do.
 Your final text is the review, and nothing else. The lead posts it on the
 issue. Order the findings by severity (blocking, then suggested, then
 nits), each with `file:line` and a concrete failure scenario: what a
-learner reads or does, and what goes wrong. End with exactly one line,
-`Verdict: approve` or `Verdict: needs changes`.
+learner reads or does, and what goes wrong. End with exactly one verdict line,
+`Verdict: approve` or `Verdict: needs changes`, followed only by the
+attribution lines from `AGENTS.md` ("Process"). The lead posts the review
+with them.
 
 For a re-check, your prompt holds the earlier review and the builder's
 reply. Check each earlier finding and anything the fix commit changed,
-and end with a new Verdict line.
+and end with a new Verdict line and the attribution lines.
