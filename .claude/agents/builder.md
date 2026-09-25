@@ -64,6 +64,9 @@ Review finds these in almost every first pass. Check each one yourself.
   `../ai-training-wt/`. Untracked files aren't in that patch unless
   `git add -N` marks them first.
 
+- Run `mise run fast` in the foreground with a Bash timeout of 600000 ms.
+  Never start it in the background and poll it with `sleep` and `tail`.
+
 - Don't run `site-dev`. The wave's `mise run ci` is the one e2e run.
 
 - Rebase on `origin/main` before the final push, and push your own branch
