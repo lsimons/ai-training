@@ -192,8 +192,9 @@ there is in
 and this section is about when to add one. Claude Code's documentation
 gives a similar trigger for its own instructions file: a mistake the agent
 has made before, or a correction you already gave in an earlier session
-(@Claude Code memory). The agent-engineering course says the same about `AGENTS.md`: start small, and add a line when you see an
-agent repeat a mistake (@AEC-15).
+(@Claude Code memory). The agent-engineering course says the same about
+`AGENTS.md`: start small, and add a line when you see an agent repeat a
+mistake (@AEC-15).
 
 A correction in the next brief fixes one session. The line in the file
 reaches each session after it, including a teammate's, because the file is
@@ -283,10 +284,10 @@ adds emphasis to those rules, which makes the file longer again. Claude
 Code's documentation names this failure: a file that is too long gets
 half its rules ignored, and in a long file, a rule the agent keeps
 breaking is a sign the file needs pruning (@Claude Code best practices).
-The agent-engineering course adds that a stale line misleads the agent more than a missing one
-(@AEC-15). The rule: each time you add a line, delete the lines the agent
-gets right without them and the lines that no longer describe the
-project.
+The agent-engineering course adds that a stale line misleads the agent
+more than a missing one (@AEC-15). The rule: each time you add a line,
+delete the lines the agent gets right without them and the lines that no
+longer describe the project.
 </Pitfall>
 
 ## Keep the session lean
@@ -302,8 +303,7 @@ it.
 Context rot is the drop in how well the agent follows its instructions as
 the context window fills. **Avoiding context rot** is keeping the context
 lean so the agent keeps following its instructions and keeps the goal in
-view. These habits keep
-a session lean.
+view. These habits keep a session lean.
 
 - One task per session. When `rename` is done and committed, start a new
   session for `remove`. Claude Code has `/clear` for this, and its
@@ -434,8 +434,8 @@ the one thing that went wrong in both. It may be `todos.json`, as on this
 page, or something else your agent does, such as a wrong test command or
 a file it edits that the task didn't need. Write the one line that fixes
 it, specific enough to check. Delete the copy and copy the fixture again.
-Add or change the one line in its `AGENTS.md`, commit it with the command above,
-then start a fresh session with the brief of session 2. Check
+Add or change the one line in its `AGENTS.md`, commit it with the command
+above, then start a fresh session with the brief of session 2. Check
 `git status --short` again.
 
 A good result: the fresh session's status no longer shows the mistake,
