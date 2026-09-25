@@ -108,7 +108,9 @@ def test_discarding_commands_are_rejected_in_the_main_checkout(command: str) -> 
     assert "main checkout" in reason
 
 
-@pytest.mark.parametrize("command", ["git reset --hard", "git checkout -- ."])
+@pytest.mark.parametrize(
+    "command", ["git reset --hard", "git checkout -- .", "git checkout .", "git restore ."]
+)
 def test_discarding_commands_pass_in_a_worktree(command: str) -> None:
     assert check(command, cwd=WORKTREE) is None
 
@@ -135,6 +137,13 @@ def test_stash_changes_are_rejected_in_every_worktree(command: str, cwd: str) ->
     assert reason is not None
     assert "shares one stash" in reason
     assert "git worktree add --detach" in reason
+
+
+def test_cd_and_dash_c_move_the_stash_check_into_a_worktree() -> None:
+    for command in [f"cd {WORKTREE} && git stash", f"git -C {WORKTREE} stash"]:
+        reason = check(command, cwd=MAIN)
+        assert reason is not None, command
+        assert "shares one stash" in reason, command
 
 
 @pytest.mark.parametrize("command", ["git stash list", "git stash show", "git stash show -p"])
