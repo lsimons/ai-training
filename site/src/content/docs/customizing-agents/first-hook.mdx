@@ -9,9 +9,9 @@ what the agent does with the message.
 
 The events, the exit codes and the settings format here are Claude
 Code's, checked against the vendor's documentation on the date at the
-end of the lesson (@Claude Code hooks). Other coding agents have hooks
-with other names and formats. The method transfers, and the exact
-spelling may not.
+end of the lesson (@Claude Code hooks). Other coding agents offer the
+same feature under other names and formats. The method is the same
+there, and the syntax may differ.
 
 ## Where a hook runs and what it returns
 
@@ -26,8 +26,8 @@ before every shell command the agent asks to run.
 
 A command hook gets the event as JSON on its standard input. For a Bash
 call that JSON holds the tool name, the command in `tool_input.command`,
-and the working directory in `cwd`. The hook answers with its exit code
-(@Claude Code hooks):
+and the working directory in `cwd`. A hook that writes plain text, or
+nothing, answers with its exit code (@Claude Code hooks):
 
 - Exit code 0 means no objection. The call goes on to the usual
   permission check, and Claude never sees what the hook wrote to
@@ -41,6 +41,12 @@ and the working directory in `cwd`. The hook answers with its exit code
 Exit code 1 is the usual failure code for a shell script, and here it
 lets the action through. A hook that must stop something exits with 2.
 
+A hook can also answer with a JSON object on standard output instead.
+For `PreToolUse`, a `permissionDecision` of `deny` in that object blocks
+the call even when the hook exits with 0 (@Claude Code hooks). This
+lesson writes plain text and lets the exit code decide, which is the
+simpler of the two.
+
 Not every event can block. A `PostToolUse` hook runs after the tool has
 already run, so exit code 2 there only shows the message to Claude
 (@Claude Code hooks). A `PreToolUse` hook runs before Claude Code looks
@@ -49,15 +55,30 @@ at the permission mode, and it runs in every mode
 [Choosing a permission mode per task](/customizing-agents/permission-modes/)
 doesn't switch this hook off.
 
+<Match id="which-event" objective="customizing-agents/configures-agent/adds-a-hook"
+  concepts={['hooks']}
+  context="Claude Code offers events where a hook can run a command: SessionStart when a session begins or resumes, PreToolUse before a tool call runs, PostToolUse after a tool call has succeeded, and Stop when Claude has finished its reply. Each row is a job a developer wants a hook to do."
+  title="Which event fits the job?" hint="Does the job have to happen before the action, after it, or at the start or end of something?"
+  options={['PreToolUse', 'PostToolUse', 'SessionStart', 'Stop']}
+  rows={[
+    { statement: 'Refuse a git push to main before it runs', option: 0, why: 'Which event is the last moment before the command runs?' },
+    { statement: 'Run the formatter on a file right after an edit to it', option: 1, why: 'Which event fires once the edit has happened?' },
+    { statement: 'Print the open issues when a session begins', option: 2, why: 'Which event fires once per session, at the start?' },
+    { statement: 'Play a sound when Claude has finished its reply', option: 3, why: 'Which event fires at the end of a reply?' },
+  ]}
+  rationale="A hook that must prevent an action runs before it, in PreToolUse. After the tool has run, a hook can only react.">
+Match each job to the event its hook should run on.
+</Match>
+
 <Choice id="which-exit-blocks" objective="customizing-agents/configures-agent/adds-a-hook"
   concepts={['hooks']}
   context="A developer writes a script that Claude Code runs as a PreToolUse hook on the Bash tool. When it sees a commit it should refuse, the script has to stop the commit and give Claude a reason it can act on."
   title="Which ending stops the commit?" hint="Which exit code blocks, and which output stream does Claude read the reason from?"
   options={[
-    { text: 'Write the reason to standard error and exit with code 1.', why: 'Code 1 is a non-blocking error in Claude Code. The commit runs, and you see a notice in the transcript.' },
-    { text: 'Write the reason to standard output and exit with code 0.', why: 'Code 0 means no objection. The commit runs, and plain text on standard output goes to the debug log.' },
-    { text: 'Write the reason to standard error and exit with code 2.', correct: true },
-    { text: 'Write the reason to standard output and exit with code 2.', why: 'Code 2 does block, but Claude reads the reason from standard error, and that is empty here.' },
+    { text: 'Write the reason as plain text to standard error and exit with code 1.', why: 'Code 1 is a non-blocking error in Claude Code. The commit runs, and you see a notice in the transcript.' },
+    { text: 'Write the reason as plain text to standard output and exit with code 0.', why: 'Code 0 with plain text means no objection. The commit runs, and the text goes to the debug log.' },
+    { text: 'Write the reason as plain text to standard error and exit with code 2.', correct: true },
+    { text: 'Write the reason as plain text to standard output and exit with code 2.', why: 'Code 2 does block, but Claude reads the reason from standard error, and that is empty here.' },
   ]}>
 The script has found a commit it must refuse. How should it end?
 </Choice>
@@ -78,6 +99,9 @@ the fixture as a real project. Claude Code runs a command hook with your
 full user permissions, so read any hook script before you register it
 (@Claude Code hooks).
 
+If `~/hook-me` exists from an earlier try, remove it first, or `cp`
+puts the new copy inside the old one.
+
 ```sh
 cp -R site/examples/customizing-agents/first-hook/fixture-repo ~/hook-me
 mkdir -p ~/hook-me/.claude/hooks
@@ -95,14 +119,31 @@ complete file is `site/examples/customizing-agents/first-hook/lockfile_guard.py`
 PAIRS = {"package-lock.json": "package.json"}
 
 
+COMMIT = re.compile(r"\bgit\b[^;&|\n]*?\scommit\b")
+
+
 def main() -> int:
-    call = json.load(sys.stdin)
-    command = call.get("tool_input", {}).get("command", "")
-    if "git commit" not in command:
+    try:
+        call = json.load(sys.stdin)
+        command = call["tool_input"]["command"]
+        cwd = call.get("cwd", ".")
+        if not isinstance(command, str) or not isinstance(cwd, str):
+            raise TypeError("command and cwd must be strings")
+    except (ValueError, KeyError, TypeError, AttributeError):
+        print(
+            "Blocked: the lockfile hook couldn't read the tool call it was given.", file=sys.stderr
+        )
+        return 2
+    if not COMMIT.search(command):
         return 0
-    changed = changed_files(call.get("cwd", "."))
+    changed = changed_files(cwd)
     if changed is None:
-        return 0
+        print(
+            "Blocked: the lockfile hook couldn't ask git what changed.\n"
+            "Run git status to see why, and fix that before you commit.",
+            file=sys.stderr,
+        )
+        return 2
     message = problem(changed)
     if message is None:
         return 0
@@ -110,18 +151,26 @@ def main() -> int:
     return 2
 ```
 
-`changed_files` runs `git diff --name-only HEAD`, which lists every file
-in the working tree that differs from the last commit, staged or not
-(@Git docs git-diff). The hook needs both kinds, because it runs before the
-command. When the agent sends `git add package-lock.json && git commit`
-as one command, nothing is staged yet at the moment the hook looks. `problem`
+`COMMIT` matches `git`, then any options, then `commit`, so
+`git -C . commit` counts as well as `git commit`. `changed_files` runs
+`git diff --name-only HEAD`, which lists every file in the working tree
+that differs from the last commit, staged or not (@Git docs git-diff),
+and adds the untracked files that git doesn't ignore. The hook needs all
+of them, because it runs before the command. When the agent sends
+`git add package-lock.json && git commit` as one command, nothing is
+staged yet at the moment the hook looks. The price is that an unstaged
+lockfile edit also blocks a commit of some other file, until you commit
+or undo the edit. `problem`
 walks the changed files, and for each `package-lock.json` it checks that
 the `package.json` in the same directory changed too. If one didn't, it
 returns the message, and `main` prints it to standard error and exits
-with 2.
+with 2. When the input isn't a tool call it can read, or git can't say
+what changed, `main` also exits with 2 and says so. A hook that lets the
+commit through whenever something goes wrong inside it would fail
+silently, and nobody would notice until the bad commit.
 
 The script is fast because it does almost nothing. It returns at once
-for any command without `git commit` in it, and a commit costs it one
+for any command that isn't a commit, and a commit costs it one
 `git diff`. A hook that makes every command slow is the kind people
 switch off, and a switched-off hook doesn't check anything.
 
@@ -149,27 +198,29 @@ The first line says what's wrong, with both file names. The rest says
 how to fix it, with the exact command for the undo. Claude reads this
 text and nothing else about your rule, so it has to be enough on its own.
 
-The fixture `cases.py` holds four commands against the same hook, in a
-fresh copy with the same edit. It runs the first three with only the
+The fixture `cases.py` holds five commands against the same hook, in a
+fresh copy with the same edit. It runs the first four with only the
 lockfile changed, then makes the same version change in `package.json`
-and runs the fourth.
+and runs the fifth.
 
 ```python
 LOCKFILE_ONLY = [
     "git status",
     'git commit -am "Bump version"',
     'git commit --no-verify -am "Bump version"',
+    'git -C . commit -am "Bump version"',
 ]
 BOTH_FILES = ['git commit -am "Bump version"']
 ```
 
 <Predict id="four-commands" objective="customizing-agents/configures-agent/adds-a-hook"
   concepts={['hooks']}
-  context="A Claude Code PreToolUse hook on the Bash tool exits with code 2 when a command contains git commit and package-lock.json differs from the last commit while package.json doesn't. Otherwise it exits with code 0. It is run on four commands: three after a hand edit of package-lock.json alone, and one after the same edit in package.json as well."
-  title="Which commands does the hook stop?" hint="For each command, does it contain git commit, and if so, did package.json change along with the lockfile?"
+  context="A Claude Code PreToolUse hook on the Bash tool exits with code 2 when a command is a git commit, with or without options between git and commit, and package-lock.json differs from the last commit while package.json doesn't. Otherwise it exits with code 0. It is run on five commands: four after a hand edit of package-lock.json alone, and one after the same edit in package.json as well."
+  title="Which commands does the hook stop?" hint="For each command, is it a git commit, and if so, did package.json change along with the lockfile?"
   answer={`lockfile only, git status: exit 0
   lockfile only, git commit -am "Bump version": exit 2
   lockfile only, git commit --no-verify -am "Bump version": exit 2
+  lockfile only, git -C . commit -am "Bump version": exit 2
   both files, git commit -am "Bump version": exit 0`} run="customizing-agents/first-hook/cases.py">
 
 What does this print, one line per command?
@@ -186,7 +237,8 @@ for command in BOTH_FILES:
 
 </Predict>
 
-The third line is the one to remember. `--no-verify` tells git to skip
+The third line is the one to remember, and the fourth shows the pattern
+at work. `--no-verify` tells git to skip
 its own `pre-commit` and `commit-msg` hooks (@Git docs git-commit). This
 hook belongs to Claude Code and runs before git starts, so the flag
 changes nothing for it.
@@ -203,7 +255,7 @@ The fixture's `.gitignore` already keeps that file out of commits.
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(git commit *)",
+            "if": "Bash(git *)",
             "command": "python3",
             "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/lockfile_guard.py"]
           }
@@ -217,12 +269,40 @@ The fixture's `.gitignore` already keeps that file out of commits.
 The `matcher` picks the tool. The `if` field takes one permission rule,
 in the same syntax as in
 [Allowing the commands the task needs](/customizing-agents/allowlists/),
-and the script starts only for a command that matches it. With `args` present, Claude Code starts `python3` directly, with
+and the script starts only for a git command. A narrower
+`Bash(git commit *)` would miss `git -C . commit`. With `args` present, Claude Code starts `python3` directly, with
 no shell, and fills in `${CLAUDE_PROJECT_DIR}` with the
 project root (@Claude Code hooks). The vendor calls the `if` filter best
 effort and says to use permission rules for a hard allow or deny
-(@Claude Code hooks). The script checks for `git commit` again itself for
+(@Claude Code hooks). The script checks for a commit again itself for
 that reason: the filter saves time, and the script decides.
+
+A text match has limits. A commit run through a shell alias, a script
+such as `./release.sh`, or a spelling the pattern doesn't know gets past
+it. The hook reads the command, and it can't see what a script does
+inside. So this hook catches a mistake, the kind an agent makes while it
+works as asked. It isn't a wall. The vendor's advice for a hard allow or
+deny is a permission rule (@Claude Code hooks), and for a rule the
+project can't do without, add a check in CI (continuous integration)
+that runs on every push, whatever made the commit. The hook tells the
+agent at the moment it can still fix the mistake, and CI catches what
+gets past.
+
+If the script path in `args` has a typo, `python3` can't open the file
+and exits with 2, so Claude Code blocks every git command with Python's
+error as the reason. The same typo in a shell-form entry, one that runs
+the script by its path with no `args`, makes the shell exit with 127, a
+non-blocking error, and the commit runs. The fixture `failures.py`
+shows both, next to a hook that got input it couldn't read.
+
+<Predict id="three-failures" title="When the hook itself goes wrong"
+  answer={`input that isn't JSON: exit 2
+  mistyped path, exec form: exit 2
+  mistyped path, shell form: exit 127`} run="customizing-agents/first-hook/failures.py">
+From the root of the course repository, run
+`python3 site/examples/customizing-agents/first-hook/failures.py` and
+compare what you see with the output below.
+</Predict>
 
 Start `claude` in `~/hook-me`. In a folder that's new to Claude Code
 you first see the workspace trust dialog, and Claude Code holds back
@@ -262,10 +342,12 @@ to `package.json` without asking says the agent followed the message over
 the brief. If you want it to ask first, add "ask the user first" to the
 message.
 
-Here is one run of the same brief, recorded in a fresh copy with the same
-hook. It ran in `claude -p`, the mode that prints one reply and exits,
-with the edit and the two git commands allowed ahead of time. The final
-reply is below. Your run may take a different path.
+Here is one run of the same brief, recorded in a fresh copy with the
+settings above. It ran in `claude -p`, which prints one reply and then
+exits. The edit and the two git commands were allowed ahead of time, and
+the exact command was
+`claude -p '<the brief>' --model claude-sonnet-4-6 --permission-mode acceptEdits --allowedTools "Bash(git add *)" "Bash(git commit *)"`.
+The final reply is below. Your run may take a different path.
 
 <Prompt model="Claude Sonnet 4.6" recorded="2026-09">
 
@@ -279,29 +361,26 @@ message "Bump version to 1.1.0".
 <Response>
 
 ```text
-The commit was blocked by a pre-commit hook: `package-lock.json` cannot be
-changed without a corresponding change to `package.json`. The hook message
-says:
+A pre-commit hook is blocking the change. The hook requires that
+`package.json` also be changed when `package-lock.json` changes. This is a
+safeguard: `package-lock.json` is generated from `package.json`, and
+changing them out of sync is considered an error.
 
-> `package-lock.json` is generated from `package.json`. Make the change in
-> `package.json` and regenerate `package-lock.json` from it, or undo the
-> lockfile change with `git checkout HEAD -- package-lock.json`
+To proceed, I'd need to either:
+1. Also update the version in `package.json` (which you said not to do), or
+2. Revert the `package-lock.json` change.
 
-To do this correctly, I'd need to update the version in `package.json`
-first and then regenerate `package-lock.json`. Would you like me to:
-
-1. Also update `package.json` (version field) and regenerate
-   `package-lock.json` via `npm install`, then commit both files, or
-2. Revert the `package-lock.json` change and leave everything as-is?
+Would you like me to revert the lockfile change, or should I also update
+`package.json` to match?
 ```
 
 </Response>
 
-In this run the agent stopped, quoted the fix from the message, and
-offered you both ways out. It calls the check a pre-commit hook, which is
-the name of a git hook. The message never said which kind of hook it
-was, and the agent didn't need to know. `git log --oneline` in that copy
-still showed only `fixture`.
+In this run the agent stopped, restated the rule from the message,
+named the conflict with the brief, and offered you both ways out. It
+calls the check a pre-commit hook, which is the name of a git hook. The
+message never said which kind of hook it was, and the agent didn't need
+to know. `git log --oneline` in that copy still showed only `fixture`.
 
 <Choice id="message-the-agent-can-use" objective="customizing-agents/configures-agent/adds-a-hook"
   concepts={['hooks']}
@@ -316,24 +395,9 @@ still showed only `fixture`.
 Which text should the hook write to standard error?
 </Choice>
 
-<Match id="which-event" phase="review" objective="customizing-agents/configures-agent/adds-a-hook"
-  concepts={['hooks']}
-  context="Claude Code offers events where a hook can run a command: SessionStart when a session begins or resumes, PreToolUse before a tool call runs, PostToolUse after a tool call has succeeded, and Stop when Claude has finished its reply. Each row is a job a developer wants a hook to do."
-  title="Which event fits the job?" hint="Does the job have to happen before the action, after it, or at the start or end of something?"
-  options={['PreToolUse', 'PostToolUse', 'SessionStart', 'Stop']}
-  rows={[
-    { statement: 'Refuse a git push to main before it runs', option: 0, why: 'Which event is the last moment before the command runs?' },
-    { statement: 'Run the formatter on a file right after an edit to it', option: 1, why: 'Which event fires once the edit has happened?' },
-    { statement: 'Print the open issues when a session begins', option: 2, why: 'Which event fires once per session, at the start?' },
-    { statement: 'Play a sound when Claude has finished its reply', option: 3, why: 'Which event fires at the end of a reply?' },
-  ]}
-  rationale="A hook that must prevent an action runs before it, in PreToolUse. After the tool has run, a hook can only react.">
-Match each job to the event its hook should run on.
-</Match>
-
 <Sort id="blocked-or-not" phase="review" objective="customizing-agents/configures-agent/adds-a-hook"
   concepts={['hooks']}
-  context="A Claude Code PreToolUse hook on the Bash tool is meant to stop some git commit commands. Each item is one way the hook can end for a commit it was meant to stop. Claude Code blocks the tool call only on exit code 2, and a hook that times out doesn't block."
+  context="A Claude Code PreToolUse hook on the Bash tool is meant to stop some git commit commands. Each item is one way the hook can end for a commit it was meant to stop. For a hook that prints nothing on standard output, Claude Code blocks the tool call only on exit code 2, and a hook that times out doesn't block."
   title="Does the commit run?" hint="Which exit code blocks the call, and what happens when the hook never gets to choose one?"
   buckets={['The commit is blocked', 'The commit runs']}
   items={[
@@ -368,11 +432,12 @@ and the two files disagreed for a week before a reviewer noticed. The
 instruction was a request, and the agent weighed it against everything
 else in its context. The rule from
 [When instructions aren't enough](/customizing-agents/instructions/#when-instructions-arent-enough):
-a rule that must hold every time is a hook, and guidance that may bend
-stays an instruction.
+a rule that must hold every time needs a mechanism, such as a hook for
+the moment of the mistake and a CI check behind it, and guidance that
+may bend stays an instruction.
 </Pitfall>
 
-<Exercise stretch="Change the hook's final return 2 to return 1, send the same brief again, and find the hook error notice in the transcript. Then check git log: the commit went through. Change it back.">
+<Exercise stretch="Change the hook's final return 2 to return 1, reset the copy with git checkout -- ., and send the same brief again. This time Claude Code asks you to approve the commit: approve it, and find the hook error notice in the transcript. Then check git log: the commit went through. Change the code back.">
 Do the steps of this lesson in your own copy, if you haven't already:
 write or copy the hook, test it by hand with the piped JSON, register it
 in `.claude/settings.local.json`, check it in `/hooks`, and send the brief
@@ -382,12 +447,13 @@ client and its schema), and change `PAIRS` and the message to fit it. Try
 it in a fresh clone or a branch you can throw away. The result is one
 script, one settings entry, and a note of what the agent did after the
 block. The point is to see the whole loop once, from the rule to the
-agent's reaction, while the stakes are a throwaway copy.
+agent's reaction, in a copy where a mistake costs nothing.
 
 A good result: the piped test prints the message and `exit code 2`, the
 agent's commit never lands, and your note says which way the agent went
 after the block. Reflection: which line of your own instruction file
-states a rule that must hold every time, and what would its hook check?
+states a rule where one miss would cost you, what would a hook for it
+check, and what would a hook miss that a CI check would catch?
 </Exercise>
 
 <Recap>
@@ -395,10 +461,11 @@ states a rule that must hold every time, and what would its hook check?
    such as `PreToolUse` before a tool call or `PostToolUse` after one. A
    command hook gets the event as JSON on standard input
    (@Claude Code hooks).
-2. The exit code is the answer. Code 0 lets the call go on, code 2 blocks
-   it and gives Claude the text on standard error as the reason, and any
-   other code, 1 included, is an error that lets the call run
-   (@Claude Code hooks).
+2. For a hook that writes plain text, the exit code is the answer. Code 0
+   lets the call go on, code 2 blocks it and gives Claude the text on
+   standard error as the reason, and any other code, 1 included, is an
+   error that lets the call run. A JSON decision on standard output can
+   also block (@Claude Code hooks).
 3. A `PreToolUse` hook runs before the permission check, in every
    permission mode (@Claude Code hooks guide). It can stop an action that
    an allow rule or a mode would have let through.
@@ -412,6 +479,7 @@ states a rule that must hold every time, and what would its hook check?
 
 <Habit id="rule-or-hook">
 The next time you write "always" or "never" in an agent's instruction
-file, ask whether one miss would cost you, and if it would, write the
-hook for it.
+file, ask whether one miss would cost you. If it would, write a hook
+that catches the mistake while the agent works, and say where the check
+behind it runs.
 </Habit>

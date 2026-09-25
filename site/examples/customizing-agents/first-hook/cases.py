@@ -1,7 +1,7 @@
-"""Four Bash commands held against the lockfile hook.
+"""Five Bash commands held against the lockfile hook.
 
-For the lesson "Writing a hook that blocks a mistake". The first three run
-after a hand edit of the version in `package-lock.json` alone. The fourth
+For the lesson "Writing a hook that blocks a mistake". The first four run
+after a hand edit of the version in `package-lock.json` alone. The fifth
 runs after the same edit in `package.json` as well. Each line is the command
 and the exit code the hook returns for it.
 """
@@ -15,6 +15,7 @@ LOCKFILE_ONLY = [
     "git status",
     'git commit -am "Bump version"',
     'git commit --no-verify -am "Bump version"',
+    'git -C . commit -am "Bump version"',
 ]
 BOTH_FILES = ['git commit -am "Bump version"']
 
