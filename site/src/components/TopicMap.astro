@@ -20,7 +20,8 @@ const byArea = (await getAreas()).map((a) => {
 	// Order by prerequisite depth within the area, then by name.
 	const depth = new Map<string, number>();
 	const visit = (id: string, seen: Set<string>): number => {
-		if (depth.has(id)) return depth.get(id)!;
+		const known = depth.get(id);
+		if (known !== undefined) return known;
 		if (seen.has(id)) return 0;
 		seen.add(id);
 		const t = list.find((x) => x.id === id);
@@ -30,7 +31,7 @@ const byArea = (await getAreas()).map((a) => {
 		return d;
 	};
 	for (const t of list) visit(t.id, new Set());
-	list.sort((x, y) => depth.get(x.id)! - depth.get(y.id)! || x.name.localeCompare(y.name));
+	list.sort((x, y) => (depth.get(x.id) ?? 0) - (depth.get(y.id) ?? 0) || x.name.localeCompare(y.name));
 	return { area: a, topics: list };
 });
 const coverage = topics.map((t) => ({
@@ -58,7 +59,7 @@ const edges = topics.flatMap((t) =>
 				<div class="topic-col">
 					<p class="topic-col-title">{area.name}</p>
 					{topics.map((t) => (
-						<a class="topic-node" href={href(`/topics/${t.id}/`)} data-topic={t.id} data-state="untouched" data-has-lesson={String(coverage.find((c) => c.id === t.id)!.lessons.length > 0)} data-planned={String(planned.has(t.id))} title={t.definition}>
+						<a class="topic-node" href={href(`/topics/${t.id}/`)} data-topic={t.id} data-state="untouched" data-has-lesson={String(lessons.some((l) => l.data.covers === t.id))} data-planned={String(planned.has(t.id))} title={t.definition}>
 							{t.name}
 						</a>
 					))}
@@ -70,46 +71,7 @@ const edges = topics.flatMap((t) =>
 </div>
 
 <script>
-	import * as progress from '@scripts/progress';
+	import { mountTopicMap } from '@scripts/topic-map';
 
-	const root = document.querySelector<HTMLElement>('[data-topic-map]');
-	if (root) {
-		const coverage: { id: string; lessons: string[] }[] = JSON.parse(root.dataset.coverage!);
-		function draw() {
-			const rec = progress.load();
-			for (const c of coverage) {
-				const states = c.lessons.map((l) => rec.lessons[l]?.state);
-				const state = c.lessons.length && states.every((s) => s === 'finished' || s === 'skipped') ? 'finished' : states.some(Boolean) ? 'in-progress' : 'untouched';
-				const el = root!.querySelector<HTMLElement>(`[data-topic="${c.id}"]`);
-				if (el) el.dataset.state = state;
-			}
-		}
-		function drawEdges() {
-			const svg = root!.querySelector<SVGSVGElement>('.topic-map-edges');
-			const raw = root!.querySelector('[data-edges]')?.textContent;
-			if (!svg || !raw) return;
-			const edges: { from: string; to: string; cross: boolean }[] = JSON.parse(raw);
-			const box = root!.getBoundingClientRect();
-			svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
-			svg.innerHTML = edges
-				.map((e) => {
-					const a = root!.querySelector(`[data-topic="${e.from}"]`)?.getBoundingClientRect();
-					const b = root!.querySelector(`[data-topic="${e.to}"]`)?.getBoundingClientRect();
-					if (!a || !b) return '';
-					const sameCol = Math.abs(a.left - b.left) < 2;
-					const x1 = sameCol ? a.left + a.width / 2 - box.left : (a.left < b.left ? a.right : a.left) - box.left;
-					const y1 = sameCol ? a.bottom - box.top : a.top + a.height / 2 - box.top;
-					const x2 = sameCol ? b.left + b.width / 2 - box.left : (a.left < b.left ? b.left : b.right) - box.left;
-					const y2 = sameCol ? b.top - box.top : b.top + b.height / 2 - box.top;
-					const mx = (x1 + x2) / 2;
-					const d = sameCol ? `M${x1},${y1} L${x2},${y2}` : `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
-					return `<path d="${d}" data-cross="${e.cross}" />`;
-				})
-				.join('');
-		}
-		draw();
-		drawEdges();
-		document.addEventListener(progress.EVENT, draw);
-		window.addEventListener('resize', drawEdges);
-	}
+	mountTopicMap();
 </script>
