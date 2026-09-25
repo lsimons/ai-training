@@ -40,12 +40,16 @@ GIT_FIXTURE_DIRS = [
     "coding-with-agents/reviewing-the-diff",
     "coding-with-agents/self-checking-loops",
     "customizing-agents/first-hook",
+    "customizing-agents/session-handoff",
     "customizing-agents/testing-a-skill",
 ]
 NOT_RUN = {
     # build.py needs a target directory and prints its usage without one. It
     # builds the repository with the same `build` the other fixtures call.
     "coding-with-agents/reviewing-the-diff/build.py",
+    # setup_practice.py needs a target directory and prints its usage without
+    # one. diff_only.py builds the same repository with the same `build`.
+    "customizing-agents/session-handoff/setup_practice.py",
     # clones.py is the module the other testing-a-skill fixtures import. Run on
     # its own it defines functions and prints nothing, so it would compare two
     # empty outputs. Its `git_env` is exercised through the fixtures that call it.
