@@ -28,5 +28,10 @@ notes: >-
   origin (run t08 of the rubrics lesson) are illustrative, written by the author. Holding one item in
   five out of tuning is this course's practice from the competency file, and AEC-09 doesn't state it,
   so the page cites no source for it, and the same goes for recording qualities and an item's origin.
-  AEC-08 backs the claim that an agent without a fallback for missing information may answer anyway. DLAI-11, Academy building-with-the-claude-api and Academy
-  ai-native-sdlc-playbook from the plan were dropped because the page cites no claim from them.
+  AEC-08 backs the claim that an agent without a fallback for missing information may answer
+  anyway. DLAI-11, Academy building-with-the-claude-api and Academy ai-native-sdlc-playbook from the
+  plan were dropped because the page cites no claim from them. The checkpoints all serve
+  builds-a-golden-set, but they test three ideas (what a prompt line protects, what to hold out, and
+  what an item records), and neither review alternate tests the Predict's idea, so a review may ask
+  one in place of the Predict. The mismatch is accepted because the plan gives the lesson one
+  objective.
