@@ -113,6 +113,18 @@ def test_widen_rule_rewrites_swap_keys_and_never_the_replacements() -> None:
     )
 
 
+def test_widen_rule_reads_a_list_item_with_more_than_one_space_after_the_dash() -> None:
+    text = 'extends: existence\ntokens:\n  -   "foo bar"\n-\tin order\n'
+    assert vale_linebreaks.widen_rule(text) == (
+        'extends: existence\ntokens:\n  -   "foo\\\\sbar"\n-\tin\\sorder\n'
+    )
+
+
+def test_widen_scalar_keeps_the_trailing_whitespace_of_a_plain_scalar_unwidened() -> None:
+    assert vale_linebreaks.widen_scalar("in order  ", "f") == "in\\sorder  "
+    assert vale_linebreaks.widen_scalar("in order \t# a comment", "f") == "in\\sorder \t# a comment"
+
+
 def test_widen_rule_leaves_other_rule_types_alone() -> None:
     sequence = "extends: sequence\nmessage: x\ntokens:\n  - tag: JJ\n    pattern: a b\n"
     assert vale_linebreaks.widen_rule(sequence) == sequence
@@ -161,6 +173,13 @@ def test_main_reports_the_count_and_a_format_error(
         vale_linebreaks.main([str(ini)])
     with pytest.raises(SystemExit, match="Usage"):
         vale_linebreaks.main([])
+
+
+def test_main_reports_a_bare_package_name_without_a_traceback(tmp_path: pathlib.Path) -> None:
+    ini = tmp_path / "vale.ini"
+    ini.write_text("Packages = Google\n")
+    with pytest.raises(SystemExit, match=r"Packages entry 'Google' is not a \.zip URL"):
+        vale_linebreaks.main([str(ini)])
 
 
 # House.VerbTricolon keeps its literal spaces until the maintainer decides
