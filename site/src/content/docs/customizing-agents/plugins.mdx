@@ -54,7 +54,7 @@ Whether the installed files stay the ones you read depends on the author
 and on the marketplace. An author who sets `version` in the manifest
 holds every install at that version until they set a new one
 (@Claude Code plugin manifest). A marketplace with auto-update turned on
-replaces the installed files in the background after a session starts
+replaces the installed files in the background
 (@Claude Code plugin security). Most of Anthropic's official marketplaces
 have auto-update on by default, and third-party ones have it off
 (@Claude Code plugin install).
@@ -65,8 +65,8 @@ it is enabled, Claude Code loads it into every session
 the skills, commands and subagents that Claude may pick by itself, which
 is the stage the previous lesson measured for one skill. The full text of
 a skill or a subagent waits until Claude uses it. The plugin's servers
-are running in each session, its hooks act on each of their events, and
-that code has your user account's rights.
+run in each session and its hooks act on their events. Both run with
+your user account's rights.
 
 <Sort id="when-each-part-acts" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
   concepts={['plugins']}
@@ -132,8 +132,8 @@ small.
 gives it a task, and it works on that task with its own instructions and
 its own context. This one writes release notes from `git log`. Its
 front matter lists `Read`, `Grep` and `Bash`, so it can run shell
-commands. Leave the `tools` line out, and a subagent may use every tool
-that subagents are allowed (@Claude Code subagents). Read that line in
+commands. A subagent file without a `tools` line may use every tool that
+subagents are allowed (@Claude Code subagents). Read that line in
 every subagent a plugin brings.
 
 **The hook** is in `hooks/hooks.json`. Nobody has to run the release
