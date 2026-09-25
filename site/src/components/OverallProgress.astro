@@ -48,65 +48,7 @@ const first = catalog.flatMap((c) => c.lessons)[0];
 </style>
 
 <script>
-	import { dueByCourse, dueLine } from '@scripts/due-counts';
-	import * as progress from '@scripts/progress';
-	import { overall, type CatalogCourse } from '@scripts/overview';
+	import { mountOverallProgress } from '@scripts/overall-progress';
 
-	document.querySelectorAll<HTMLElement>('[data-overall]').forEach((root) => {
-		const catalog: CatalogCourse[] = JSON.parse(root.dataset.catalog!);
-		const base = root.dataset.base!.replace(/\/$/, '');
-		const bar = root.querySelector<HTMLElement>('[data-bar]')!;
-		const fill = bar.firstElementChild as HTMLElement;
-		const pct = root.querySelector<HTMLElement>('[data-percent]')!;
-		const skippedEl = root.querySelector<HTMLElement>('[data-skipped]')!;
-		const text = root.querySelector<HTMLElement>('[data-text]');
-		const cont = root.querySelector<HTMLAnchorElement>('[data-continue]')!;
-		const dueLines = root.querySelector<HTMLElement>('[data-due-lines]')!;
-
-		/** One line per course with items due, each linking to that course's review page. Hidden when none. */
-		function drawDue(rec: progress.ProgressRecord) {
-			const due = dueByCourse(catalog, rec, progress.today());
-			dueLines.hidden = due.length === 0;
-			dueLines.replaceChildren(
-				...due.map((c) => {
-					const li = document.createElement('li');
-					const a = document.createElement('a');
-					a.href = `${base}/${c.area}/review/`;
-					a.dataset.dueLine = c.area;
-					a.textContent = dueLine(c);
-					li.appendChild(a);
-					return li;
-				}),
-			);
-		}
-
-		function draw() {
-			const rec = progress.load();
-			const o = overall(catalog, rec);
-			drawDue(rec);
-			fill.style.width = `${o.percent}%`;
-			bar.setAttribute('aria-valuenow', String(o.percent));
-			pct.textContent = `${o.percent}%`;
-			// Spec S04 "Progress display": skipped is out of the percent and shown as its own count.
-			skippedEl.textContent = `${o.skipped} skipped`;
-			skippedEl.hidden = o.skipped === 0;
-			if (text) text.textContent = o.any
-				? `${o.finished} of ${o.lessons} lessons finished${o.started ? `, ${o.started} in progress` : ''}; ${o.passed} of ${o.checkpoints} checkpoints passed.`
-				: `${o.lessons} lessons and ${o.checkpoints} checkpoints across six courses. Nothing started yet.`;
-			// Spec S04 "Progress display": the next unfinished lesson; with none left, the first skipped one.
-			const target = o.next ?? o.firstSkipped;
-			if (o.any && target && (o.next || o.finished === 0)) {
-				cont.href = `${base}/${target.id}/`;
-				cont.textContent = `Continue with: ${target.title}`;
-			} else if (o.any && target) {
-				cont.href = `${base}/${target.id}/`;
-				cont.textContent = `All lessons finished, ${o.skipped} skipped`;
-			} else if (o.any) {
-				cont.href = `${base}/map/`;
-				cont.textContent = 'All lessons finished: see the topic map';
-			}
-		}
-		draw();
-		document.addEventListener(progress.EVENT, draw);
-	});
+	mountOverallProgress();
 </script>
