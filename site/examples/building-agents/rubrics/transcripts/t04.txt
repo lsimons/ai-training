@@ -1,0 +1,4 @@
+question: How many days per week can I work from home?
+call: search_docs(query='work from home days week')
+result: remote-work.txt: Remote work. Staff may work from home up to three days per week. A home office allowance of 30 euros per month is paid with salary. Equipment stays company property.
+answer: Up to three days per week, and you get a home office allowance of 50 euros per month. "Staff may work from home up to three days per week."
