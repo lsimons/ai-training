@@ -769,3 +769,24 @@ Claude docs best-practices:
   author: Anthropic
   license: Proprietary
   url: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+Claude Code monitoring:
+  type: reference
+  title: Monitoring
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/monitoring-usage
+Claude docs model-ids-and-versions:
+  type: reference
+  title: Model IDs and versioning
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/about-claude/models/model-ids-and-versions
+Claude docs model-deprecations:
+  type: reference
+  title: Model deprecations
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/about-claude/model-deprecations
