@@ -19,7 +19,8 @@ from it, and none of them is in the diff:
 For each fact the script looks for the words that name it, without regard to
 upper or lower case, and prints `named` or `missing`. It only matches words.
 A handoff that states a fact in other words is reported as `missing`, so
-read the file yourself before you trust a `missing`.
+read the file yourself before you trust a `missing`. A `named` only means
+that the words are there, not that the handoff states the fact.
 """
 
 import sys
