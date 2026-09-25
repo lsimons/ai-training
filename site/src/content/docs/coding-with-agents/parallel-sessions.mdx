@@ -56,8 +56,9 @@ The course's script copies `shop` to a temporary place and makes the copy
 a git repository with one commit on `main`. Then it runs the commands above
 and prints each one after the name of the folder it runs in. The list
 shows only the folder and the branch of each worktree, because paths and
-commit hashes differ on every machine. For the last command the script
-says in its own words what git does. Run it from
+commit hashes differ on every machine. The script runs git quietly, so
+the two `add` lines show no output of their own. For the last command the
+script says in its own words what git does. Run it from
 `site/examples/coding-with-agents/parallel-sessions/` in your clone of the
 course repository, and compare what you see with the output below.
 
@@ -154,17 +155,7 @@ sessions take, you are running too many.
 Which line lets you pick up that session after the meeting?
 </Choice>
 
-<Pitfall title="Two sessions that never touched the same file">
-A developer ran two sessions in two worktrees of one clone. The docs
-session stashed its half-done README to try something. The API session
-had stashed its own edit earlier and ran `git stash pop` to get it back.
-Git applied the newest stash, the docs edit, in the API worktree. Both sessions also started the dev server
-on the same port. The second server failed to start, and the second
-session's checks then ran against the first session's server and passed on
-the wrong code. No merge conflict showed any of it. The stash belongs to
-the clone and the port to the machine, and every worktree shares both. Give
-each session its own copy of what it needs, or tell every session to leave it alone.
-</Pitfall>
+## Know what the worktrees share
 
 Git stores the newest stash in the ref `refs/stash` and the older ones in
 that ref's log (@Git docs git-stash), and every ref under `refs/` is shared
@@ -186,8 +177,9 @@ stash for all the sessions.
   (nothing)`} run="coding-with-agents/parallel-sessions/stash.py">
 The course's script opens the two worktrees, makes both sessions' edits
 without committing them, and then runs the commands below in the folder
-each line names. `(nothing)` means the command printed nothing. Run it from
-the same directory.
+each line names. `(nothing)` means the command printed nothing. The script
+runs git quietly, so the `stash push` and `stash pop` lines show no output
+of their own. Run it from the same directory.
 
 ```sh
 python3 stash.py
@@ -198,6 +190,15 @@ python3 stash.py
 The API worktree now holds the docs session's README edit next to its own
 changes, and the docs session's work is gone from its own worktree. Git
 reported no error at any step.
+
+<Pitfall title="Two sessions that never touched the same file">
+A developer ran two sessions in two worktrees of one clone. The API
+session stashed its own edit to try something, and later the docs session
+stashed its half-done README. When the API session ran `git stash pop` to
+get its edit back, git applied the newest stash, the docs edit, in the API
+worktree. No merge conflict and no error showed it. Tell every session to
+leave the stash alone and to commit its work in progress instead.
+</Pitfall>
 
 <Sort id="own-or-shared" objective="coding-with-agents/works-in-team/runs-parallel-work"
   concepts={['worktrees']}
@@ -253,8 +254,9 @@ check again after every rebase.
   chore: the shipping module`} run="coding-with-agents/parallel-sessions/integrate.py">
 The course's script makes both sessions' commits, then merges and rebases
 in the order above. It prints a short result where git's own messages
-differ between git versions. The line in brackets is the step the docs
-session takes after the failed check. Run it from the same directory.
+differ between git versions. The `merge` lines have no output of their
+own, because the script runs the merges quietly. The line in parentheses is the
+step the docs session takes after the failed check. Run it from the same directory.
 
 ```sh
 python3 integrate.py
@@ -263,7 +265,7 @@ python3 integrate.py
 </Predict>
 
 The check passed on the docs branch before the rebase and failed after it,
-and the rebase had no conflict. It caught the example. A sentence in the
+and the rebase had no conflict. The check caught the example. A sentence in the
 README about the price rule would have gone stale without a failing check,
 so the brief for the rebase also asks the session to read what the other
 branch changed. With `--ff-only`, git refuses a merge that it can't do as a
@@ -281,7 +283,7 @@ last line of the check.
 
 <Scenario id="both-branches-done" objective="coding-with-agents/works-in-team/runs-parallel-work"
   concepts={['parallel-sessions']}
-  context="A developer ran two agent sessions in two worktrees. One changed the price rule in the shipping module, and the other added README examples that call that module. Both sessions report that the check passes on their own branch, and neither branch has been merged."
+  context="A developer ran two agent sessions in two worktrees. The API branch changed the price rule in the shipping module, and the docs branch added README examples that call that module. Both sessions report that the check passes on their own branch, and neither branch has been merged."
   title="Both sessions say they are done" hint="Which branch describes the other, and when was each check run?"
   options={[
     { text: 'Merge the docs branch first, because it is the smaller change, and then merge the API branch after it.', consequence: 'The API merge brings in the new price, and the README example on main now fails the check. The API session has to edit the README, the one file its brief kept it out of.' },
@@ -309,7 +311,7 @@ the vendor page names (@Claude Code worktrees).
 
 Many pages of this course are written by agent sessions that run side by
 side, and the repository's page on orchestration describes how
-(@AI Training orchestration). In our own words:
+(@AI Training orchestration):
 
 - One coordinating session takes the ready issues and starts one builder
   session per issue. Each builder works in its own worktree, in one folder
@@ -335,8 +337,8 @@ side, and the repository's page on orchestration describes how
   title="Which lines go into the docs brief?" hint="For each line, does it keep the session in its own files and its own copy of things, or does it reach into what the other session uses?"
   options={[
     { text: 'Change only README.md, and leave the code files to the other agent.', correct: true },
-    { text: 'Run the check in your worktree, and don\'t start the dev server.', correct: true },
-    { text: 'Stash your work when you want to try something, and pop it later.', why: 'The stash is shared by every worktree of the clone, so the other session can pop it.' },
+    { text: 'Run the check in your worktree, and don\'t use the git stash.', correct: true },
+    { text: 'Start the dev server on its usual port to look at the pages.', why: 'The port is shared by every session on the machine. A server that is already running there answers in place of yours.' },
     { text: 'Pull the other branch into yours whenever it has new commits.', why: 'The docs branch then carries unfinished API commits. You rebase it on main once the API branch has merged.' },
     { text: 'Commit and stop when the check passes, and wait for me to say rebase.', correct: true },
   ]}>
@@ -371,7 +373,7 @@ What happens?
 
 <Order id="integration-order" phase="review" objective="coding-with-agents/works-in-team/runs-parallel-work"
   concepts={['parallel-sessions']}
-  context="A developer ran two agent sessions in two worktrees. One changed a module, and the other wrote README examples that call that module. Both committed on their own branches."
+  context="A developer ran two agent sessions in two worktrees. The API branch changed a module, and the docs branch added README examples that call it. Both sessions committed on their own branches."
   title="Put the integration in order" hint="Which branch do the others depend on, and when is the check on the combined code run?"
   steps={['Merge the API branch into main', 'Have the docs session rebase on main', 'Run the check on the rebased docs branch', 'Fix what the check reports and commit', 'Merge the docs branch into main']} />
 
@@ -403,9 +405,11 @@ Match each resource to what the briefs say about it.
 What do you do first?
 </Scenario>
 
-<Exercise stretch="Run the same two tasks again with claude --worktree, and find where Claude Code put each worktree and what it named the branches.">
-Make a project of your own from the course files. From the root of your
-clone of the course repository, run:
+<Exercise stretch="Run the same two tasks again with claude --worktree. Run claude once in ~/shop first to accept the trust prompt, then find where Claude Code put each worktree and what it named the branches.">
+Make a project of your own from the course files. Afterwards you can run
+two real sessions side by side without them taking each other's files or
+stash. Make sure `~/shop`, `~/shop-api` and `~/shop-docs` don't exist yet.
+Then, from the root of your clone of the course repository, run:
 
 ```sh
 cp -R site/examples/coding-with-agents/parallel-sessions/shop ~/shop
@@ -424,7 +428,8 @@ session before you press enter, and update it each time you look at a
 session. When both have committed, merge the API branch in `~/shop` with
 `git merge --ff-only api-half-kilo`, and give the docs session the rebase
 brief. Merge the docs branch when its check passes. Then remove the two
-worktrees with `git worktree remove`.
+worktrees with `git worktree remove`. If git refuses, run `git status` in
+that worktree to see which files an agent left there.
 
 A good result has a `main` with the API commit first and the docs commits
 after it, a `README.md` whose examples pass `python3 check.py`, and a note
@@ -435,8 +440,8 @@ knowing?
 </Exercise>
 
 <Recap>
-1. Parallel sessions use the time you would spend waiting. Give each one a worktree on its own branch, with a task that changes other files than the rest.
-2. Worktrees of one clone share the history and every ref, including the stash. Each worktree has a separate folder of files, `HEAD` and index (@Git docs git-worktree). A new worktree has no ignored files and no installed dependencies until you set it up (@Claude Code worktrees).
+1. Parallel sessions use the time you would spend waiting. Give each one a worktree on its own branch, with a task that changes different files from the rest.
+2. Worktrees of one clone share the history and every ref under `refs/`, including the stash. Each worktree has a separate folder of files, `HEAD` and index (@Git docs git-worktree). A new worktree has no ignored files and no installed dependencies until you set it up (@Claude Code worktrees).
 3. Keep one line per session: worktree and branch, task, next check-in, and whether it waits on you. Answer a waiting session first.
 4. Integrate in a fixed order, the change others depend on first. The other sessions rebase and run the check again, because a rebase without a conflict can still leave a stale example.
 5. Give each session its own copy of what a worktree can hold, and tell every session to leave alone what exists once, such as the stash, `main` and a fixed port.

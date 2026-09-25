@@ -101,6 +101,8 @@ def git_ok(cwd: str, *args: str) -> str:
 def make_shop(tmpdir: str) -> str:
     """The learner's copy of the project: one commit on `main`."""
     shop = os.path.join(tmpdir, "shop")
+    # copytree copies every file in shop/, tracked or not, so a stray file a
+    # learner adds there (another test_*.py, say) changes the counts the page shows.
     shutil.copytree(SHOP, shop, ignore=shutil.ignore_patterns("__pycache__"))
     with open(os.path.join(shop, ".gitignore"), "w", encoding="utf-8") as handle:
         handle.write("__pycache__/\n")

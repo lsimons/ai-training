@@ -1,4 +1,4 @@
-"""The project check: the unit tests, then every `>>>` example in README.md.
+"""The project check: the unit tests, then every `>>>` example in README.md, run by doctest.
 
 Prints one line per part and `check passed` or `check failed` last, and
 exits with status 1 when anything fails.
@@ -7,6 +7,7 @@ exits with status 1 when anything fails.
 import doctest
 import os
 import sys
+import traceback
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -24,23 +25,52 @@ def run_tests() -> bool:
     return failed == 0
 
 
+class ReadmeRunner(doctest.DocTestRunner):
+    """A doctest runner that keeps one short line per failed example."""
+
+    def __init__(self) -> None:
+        super().__init__(verbose=False)
+        self.problems: list[str] = []
+
+    def report_start(self, out, test, example) -> None:
+        pass
+
+    def report_success(self, out, test, example, got) -> None:
+        pass
+
+    def report_failure(self, out, test, example, got) -> None:
+        shown = got.strip() or "no output"
+        self.problems.append(
+            f"  {example.source.strip()}: expected {expected(example)}, got {shown}"
+        )
+
+    def report_unexpected_exception(self, out, test, example, exc_info) -> None:
+        error = traceback.format_exception_only(exc_info[0], exc_info[1])[-1].strip()
+        self.problems.append(
+            f"  {example.source.strip()}: expected {expected(example)}, got {error}"
+        )
+
+
+def expected(example: doctest.Example) -> str:
+    """What the example expects, as one line: the value, the exception line, or no output."""
+    if example.exc_msg is not None:
+        return example.exc_msg.strip()
+    return example.want.strip() or "no output"
+
+
 def run_readme() -> bool:
     with open(os.path.join(HERE, "README.md"), encoding="utf-8") as handle:
         text = handle.read()
-    passed = 0
-    problems = []
-    for example in doctest.DocTestParser().get_examples(text):
-        source = example.source.strip()
-        expected = example.want.strip()
-        got = repr(eval(source, {"quote": shipping.quote}))
-        if got == expected:
-            passed += 1
-        else:
-            problems.append(f"  {source}: expected {expected}, got {got}")
-    print(f"README examples: {passed} passed, {len(problems)} failed")
-    for line in problems:
+    test = doctest.DocTestParser().get_doctest(
+        text, {"quote": shipping.quote}, "README.md", "README.md", 0
+    )
+    runner = ReadmeRunner()
+    results = runner.run(test, out=lambda _text: None, clear_globs=True)
+    passed = results.attempted - results.failed
+    print(f"README examples: {passed} passed, {results.failed} failed")
+    for line in runner.problems:
         print(line)
-    return not problems
+    return results.failed == 0
 
 
 def main() -> int:
