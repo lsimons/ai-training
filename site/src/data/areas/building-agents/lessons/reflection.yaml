@@ -1,21 +1,35 @@
 id: building-agents/reflection
 title: A second pass that critiques the first
+description: >-
+  Run a fake critic and reviser on four handbook answers, see a critic without criteria loop on a
+  trivial edit, and bound the pattern with concrete checks, a cap of two rounds and a view of what
+  each round costs.
 mode: tutorial
 covers: building-agents/patterns
 serves: [building-agents/orchestrates-agents/picks-a-pattern]
 introduces: [reflection]
-assumes: []
+assumes:
+  - objective: building-agents/evaluates-agents/writes-a-rubric
+    lesson: building-agents/rubrics
+    section: from-well-grounded-to-a-criterion
 after: [building-agents/react, building-agents/rubrics]
 shorts: []
 exercise:
   kind: do
   brief: >-
-    Give the fixture critic the three criteria from the rubrics lesson instead of "is this good",
-    cap the rounds at two, and run it on the fixture's four drafts. The output is the round count
-    and final draft per input.
-sources: []
-issue: 206
+    Give the fixture critic the three criteria from the rubrics lesson's model answer instead of
+    "is this good", cap the rounds at two, and run it on the fixture's four drafts. The output is
+    the round count and final draft per input.
+sources: [AEC-04, Madaan 2023, Huang 2023]
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 minutes: 15
 notes: >-
-  A fake critic call revises a draft with checkable rules. Predict the number of rounds with and
-  without a cap, and what a critic without concrete criteria does to a trivial edit.
+  The drafts are four answers of the handbook assistant from the rubrics lesson, with the passages
+  from the retrieval-as-a-tool handbook, and the critic and reviser in
+  site/examples/building-agents/reflection/agent.py are fakes written by hand. The exercise's
+  model answer is model_answer.py in the same folder, and its round counts are pasted into the
+  exercise text. The loop with no cap ends on the character budget, the stand-in for a run that
+  would otherwise not end. DLAI-11 and Academy building-with-the-claude-api from the plan were
+  dropped because the page cites no claim from them. Self-Refine and Huang et al. back the result
+  claims, checked on 2026-09-25.
