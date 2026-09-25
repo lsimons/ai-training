@@ -137,6 +137,34 @@ def test_a_repository_inside_the_package_is_not_the_one_read(
     assert "has uncommitted changes" in capsys.readouterr().err
 
 
+def test_a_failing_git_status_is_named_in_the_note(
+    clones: ModuleType,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    package = _course(tmp_path, monkeypatch, clones)
+    (package / "notes.py").write_text('__version__ = "0.4.0"\n', encoding="utf-8")
+    real = clones._git_bytes
+
+    def git_bytes(cwd: Path, env: dict[str, str], *args: str) -> subprocess.CompletedProcess[bytes]:
+        if "status" in args:
+            return subprocess.CompletedProcess(
+                ["git", *args], 128, b"", b"fatal: index is locked\n"
+            )
+        return real(cwd, env, *args)
+
+    monkeypatch.setattr(clones, "_git_bytes", git_bytes)
+
+    repo = clones.clean_clone(tmp_path / "out")
+
+    assert _files(repo.path) == COMMITTED
+    err = capsys.readouterr().err
+    assert "git status failed" in err
+    assert "(fatal: index is locked)" in err
+    assert "the copy takes the committed version" not in err
+
+
 def test_a_committed_symlink_stops_the_copy(
     clones: ModuleType, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
