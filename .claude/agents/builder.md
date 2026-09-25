@@ -89,6 +89,11 @@ Review finds these in almost every first pass. Check each one yourself.
   your branch only. The first one after an `Unfinished:` comment for your
   branch marks the branch finished.
 
+- When you take over a branch that has an `Unfinished:` comment, post an
+  issue comment with a `Branch: <branch>` line before you hand back, even
+  when your prompt asks for no other reply. Without it a resumed lead
+  builds the finished branch again.
+
 - Rebase on `origin/main` before the final push, and push your own branch
   with `git push --force-with-lease` only. Never discard another agent's
   work to resolve a conflict, never merge, and never message a reviewer.

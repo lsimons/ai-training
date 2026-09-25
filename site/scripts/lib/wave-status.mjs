@@ -14,7 +14,11 @@
  * A comment with a `Branch: <name>` line applies to that branch only, so the
  * two halves of a split issue (`feat/<issue>-<slug>-1` and `-2`) each get
  * their own verdict. A comment without one applies to every branch of the
- * issue.
+ * issue. The last `Branch:` line outside a code fence counts, with a leading
+ * `origin/` and trailing punctuation dropped. A name that matches no pushed
+ * branch of the issue errs toward more work (review): a builder reply or an
+ * `Unfinished:` comment then applies to every branch, and a verdict or a lead
+ * re-check to none.
  *
  * A builder that stops at its turn limit posts a comment whose first line is
  * `Unfinished: <branch>`, then the list of what is left (#418). The branch is
@@ -39,10 +43,13 @@ export const TRUSTED_VERDICT_AUTHORS = Object.freeze(['lsimons', 'lsimons-bot'])
 const VERDICT_LINE = /^\s*\**Verdict:?\**:?\s*\**\s*(approve|needs changes)\b/im;
 
 /** A `Branch:` line, as the reviewers write it next to their `Verdict:` line. */
-const BRANCH_LINE = /^\s*\**Branch:?\**:?\s*\**\s*`?([^\s`*]+)`?/im;
+const BRANCH_LINE = /^\s*\**Branch(?::\**|\**:)\s*\**\s*`?([^\s`*]+)`?/;
 
 /** The first line of a builder's hand-back at its turn limit. */
-const UNFINISHED_LINE = /^\s*\**Unfinished:?\**:?\s*\**\s*`?([^\s`*]+)`?/i;
+const UNFINISHED_LINE = /^\s*\**Unfinished(?::\**|\**:)\s*\**\s*`?([^\s`*]+)`?/i;
+
+/** The opening or closing line of a Markdown code fence. */
+const FENCE_LINE = /^\s*(`{3,}|~{3,})/;
 
 /** The lead's comment after it read an approved branch's fix commit. */
 const LEAD_RE_CHECK_LINE = /^\s*\**re-checked by lead\b/im;
@@ -84,11 +91,51 @@ export function commentKind(body) {
 }
 
 /**
- * The branch a comment names on a `Branch:` line, or null when it names none.
+ * A branch name as a comment writes it, without a leading `origin/` or
+ * trailing punctuation (`feat/1-x.` is `feat/1-x`).
+ * @param {string} name
+ */
+export function normalizeBranch(name) {
+	return name.replace(/^origin\//, '').replace(/[.,;:!?)\]]+$/, '');
+}
+
+/**
+ * The lines of a comment outside its code fences, so a quoted example
+ * doesn't count as the comment's own `Branch:` line.
+ * @param {string} body
+ */
+function linesOutsideFences(body) {
+	/** @type {string[]} */
+	const lines = [];
+	/** @type {string | null} */
+	let fence = null;
+	for (const line of body.split('\n')) {
+		const marker = FENCE_LINE.exec(line)?.[1]?.[0];
+		if (marker) {
+			if (fence === null) fence = marker;
+			else if (marker === fence) fence = null;
+			continue;
+		}
+		if (fence === null) lines.push(line);
+	}
+	return lines;
+}
+
+/**
+ * The branch a comment names on its last `Branch:` line outside a code
+ * fence, or null when it names none. The word is case-sensitive and the
+ * colon required, so `Branch coverage ...` and `Branches pushed: ...` name
+ * no branch.
  * @param {string} body
  */
 export function branchOf(body) {
-	return BRANCH_LINE.exec(body)?.[1] ?? null;
+	/** @type {string | null} */
+	let named = null;
+	for (const line of linesOutsideFences(body)) {
+		const match = BRANCH_LINE.exec(line)?.[1];
+		if (match) named = normalizeBranch(match);
+	}
+	return named;
 }
 
 /**
@@ -98,18 +145,27 @@ export function branchOf(body) {
  */
 export function unfinishedBranchOf(body) {
 	const first = body.split('\n', 1)[0] ?? '';
-	return UNFINISHED_LINE.exec(first)?.[1] ?? null;
+	const match = UNFINISHED_LINE.exec(first)?.[1];
+	return match ? normalizeBranch(match) : null;
 }
 
 /**
- * Whether a comment applies to a branch: it names that branch on its
- * `Unfinished:` or `Branch:` line, or names none.
+ * Whether a comment applies to a branch. It does when it names that branch
+ * on its `Unfinished:` or `Branch:` line, or names none. A comment that names
+ * a branch the issue has no pushed branch for errs toward more work: a reply
+ * or an `Unfinished:` comment applies to every branch (so a branch goes to
+ * `re-check`, `lead-re-check` or `build`), and a verdict or a lead re-check to
+ * none (so it stays in `review` or `lead-re-check`).
  * @param {string} body
  * @param {string} branch
+ * @param {readonly string[]} branches the pushed branches of the issue
  */
-export function appliesTo(body, branch) {
+export function appliesTo(body, branch, branches) {
 	const named = unfinishedBranchOf(body) ?? branchOf(body);
-	return named === null || named === branch;
+	if (named === null) return true;
+	if (branches.includes(named)) return named === branch;
+	const kind = commentKind(body);
+	return kind === 'reply' || kind === 'unfinished';
 }
 
 /**
@@ -131,22 +187,26 @@ function leftOf(body) {
  * none or a later trusted comment finished the branch: a verdict that applies
  * to it, or a reply that names it on a `Branch:` line. A reply that names no
  * branch leaves it unfinished, so a stray note can't send a half-built branch
- * to review.
+ * to review. An `Unfinished:` comment that names no pushed branch of the
+ * issue opens every branch.
  * @param {IssueComment[]} comments
  * @param {string} branch
+ * @param {readonly string[]} branches the pushed branches of the issue
  * @param {readonly string[]} [trusted]
  * @returns {Unfinished | null}
  */
-export function openUnfinished(comments, branch, trusted = TRUSTED_VERDICT_AUTHORS) {
+export function openUnfinished(comments, branch, branches, trusted = TRUSTED_VERDICT_AUTHORS) {
 	/** @type {Unfinished | null} */
 	let open = null;
 	for (const c of trustedInOrder(comments, trusted)) {
 		const kind = commentKind(c.body);
 		if (kind === 'unfinished') {
-			if (unfinishedBranchOf(c.body) === branch) {
+			if (appliesTo(c.body, branch, branches)) {
 				open = { author: c.author, createdAt: c.createdAt, url: c.url, left: leftOf(c.body) };
 			}
-		} else if (kind === 'verdict' ? appliesTo(c.body, branch) : kind === 'reply' && branchOf(c.body) === branch) {
+		} else if (
+			kind === 'verdict' ? appliesTo(c.body, branch, branches) : kind === 'reply' && branchOf(c.body) === branch
+		) {
 			open = null;
 		}
 	}
@@ -171,14 +231,15 @@ function trustedInOrder(comments, trusted) {
  * that came after the last of those, or null.
  * @param {IssueComment[]} comments
  * @param {string} branch
+ * @param {readonly string[]} branches the pushed branches of the issue
  * @param {readonly string[]} [trusted]
  * @returns {Verdict | null}
  */
-export function lastTrustedVerdict(comments, branch, trusted = TRUSTED_VERDICT_AUTHORS) {
+export function lastTrustedVerdict(comments, branch, branches, trusted = TRUSTED_VERDICT_AUTHORS) {
 	/** @type {Verdict | null} */
 	let last = null;
 	for (const c of trustedInOrder(comments, trusted)) {
-		if (!appliesTo(c.body, branch)) continue;
+		if (!appliesTo(c.body, branch, branches)) continue;
 		const kind = commentKind(c.body);
 		const verdict = verdictOf(c.body);
 		if (verdict) {
@@ -262,9 +323,10 @@ export function waveStatus({ waveBranch, issues, heads, commentsByIssue, worktre
 		waveBranch: { name: waveBranch, pushed: heads.includes(waveBranch) },
 		issues: issues.map((issue) => {
 			const comments = commentsByIssue.get(issue) ?? [];
-			const branches = featBranches(heads, issue).map((name) => {
-				const verdict = lastTrustedVerdict(comments, name);
-				const unfinished = openUnfinished(comments, name);
+			const names = featBranches(heads, issue);
+			const branches = names.map((name) => {
+				const verdict = lastTrustedVerdict(comments, name, names);
+				const unfinished = openUnfinished(comments, name, names);
 				return { name, verdict, unfinished, next: nextStep(verdict, unfinished) };
 			});
 			return { issue, next: branches.length === 0 ? 'build' : 'per-branch', branches };
