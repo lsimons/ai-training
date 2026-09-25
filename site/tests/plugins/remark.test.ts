@@ -4,6 +4,7 @@ import { unified } from 'unified';
 import { describe, expect, it } from 'vitest';
 import {
 	citationKeys,
+	citationSpans,
 	createNumbering,
 	hasMultipleKeys,
 	multipleKeysMessage,
@@ -44,6 +45,20 @@ const bibliography = {
 		type: 'reference',
 		title: 'Taste: what is worth building',
 		container: 'Brilliant',
+		author: null,
+		url: null,
+	},
+	'Token guide': {
+		type: 'docs',
+		title: 'Counting tokens',
+		container: 'Example docs',
+		author: null,
+		url: null,
+	},
+	'Context window limits': {
+		type: 'docs',
+		title: 'Context window limits',
+		container: 'Example docs',
 		author: null,
 		url: null,
 	},
@@ -164,6 +179,34 @@ describe('remarkTerms', () => {
 		expect(links(await run('A token.\n', []), 'term')).toHaveLength(0);
 		expect(links(await run('A token.\n', undefined, `${docsDir}guides/how-models-work.mdx`), 'term')).toHaveLength(0);
 	});
+	it('never splits a citation whose key holds a covered term, and marks the term outside it', async () => {
+		const tree = await run('See (@Token guide): a token is small.\n');
+		expect(links(tree, 'term').map((t) => [t.url, text(t)])).toEqual([['/glossary/#token', 'token']]);
+		expect(links(tree, 'citation').map((c) => [c.title, text(c)])).toEqual([['Token guide', '[1]']]);
+		expect(text(tree.children?.[0] as Node)).toBe('See [1]: a token is small.');
+	});
+
+	it('resolves two citations in one text node that both hold terms, and marks terms between and after them', async () => {
+		const src = 'First (@Token guide) and (@Context window\nlimits), then the context window and a token.\n';
+		const tree = await run(src);
+		expect(links(tree, 'citation').map((c) => [c.title, text(c)])).toEqual([
+			['Token guide', '[1]'],
+			['Context window limits', '[2]'],
+		]);
+		expect(links(tree, 'term').map((t) => [t.url, text(t)])).toEqual([
+			['/glossary/#context-window', 'context window'],
+			['/glossary/#token', 'token'],
+		]);
+		expect(text(tree.children?.[0] as Node)).toBe('First [1] and [2], then the context window and a token.');
+		expect(allLinks(tree).some((l) => text(l).includes('(@'))).toBe(false);
+	});
+
+	it('leaves a text node whose only mention of a term is inside a citation as one node', async () => {
+		const tree = await run('Only (@Token guide) here.\n');
+		expect(links(tree, 'term')).toHaveLength(0);
+		expect(text(tree.children?.[0] as Node)).toBe('Only [1] here.');
+	});
+
 	it('refuses to run without the lesson list and docs directory', () => {
 		expect(() => remarkTerms({ topics } as never)).toThrow(/lesson list/);
 	});
@@ -208,6 +251,18 @@ describe('remarkCitations', () => {
 		]);
 		expect(splitCitations('plain')).toEqual([{ type: 'text', value: 'plain' }]);
 		expect(splitCitations('')).toEqual([{ type: 'text', value: '' }]);
+	});
+	it('citationSpans gives the index and length of each token splitCitations finds, and skips one over a blank line', () => {
+		const src = 'A (@K-1) b (@K\n2) c (@X\n\nY) d (@) e.';
+		expect(citationSpans(src)).toEqual([
+			{ index: 2, length: 6 },
+			{ index: 11, length: 6 },
+		]);
+		expect(citationSpans(src).map(({ index, length }) => src.slice(index, index + length))).toEqual([
+			'(@K-1)',
+			'(@K\n2)',
+		]);
+		expect(citationSpans('plain')).toEqual([]);
 	});
 	it('createNumbering numbers keys by first appearance and throws unknownKeyMessage on a key the bibliography lacks', () => {
 		const { numberOf, order } = createNumbering({ 'K-1': {}, 'K-2': {} }, 'here');
