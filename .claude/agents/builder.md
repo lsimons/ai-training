@@ -57,8 +57,11 @@ Review finds these in almost every first pass. Check each one yourself.
 
 - Never run `git stash`, in any worktree. Every worktree of the clone
   shares one stash (`refs/stash`), so a pop can return another builder's
-  changes. To compare with the base, commit work in progress, use
-  `git diff > .scratch/x.patch` and `git apply`, or `git worktree add --detach` a separate checkout under `../ai-training-wt/`.
+  changes. To compare with the base, commit work in progress. Otherwise
+  use `git diff HEAD > .scratch/x.patch` and `git apply`, or run
+  `git worktree add --detach` for a separate checkout under
+  `../ai-training-wt/`. Untracked files aren't in that patch unless
+  `git add -N` marks them first.
 
 - Don't run `site-dev`. The wave's `mise run ci` is the one e2e run.
 
