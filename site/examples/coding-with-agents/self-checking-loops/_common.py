@@ -9,8 +9,10 @@ same copy the lesson tells the learner to make.
 The two agent runs the lesson shows are text edits on the copy: the fix that
 reads each export with the `csv` module, and a run without limits that skips
 the bad rows and then removes the check that caught it. The fix is the one
-the observing-and-debugging lesson briefs for, and its text is read from that
-lesson's `after_fix.py`, so the two lessons can't drift apart.
+the observing-and-debugging lesson briefs for. Its two text edits are read
+from that lesson's `after_fix.py`, so a change there reaches this lesson too.
+The added `import csv` line is written out here as well, and `replace` stops
+with an error if the importer no longer holds the text it edits.
 """
 
 import ast
