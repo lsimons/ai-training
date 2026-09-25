@@ -825,3 +825,45 @@ Claude docs thinking:
   author: Anthropic
   license: Proprietary
   url: https://platform.claude.com/docs/en/build-with-claude/thinking
+Claude Code plugins:
+  type: reference
+  title: Plugins overview
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/plugins
+Claude Code plugin security:
+  type: reference
+  title: Plugin security and trust
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/plugins/security
+Claude Code plugin parts:
+  type: reference
+  title: Add components to a plugin
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/plugins/components
+Claude Code plugin install:
+  type: reference
+  title: Install and manage plugins
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/plugins/install
+Claude Code plugin manifest:
+  type: reference
+  title: Plugin manifest reference
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/plugins/manifest-reference
+Claude Code hooks:
+  type: reference
+  title: Hooks reference
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/hooks

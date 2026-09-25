@@ -1,0 +1,6 @@
+{
+  "name": "release-kit",
+  "version": "1.4.0",
+  "description": "Cut releases the same way in every repository.",
+  "author": { "name": "An invented platform team" }
+}
