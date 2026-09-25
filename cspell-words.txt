@@ -231,3 +231,8 @@ Shunyu
 Zhao
 hookify
 anthropics
+Pearce
+Baleegh
+venv
+nosec
+fetchall

@@ -54,4 +54,4 @@ links:
   prerequisites: [coding-with-agents/verification, safety/agent-risk]
   related: []
   specializations: []
-sources: [DLAI-7, Brilliant SEC, Fuchsia review, OpenSSF Scorecard, Academy ai-native-sdlc-playbook, Academy claude-code-in-action]
+sources: [DLAI-7, Brilliant SEC, Fuchsia review, OpenSSF Scorecard, Academy ai-native-sdlc-playbook, Academy claude-code-in-action, Pearce 2022, Bandit, Python sqlite3]
