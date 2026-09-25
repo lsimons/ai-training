@@ -45,7 +45,7 @@ notes: >-
   old conversation and conversations are saved locally under ~/.claude/projects/ (how it works),
   `--continue`, `--resume` and the advice to start clean after repeated corrections (best
   practices), CLAUDE.md and auto-memory loaded at session start, the auto-memory switch and the
-  "Saved 1 memory" message (memory), and what Manual mode allows without a prompt (permission
+  "Saved 2 memories" example message (memory), and what Manual mode allows without a prompt (permission
   modes). AEC-05 supplies the session and state distinction, paraphrased. Brilliant MEM is
   alignment only, and the Academy courses are not cited. The page doesn't say "the previous
   lesson", so it has no assumes entry for compaction.
