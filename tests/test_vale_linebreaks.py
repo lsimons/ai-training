@@ -475,3 +475,71 @@ def test_a_token_ignores_phrase_applies_across_a_line_break(
     old = ignores.replace(pattern, pattern.replace(r"\s", " "))
     assert old != ignores
     assert _vale_with(tmp_path / "old", rules, text, accept=accept, token_ignores=old) == [rule]
+
+
+# The pre-push Vale hooks in prek.toml run the same steps as the `depends`
+# of `mise run prose`: the package check, then the rewrite, then Vale
+# (issue #454). Without the rewrite a checkout synced by a bare `vale sync`
+# passes a line-split hit on a push that `mise run prose` rejects.
+PACKAGE_CHECK = "scripts/prose_eval.py --check-packages .vale.ini .vale-extended.ini"
+WIDEN = "scripts/vale_linebreaks.py .vale.ini .vale-extended.ini"
+
+
+def _vale_hook_problem(entry: str) -> str:
+    """Why a hook entry that runs Vale would run it on unwidened rules, or ''."""
+    vale_at = entry.find(" vale ")
+    if vale_at < 0:
+        return "does not run vale"
+    check_at = entry.find(PACKAGE_CHECK)
+    widen_at = entry.find(WIDEN)
+    if check_at < 0 or check_at > vale_at:
+        return "does not check the packages before vale"
+    if widen_at < 0 or widen_at > vale_at:
+        return "does not widen the packages before vale"
+    if widen_at < check_at:
+        return "widens before the package check"
+    return ""
+
+
+def _prek_vale_hooks() -> dict[str, str]:
+    """The `entry` of each prek.toml hook that runs Vale, by hook id.
+
+    prek.toml writes a hook as an inline table over several lines, which is
+    TOML 1.1 and which `tomllib` in Python 3.14 rejects, so the `id` and
+    `entry` lines are read directly. Each is one basic string on its own
+    line, and its escapes (`\\"`) are also JSON escapes.
+    """
+    import json
+
+    hooks: dict[str, str] = {}
+    hook_id = ""
+    for line in (REPO_ROOT / "prek.toml").read_text(encoding="utf-8").splitlines():
+        key, _, value = line.strip().partition(" = ")
+        if key == "id":
+            hook_id = json.loads(value.rstrip(","))
+        elif key == "entry":
+            entry = json.loads(value.rstrip(","))
+            if " vale " in f" {entry}":
+                hooks[hook_id] = entry
+    return hooks
+
+
+def test_the_prek_vale_hooks_widen_the_packages_before_vale() -> None:
+    hooks = _prek_vale_hooks()
+    assert sorted(hooks) == ["vale", "vale-yaml"]
+    for hook_id, entry in hooks.items():
+        assert _vale_hook_problem(entry) == "", hook_id
+
+
+@pytest.mark.parametrize(
+    ("entry", "problem"),
+    [
+        (f"sh -c '{PACKAGE_CHECK} && vale \"$@\"' --", "does not widen"),
+        (f"sh -c '{PACKAGE_CHECK} && vale \"$@\" && {WIDEN}' --", "does not widen"),
+        (f"sh -c '{WIDEN} && vale \"$@\"' --", "does not check"),
+        (f"sh -c '{WIDEN} && {PACKAGE_CHECK} && vale \"$@\"' --", "widens before"),
+        ("sh -c 'cspell \"$@\"' --", "does not run vale"),
+    ],
+)
+def test_vale_hook_problem_names_a_hook_that_skips_the_rewrite(entry: str, problem: str) -> None:
+    assert _vale_hook_problem(entry).startswith(problem)

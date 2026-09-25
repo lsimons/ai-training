@@ -17,8 +17,9 @@ place and prints how many files it changed. Running it again changes
 nothing. A package that is not synced is skipped (`prose-check-packages`
 reports it). `mise run prose-sync` and `prose-eval-sync` run the script
 after `vale sync`, and `prose`, `prose-extended`, `prose-eval` and
-`prose-metrics` run it first (`prose-widen`, `prose-widen-eval`), so a
-package synced before this script existed is widened too.
+`prose-metrics` run it first (`prose-widen`, `prose-widen-eval`), and so
+do the pre-push Vale hooks in prek.toml (issue #454), so a package synced
+before this script existed, or by a bare `vale sync`, is widened too.
 
 The House style (.vale/styles/House/) is committed and written with `\\s`
 from the start, and tests/test_vale_linebreaks.py checks that it stays so.

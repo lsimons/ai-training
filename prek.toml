@@ -155,6 +155,16 @@ hooks = [
 # its wave branch opens one, and these catch what CI would reject there
 # before the push. `mise run lint` runs the pre-commit stage, so these
 # don't run twice in `ci`.
+#
+# The two Vale hooks run the same steps as the `depends` of `mise run
+# prose`, in the same order: `prose-check-packages` stops when a package
+# is not synced, and `prose-widen` (scripts/vale_linebreaks.py) rewrites
+# the synced rules to match across a line break (issue #454). The rewrite
+# is local, takes well under a second and changes nothing on a second run,
+# so a checkout synced by a bare `vale sync` gets the same result here as
+# from `mise run prose`. The rewritten files are gitignored, so the push
+# sees no change to the tree. The scripts are called directly, as the
+# package check already is, rather than through mise.
 [[repos]]
 repo = "local"
 hooks = [
@@ -170,7 +180,7 @@ hooks = [
   {
     id = "vale",
     name = "vale (changed Markdown and MDX)",
-    entry = "sh -c 'scripts/prose_eval.py --check-packages .vale.ini .vale-extended.ini && vale --minAlertLevel=error \"$@\"' --",
+    entry = "sh -c 'scripts/prose_eval.py --check-packages .vale.ini .vale-extended.ini && scripts/vale_linebreaks.py .vale.ini .vale-extended.ini && vale --minAlertLevel=error \"$@\"' --",
     language = "system",
     stages = ["pre-push"],
     files = '\.mdx?$',
@@ -179,7 +189,7 @@ hooks = [
   {
     id = "vale-yaml",
     name = "vale (changed data YAML)",
-    entry = "sh -c 'scripts/prose_eval.py --check-packages .vale.ini .vale-extended.ini && vale --minAlertLevel=error --ext=.md \"$@\"' --",
+    entry = "sh -c 'scripts/prose_eval.py --check-packages .vale.ini .vale-extended.ini && scripts/vale_linebreaks.py .vale.ini .vale-extended.ini && vale --minAlertLevel=error --ext=.md \"$@\"' --",
     language = "system",
     stages = ["pre-push"],
     files = '^site/src/data/.*\.yaml$',
