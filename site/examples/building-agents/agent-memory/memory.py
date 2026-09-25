@@ -53,11 +53,11 @@ def step_whole() -> None:
 def step_grown() -> None:
     lines = grown_notes(load())
     prompt_part = read_whole(lines)
-    found = search_notes(lines, "date format")
+    found = search_notes(lines, "project 0412")
     print(f"grown notes: {len(lines)} lines")
     print(f"read whole into the prompt: {len(prompt_part)} characters")
     noun = "line" if len(found) == 1 else "lines"
-    print(f"search_notes('date format'): {len(found)} {noun}, {len(read_whole(found))} characters")
+    print(f"search_notes('project 0412'): {len(found)} {noun}, {len(read_whole(found))} characters")
     for line in found:
         print(f"  {line}")
 
@@ -68,4 +68,6 @@ STEPS = {
 }
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2 or sys.argv[1] not in STEPS:
+        sys.exit(f"usage: python3 memory.py <step>, where step is one of: {', '.join(STEPS)}")
     STEPS[sys.argv[1]]()
