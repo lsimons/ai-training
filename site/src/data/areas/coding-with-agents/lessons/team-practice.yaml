@@ -1,10 +1,23 @@
 id: coding-with-agents/team-practice
 title: Writing down how the team uses agents
+description: >-
+  Write the team's practice for agent use into the project instructions file, starting from the
+  incidents in the project's history, take out the rule no incident supports, and decide which
+  agreements a hook or a CI check also enforces.
 mode: explanation
 covers: coding-with-agents/team
 serves: [coding-with-agents/works-in-team/sets-team-practice]
 introduces: []
-assumes: []
+assumes:
+  - objective: coding-with-agents/works-in-team/attributes-honestly
+    lesson: coding-with-agents/attribution-and-review-norms
+    section: the-sign-off-only-a-person-gives
+  - objective: coding-with-agents/works-in-team/follows-team-norms
+    lesson: coding-with-agents/ci-and-hooks
+    section: run-the-gates-in-ci
+  - objective: coding-with-agents/works-in-team/runs-parallel-work
+    lesson: coding-with-agents/parallel-sessions
+    section: know-what-the-worktrees-share
 after: [coding-with-agents/parallel-sessions, coding-with-agents/attribution-and-review-norms]
 shorts: []
 exercise:
@@ -12,10 +25,29 @@ exercise:
   brief: >-
     From three incidents in the fixture's history, write the practice section of an agent
     instructions file and drop the rule no incident supports.
-sources: []
+sources:
+  - Claude Code memory
+  - AI Training AGENTS
+  - AI Training wave lead prompt
+  - AI Training orchestration
+  - Academy ai-native-sdlc-playbook
 issue: 193
 minutes: 10
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 notes: >-
   Introduces no concept: draws the six team concepts together for the expert objective. Expert level
   and the last lesson in the course. Explanation mode because the deliverable is a document, and the
-  judge exercise keeps it concrete.
+  judge exercise keeps it concrete. This repository's own practice is the worked example:
+  AGENTS.md for the gate, the push rule and the attribution lines, the wave lead prompt for rules
+  that name their incident and carry an exit ("remove after #311"), and orchestration.md for the
+  stash rule backed by a hook. Claude Code memory gives the session-start load, sharing through
+  version control, instructions as unenforced context with a PreToolUse hook to block, and the
+  advice to prune old rules and keep the file short, all checked on 2026-09-25. The Academy
+  playbook is cited at the level of its public course page (a lesson on CLAUDE.md, knowledge kept
+  in versioned files). The outline asked for a Scenario on three incidents; a Match of incidents to
+  rules, with a fourth rule no incident supports, tests the same thing and is the natural form. The
+  assumes entries name the three team lessons the page links and builds on. The fixture
+  site/examples/coding-with-agents/team-practice/history.py builds the history with an allow-list
+  git environment and fixed dates, and copies agents-draft.md in as AGENTS.md (the draft is not
+  named AGENTS.md in the course repository, so no agent loads it as instructions).
