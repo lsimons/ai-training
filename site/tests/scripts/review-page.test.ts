@@ -96,6 +96,11 @@ describe('mountReviewPage', () => {
 		document.body.innerHTML = '<p>other</p>';
 		expect(mountReviewPage(document)).toBe(false);
 	});
+	it('throws when a part the page renders is missing', () => {
+		page();
+		q('[data-bar]').remove();
+		expect(() => mountReviewPage(document)).toThrow('missing [data-bar]');
+	});
 	it('says nothing is due and fills the bar when the session is empty', async () => {
 		page();
 		const fetch = fetchPage(lessonPage());

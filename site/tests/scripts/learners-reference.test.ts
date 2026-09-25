@@ -74,6 +74,12 @@ describe('mountLearnersReference', () => {
 		mountLearnersReference(root);
 		expect(root.querySelector('[data-reference-finished="concepts/b"]')?.textContent).toBe('B');
 	});
+	it('throws when a part the component renders is missing', () => {
+		document.body.innerHTML = `<div data-learners-reference data-catalog="[]" data-base="/"></div>`;
+		expect(() => mountLearnersReference(document.body)).toThrow('missing [data-reference-empty]');
+		document.body.innerHTML = '<div data-learners-reference data-base="/"></div>';
+		expect(() => mountLearnersReference(document.body)).toThrow('missing data-catalog');
+	});
 	it('returns false and changes nothing on a page without the component', () => {
 		document.body.innerHTML = '<p>other</p>';
 		expect(mountLearnersReference(document.body)).toBe(false);

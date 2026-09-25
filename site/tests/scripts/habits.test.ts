@@ -2,6 +2,7 @@
 import { bindHabit, bindHabits, drawHabit, habitStatusText } from '@scripts/habits';
 import * as progress from '@scripts/progress';
 import { addDays, type HabitEntry, today } from '@scripts/progress-model';
+import { requiredElement } from '@scripts/required-element';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 const ID = 'a/x#h';
@@ -16,11 +17,11 @@ function card(): HTMLElement {
 			</div>
 			<ol data-habit-results hidden></ol>
 		</aside>`;
-	return document.querySelector<HTMLElement>('[data-habit]')!;
+	return requiredElement(document, '[data-habit]');
 }
 const status = (el: HTMLElement) => el.querySelector('[data-habit-status]')?.textContent;
-const actions = (el: HTMLElement) => el.querySelector<HTMLElement>('[data-habit-actions]')!;
-const results = (el: HTMLElement) => el.querySelector<HTMLElement>('[data-habit-results]')!;
+const actions = (el: HTMLElement) => requiredElement(el, '[data-habit-actions]');
+const results = (el: HTMLElement) => requiredElement(el, '[data-habit-results]');
 
 beforeEach(() => {
 	localStorage.clear();
@@ -75,7 +76,7 @@ describe('bindHabit', () => {
 		expect(results(el).hidden).toBe(true);
 		const seen: string[] = [];
 		bindHabit(el, { onResult: (_, r) => seen.push(r) }); // a second bind is a no-op
-		el.querySelector<HTMLButtonElement>('[data-habit-done]')!.click();
+		requiredElement(el, '[data-habit-done]').click();
 		expect(progress.load().habits[ID]).toMatchObject({ next: null, history: [{ at: today(), result: 'done' }] });
 		expect(el.dataset.state).toBe('retired');
 		expect(actions(el).hidden).toBe(true);
@@ -92,7 +93,7 @@ describe('bindHabit', () => {
 		const el = card();
 		const seen: string[] = [];
 		expect(bindHabits(document, { onResult: (_, r) => seen.push(r) })).toEqual([el]);
-		el.querySelector<HTMLButtonElement>('[data-habit-skip]')!.click();
+		requiredElement(el, '[data-habit-skip]').click();
 		expect(seen).toEqual(['skipped']);
 		expect(progress.load().habits[ID]?.history).toEqual([{ at: today(), result: 'skipped' }]);
 		expect(el.dataset.state).toBe('waiting');

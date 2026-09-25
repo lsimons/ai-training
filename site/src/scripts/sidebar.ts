@@ -9,6 +9,7 @@
  */
 import { dueByCourse, dueCountLabel } from './due-counts';
 import * as progress from './progress';
+import { requiredElement } from './required-element';
 
 /** The selector of the JSON script element that holds the course list. */
 export const COURSES_SELECTOR = '[data-sidebar-courses]';
@@ -39,11 +40,12 @@ function drawCount(area: string, link: HTMLAnchorElement, n: number): void {
 /**
  * Draws the counts on the course links under `root` and redraws them on
  * every progress event. `base` is the site's base path. Returns the number of
- * course links found: zero when the course list or the links are missing.
+ * course links found, zero when the sidebar has none. The course list element
+ * is rendered by the same component, so a missing one throws.
  */
 export function mountSidebarDueCounts(root: ParentNode, base: string = import.meta.env.BASE_URL): number {
 	const prefix = base.replace(/\/$/, '');
-	const courses: Course[] = JSON.parse(root.querySelector(COURSES_SELECTOR)?.textContent || '[]');
+	const courses: Course[] = JSON.parse(requiredElement(root, COURSES_SELECTOR).textContent || '[]');
 	const links = new Map<string, HTMLAnchorElement>();
 	for (const c of courses) {
 		const link = root.querySelector<HTMLAnchorElement>(`.sidebar-content a[href="${prefix}/${c.area}/"]`);

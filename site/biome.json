@@ -38,7 +38,7 @@
       "style": {
         "useConst": "error",
         "useTemplate": "error",
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "error"
       },
       "suspicious": {
         "noExplicitAny": "error"

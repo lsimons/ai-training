@@ -11,6 +11,7 @@
 import { bindCheckpoint } from './checkpoints';
 import { bindHabit } from './habits';
 import * as progress from './progress';
+import { requiredData, requiredElement } from './required-element';
 import {
 	type Ask,
 	askFor,
@@ -103,23 +104,19 @@ function sectionFor(doc: Document, progressId: string, ask: Ask, onServed: (id: 
 /**
  * Starts the review session under `root`. Returns a promise that settles once
  * the first item is shown (or the session is empty or done), or false, with
- * nothing changed, on a page without the review element or one of its parts.
+ * nothing changed, on a page without the review element. A part the page
+ * always renders throws when it is missing.
  */
 export function mountReviewPage(root: ParentNode, fetchPage: FetchText = fetchText): Promise<void> | false {
 	const el = root.querySelector<HTMLElement>(ROOT_SELECTOR);
-	const area = el?.dataset.review;
-	const catalogJson = el?.dataset.catalog;
-	const itemsEl = el?.querySelector<HTMLElement>('[data-items]');
-	const statusEl = el?.querySelector<HTMLElement>('[data-status]');
-	const barEl = el?.querySelector<HTMLElement>('[data-bar]');
-	const habitsBlock = el?.querySelector<HTMLElement>('[data-habits]');
-	if (!el || !area || catalogJson === undefined || !itemsEl || !statusEl || !barEl || !habitsBlock) return false;
-	// Plain `HTMLElement`s for the hoisted functions below, which do not see the narrowing above.
-	const items: HTMLElement = itemsEl;
-	const status: HTMLElement = statusEl;
-	const bar: HTMLElement = barEl;
-	const catalog: CatalogLesson[] = JSON.parse(catalogJson);
-	const backHref = el.querySelector<HTMLAnchorElement>('.review-actions a')?.href ?? '';
+	if (!el) return false;
+	const area = requiredData(el, 'review');
+	const catalog: CatalogLesson[] = JSON.parse(requiredData(el, 'catalog'));
+	const items = requiredElement(el, '[data-items]');
+	const status = requiredElement(el, '[data-status]');
+	const bar = requiredElement(el, '[data-bar]');
+	const habitsBlock = requiredElement(el, '[data-habits]');
+	const backHref = requiredElement<HTMLAnchorElement>(el, '.review-actions a').href;
 
 	/**
 	 * Today's due habits of this course, each with Done and Skip. A result
