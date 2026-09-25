@@ -208,11 +208,11 @@ suite before the merge.
 
 The agent also must not change the tests to get a pass. The shortest
 way to make a failing change pass is to delete the test, skip it or
-loosen its assertion, as the agent in the pitfall did. When an agent may edit the tests, the
-blast radius of one wrong change includes the check that should catch
-it. So the rule for an agent is that it never deletes or weakens a
-test. When it thinks a test is wrong, it stops and explains why, so
-that you can decide.
+loosen its assertion, as the agent in the pitfall did. When an agent
+may edit the tests, the blast radius of one wrong change includes the
+check that should catch it. So the rule for an agent is that it never
+deletes or weakens a test. A test it thinks is wrong makes it stop and
+explain why, and the decision is yours.
 
 A rule in the project instructions is a request. Claude Code reads its
 instructions file when a session starts and uses it as context, and
@@ -239,7 +239,7 @@ Which way of running the tests fits the agent's loop?
   title="The tests pass, and one assertion changed" hint="If you put the old assertion back, what would it say about the code as it is now?"
   options={[
     { text: 'Accept the change, since the new assertion still checks that the total is about right.', consequence: 'A total of 49.40 passes the new test. The order that should cost 49.95 now costs something the test no longer pins.' },
-    { text: 'Put the old assertion back, run the tests, and brief the agent again with the existing tests off limits.', correct: true, consequence: 'The restored test fails and prints the wrong total. The agent works on the code, against a check you trust.' },
+    { text: 'Put the old assertion back, run the tests, and brief the agent again, and tell it not to change the existing tests.', correct: true, consequence: 'The restored test fails and prints the wrong total. The agent works on the code, against a check you trust.' },
     { text: 'Ask the agent why it changed the test, and accept the change if its reason sounds right.', consequence: 'The agent explains that the old value was too strict. The reason is a claim, and the test is still weaker than before.' },
     { text: 'Keep the new assertion, and add a comment above it that says why the check was loosened.', consequence: 'The comment records the weakening and doesn\'t undo it. The wrong total still passes.' },
   ]}>
@@ -322,9 +322,9 @@ search the three places for the old threshold.
   docs/pricing.md:7:the free-shipping threshold, and free from 50.00 EUR. The threshold is`} run="coding-with-agents/tests-and-docs-that-hold/the_change.py">
 The course's script makes the agent's change to a fresh copy of the
 shop, committed and tagged `before-change` first, and runs the same
-commands you run after your own agent's run in the exercise. You can run it from
-`site/examples/coding-with-agents/tests-and-docs-that-hold/` in your
-clone.
+commands you run after your own agent's run in the exercise. You can
+run it from `site/examples/coding-with-agents/tests-and-docs-that-hold/`
+in your clone.
 
 ```sh
 python3 the_change.py
@@ -333,8 +333,8 @@ python3 the_change.py
 </Predict>
 
 The tests pass, and the list of changed files holds neither
-`README.md` nor `docs/pricing.md`. The search finds the old threshold in `README.md` and in
-`docs/pricing.md`, and nothing in `pricing.py`, whose docstring the
+`README.md` nor `docs/pricing.md`. The search finds the old threshold
+in `README.md` and in `docs/pricing.md`, and nothing in `pricing.py`, whose docstring the
 agent did update. A customer who reads the README expects free
 shipping on a 55.00 EUR order and pays 4.95 EUR. Send the two stale
 lines back to the agent, and review the next diff the same way.
@@ -418,10 +418,9 @@ What does the report tell you?
 </Choice>
 
 <Exercise stretch="Then pick one test an agent wrote in your own project, break the line of code it is about on purpose, and see whether the test fails.">
-The exercise takes about ten minutes and gives you two results: one
-rewritten test and a short list of stale lines. It practices the two
-checks that catch what a passing suite hides, a test that can't fail
-and documentation that no longer matches the code.
+The exercise takes about ten minutes and gives you one rewritten test
+and a short list of stale lines. It practices the checks that find a
+test that can't fail and documentation that no longer matches the code.
 
 From the root of your clone, make a fresh copy of the shop for the
 first part:
