@@ -107,8 +107,8 @@ python3 grade.py agreement
 
 </Predict>
 
-Both disagreement counts are on one criterion. On Quoted the judge
-agrees with the person on every run, because checking whether a sentence
+All three disagreements are on one criterion. On Quoted the judge agrees
+with the person on every run, because checking whether a sentence
 appears word for word in the passage doesn't depend on how long the
 answer is. On Complete it differs three times, each time upward and each
 time on an answer of more than 40 words. Run three gives the meal limit
@@ -121,16 +121,16 @@ that misses a part, and an answer that misses nothing is already at 2.
 
 The fix goes where the disagreement is. The person applied the rubric
 without trouble, so the rubric is clear, and the judge is what needs the
-fix. For a model judge, that's the
-Complete criterion in the judge's instructions: say that length and
-politeness don't add points, have the judge list each part of the
-reference answer and mark it found or missing before it scores, and
-then run the same sample again. Keep the Quoted criterion as it is,
-because it agrees on every run. The rubrics lesson set the bar: the
-judge is ready for a criterion when it agrees with the person about as
-often as two people agree with each other. Model judges can also miss
-a wrong fact they have no knowledge to check (@AEC-09), and the
-reference answer is what gives them that knowledge here.
+fix. For a model judge, that's the Complete criterion in the judge's
+instructions: say that length and politeness don't add points, have the
+judge list each part of the reference answer and mark it found or
+missing before it scores, and then run the same sample again. Keep the
+Quoted criterion as it is, because it agrees on every run. The rubrics
+lesson set the bar: the judge is ready for a criterion when it agrees
+with the person about as often as two people agree with each other.
+Model judges can also miss a wrong fact they have no knowledge to check
+(@AEC-09), and the reference answer is what gives them that knowledge
+here.
 
 <Choice id="where-to-fix-the-judge" objective="building-agents/evaluates-agents/writes-a-rubric"
   concepts={['llm-as-judge']}
@@ -261,12 +261,11 @@ python3 grade.py held_out
 The development score went from 18 to 22 of 24, and the held-out score
 stayed at 6 of 8. Held-out runs h01 and h02 are two-part questions too,
 about opening hours and about laptops, and the new line has no example
-for them, so they still miss a part. The line fixed the
-four runs it names. Report the held-out result as the effect of the
-change, and write a line that asks for both parts without naming
-topics. Four held-out runs is a small sample. A real set holds back
-about one item in five of many more items, and the same comparison then
-has more runs behind it.
+for them, so they still miss a part. The line fixed the four runs it
+names. Report the held-out result as the effect of the change, and write
+a line that asks for both parts without naming topics. Four held-out
+runs is a small sample. A real set holds back about one item in five of
+many more items, and the same comparison then has more runs behind it.
 
 <Choice id="what-to-report" objective="building-agents/evaluates-agents/avoids-gamed-metrics"
   concepts={['metrics-that-cannot-be-gamed']}
