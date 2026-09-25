@@ -79,8 +79,15 @@ Review finds these in almost every first pass. Check each one yourself.
 
 - Past about 150 turns, or after a context compaction, stop. Commit, run
   `mise run fast`, push even when it fails, and hand back with its result
-  and a list of what is left. The lead spawns a fresh builder for the
-  rest.
+  and a list of what is left. Post that list on the issue as a comment
+  whose first line is `Unfinished: <branch>`, so a resumed lead builds
+  the branch instead of reviewing it (`mise run wave-status`). The lead
+  spawns a fresh builder for the rest.
+
+- Every comment you post on the issue (a hand-back reply, a fix reply)
+  has a `Branch: <branch>` line, so `mise run wave-status` applies it to
+  your branch only. The first one after an `Unfinished:` comment for your
+  branch marks the branch finished.
 
 - Rebase on `origin/main` before the final push, and push your own branch
   with `git push --force-with-lease` only. Never discard another agent's
