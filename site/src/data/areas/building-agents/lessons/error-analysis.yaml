@@ -1,24 +1,45 @@
 id: building-agents/error-analysis
 title: Reading failures one by one
+description: >-
+  Read the ten failed runs of a handbook assistant's week one at a time, name the step where each went
+  wrong, count the kinds, fix the most common one first, and turn every failure into a golden-set item.
 mode: explanation
 covers: building-agents/evaluation
 serves:
   - building-agents/evaluates-agents/grades-trajectories
   - building-agents/evaluates-agents/builds-a-golden-set
 introduces: [error-analysis]
-assumes: []
+assumes:
+  - objective: building-agents/builds-agent-loop/defines-a-tool
+    lesson: building-agents/tool-schemas
+    section: a-parameter-the-model-has-to-guess
+  - objective: building-agents/builds-agent-loop/implements-the-loop
+    lesson: building-agents/stopping-the-loop
+    section: the-rules-that-end-a-run
 after: [building-agents/traces-and-trajectories]
 shorts: []
 exercise:
   kind: judge
   brief: >-
-    Classify the fixture's ten failed traces into categories you name, count them, and say which
-    single fix moves the score most. Then name the one item each failure adds to the golden set.
-sources: []
+    Classify the ten failed traces of the fixture's second week into categories you name, count them,
+    and say which single fix moves the score most. Then name the one item each failure adds to the
+    golden set.
+sources: [AEC-09]
 issue: 203
 minutes: 12
 notes: >-
   Explanation mode on purpose. The categories are the learner's own judgment, and a script that
-  tallies given labels would only test arithmetic. Counting the categories replaces guessing about
-  what to fix, because the most common failure is usually one thing, and every failure that reached
-  a user is a golden-set item. Checkpoints are match and scenario.
+  tallies given labels would only test arithmetic, so the fixture prints transcripts and never a
+  category. The fixture in site/examples/building-agents/error-analysis/ holds two weeks of a
+  handbook assistant's runs: a scripted model per run, and real tools (a keyword search over a small
+  handbook and an opening-hours calendar that reads only YYYY-MM-DD) and a real loop whose stop rule
+  ends a run on any text. The handbook, the calendar, the questions and the counts are illustrative,
+  written by the author. The page classifies week 1 (five date-parameter failures, three search
+  misses, two stop-rule endings), so the exercise uses week 2, which ran with the fixed date
+  description and has five search misses as its largest kind. Classifying by the first step that
+  went wrong and fixing the most common kind first are this course's practice from the concept
+  definition, and AEC-09 is cited only for finding the step in a trace, for improving a tool
+  description when a trace shows wrong arguments, and for adding a production failure to the test
+  set. DLAI-11 and Academy building-with-the-claude-api from the plan were dropped because the page
+  cites no claim from them. The two first checkpoints on grades-trajectories test classifying and
+  choosing the fix, and each has its own review alternate.

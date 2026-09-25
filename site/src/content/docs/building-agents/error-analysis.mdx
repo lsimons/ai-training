@@ -1,0 +1,421 @@
+import { Choice, Match, MultiChoice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+In this lesson we read an agent's failed runs one at a time and count
+them by where they went wrong. In
+[Recording and grading the path the agent took](/building-agents/traces-and-trajectories/)
+you graded runs and read the transcripts of two of them. Here the runs
+have already failed, and the question is what to fix first. **Error
+analysis** is the name for this work: read each failed run in full, name
+the step where it went wrong, and count how often each kind of failure
+occurs. The count tells you which fix changes the most runs, so you don't
+have to guess.
+
+The agent is a handbook assistant for the staff of one office. It has two
+tools. `search_handbook` is a keyword search that returns the handbook
+page with the most matching words, and `opening_hours` returns the
+office's hours on one day from a calendar of holiday closures. A
+colleague checked a week of its answers against the handbook and the
+calendar, and wrote down the phrase that a correct answer contains. Each
+run has its own scripted model, the list of replies that run makes, and
+the tools and the loop are real code. So every tool result in a
+transcript is what the tool returns for those arguments. The handbook,
+the calendar and the questions are illustrative, written by the author.
+The files are in `site/examples/building-agents/error-analysis/`. Copy
+the `error-analysis` folder and `cd` into the copy. Each step below is
+`python3 errors.py <step>`, and no application programming interface
+(API) key is needed.
+
+## Read the failures one by one
+
+The `week1` step lists the runs of the first week that failed. Each
+line has the question, and below it the answer the user got.
+
+<Predict id="week-one-failures" title="The failed runs of week 1"
+  answer={`week 1, 30 November to 4 December: 30 runs, 20 passed, 10 failed
+  a03 Mon  Is the office open on 24 December?
+      answer: Yes, the office is open from 7:00 to 20:00 on weekdays.
+  a06 Mon  Where can I leave my car?
+      answer: Request leave in the HR portal at least two weeks ahead.
+  a09 Tue  Can I come in on 25/12?
+      answer: Yes, the office is open from 7:00 to 20:00.
+  a11 Tue  Is the office open on 2026-12-31?
+      answer: Let me check the calendar.
+  a14 Wed  What is the wifi code?
+      answer: The handbook does not say anything about wifi.
+  a16 Wed  What time does the office close on New Year's Eve?
+      answer: The office closes at 20:00.
+  a20 Thu  Is the office open on Monday 28 December?
+      answer: Yes, it is a weekday, so it is open from 7:00 to 20:00.
+  a22 Thu  Can I expense a taxi?
+      answer: The handbook does not cover taxis, so I cannot say.
+  a26 Fri  Is the office open on the afternoon of Christmas Eve?
+      answer: Yes, the office is open until 20:00.
+  a29 Fri  Is the office open on 2027-01-01?
+      answer: I will look that up for you.`} run="building-agents/error-analysis/week1.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 errors.py week1
+```
+
+</Predict>
+
+The answers show what went wrong for the user, and they don't show
+where. For that you read the whole run. A trace lets you find the step
+at which the agent went off course (@AEC-09). Start with a03.
+
+<Predict id="transcript-a03" title="The transcript of run a03"
+  answer={`transcript a03, Monday 30 November
+    user: Is the office open on 24 December?
+    opening_hours {"date": "24 December"}
+      -> {"error": "cannot read the date '24 December'"}
+    search_handbook {"query": "office opening hours"}
+      -> {"page": "office-hours", "text": "The office is open from 7:00 to 20:00 on weekdays and is closed at weekends."}
+    answer: Yes, the office is open from 7:00 to 20:00 on weekdays.
+    graded: fail, a correct answer contains "14:00"`} run="building-agents/error-analysis/show_a03.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 errors.py show a03
+```
+
+</Predict>
+
+The model chose the right tool first. The tool couldn't read
+"24 December", so the model searched the handbook and answered with the
+usual hours it found there. On 24 December the office closes at 14:00,
+and the handbook page doesn't say so. The calendar does. The search and the answer did what they
+could with what they had, and the run went wrong at its first step, the
+date argument. The model reads this description of the tool:
+
+```python
+"opening_hours": {
+    "fn": opening_hours,
+    "description": "Get the opening hours of the office on one day, with holiday closures.",
+    "parameters": {"date": "The day to check."},
+},
+```
+
+The function reads only dates written as `YYYY-MM-DD`, and the
+description of `date` doesn't say so. The second transcript is a06.
+
+<Predict id="transcript-a06" title="The transcript of run a06"
+  answer={`transcript a06, Monday 30 November
+    user: Where can I leave my car?
+    search_handbook {"query": "leave car"}
+      -> {"page": "annual-leave", "text": "Every employee gets 25 days of annual leave per year. Request leave in the HR portal at least two weeks ahead."}
+    answer: Request leave in the HR portal at least two weeks ahead.
+    graded: fail, a correct answer contains "car park"`} run="building-agents/error-analysis/show_a06.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 errors.py show a06
+```
+
+</Predict>
+
+The query is reasonable. The search counts matching words, and the page
+about annual leave contains "leave" twice, while the parking page
+contains "car" once. So the search returned the wrong page, and the model
+answered from it. Here the tool call was right and the search was
+wrong: the handbook has the answer, and the search didn't find it.
+
+## Name where each run went wrong
+
+Read the other eight the same way, with `python3 errors.py show` and the
+run id. For each run, write down the first step that went wrong, and name
+it after the part of the agent that failed: a tool parameter, the search,
+the loop. A name for what the user saw, such as "wrong answer", fits
+every failure and tells you nothing about the fix.
+
+Runs a11 and a29 need one more piece. The loop decides when a run is
+over with this function:
+
+```python
+def should_stop(reply: dict) -> bool:
+    """The run ends when the model's reply has text."""
+    return bool(reply.get("text"))
+```
+
+In a11 the model replied with a short note, "Let me check the calendar.",
+and a request for `opening_hours` in the same reply. The loop saw text
+and ended the run, and the note became the answer. The transcript shows
+the reply and the request that never ran. The fault is in the loop's
+stop rule, which should end the run only when the reply has no tool
+request.
+
+Here is the whole week, by the first step that went wrong:
+
+| Run | First step that went wrong                          | Kind                        |
+| --- | --------------------------------------------------- | --------------------------- |
+| a03 | the tool can't read the date "24 December"          | date parameter              |
+| a06 | "leave" finds the annual leave page                 | search misses the page      |
+| a09 | the tool can't read "25/12" or "25-12-2026"         | date parameter              |
+| a11 | the loop ends on a note with a tool request         | stop rule                   |
+| a14 | no page contains "wifi" or "code"                   | search misses the page      |
+| a16 | the tool can't read "New Year's Eve"                | date parameter              |
+| a20 | the tool can't read "Monday 28 December"            | date parameter              |
+| a22 | "taxi" doesn't match "Taxis"                        | search misses the page      |
+| a26 | the tool can't read "Christmas Eve"                 | date parameter              |
+| a29 | the loop ends on a note with a tool request         | stop rule                   |
+
+Five of the ten failures are one kind, a date the tool couldn't read.
+Searches that missed the page with the answer come next with three, and
+the stop rule caused two. Your names for the kinds may differ from these, and the
+count is what matters. With categories named after where the run went
+wrong, one of them is five of ten.
+
+<Match id="classify-the-failures" objective="building-agents/evaluates-agents/grades-trajectories"
+  concepts={['error-analysis', 'trajectory-evaluation']}
+  context="A handbook assistant has a keyword search tool over a staff handbook and an opening_hours tool that reads a calendar of holiday closures and accepts dates only as YYYY-MM-DD. Its loop ends a run as soon as a model reply has text. Each row describes one failed run by what its transcript shows."
+  title="Where did each run go wrong?"
+  hint="In each transcript, which step is the first one whose output is wrong, even though its input was right?"
+  options={['The tool got an argument its schema doesn\'t describe', 'The search returned the wrong page or no page', 'The loop ended the run too early', 'The model misread a correct tool result']}
+  rows={[
+    { statement: 'The calendar returned "closed (public holiday)", and the reply said the office is open.', option: 3, why: 'The tool returned the right hours. Which step turned them into the wrong reply?' },
+    { statement: 'The reply is "Let me check that for you.", and the transcript shows a tool request that never ran.', option: 2, why: 'The model asked for a tool. Which part decided not to run it?' },
+    { statement: 'The search for "holiday days" returned the training page, and the reply quoted the training budget.', option: 1, why: 'The model answered from the page it got. Was it the page with the answer?' },
+    { statement: 'The calendar returned "cannot read the date \'next Friday\'", and the reply gave the weekday hours.', option: 0, why: 'The tool needs YYYY-MM-DD. Where would the model have learned that?' },
+    { statement: 'The search for "guest wifi" found no page, and the handbook has a page about the network for guests.', option: 1, why: 'The handbook has the answer. Which step failed to bring it back?' },
+  ]}
+  rationale="Each run is named by the first step whose output is wrong: the argument, the search, the loop's stop rule, or the model's reading of a correct result. The name points at the part to fix.">
+
+Match each failed run to the step where it went wrong.
+
+</Match>
+
+## Fix the most common failure first
+
+The date parameter is half of the week's failures, and the fix is one
+line: say the format in the description of `date`. The course this lesson
+draws on gives the same kind of fix for a trace that shows a tool called
+with the wrong arguments, a better description of the tool (@AEC-09).
+After week 1 the team changed the description to this:
+
+```python
+"parameters": {"date": "The day to check, as YYYY-MM-DD, for example 2026-12-24."},
+```
+
+That line can turn at most five of the ten failures into passes, because
+it reaches only the runs whose first wrong step was the date. It's still
+the largest gain one change can give this week. The fix to the stop
+rule would reach two runs, and a better search three.
+
+A general change reaches fewer runs than it seems to. A larger model
+still doesn't know that the tool wants `YYYY-MM-DD`, because the schema
+is the only place that says what the tool reads. A line in the system
+prompt that asks the agent to be careful with dates doesn't tell it the
+format either. Both changes also touch the twenty runs that passed, and
+some of those can start to fail. A fix aimed at the most common category
+changes one thing that you can name, and you can check it on the runs
+that failed.
+
+<Choice id="which-fix-first" objective="building-agents/evaluates-agents/grades-trajectories"
+  concepts={['error-analysis']}
+  context="A support agent answers product questions with a search tool. A team read its 20 failed runs of one week and counted them by the step where each went wrong. The run a manager forwarded on Friday was one of the step-limit failures."
+  title="Which change comes first?"
+  hint="How many of the 20 failures can each change reach?"
+  options={[
+    { text: 'Raise the step limit, because a manager reported that failure and it is the latest.', why: 'The step limit is behind 3 of the 20. Being the latest and the most visible does not make it the most common.' },
+    { text: 'Make the search match product names in the forms that users write them.', correct: true },
+    { text: 'Move to a larger model, which should do better on all four kinds of failure.', why: 'A larger model gets the same search results. The 11 misses happen in the tool, before the model reads anything.' },
+    { text: 'Add a line to the prompt that asks the agent to check its answer with care.', why: 'The prompt cannot make the search return a page that it did not find, and 11 of the failures start there.' },
+  ]}>
+
+The counts are: 11 searches that missed because users write product
+names differently from the catalog, 4 refund amounts the model made up,
+3 runs cut off by the step limit, and 2 replies in the wrong language.
+Which change do you make first?
+
+</Choice>
+
+<Pitfall title="Fixing the latest failure">
+
+On Friday evening a user gets "I will look that up for you." as the whole
+answer, from run a29, and the team lead forwards it to the team. On
+Monday the team fixes the stop rule, which is a real fault, and ships
+the fix. It reaches two of the ten failures. The five date failures keep
+happening for another week, because nobody counted. The latest failure
+is the one people remember. Count the failures of the week by kind before
+you choose what to fix.
+
+</Pitfall>
+
+<Sort id="sort-by-first-wrong-step" phase="review" objective="building-agents/evaluates-agents/grades-trajectories"
+  concepts={['error-analysis', 'trajectory-evaluation']}
+  context="A handbook assistant has a keyword search tool, and an opening_hours tool that accepts dates only as YYYY-MM-DD. Its loop ends a run when a model reply has text. Each item describes one failed run by its transcript."
+  title="Sort the failures by where they went wrong"
+  hint="Look for the first step whose output is wrong while its input was right."
+  buckets={['A tool argument', 'The search', 'The stop rule']}
+  items={[
+    { text: 'opening_hours got "Boxing Day" and returned an error', bucket: 0 },
+    { text: 'The search for "sick day" returned the training page', bucket: 1 },
+    { text: 'The answer is "One moment." and a tool request never ran', bucket: 2 },
+    { text: 'opening_hours got "26/12" and returned an error', bucket: 0 },
+    { text: 'The search for "bicycle" found no page, and a page covers bikes', bucket: 1 },
+  ]} />
+
+<Scenario id="the-forwarded-failure" phase="review" objective="building-agents/evaluates-agents/grades-trajectories"
+  concepts={['error-analysis']}
+  context="A team runs a handbook assistant. Its manager forwards one bad answer from this morning and asks the team to fix it today. The team has the transcripts of the week's 12 failed runs and hasn't read them yet."
+  title="The manager forwards one failure"
+  hint="What do you need to know before you can say which fix helps the most runs?"
+  options={[
+    { text: 'Fix what went wrong in the forwarded run today, then look at the others.', consequence: 'The forwarded run was one of two with that cause. The team ships the fix, and the seven failures of the most common kind go on for another week.' },
+    { text: 'Switch to a larger model today, which should improve every kind of failure.', consequence: 'Most of the week\'s failures come from a tool that rejects the arguments it gets, and a larger model sends the same arguments. Some runs that passed now fail.' },
+    { text: 'Read the 12 transcripts, name where each went wrong, and count the kinds first.', correct: true, consequence: 'Seven of the 12 come from one parameter description. The team fixes that first, and fixes the forwarded run\'s cause next.' },
+    { text: 'Add the forwarded question to the system prompt with the right answer written out.', consequence: 'That one question now gets the right answer. The other eleven failures are unchanged, and the prompt holds an answer that goes out of date.' },
+  ]}>
+
+Your manager forwards a bad answer from this morning and asks for a fix
+today. You have the transcripts of the week's 12 failed runs. What do
+you do first?
+
+</Scenario>
+
+## Every failure becomes a golden-set item
+
+A failure that reached a user shows a case the tests didn't have, and it
+goes into the test set (@AEC-09). In
+[A golden set is the agent's regression suite](/building-agents/golden-sets/)
+an item records the qualities a good answer has, not one exact reply. So
+each of the ten failures adds one item: the question as the user asked
+it, what a correct answer must say, what it must not say when there is a
+wrong answer to rule out, and the run it came from. Here are the items
+from a03 and a11:
+
+```text
+question: Is the office open on 24 December?
+must say: open until 14:00
+must not say: 20:00
+origin: run a03, week of 30 November, the tool could not read "24 December"
+
+question: Is the office open on 2026-12-31?
+must say: open until 14:00
+origin: run a11, week of 30 November, the loop ended on a note
+```
+
+The a03 item keeps the question in the words the user wrote, "24
+December". Run a02 asked the same question with `2026-12-24` and
+passed (`python3 errors.py show a02`), so an item written that way would
+never have caught this failure. After the fix to the date parameter the five date items pass.
+They stay in the set, and a later edit that shortens the description
+again fails them before users see it.
+
+<Scenario id="holiday-closure" objective="building-agents/evaluates-agents/builds-a-golden-set"
+  concepts={['error-analysis', 'golden-sets']}
+  context="A handbook assistant told a user that the office is open on 1 May. The office is closed that day for a public holiday. The team found the cause, a date parameter whose description did not give the format, and fixed it."
+  title="A wrong answer about a holiday closure"
+  hint="What would catch this failure if it came back in six months, with a reply worded differently?"
+  options={[
+    { text: 'Add the question as the user wrote it, with "says it is closed" and "gives no weekday hours" as qualities, and the run.', correct: true, consequence: 'Every golden-set run checks the holiday question. When a later change breaks the date again, this item fails before a user sees it.' },
+    { text: 'Add the question with the exact reply a colleague wrote, "No, the office is closed on 1 May for the public holiday."', consequence: 'Next week the agent answers "The office is closed on 1 May, a public holiday." The answer is right, and the item fails it for its words.' },
+    { text: 'Add nothing to the set, because the cause is fixed and the same run cannot fail again after the fix.', consequence: 'Months later someone shortens the parameter description. Nothing in the set asks about a holiday, and users get the weekday hours again.' },
+    { text: 'Add twenty generated holiday questions on other dates, each without expected qualities, to cover more days.', consequence: 'The twenty items have nothing to grade against, so they pass or fail on nobody\'s rule. The question that reached a user is not among them.' },
+  ]}>
+
+A user was told that the office is open on 1 May, a public holiday on
+which it is closed. The team found the cause and fixed it. What goes
+into the golden set, and what does the item record?
+
+</Scenario>
+
+<MultiChoice id="what-the-item-records" phase="review" objective="building-agents/evaluates-agents/builds-a-golden-set"
+  concepts={['golden-sets', 'error-analysis']}
+  context="A handbook assistant answered Can I expense a taxi? with The handbook does not cover taxis, so I cannot say. The expenses page says that taxis are reimbursed when no train or bus goes there, and the keyword search missed it because the query said taxi and the page says Taxis. The team adds the run to its golden set."
+  title="What goes into the taxi item?"
+  hint="Which lines would still grade the item correctly after the search is fixed and the reply is worded differently?"
+  options={[
+    { text: 'The question, "Can I expense a taxi?", in the user\'s words.', correct: true },
+    { text: 'A must-say line: taxis are paid back when no train or bus goes there.', correct: true },
+    { text: 'The origin: the run that failed, and where the search missed the page.', correct: true },
+    { text: 'The reply the agent gave, as the expected answer for the item.', why: 'That reply is the failure. An item records what a good answer has.' },
+    { text: 'The query the model wrote, which later runs must also send as "expense taxi".', why: 'The fix may change the query, and a good run may search with other words. The item grades the answer, and the query is part of the path.' },
+  ]}>
+
+Which of these lines belong in the golden-set item for the taxi run?
+
+</MultiChoice>
+
+The team shipped the one-line fix to the date parameter, and the second
+week ran with it. The `week2` step lists that week's failures. The
+exercise starts from this list.
+
+<Predict id="week-two-failures" title="The failed runs of week 2"
+  answer={`week 2, 7 December to 11 December: 40 runs, 30 passed, 10 failed
+  b02 Mon  What are the rules for working remotely?
+      answer: The handbook has no page about working remotely.
+  b05 Mon  Is the office open on New Year's Day?
+      answer: Yes, the office is open from 7:00 to 20:00.
+  b09 Tue  Is there wifi for my visitor?
+      answer: The handbook does not mention wifi.
+  b12 Tue  Is the office open on 2026-12-24?
+      answer: One moment, I will check the calendar.
+  b15 Tue  Can I take a taxi to the airport and claim it?
+      answer: I could not find anything about taxis in the handbook.
+  b19 Wed  Is the office open on 25 December?
+      answer: Yes, the office is open from 7:00 to 20:00 on 25 December.
+  b23 Wed  Where can I leave my bike?
+      answer: Request leave in the HR portal at least two weeks ahead.
+  b27 Thu  Is the office open on 30 December?
+      answer: Yes, it is open from 7:00 to 20:00 on 30 December.
+  b33 Fri  How do I get a new badge?
+      answer: The handbook does not say how to get a badge.
+  b38 Fri  Can I get into the building on 2026-12-29?
+      answer: Let me look at the opening hours.`} run="building-agents/error-analysis/week2.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 errors.py week2
+```
+
+</Predict>
+
+<Exercise stretch="Change search_handbook in agent.py so that it finds the right page for the most common kind you found, without changing the scripted runs, and run week2 again. Check which runs of week 1 and week 2 now pass, and whether any run that passed before now fails.">
+
+Read the ten transcripts of week 2 with `python3 errors.py show b02` and
+the other run ids. For each run, write one line with the first step that
+went wrong and a name for its kind that you choose. Count the kinds, and
+say which single fix would change the most runs. Then write the golden-set
+item each failure adds: the question in the user's words, what a correct
+answer must say, and the run it came from. The count, not the most
+recent run, is what picks the fix.
+
+A good result has five search misses as the largest kind: b02, b09, b15,
+b23 and b33. The words in each question ("working remotely", "wifi",
+"taxi", "leave", "badge") aren't the words on the page that has the
+answer, or they match another page. So one change to the search reaches
+five runs. Two runs, b12 and b38, ended on a note, the stop rule that
+nobody fixed after week 1. Two more, b05 and b27, sent a date in the
+right format and the wrong year. In b19 the calendar said closed, and the
+model answered that the office is open. Your names may differ. Check that
+each one names a step, and that the search is still the largest. Which of
+the ten would a team lead have forwarded on Friday, and would it have
+been a search miss?
+
+</Exercise>
+
+<Recap>
+
+1. A trace shows the step where a run went wrong (@AEC-09). Error
+   analysis reads each failed run in full and writes that step down.
+2. Name each kind after the part of the agent that failed, such as a
+   tool parameter, the search or the stop rule, and count the kinds.
+3. Fix the most common kind first. A general change, such as a larger
+   model or a careful-sounding prompt line, doesn't reach a fault in a
+   tool's schema or in the search.
+4. The latest failure is the one people remember, and the count is what
+   says which failure is common.
+5. Each failure that reached a user becomes a golden-set item, with the
+   question in the user's words, the qualities of a good answer and the
+   run it came from (@AEC-09).
+
+</Recap>
+
+<Habit id="count-before-fixing">
+The next time someone forwards you one bad answer from an agent you work on, open the other failed runs of that week and count them by kind before you choose what to fix.
+</Habit>
