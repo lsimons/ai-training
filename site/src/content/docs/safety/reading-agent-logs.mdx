@@ -1,0 +1,294 @@
+import { Choice, Predict, Scenario, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+
+A support team uses an agent to answer customer emails. On Monday morning a
+customer gets a reply from it: "Your refund for order 8812 has been
+approved." The refund wasn't approved. The customer phones to ask when the
+money arrives, and the team lead asks the team what happened. The agent's
+own summary of the session says it sent two order-status replies and saved
+one refund request as a draft. Nobody on the team can say why a refund
+email got a reply, or whether it happened before.
+
+In this lesson we answer the team lead's question from the agent's log,
+and then look at the change that nobody on the team made: the vendor moved
+the agent to a new model version the week before. The team, the emails, the
+orders and the model names are invented for this lesson. This page is all
+you need.
+
+## Reconstruct the session from the log
+
+**Logging and audit** means recording what an agent was asked, which tools
+it called and what it changed, so that a person can reconstruct the session
+later and judge it. A course on evaluating agents lists the same parts:
+the user's input and the agent's output, each tool call with its result,
+and the errors (@AEC-09). This is the log of the Monday session, one line
+per event:
+
+```text
+# support agent log, 2026-09-22
+# time | session | model | event | target | text
+09:02:11 | s-418 | assistant-2026-09 | prompt | u-17 | Answer the new emails in the support inbox. Send replies to order-status questions. Leave any email about a refund as a draft for a person.
+09:02:14 | s-418 | assistant-2026-09 | tool read_inbox | - | 3 new: E-201, E-202, E-203
+09:02:15 | s-418 | assistant-2026-09 | tool read_email | E-201 | Where is my order 5531?
+09:02:16 | s-418 | assistant-2026-09 | tool read_email | E-202 | Order 8812: I want my money back
+09:02:17 | s-418 | assistant-2026-09 | tool read_email | E-203 | Order 7730 arrived damaged, refund please
+09:02:20 | s-418 | assistant-2026-09 | tool lookup_order | 5531 | shipped on 2026-09-19
+09:02:25 | s-418 | assistant-2026-09 | tool send_reply | E-201 | Your order 5531 was shipped on 19 September.
+09:02:31 | s-418 | assistant-2026-09 | tool lookup_order | 8812 | refund requested, not approved yet
+09:02:36 | s-418 | assistant-2026-09 | tool send_reply | E-202 | Your refund for order 8812 has been approved.
+09:02:41 | s-418 | assistant-2026-09 | tool lookup_order | 7730 | delivered on 2026-09-18
+09:02:47 | s-418 | assistant-2026-09 | tool save_draft | E-203 | We are sorry your order arrived damaged.
+09:02:50 | s-418 | assistant-2026-09 | summary | - | Answered 3 emails: 2 order-status replies sent, 1 refund request saved as a draft.
+```
+
+The first line is what the agent was asked, and by whom. The `tool` lines
+are the calls it made, with the email or order each call was about and what
+came back. The tool `send_reply` sends an email to a customer, and
+`save_draft` leaves one for a person, so those two change something outside
+the session. Before you read on, find the reply that the request said to leave
+as a draft.
+
+<Predict id="which-reply-broke-the-rule" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['logging-and-audit']}
+  context="A support agent was asked to send replies to order-status questions and to leave any email about a refund as a draft. Its log shows three emails: E-201 'Where is my order 5531?', E-202 'Order 8812: I want my money back' and E-203 'Order 7730 arrived damaged, refund please'. The log shows send_reply for E-201 and E-202, and save_draft for E-203."
+  title="Which reply went against the request?"
+  hint="For each send_reply line, go back to the read_email line for the same email. Is that email about a refund, even if the word refund is not in it?"
+  answer="E-202">
+One email got a sent reply although the request said to leave it as a
+draft for a person. Type its id as the log shows it.
+</Predict>
+
+A short program reads the same log and sorts every line into asked, called
+and changed. This is the part of its output that lists the changes, checked
+against the request, and the agent's own summary:
+
+```text
+changed, checked against the request:
+  sent   E-201  Where is my order 5531?
+         reply: Your order 5531 was shipped on 19 September.
+         ok
+  sent   E-202  Order 8812: I want my money back
+         reply: Your refund for order 8812 has been approved.
+         AGAINST THE REQUEST (about a refund, so a draft)
+  draft  E-203  Order 7730 arrived damaged, refund please
+         reply: We are sorry your order arrived damaged.
+         ok
+
+agent's summary: "Answered 3 emails: 2 order-status replies sent, 1 refund request saved as a draft."
+changes: 3, sent: 2, drafts: 1, against the request: 1
+```
+
+The email with "refund" in its subject was handled correctly. The one that
+went wrong asks for "money back" and starts with an order number, and the
+agent treated it as an order-status question. The summary repeats that
+mistake, since it counts two order-status replies. The log also shows
+something the summary doesn't. At 09:02:31 the order lookup said "refund
+requested, not approved yet", and five seconds later the agent wrote that
+the refund was approved.
+
+A log tells you what happened. It doesn't tell you why the model chose to
+write that sentence, and asking the agent afterwards only gets you another
+summary. The log does narrow the question. Each line of this log names the
+model version that ran the session, and that gives the team its next lead,
+in the second half of this lesson.
+
+## What the log must hold, and who reads it
+
+A log answers the team lead's question only if it holds the text. A line
+that says "a reply was sent to E-202" without the reply can't show what the
+customer was told. Check what your tool records before you rely on it. For
+example, one vendor's coding agent sends its activity to a monitoring
+system only after someone sets that up. Even then, it leaves out the text
+of the prompts and the details of each tool call until a setting turns them
+on (@Claude Code monitoring). The same page lists the model name on each
+recorded request to the model. Leaving text out by default protects
+private data, so turning it on is a decision for the team, with the data
+section of its policy in mind.
+
+Then decide where the log is kept and who reads it.
+
+**Where do you keep it?** Store the log where the agent can't change or
+delete it. An agent that can edit its own record can also erase the line
+that shows its mistake, by accident or because a planted instruction told it
+to. A separate system that the agent writes to and can't edit is enough.
+
+**Who reads it?** A log nobody reads doesn't catch anything. Name one person who
+reads a sample every week, a few sessions picked at random, even when
+nothing has gone wrong. The Monday refund reply was the first one a
+customer complained about, and a weekly sample is how the team finds the
+second one before the customer does. Once an organization runs many
+agents, the agent engineering course asks for audit trails for two uses:
+finding out why something failed, and showing auditors the facts (@AEC-10).
+This lesson adds its own rule: for a workflow a regulator can ask about, a
+tool that doesn't keep such a record is the wrong tool.
+
+<Choice id="where-the-log-lives" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['logging-and-audit']}
+  context="A support team's agent answers customer emails. The team wants a log it can use after an incident to reconstruct what the agent was asked, which tools it called and what it sent, and a person is named to read a weekly sample."
+  title="Where should the log go?"
+  hint="After an incident, which copy of the record could still have been changed by the thing you are investigating?"
+  options={[
+    { text: 'A file in the agent\'s own work folder, which it can already edit.', why: 'The agent can edit or delete that file, so after an incident nobody knows whether the record is complete.' },
+    { text: 'The chat history of the session, which the agent writes as it works.', why: 'The history is part of the session the agent controls, and the agent\'s summary already showed that its own account can be wrong.' },
+    { text: 'A separate system the agent can write to and cannot edit or delete.', correct: true },
+    { text: 'The inbox of the team lead, who gets a copy of every agent reply.', why: 'The inbox holds the sent replies and nothing about the prompt, the lookups or the drafts, so it shows what went out without the calls that led to it.' },
+  ]}>
+The support team is choosing where the agent's log goes. Which place
+still gives a record the team can trust after the next incident?
+</Choice>
+
+<Sort id="asked-called-changed" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['logging-and-audit']}
+  context="The lesson sorts the lines of an agent's log into three parts: what the agent was asked, which tools it called that only read something, and what it changed outside the session, such as a sent email or a saved draft."
+  title="Asked, called or changed?"
+  hint="Did the line come from a person, did the agent only look something up, or is something different in the world after it?"
+  buckets={['Asked', 'Called, and only read', 'Changed something']}
+  items={[
+    { text: 'prompt | Answer the new emails in the support inbox.', bucket: 0 },
+    { text: 'tool lookup_order | 8812 | refund requested, not approved yet', bucket: 1 },
+    { text: 'tool send_reply | E-202 | Your refund has been approved.', bucket: 2 },
+    { text: 'tool read_email | E-203 | Order 7730 arrived damaged', bucket: 1 },
+    { text: 'tool save_draft | E-203 | We are sorry your order arrived damaged.', bucket: 2 },
+  ]} />
+
+## A model change is a change
+
+The team's logs from the week before show a different model name on every
+line, `assistant-2026-06`. The vendor moved the agent to `assistant-2026-09`
+on the Friday, and nobody on the team noticed. This is **model change
+risk**. The same instructions on a new model version can act differently. A
+reply comes back in a new format, or an email is sorted into the wrong
+group. The model is outside the team's control. The team treats a new
+version like an upgrade of any other part it depends on.
+
+**Pin the version where you can.** Some vendors let you name the exact
+version. On Anthropic's API, each model ID names a fixed version, and the
+model behind that ID stays the same for as long as the ID exists. The
+shorter aliases for some older models move to the newest snapshot
+(@Claude docs model-ids-and-versions). A pin doesn't last forever. When a
+version is retired, requests to it fail. Anthropic gives customers who use a
+publicly released model at least 60 days' notice, and advises testing the
+replacement on your own tasks well before the date
+(@Claude docs model-deprecations). If your team uses a chat product that
+picks the model for you, ask the vendor whether you can choose the version
+and how you hear about a change.
+
+**Keep a task set.** A task set is a short list of real past tasks, each
+with the result a person agreed was right. The support team's set is eight
+past emails, each marked "send" or "draft" by the rule in the request.
+
+**Rerun it on every change.** When the version changes, run the task set
+on the new version, compare it with the old one, and read every row that
+differs before the agent goes back on live work. A course on shipping
+agents gives the same rule for any agent change: no new version goes live
+until it passes the tests, including the cases that passed before
+(@AEC-11).
+
+After the Monday reply, the team ran its task set on both versions. This
+is what the agent did with each email on each version:
+
+```text
+task  subject                                        agreed  2026-06  2026-09
+T1    Where is my order 5531?                        send    send     send
+T2    Order 3307: I want my money back               draft   draft    send
+T3    Can I change my delivery address?              send    send     send
+T4    Order 7730 arrived damaged, refund please      draft   draft    draft
+T5    Has order 6120 shipped yet?                    send    send     send
+T6    Order 4410: you charged me twice               draft   send     draft
+T7    Do you ship to Norway?                         send    send     send
+T8    Order 9001 is late, cancel it and pay me back  draft   draft    draft
+```
+
+<Predict id="which-task-got-worse" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['model-change-risk']}
+  context="A support team's task set has eight past emails, each with an agreed action, send or draft. It was run on an old model version and a new one. The old version drafted T2 'Order 3307: I want my money back' and sent T6 'Order 4410: you charged me twice'. The new version sent T2 and drafted T6. Both agreed actions are draft, and every other row is the same on both versions."
+  title="Which task got worse?"
+  hint="First find the rows where the two version columns differ. Then, for each, which version matches the agreed column?"
+  answer="T2">
+A program prints only the rows where the two versions did something
+different. One of those rows is worse on the new version than on the old
+one. Type its task id.
+</Predict>
+
+The program's output:
+
+```text
+task set: 8 emails, run on assistant-2026-06 and on assistant-2026-09
+
+rows that differ:
+  task  subject                            agreed  old    new    verdict
+  T2    Order 3307: I want my money back   draft   draft  send   WORSE
+  T6    Order 4410: you charged me twice   draft   send   draft  better
+
+same on both versions: 6 of 8
+differ: 2, better: 1, worse: 1
+```
+
+T2 is the same kind of email as the one that went wrong on Monday, and the
+rerun shows the new version sends it. Had anyone run the task set on the
+Friday, the team would have seen that row before a customer did. T6 also
+differs, and there the new version is better: the old one sent a reply to
+an email about a double payment. A row that differs isn't bad by itself.
+Read it against the agreed column, and then decide. The team adds a line to
+the request for emails that ask for money back, and reruns the set before
+the agent goes back on the inbox.
+
+<Pitfall title="The update nobody noticed">
+The vendor announced the new model version in a release note, and nobody on
+the support team reads release notes, so the change reached live work on a
+Friday with no rerun. The first sign was a customer on the phone. Name one
+person who follows the vendor's model announcements and the version name in
+the logs, and make a new version the trigger for the task set, the same way
+a new version of any other tool the team depends on is tested first.
+</Pitfall>
+
+<Scenario id="the-announcement" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['model-change-risk']}
+  context="A team's agent answers customer emails. The team keeps a task set of past emails with agreed actions. The vendor announces that the agent will move to a new model version next week."
+  title="The vendor announces a new version"
+  hint="Which step tells you how the new version handles your own emails before it answers a customer?"
+  options={[
+    { text: 'Rerun the task set on the new version and read every row that differs.', correct: true, consequence: 'One row that used to be a draft is now sent. You add a line to the request, rerun, and the new version starts with all eight rows agreed.' },
+    { text: 'Trust the change, because the vendor tested the new version first.', consequence: 'The vendor tested it on its own tasks. On yours, a refund email now gets a reply, and a customer is the one who finds it.' },
+    { text: 'Ask the agent to confirm that it will behave as before.', consequence: 'The agent says yes. The answer is text from a model that has not seen the new version, and it checks nothing.' },
+    { text: 'Wait a week after the change and read a sample of the log then.', consequence: 'The sample is a good habit, and it finds the wrong reply on day six. By then five customers have been told their refund was approved.' },
+  ]}>
+The vendor announces that the agent moves to a new model version from
+next Monday. What does the team do this week?
+</Scenario>
+
+<Choice id="pinned-or-not" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['model-change-risk']}
+  context="The lesson says a team treats a new model version like an upgrade of any other part it depends on: pin the version where the vendor allows it, keep a task set of past tasks with agreed results, and rerun it when the version changes. A pinned version is retired at some point, with notice."
+  title="What does the pin buy?"
+  hint="Does a pinned version stay available forever, and what should happen before the team moves off it?"
+  options={[
+    { text: 'The agent never changes, so the team can drop its task set.', why: 'A pinned version is retired at some point, and the team then has to move. Without a task set it moves blind.' },
+    { text: 'The vendor now checks the team\'s own tasks before any change.', why: 'The vendor tests on its own tasks. Nobody but the team knows which emails must stay drafts.' },
+    { text: 'Time to rerun the task set on the next version before moving.', correct: true },
+    { text: 'Nothing, because every model version answers each email the same way.', why: 'The task set above shows two emails handled differently by two versions. The same instructions can act differently on a new version.' },
+  ]}>
+The team's agent now runs on a pinned model version. What does that give
+the team?
+</Choice>
+
+<Exercise stretch="Pick five real past tasks for that assistant and write, next to each, the result a person would agree is right. That list is the start of your task set.">
+Take one agent or assistant your team uses. In a note, write down what it
+logs, where the log is kept, and who reads a sample of it and how often. If
+you don't know, write down who you would ask. Then write what you would
+rerun after the vendor's next model update, and who on the team would hear
+about the update first.
+
+A good result names a place the agent can't edit and one person by name
+for the sample. It also has at least two concrete tasks to rerun, with the
+result you expect from each. "We would test it" is not enough. Which of
+your answers did you have to guess, and who can confirm it this week?
+</Exercise>
+
+<Recap>
+1. A log records what the agent was asked, which tools it called and what it changed. Sorted into those three parts, it answers "what happened" when the agent's summary is wrong (@AEC-09).
+2. A log shows what the agent did and which model version did it. It never shows why the model wrote a sentence, but the version narrows the question.
+3. Check that the log holds the text of what was sent. Some tools leave it out until someone turns it on (@Claude Code monitoring).
+4. Keep the log where the agent can't edit it, and name one person who reads a weekly sample. A log nobody reads doesn't catch anything.
+5. A model change is a change. Pin the version where you can, keep a task set of past tasks with agreed results, and rerun it before a new version goes live (@Claude docs model-ids-and-versions).
+6. A pinned version is retired with notice, so the rerun is needed later anyway (@Claude docs model-deprecations). Read each row that differs against the agreed result.
+</Recap>
