@@ -51,7 +51,7 @@ Repeat this section verbatim in every builder and reviewer prompt.
 
 Post the reviewer's final text as it is, including the attribution lines after the `Verdict:` line. If they're missing, add them before posting.
 
-Put the session record in the body of the wave pull request, under a `## Session record` heading after the review table, in the form of the wave comments on the older run issues (for example #360): counts, what review caught, what the builder prompt should have said. Commit no record file. Return a report of AT MOST 200 words, plus the `Follow-ups` lines, in exactly this form and nothing else:
+Put the session record in the body of the wave pull request, under a `## Session record` heading after the review table, in the form of the wave comments on the older run issues (for example #360): counts, what review caught, what the builder prompt should have said. Commit no record file. In the review table's re-check column, a branch you re-checked yourself after `Verdict: approve` links your `re-checked by lead` comment on the issue. Return a report of AT MOST 200 words, plus the `Follow-ups` lines, in exactly this form and nothing else:
 
 ```text
 {{WAVE}} <merged|open|failed>
