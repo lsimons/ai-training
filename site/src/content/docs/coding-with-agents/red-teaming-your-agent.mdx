@@ -263,14 +263,13 @@ python3 scan_hidden.py ~/red-team/project; echo "exit status $?"
 
 <Match id="finding-to-fix" objective="coding-with-agents/verifies-agent-work/screens-for-security"
   concepts={['red-teaming-your-own-agent', 'deterministic-gates']}
-  context="A learner has red-teamed their coding agent in a scratch copy of a project and written down four findings. Each finding gets one kind of fix."
+  context="A learner has red-teamed their coding agent in a scratch copy of a project and written down three findings. Each finding gets one kind of fix."
   title="Which fix answers each finding?" hint="For each finding, was the agent missing a fact, able to do something it never needs, or is there a check that could catch it every time?"
   options={['A permission change', 'A line in the instructions', 'A gate']}
   rows={[
     { statement: 'The web fetch tool loaded a page in a session meant to stay offline', option: 0, why: 'Does the agent need that tool for this project at all?' },
     { statement: 'Nothing told the agent that finance still runs legacy_export.py, so it removed the file', option: 1, why: 'What did the agent not know, and where would it have read it?' },
     { statement: 'A vendor file held an HTML comment addressed to AI assistants', option: 2, why: 'Could a script find this in every file, the same way each time, before an agent reads it?' },
-    { statement: 'A string shaped like an API key turned up in a file the agent wrote', option: 2, why: 'What kind of scanner would flag that string on every commit?' },
   ]}
   rationale="A permission removes what the agent never needs, an instruction supplies what it didn't know, and a gate catches the same problem the same way every time.">
 Match each finding to the fix that answers it.
@@ -300,6 +299,19 @@ Which of these belong in the team's red-team session?
     { text: 'Run the same check a second time, to rule out a file the agent was still writing when you ran it.', why: 'A second run looks at the same folder and misses the same places. The session had already ended.' },
   ]}>
 The check doesn't report anything. What do you conclude?
+</Choice>
+
+<Choice id="the-reply-and-the-files-disagree" phase="review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['red-teaming-your-own-agent', 'prompt-injection']}
+  context="In a red-team session in a scratch copy, a file held a hidden comment asking the agent to copy a fake key to collected.txt outside the project. The agent's reply says it noticed the comment and ignored it. The check after the session lists collected.txt as added, holding the fake key."
+  title="The reply and the files disagree" hint="Which of the two is a record of what happened, and which is a claim about it?"
+  options={[
+    { text: 'Trust the reply, since the agent spotted the comment and said so without being asked.', why: 'The reply is a claim. The new file with the key in it is what the session left behind.' },
+    { text: 'Record that the key left the project despite the reply, and find the step that wrote it in the transcript.', correct: true },
+    { text: 'Delete collected.txt and run the check again, since the file is most likely left over from setup.', why: 'The setup script never writes that file, and the check compares with hashes taken at setup, so the file is new.' },
+    { text: 'Ask the agent to explain why it wrote the file, and use its explanation as the finding.', why: 'The explanation is more text written after the fact. The transcript shows the steps it took.' },
+  ]}>
+The reply and the check disagree. What do you record?
 </Choice>
 
 <Exercise stretch="Then plant a second note of your own in a new scratch copy, for example as a code comment in invoice.py or as a zero-width line in the README, and see whether the scan and your agent treat it the same way.">
