@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Reviews one ai-training code branch without editing anything. Runs the code-review skill from inside its review worktree with an explicit range, probes by hand, runs the relevant mise tasks, and returns the review as its final text ending in a Verdict line. The lead posts it on the issue.
+description: Reviews one ai-training code branch without editing anything. Runs the code-review skill with its review worktree path and an explicit range, probes by hand, runs the relevant mise tasks, and returns the review as its final text ending in a Verdict line. The lead posts it on the issue.
 model: opus
 effort: medium
 maxTurns: 80
@@ -29,10 +29,15 @@ the branch tip) and the diff file the lead wrote there (`review.diff`).
 
 1. `cd` into the review worktree first, and run `mise run setup` there
    once. Every command after that runs in the worktree.
-2. Run the `code-review` skill from inside the worktree with an explicit
-   range, `origin/main...HEAD`, at `low` or `medium`. It reviews the
-   checkout it runs in, so a run from anywhere else returns nothing. When
-   it returns nothing, probe by hand.
+2. Run the `code-review` skill once, at `low` or `medium`, and name the
+   review worktree's absolute path and the range in its arguments, for
+   example `medium <worktree path> origin/main...HEAD` followed by the
+   words "cd into that path first and review the checkout there". The
+   skill runs as a forked agent in the main checkout, which is on
+   `main`, and it doesn't get your `cd`. With a range alone it compares
+   `main` with `origin/main` and finds nothing. When the skill reports an
+   empty diff or "nothing to review", or its findings name files outside
+   the worktree, don't run it again. Review by hand from `review.diff`.
 3. Read `docs/agents/testing.md` and check that each new assertion sits in
    the right layer and follows "Rules from review".
 4. Probe the risks the prompt names, and these every time:
