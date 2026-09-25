@@ -312,11 +312,16 @@ describe('citations in component props', () => {
 			'</Pitfall>', // 3
 			'', // 4
 			'<abbr title="see (@AEC-01 and more">x</abbr>', // 5
+			'', // 6
+			'<Pitfall title="Run ``a ` b`` then (@AEC-01) and `c`">', // 7: the double run closes only on a double run
+			'Body.', // 8
+			'</Pitfall>', // 9
 			'',
 		].join('\n');
 		expect(propCitations(src, 'p')).toEqual([
 			{ line: 1, tag: 'Pitfall', prop: 'title', token: '(@AEC-01)' },
 			{ line: 5, tag: 'abbr', prop: 'title', token: '(@AEC-01 and more' },
+			{ line: 7, tag: 'Pitfall', prop: 'title', token: '(@AEC-01)' },
 		]);
 		const { errors } = check(tree({ 'content/a/index.mdx': '<Recap hint="(@AEC-01)">\nDone.\n</Recap>\n' }));
 		expect(errors).toEqual([
@@ -334,6 +339,14 @@ describe('citations in component props', () => {
 			'<Predict answer="(@AEC-01)">', // expected output, shown as code
 			'Run it.',
 			'</Predict>',
+			'',
+			'<Repair id="r" broken="See (@AEC-01)" model="Cite (@AEC-01) in text">', // both shown verbatim
+			'Fix it.',
+			'</Repair>',
+			'',
+			'<Pitfall title="Write ``a ` (@AEC-01)`` as code">', // a double-backtick span with a backtick inside
+			'Body.',
+			'</Pitfall>',
 			'',
 			'<Widget data={items} />', // not a literal, so not readable before render
 			'',
