@@ -1,0 +1,321 @@
+import { Choice, MultiChoice, Match, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+The lessons of this part each gave the team one agreement. The
+[lesson on attribution and review](/coding-with-agents/attribution-and-review-norms/)
+agreed how a change says what the agent did. The
+[lesson on hooks and CI](/coding-with-agents/ci-and-hooks/) made two rules
+run by themselves, and the
+[lesson on parallel sessions](/coding-with-agents/parallel-sessions/)
+kept sessions away from what they share. This last lesson of the course
+adds no new idea. We write those agreements down as the team's practice
+for agent use, from the mistakes the team has seen, and decide which of
+them a check enforces.
+
+## Why the practice is written down
+
+Ask five engineers how the team uses agents, and when nothing is written
+down you get five answers. Each person follows the habits they built in
+their own sessions. The agents follow none of them, because an agent
+knows only what is in its context. A habit in someone's head never gets
+there. A file that the agent loads at the start of every session does.
+
+That file is the project instructions file from the
+[lesson on project instructions](/coding-with-agents/project-instructions/),
+`AGENTS.md` or `CLAUDE.md` at the root of the repository. The Claude Code
+documentation says that the agent reads the project's file at the start of
+every session. The file reaches the whole team through the repository, and
+the documentation advises keeping personal preferences out of it
+(@Claude Code memory). A change to the practice is then a change to a
+file, and it gets a diff and a review like any other change.
+
+The practice section of that file says four things:
+
+- what agents may do, and what every change must pass before it merges,
+- how agent work is attributed in commits and pull requests,
+- how agent work is reviewed, and what the author does before asking,
+- which directories and commands are off limits to agents.
+
+This course's repository is a worked example. Its `AGENTS.md` says that
+the full check must pass before a push, that no agent pushes to `main`,
+and that every commit message an agent writes ends with a
+`Co-Authored-By` line and an `Assisted-by` line and carries no
+`Signed-off-by` (@AI Training AGENTS). The AI-native software development
+playbook on Claude Academy has a lesson on the `CLAUDE.md` file, and its
+course page describes that file and the team's skills as knowledge the
+team keeps in versioned files that the agents read
+(@Academy ai-native-sdlc-playbook).
+
+<Choice id="where-the-practice-lives" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['review-norms', 'attribution']}
+  context="A team of five engineers uses coding agents on one repository, and nothing about how they use the agents is written down yet."
+  title="Where does the answer go?" hint="Which of these places do the agents load, and which of them can the whole team read and change?"
+  options={[
+    { text: 'On a page of the team wiki that every new member of the team reads in their first week.', why: 'People read it once, and no agent session loads it. The agents keep working from nothing.' },
+    { text: 'In the user instructions file of each engineer, the one their own agent loads in every session.', why: 'Five copies, each edited by one person, drift apart. That is the unwritten practice again, and the team cannot review it.' },
+    { text: 'In the project instructions file in the repository, where each change to it gets a review.', correct: true },
+    { text: 'In the minutes of the team meeting where the five engineers agreed on the answer together.', why: 'The minutes record the agreement for people who look for them. No agent reads them at the start of a session.' },
+  ]}>
+A new engineer asks whether an agent may push to a shared branch, and the
+other four engineers give three different answers. Where does the team
+write the answer, so that every person and every agent session works from
+the same one?
+</Choice>
+
+## Start from the mistakes you have seen
+
+A few lines of the practice are decisions the team makes once, at the
+start: the check every change passes, and the form of the attribution
+trailer. The other lines come from incidents. An incident is a change the
+team had to take back or repair, and each one shows a mistake that
+happened on this project, with these people and these agents. A rule
+written from an incident guards against a mistake the team knows it
+makes. Write the incident next to the rule, so a reader knows why the
+rule is there and can tell when the reason is gone.
+
+The fixture for this lesson is a small invoice project in the course
+repository under `site/examples/coding-with-agents/team-practice/`. Its
+`AGENTS.md` has a practice section that the team wrote before any of the
+incidents in its history:
+
+```markdown
+## Working with agents
+
+- Be careful with dependencies.
+- Don't lose other people's work.
+- Say when an agent helped with a commit.
+- Agents never edit the database migrations in `migrations/`.
+```
+
+<Predict id="read-the-history" title="The invoice project's history"
+  answer={`2026-05-04  chore: the invoice service
+  2026-05-11  feat: export invoices as CSV
+              Assisted-by: Claude:claude-sonnet-4-6
+  2026-05-12  Revert "feat: export invoices as CSV"
+              The agent ran the lock command while it added the export,
+              and requirements.lock upgraded both dependencies. The review
+              read invoices.py and skipped the lockfile, and the release
+              failed its smoke test.
+  2026-05-13  feat: export invoices as CSV, lockfile unchanged
+              Assisted-by: Claude:claude-sonnet-4-6
+  2026-05-18  feat: a due date on each invoice
+  2026-05-27  feat: discount for early payment
+              Assisted-by: Claude:claude-sonnet-4-6
+  2026-06-02  fix: cap the early-payment discount at five days again
+              Two agent sessions ran in two worktrees of one clone. The
+              invoice session stashed its cap on the discount, and the
+              report session popped that stash into its own worktree and
+              discarded it with its other changes. The discount shipped
+              without the cap.
+  2026-06-08  docs: list the invoice rules
+  2026-06-16  feat: late fee on overdue invoices
+              Assisted-by: Claude:claude-sonnet-4-6
+              Signed-off-by: Coding Agent <agent@example.com>
+  2026-06-17  Revert "feat: late fee on overdue invoices"
+              The commit ends with a sign-off in the agent's name. Our
+              sign-off certifies the Developer Certificate of Origin, and
+              only a person can give that.
+  2026-06-18  feat: late fee on overdue invoices
+              Assisted-by: Claude:claude-sonnet-4-6
+              Signed-off-by: Robin <robin@example.com>`} run="coding-with-agents/team-practice/history.py">
+The course's script builds the project's git history with fixed dates and
+prints each commit, oldest first, with its message body indented under
+it. Run it from `site/examples/coding-with-agents/team-practice/` in your
+clone of the course repository, and compare what you see with the output
+below.
+
+```sh
+python3 history.py
+```
+
+</Predict>
+
+This example isn't graded. Three of the commits take back or repair an
+earlier one, and their messages say what went wrong. You write the
+practice from them in the exercise at the end of the lesson.
+
+The practice also changes when the mistakes change. When a review finds
+the same kind of mistake a second time, it gets a line, as the
+[lesson on hooks and CI](/coding-with-agents/ci-and-hooks/) said. A rule
+whose reason is gone comes out: the directory it protects was removed, or
+a check now catches the mistake. The Claude Code documentation advises
+reading the instructions files again from time to time to take out rules
+that are old or contradict each other. It adds that every extra line takes
+up context and makes the agent follow the file less closely
+(@Claude Code memory).
+
+This course's repository keeps its rules for the agents that write lessons
+in the prompt of the wave lead, the agent that coordinates each group of
+builders. Many of the rules name the incident behind them. The one on
+fixtures that run git says that a fixture passes git a fixed list of
+environment variables, and names issue #169, where a fixture that removed
+some variables let an inherited one install a hook. Two rules end with a
+note of the form "(remove after #311)", the issue whose fix makes the rule
+unnecessary (@AI Training wave lead prompt).
+
+<Pitfall title="Thirty rules for the agents they imagined">
+A team wrote its agent practice in a one-hour meeting, before anyone had
+used an agent on the code. It had thirty rules on which files an agent
+may read and how many lines it may write. In the first two months the
+agents committed generated files from the build folder, and reviewers
+approved pull requests they had only skimmed. None of the thirty rules
+covered either, and nobody could say which rules were still needed. Write
+the practice from the incidents you have, add a rule when a new mistake
+shows up, and take out a rule that no incident supports.
+</Pitfall>
+
+<Scenario id="the-rule-that-never-fired" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['review-norms']}
+  context="A team's practice section has had the rule that agents never edit migrations/ for a year, and the project has no database and no migrations folder. This month, two agent pull requests edited the CI workflow file to skip a failing job."
+  title="A year of practice" hint="Which rule has an incident behind it, and which one guards a folder the project doesn't have?"
+  options={[
+    { text: 'Add the rule on the workflow file, and keep the migrations rule, because a rule that never fired costs nothing.', consequence: 'Every session loads a line about a folder that doesn\'t exist, and readers start to skim the section. The next unused rule stays in too, and the file grows with every fear.' },
+    { text: 'Leave the file as it is, and remind the team in chat to look for workflow edits in each review.', consequence: 'The agents never read the chat, so the third pull request that skips a job comes a week later. It depends on each reviewer remembering the message.' },
+    { text: 'Rewrite the whole section from a new list of risks that the team collects in a one-hour meeting.', consequence: 'The new list guards against what the team imagines, as the old one did. The two real pull requests are one line among many.' },
+    { text: 'Add a rule on the workflow file that names the two pull requests, and remove the migrations rule.', correct: true, consequence: 'The section stays short, and each rule in it has a reason a reader can check. The next review sees the two pull requests and why the rule exists.' },
+  ]}>
+The practice section has a rule that agents never edit `migrations/`,
+written in the first week. The project has no database. This month two
+agent pull requests changed the CI workflow file to skip a failing job.
+What do you change in the practice?
+</Scenario>
+
+## Say it in the file, check it where a script can
+
+The practice section draws together what this part of the course taught.
+Parallel sessions run in worktrees, each on its own branch, and leave
+alone what the clone and the machine have only once. CI integration makes
+one check the gate for every change, whoever wrote it. Team hooks stop an
+agent's step before it happens. Review norms say what the author does
+before asking for a review and what the pull request says. Attribution
+names the agent in a trailer, and only a person signs off.
+
+Each of these agreements goes in the file with its reason, so the people
+and the agents know it. The file doesn't enforce anything. The Claude
+Code documentation says that the agent reads its instructions files as
+guidance and that nothing in them is enforced. To block an action whatever
+the agent decides, it points to a `PreToolUse` hook (@Claude Code memory). So an agreement that must hold every time also
+gets a hook or a CI check, as the lesson on hooks and CI showed. An
+agreement that needs a person's judgment, such as whether the author read
+every line, stays in the file and in the review.
+
+This course's repository does both for the stash. Its page on
+orchestration says that agents never run `git stash` in any worktree and
+gives the reason, the one stash that all worktrees of a clone share. A
+hook in the repository rejects the command (@AI Training orchestration).
+
+<Match id="incident-to-rule" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['team-hooks', 'parallel-sessions', 'attribution']}
+  context="A team reads its last quarter of history and finds three incidents with coding agents. It has four candidate rules for its practice section, and wants each rule it keeps to have an incident behind it."
+  title="Which rule does each incident support?" hint="For each incident, which rule would have stopped that exact mistake? Is there a rule that no incident needs?"
+  options={['Agents never edit tests/recorded/, and a hook blocks it', 'Agents check pages with the build and never start the dev server', 'Agent commits end with an Assisted-by trailer in the last paragraph', 'Agents write at most 200 lines in one session']}
+  rows={[
+    { statement: 'An agent edited the recorded test data until a failing test passed, and the pull request was approved', option: 0, why: 'Which rule stops the edit itself, before the test data changes?' },
+    { statement: 'Two sessions in worktrees of one clone used the same port, and one checked pages the other served', option: 1, why: 'What does the port have that each worktree has only once, and which rule keeps sessions off it?' },
+    { statement: 'An agent put its trailer in the middle of the body, and the count of agent-assisted commits missed it', option: 2, why: 'Where does git read trailers from, and which rule names that place?' },
+  ]}
+  rationale="Each rule the team keeps names the incident it came from. The limit on lines has no incident behind it, so it stays out of the practice.">
+Match each incident to the rule it supports.
+</Match>
+
+<Sort id="said-or-checked" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['ci-integration', 'team-hooks', 'review-norms']}
+  context="A team is writing the practice section of its project instructions file. Every agreement goes in the file with its reason, and the team decides which of them also get a hook on agent commands or a CI check on every pull request."
+  title="Does a check enforce it too?" hint="Can a script decide the rule from the command the agent runs or from the files and messages in the pull request?"
+  buckets={['The file says it, and a hook or CI check enforces it', 'The file says it, and people keep to it']}
+  items={[
+    { text: 'Agents never run git stash in any worktree', bucket: 0 },
+    { text: 'No commit carries a Signed-off-by in the agent\'s name', bucket: 0 },
+    { text: 'The lockfile changes only in a pull request of its own', bucket: 0 },
+    { text: 'The author reads every changed line before asking for review', bucket: 1 },
+    { text: 'The pull request says truthfully what the author ran and saw', bucket: 1 },
+  ]} />
+
+<MultiChoice id="a-rule-worth-its-line" phase="review" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['review-norms']}
+  context="A team adds rules to the practice section of its project instructions file, the file every agent session loads, after incidents with coding agents."
+  title="A rule worth its line" hint="For each property, does it help a reader know why the rule is there and whether a change breaks it?"
+  options={[
+    { text: 'It names the incident that it came from.', correct: true },
+    { text: 'It is precise enough to tell when a change breaks it.', correct: true },
+    { text: 'It says which hook or CI check enforces it, if any.', correct: true },
+    { text: 'It covers every risk the team could think of in a meeting.', why: 'Imagined risks guard against the wrong things, and the section grows until nobody reads it.' },
+    { text: 'It is worded by each engineer in their own user file.', why: 'Then each engineer has a different rule, and the team never reviews them together.' },
+  ]}>
+Which of these make a rule in the practice section worth keeping?
+</MultiChoice>
+
+<Choice id="the-push-to-main" phase="review" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['team-hooks', 'review-norms']}
+  context="A team agreed in a meeting that agents open a pull request for every change and never push to main. The agreement is written nowhere, and last week an agent session pushed a change straight to main."
+  title="The agent pushed to main" hint="Which fix reaches every session, whoever starts it, and still holds when an agent ignores an instruction?"
+  options={[
+    { text: 'Write the rule in the project instructions file, and add a check that rejects a push to main.', correct: true },
+    { text: 'Ask the engineer who started that session to repeat the agreement in each brief from now on.', why: 'It then holds in one person\'s sessions, as long as they remember it. The other engineers\' agents still don\'t know.' },
+    { text: 'Repeat the agreement at the next team meeting, so that every engineer on the team remembers it.', why: 'The people remember it for a while. The agents never attend the meeting, and nothing reaches their context.' },
+    { text: 'Add the rule to that engineer\'s own user instructions file, the one their agent loads in each session.', why: 'Only that engineer\'s sessions load it, and a rule in an instructions file is advice the agent can still skip.' },
+  ]}>
+What does the team change so that no agent session pushes to `main` again?
+</Choice>
+
+<Scenario id="the-copied-practice" phase="review" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['review-norms', 'ci-integration']}
+  context="A team is starting to use coding agents on its repository and has no written practice yet. Another team offers its practice section of forty rules, written for a different project."
+  title="Forty rules from another team" hint="Which lines can the team decide today, and where do the other lines come from?"
+  options={[
+    { text: 'Copy all forty rules into the file, since the other team learned them the hard way.', consequence: 'The file guards against the other team\'s mistakes on another project. Nobody can say which rules apply here, and the agents load all forty in every session.' },
+    { text: 'Write the gate and the attribution form now, and add a rule with its incident as each mistake happens.', correct: true, consequence: 'The file is short on day one and has a reason for each line. The first incident a month later becomes a rule with its date.' },
+    { text: 'Write nothing for the first year, so the team has enough incidents before it writes any rule.', consequence: 'For a year each engineer and each agent works to a different practice. The gate and the trailer form were decisions the team could make on the first day.' },
+    { text: 'Hold a meeting to list every risk agents bring, and write one rule for each risk on the list.', consequence: 'The list is what the team imagines, and the first real incidents fall between its rules.' },
+  ]}>
+The team has no written practice yet. What does it write?
+</Scenario>
+
+<Sort id="keep-or-take-out" phase="review" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['review-norms']}
+  context="A team reviews the practice section of its project instructions file. Each item is a rule in that section, with what the team knows about it."
+  title="Keep it or take it out?" hint="Does the rule still have a reason on this project today?"
+  buckets={['Keep it in the practice', 'Take it out of the practice']}
+  items={[
+    { text: 'The lockfile rule, added after a release failed on an upgrade the review skipped', bucket: 0 },
+    { text: 'A rule about the old build tool that the team replaced last spring', bucket: 1 },
+    { text: 'The trailer form that the team\'s commit check reads on every pull request', bucket: 0 },
+    { text: 'A rule on a migrations folder, in a project that has no database', bucket: 1 },
+  ]} />
+
+<Exercise stretch="Do the same for a repository your team uses with agents: read the last three months of history for reverts and fixes of agent work, and compare what you find with the practice section of its instructions file.">
+Build the invoice project where you can read it with git. From
+`site/examples/coding-with-agents/team-practice/` in your clone of the
+course repository, run this, with a folder name that doesn't exist yet:
+
+```sh
+python3 history.py ~/invoices
+```
+
+In `~/invoices`, read the history with `git log` and each incident with
+`git show`. Then rewrite the "Working with agents" section of `AGENTS.md`
+there. Write one rule for each of the three incidents, precise enough
+that a reviewer can tell whether a change breaks it, and give the date of
+the commit it came from. Say after each rule whether a hook or a CI check
+should also enforce it, and which one. Drop the rule that no incident
+supports. Delete `~/invoices` when you are done, and run the script again
+to start over.
+
+A good result has three rules, each tied to one of the three commits that
+take back or repair a change, and none of them as vague as the draft's
+lines. The rule with no incident behind it is gone, and the section is
+shorter than a screen. A colleague who reads only the section could say
+why each rule is there. Then answer one question: which rule of your own
+team's practice could nobody tie to an incident, and what would happen if
+you took it out?
+</Exercise>
+
+<Recap>
+1. Write the team's practice for agent use in the project instructions file, where every person and every agent session reads it. It says what agents may do and what every change passes, how agent work is attributed and reviewed, and which directories and commands are off limits (@Claude Code memory).
+2. Make the gate and the attribution form decisions at the start. Write every other rule from an incident the team has seen, and name the incident next to the rule.
+3. Add a rule when a mistake comes back, and remove a rule when its reason is gone or no incident supports it (@AI Training wave lead prompt).
+4. The file states each agreement and its reason. An agreement that must hold every time also gets a hook or a CI check, and one that needs a person's judgment stays with the review.
+</Recap>
+
+<Habit id="rule-with-its-incident">
+The next time a review finds an agent mistake that the team has seen before, add a rule to the practice section with the date or the pull request it came from.
+</Habit>
