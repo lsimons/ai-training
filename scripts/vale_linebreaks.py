@@ -22,6 +22,7 @@ package synced before this script existed is widened too.
 
 The House style (.vale/styles/House/) is committed and written with `\\s`
 from the start, and tests/test_vale_linebreaks.py checks that it stays so.
+House.VerbTricolon is the exception until issue #441 is decided.
 
 What is rewritten, per rule file:
 

@@ -163,7 +163,21 @@ def test_main_reports_the_count_and_a_format_error(
         vale_linebreaks.main([])
 
 
-@pytest.mark.parametrize("rule", sorted(HOUSE.glob("*.yml")), ids=lambda p: p.name)
+# House.VerbTricolon keeps its literal spaces until the maintainer decides
+# what to do about the noun lists it flags once it matches across a line
+# break (issue #441). Strict, so widening the rule fails here until the
+# marker goes.
+VERB_TRICOLON_PENDING = pytest.mark.xfail(
+    strict=True, reason="House.VerbTricolon is not widened yet (issue #441)"
+)
+
+
+def _house_rule(rule: pathlib.Path) -> object:
+    marks = [VERB_TRICOLON_PENDING] if rule.name == "VerbTricolon.yml" else []
+    return pytest.param(rule, id=rule.name, marks=marks)
+
+
+@pytest.mark.parametrize("rule", [_house_rule(rule) for rule in sorted(HOUSE.glob("*.yml"))])
 def test_house_rules_have_no_literal_space_in_a_pattern(rule: pathlib.Path) -> None:
     text = rule.read_text(encoding="utf-8")
     assert vale_linebreaks.widen_rule(text, str(rule)) == text
@@ -189,17 +203,26 @@ ISSUE_371 = (
     "Then it asks for the case against it, for the questions left open, and\n"
     "for what each option costs."
 )
-CASES = [
-    ("ai-tells.StackedAnaphora", ISSUE_371),
-    ("ai-tells.MotionMetaphors", "The config then drives\nthe build on every push."),
-    ("House.VerbTricolon", ISSUE_371),
-    ("House.Transitions", "The run failed. In\naddition, the log was empty."),
-    ("House.Idioms", "The second run came at a\nprice for the team."),
-]
+SPLIT_HITS = {
+    "ai-tells.StackedAnaphora": ISSUE_371,
+    "ai-tells.MotionMetaphors": "The config then drives\nthe build on every push.",
+    "House.VerbTricolon": ISSUE_371,
+    "House.Transitions": "The run failed. In\naddition, the log was empty.",
+    "House.Idioms": "The second run came at a\nprice for the team.",
+}
+
+
+def _split_case(rule: str) -> object:
+    marks = [VERB_TRICOLON_PENDING] if rule == "House.VerbTricolon" else []
+    return pytest.param(rule, id=rule, marks=marks)
 
 
 def _vale(tmp_path: pathlib.Path, rule: str, text: str) -> list[str]:
-    """The checks that fire on `text` with only `rule` on, at error."""
+    """The checks that fire on `text` with only `rule` on, at error.
+
+    A package rule is widened the way `prose-sync` widens it. A House rule
+    is used as committed.
+    """
     style, name = rule.split(".")
     styles = tmp_path / "styles"
     (styles / style).mkdir(parents=True, exist_ok=True)
@@ -207,7 +230,10 @@ def _vale(tmp_path: pathlib.Path, rule: str, text: str) -> list[str]:
     assert source.is_file(), f"{source} is missing: run 'mise run setup'"
     target = styles / style / f"{name}.yml"
     shutil.copy(source, target)
-    target.write_text(vale_linebreaks.widen_rule(target.read_text(encoding="utf-8"), str(target)))
+    if style != "House":
+        target.write_text(
+            vale_linebreaks.widen_rule(target.read_text(encoding="utf-8"), str(target))
+        )
     (tmp_path / ".vale.ini").write_text(
         f"StylesPath = styles\nMinAlertLevel = suggestion\n[*.md]\n{rule} = error\n"
     )
@@ -223,13 +249,17 @@ def _vale(tmp_path: pathlib.Path, rule: str, text: str) -> list[str]:
     return [alert["Check"] for alerts in hits.values() for alert in alerts]
 
 
-@pytest.mark.parametrize(("rule", "text"), CASES, ids=[case[0] for case in CASES])
-def test_rule_fires_on_a_hit_split_over_two_lines(
-    tmp_path: pathlib.Path, rule: str, text: str
-) -> None:
-    assert "\n" in text
-    assert rule in _vale(tmp_path / "split", rule, text)
-    assert rule in _vale(tmp_path / "one-line", rule, text.replace("\n", " "))
+@pytest.mark.parametrize("rule", [_split_case(rule) for rule in SPLIT_HITS])
+def test_rule_fires_on_a_hit_split_over_two_lines(tmp_path: pathlib.Path, rule: str) -> None:
+    assert "\n" in SPLIT_HITS[rule]
+    assert rule in _vale(tmp_path, rule, SPLIT_HITS[rule])
+
+
+# The same hits on one line. House.VerbTricolon fires there already.
+@pytest.mark.parametrize("rule", SPLIT_HITS)
+def test_rule_fires_on_the_same_hit_on_one_line(tmp_path: pathlib.Path, rule: str) -> None:
+    text = SPLIT_HITS[rule]
+    assert rule in _vale(tmp_path, rule, text.replace("\n", " "))
 
 
 def test_an_unwidened_rule_misses_the_split_hit(tmp_path: pathlib.Path) -> None:

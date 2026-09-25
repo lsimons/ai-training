@@ -185,8 +185,8 @@ thing at an address.
   19	        return f"no item #{number}"
   20	    items[index]["done"] = True
   21	    return f"done #{number}: {items[index]['text']}"`} run="coding-with-agents/scoping-and-referencing/reference.py">
-Print lines 16 to 21 of `todo.py` with their line numbers. This is what the
-brief in the next section points at.
+Print lines 16 to 21 of `todo.py` with their line numbers. The
+brief in the next section points at these lines.
 
 ```sh
 awk 'NR >= 16 && NR <= 21 { print NR "\t" $0 }' todo.py

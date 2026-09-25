@@ -66,8 +66,8 @@ def run(question, model, execute=in_order, max_steps=5):
 
 The `show` function prints the `user` line as the question in `repr`, the
 same as the last lesson, an assistant line as `call_1 get_weather(city='Amsterdam')`
-and a tool line as `call_1 '14°C, rain'`. When one message holds more
-than one call or result, they go on one line, joined with commas. The weather table has
+and a tool line as `call_1 '14°C, rain'`. If a message has two
+or more calls or results, the line lists them all, separated by commas. The weather table has
 `Amsterdam: 14°C, rain`, `Lisbon: 27°C, sun` and `Oslo: 6°C, snow`, and
 `summary` joins them in that order with a period after each.
 
@@ -102,8 +102,8 @@ waiting for the model.
 
 ## All three in one reply
 
-The second fake model asks for every city in its first reply. Nothing in
-the loop needs to change for that, because `execute` already takes a list.
+The second fake model asks for every city in its first reply. The
+same loop handles that, because `execute` already takes a list.
 The list can run in a different way, though. `together` hands the calls to
 a thread pool, and `map` returns the results in the order of the calls, whichever
 one finishes first.

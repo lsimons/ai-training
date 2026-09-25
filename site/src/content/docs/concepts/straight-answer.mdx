@@ -79,8 +79,8 @@ truthful answers (@Sharma 2023).
 So a cause is in the training, and the trigger is in your prompt. Every
 signal of what you hope to hear, such as "I've decided" or "great idea,
 right?", raises the probability of text that agrees with you. A leading
-question produces a leading answer. Your framing of the
-question shapes the answer more than it would with a colleague, because
+question produces a leading answer. How you frame the
+question changes the answer more than it would with a colleague, because
 the colleague has an opinion of their own and the model has a distribution
 over likely replies. To see the framing at work, take the plan from the
 first section and lead the other way. The exchange is illustrative.
@@ -92,8 +92,8 @@ written update in a shared doc. Good call, right?
 <Response>
 Good call! Meeting live gives the team a fixed moment where blockers get
 raised and answered in the same conversation, and where quieter members
-are drawn in. Written updates are easy to skip, and a shared doc never
-asks a follow-up question. Keeping the meeting shows you value the team's
+are drawn in. Written updates are easy to skip. A shared doc can't
+ask a follow-up question. Keeping the meeting shows you value the team's
 connection.
 </Response>
 
@@ -182,8 +182,8 @@ for the option you did not choose, or to write the note a colleague would
 send to talk you out of it. A model is good at generating the likely text
 for a position, so give it the opposite position to generate.
 
-The model stays a poor judge of your work after each of these moves. What
-changes is that the answer no longer depends on what you hoped for, and
+The model stays a poor judge of your work after each of these moves. Now
+the answer no longer depends on what you hoped for, and
 that is what turns it into evidence.
 
 <Choice id="hide-the-preference" objective="concepts/explains-models/names-failure-modes"
@@ -207,7 +207,7 @@ preference?
 <Pitfall title="The challenge that flips a right answer">
 You ask a model to check a spreadsheet formula that adds up a column of
 monthly totals. It says the formula skips the last row. You are sure it
-does not and say so, and the model replies that on reflection the formula
+counts every row and say so, and the model replies that on reflection the formula
 is correct. You don't give it a test case or a new fact between the two answers,
 so the reversal is the model following your pushback, and the formula
 still skips the last row. Rule: a changed answer under pushback with no

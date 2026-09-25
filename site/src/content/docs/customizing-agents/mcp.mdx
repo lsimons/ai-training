@@ -21,8 +21,8 @@ MCP is a standard way to give an agent tools it didn't ship with. A
 a parameter schema. The *client*, inside the agent application, connects
 to servers, passes the tool descriptions to the model, and runs the
 model's tool calls against the right server. The model calls a tool from
-a server the same way it calls one built into the agent. What the
-protocol changes is who writes the tool and where it runs
+a server the same way it calls one built into the agent. The
+protocol changes who writes the tool and where it runs
 (@Academy introduction-to-model-context-protocol). A local server is a child
 process on your machine, while a remote one is reached over HTTP and
 runs code, often someone else's, with credentials you gave it.
@@ -124,9 +124,9 @@ window before the task starts. Fifteen short descriptions are cheap. A
 server that exposes every endpoint of a large API isn't, and you pay for
 it on every message. Some clients, Claude Code among them, hold the
 descriptions back and let the model search for a tool by name when it
-needs one. That lowers the per-turn cost, and it also means a tool that
-isn't in context is a tool the model has to think to look for. Disable
-the servers a project doesn't use rather than relying on that
+needs one. That lowers the per-turn cost, and it also means a tool that's
+missing from the context is a tool the model has to think to look for. Disable
+the servers a project has no use for rather than relying on that
 (@Academy claude-code-101).
 
 The complete program for this lesson is

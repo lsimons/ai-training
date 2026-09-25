@@ -43,7 +43,7 @@ high temperature it wanders.
 You ask a model to solve a puzzle and it gets it wrong. You ask "why did
 you say that?" and it produces a fluent explanation. That explanation is
 *also* next-token prediction conditioned on your question. It is a
-plausible story about the earlier text, not a readout of what happened
+plausible story about the earlier text, with no view of what happened
 inside. Rule: treat self-explanations as new output to be checked, not as
 evidence.
 </Pitfall>
@@ -53,7 +53,7 @@ evidence.
 A neural network with billions of adjustable numbers, the **weights**,
 produces the scores. During training the network reads enormous
 amounts of text and is nudged, each time, so that the token that really
-came next scores higher, and it doesn't store facts or rules. What emerges
+came next scores higher, and it doesn't store facts or rules. The result
 is a compressed statistical model of the text it saw: grammar, style,
 common facts, common code, common arguments.
 
