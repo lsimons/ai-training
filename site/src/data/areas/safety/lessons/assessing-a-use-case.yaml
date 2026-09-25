@@ -1,10 +1,16 @@
 id: safety/assessing-a-use-case
 title: Assessing the risk of a use case before it starts
+description: >-
+  Rate three proposed AI use cases on impact and likelihood, find the ones at or above the threshold,
+  and decide between extra controls and a written acceptance, with a record that can be reviewed.
 mode: tutorial
 covers: safety/governance
 serves: [safety/judges-agent-risk/sets-oversight, safety/judges-agent-risk/names-blast-radius]
 introduces: [risk-assessment]
-assumes: []
+assumes:
+  - objective: safety/judges-agent-risk/chooses-human-in-loop
+    lesson: safety/agent-risk
+    section: human-in-the-loop
 after: [safety/writing-an-ai-policy]
 shorts: []
 exercise:
@@ -12,9 +18,15 @@ exercise:
   brief: >-
     Assess one AI use case from your own work with the method: domains touched, impact and
     likelihood on the scales, the level, and who would have to accept it in writing.
-sources: []
+sources: [AEC-10]
 issue: 141
 minutes: 15
 notes: >-
-  A fixture scores three use cases from their impact and likelihood ratings into a level and prints
-  which ones cross the threshold.
+  The page shows the output of the fixture site/examples/safety/assessing-a-use-case/score_use_cases.py
+  in a text fence, because safety is a foundations area and the page carries no Predict run. The
+  fixture is CI proof only, and how CI asserts a hidden fixture against a foundations page is decided
+  in #237 (then #311). The graded Predict has an answer and no run, as in tracing-a-planted-instruction.
+  The scales, the threshold of 8 and the three use cases are the lesson's own worked example. The
+  likelihood advice (how fast a mistake is noticed, how easily it is undone, classify by reversibility)
+  paraphrases AEC-10 "Calibrated autonomy". The two Academy sources in the issue were not used, because
+  no claim on the page rests on them. The page holds no person or company names.

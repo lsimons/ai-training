@@ -1,0 +1,287 @@
+import { Choice, MultiChoice, Predict, Scenario, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+In one week, a team lead gets a proposal for an assistant that listens to
+the team's meetings and writes the summary. The next day a second proposal
+arrives, for an assistant that drafts the internal newsletter from the
+updates people send in. On Thursday a third asks for an agent that reads
+the customer mailbox and answers the mail itself. Each proposal comes with a demo that went well, and each person
+asks for a yes by Friday.
+
+The team's [AI policy](/safety/writing-an-ai-policy/) says which tasks an
+agent may do. It doesn't say which new use case is safe to start, and a
+demo doesn't answer that question. In this lesson we answer it with a
+**risk assessment**: a short written method that rates each proposal
+before it starts and says which ones need a decision from someone with the
+authority to take the risk. You need a document or a chat assistant with no
+tools, and about fifteen minutes.
+
+## The method on one page
+
+Each step of the method is written down.
+
+1. Name the domains the use case touches. Personal data, money, safety
+   (the physical safety of people) and reputation cover most cases. Next
+   to the domains, name the people who are affected when it goes wrong.
+2. Rate the impact of the worst realistic mistake, and the likelihood that
+   it happens, on scales the organization agreed in advance.
+3. Combine the two ratings into a level.
+4. Compare the level with the agreed threshold. Below it, the team goes
+   ahead under its policy. At or above it, the use case needs extra
+   controls, or a written acceptance from the person who answers for the
+   risk.
+
+Here are the scales this lesson uses. An organization may pick other words
+and other numbers. Everyone must rate on the same scales, so
+two ratings can be compared.
+
+```text
+Impact of the worst realistic mistake
+  1 minor        one person is inconvenienced, and it is fixed within a day
+  2 moderate     a few people are affected, or a small cost, fixed within a week
+  3 major        many people are affected, or personal data reaches people who
+                 should not see it
+  4 severe       customers or the public are harmed, a legal duty is broken,
+                 or the loss can't be undone
+
+Likelihood that it happens
+  1 rare             not expected in a year of use
+  2 possible         a few times a year
+  3 likely           about once a month
+  4 almost certain   every week
+
+Level = impact x likelihood
+  1 to 3 low    4 to 6 medium    8 to 9 high    12 to 16 very high
+
+Threshold: 8. A level of 8 or more needs extra controls or a written acceptance.
+```
+
+The first step comes first on purpose. A rating made before the domains
+are named is a rating of the demo. The domains and the affected people are
+the blast radius of the use case: what a wrong step can reach, and who
+feels it. They decide how bad the worst realistic mistake is, and so they
+decide the impact rating.
+
+The likelihood rating needs two honest answers. The first is how quickly
+the team would notice a mistake, and the second is how easily it could
+undo one. Work that the team checks slowly and undoes with difficulty gets a higher rating,
+and a payment or a sent email is a different kind of work from a draft
+nobody has read yet (@AEC-10).
+
+<Scenario id="name-the-domains-first" objective="safety/judges-agent-risk/names-blast-radius"
+  concepts={['risk-assessment', 'blast-radius']}
+  title="Where does the assessment start?" hint="What does the impact rating depend on, and do you know it yet?"
+  options={[
+    { text: 'Rate the likelihood from the pilot results, since a pilot shows how often the tool gets it wrong.', consequence: 'The pilot ran on last year\'s applications, sorted by the hiring manager who proposed the tool. The rating says nothing about who is harmed by a wrong "no", and the impact rating is left for later.' },
+    { text: 'Write down the domains it touches and the people it affects: the applicants, their personal data, and the hiring managers who act on the sort.', correct: true, consequence: 'The list shows that a wrong "no" harms an applicant who never learns why, and that the applications hold personal data. The impact rating now has a reason, and it is major.' },
+    { text: 'Ask the vendor for the accuracy figure, and use it for both the impact and the likelihood ratings.', consequence: 'An accuracy figure is a claim about likelihood on the vendor\'s test set. It says nothing about impact, and the team still doesn\'t know who a mistake reaches.' },
+    { text: 'Start the tool on a few real applications, and rate it once the team has seen what it does in daily use.', consequence: 'The assessment was meant to happen before the tool starts. Real applicants are now sorted by a tool nobody has rated.' },
+  ]}>
+A hiring manager proposes an assistant that sorts incoming job
+applications into "interview" and "no". You are asked to assess it before
+it starts. What do you write down first?
+</Scenario>
+
+## Scoring the three proposals
+
+The team lead writes down the domains, the people affected and the two
+ratings for each proposal.
+
+- **Meeting summarizer.** It runs in team meetings and in one-to-ones,
+  where health and performance come up. The summaries are saved in the
+  shared team folder. Domains: personal data, reputation. Impact 3, because
+  personal data reaches people who should not see it. Likelihood 3, because
+  the one-to-ones are weekly and the folder is shared by default.
+- **Newsletter drafter.** An editor reads every draft before it goes out to
+  the staff. Domain: reputation. Impact 2, likelihood 2.
+- **Customer mail agent.** It reads the customer mailbox and sends its
+  replies without a person reading them. Customers write about orders,
+  refunds and their accounts. Domains: personal data, money, reputation.
+  Impact 4, because a wrong reply can promise a refund or show one
+  customer another customer's details. Likelihood 3, because the mailbox
+  gets thousands of messages a month.
+
+A small program applies the method to these ratings and prints the level
+of each proposal and whether it is at or above the threshold. Before you
+read its output, work out the three answers yourself.
+
+<Predict id="predict-which-cross" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['risk-assessment']}
+  context="A program scores three proposed AI use cases in this order: a meeting summarizer rated impact 3 and likelihood 3, a newsletter drafter rated impact 2 and likelihood 2, and a customer mail agent rated impact 4 and likelihood 3. The level is impact times likelihood, and the threshold is 8. For each use case the program prints whether the level is at or above the threshold, as yes or no."
+  title="Which proposals need a decision?" hint="Multiply the two ratings for each proposal, then compare each level with 8."
+  answer="yes no yes">
+The program prints one `at or above threshold:` line per proposal, in the
+order above. Type the three values, `yes` or `no`, separated by spaces.
+</Predict>
+
+The program's output:
+
+```text
+threshold: 8 (high)
+
+use case: meeting summarizer
+  domains: personal data, reputation
+  affected: everyone in the meetings, and anyone discussed in a one-to-one
+  impact: 3 (major)
+  likelihood: 3 (likely)
+  level: 9 (high)
+  at or above threshold: yes
+
+use case: newsletter drafter
+  domains: reputation
+  affected: the staff who read the newsletter
+  impact: 2 (moderate)
+  likelihood: 2 (possible)
+  level: 4 (medium)
+  at or above threshold: no
+
+use case: customer mail agent
+  domains: personal data, money, reputation
+  affected: every customer who writes in, and the support team
+  impact: 4 (severe)
+  likelihood: 3 (likely)
+  level: 12 (very high)
+  at or above threshold: yes
+```
+
+The customer mail agent was the expected result. The meeting summarizer is
+the one that surprises people, because summarizing a meeting sounds
+harmless. The domains changed the answer. Once the list says "personal
+data" and "anyone discussed in a one-to-one", the summarizer is a tool that
+copies health and performance remarks into a shared folder every week.
+
+The newsletter drafter goes ahead under the team's policy. The other two
+wait for the decision in the next section.
+
+<Pitfall title="Rating likelihood from the demo">
+The customer mail agent's demo answered twenty test messages, and every
+reply was right. The person proposing it rates the likelihood 1, rare, and
+the program prints `level: 4 (medium)` and `at or above threshold: no`.
+The twenty messages were picked for the demo, and the real mailbox gets
+thousands a month, with refunds, complaints and messages in other
+languages among them. A demo shows that the tool can do the task. It
+doesn't show how often it fails on the messages nobody picked. Rate
+likelihood from the volume and the variety of the real work, and from how
+quickly a mistake would be noticed.
+</Pitfall>
+
+## At or above the threshold
+
+A use case at or above the threshold doesn't stop there. It gets one of two
+decisions, and both are written down.
+
+The first is **extra controls** that bring the level down. The team lead
+changes the customer mail agent so that it drafts each reply and a person
+from the support team reads and sends it. The impact of a wrong reply is
+the same as before, but a wrong draft is now caught before a customer sees
+it. Scored again, the program prints `likelihood: 1 (rare)` and
+`level: 4 (medium)`, below the threshold. The approval sits right before
+the step that can't be undone, as the
+[human in the loop](/safety/agent-risk/#human-in-the-loop) section of the
+agent risk lesson describes. The rating is only as good as that control,
+so the record names it.
+
+The second is **acceptance in writing** by a person with the authority to
+accept the risk. That is the person who answers for the domain when it goes
+wrong: for the customer mailbox, the head of customer service. The person
+who proposed the tool, or the team that wants it, can't accept the risk on
+their own. A person with the authority may accept it for a limited time, or
+with a review date, and signs a record that says so.
+
+For the meeting summarizer the team lead picks a control that shrinks the
+list of affected people. The assistant stays out of one-to-ones, and each summary goes only
+to the people who were in the meeting. The team lead rates it again with
+the smaller list, and the new ratings go in the record.
+
+Whichever decision is made, the record holds the same lines.
+
+```text
+Risk record: customer mail agent
+Domains        personal data, money, reputation
+Affected       every customer who writes in, and the support team
+Ratings        impact 4 (severe), likelihood 3 (likely), level 12 (very high)
+Decision       extra control: the agent drafts, a person reads and sends each reply
+Rated again    impact 4 (severe), likelihood 1 (rare), level 4 (medium)
+Decided by     head of customer service
+Review         in three months, or after the first incident
+```
+
+The record matters later. When a wrong reply does reach a customer, the
+team can read what was assumed, who decided and which control was supposed
+to catch it, and fix the rating or the control. Without the record the
+same question gets a new answer from whoever is asked. An auditor, or the
+person who takes over the team next year, can review a decision only when
+it is written down. The [EU AI Act lesson](/safety/eu-ai-act/) comes next,
+and it covers the uses that the law itself sorts into risk levels.
+
+<Choice id="who-accepts-the-risk" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['risk-assessment']}
+  title="Who signs the acceptance?" hint="Who has to answer for the mailbox when a customer is harmed?"
+  options={[
+    { text: 'The support team member who proposed the agent, since they know best how it works.', why: 'They know the tool, and they want it. Accepting a risk is a decision for the person who answers for the harm, and that isn\'t the person asking.' },
+    { text: 'The vendor of the agent, because the vendor built it and knows its failure rate.', why: 'The vendor doesn\'t answer for your customers or your mailbox. A failure rate from the vendor is an input to the likelihood rating.' },
+    { text: 'The head of customer service, who answers for the mailbox and its customers.', correct: true },
+    { text: 'The whole support team together, by a vote at the next team meeting.', why: 'A vote spreads the decision so thin that nobody is accountable for it. The record needs one name with the authority to accept.' },
+  ]}>
+The team decides not to add controls to the customer mail agent for now,
+and to ask for a written acceptance of its level instead. Who should sign
+it?
+</Choice>
+
+<MultiChoice id="which-domains-and-people" phase="review" objective="safety/judges-agent-risk/names-blast-radius"
+  concepts={['risk-assessment', 'blast-radius']}
+  context="The lesson teaches a risk assessment for AI use cases that starts by naming the domains a use case touches (personal data, money, safety and reputation) and the people a mistake affects, before any rating."
+  title="What goes on the list?" hint="What can a wrong reminder reach, and who notices it?"
+  options={[
+    { text: 'Personal data: the reminders name each patient and their appointment.', correct: true },
+    { text: 'The patients who get a reminder with the wrong time, and the staff who deal with them.', correct: true },
+    { text: 'The model the vendor uses, and the number of test messages in the demo.', why: 'Both are facts about the tool. The list names what a mistake can reach and who it affects.' },
+    { text: 'Safety: a patient told the wrong day misses a treatment they need.', correct: true },
+    { text: 'The time the clinic saves each week once the reminders are automatic.', why: 'The saving is the reason for the proposal. It belongs in the proposal, and it says nothing about who a mistake reaches.' },
+  ]}>
+A clinic proposes an assistant that writes and sends appointment reminders
+by text message. Before anyone rates it, which of these go on the list of
+domains and affected people?
+</MultiChoice>
+
+<Scenario id="the-record-is-missing" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['risk-assessment']}
+  context="The lesson teaches a risk assessment that rates an AI use case, decides on extra controls or a written acceptance when the level is at or above a threshold, and keeps a record of the ratings, the decision and who made it."
+  title="Six months later" hint="What would the team need to read to find out which part of the decision was wrong?"
+  options={[
+    { text: 'Ask the people who were in the room at the time what they remember deciding.', consequence: 'Two of them have left. The rest remember different ratings, and nobody is sure whether a person was meant to read each reply.' },
+    { text: 'Rate the use case again from scratch, using what the team knows today about the incident.', consequence: 'The new rating is higher, and it is probably right. The team still can\'t say whether the old rating was wrong or the control was never put in place.' },
+    { text: 'From now on, write a record for each use case: the ratings, the decision, the control, and who decided.', correct: true, consequence: 'The next incident starts from the record. The team finds the control that failed on the first day, and fixes the control instead of arguing about the rating.' },
+    { text: 'Stop the agent for good, because the incident shows that the assessment method doesn\'t work.', consequence: 'The method was never written down, so nobody tested it. The next proposal gets no assessment at all.' },
+  ]}>
+Six months after an agent started, a wrong reply reaches a customer. The
+team looks for the assessment, and finds only a line in the meeting notes:
+"agent approved". Which change would have let the team say today which
+part of the decision was wrong?
+</Scenario>
+
+<Exercise stretch="Show your assessment to a colleague and ask them to rate the impact and the likelihood without seeing your ratings. Where your numbers differ, write down which fact explains the gap.">
+Assess one AI use case from your own work, one that is proposed or that
+you already use, in a document or in a chat with an assistant that has no
+tools. Write down the domains it touches and the people a mistake would
+affect, rate the impact and the likelihood on the scales in this lesson,
+work out the level and compare it with the threshold. If the level is 8 or
+more, name one control that would bring it down, and the person who would
+have to accept it in writing if you added none.
+
+A good result fits in a record like the one above, and every
+rating has a reason next to it that someone else could check. If a
+likelihood reason mentions a demo or a trial run, rate it again from the
+real volume of work. Which domain did you almost leave off the list?
+</Exercise>
+
+<Recap>
+1. A risk assessment starts with the domains a use case touches (personal data, money, safety and reputation) and the people a mistake affects. That list sets the impact rating.
+2. Rate impact and likelihood on scales everyone agreed, multiply them into a level, and compare the level with the agreed threshold.
+3. Rate likelihood from the real volume of work, and from how fast a mistake is noticed and undone (@AEC-10). A demo shows the tool can do the task, and says little about how often it fails.
+4. At or above the threshold, add a control that brings the level down, or get a written acceptance from the person who answers for the risk.
+5. The record is what makes the decision reviewable. It holds the domains, the ratings, the decision, the control and the name of who decided.
+</Recap>
+
+<Habit id="domains-before-the-demo">
+The next time someone proposes a new AI tool for your team, ask which domains it touches and who a mistake would affect before anyone talks about how well the demo went.
+</Habit>
