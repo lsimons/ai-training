@@ -5,11 +5,11 @@
  * the unit tests. The DOM half is `instructions-builder.ts`.
  */
 
-/** The optional lines of the file. Each has a checkbox and a text field. */
-export type OptionalLine = 'runtime' | 'test' | 'lint' | 'branch' | 'notouch' | 'mistake';
+/** Every optional line of the file, in the order the form shows them. Each has a checkbox and a text field. */
+export const OPTIONAL_LINES = ['runtime', 'test', 'lint', 'branch', 'notouch', 'mistake'] as const;
 
-/** Every optional line, in the order the form shows them. */
-export const OPTIONAL_LINES: readonly OptionalLine[] = ['runtime', 'test', 'lint', 'branch', 'notouch', 'mistake'];
+/** One optional line. */
+export type OptionalLine = (typeof OPTIONAL_LINES)[number];
 
 /** One optional line as the form holds it: whether it is ticked, and its trimmed text. */
 export interface LineInput {
