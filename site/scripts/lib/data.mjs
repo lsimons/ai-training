@@ -236,11 +236,21 @@ export function reviewDatePairError(lesson) {
 }
 
 /**
- * Props whose text a component renders as code, so a `(@` in one is what the
- * reader should see: the expected output of a `<Predict>` (spec S03
- * "Examples").
+ * Props whose text a component shows verbatim as code, so a `(@` in one is
+ * what the reader should see: the expected output of a `<Predict>` (spec S03
+ * "Examples"), and the broken artifact and the model answer of a `<Repair>`
+ * (`components/lesson/Repair.astro` puts both in a textarea or a `pre`).
  */
-export const CODE_PROPS = new Map([['Predict', new Set(['answer'])]]);
+export const CODE_PROPS = new Map([
+	['Predict', new Set(['answer'])],
+	['Repair', new Set(['broken', 'model'])],
+]);
+
+/**
+ * A code span per CommonMark: a run of backticks, closed by the next run of
+ * the same length, so ``a ` b`` is one span.
+ */
+const CODE_SPAN = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/g;
 
 /**
  * Every string inside a prop value, with its path from the prop name
@@ -268,7 +278,9 @@ function propStrings(value, path) {
  * component or a raw HTML element. Exempt are text inside a code span in the
  * string, the props in `CODE_PROPS`, and an expression prop that is not a
  * literal, which no reader can see before render time (the checkpoint reader
- * rejects one on a checkpoint tag). Tags inside a fence or a code span are
+ * rejects one on a checkpoint tag). An expression prop that is only partly a
+ * literal, such as an array with one identifier in it, is skipped as a whole,
+ * its literal strings included. Tags inside a fence or a code span are
  * not JSX in the MDX tree, so they are skipped too. A page that does not
  * parse throws, naming `where`.
  * @param {string} src
@@ -298,7 +310,7 @@ export function propCitations(src, where = 'lesson') {
 				}
 			} else continue;
 			for (const { path, text } of propStrings(value, a.name)) {
-				const plain = text.replace(/`[^`]*`/g, '');
+				const plain = text.replace(CODE_SPAN, '');
 				const at = plain.indexOf('(@');
 				if (at === -1) continue;
 				const close = plain.indexOf(')', at);
