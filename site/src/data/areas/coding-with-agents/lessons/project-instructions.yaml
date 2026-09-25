@@ -1,5 +1,9 @@
 id: coding-with-agents/project-instructions
 title: Writing project instructions the agent reads every session
+description: >-
+  Read two coding agent sessions on the same small repository, find the mistake the agent makes in
+  both, fix it with one line in the project's instructions file, and keep later sessions short
+  enough that the agent keeps following that file.
 mode: tutorial
 covers: coding-with-agents/context
 serves:
@@ -8,7 +12,13 @@ serves:
 introduces: [project-instructions, avoiding-context-rot]
 assumes:
   - objective: concepts/explains-models/explains-grounding
+    lesson: concepts/retrieval
+    section: grounding-and-what-it-doesnt-fix
   - objective: customizing-agents/configures-agent/writes-project-instructions
+    lesson: customizing-agents/instructions
+    section: what-belongs-in-it
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 after: [coding-with-agents/scoping-and-referencing]
 shorts:
   - long instruction files are followed less reliably than short ones. When the agent drifts,
@@ -18,13 +28,33 @@ exercise:
   brief: >-
     Find the mistake the agent repeats across two fixture sessions, put the one-line fix in the
     fixture's existing instructions file, and confirm a fresh session follows it without being told.
-sources: [AEC-15, Academy claude-code-in-action]
+sources: [AEC-15, Academy claude-code-in-action, Claude Code memory, Claude Code best practices]
 issue: 163
 minutes: 15
 notes: >-
   The plan named the topic concepts/grounding as assumed; taken as the objective
-  concepts/explains-models/explains-grounding. The user side of the subject that
+  concepts/explains-models/explains-grounding, taught by concepts/retrieval in its section
+  "Grounding, and what it doesn't fix". The user side of the subject that
   customizing-agents/instructions teaches from the author side (S02 cross-area edge, related): the
   file exists already, and this lesson is about what the agent does with it and where a recurring
-  mistake gets fixed once. Sources: AEC-15, Academy claude-code-in-action (steering long sessions,
-  paraphrased).
+  mistake gets fixed once. The page links back to that lesson and doesn't re-teach what belongs in
+  the file. The fixture is the scoping-and-referencing to-do program after its `undo` change, with
+  `rename` and `remove` specified in docs/SPEC.md and a .gitignore for the Python cache folder.
+  The two session logs in sessions/ sit next to fixture-repo, so an agent in a copy never reads
+  them. They are illustrative, and replay.py fails when the program prints something other than
+  what a log shows. The repeated mistake is trying a new command against the committed
+  `todos.json`: the AGENTS.md rule says "do not edit", and the agent changed the file by running
+  `todo.py`. The fix
+  replaces that line with one that says how to try a command (TODO_FILE pointing at a copy).
+  The architecture-decision section is short and points ahead to
+  coding-with-agents/keeping-understanding, which teaches the decisions folder in full. Vendor
+  facts: Claude Code memory (instructions loaded at the start of every session, AGENTS.md read
+  when there is no CLAUDE.md with a line naming it, add a line when the same mistake happens a
+  second time, specific and concise instructions followed more consistently, the project-root
+  file re-read after /compact) and Claude Code best practices (a long file makes rules get lost,
+  /clear between unrelated tasks, /clear after two failed corrections, auto compaction and
+  /compact with instructions, /context to confirm the file loaded). No line count is quoted,
+  because the memory page and AEC-15 give different numbers. AEC-15 backs adding a line when an
+  agent repeats a mistake and keeping the file current. Academy claude-code-in-action is linked
+  for its modules on steering long sessions and on a CLAUDE.md the agent follows, and nothing is
+  copied from it.
