@@ -1,4 +1,4 @@
-question: Who books train tickets, and what is the meal limit on a trip?
-call: search_docs(query='train tickets meal limit')
-result: expenses.txt: Expenses. Meals on a work trip are reimbursed up to 40 euros per day with a receipt. Claims are filed within 30 days. Train tickets are booked through the travel desk.
-answer: The travel desk books them. "Train tickets are booked through the travel desk."
+question: How often are laptops replaced, and where do I report a lost one?
+call: search_docs(query='laptops replaced report lost')
+result: laptops.txt: Laptops. Laptops are replaced every four years. The cost center owner of your team approves a replacement laptop before that, see the team pages. Report a lost laptop to the service desk the same day.
+answer: Every four years. "Laptops are replaced every four years."
