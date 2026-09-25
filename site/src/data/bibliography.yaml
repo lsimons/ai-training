@@ -1098,3 +1098,10 @@ Git docs git-merge:
   author: The Git project
   license: GPL-2.0
   url: https://git-scm.com/docs/git-merge
+Claude Code features:
+  type: reference
+  title: Extend Claude Code
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/features-overview
