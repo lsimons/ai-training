@@ -12,6 +12,7 @@ Run it by hand:  python3 stand_in.py handbook
 Then type a request such as {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
 """
 
+import errno
 import glob
 import json
 import os
@@ -51,6 +52,13 @@ def allowed(path, roots):
 
 
 def list_directory(path):
+    # The reference server lists a path with Node's fs.readdir, which fails on
+    # a file, and the MCP TypeScript SDK turns a failing tool into a result
+    # with isError set. Its source:
+    # https://github.com/modelcontextprotocol/servers/blob/18ce19763999dcf7697b00c86c3a427f01eb2919/src/filesystem/index.ts#L454-L464
+    # https://github.com/modelcontextprotocol/typescript-sdk/blob/60321700871029401a2e3bed8fdf4f02c9ec3331/packages/server/src/server/mcp.ts#L282-L308
+    if not os.path.isdir(path):
+        raise NotADirectoryError(errno.ENOTDIR, "Not a directory", path)
     entries = []
     for entry in sorted(glob.glob(os.path.join(glob.escape(path), "*"))):
         prefix = "[DIR]" if os.path.isdir(entry) else "[FILE]"
