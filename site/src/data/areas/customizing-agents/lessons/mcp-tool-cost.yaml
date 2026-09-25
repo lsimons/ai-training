@@ -43,7 +43,7 @@ notes: >-
   with twenty tools (only search_issues and get_issue answer), a CLI over the same issues file, and
   three measurement scripts that estimate tokens at four characters per token, the rule of thumb from
   concepts/context-window. The second assumes entry is there because the page names the previous
-  lesson and its exercise reuses that lesson's handbook copy and server command. The tool search
+  lesson and its exercise copies that lesson's handbook fixture and server command. The tool search
   default, its upfront fallbacks and ENABLE_TOOL_SEARCH come from code.claude.com/docs/en/mcp; that a
   loaded definition stays in the conversation and counts as input tokens from the API's tool search
   page; /context from the context-window and commands pages; /clear from the commands page; prefer the
