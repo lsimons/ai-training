@@ -18,16 +18,14 @@ exercise:
   brief: >-
     Read the fixture's twelve retrieval-agent transcripts, write three criteria with anchored 0-1-2
     scales, and score two transcripts with them. Compare your scores with the model answer's.
-sources:
-  - AEC-09
-  - Academy building-with-the-claude-api
+sources: [AEC-09]
 issue: 200
 minutes: 15
 notes: >-
   Correctness, faithfulness, safety, efficiency and adherence as separate scores, because one number
   hides the trade. A rubric written from real outputs. Checkpoints are choice and repair on weak
   criteria. The twelve transcripts under site/examples/building-agents/rubrics/transcripts/ are
-  written for this lesson against the retrieval-as-a-tool handbook, and the grades in the grades file are
-  illustrative, written by the author, with no model called. DLAI-11 and Brilliant VER from the plan
-  were dropped because the page cites no claim from them; the Academy course is cited only for
-  grading by code or by a model, which its prompt evaluation lesson titles state.
+  written for this lesson against the retrieval-as-a-tool handbook, and the grades in the grades
+  file are illustrative, written by the author, with no model called. DLAI-11, Brilliant VER and
+  Academy building-with-the-claude-api from the plan were dropped because the page cites no claim
+  from them; AEC-09 covers grading by code or by a model.
