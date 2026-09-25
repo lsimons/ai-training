@@ -1,11 +1,11 @@
-import { Choice, MultiChoice, Predict, Scenario, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+import { Choice, MultiChoice, Predict, Scenario, Sort, Pitfall, Exercise, MorePractice, Recap, Habit } from '@components/lesson';
 
 In one week, a team lead gets a proposal for an assistant that listens to
 the team's meetings and writes the summary. The next day a second proposal
 arrives, for an assistant that drafts the internal newsletter from the
 updates people send in. On Thursday a third asks for an agent that reads
-the customer mailbox and answers the mail itself. Each proposal comes with a demo that went well, and each person
-asks for a yes by Friday.
+the customer mailbox and answers the mail itself. Each proposal comes with
+a demo that went well, and each person asks for a yes by Friday.
 
 The team's [AI policy](/safety/writing-an-ai-policy/) says which tasks an
 agent may do. It doesn't say which new use case is safe to start, and a
@@ -17,7 +17,7 @@ tools, and about fifteen minutes.
 
 ## The method on one page
 
-Each step of the method is written down.
+Write down the result of each step.
 
 1. Name the domains the use case touches. Personal data, money, safety
    (the physical safety of people) and reputation cover most cases. Next
@@ -61,18 +61,22 @@ the blast radius of the use case: what a wrong step can reach, and who
 feels it. They decide how bad the worst realistic mistake is, and so they
 decide the impact rating.
 
-The likelihood rating needs two honest answers. The first is how quickly
-the team would notice a mistake, and the second is how easily it could
-undo one. Work that the team checks slowly and undoes with difficulty gets a higher rating,
-and a payment or a sent email is a different kind of work from a draft
-nobody has read yet (@AEC-10).
+How easily a mistake can be undone is part of its impact, which is why the
+impact scale says "fixed within a day" and "can't be undone". Sort the work
+by how easily it can be undone (@AEC-10). A sent email or a payment stays
+sent, and a draft nobody has read yet can still be thrown away.
+
+The likelihood rating comes from the real volume of work and from how
+quickly the team would notice a mistake. A mistake caught in a
+draft never reaches a customer, and one that nobody notices for a month
+has a month to happen again.
 
 <Scenario id="name-the-domains-first" objective="safety/judges-agent-risk/names-blast-radius"
   concepts={['risk-assessment', 'blast-radius']}
   title="Where does the assessment start?" hint="What does the impact rating depend on, and do you know it yet?"
   options={[
     { text: 'Rate the likelihood from the pilot results, since a pilot shows how often the tool gets it wrong.', consequence: 'The pilot ran on last year\'s applications, sorted by the hiring manager who proposed the tool. The rating says nothing about who is harmed by a wrong "no", and the impact rating is left for later.' },
-    { text: 'Write down the domains it touches and the people it affects: the applicants, their personal data, and the hiring managers who act on the sort.', correct: true, consequence: 'The list shows that a wrong "no" harms an applicant who never learns why, and that the applications hold personal data. The impact rating now has a reason, and it is major.' },
+    { text: 'Write down the domains it touches and the people it affects: the applicants, their personal data, and the hiring managers who act on the sort.', correct: true, consequence: 'The list shows that a wrong "no" harms an applicant who never learns why, and that the applications hold personal data. The impact rating now has a reason, and it is at least major.' },
     { text: 'Ask the vendor for the accuracy figure, and use it for both the impact and the likelihood ratings.', consequence: 'An accuracy figure is a claim about likelihood on the vendor\'s test set. It says nothing about impact, and the team still doesn\'t know who a mistake reaches.' },
     { text: 'Start the tool on a few real applications, and rate it once the team has seen what it does in daily use.', consequence: 'The assessment was meant to happen before the tool starts. Real applicants are now sorted by a tool nobody has rated.' },
   ]}>
@@ -100,17 +104,23 @@ ratings for each proposal.
   customer another customer's details. Likelihood 3, because the mailbox
   gets thousands of messages a month.
 
-A small program applies the method to these ratings and prints the level
-of each proposal and whether it is at or above the threshold. Before you
-read its output, work out the three answers yourself.
+The team lead can say yes alone only to a proposal below the threshold.
+A proposal at or above it needs extra controls, or a written acceptance
+from the person who answers for the risk. A small program applies the
+method to these ratings and prints the level of each proposal and whether
+it is at or above the threshold. Before you read its output, work out the
+three answers yourself.
 
 <Predict id="predict-which-cross" objective="safety/judges-agent-risk/sets-oversight"
   concepts={['risk-assessment']}
-  context="A program scores three proposed AI use cases in this order: a meeting summarizer rated impact 3 and likelihood 3, a newsletter drafter rated impact 2 and likelihood 2, and a customer mail agent rated impact 4 and likelihood 3. The level is impact times likelihood, and the threshold is 8. For each use case the program prints whether the level is at or above the threshold, as yes or no."
-  title="Which proposals need a decision?" hint="Multiply the two ratings for each proposal, then compare each level with 8."
+  context="A program scores three proposed AI use cases in this order: a meeting summarizer rated impact 3 and likelihood 3, a newsletter drafter rated impact 2 and likelihood 2, and a customer mail agent rated impact 4 and likelihood 3. The level is impact times likelihood, and the threshold is 8. For each use case the program prints whether the level is at or above the threshold, as yes or no. A yes means the team lead cannot approve it alone."
+  title="Which proposals can the team lead not approve alone?" hint="Multiply the two ratings for each proposal, then compare each level with 8."
   answer="yes no yes">
-The program prints one `at or above threshold:` line per proposal, in the
-order above. Type the three values, `yes` or `no`, separated by spaces.
+Which proposals need extra controls or the risk owner's written acceptance
+before they start? The program prints one `at or above threshold:` line
+per proposal, in the order above, and a `yes` means the team lead can't
+approve that proposal alone. Type the three values, `yes` or `no`,
+separated by spaces.
 </Predict>
 
 The program's output:
@@ -154,8 +164,9 @@ wait for the decision in the next section.
 
 <Pitfall title="Rating likelihood from the demo">
 The customer mail agent's demo answered twenty test messages, and every
-reply was right. The person proposing it rates the likelihood 1, rare, and
-the program prints `level: 4 (medium)` and `at or above threshold: no`.
+reply was right. The person proposing it rates the likelihood 1, rare.
+Rated that way, the level is 4 (medium), and the agent is below the
+threshold.
 The twenty messages were picked for the demo, and the real mailbox gets
 thousands a month, with refunds, complaints and messages in other
 languages among them. A demo shows that the tool can do the task. It
@@ -173,8 +184,12 @@ The first is **extra controls** that bring the level down. The team lead
 changes the customer mail agent so that it drafts each reply and a person
 from the support team reads and sends it. The impact of a wrong reply is
 the same as before, but a wrong draft is now caught before a customer sees
-it. Scored again, the program prints `likelihood: 1 (rare)` and
-`level: 4 (medium)`, below the threshold. The approval sits right before
+it. Rated again, the likelihood is 1 (rare) and the level is 4 (medium),
+below the threshold. Rare holds only while a person really reads each
+draft. The support team already read and answered every message by hand,
+so reading a draft is less work than they did before. If the drafts arrive
+faster than people can read them, the approvals stop being read, and the
+rating goes back up. The approval sits right before
 the step that can't be undone, as the
 [human in the loop](/safety/agent-risk/#human-in-the-loop) section of the
 agent risk lesson describes. The rating is only as good as that control,
@@ -185,11 +200,13 @@ accept the risk. That is the person who answers for the domain when it goes
 wrong: for the customer mailbox, the head of customer service. The person
 who proposed the tool, or the team that wants it, can't accept the risk on
 their own. A person with the authority may accept it for a limited time, or
-with a review date, and signs a record that says so.
+with a review date, and signs a record that says so. An organization may
+name a more senior person for the very high band, and the record then
+carries that person's name.
 
 For the meeting summarizer the team lead picks a control that shrinks the
-list of affected people. The assistant stays out of one-to-ones, and each summary goes only
-to the people who were in the meeting. The team lead rates it again with
+list of affected people. The assistant stays out of one-to-ones, and each
+summary goes only to the people who were in the meeting. The team lead rates it again with
 the smaller list, and the new ratings go in the record.
 
 Whichever decision is made, the record holds the same lines.
@@ -220,11 +237,12 @@ and it covers the uses that the law itself sorts into risk levels.
     { text: 'The support team member who proposed the agent, since they know best how it works.', why: 'They know the tool, and they want it. Accepting a risk is a decision for the person who answers for the harm, and that isn\'t the person asking.' },
     { text: 'The vendor of the agent, because the vendor built it and knows its failure rate.', why: 'The vendor doesn\'t answer for your customers or your mailbox. A failure rate from the vendor is an input to the likelihood rating.' },
     { text: 'The head of customer service, who answers for the mailbox and its customers.', correct: true },
-    { text: 'The whole support team together, by a vote at the next team meeting.', why: 'A vote spreads the decision so thin that nobody is accountable for it. The record needs one name with the authority to accept.' },
+    { text: 'The whole support team together, by a vote at the next team meeting.', why: 'A vote leaves no single person accountable for the decision. The record needs one name with the authority to accept.' },
   ]}>
 The team decides not to add controls to the customer mail agent for now,
-and to ask for a written acceptance of its level instead. Who should sign
-it?
+and to ask for a written acceptance of its level instead. In this
+organization, the person who answers for an area signs the acceptances for
+it at every level. Who should sign?
 </Choice>
 
 <MultiChoice id="which-domains-and-people" phase="review" objective="safety/judges-agent-risk/names-blast-radius"
@@ -243,20 +261,33 @@ by text message. Before anyone rates it, which of these go on the list of
 domains and affected people?
 </MultiChoice>
 
-<Scenario id="the-record-is-missing" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+<Sort id="goes-ahead-or-decision" phase="review" objective="safety/judges-agent-risk/sets-oversight"
   concepts={['risk-assessment']}
-  context="The lesson teaches a risk assessment that rates an AI use case, decides on extra controls or a written acceptance when the level is at or above a threshold, and keeps a record of the ratings, the decision and who made it."
-  title="Six months later" hint="What would the team need to read to find out which part of the decision was wrong?"
+  context="The lesson rates AI use cases for impact and likelihood on scales from 1 to 4, multiplies the two into a level, and uses a threshold of 8. Below the threshold the team goes ahead under its policy. At or above it, the use case needs extra controls or a written acceptance from the person who answers for the risk."
+  title="Goes ahead, or needs a decision?" hint="Multiply the two ratings for each use case. Which levels are 8 or more?"
+  buckets={['Goes ahead under the team policy', 'Needs a control or the risk owner\'s written acceptance']}
+  items={[
+    { text: 'An assistant suggests titles for internal wiki pages: impact 1, likelihood 3', bucket: 0 },
+    { text: 'An agent changes prices in the web shop: impact 3, likelihood 3', bucket: 1 },
+    { text: 'An assistant translates the staff handbook, and a translator checks it: impact 2, likelihood 2', bucket: 0 },
+    { text: 'An agent books staff travel with the company card: impact 2, likelihood 4', bucket: 1 },
+    { text: 'An assistant answers patients\' questions about their medicines: impact 4, likelihood 2', bucket: 1 },
+  ]} />
+
+<Scenario id="the-proposer-signs" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['risk-assessment']}
+  context="The lesson teaches a risk assessment that multiplies an impact rating and a likelihood rating into a level. At or above a threshold of 8, the use case needs extra controls or a written acceptance from the person who answers for the risk."
+  title="The proposer signs it off" hint="Who answers for the web shop prices when a customer is charged the wrong amount, and did that person decide?"
   options={[
-    { text: 'Ask the people who were in the room at the time what they remember deciding.', consequence: 'Two of them have left. The rest remember different ratings, and nobody is sure whether a person was meant to read each reply.' },
-    { text: 'Rate the use case again from scratch, using what the team knows today about the incident.', consequence: 'The new rating is higher, and it is probably right. The team still can\'t say whether the old rating was wrong or the control was never put in place.' },
-    { text: 'From now on, write a record for each use case: the ratings, the decision, the control, and who decided.', correct: true, consequence: 'The next incident starts from the record. The team finds the control that failed on the first day, and fixes the control instead of arguing about the rating.' },
-    { text: 'Stop the agent for good, because the incident shows that the assessment method doesn\'t work.', consequence: 'The method was never written down, so nobody tested it. The next proposal gets no assessment at all.' },
+    { text: 'Add a control, such as a person approving each price change, or ask the head of the web shop to accept the level in writing.', correct: true, consequence: 'The head of the web shop asks for the control. Price changes wait for one click from the pricing team, and the agent starts the week after.' },
+    { text: 'Let the agent start, because the project lead has written the acceptance down and signed it.', consequence: 'The record exists, and the name on it is the person who wanted the tool. When a price is wrong for a weekend, nobody who answers for the shop had agreed to the risk.' },
+    { text: 'Let the agent start, and rate it again after the first month, when the team has real results.', consequence: 'The assessment was meant to happen before the start. For a month the agent changes prices at a level nobody with the authority accepted.' },
+    { text: 'Ask the vendor to confirm in writing that the agent is safe for pricing work, and file the letter.', consequence: 'The vendor doesn\'t answer for your prices or your customers. The letter adds nothing to the rating, and nobody in the organization has accepted the level.' },
   ]}>
-Six months after an agent started, a wrong reply reaches a customer. The
-team looks for the assessment, and finds only a line in the meeting notes:
-"agent approved". Which change would have let the team say today which
-part of the decision was wrong?
+An agent that changes prices in the web shop is rated impact 3 and
+likelihood 3, a level of 9. The project lead who proposed it writes "risk
+accepted" under the rating and signs it. What should happen before the
+agent starts?
 </Scenario>
 
 <Exercise stretch="Show your assessment to a colleague and ask them to rate the impact and the likelihood without seeing your ratings. Where your numbers differ, write down which fact explains the gap.">
@@ -274,10 +305,30 @@ likelihood reason mentions a demo or a trial run, rate it again from the
 real volume of work. Which domain did you almost leave off the list?
 </Exercise>
 
+<MorePractice>
+
+<Scenario id="the-record-is-missing" phase="practice" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['risk-assessment']}
+  title="Six months later" hint="What would the team need to read, after the next incident, to find out which part of the decision was wrong?"
+  options={[
+    { text: 'Keep writing one line in the meeting notes each time a tool is approved, as the team does now.', consequence: 'The next incident finds another line that says "agent approved". Nobody can tell whether the rating was wrong or a control was missing.' },
+    { text: 'After each incident, rate the use case again from scratch, using what the team knows then.', consequence: 'The new rating is higher, and it is probably right. The team still can\'t say whether the old rating was wrong or the control was never put in place.' },
+    { text: 'Stop approving agents until the team can prove that the assessment method works.', consequence: 'Nothing about the method was written down, so there is nothing to test. The proposals wait, and the next incident is no easier to read.' },
+    { text: 'When each use case starts, write a record with the ratings, the decision, the control, and who decided.', correct: true, consequence: 'After the next incident the team reads the record, sees which control it relied on, and finds that the control was never put in place. It fixes the control and keeps the rating.' },
+  ]}>
+Six months after an agent started, a wrong reply reaches a customer. The
+team looks for the assessment, and finds only a line in the meeting notes:
+"agent approved". Nobody can say whether the rating was wrong or a control
+was missing. Which change lets the team answer that question after the
+next incident?
+</Scenario>
+
+</MorePractice>
+
 <Recap>
 1. A risk assessment starts with the domains a use case touches (personal data, money, safety and reputation) and the people a mistake affects. That list sets the impact rating.
 2. Rate impact and likelihood on scales everyone agreed, multiply them into a level, and compare the level with the agreed threshold.
-3. Rate likelihood from the real volume of work, and from how fast a mistake is noticed and undone (@AEC-10). A demo shows the tool can do the task, and says little about how often it fails.
+3. Sort the work by how easily a mistake can be undone (@AEC-10), and put that in the impact rating. Rate likelihood from the real volume of work and from how fast a mistake is noticed. A demo shows the tool can do the task, and says little about how often it fails.
 4. At or above the threshold, add a control that brings the level down, or get a written acceptance from the person who answers for the risk.
 5. The record is what makes the decision reviewable. It holds the domains, the ratings, the decision, the control and the name of who decided.
 </Recap>
