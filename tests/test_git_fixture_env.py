@@ -5,7 +5,8 @@ allow-list environment (`GIT_ENV_BASE` in their `_common.py`). This runs every
 one of them twice, once plainly and once with variables that change what git
 does: a template directory whose pre-commit hook fails, extra config through
 GIT_CONFIG_PARAMETERS, an external diff program and GIT_DIFF_OPTS. The output
-must match byte for byte.
+must match byte for byte. The reversible-changes fixtures print no diff, so
+for them only the failing template hook shows a leak.
 """
 
 import os
@@ -18,7 +19,7 @@ import pytest
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 EXAMPLES = REPO_ROOT / "site" / "examples" / "coding-with-agents"
-GIT_FIXTURE_DIRS = ["reversible-changes", "reviewing-the-diff"]
+GIT_FIXTURE_DIRS = ["project-instructions", "reversible-changes", "reviewing-the-diff"]
 # build.py needs a target directory and prints its usage without one. It
 # builds the repository with the same `build` the other fixtures call.
 NOT_RUN = {"build.py"}

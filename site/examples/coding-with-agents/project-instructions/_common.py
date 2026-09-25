@@ -23,6 +23,8 @@ REMOVE_TEST = os.path.join(HERE, "test_remove.py")
 # git runs with only these variables, so nothing in the learner's environment
 # (a GIT_DIR pointing elsewhere, GIT_TEMPLATE_DIR, GIT_CONFIG_PARAMETERS) can
 # reach it. HOME is set per copy, below, so no user config is read either.
+# The same list is in the `_common.py` of reversible-changes,
+# reviewing-the-diff and project-instructions: keep the three in step.
 GIT_ENV_BASE = {
     "PATH": os.environ.get("PATH", ""),
     "LANG": "C",
