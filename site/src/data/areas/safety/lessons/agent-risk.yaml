@@ -20,8 +20,8 @@ assumes:
     lesson: concepts/how-models-work
     section: failure-modes-named
   - objective: safety/verifies-output/calibrates-trust
-    lesson: safety/bias-in-patterns
-    section: how-much-checking-a-screening-task-gets
+    lesson: safety/checking-what-an-agent-changed
+    section: pause-before-the-step-you-cant-undo
 extends-to:
   - label: Introduction to the EU AI Act
     href: /safety/eu-ai-act/
@@ -38,6 +38,6 @@ sources:
 minutes: 20
 notes: >-
   The plan also assumed concepts/recognizes-agents/tells-agent-from-assistant, which the page does
-  not name. Two entries are stand-ins. The calibrates-trust assumes entry points at bias-in-patterns
-  until checking-what-an-agent-changed (#128) is live, and extends-to points at eu-ai-act until
-  sizing-the-blast-radius (#130) is live. The builders of #128 and #130 point them at those lessons.
+  not name. The calibrates-trust assumes entry points at checking-what-an-agent-changed (#128). One
+  entry is a stand-in: extends-to points at eu-ai-act until sizing-the-blast-radius (#130) is live,
+  and the builder of #130 points it at that lesson.

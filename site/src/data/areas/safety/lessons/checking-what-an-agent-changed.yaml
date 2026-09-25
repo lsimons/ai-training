@@ -1,11 +1,19 @@
 id: safety/checking-what-an-agent-changed
 title: Checking what an agent changed
+description: >-
+  Compare what an agent did with what you asked for, find the deleted file and the sent message its
+  summary left out, and put the one pause before the step that cannot be undone.
 mode: tutorial
 covers: safety/verification
 serves: [safety/verifies-output/calibrates-trust]
 introduces: [trust-but-verify-for-agents]
 assumes:
   - objective: concepts/recognizes-agents/tells-agent-from-assistant
+    lesson: concepts/assistant-or-agent
+    section: one-test-what-can-it-do-without-another-prompt
+  - objective: safety/verifies-output/checks-claims
+    lesson: safety/checking-habits
+    section: the-routine
 after: [safety/checking-habits]
 shorts: []
 exercise:
@@ -13,9 +21,15 @@ exercise:
   brief: >-
     For one agent task you have seen or read about, list the effects to inspect afterwards (what
     changed and what was sent) and the one step that needs a pause first.
-sources: []
+sources: [CS50x, Academy ai-fluency-framework-foundations]
 issue: 128
 minutes: 15
 notes: >-
-  A fixture replays a recorded agent session as file changes and prints the before and after, so the
-  learner checks effects against the request without running an agent.
+  The fixture site/examples/safety/checking-what-an-agent-changed/replay.py replays an invented agent
+  session as changes to an in-memory folder, prints the folder before and after, and marks each
+  effect as asked for or not against the request. The page shows its output in text fences and
+  carries no Predict run, because safety is a foundations area. The fixture is CI proof only, and
+  how CI asserts a hidden fixture against a foundations page is decided in #237. The folder, files,
+  session and summary are invented, and the page holds no person names. CS50 is cited for the
+  endorsed-answers idea only, in our own words. The Academy course is linked and its Discernment
+  framing paraphrased, with no text copied.
