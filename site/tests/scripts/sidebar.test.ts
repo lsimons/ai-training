@@ -56,9 +56,9 @@ describe('mountSidebarDueCounts', () => {
 		expect(document.querySelectorAll('[data-due-count="concepts"]')).toHaveLength(1);
 		expect(count('safety')).toBeNull();
 	});
-	it('finds nothing without the course list, or with an empty one', () => {
+	it('throws without the course list, and finds nothing with an empty one', () => {
 		document.body.innerHTML = '<nav class="sidebar-content"><a href="/ai-training/concepts/">C</a></nav>';
-		expect(mountSidebarDueCounts(document)).toBe(0);
+		expect(() => mountSidebarDueCounts(document)).toThrow('missing [data-sidebar-courses]');
 		page('');
 		expect(mountSidebarDueCounts(document)).toBe(0);
 	});

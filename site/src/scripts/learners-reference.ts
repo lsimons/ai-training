@@ -8,6 +8,7 @@
  */
 import * as progress from './progress';
 import { finishedByArea, type ReferenceArea } from './reference';
+import { requiredData, requiredElement } from './required-element';
 
 /** The selector of the element the component renders. */
 export const ROOT_SELECTOR = '[data-learners-reference]';
@@ -46,18 +47,16 @@ function areaSection(base: string, area: ReferenceArea): HTMLElement {
 
 /**
  * Draws the reference list under `root` and redraws it on every progress
- * event. Returns false, and changes nothing, when the component's element or
- * one of its parts is missing (another page).
+ * event. Returns false, and changes nothing, on a page without the component.
+ * A part the component always renders throws when it is missing.
  */
 export function mountLearnersReference(root: ParentNode): boolean {
 	const el = root.querySelector<HTMLElement>(ROOT_SELECTOR);
-	const catalogJson = el?.dataset.catalog;
-	const baseAttr = el?.dataset.base;
-	const empty = el?.querySelector<HTMLElement>('[data-reference-empty]');
-	const areas = el?.querySelector<HTMLElement>('[data-reference-areas]');
-	if (catalogJson === undefined || baseAttr === undefined || !empty || !areas) return false;
-	const catalog: ReferenceArea[] = JSON.parse(catalogJson);
-	const base = baseAttr.replace(/\/$/, '');
+	if (!el) return false;
+	const catalog: ReferenceArea[] = JSON.parse(requiredData(el, 'catalog'));
+	const base = requiredData(el, 'base').replace(/\/$/, '');
+	const empty = requiredElement(el, '[data-reference-empty]');
+	const areas = requiredElement(el, '[data-reference-areas]');
 	const draw = () => {
 		const finished = finishedByArea(catalog, progress.load());
 		empty.hidden = finished.length > 0;

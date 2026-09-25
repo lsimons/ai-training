@@ -168,14 +168,14 @@ logic into a module that can be tested. `.astro` files are not
 instrumented (their template half runs in the e2e suite), and
 `lesson-context.ts` is excluded because it only reads route locals.
 
-The inline `<script>` blocks in `.astro` components (`Settings.astro`,
-`ProgressOverview.astro`, `OverallProgress.astro`, `CourseGraph.astro`,
-`TopicMap.astro`, `overrides/MarkdownContent.astro`, `overrides/Sidebar.astro`,
-`pages/[area]/review.astro`)
-are outside Biome and outside the coverage floor. Only `astro check` and
-the e2e suite see them. When one of them grows logic worth a unit test,
-move that logic into `site/src/scripts/*.ts` and import it, which puts it
-under Biome, the strict tsconfig flags and the coverage include set.
+The `<script>` block of a component holds only the import of its module
+under `site/src/scripts/` and the call that starts it, so the logic is
+under Biome, the strict tsconfig flags and the coverage include set. A part
+of the page the component always renders is looked up with
+`requiredElement` or `requiredData` (`site/src/scripts/required-element.ts`),
+which throw with the selector when the markup and the script disagree.
+`widgets/InstructionsBuilder.astro`, `widgets/Sampler.astro` and
+`lesson/TutorBlock.astro` still hold their logic inline (#447).
 
 ## Timeouts
 
@@ -256,13 +256,12 @@ stage by hand.
 ## Lint notes
 
 Biome formats and lints the frontmatter of `.astro` files and leaves the
-template and the inline `<script>` blocks alone, so `astro check` stays the
+template and the `<script>` blocks alone, so `astro check` stays the
 check for those two. Because Biome cannot see the template, the
 unused-variable rules are off for `.astro` files (`overrides` in
-`site/biome.json`). `noNonNullAssertion` is off because the frontmatter of
-`TopicMap.astro` and `overrides/MarkdownContent.astro` and `src/lib/lessons.ts`
-use `!` on lookups the content collections guarantee; `src/scripts/` has
-none left. A `// biome-ignore` needs the reason on the same line.
+`site/biome.json`). `noNonNullAssertion` is `error`: a lookup that can't
+fail throws with a message or uses `requiredElement`, and never `x!`. A
+`// biome-ignore` needs the reason on the same line.
 
 `exactOptionalPropertyTypes` is deliberately not set in `site/tsconfig.json`:
 Astro passes an absent optional prop as `undefined`, which fails six

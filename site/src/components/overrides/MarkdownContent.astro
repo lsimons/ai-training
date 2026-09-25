@@ -46,7 +46,8 @@ if (isLesson) {
 	// `assumes[].section` must be a `## ` heading of the target lesson. The slugs
 	// come from Starlight's own rendering, so they match the anchors it emits.
 	// `mise run data` checks the same rule earlier, and for planned lessons too.
-	const sectionSlugs = new Map<string, string[]>();
+	// Per assumed lesson: its title and the slugs of its `## ` headings.
+	const assumedLessons = new Map<string, { title: string; slugs: string[] }>();
 	// A live lesson's `assumes` entries name the lesson and section that teach the objective (spec S11).
 	const assumed = (data.assumes ?? []).map((a) => {
 		if (!a.lesson || !a.section) {
@@ -55,26 +56,27 @@ if (isLesson) {
 		return { objective: a.objective, lesson: a.lesson, section: a.section };
 	});
 	for (const a of assumed) {
-		if (sectionSlugs.has(a.lesson)) continue;
+		if (assumedLessons.has(a.lesson)) continue;
 		const lesson = docs.find((d) => d.id === a.lesson);
 		if (!lesson) throw new Error(`${lessonId}: assumes unknown lesson ${a.lesson}`);
 		const { headings } = await render(lesson);
-		sectionSlugs.set(
-			a.lesson,
-			headings.filter((h) => h.depth === 2).map((h) => h.slug),
-		);
+		assumedLessons.set(a.lesson, {
+			title: lesson.data.title ?? a.lesson,
+			slugs: headings.filter((h) => h.depth === 2).map((h) => h.slug),
+		});
 	}
 	behind = assumed.map((a) => {
-		const lesson = docs.find((d) => d.id === a.lesson)!;
-		if (!statements.has(a.objective)) throw new Error(`${lessonId}: assumes unknown objective ${a.objective}`);
-		const slugs = sectionSlugs.get(a.lesson)!;
-		const sectionError = assumedSectionError(lessonId, a.lesson, a.section, slugs);
+		const statement = statements.get(a.objective);
+		if (statement === undefined) throw new Error(`${lessonId}: assumes unknown objective ${a.objective}`);
+		const target = assumedLessons.get(a.lesson);
+		if (!target) throw new Error(`${lessonId}: assumes unknown lesson ${a.lesson}`);
+		const sectionError = assumedSectionError(lessonId, a.lesson, a.section, target.slugs);
 		if (sectionError) throw new Error(sectionError);
 		return {
 			objective: a.objective,
-			statement: statements.get(a.objective)!,
+			statement,
 			href: href(`/${a.lesson}/#${a.section}`),
-			lessonTitle: lesson.data.title ?? a.lesson,
+			lessonTitle: target.title,
 		};
 	});
 	// An `extends-to` href is a root-relative page path, or an `https://` URL under

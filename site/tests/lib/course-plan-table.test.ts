@@ -51,7 +51,7 @@ describe('objectiveCells', () => {
 describe('afterTitles', () => {
 	it('resolves ids to the titles in the plan and keeps an unknown id', () => {
 		const plan = [entry({ id: 'a/one', title: 'One' }), entry({ id: 'a/two', title: 'Two', after: ['a/one', 'a/x'] })];
-		expect(afterTitles(plan[1]!.after, plan)).toEqual(['One', 'a/x']);
+		expect(afterTitles(plan[1]?.after ?? [], plan)).toEqual(['One', 'a/x']);
 		expect(afterTitles([], plan)).toEqual([]);
 	});
 });
