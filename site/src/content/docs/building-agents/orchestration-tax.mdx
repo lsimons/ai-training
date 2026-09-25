@@ -1,0 +1,349 @@
+import { Choice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+In this lesson we count what a second and a third agent cost, and we
+decide when a design with more agents should replace one agent. The
+previous lesson built two ways to coordinate agents: a pipeline, in
+which code runs three agents one after another, and a manager model that
+calls two workers as tools. Both answer a task that one agent can also
+do. Here we run the two arrangements from the previous lesson next to
+one agent that does the same work alone, and count the difference.
+
+The difference is called the **orchestration tax**: the cost that each
+extra agent adds. Handoffs and context sent again take more tokens. The
+extra calls take time, and each boundary between agents can lose
+information. Agents can also disagree or wait on each other, and a run
+with many agents is harder to debug. A design with more agents has to
+do better than one well-equipped agent by more than that tax. The
+Agent Engineer Course uses the same name for another cost, the time a
+person needs to review what many agents produce (@AEC-07). This lesson
+counts the cost inside the system.
+
+The fixture is a small shop that answers customer emails about broken
+items. The one-agent design has three tools, `get_order`, `get_policy` and
+`check_stock`, and a loop. The pipeline runs a `lookup` agent that reads
+the email, looks the order up and writes notes, then a `writer` that
+writes the reply from those notes, then a `checker` that checks the
+reply against the notes. The `manager` calls the same `lookup` and
+`writer` agents as tools. Every model is fake: a
+function that reads its prompt and its input and writes text back. Every
+run prints the same result. The orders, the policy and the emails
+are illustrative, written by the author. The files are in
+`site/examples/building-agents/orchestration-tax/`. Copy the
+`orchestration-tax` folder and `cd` into the copy. Each step below is
+`python3 tax.py <step>`, and no application programming interface (API)
+key is needed.
+
+## Where the tokens go
+
+The `tokens` step runs one email, g06, through all three arrangements
+and counts the tokens that each model call reads and writes. The
+fixture counts a word or a punctuation mark as one token. That's a
+rough stand-in for a real tokenizer, so compare the numbers with each
+other and not with a price list.
+
+<Predict id="tokens-per-arrangement" title="The tokens of one email"
+  answer={`email g06, tokens per arrangement
+                     calls   new handoff repeat written  total
+  single agent           2   218       0    162      70    450  1.0x
+  pipeline               4   237      44    300      65    646  1.4x
+  manager + workers      6   250     100    718     157   1225  2.7x`} run="building-agents/orchestration-tax/tokens.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 tax.py tokens
+```
+
+</Predict>
+
+Each piece of text that a call reads gets one of three labels. `new` is
+text that no call of the run has read yet: a prompt, the email, a tool
+result. `handoff` is text that another agent wrote, such as the notes of
+`lookup`. `repeat` is text that a call of the same run read before, or an
+agent's own earlier output sent back to it. `written` counts what the
+models wrote.
+
+The one-agent design has 162 repeated tokens too. A loop sends the whole
+conversation back to the model on each call. The second call reads the
+first one again. The extra agents add to that. Every agent in the
+pipeline starts with the same 59-token description of the shop, and
+each agent reads it again. The manager has three calls of its own, and
+each one reads the manager's whole conversation so far, the email
+included. The manager also copies the notes of `lookup` into its call to
+the writer, and it returns the writer's reply as its own answer, so it
+writes that reply a second time. That's how 718 of its 1225 tokens are
+repeats.
+
+The pipeline costs only 1.4 times the one-agent design here, partly
+because the writer and the checker never read the email. The next
+section shows what that costs.
+
+## The rest of the tax
+
+**Latency.** For the same email, the one-agent design makes 2 model
+calls, the pipeline 4 and the manager 6. Each call waits for the one
+before it, and the customer waits for every call. When a response has
+to be fast, the Agent Engineer Course advises one agent, because more
+agents add overhead (@AEC-07).
+
+**Information lost at a boundary.** Email g06 asks for a refund and asks
+one more question: can the customer bring the toaster back to the shop?
+The `trace` step shows each call of the pipeline for that email.
+
+<Predict id="trace-pipeline-g06" title="The pipeline on email g06"
+  answer={`pipeline, email g06
+  call 1 lookup: reads new 136; writes 20
+    wrote: get_order {"order_id": "1131"} / get_policy {"topic": "returns"}
+  call 2 lookup: reads new 50, repeat 156; writes 26
+    wrote: order 1131: toaster, delivered 20 days ago / asks for: refund / policy: Returns and refunds are possible within 30 days of delivery.
+  call 3 writer: reads new 22, handoff 26, repeat 59; writes 18
+  call 4 checker: reads new 29, handoff 18, repeat 85; writes 1
+    wrote: ok
+  reply: Dear customer, Your refund for the toaster is on its way. Kind regards, the shop
+  graded: fail, missing "weekdays"`} run="building-agents/orchestration-tax/trace_pipeline_g06.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 tax.py trace pipeline g06
+```
+
+</Predict>
+
+The prompt of `lookup` asks for notes with the order, what the customer
+asks for and what the tools returned. The notes follow it, and the
+second question isn't in them. The writer and the checker only get the
+notes, so no later agent can answer the question. The checker says
+`ok`, because it compares the reply with the notes, and the reply
+answers every point in them. The writer and the checker read 26 tokens
+of notes and not the whole conversation of `lookup`, which is why the
+pipeline was cheap. A handoff that summarizes
+saves tokens and can drop what a later step needs. Passing the whole
+conversation to every agent keeps it, and the Agent Engineer Course
+names that as its own mistake, because the contexts grow fast
+(@AEC-18). The same course advises checking each agent's output before
+the next agent gets it, because a bad result early in a pipeline goes
+on through every later step (@AEC-18). A check like that only finds
+what its input holds, and this checker never saw the email.
+
+**Agents that disagree or wait.** Agents that depend on each other can
+wait for each other and never finish, send a task back and forth, or
+change the same thing in opposite ways (@AEC-07). The fixture has none
+of these, because code or the manager decides who runs, one at a time.
+Each new agent that can start work on its own adds a way to fail that
+one agent on its own doesn't have.
+
+**Harder debugging.** The g06 failure shows in the writer's reply. It
+started one call earlier in another agent, in the notes of `lookup`,
+and the checker passed the reply because it compared it with those
+notes. With one agent, the email and the reply are in one conversation.
+With three, you need a log of every message between the agents to
+follow a request from start to end (@AEC-07). When a model decides the
+order, as the manager does, it is also harder to say why a run took the
+path it took (@AEC-18).
+
+## What can't one agent do?
+
+Before you add a second agent, name what the first one can't do. The
+Agent Engineer Course puts one agent with good tools ahead of a group of
+agents that are poorly coordinated. It advises starting with one agent
+and adding another only when the first is shown to be unable to do the
+work (@AEC-18). The reasons below come up often, and for each one there
+is a fix inside one agent to try first.
+
+**The context doesn't fit.** The task needs more text than the context
+window holds, or the context is full of old tool results before the
+agent reaches the question. The agent can load text just in time: it
+reads a file or searches when it needs a fact, and it doesn't take
+everything in at the start. Compaction replaces the older turns of a
+conversation with a summary, and that keeps a long agent task inside the
+context window (@Claude docs compaction). Claude Platform 101 teaches
+more patterns for managing the context of a long-running agent
+(@Academy claude-platform-101). When the work is still too large after
+you try those patterns, a second agent can read a large part of it in
+its own context and send back a short summary.
+
+**The tool set is too large.** An agent with many tools picks the wrong
+one more often (@AEC-07). A tool search tool keeps most definitions out
+of the context and loads only the tools the model searches for
+(@Claude docs tool-search-tool).
+
+**A step needs a different prompt.** A skill puts its instructions into
+the context only when the task matches its description, so one agent
+can have many sets of instructions and hold only the one it uses
+(@Claude docs agent-skills-overview). A skill can't remove text that the
+agent has already read. A reviewer that must judge a draft
+without the writer's notes and reasoning needs a context that never
+held them. A step that reads untrusted input and must not hold a
+dangerous tool is the same case, because separate agents can have
+separate permissions (@AEC-07).
+
+The shop's emails are short, the agent has three tools, and one prompt
+covers the work. The shop has none of these problems, so the pipeline
+and the manager can't do anything that the one agent can't.
+
+<Choice id="what-one-agent-cannot-do" objective="building-agents/orchestrates-agents/justifies-orchestration-cost"
+  concepts={['orchestration-tax']}
+  context="A team runs one agent that drafts replies to support tickets. Each colleague gives one reason to split it into several agents."
+  title="Which reason names something one agent can't do?"
+  hint="For each reason, is there a fix that works inside one agent's context?"
+  options={[
+    { text: 'The agent has 60 tools, and in some runs it picks the wrong one.', why: 'A tool search loads only the tools the model looks for, and the agent stays one agent.' },
+    { text: 'Long runs fill the context with old tool results before the answer.', why: 'Compaction or loading results only when they are needed keeps one context small enough.' },
+    { text: 'The reviewer has to grade each draft without the drafter\'s notes.', correct: true },
+    { text: 'The team itself splits the work into triage, research and writing.', why: 'How the people are organized says nothing about what one agent can or can\'t do.' },
+  ]}>
+
+A colleague proposes to split the agent into several agents. Which
+reason names something the one agent can't do, even after the fixes
+that work inside one agent?
+
+</Choice>
+
+## Measure the design against one agent
+
+A design with more agents has to score better, and by more than it
+costs. The `compare` step runs the shop's golden set of twelve emails
+through the one-agent design and through the pipeline. Each email has
+the phrases a correct reply contains and the ones it must not contain,
+the way a golden set records qualities in
+[A golden set is the agent's regression suite](/building-agents/golden-sets/).
+
+<Predict id="compare-on-golden-set" title="Both designs on the golden set"
+  answer={`golden set, 12 emails
+                            passed  calls  tokens
+  single agent               9 of 12    24    4353  1.0x
+  pipeline (three agents)   10 of 12    48    8083  1.9x`} run="building-agents/orchestration-tax/compare.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 tax.py compare
+```
+
+</Predict>
+
+The pipeline passes one email more. It makes twice the calls and uses
+1.9 times the tokens. The totals don't say which to keep, because they
+don't say where the point came from. A difference of one can be the
+sum of many emails, some that only one design passes and some that
+only the other passes. The `items` step lists each email with its
+result in both designs, and the `trace` step shows how a run got there.
+Find what each design did on the emails where they differ. When the
+gain comes from something the one agent can take, such as a line in a
+prompt or one more tool, give it that and run the set again. When it
+comes from one of the reasons in the last section, weigh those emails
+against the tax.
+
+<Scenario id="three-points-twice-the-cost" objective="building-agents/orchestrates-agents/justifies-orchestration-cost"
+  concepts={['orchestration-tax']}
+  context="A team compares a design with three agents and a design with one agent on the same golden set of 40 support questions. The team has only the two totals so far."
+  title="Three points more at twice the cost"
+  hint="What would you need to know about the three points before you pay for them on every run?"
+  options={[
+    { text: 'Keep the three agents, because three more passes on 40 items is a clear gain.', consequence: 'The three items needed a lookup rule that is in one worker\'s prompt. The team pays twice per run for a line that the single agent could have had.' },
+    { text: 'Keep the single agent, because twice the cost is too much for three points.', consequence: 'The three items needed a file set larger than one context. The team ships the single agent, and those questions keep failing.' },
+    { text: 'Run both designs on a new set of 40 items and keep the one that scores higher.', consequence: 'The new set gives a similar result, and the team still doesn\'t know why the three agents do better.' },
+    { text: 'Find which items differ and why, and give the single agent what it lacked, if it can take it.', correct: true, consequence: 'Two of the items needed a prompt line, which the single agent now has. The third needs a context that doesn\'t fit, and that one result is what the team weighs against the cost.' },
+  ]}>
+
+On a golden set of 40 items, the design with three agents passes 34 and
+the single agent passes 31. The design with three agents uses twice the
+tokens per run. Which do you keep?
+
+</Scenario>
+
+<Pitfall title="A design that was never measured">
+
+A team splits its support agent into an agent that sorts the tickets,
+an agent that looks things up and a writer, because each role now has a short and clear prompt. The
+new design reads better, and every trace the team looks at seems
+reasonable, so it ships. Nobody runs the old single agent on the same
+golden set, so nobody sees the questions that the first agent's note now drops, or
+that the bill for each run went up. A design with more agents is a
+claim to test like any other change. Run the single agent on the same
+golden set, and keep the extra agents only when they win by more than
+they cost.
+
+</Pitfall>
+
+<Sort id="fix-inside-or-add-an-agent" phase="review" objective="building-agents/orchestrates-agents/justifies-orchestration-cost"
+  concepts={['orchestration-tax']}
+  context="Each item is a problem a team has with one agent. For some there is a fix that works inside that agent, and for others the fix needs a second agent with its own context."
+  title="Fix it inside one agent, or add one?"
+  hint="Would a change inside the one context remove the problem, or does the problem come from what that context already holds?"
+  buckets={['A fix inside one agent', 'A second agent with its own context']}
+  items={[
+    { text: 'The model picks the wrong tool out of 80', bucket: 0 },
+    { text: 'Old tool results fill the context in long runs', bucket: 0 },
+    { text: 'The refund rules are needed only for refund emails', bucket: 0 },
+    { text: 'A grader must not see the notes of the agent it grades', bucket: 1 },
+    { text: 'The step that reads web pages must not hold the payment tool', bucket: 1 },
+  ]} />
+
+<Choice id="where-the-point-came-from" phase="review" objective="building-agents/orchestrates-agents/justifies-orchestration-cost"
+  concepts={['orchestration-tax']}
+  context="A team compared a pipeline of three agents with a single agent on the same golden set. The pipeline passed 18 of 20 items, and the single agent passed 16. The pipeline used 1.8 times the tokens. Reading the two items that differ, the team found that both needed the date format rule, which is in the prompt of the pipeline's first agent and not in the single agent's prompt."
+  title="What does the team do next?"
+  hint="Is the difference something that only a second agent can provide?"
+  options={[
+    { text: 'Keep the pipeline, because it scores two points higher on the same golden set.', why: 'The two points came from one line of a prompt. The pipeline charges 1.8 times the tokens for it on every run.' },
+    { text: 'Add the date format rule to the single agent\'s prompt and run the set again.', correct: true },
+    { text: 'Add a fourth agent that checks dates, so the pipeline gets the rule twice.', why: 'That adds calls and handoffs for a rule the team already has, and it doesn\'t test the single agent.' },
+    { text: 'Keep the single agent as it is, because the 1.8 times cost settles the choice.', why: 'The single agent still fails the two items. The cause is known, and it takes one line to fix.' },
+  ]}>
+
+What does the team do next?
+
+</Choice>
+
+<Exercise stretch="Add the stock line to SINGLE_PROMPT in tax.py and run python3 tax.py compare again. Compare the new score and tokens with the pipeline's.">
+
+Run `python3 tax.py items` to see which of the twelve emails each design
+passes. For each email where the two differ, run
+`python3 tax.py trace single <email>` and
+`python3 tax.py trace pipeline <email>`, and read the prompts at the top
+of `tax.py`. Decide which design to keep, and write one line per email
+that differs, saying where the difference came from. The totals said the
+pipeline wins by one point, and the lines say whether that point is
+worth 1.9 times the tokens.
+
+A good result names five emails. The pipeline passes g04, g05 and g08,
+which all ask for a replacement of an item that is out of stock. The
+prompt of `lookup` has the line "Check the stock before you offer a
+replacement.", and the single agent's prompt doesn't, so the single
+agent promises a replacement that the shop can't send. The single agent
+passes g06 and g09, which each ask for one more thing, a drop-off at the
+shop and a refund to a gift card. The notes of `lookup` drop that request,
+and no later agent sees the email. So the pipeline gains three emails
+from one prompt line and loses two at its first boundary. Keep the
+single agent and add the line to its prompt. With the line, the single
+agent passes 12 of 12 with 4864 tokens, against the pipeline's 8083.
+
+Which of the three reasons in "What can't one agent do?" would change
+your answer for this shop, and what would it take for the shop's emails
+to meet it?
+
+</Exercise>
+
+<Recap>
+
+1. The orchestration tax is what each extra agent adds: tokens for
+   handoffs and repeated context, calls to wait for, information lost at
+   each boundary, new ways to fail and harder debugging.
+2. A loop repeats its own context on every call, and each extra agent
+   repeats the shared context again. A manager also re-reads its whole
+   conversation on each of its calls.
+3. A short handoff saves tokens and can drop what a later step needs.
+4. Before you add an agent, name what one agent can't do, and try the
+   fixes inside one context first: loading just in time, compaction
+   (@Claude docs compaction), tool search (@Claude docs tool-search-tool)
+   and skills (@Claude docs agent-skills-overview).
+5. Compare the design with the single agent on the same golden set, and
+   read the items that differ before you decide (@AEC-18).
+
+</Recap>
+
+<Habit id="baseline-before-a-second-agent">
+The next time you or a colleague propose a second agent, run the single agent on the same golden set first, and read the items where the two differ.
+</Habit>
