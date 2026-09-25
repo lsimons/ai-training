@@ -63,7 +63,9 @@ LIST_BLOCKS = {
 MAP_BLOCKS = {"substitution": {"swap"}}
 
 TOP_KEY = re.compile(r"^([A-Za-z_]+):(.*)$")
-LIST_ITEM = re.compile(r"^(\s+- )(.*)$")
+# A list item: the dash, then any run of spaces before the value, which
+# YAML allows and which is not part of the value.
+LIST_ITEM = re.compile(r"^(\s*-\s+)(.*)$")
 MAP_ITEM = re.compile(r"^(\s+)(.+?)(:(?: .*)?)$")
 # A YAML comment starts at a `#` after whitespace, in a plain scalar.
 PLAIN_COMMENT = re.compile(r"\s+#.*$")
@@ -154,9 +156,12 @@ def widen_scalar(text: str, where: str) -> str:
         return "'" + widen_pattern(body.replace("''", "'")).replace("'", "''") + "'" + rest
     if text[:1] in "|>[{&*!%@`":
         raise RuleFormatError(f"{where}: unsupported YAML scalar '{text}'")
+    # A plain scalar ends before a comment and before trailing whitespace,
+    # which YAML drops, so both are kept as written and never widened.
     comment = PLAIN_COMMENT.search(text)
     cut = comment.start() if comment else len(text)
-    return widen_pattern(text[:cut]) + text[cut:]
+    value = text[:cut].rstrip()
+    return widen_pattern(value) + text[len(value) :]
 
 
 def widen_rule(text: str, name: str = "<rule>") -> str:
@@ -244,6 +249,11 @@ def main(argv: Sequence[str]) -> int:
         sys.exit(__doc__)
     try:
         changed = run([pathlib.Path(arg) for arg in argv], STYLES)
+    except prose_eval.UnsupportedPackageError as exc:
+        sys.exit(
+            f"vale_linebreaks: Packages entry '{exc}' is not a .zip URL. "
+            "Pin each package by its release .zip URL: a bare package name is not supported."
+        )
     except RuleFormatError as exc:
         sys.exit(f"vale_linebreaks: {exc}")
     if changed:
