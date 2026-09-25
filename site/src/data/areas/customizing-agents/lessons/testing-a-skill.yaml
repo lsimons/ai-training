@@ -12,6 +12,9 @@ assumes:
   - objective: coding-with-agents/ships-with-agent/runs-a-session
     lesson: coding-with-agents/first-session
     section: sessions-and-context
+  - objective: customizing-agents/writes-skill/packages-a-procedure
+    lesson: customizing-agents/first-skill
+    section: pass-three-when-a-step-fails
 sources-checked: 2026-09-25
 review-by: 2027-03-25
 after: [customizing-agents/first-skill]
@@ -26,7 +29,7 @@ sources:
   - Claude Code skills
   - Claude Code memory
 issue: 165
-minutes: 15
+minutes: 20
 notes: >-
   Introduces no concept: deepens writing-a-good-skill: watch an agent use the skill on a real task
   and revise where it went wrong. The fixtures in `site/examples/customizing-agents/testing-a-skill/`
