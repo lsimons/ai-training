@@ -173,14 +173,11 @@ way of the task in front of it.
 So the reasons go in the repository, in two places that point at each
 other. A decisions folder, often `docs/decisions/`, holds one short file
 per decision: what was decided, why, and what was considered and
-rejected. The project instructions point the agent at it. Project
-instructions are a file at the root of the repository that the agent
-reads at the start of every session. Claude Code reads `CLAUDE.md`, and
-many agents read `AGENTS.md`. The to-do fixture has one, and its
-lines say which commands must keep working and that `SPEC.md` is the
-source of truth while a change is in progress. If you want the full
-tutorial, *Project instructions* in the customizing-agents course is
-live at [/customizing-agents/instructions/](/customizing-agents/instructions/).
+rejected. The project instructions point the agent at it, the way
+[Writing project instructions the agent reads every session](/coding-with-agents/project-instructions/)
+showed. The to-do fixture has an instructions file, and its lines say
+which commands must keep working and that `SPEC.md` is the source of
+truth while a change is in progress.
 
 A decision file for the fixture is short.
 
