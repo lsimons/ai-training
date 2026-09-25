@@ -52,8 +52,8 @@ noun lists, and what to do about that is open in issue #441.
 The exceptions written in this repository follow the same rule. A
 multi-word entry in `accept.txt` (`[Ii]t\sis`, `Learn\sPrompting`) and a
 phrase in a `TokenIgnores` pattern (`"significant\sharm"`) use `\s`
-between their words, so the exception applies where a paragraph wraps
-between them (issue #453). `tests/test_vale_linebreaks.py` fails on an
+between their words. The exception then applies where a paragraph wraps
+between them too (issue #453). `tests/test_vale_linebreaks.py` fails on an
 entry or a pattern with a literal space, and runs each one split over
 two lines.
 
