@@ -40,10 +40,10 @@ notes: >-
   lines log (show_log.py). share_note sends nothing. The server takes its folder from its command line
   and never sends roots/list, so the page says so and has the learner start the agent inside the notes
   copy, where Claude Code's own write boundary also sits (code.claude.com/docs/en/security). The server
-  marks share_note with _meta anthropic/requiresUserInteraction, which makes Claude Code ask on every
+  marks share_note with the requiresUserInteraction flag in _meta, which makes Claude Code ask on every
   call even with an allow rule (code.claude.com/docs/en/mcp, checked with Claude Code 2.1.281 in -p
   mode, where the call was held for approval). The --env syntax for claude mcp add and local scope in
-  ~/.claude.json come from the same mcp page. The short-lived token advice and "clients should log tool
+  the Claude Code config file come from the same mcp page. The short-lived token advice and "clients should log tool
   usage for audit" come from the 2025-06-18 spec (authorization and tools pages), the revision the
   bibliography pins; the latest revision is 2026-07-28. In a trial with a small model the model
   noticed the planted line and did not call share_note, so the exercise has the learner ask for the
