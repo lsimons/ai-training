@@ -72,7 +72,12 @@ test('the sidebar and the landing page show the same due count once a finished l
 	await page.goto('concepts/review/');
 	await expect(count).toHaveText(`${items} review items due`);
 	for (let reviewed = 1; reviewed < items; reviewed++) {
-		if (reviewed > 1) await page.getByRole('button', { name: 'Next item' }).click();
+		if (reviewed > 1) {
+			// The button is inside the answered item, which the page replaces. It writes the status line before the
+			// swap, so wait for the old item to be gone first.
+			await page.getByRole('button', { name: 'Next item' }).click();
+			await expect(page.getByRole('button', { name: 'Next item' })).toHaveCount(0);
+		}
 		await expect(page.locator('[data-status]')).toHaveText(`Item ${reviewed} of ${items}`);
 		await solveCheckpoint(page.locator('.review [data-checkpoint]'));
 		const left = items - reviewed;
