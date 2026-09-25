@@ -13,6 +13,8 @@ import {
 	frontmatter,
 	knownIds,
 	lessonPages,
+	propCitationMessage,
+	propCitations,
 	reviewDatePairError,
 } from '../../scripts/lib/data.mjs';
 
@@ -277,6 +279,73 @@ describe('competency behavior citations', () => {
 		expect(check(tree()).errors).toEqual([]);
 		const root = tree();
 		expect(checkBehaviorCitations(readAreaTree(join(root, 'data')), (f) => f)).toEqual([]);
+	});
+});
+
+describe('citations in component props', () => {
+	const choice = (why: string) =>
+		[
+			'Text cites (@AEC-01) and renders.', // 1
+			'', // 2
+			'<Choice id="q" title="T"', // 3
+			'  options={[', // 4
+			"    { text: 'A', correct: true },", // 5
+			`    { text: 'B', why: ${JSON.stringify(why)} },`, // 6
+			'  ]}>', // 7
+			'Stem (@AEC-01)?', // 8: children are text, which the plugin renders
+			'</Choice>', // 9
+			'',
+		].join('\n');
+	it('fails a (@ token in a checkpoint option, naming the line, tag, prop path and token', () => {
+		expect(propCitations(choice('Wrong (@AEC-01). More.'), 'p')).toEqual([
+			{ line: 4, tag: 'Choice', prop: 'options[1].why', token: '(@AEC-01)' },
+		]);
+		const { errors } = check(tree({ 'content/a/x.mdx': choice('Wrong (@AEC-01). More.') }));
+		expect(errors).toEqual([
+			'src/content/docs/a/x.mdx:4: <Choice> prop options[1].why holds the citation (@AEC-01), which the page shows as literal text because citations in props are not rendered. Name the source in words, or cite it in the page text',
+		]);
+	});
+	it('fails a token in a quoted prop, on a course page, on a raw HTML element and one without its closing parenthesis', () => {
+		const src = [
+			'<Pitfall title="Read (@AEC-01)">', // 1
+			'Body.', // 2
+			'</Pitfall>', // 3
+			'', // 4
+			'<abbr title="see (@AEC-01 and more">x</abbr>', // 5
+			'',
+		].join('\n');
+		expect(propCitations(src, 'p')).toEqual([
+			{ line: 1, tag: 'Pitfall', prop: 'title', token: '(@AEC-01)' },
+			{ line: 5, tag: 'abbr', prop: 'title', token: '(@AEC-01 and more' },
+		]);
+		const { errors } = check(tree({ 'content/a/index.mdx': '<Recap hint="(@AEC-01)">\nDone.\n</Recap>\n' }));
+		expect(errors).toEqual([
+			propCitationMessage('src/content/docs/a/index.mdx', { line: 1, tag: 'Recap', prop: 'hint', token: '(@AEC-01)' }),
+		]);
+	});
+	it('passes clean props, a token in a code span, a Predict answer, a non-literal prop and a tag inside a fence', () => {
+		expect(propCitations(choice('Wrong, as the vendor page says. More.'), 'p')).toEqual([]);
+		expect(check(tree({ 'content/a/x.mdx': choice('Wrong, as the vendor page says.') })).errors).toEqual([]);
+		const src = [
+			'<Choice id="q" options={[{ text: \'Write `(@key)` in the text\', correct: true }]}>', // code span
+			'Stem?',
+			'</Choice>',
+			'',
+			'<Predict answer="(@AEC-01)">', // expected output, shown as code
+			'Run it.',
+			'</Predict>',
+			'',
+			'<Widget data={items} />', // not a literal, so not readable before render
+			'',
+			'```text',
+			'<Pitfall title="(@AEC-01)">',
+			'```',
+			'',
+		].join('\n');
+		expect(propCitations(src, 'p')).toEqual([]);
+	});
+	it('names the page when it does not parse', () => {
+		expect(() => propCitations('<Choice options={[}>\n', 'src/x.mdx')).toThrow(/^src\/x\.mdx: /);
 	});
 });
 
