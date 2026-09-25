@@ -32,6 +32,7 @@ GIT_FIXTURE_DIRS = [
     "coding-with-agents/reversible-changes",
     "coding-with-agents/reviewing-the-diff",
     "coding-with-agents/self-checking-loops",
+    "customizing-agents/first-hook",
     "customizing-agents/testing-a-skill",
 ]
 NOT_RUN = {
