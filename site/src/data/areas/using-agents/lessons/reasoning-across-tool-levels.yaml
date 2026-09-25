@@ -12,8 +12,8 @@ assumes:
     lesson: concepts/thin-path
     section: the-pair-behind-a-failure
   - objective: safety/verifies-output/calibrates-trust
-    lesson: safety/when-the-tool-is-usually-right
-    section: build-the-check-in
+    lesson: safety/checking-habits
+    section: depth-scales-with-stakes
 after: [using-agents/steps-that-stay-human, using-agents/trying-two-models]
 shorts: [Going down a level when the number looks round]
 exercise:
@@ -28,8 +28,8 @@ minutes: 15
 notes: >-
   The plan named the topic concepts/limits as assumed; taken as the objective
   concepts/explains-models/names-failure-modes, served live by concepts/thin-path. The plan named
-  safety/checking-habits for calibrates-trust, which is not live, so the live
-  safety/when-the-tool-is-usually-right serves it instead. The page cites Brilliant ABS for the
+  safety/checking-habits for calibrates-trust, and its section on depth scaling with stakes
+  teaches it. The page cites Brilliant ABS for the
   ladder of abstraction (codes as facts, no text) and Academy building-effective-human-agent-teams
   for the human step needing a new place when the level rises (ideas in our own words). AEC-12 and
   Academy ai-fluency-for-builders from the plan are not cited, because the page is a foundations
