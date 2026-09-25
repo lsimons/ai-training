@@ -95,13 +95,14 @@ both, so the builder and the reviewer never talk to each other.
    designs) is reported to the maintainer instead.
 
    After `Verdict: needs changes`, the same reviewer re-checks the
-   revision. After `Verdict: approve` that lists only should-fix or nit
-   items, the coordinator re-checks the fix commit itself: `git show` of
-   the commit and the one `mise` task that covers its files
-   (`testing.md` says which). It spawns no second reviewer, and the
-   re-check column of the review table says `re-checked by lead` with a
-   link to the fix commit. A full second review of a one-line fix costs
-   15 to 20 minutes and 1 to 3M tokens.
+   revision. After `Verdict: approve`, the coordinator re-checks the fix
+   commit itself: it reads the commit with `git show`, runs
+   `mise run fast` on the branch, and comments
+   `re-checked by lead: <commit link>` on the issue. The re-check column
+   of the wave pull request's review table links that comment. A fix that
+   changes more than the findings named, or a finding too big for the
+   coordinator to check, goes back to the same reviewer. A full second
+   review of a one-line fix costs 15 to 20 minutes and 1 to 3M tokens.
 
 5. **Merge queue.** The maintainer approves each pull request in a message
    to the coordinator, who merges with
