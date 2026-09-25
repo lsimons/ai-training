@@ -1,8 +1,8 @@
 id: using-agents/choosing-autonomy
 title: How much the agent may do before it asks
 description: >-
-  Pick draft only, act and ask before anything that can't be undone, or run to completion from what
-  a wrong step costs, add check-ins on a first run, and write the setting as one sentence.
+  Choose draft only, ask before anything that can't be undone, or run to completion by what a wrong
+  step costs, add check-ins on a first run, and write the setting as one sentence.
 mode: explanation
 covers: using-agents/delegating
 serves: [using-agents/delegates-and-checks/chooses-autonomy]
@@ -31,7 +31,7 @@ sources: [DLAI-11, Academy introduction-to-claude-cowork]
 sources-checked: 2026-09-25
 review-by: 2027-03-25
 issue: 145
-minutes: 10
+minutes: 15
 notes: >-
   Introduces no concept: deepens choosing-a-degree-of-autonomy from the live lesson. Foundations page
   with no fixture and no vendor product claims. The page opens on the lesson on delegating and uses
