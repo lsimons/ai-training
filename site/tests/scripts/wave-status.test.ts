@@ -23,6 +23,13 @@ describe('verdictOf', () => {
 		expect(verdictOf('**Verdict:** Needs changes')).toBe('needs changes');
 	});
 
+	it('reads the verdict line when the attribution lines follow it', () => {
+		const attribution = '\n\nCo-Authored-By: lsimons-bot <bot@leosimons.com>\nAssisted-by: Claude:claude-opus-5-5';
+		expect(verdictOf(`Findings...\n\nVerdict: approve${attribution}`)).toBe('approve');
+		expect(verdictOf(`Findings...\n\nVerdict: needs changes${attribution}`)).toBe('needs changes');
+		expect(verdictOf(`Fixed in abc123, please re-check.${attribution}`)).toBeNull();
+	});
+
 	it('finds no verdict in an ordinary comment', () => {
 		expect(verdictOf('Fixed in abc123, please re-check.')).toBeNull();
 		expect(verdictOf('The verdict: approve would be wrong here')).toBeNull();

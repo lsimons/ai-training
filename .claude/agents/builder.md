@@ -79,9 +79,9 @@ Review finds these in almost every first pass. Check each one yourself.
   shows it. When a gate's result and the list in the issue disagree, the
   gate is right.
 
-- Every commit message ends with these two lines, and no `Signed-off-by`.
-  The `Assisted-by` line names the model you are running, for example
-  `claude-opus-5-5`:
+- Every commit message ends with the attribution lines in `AGENTS.md`
+  ("Process"), and no `Signed-off-by`. The `Assisted-by` line names the
+  model you are running, for example `claude-opus-5-5`:
 
   ```text
   Co-Authored-By: lsimons-bot <bot@leosimons.com>
