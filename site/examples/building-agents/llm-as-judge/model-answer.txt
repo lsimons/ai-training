@@ -1,0 +1,25 @@
+Model answer for the exercise in "A model as the grader".
+Your changes and partners may differ. Compare whether each partner
+measures the quality its number was meant to show.
+
+Mean answer length (read as: answers are more complete)
+  How it rises: a closing sentence that thanks the user and offers more
+  help, added to every answer. Run r02 grows from 17 words to 50
+  and still leaves out the home office allowance.
+  Partner: the parts of the reference answer that each answer states,
+  from reference.csv. A closing sentence adds words and no part.
+
+Keyword presence (read as: the answer comes from the right page)
+  How it rises: a closing sentence that names the topic of the
+  question. Run r11 already names the payments team, and its search
+  returned the laptops page, so the answer has no owner in it.
+  Partner: a check in the trace that the search returned the page the
+  question needs. Naming a topic doesn't change what the search returned.
+
+Judge score on Complete (read as: what a person would score)
+  How it rises: the same closing sentence, because the judge gives an
+  extra point to answers over 40 words. Runs r03 and r07 score 2 from
+  the judge and 1 from the person.
+  Partner: a person scoring a sample of the same runs with the same
+  rubric, compared with the judge per criterion. The person doesn't
+  count words.

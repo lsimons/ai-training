@@ -1,0 +1,4 @@
+question: Who books train tickets, and what is the meal limit on a trip?
+call: search_docs(query='train tickets meal limit')
+result: expenses.txt: Expenses. Meals on a work trip are reimbursed up to 40 euros per day with a receipt. Claims are filed within 30 days. Train tickets are booked through the travel desk.
+answer: The travel desk books them. "Train tickets are booked through the travel desk."

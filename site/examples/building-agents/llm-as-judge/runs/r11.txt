@@ -1,0 +1,4 @@
+question: Who is the cost center owner of the payments team?
+call: search_docs(query='cost center owner payments')
+result: laptops.txt: Laptops. Laptops are replaced every four years. The cost center owner of your team approves a replacement laptop before that, see the team pages. Report a lost laptop to the service desk the same day.
+answer: The cost center owner of each team approves replacement laptops for that team, as the laptops page of the handbook explains. "The cost center owner of your team approves a replacement laptop before that, see the team pages." The team pages list who the cost center owner of the payments team is, so look there for the name.
