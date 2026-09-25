@@ -1,10 +1,16 @@
 id: building-agents/react
 title: Reasoning before each action
+description: >-
+  Give the fake model a one-line thought before each tool request, compare its trace with the plain
+  loop's on the same tasks, and see when the reasoning changes the call and what it costs.
 mode: tutorial
 covers: building-agents/patterns
 serves: [building-agents/orchestrates-agents/picks-a-pattern]
 introduces: [react]
-assumes: []
+assumes:
+  - objective: building-agents/builds-agent-loop/implements-the-loop
+    lesson: building-agents/stopping-the-loop
+    section: the-rules-that-end-a-run
 after: [building-agents/stopping-the-loop, building-agents/rubrics]
 shorts: []
 exercise:
@@ -13,9 +19,18 @@ exercise:
     Add a `thought` field to the fixture model's replies and print it before each tool call, then
     run the same three tasks and compare the trace with the one from the live lesson's loop. The
     output is the two traces side by side.
-sources: []
-issue: 205
+sources:
+  - AEC-04
+  - Yao 2022
+  - Turpin 2023
+  - Claude docs thinking
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 minutes: 12
 notes: >-
   The fake model writes one line of reasoning before each tool request. Predict the trace. Most
-  tool-using loops are this pattern whether or not the reasoning is shown.
+  tool-using loops are this pattern whether or not the reasoning is shown. The loop in
+  site/examples/building-agents/react/agent.py is the one from stopping-the-loop, unchanged, and
+  the exercise adds a thought to that lesson's three fake models, which are the "same three tasks"
+  of the brief. DLAI-11 and Academy building-with-the-claude-api from the plan were dropped because
+  the page cites no claim from them.

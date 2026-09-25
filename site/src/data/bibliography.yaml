@@ -804,3 +804,24 @@ Git docs git-bisect:
   author: The Git project
   license: GPL-2.0
   url: https://git-scm.com/docs/git-bisect
+Yao 2022:
+  type: paper
+  title: "ReAct: Synergizing Reasoning and Acting in Language Models"
+  container: International Conference on Learning Representations (ICLR 2023), arXiv preprint 2210.03629
+  author: Shunyu Yao, Jeffrey Zhao, Dian Yu and 4 others
+  license: CC BY 4.0
+  url: https://arxiv.org/abs/2210.03629
+Turpin 2023:
+  type: paper
+  title: "Language Models Don't Always Say What They Think: Unfaithful Explanations in Chain-of-Thought Prompting"
+  container: Advances in Neural Information Processing Systems 36 (NeurIPS 2023)
+  author: Miles Turpin, Julian Michael, Ethan Perez and Samuel R. Bowman
+  license: CC BY 4.0
+  url: https://proceedings.neurips.cc/paper_files/paper/2023/hash/ed3fea9033a80fea1376299fa7863f4a-Abstract-Conference.html
+Claude docs thinking:
+  type: reference
+  title: Thinking
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/build-with-claude/thinking
