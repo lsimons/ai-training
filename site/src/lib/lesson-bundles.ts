@@ -1,4 +1,10 @@
 import { getCollection } from 'astro:content';
+import {
+	hasMultipleKeys,
+	multipleKeysMessage,
+	splitCitations,
+	unknownKeyMessage,
+} from '../../plugins/citation-syntax.mjs';
 import { BUNDLE_VERSION } from './bundle-version';
 import { buildCheckpointExport, type CheckpointItem } from './checkpoint-items';
 import { KIND_OF_TAG } from './checkpoint-rules';
@@ -12,6 +18,7 @@ import {
 	phaseProp,
 	propValue,
 } from './checkpoint-tags';
+import type { BibliographyEntry } from './citations';
 import { getLessons, type Lesson } from './lessons';
 import { absoluteUrl } from './url';
 
@@ -75,6 +82,8 @@ export interface BundleSources {
 	items: CheckpointItem[];
 	/** Every lesson page's id, so an `assumes[].lesson` that names no page fails the build. */
 	lessonIds: Set<string>;
+	/** site/src/data/bibliography.yaml, keyed by citation key, so a `(@key)` in the prose renders as its source. */
+	bibliography: Record<string, BibliographyEntry>;
 	/** Astro's `site`, the origin the absolute URLs start with. */
 	site: string;
 }
@@ -287,6 +296,41 @@ function parseAside(text: string, where: string): MdxNode {
 	}
 }
 
+/**
+ * A citation as the prose shows it (spec S08 "Lesson bundles"): the source's
+ * title and container in parentheses, or the title alone when the entry has
+ * no container or its container is the title, as the References list does.
+ */
+export function citationText(entry: BibliographyEntry): string {
+	const container = entry.container && entry.container !== entry.title ? `, ${entry.container}` : '';
+	return `(${entry.title}${container})`;
+}
+
+/**
+ * Every `(@key)` token in `text`, the lesson with its code set aside, replaced
+ * by `citationText` for its entry. The rendered text is set aside too, so the
+ * MDX parser never reads a title as markup, and a token inside code, already
+ * a placeholder, stays as written. A token inside a component's children
+ * resolves, as it does on the page. An unknown key or a token with more than
+ * one key throws the message remark-citations.mjs fails the page build with.
+ */
+function resolveCitations(
+	text: string,
+	bibliography: Record<string, BibliographyEntry>,
+	aside: CodeAside,
+	where: string,
+): string {
+	return splitCitations(text)
+		.map((part) => {
+			if (part.type === 'text') return part.value;
+			if (hasMultipleKeys(part.key)) throw new Error(multipleKeysMessage(where, part.key));
+			const entry = bibliography[part.key];
+			if (!entry) throw new Error(unknownKeyMessage(where, part.key));
+			return aside.keep(citationText(entry));
+		})
+		.join('');
+}
+
 /** Every root-relative link and image in Markdown and raw HTML, made absolute. Links with a scheme, `#` and `mailto:` are left alone. */
 function absolutizeLinks(md: string, site: string): string {
 	return md
@@ -306,13 +350,20 @@ function withoutImportBlock(body: string): string {
  * The lesson body as Markdown for a reader without the components: the
  * import block dropped, components rendered to plain text (a `Pitfall`
  * becomes a titled paragraph, a `Prompt` a fenced block), widgets omitted,
- * links absolute. Fenced blocks and inline code are copied unchanged. `where`
- * names the lesson in error messages.
+ * links absolute, and each `(@key)` citation rendered by `citationText` from
+ * `bibliography`. Fenced blocks and inline code are copied unchanged, the
+ * citations in them included. `where` names the lesson in error messages.
  */
-export function proseOf(body: string, site: string, where = 'lesson'): string {
+export function proseOf(
+	body: string,
+	site: string,
+	where = 'lesson',
+	bibliography: Record<string, BibliographyEntry> = {},
+): string {
 	const aside = setAsideCode(withoutImportBlock(body));
-	const tree = parseAside(aside.text, where);
-	const components = renderComponents(aside.text, 0, aside.text.length, componentsUnder(tree), aside, where);
+	const text = resolveCitations(aside.text, bibliography, aside, where);
+	const tree = parseAside(text, where);
+	const components = renderComponents(text, 0, text.length, componentsUnder(tree), aside, where);
 	// Runs of blank lines are collapsed before the code comes back, so a double blank line inside a fence stays.
 	const rendered = absolutizeLinks(components, site).replace(/\n{3,}/g, '\n\n');
 	return `${aside.restore(rendered).trim()}\n`;
@@ -360,7 +411,7 @@ export function bundleOf(lesson: Lesson, sources: BundleSources): LessonBundle {
 		url: lessonUrl(lesson.id, site),
 		title: data.title,
 		mode: data.mode,
-		prose: proseOf(lesson.body ?? '', site, lesson.id),
+		prose: proseOf(lesson.body ?? '', site, lesson.id, sources.bibliography),
 		topics: [
 			{
 				id: topic.id,
@@ -379,9 +430,10 @@ export function bundleOf(lesson: Lesson, sources: BundleSources): LessonBundle {
 
 /** One bundle per live lesson (every lesson page), in lesson id order, so the output is the same on every build. */
 export async function buildLessonBundles(site: string): Promise<LessonBundle[]> {
-	const [topics, competencies, lessons, { items }] = await Promise.all([
+	const [topics, competencies, bibliography, lessons, { items }] = await Promise.all([
 		getCollection('topics'),
 		getCollection('competencies'),
+		getCollection('bibliography'),
 		getLessons(),
 		buildCheckpointExport(),
 	]);
@@ -390,6 +442,7 @@ export async function buildLessonBundles(site: string): Promise<LessonBundle[]> 
 		competencies: competencies.map((c) => c.data),
 		items,
 		lessonIds: new Set(lessons.map((l) => l.id)),
+		bibliography: Object.fromEntries(bibliography.map((e) => [e.id, e.data])),
 		site,
 	};
 	return lessons.map((l) => bundleOf(l, sources));

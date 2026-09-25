@@ -11,7 +11,9 @@
  * - a fenced code block of the page (```` ``` ```` or `~~~`, three or more) is
  *   not in the bundle's `prose` byte for byte. The prose pass in
  *   `src/lib/lesson-bundles.ts` sets code aside so its rewrites skip it, and
- *   this is the check that it did.
+ *   this is the check that it did;
+ * - a `(@` is in `prose` outside a fenced block or an inline code span, since
+ *   the prose pass renders each citation as its source (S08 "Lesson bundles").
  *
  * The bundles are written by `src/pages/data/lessons/[...id].json.ts` from
  * the same content collections as the pages, and their unit tests run on
@@ -85,6 +87,27 @@ export function fencedBlocks(src) {
 	return out;
 }
 
+/** `code` with every character but a line break removed, so the lines around it keep their numbers. */
+const blankOut = (code) => code.replace(/[^\n]/g, '');
+
+/**
+ * Each line of `prose` that holds a `(@` outside code, trimmed. Code is the
+ * fenced blocks `fencedBlocks` finds and, in the text around them, inline
+ * spans: a run of backticks up to the next run of the same length within the
+ * paragraph (CommonMark "Code spans"). A token left in the prose is a
+ * citation the tutor would quote as raw syntax.
+ */
+export function citationsOutsideCode(prose) {
+	let text = prose;
+	for (const block of fencedBlocks(prose)) text = text.replace(block, blankOut(block));
+	const outside = text
+		.split(/(\n[ \t]*\n)/)
+		.map((paragraph) => paragraph.replace(/(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/g, blankOut))
+		.join('');
+	const lines = prose.split('\n');
+	return outside.split('\n').flatMap((line, i) => (line.includes('(@') ? [(lines[i] ?? '').trim()] : []));
+}
+
 /** `<area>/<lesson>` for every `.json` under `bundlesDir`. */
 export function bundleIds(bundlesDir) {
 	const out = new Set();
@@ -141,6 +164,9 @@ export function checkBundle(id, file, src) {
 				const first = block.split('\n')[0];
 				errors.push(`${id}: the fenced block starting ${JSON.stringify(first)} is not in prose unchanged`);
 			}
+		}
+		for (const line of citationsOutsideCode(bundle.prose)) {
+			errors.push(`${id}: prose keeps a raw citation token outside code: ${JSON.stringify(line)}`);
 		}
 	}
 	return errors;

@@ -2,13 +2,14 @@ import {
 	type BundleSources,
 	buildLessonBundles,
 	bundleOf,
+	citationText,
 	lessonUrl,
 	proseOf,
 	setAsideCode,
 } from '@lib/lesson-bundles';
 import type { Lesson } from '@lib/lessons';
 import { describe, expect, it, vi } from 'vitest';
-import { competencies, docs, topics } from './content';
+import { bibliography, competencies, docs, topics } from './content';
 
 vi.mock('astro:content', async () => (await import('./content')).mockContent());
 
@@ -255,6 +256,66 @@ describe('proseOf', () => {
 	});
 });
 
+describe('citations in proseOf', () => {
+	const bib = {
+		'AEC-02': { type: 'course', title: 'How agents think', container: 'Agent Engineer Course' },
+		'Claude Code docs.permissions': { type: 'reference', title: 'Permissions', container: null },
+		Same: { type: 'book', title: 'Same', container: 'Same' },
+	};
+	it('renders a token as title and container, or the title alone without a distinct container', () => {
+		expect(citationText(bib['AEC-02'])).toBe('(How agents think, Agent Engineer Course)');
+		expect(citationText(bib['Claude Code docs.permissions'])).toBe('(Permissions)');
+		expect(citationText(bib.Same)).toBe('(Same)');
+		expect(proseOf('Tokens (@AEC-02) and rules (@Claude Code\n  docs.permissions).\n', site, 'a/b', bib)).toBe(
+			'Tokens (How agents think, Agent Engineer Course) and rules (Permissions).\n',
+		);
+	});
+	it('resolves a token in component children and props, and leaves one in code unchanged', () => {
+		const src = [
+			'<Pitfall title="Cited (@Same)">',
+			'See (@AEC-02), not `(@AEC-02)`.',
+			'</Pitfall>',
+			'',
+			'<Prompt model="illustrative">',
+			'Read (@Same) and `(@Same)`.',
+			'</Prompt>',
+			'',
+			'```md',
+			'Write (@AEC-02) to cite.',
+			'```',
+			'',
+		].join('\n');
+		expect(proseOf(src, site, 'a/b', bib)).toBe(
+			[
+				'#### Pitfall: Cited (Same)',
+				'',
+				'See (How agents think, Agent Engineer Course), not `(@AEC-02)`.',
+				'',
+				'#### Prompt (illustrative, not a recorded transcript)',
+				'',
+				'```text',
+				'Read (Same) and `(@Same)`.',
+				'```',
+				'',
+				'```md',
+				'Write (@AEC-02) to cite.',
+				'```',
+				'',
+			].join('\n'),
+		);
+	});
+	it('does not read a title as markup', () => {
+		const odd = { X: { type: 'book', title: 'Use <Tag> and {x}', container: null } };
+		expect(proseOf('A (@X).\n', site, 'a/b', odd)).toBe('A (Use <Tag> and {x}).\n');
+	});
+	it('rejects an unknown key and a token with two keys, naming the lesson', () => {
+		expect(() => proseOf('A (@Nope).\n', site, 'a/b', bib)).toThrow(/^a\/b: unknown citation key "Nope"/);
+		expect(() => proseOf('A (@AEC-02, @Same).\n', site, 'a/b', bib)).toThrow(
+			/^a\/b: citation key "AEC-02, @Same" contains "@"/,
+		);
+	});
+});
+
 describe('bundleOf and buildLessonBundles', () => {
 	it('builds one bundle per live lesson, in id order, with an id equal to its path', async () => {
 		const bundles = await buildLessonBundles(site);
@@ -289,6 +350,8 @@ describe('bundleOf and buildLessonBundles', () => {
 		expect(models?.checkpoints[0]).toMatchObject({ kind: 'choice', options: ['a', 'b > c'], answer: 'a', revision: 1 });
 		expect(models?.prose).toContain('#### Checkpoint: What the model does');
 		expect(models?.prose).toContain('## Recap');
+		expect(models?.prose).toContain('Tokens, **not** words (How agents think, Agent Engineer Course).');
+		expect(models?.prose).not.toContain('(@');
 		expect(risk?.assumes).toEqual([
 			{ objective: 'o1', lesson: 'concepts/how-models-work', section: 's', url: `${ROOT}/concepts/how-models-work/#s` },
 		]);
@@ -304,6 +367,7 @@ describe('bundleOf and buildLessonBundles', () => {
 			competencies: competencies.map((c) => c.data) as BundleSources['competencies'],
 			items: [],
 			lessonIds: new Set(['concepts/how-models-work']),
+			bibliography: Object.fromEntries(bibliography.map((e) => [e.id, e.data])),
 			site,
 		};
 		const base = docs.find((d) => d.id === 'safety/agent-risk') as unknown as Lesson;

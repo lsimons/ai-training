@@ -2,7 +2,14 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { bundleIds, checkBundle, checkBundles, fencedBlocks, isLessonUrl } from '../../scripts/lib/bundles.mjs';
+import {
+	bundleIds,
+	checkBundle,
+	checkBundles,
+	citationsOutsideCode,
+	fencedBlocks,
+	isLessonUrl,
+} from '../../scripts/lib/bundles.mjs';
 
 const roots: string[] = [];
 afterAll(() => {
@@ -68,6 +75,23 @@ describe('fencedBlocks', () => {
 	});
 });
 
+describe('citationsOutsideCode', () => {
+	it('returns each line with a (@ outside code, and none for a token in a fenced block or a code span', () => {
+		expect(citationsOutsideCode('A (@AEC-02) here.\n\n  B (@Claude Code\ndocs.x) there.\n')).toEqual([
+			'A (@AEC-02) here.',
+			'B (@Claude Code',
+		]);
+		expect(
+			citationsOutsideCode('Write `(@key)`, or ``a ` (@key)``.\n\n```md\n(@key)\n```\n\n~~~\n(@k)\n~~~\n'),
+		).toEqual([]);
+		expect(citationsOutsideCode('A `span\nover (@key) lines`.\n')).toEqual([]);
+	});
+	it('does not pair backticks across a blank line or runs of different lengths', () => {
+		expect(citationsOutsideCode('A ` stray.\n\n(@key) b `.\n')).toEqual(['(@key) b `.']);
+		expect(citationsOutsideCode('A `` (@key) ` b.\n')).toEqual(['A `` (@key) ` b.']);
+	});
+});
+
 describe('checkBundles', () => {
 	it('passes a tree with one bundle per lesson page and counts them', () => {
 		expect(check(tree())).toEqual({ errors: [], bundles: 1 });
@@ -115,6 +139,12 @@ describe('checkBundles', () => {
 		expect(check(tree({ 'a/x': bundle({ prose }) })).errors).toEqual([
 			'a/x: the fenced block starting "```py" is not in prose unchanged',
 			'a/x: the fenced block starting "~~~" is not in prose unchanged',
+		]);
+	});
+	it('reports a raw citation token in the prose outside code', () => {
+		const prose = `${PROSE}\nSee (@AEC-02) and \`(@AEC-02)\`.\n`;
+		expect(check(tree({ 'a/x': bundle({ prose }) })).errors).toEqual([
+			'a/x: prose keeps a raw citation token outside code: "See (@AEC-02) and `(@AEC-02)`."',
 		]);
 	});
 	it('checks one bundle file against its page source', () => {
