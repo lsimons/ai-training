@@ -39,7 +39,7 @@ GIT_ENV_BASE = {
 RULE_BEFORE = "- Do not edit `todos.json`; the tests use their own lists.\n"
 RULE_AFTER = (
     "- Never change `todos.json`, by hand or by running `todo.py`. To try a command,"
-    " copy it first: `cp todos.json /tmp/todos.json`, then run"
+    " copy the list first: `cp todos.json /tmp/todos.json`, then run"
     " `TODO_FILE=/tmp/todos.json python3 todo.py ...`.\n"
 )
 
@@ -107,7 +107,9 @@ def git(repo: str, *args: str) -> str:
 def copy_repo(parent: str) -> str:
     """Copies the fixture into `parent` and gives the copy one commit, as the page says."""
     copy = os.path.join(parent, "fixture-repo")
-    shutil.copytree(REPO, copy)
+    # A learner who ran git or the program inside the committed fixture leaves
+    # a .git/ or a cache there. Neither is part of the fixture.
+    shutil.copytree(REPO, copy, ignore=shutil.ignore_patterns(".git", "__pycache__"))
     git(copy, "init", "-q")
     git(copy, "add", "-A")
     git(copy, "commit", "-qm", "start")
@@ -134,6 +136,25 @@ def apply_remove(repo: str) -> None:
     shutil.copyfile(REMOVE_TEST, os.path.join(repo, "test_remove.py"))
 
 
+def python_env(**extra: str) -> "dict[str, str]":
+    """The only variables the program and the suite see, plus `extra`.
+
+    An allow-list, like git's above, so a variable in the learner's
+    environment (PYTHONSAFEPATH, PYTHONPATH, a TODO_FILE) can't change what
+    the lesson shows.
+    """
+    env = {
+        "PATH": os.environ.get("PATH", ""),
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHON_COLORS": "0",
+        "NO_COLOR": "1",
+        "PYTHONDONTWRITEBYTECODE": "1",
+    }
+    env.update(extra)
+    return env
+
+
 def run_todo(repo: str, todo_file: "str | None", *args: str) -> str:
     """Runs a todo.py command in the copy and returns what it printed.
 
@@ -141,9 +162,7 @@ def run_todo(repo: str, todo_file: "str | None", *args: str) -> str:
     recorded sessions: no TODO_FILE, so it reads and writes the copy's own
     `todos.json`.
     """
-    env = {key: value for key, value in os.environ.items() if key != "TODO_FILE"}
-    if todo_file is not None:
-        env["TODO_FILE"] = todo_file
+    env = python_env() if todo_file is None else python_env(TODO_FILE=todo_file)
     result = subprocess.run(
         [sys.executable, "todo.py", *args],
         cwd=repo,
@@ -157,7 +176,7 @@ def run_todo(repo: str, todo_file: "str | None", *args: str) -> str:
 
 def test_verdict(repo: str) -> str:
     """Runs the suite and returns its last line, OK or FAILED."""
-    env = dict(os.environ, PYTHON_COLORS="0", NO_COLOR="1")
+    env = python_env()
     result = subprocess.run(
         [sys.executable, "-m", "unittest", "-q"],
         cwd=repo,
@@ -167,6 +186,8 @@ def test_verdict(repo: str) -> str:
         text=True,
     )
     lines = result.stdout.strip().splitlines()
+    # A suite that prints nothing returns "", which matches neither OK nor a
+    # recorded log line, so the caller fails instead of passing on silence.
     return lines[-1] if lines else ""
 
 

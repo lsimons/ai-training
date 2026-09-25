@@ -33,6 +33,8 @@ def recorded_runs(name: str) -> list[tuple[str, list[str]]]:
                 runs[-1][1].append(line[2:])
             else:
                 collecting = False
+    if not runs:
+        raise SystemExit(f"{name}: the log has no `run` lines")
     return runs
 
 
@@ -40,10 +42,13 @@ def replay(name: str) -> Callable[[str, str], int]:
     def session(repo: str, scratch: str) -> int:
         CHANGES[name](repo)
         for command, recorded in recorded_runs(name):
+            words = shlex.split(command)
             if command == "python3 -m unittest -q":
                 printed = [test_verdict(repo)]
+            elif words[:2] == ["python3", "todo.py"]:
+                printed = run_todo(repo, None, *words[2:]).splitlines()
             else:
-                printed = run_todo(repo, None, *shlex.split(command)[2:]).splitlines()
+                raise SystemExit(f"{name}: `{command}` is a command the replay can't run")
             if printed != recorded:
                 raise SystemExit(f"{name}: `{command}` printed {printed}, the log shows {recorded}")
         print(name)
