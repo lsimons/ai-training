@@ -256,3 +256,4 @@ Eastlake
 Panitz
 unsandboxed
 developercertificate
+worktreeinclude

@@ -34,6 +34,7 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 EXAMPLES = REPO_ROOT / "site" / "examples"
 GIT_FIXTURE_DIRS = [
     "coding-with-agents/attribution-and-review-norms",
+    "coding-with-agents/parallel-sessions",
     "coding-with-agents/project-instructions",
     "coding-with-agents/reversible-changes",
     "coding-with-agents/reviewing-the-diff",

@@ -1,5 +1,10 @@
 id: coding-with-agents/parallel-sessions
 title: Running several agent sessions in worktrees
+description: >-
+  Run two agent sessions on one project at once, each in its own git worktree and branch with a task
+  that changes other files, keep a one-line note per session, and integrate in a fixed order: merge
+  the API branch, have the docs session rebase and run the check again, and keep every session away
+  from the shared stash and port.
 mode: tutorial
 covers: coding-with-agents/team
 serves: [coding-with-agents/works-in-team/runs-parallel-work]
@@ -14,9 +19,30 @@ exercise:
     Open two worktrees of the fixture and brief one agent on the API change and one on the docs,
     with no shared files. Keep a one-line note per session, merge the API branch first and have the
     other session rebase.
-sources: [Academy claude-code-in-action, Brilliant BLD]
+sources:
+  - Brilliant BLD
+  - Claude Code worktrees
+  - Git docs git-worktree
+  - Git docs git-stash
+  - Git docs git-rebase
+  - Git docs git-merge
+  - AI Training orchestration
 issue: 190
 minutes: 15
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 notes: >-
   Expert level. This repository's orchestration practice (docs/agents/orchestration.md) is the
-  worked example. Sources: Academy claude-code-in-action (paraphrased), Brilliant BLD-4, BLD-5.
+  worked example, cited by its GitHub URL as `AI Training orchestration` and described in our own
+  words. The plan named Academy claude-code-in-action for parallel and headless runs, but its public
+  lesson titles (checked on 2026-09-25) have no lesson on parallel sessions or worktrees, so it is
+  dropped from the sources. Brilliant BLD-4 and BLD-5 (organize and oversee a workflow) are cited
+  as an idea, and the S02 alignment table already maps them to runs-parallel-work. Claude Code
+  worktrees gives the `--worktree` location and branch name, the default base branch, the fresh
+  checkout without ignored files, `.worktreeinclude`, and the permission approvals saved in the main
+  checkout, all checked on 2026-09-25. Git docs git-worktree gives the per-worktree HEAD and index,
+  the shared refs, the refusal to check out one branch twice and `remove`. Git docs git-stash gives
+  `refs/stash`. Attribution and review norms are left to coding-with-agents/attribution-and-review-norms.
+  The fixtures under site/examples/coding-with-agents/parallel-sessions/ copy `shop/` to a
+  temporary place, run git with an allow-list environment and fixed dates, and open the two
+  worktrees as siblings of the copy, as the page and the exercise do.
