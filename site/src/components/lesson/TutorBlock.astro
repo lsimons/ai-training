@@ -43,18 +43,7 @@ const opencodeRequest = `Use the tutor skill on ${lessonUrl}`;
 </aside>
 
 <script>
-	for (const button of document.querySelectorAll<HTMLButtonElement>('[data-tutor-block] .tutor-copy')) {
-		button.addEventListener('click', async () => {
-			const label = button.textContent;
-			try {
-				await navigator.clipboard.writeText(button.dataset.copy ?? '');
-				button.textContent = 'Copied';
-			} catch {
-				button.textContent = 'Select and copy';
-			}
-			window.setTimeout(() => {
-				button.textContent = label;
-			}, 1500);
-		});
-	}
+	import { mountTutorBlock } from '@scripts/tutor-block';
+
+	mountTutorBlock();
 </script>
