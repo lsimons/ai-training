@@ -7,15 +7,13 @@ admin password comes from the environment, and is_admin raises an error
 when it isn't set.
 """
 
-import hmac
 import os
 import sqlite3
 
 
 def is_admin(password: str) -> bool:
     """Lets the admin page in when the password matches."""
-    expected = os.environ["NOTES_ADMIN_PASSWORD"]
-    return hmac.compare_digest(password.encode(), expected.encode())
+    return password == os.environ["NOTES_ADMIN_PASSWORD"]
 
 
 def search_notes(conn: sqlite3.Connection, owner: str, term: str) -> "list[str]":

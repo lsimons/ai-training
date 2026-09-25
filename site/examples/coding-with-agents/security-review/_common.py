@@ -11,7 +11,7 @@ NOTES = [
     ("alice", "Call O'Brien about the lease"),
     ("alice", "Plan the team offsite"),
     ("bob", "Plan salary review"),
-    ("bob", "Bank PIN reminder"),
+    ("bob", "Bank login reminder"),
 ]
 
 
