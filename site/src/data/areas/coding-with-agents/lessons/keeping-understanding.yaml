@@ -31,8 +31,8 @@ notes: >-
   behaviors of its own (Brilliant INC-3, INC-4) and none of the tutorial lessons above has room for
   them without going past fifteen minutes. The examples and the exercise use the spec-driven-increments
   to-do fixture after its increments, so that lesson is the one assumes entry. Project instructions
-  are explained in a sentence on the page (AGENTS.md or CLAUDE.md, read at the start of every
-  session) with a link to customizing-agents/instructions, because coding-with-agents/project-instructions
-  was not live when this lesson was written. The transcript and the decision file on the page are
+  are not explained on the page: the decisions-folder section points back at
+  coding-with-agents/project-instructions, which teaches the file and is live as of 2026-09-25.
+  The transcript and the decision file on the page are
   illustrative and the page says so. Sources: Brilliant INC, paraphrased, and Claude Code memory for
   what a session loads at its start (CLAUDE.md and auto memory), stated as a fact and dated.
