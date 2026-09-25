@@ -23,7 +23,9 @@ and #342. `.claude/settings.json` registers them.
   commands and rejects everything else, and any redirect to a file but
   `/dev/null`. It allows `mise run` only for the check tasks in
   `REVIEW_TASKS` in `scripts/agent_hooks.py`. `fast` and `ci` aren't in
-  that list, because their `lint` step runs fixers.
+  that list, because their `lint` step runs fixers. The hook catches
+  mistakes and isn't a sandbox, since the branch under review defines the
+  tasks it runs.
 - `format-file.sh`, PostToolUse on Edit and Write. It runs Biome on an
   edited file under `site/` and ruff on an edited `.py` file, in the
   worktree that holds the file, and never fails the tool call.
