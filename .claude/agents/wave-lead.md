@@ -47,9 +47,13 @@ line. Post that text on the ISSUE yourself with `gh issue comment`, then
 send the builder one message: the required findings, the suggested
 rewrites to apply unless they read worse, and the findings to skip. The
 builder makes one commit, runs `mise run fast`, pushes and replies on the
-issue. Then the same reviewer re-checks. Cheap nits from a re-check go
-back as one more one-line commit without another review round, and you
-read that diff yourself.
+issue. After `Verdict: needs changes`, the same reviewer re-checks.
+After `Verdict: approve` that lists only should-fix or nit items, spawn no
+second reviewer: read the fix commit with `git show`, run the one `mise`
+task that covers its files, and write `re-checked by lead` with a link to
+the fix commit in the re-check column of the review table. Cheap nits from
+a re-check also go back as one more one-line commit that you read
+yourself.
 
 A branch gets at most two revision rounds. After the second
 `Verdict: needs changes`, leave the branch out of the wave and report it
