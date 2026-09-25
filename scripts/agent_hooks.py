@@ -8,9 +8,11 @@ Three entry points, each reading the hook's JSON event on stdin:
   reason that names the alternative, which Claude Code shows the agent.
 - `review-bash` (PreToolUse on Bash in the `code-reviewer` agent,
   `.claude/agents/code-reviewer.md`, #348) allows only the read-only
-  commands a review needs: `git diff|log|show|status`, `gh pr diff|view`,
-  `gh issue view`, `mise run <task>`, `cd`, `ls`, `grep`, and `head`,
-  `tail` and `wc`, with no redirect to a file. Anything else exits 2.
+  commands a review needs: `git diff|log|show|status|ls-files`,
+  `gh pr diff|view`, `gh issue view`, `mise tasks`, `mise run` of a check
+  task in `REVIEW_TASKS`, `cd`, `ls`, `grep`, `cat`, `echo`, `head`,
+  `tail`, `wc`, `sort`, `uniq`, `sed -n` with print scripts, and `for`
+  loops over these, with no redirect to a file. Anything else exits 2.
 - `format` (PostToolUse on Edit and Write) runs Biome on an edited file
   under `site/` and ruff on an edited `.py` file. It never fails the tool
   call: a formatter that is missing or errors is skipped.
@@ -500,13 +502,52 @@ REVIEW_COMMANDS = (
     ("gh", "pr", "diff"),
     ("gh", "pr", "view"),
     ("gh", "issue", "view"),
-    ("mise", "run"),
+    ("git", "ls-files"),
+    ("mise", "tasks"),
     ("head",),
     ("tail",),
     ("grep",),
     ("wc",),
     ("ls",),
+    ("cat",),
+    ("echo",),
+    ("sort",),
+    ("uniq",),
 )
+
+# The `mise run` tasks a reviewer may run: checks that write only to
+# ignored paths (site/dist, site/.astro, site/coverage, .venv, the caches).
+# `setup` stays: its installs are frozen (`bun install --frozen-lockfile`,
+# `uv sync --locked`), so they fail instead of rewriting a lockfile, and
+# they write only site/node_modules, .venv and .vale/styles, which are
+# ignored. `fast` and `ci` are left out: both run `lint`, whose prek hooks
+# include fixers (ruff-check --fix, ruff-format, mdformat,
+# trailing-whitespace, end-of-file-fixer) that rewrite a tracked file on a
+# branch that isn't formatted, even in a clean checkout. The formatters
+# (`site-format`, `py-format`) and the installs that may update a lockfile
+# (`site-install`, `py-install`) are left out for the same reason (#388).
+REVIEW_TASKS = (
+    "setup",
+    "py-lint",
+    "py-typecheck",
+    "py-test",
+    "prose",
+    "spell",
+    "examples",
+    "data",
+    "site-check",
+    "site-lint",
+    "site-test",
+    "site-build",
+    "checkpoints",
+    "bundles",
+)
+
+# `mise tasks` subcommands that change or run something.
+MISE_TASKS_WRITERS = frozenset({"add", "edit", "run", "r"})
+
+SED_ADDRESS = r"(\d+|\$|/(?:[^/\\]|\\.)*/)"
+SED_PRINT = re.compile(rf"{SED_ADDRESS}(,{SED_ADDRESS})?p(;{SED_ADDRESS}(,{SED_ADDRESS})?p)*")
 
 
 REDIRECT_END = frozenset(" \t\n;|&<>()")
@@ -563,10 +604,77 @@ def writes_a_file(command: str) -> bool:
     )
 
 
+def sed_prints_only(args: Sequence[str]) -> bool:
+    """True for `sed -n` with print-only scripts (`1,20p`, `/a/,/b/p`).
+
+    Any other option, including `-i` in any spelling, and any other sed
+    command, such as `w` (write a file) or `e` (run a command), is rejected.
+    """
+    quiet = False
+    scripts: list[str] = []
+    operands: list[str] = []
+    i = 0
+    while i < len(args):
+        word = args[i]
+        cluster = re.fullmatch(r"-([nErsuz]*)(e?)", word)
+        if cluster and word != "-":
+            quiet = quiet or "n" in cluster.group(1)
+            if cluster.group(2):
+                i += 1
+                if i == len(args):
+                    return False
+                scripts.append(args[i])
+        elif word.startswith("-"):
+            return False
+        else:
+            operands.append(word)
+        i += 1
+    if not scripts and operands:
+        scripts.append(operands.pop(0))
+    return quiet and bool(scripts) and all(SED_PRINT.fullmatch(s) for s in scripts)
+
+
+def sort_writes(args: Sequence[str]) -> bool:
+    """True when `sort` writes a file (`-o`) or runs a program (`--compress-program`)."""
+    return any(
+        word.startswith(("--output", "--compress-program"))
+        or re.fullmatch(r"-[a-zA-Z]*o.*", word) is not None
+        for word in args
+    )
+
+
+def uniq_writes(args: Sequence[str]) -> bool:
+    """True when `uniq` gets a second operand, which it writes to."""
+    operands = 0
+    skip = False
+    for word in args:
+        if skip:
+            skip = False
+        elif word in {"-f", "-s", "-w"}:
+            skip = True
+        elif not word.startswith("-") or word == "-":
+            operands += 1
+    return operands > 1
+
+
 def review_allows(words: Sequence[str]) -> bool:
     """True when a simple command is one the code reviewer may run."""
-    if words[0] == "cd":
+    if words[0] in {"cd", "done"}:
         return True
+    if words[0] == "for":
+        # The loop header: its word list is data, and the body segments
+        # are checked one by one.
+        return len(words) >= 2 and words[1].isidentifier() and words[2:3] in ([], ["in"])
+    if words[0] == "sed":
+        return sed_prints_only(words[1:])
+    if words[0] == "sort" and sort_writes(words[1:]):
+        return False
+    if words[0] == "uniq" and uniq_writes(words[1:]):
+        return False
+    if words[:2] == ["mise", "run"]:
+        return len(words) == 3 and words[2] in REVIEW_TASKS
+    if words[:2] == ["mise", "tasks"] and MISE_TASKS_WRITERS & set(words[2:]):
+        return False
     if words[0] == "git":
         parsed = git_args(words, ".")
         args = parsed[0] if parsed else []
@@ -591,9 +699,12 @@ def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
     for segment in split_segments(harmless, "."):
         if segment.role is not None or not review_allows(segment.words):
             allowed = ", ".join(" ".join(c) for c in REVIEW_COMMANDS)
+            tasks = ", ".join(REVIEW_TASKS)
             return 2, (
                 f"Blocked by the code-reviewer hook: `{' '.join(segment.words)}` is not a "
-                f"review command. A reviewer runs only {allowed} and cd, and never edits."
+                f"review command. A reviewer runs only {allowed}, sed -n with p scripts, "
+                f"for loops over these, cd, and mise run with one of {tasks}. "
+                "A reviewer never edits."
             )
     return 0, ""
 
