@@ -45,7 +45,7 @@ objectives:
     behaviors:
       - claim: The learner turns a manual check into a command the agent can run and read the result of.
         why: A check the agent can run is run on every iteration, and a check only the learner can run is
-          run once (@Academy ai-native-sdlc-playbook).
+          run once (@Claude Code best practices).
         example: '"Open the page and see that the table has rows" becomes a test that renders the page and
           asserts on the row count.'
       - claim: "The loop has a bound: a number of attempts or a time limit, after which the agent stops and
