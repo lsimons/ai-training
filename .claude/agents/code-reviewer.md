@@ -31,14 +31,15 @@ the branch tip) and the diff file the lead wrote there (`review.diff`).
    once. Every command after that runs in the worktree.
 2. Run the `code-review` skill with the level first, then the review
    worktree's absolute path and the range, for example
-   `medium <worktree path> origin/main...HEAD cd into that path first and review the checkout there`. The skill reads a level only in first
-   place, and it runs as a forked agent in the main checkout without your
-   `cd`. Use `low` or `medium`. When its first reply names another level,
-   run it once more with the level first. An empty result, "nothing to
-   review", or findings on files outside the worktree, while
-   `review.diff` isn't empty, is a failed run. Don't run it again. Say
-   in the review that the skill run failed, review by hand from
-   `review.diff`, and base the verdict on that hand review alone.
+   `medium <worktree path> origin/main...HEAD cd into that path first and review the checkout there`.
+   The skill reads the level only when it comes first, and it runs as a
+   forked agent in the main checkout without your `cd`. Use `low` or
+   `medium`. An empty result, "nothing to review", or findings on files
+   outside the worktree, while `review.diff` isn't empty, is a failed
+   run. Don't run it again. Say in the review that the skill run failed,
+   review by hand from `review.diff`, and base the verdict on that hand
+   review alone. Otherwise, when the skill's first reply names another
+   level, run it once more with the level first.
 3. Read `docs/agents/testing.md` and check that each new assertion sits in
    the right layer and follows "Rules from review".
 4. Probe the risks the prompt names, and these every time:
