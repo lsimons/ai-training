@@ -1,7 +1,8 @@
 ---
 // InstructionsBuilder: tick the facts about a project, fill in the short
 // fields, and watch the resulting AGENTS.md take shape. Teaches only; it
-// never grades. No framework; the script below runs once per instance.
+// never grades. No framework: `scripts/instructions-builder.ts` binds each
+// instance, and `scripts/instructions-builder-logic.ts` builds the file.
 ---
 
 <div class="not-content instructions-builder">
@@ -210,109 +211,7 @@
 </style>
 
 <script>
-  function text(root: Element, cls: string): string {
-    const el = root.querySelector<HTMLInputElement>('.' + cls);
-    return el ? el.value.trim() : '';
-  }
+  import { mountInstructionsBuilders } from '@scripts/instructions-builder';
 
-  function checked(root: Element, cls: string): boolean {
-    const el = root.querySelector<HTMLInputElement>('.' + cls);
-    return el ? el.checked : false;
-  }
-
-  function build(root: Element): string {
-    const name = text(root, 'ib-name') || 'my-project';
-    const purpose = text(root, 'ib-purpose');
-    const lines: string[] = ['# ' + name];
-    if (purpose) lines.push('', purpose);
-
-    const commands: string[] = [];
-    if (checked(root, 'ib-has-runtime')) {
-      commands.push('- Runtime: ' + (text(root, 'ib-runtime') || '<language and version>'));
-    }
-    if (checked(root, 'ib-has-test')) {
-      commands.push('- Test: `' + (text(root, 'ib-test') || '<test command>') + '`');
-    }
-    if (checked(root, 'ib-has-lint')) {
-      commands.push('- Lint and format: `' + (text(root, 'ib-lint') || '<lint command>') + '`');
-    }
-    if (commands.length > 0) {
-      lines.push('', '## Commands', '', ...commands);
-    }
-
-    const rules: string[] = [];
-    if (checked(root, 'ib-has-branch')) {
-      rules.push('- ' + (text(root, 'ib-branch') || '<branch rule>'));
-    }
-    if (checked(root, 'ib-has-notouch')) {
-      rules.push('- Never edit: ' + (text(root, 'ib-notouch') || '<paths>'));
-    }
-    if (checked(root, 'ib-has-mistake')) {
-      rules.push('- ' + (text(root, 'ib-mistake') || '<the mistake to stop, and what to do instead>'));
-    }
-    if (rules.length > 0) {
-      lines.push('', '## Rules', '', ...rules);
-    }
-
-    return lines.join('\n') + '\n';
-  }
-
-  function syncDisabled(root: Element): void {
-    const pairs: Array<[string, string]> = [
-      ['ib-has-runtime', 'ib-runtime'],
-      ['ib-has-test', 'ib-test'],
-      ['ib-has-lint', 'ib-lint'],
-      ['ib-has-branch', 'ib-branch'],
-      ['ib-has-notouch', 'ib-notouch'],
-      ['ib-has-mistake', 'ib-mistake'],
-    ];
-    for (const [box, field] of pairs) {
-      const input = root.querySelector<HTMLInputElement>('.' + field);
-      if (input) input.disabled = !checked(root, box);
-    }
-  }
-
-  function render(root: Element): void {
-    const code = root.querySelector<HTMLElement>('.ib-code');
-    const count = root.querySelector<HTMLElement>('.ib-count');
-    if (!code) return;
-    const out = build(root);
-    code.textContent = out;
-    if (count) {
-      const n = out.split('\n').filter((l) => l.trim().length > 0).length;
-      count.textContent = n + ' non-empty line' + (n === 1 ? '' : 's');
-    }
-  }
-
-  function init(root: Element): void {
-    const form = root.querySelector<HTMLFormElement>('.ib-form');
-    const copy = root.querySelector<HTMLButtonElement>('.ib-copy');
-    if (!form) return;
-
-    form.addEventListener('input', () => {
-      syncDisabled(root);
-      render(root);
-    });
-    form.addEventListener('submit', (ev) => ev.preventDefault());
-
-    if (copy) {
-      copy.addEventListener('click', async () => {
-        const label = copy.textContent;
-        try {
-          await navigator.clipboard.writeText(build(root));
-          copy.textContent = 'Copied';
-        } catch {
-          copy.textContent = 'Select and copy';
-        }
-        window.setTimeout(() => {
-          copy.textContent = label;
-        }, 1500);
-      });
-    }
-
-    syncDisabled(root);
-    render(root);
-  }
-
-  document.querySelectorAll('.instructions-builder').forEach(init);
+  mountInstructionsBuilders(document);
 </script>
