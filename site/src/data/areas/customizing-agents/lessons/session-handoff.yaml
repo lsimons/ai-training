@@ -1,11 +1,16 @@
 id: customizing-agents/session-handoff
 title: Handing work to the next session
+description: >-
+  End a session that stopped halfway with a handoff file that names the state, the decisions and
+  what was ruled out, and count the turns a fresh session needs with and without it.
 mode: tutorial
 covers: customizing-agents/memory
 serves: [customizing-agents/configures-agent/manages-memory]
 introduces: [session-handoff]
 assumes:
   - objective: coding-with-agents/ships-with-agent/keeps-understanding
+    lesson: coding-with-agents/keeping-understanding
+    section: keep-the-reasons-where-the-agent-reads-them
 after: [customizing-agents/compaction]
 shorts: []
 exercise:
@@ -13,6 +18,34 @@ exercise:
   brief: >-
     End a session with a handoff file naming state, decisions, the failing test and what was ruled
     out, then start a fresh session from it and count the turns until useful work resumes.
-sources: []
+sources:
+  - AEC-05
+  - Claude Code how it works
+  - Claude Code memory
+  - Claude Code best practices
+  - Claude Code permission modes
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 issue: 195
 minutes: 15
+notes: >-
+  The fixtures are in `site/examples/customizing-agents/session-handoff/`. `project/` is a small
+  report service whose `test_export_timezone` fails on main. `session.md` is a session log written
+  for the lesson: the agent changes the test to expect UTC, the user rules that out and then rules
+  out the server's time zone, three decisions follow with reasons, and the session stops before any
+  code changes. `setup_practice.py` builds a git repository from `project/` in that state (the test
+  edit uncommitted, the suite green) into a directory that must not exist yet; `diff_only.py` runs
+  the same build in a temporary directory for `mise run examples`. `check_handoff.py` matches the
+  words that name seven facts in a handoff file, and `files_only.py` and `full.py` run it on the two
+  author-written samples in `samples/`. The turn counts come from the learner's own sessions and
+  can't be asserted, so the page says counts vary between runs. Practice sessions run with
+  CLAUDE_CODE_DISABLE_AUTO_MEMORY=1, so a memory note can't carry facts from the replayed session
+  into the fresh one, and in Manual mode (`--permission-mode default`), so the learner sees each
+  edit the agent proposes. Vendor facts to re-check by review-by: a new session starts without the
+  old conversation and conversations are saved locally under ~/.claude/projects/ (how it works),
+  `--continue`, `--resume` and the advice to start clean after repeated corrections (best
+  practices), CLAUDE.md and auto-memory loaded at session start, the auto-memory switch and the
+  "Saved 1 memory" message (memory), and what Manual mode allows without a prompt (permission
+  modes). AEC-05 supplies the session and state distinction, paraphrased. Brilliant MEM is
+  alignment only, and the Academy courses are not cited. The page doesn't say "the previous
+  lesson", so it has no assumes entry for compaction.
