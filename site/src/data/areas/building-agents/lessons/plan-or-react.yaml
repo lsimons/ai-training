@@ -2,8 +2,8 @@ id: building-agents/plan-or-react
 title: Plan everything first or react step by step
 description: >-
   Place plan-then-execute and reactive agents on one spectrum, compare a fixed workflow with an
-  agent, count what five patterns cost at twelve steps, and name what is lost between levels of
-  plans and at each seam of a composition.
+  agent, count what six patterns cost at twelve steps, and name what is lost between levels of
+  plans and at each handoff of a composition.
 mode: explanation
 covers: building-agents/patterns
 serves:
@@ -27,10 +27,11 @@ exercise:
 sources: [AEC-06, AEC-04, Anthropic effective agents, Claude Code subagents]
 sources-checked: 2026-09-26
 review-by: 2027-03-26
+issue: 208
 minutes: 15
 notes: >-
   Explanation mode with one ungraded Predict: site/examples/building-agents/plan-or-react/costs.py
-  counts the model and tool calls of five patterns at twelve steps and adds up the time with 3
+  counts the model and tool calls of six patterns at twelve steps and adds up the time with 3
   seconds per model call and 1 per tool call, assumptions written by hand. Every number in the
   prose, the pitfall, the exercise's model answer and the recap is pasted from its output. The
   workflows-versus-agents recommendation is cited from Anthropic's public engineering article
@@ -39,6 +40,6 @@ notes: >-
   issue was dropped because the page cites no claim from it. AEC-06 backs the spectrum, the middle
   way, when to lean to each end, the levels of hierarchical planning and cascading failures, and
   AEC-04 the wasted work of a wrong plan, the rough plan first and the cost of combining patterns.
-  The seams of a composition come from the composes-patterns behaviors in the competency file. The
+  The handoffs of a composition come from the composes-patterns behaviors in the competency file. The
   subagent claims (fresh context, own system prompt and task message, a summary back) are from the
   Claude Code subagents page, checked on 2026-09-26.

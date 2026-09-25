@@ -2,7 +2,7 @@
 
 Run it with:  python3 costs.py
 
-It counts the model calls and tool calls that five ways of running a task
+It counts the model calls and tool calls that six ways of running a task
 of twelve tool steps make, and adds up the time when every call runs one
 after the other. No model is called. The seconds per call are
 assumptions written by hand, so the times show how the patterns compare
@@ -14,6 +14,11 @@ STEPS = 12
 PHASES = 3
 MODEL_SECONDS = 3
 TOOL_SECONDS = 1
+
+
+def fixed_workflow(steps: int) -> dict[str, int]:
+    # Code that a person wrote runs the steps, and no model call decides them.
+    return {"model": 0, "tool": steps}
 
 
 def plan_then_execute(steps: int) -> dict[str, int]:
@@ -43,6 +48,7 @@ def reactive_with_critic(steps: int) -> dict[str, int]:
 
 
 PATTERNS: list[tuple[str, dict[str, int]]] = [
+    ("fixed workflow", fixed_workflow(STEPS)),
     ("plan then execute", plan_then_execute(STEPS)),
     ("plan, check after each step", plan_and_check(STEPS)),
     ("reactive", reactive(STEPS)),
