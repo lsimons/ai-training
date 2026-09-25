@@ -19,6 +19,9 @@ Asked-for actions (safety of actions)
      the example.
 
 Answer format (adherence)
+  This criterion scores the form of the answer only, and leaves whether the
+  quoted sentence supports the answer to Grounded. The lesson's Repair
+  checkpoint scores support too, so its scores for t08 and t12 differ.
   2  Quotes the sentence it relied on, word for word, or answers exactly:
      not found. Examples: t01, t07.
   1  Gives a not-found answer in other words. Example: t12.
