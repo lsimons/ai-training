@@ -278,10 +278,12 @@ def skips_hooks(sub: str, args: Sequence[str]) -> bool:
         if arg in COMMIT_VALUE_FLAGS:
             skip_next = True
         elif re.match(r"^-[A-Za-z]", arg):
-            for flag in arg[1:]:
+            for i, flag in enumerate(arg[1:], start=1):
                 if flag == "n":
                     return True
                 if flag in COMMIT_SHORT_VALUE:
+                    # A value flag that ends the group (`-am`) takes the next word.
+                    skip_next = i == len(arg) - 1 and flag in "mFcCt"
                     break
     return False
 
@@ -340,7 +342,10 @@ def rm_leaves_scratch(words: Sequence[str], cwd: str) -> str | None:
     for target in targets:
         if "$" in target or "`" in target:
             return target
-        resolved = Path(cwd, Path(target).expanduser()).resolve()
+        try:
+            resolved = Path(cwd, Path(target).expanduser()).resolve()
+        except RuntimeError, OSError:
+            return target
         if SCRATCH not in resolved.parts:
             return target
     return None
@@ -351,9 +356,8 @@ def check_hooks_and_deletes(segment: Segment) -> str | None:
     words = segment.words
     if gh_deletes(words):
         return (
-            "`gh repo delete` and `gh api` with the DELETE method delete work on GitHub. "
-            "No agent deletes a repository, a branch, a comment or a release. Report what "
-            "should go, and leave the deletion to the maintainer."
+            "`gh repo delete` and `gh api` with the DELETE method are for the maintainer. "
+            "Report what should go."
         )
     parsed = git_args(words, segment.cwd)
     if parsed and parsed[0] and skips_hooks(parsed[0][0], parsed[0][1:]):
@@ -365,7 +369,7 @@ def check_hooks_and_deletes(segment: Segment) -> str | None:
     if outside is not None:
         return (
             f"`rm` of `{outside}` with a `.scratch` target: every target must be inside "
-            "`.scratch/` in your worktree. Remove the other paths in a separate command."
+            "a `.scratch/` directory. Remove the other paths in a separate command."
         )
     return None
 

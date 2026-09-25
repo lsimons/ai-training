@@ -255,6 +255,8 @@ def test_skipping_the_git_hooks_is_rejected(command: str) -> None:
         "git commit -m x",
         "git commit -m --no-verify",
         "git commit -mnote",
+        "git commit -am --no-verify",
+        'git commit -am "-n fix"',
         'git commit -m "fix: mention --no-verify"',
         "git commit -am x -- -n",
         "git push -n origin feat/1-x",
@@ -308,6 +310,7 @@ def test_other_gh_calls_pass(command: str) -> None:
         ("rm -rf .scratch/x /", "/"),
         ("rm -rf .scratch/x $HOME", "$HOME"),
         ("rm -rf -- .scratch/x site", "site"),
+        ("rm -rf .scratch/x ~nosuchuser/y ../..", "~nosuchuser/y"),
     ],
 )
 def test_rm_with_a_scratch_target_must_stay_inside_scratch(command: str, outside: str) -> None:
