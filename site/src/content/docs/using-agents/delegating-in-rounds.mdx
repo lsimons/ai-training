@@ -1,0 +1,302 @@
+import { Choice, MultiChoice, Match, Scenario, Pitfall, Exercise, Recap, Habit, Prompt, Response } from '@components/lesson';
+
+In this lesson we delegate one piece of a split task and check the
+result line by line. Then we change the brief with what the check showed. Then we
+delegate the next piece with the change in its brief, and we keep a short
+log of both rounds. The task is the bike pilot report from the previous
+lesson, so the sources are already familiar.
+
+You need any chat-capable agent you already have access to. Start each
+piece in a fresh conversation. The next piece then sees only what you
+write into its brief, and the lesson is about what goes into it. Every exchange on this page is illustrative. The author
+wrote it to show the pattern, and your agent gives a different text.
+
+## The first piece and its criteria
+
+The previous lesson split the report into three pieces, ran the usage
+piece, and left the riders piece and the cost piece as the exercise. The
+brief below is a model answer to that exercise for the riders piece. If
+you wrote your own brief for it, use yours with the criteria below next
+to it.
+
+<Prompt model="illustrative" recorded="illustrative">
+Write the "Riders" section of a report from the survey note below.
+Format: the heading "Riders", then four bullets, one per finding, each
+count written as "n of 41 replies".
+
+Use only the survey note as your source. Use the 41 replies as the base
+for every count, and don't turn counts into percentages. Don't add
+commentary or recommendations.
+
+Done when: there are four bullets, each count is written as "n of 41
+replies", every count is in the note, no percentage appears, and there is
+no commentary or recommendation.
+
+[survey note follows]
+</Prompt>
+
+The criteria for this piece are the done-criteria of the brief, written as
+four lines you can tick:
+
+1. A heading and four bullets, each count written as "n of 41 replies".
+2. Every count is in the note.
+3. The section has no percentages.
+4. No commentary or recommendation.
+
+For reference, here is the survey note again.
+
+> All 120 pilot participants got the survey and 41 replied. 33 said they
+> would keep using the bikes if the scheme continues. 29 named "no bike
+> available in the morning" as the biggest problem. 12 asked for helmets
+> at the docking station. 6 wrote in the free-text box that the docking
+> station is too far from the east entrance. I haven't turned any of this
+> into percentages.
+
+## Round one: delegate and check
+
+Send the brief with only the survey note pasted underneath. Here is the
+kind of result that comes back.
+
+<Response>
+**Riders**
+
+- 33 of 41 replies would keep using the bikes if the scheme continues,
+  and 8 of 41 replies would not.
+- 29 of 41 replies named "no bike available in the morning" as the
+  biggest problem.
+- 12 of 41 replies asked for helmets at the docking station.
+- 6 of 41 replies said in the free-text box that the docking station is
+  too far from the east entrance.
+</Response>
+
+It reads well, and it looks like what you asked for. Check it before you
+read on. Take the four lines one at a time, with the note next to the
+result, and mark each one pass or fail.
+
+<Match id="tick-round-one" objective="using-agents/delegates-and-checks/reviews-against-brief"
+  concepts={['task-iteration', 'checking-results']}
+  context="The lesson delegates the riders section of a report on a shared-bike pilot. The survey note says 41 of 120 participants replied, 33 would keep using the bikes, 29 named no bike in the morning as the biggest problem, 12 asked for helmets and 6 said the docking station is too far from the east entrance. The result has four bullets, each written as n of 41 replies, and the first bullet ends with: and 8 of 41 replies would not."
+  title="Pass or fail, line by line" hint="For each line, find the thing it names in the result, then look for it in the note."
+  options={['Pass', 'Fail']}
+  rows={[
+    { statement: 'A heading and four bullets, each count written as "n of 41 replies"', option: 0, why: 'Count the bullets and read how each count is written.' },
+    { statement: 'Every count is in the note', option: 1, why: 'Take each number in the result and find it in the note. Is there one you cannot find?' },
+    { statement: 'The section has no percentages', option: 0, why: 'Look for a percent sign or the word percent anywhere in the section.' },
+    { statement: 'No commentary or recommendation', option: 0, why: 'Does any bullet say what should be done, or what the numbers mean?' },
+  ]}
+  rationale="Three lines pass and one fails. The note has no count of 8 anywhere, and it never says that anyone would stop using the bikes.">
+Check the round one result against the four criteria. Which lines pass and which fail?
+</Match>
+
+The failing line is the second one. The note has no 8 in it. The agent
+took 41 replies, subtracted the 33 who said they would keep using the
+bikes, and wrote the difference as a finding. It is also a claim the note
+doesn't make. The other 8 replies didn't say they would keep using the
+bikes, and that isn't the same as saying they would stop. Some of them
+may not have answered that question at all.
+
+Notice how the check found it. A read of the whole section gives a
+feeling that it is fine. A walk down the four lines gives three passes
+and one fail, and the fail names the exact bullet to look at.
+
+## Reading the miss as feedback on the brief
+
+The easy reading of the miss is that the agent made a mistake. The more
+useful reading is that the brief left a constraint unsaid. It told the
+agent which source to use and how to write each count. It never said that
+every count is copied from the note as it stands and that no count is
+worked out from others. "Use only the survey note as your source" allows
+a number computed from the note, and the agent read it that way.
+
+So the fix goes in the brief, as a limit the agent reads before it
+starts. Add this line to the limits of the riders brief:
+
+```text
+Copy each count as the note gives it. Don't add, subtract or combine
+counts.
+```
+
+Working this way, one piece at a time with the brief changed after each
+check, is iteration. Each result is feedback on the brief, and the next
+brief carries what the result showed. The AI Fluency course from Claude
+Academy describes the same back and forth between describing a task and
+judging what comes back, and it treats the judging as the source of the
+next description (@Academy ai-fluency-framework-foundations).
+
+The cost piece needs the change too, because it has the same gap. The vendor email has two monthly prices and a twelve-month term, and
+an agent with no limit on computed numbers may add a yearly total or the
+difference between the two options. Neither number is in the email, and
+the manager reads it as if the vendor had quoted it. Put the change into
+the cost brief before you send it.
+
+<Choice id="where-the-fix-goes" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['task-iteration']}
+  context="A learner delegates a report on a shared-bike pilot one piece at a time, each piece in a fresh conversation. The first piece, the riders section, came back with a count that the source note never gives, because the agent worked it out from two other counts. The cost piece, from a vendor email with two prices, is next."
+  title="Where does the fix go?" hint="Which of these will the cost piece, in its own fresh conversation, still see?"
+  options={[
+    { text: 'Reply in this conversation that counts are copied, never worked out, and ask for the riders section again.', why: 'This section gets fixed. The cost piece starts in a fresh conversation that never sees the reply, so it has the same gap.' },
+    { text: 'Send the riders brief again, unchanged, in a fresh conversation, since the next result may be different.', why: 'The brief still allows a computed count, so the same kind of miss can come back. Nothing about the gap has changed.' },
+    { text: 'Delete the computed count from the bullet by hand, and send the cost brief as you had written it.', why: 'The riders section is right now. The cost brief has the same gap, and a yearly total or a price difference can appear there.' },
+    { text: 'Add a limit on computed numbers to the riders brief, and put the same limit in the cost brief before sending it.', correct: true },
+  ]}>
+The riders section came back with a count the note never gives. The
+agent worked it out by subtracting two numbers in the note. You are about
+to delegate the cost piece. Where does the fix go?
+</Choice>
+
+## Round two: the next piece with the change
+
+Here is the cost brief, a model answer to the other half of the previous
+exercise, with the change from round one in its limits. Open a fresh
+conversation, send it with only the vendor email pasted underneath, and
+check what comes back.
+
+<Prompt model="illustrative" recorded="illustrative">
+Write the "Cost" section of a report from the vendor email below. Format:
+the heading "Cost", then one bullet per option with its monthly price and
+what it includes, then one line with the minimum term.
+
+Use only the email as your source. Include both options. Copy each amount
+as the email gives it. Don't add, subtract or multiply amounts. Don't add
+commentary or recommendations.
+
+Done when: both prices appear once and match the email, each option says
+what it includes, the twelve-month term is stated, and every amount is in
+the email.
+
+[vendor email follows]
+</Prompt>
+<Response>
+**Cost**
+
+- Option A: 1,800 per month for the bikes and the docking station. Your
+  facilities team does the maintenance.
+- Option B: 2,400 per month, including maintenance and replacement of
+  damaged bikes.
+
+Both options have a minimum term of twelve months. Both prices exclude
+tax.
+</Response>
+
+Walk the four lines again. Both prices appear once, and they match the
+email. Each option says what it includes. The term is stated. Every amount
+in the section is in the email, and there is no yearly total and no
+difference between the two prices. All four pass. The limit you added after
+round one kept computed numbers out of a piece the miss never touched.
+
+## A two-line log per round
+
+Keep a log while you work, two lines per round: what changed in the brief,
+and what the result showed. After the two rounds above it reads like this.
+
+```text
+Round 1, riders piece
+  Changed: nothing, this is the first brief from the split.
+  Showed: "8 of 41 replies would not" is a count the note never
+    gives. The brief never said to copy counts and not work them out.
+
+Round 2, cost piece
+  Changed: added "Copy each amount as the email gives it. Don't add,
+    subtract or multiply amounts."
+  Showed: all four lines pass. No yearly total or price difference.
+```
+
+Read the log after two rounds and look at what the miss cost. It cost one
+section of four bullets and a minute of checking. The fix was in the next
+brief before the next piece ran. Now picture the same gap in the one-prompt
+report from the previous lesson. The computed 8 would sit in a paragraph
+next to a yearly total, and both would read as findings. You would find
+them after the manager had asked about them, if at all. A short round
+keeps each mistake small because it is found in one piece, while the
+piece is still the only thing that depends on it.
+
+The log is also the lightest record of what you checked. It has one line
+for what changed, and one for what the check found. A check that is light
+enough gets done on a busy day, and the log is a check of that size. The
+safety course makes the same point about a checked-by line in a team
+template ([Marking what a person
+checked](/safety/marking-what-a-person-checked/#put-the-mark-in-the-process)).
+
+<Pitfall title="Sending the same brief again">
+A learner sees the computed count in the riders section, opens a fresh
+conversation and sends the same brief again, expecting a better result.
+The new result has "and 8 of 41 replies did not say so" in the first bullet, which is
+the same computed count with new wording. The brief is the same, so
+the gap that produced the miss is still there, and the agent fills it
+the same way. A second run of an unchanged brief only asks for another guess.
+When a round misses, change the brief first, and write the change in the
+log.
+</Pitfall>
+
+<Scenario id="newsletter-round-two" phase="review" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['task-iteration']}
+  context="A learner delegates a three-section team newsletter one section at a time, each in a fresh conversation, from a notes file. The first section came back with the event on the 14th written as next Tuesday, which will be wrong by the time anyone reads it."
+  title="Before the second section" hint="What does the second section's conversation have to go on, apart from its brief?"
+  options={[
+    { text: 'Tell the agent in the first conversation to use the dates from the notes, then open a fresh conversation for the second section with its brief as written.', consequence: 'The first section is fixed. The second conversation never saw the reply, and its dates come back as next Friday and in two weeks.' },
+    { text: 'Add "write every date as it appears in the notes" to the limits of both briefs, and send the second one.', correct: true, consequence: 'The second section comes back with the dates as the notes give them. The log shows the change in round two and a pass on the date line.' },
+    { text: 'Send the first brief again in a fresh conversation, since a second run often reads the notes more carefully.', consequence: 'The brief has the same gap, and the date comes back as this Tuesday. The second section has not started yet.' },
+    { text: 'Correct the date by hand and move on to the second section with its brief as written, to keep the rounds short.', consequence: 'The first section is right. The second section has two relative dates, and you correct those by hand too.' },
+  ]}>
+The first section of the newsletter came back with "next Tuesday" where
+the notes say the 14th. You are about to delegate the second section.
+What do you do?
+</Scenario>
+
+<MultiChoice id="cost-lines-that-fail" phase="review" objective="using-agents/delegates-and-checks/reviews-against-brief"
+  concepts={['task-iteration', 'checking-results']}
+  context="A vendor email offers two options with a twelve-month minimum term: Option A at 1,800 per month with maintenance done by the customer, and Option B at 2,400 per month with maintenance and replacement included. The criteria for the cost section are: both prices appear once and match the email, each option says what it includes, the twelve-month term is stated, and every amount is in the email."
+  title="Which criteria fail?" hint="Take the criteria one at a time and look for the thing each one names, in the section and in the email."
+  options={[
+    { text: 'The twelve-month term is stated.', correct: true },
+    { text: 'Both prices appear once and match the email.', why: 'Compare 1,800 and 2,400 with the email. Each appears once and matches.' },
+    { text: 'Every amount is in the email.', correct: true },
+    { text: 'Each option says what it includes.', why: 'Read each bullet for what the option covers. Both say it.' },
+  ]}>
+The cost section comes back as two bullets: "Option A: 1,800 per month
+for the bikes and the docking station, your team does the maintenance" and "Option B: 2,400 per month, with
+maintenance and replacement of damaged bikes, 600 more than Option A".
+The section has nothing else in it. Which of the criteria does it
+fail?
+</MultiChoice>
+
+## The round as the unit of work
+
+A round is one brief, one result, one check, and one change to the brief.
+The previous lesson made the pieces small enough to check. In this lesson
+you planned and counted the work in rounds, and each round ended with a
+log entry. Most pieces take one or two
+rounds. The next lesson is about the piece that keeps needing more, and
+how to see from the log when it is time to do the step yourself.
+
+Improving work step by step from its failures is also how DeepLearning.AI
+teaches builders to improve an agent workflow. They look at where the
+output goes wrong, and they fix that step first (@DLAI-11). You do the
+same at a smaller size, one piece and one brief at a time.
+
+<Exercise stretch="Run the usage piece from the previous lesson again with the change from round one in its brief, and add a third round to your log. Did the change hold on a piece with a total in it?">
+Delegate the riders piece with the brief above, or with the first piece of
+your own split and its criteria. Check the result against the criteria,
+one line at a time, and write pass or fail next to each line. Change the
+brief with what the result showed, put the same change into the brief for
+the cost piece, and delegate the cost piece in a fresh conversation. Keep
+a two-line log per round, in the format above. The whole exercise fits in
+fifteen minutes. A good result is a log of two rounds, with a pass or fail
+for every criterion in each round and a round two brief that holds the
+change from round one. If your first round passed every line, write
+"Changed: nothing" for round two and say what the result showed anyway.
+Which line of your log would you want to read before you start the next
+report of this kind?
+</Exercise>
+
+<Recap>
+1. Delegate one piece at a time, and check each result line by line against its criteria, pass or fail per line. A read of the whole result gives a feeling, and the lines give you the failing bullet.
+2. Read a miss as feedback on the brief. Most misses come from a constraint the brief left unsaid, such as a count worked out from other counts when the brief never said to copy them (@Academy ai-fluency-framework-foundations).
+3. The fix goes into the brief as a limit, and into the brief of every later piece with the same gap. A reply in the chat stays in that conversation.
+4. Keep a log of two lines per round: what changed in the brief, and what the result showed. It is light enough to keep on a busy day.
+5. Short rounds keep mistakes cheap, because a miss is found in one small piece before anything else depends on it.
+</Recap>
+
+<Habit id="change-the-brief-first">
+The next time a delegated result misses one of its criteria, write the change into the brief before you send anything else to the agent.
+</Habit>
