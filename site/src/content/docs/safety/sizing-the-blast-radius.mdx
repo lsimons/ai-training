@@ -38,12 +38,13 @@ Who can see each place
 
 ## What the list reaches
 
-A small program reads the list. For each row it prints who the row
-reaches and whether its actions can be undone. Its rule for undo is the
-plain one. Reading doesn't change anything, so there is nothing to undo. On
-this drive a move never replaces a file: two files with the same name stay
-side by side, so a move or a rename can be moved or renamed back. A delete with no trash can't be
-restored, and a message that someone has read can't be taken back.
+A small program reads the list. For each row it prints who the row reaches
+and whether its actions can be undone. Its rule for undo is the plain one.
+Reading doesn't change anything, so there is nothing to undo. On this
+drive a move never replaces a file: two files with the same name are kept
+side by side, so a move or a rename can be moved or renamed back. A delete
+with no trash can't be restored, and a message that someone has read can't
+be taken back.
 
 <Predict id="predict-rows-without-undo" objective="safety/judges-agent-risk/names-blast-radius"
   concepts={['blast-radius', 'permissions-and-least-privilege']}
@@ -138,12 +139,12 @@ about, and grant again when the next task needs more.
 
 ## Place the approval on the row that can't be undone
 
-After the cut, one row is left that can't be undone: row 3, the delete.
-A person approves right before the agent deletes. The moves
-and renames in row 2 don't need an approval, because on this drive a wrong move can
-be moved back. Row 1 doesn't change anything. An approval on every move would ask the
-person dozens of times, and after the tenth time they stop reading. Keep
-the approvals few, and each one gets read.
+After the cut, one row is left that can't be undone: row 3, the delete. A
+person approves right before the agent deletes. The moves and renames in
+row 2 don't need an approval, because on this drive a wrong move can be
+moved back, and row 1 doesn't change anything. An approval on every move
+would ask the person dozens of times, and after the tenth time they stop
+reading. Keep the approvals few, and each one gets read.
 
 An approval is only as good as what the approver sees. A prompt that says
 "Delete the duplicates? yes / no" asks the person to guess. To judge a
