@@ -17,6 +17,14 @@ describe('sectionSlugs', () => {
 	it('numbers a repeated heading across all depths, as one slugger per page does', () => {
 		expect(slugs('## Recap\n\n### Recap\n\n## Recap\n')).toEqual(['recap', 'recap-2']);
 	});
+	it('slugs dashes after smart punctuation, as a site build showed: a lone -- becomes an em dash, --- stays', () => {
+		expect(slugs('## Plan -- then act\n\n## A --- b\n\n## x--y\n\n## Run `a -- b`\n')).toEqual([
+			'plan--then-act',
+			'a-----b',
+			'xy',
+			'run-a----b',
+		]);
+	});
 	it('ignores a heading inside a fence', () => {
 		expect(slugs('```markdown\n## Not a heading\n```\n\n## Real\n')).toEqual(['real']);
 	});
