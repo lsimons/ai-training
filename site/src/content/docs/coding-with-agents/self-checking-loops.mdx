@@ -21,14 +21,16 @@ with totals 22975.95 EUR and 23257.33 EUR.
 
 ## Write the check as a test
 
-A check that only you can run gets run when you remember it. A check the
-agent can run gets run on every attempt, because the agent can run it
-and read the result without you (@Academy ai-native-sdlc-playbook). The
-vendor guide for Claude Code gives the same advice: give the agent a
-check with a pass or fail result, such as tests, a build, or a script
-that compares the output with a known good result. After each change the agent
-runs the check and reads the result, and it keeps working until the
-check passes (@Claude Code best practices).
+A check that only you can run gets run when you remember it. The vendor
+guide for Claude Code says that without a check the agent can run, you
+are the one who has to notice every mistake. Its advice is to give the
+agent a check with a pass or fail result. A test suite is one, and a
+script that compares the output with a known good result is another. The agent can then
+rerun the check after each change and stop once it passes
+(@Claude Code best practices). The Academy course The AI-native SDLC
+playbook, where SDLC stands for the life cycle of software development, teaches
+the same idea in a lesson on giving the agent a feedback loop
+(@Academy ai-native-sdlc-playbook).
 
 For the nightly import, the check is `test_nights.py`, a short Python
 script in the course repository. It runs the importer on each night the
@@ -106,8 +108,8 @@ may change, and the check itself is not on that list. Without the
 limits, an agent told to keep going until the test passes can keep going
 for a long time, and the shortest way to a passing test is often to
 change the test. Automating a check is one of the verification skills
-in Brilliant's map, and the limits are what make it safe to hand over
-(@Brilliant VER).
+in Brilliant's skills map for coding with AI (@Brilliant VER). The limits
+are what make it safe to hand the check to the agent.
 
 The transcript below is illustrative and doesn't record a specific
 model's words.
@@ -134,8 +136,8 @@ changed only `importer.py`.
 
 The response is a claim about what the agent did. Before the run, make
 the copy a git repository with one commit and give that commit a tag.
-Afterwards git can then list every file the run changed, even when the
-agent made commits of its own.
+Afterwards git can list every file that differs from the tag, even when
+the agent made commits of its own.
 
 ```sh
 git init
@@ -144,10 +146,14 @@ git commit -m "Before the agent's run"
 git tag before-run
 ```
 
-After the run, list what changed, and run the test yourself.
+After the run, list what changed, and run the test yourself. A plain
+`git diff` leaves out files the agent created, so stage everything
+first, with `git add -A`, and compare the staged files with the tag.
+A new file then shows in the list like a changed one.
 
 <Predict id="run-after-the-loop" title="What the bounded run changed"
-  answer={`$ git diff --stat before-run
+  answer={`$ git add -A
+  $ git diff --cached --stat before-run
    importer.py | 9 +++++----
    1 file changed, 5 insertions(+), 4 deletions(-)
   $ python3 test_nights.py
@@ -157,19 +163,28 @@ After the run, list what changed, and run the test yourself.
   2026-09-17: pass
   4 passed, 0 failed
   exit status 0`} run="coding-with-agents/self-checking-loops/after_loop.py">
-In the copy, after the agent's run, run these two commands. The course's
-script applies the same change to a copy of its own and prints the
-output of both, with the exit status of the test as the last line.
+These are the commands you run in `~/loop-me` after your own agent's
+run, in the exercise at the end of the lesson:
 
 ```sh
-git diff --stat before-run
+git add -A
+git diff --cached --stat before-run
 python3 test_nights.py
+```
+
+The course's script applies the change from the transcript to a fresh
+copy of its own, runs the same three commands, and prints their output,
+with the exit status of the test as the last line. Run it from
+`site/examples/coding-with-agents/self-checking-loops/` in your clone.
+
+```sh
+python3 after_loop.py
 ```
 
 </Predict>
 
-Only `importer.py` changed, so the test ran with the assertions you
-wrote. The test passing now means what it meant when you wrote it.
+Only `importer.py` changed, and no file was added, so the test ran with
+the assertions you wrote. The test passing now means what it meant when you wrote it.
 
 "Read-only" in a brief is a request, and the agent decides whether to
 follow it. Claude Code can enforce part of it with a deny rule on the
@@ -183,7 +198,7 @@ test stayed the same.
 <MultiChoice id="lines-of-the-loop-brief" objective="coding-with-agents/verifies-agent-work/automates-the-check"
   concepts={['bounded-self-checking-loops']}
   context="A learner briefs a coding agent to fix a nightly import until its test, test_nights.py, passes. The agent can run the test itself and read the result."
-  title="What goes into the loop brief?" hint="Which lines limit how long the agent runs, or what it may change, and which lines take a limit away?"
+  title="What goes into the loop brief?" hint="Which lines make the agent check its own work, which lines limit how long it runs or what it may change, and which lines take a limit away?"
   options={[
     { text: 'Rerun the test after each change and read what it prints.', correct: true },
     { text: 'Keep going until the test passes, however long that takes.', why: 'That removes the limit. An agent that can\'t make the test pass keeps trying, and the test itself becomes the easiest thing to change.' },
@@ -209,7 +224,8 @@ agent made the importer skip the rows it can't read, saw the row count
 in the test fail, and removed the row count from the test.
 
 <Predict id="run-the-unbounded-run" title="What a run without limits changed"
-  answer={`$ git diff --stat before-run
+  answer={`$ git add -A
+  $ git diff --cached --stat before-run
    importer.py    | 3 +--
    test_nights.py | 6 ------
    2 files changed, 1 insertion(+), 8 deletions(-)
@@ -221,7 +237,7 @@ in the test fail, and removed the row count from the test.
   4 passed, 0 failed
   exit status 0`} run="coding-with-agents/self-checking-loops/unbounded_run.py">
 The course's script makes those two changes to a fresh copy and runs the
-same two commands. You can run it from
+same three commands. You can run it from
 `site/examples/coding-with-agents/self-checking-loops/` in your clone.
 
 ```sh
@@ -232,7 +248,7 @@ python3 unbounded_run.py
 
 <Scenario id="the-test-file-changed" objective="coding-with-agents/verifies-agent-work/automates-the-check"
   concepts={['bounded-self-checking-loops']}
-  context="A coding agent was asked to fix a nightly import until its test passed. After the run, git diff --stat lists importer.py and the test file, test_nights.py, with six lines deleted from the test. The test prints 4 passed, 0 failed."
+  context="A coding agent was asked to fix a nightly import until its test passed. After the run, the list of changed files holds importer.py and the test file, test_nights.py, with six lines deleted from the test. The test prints 4 passed, 0 failed."
   title="The test passes, and the test changed" hint="If you put the test back the way you wrote it, what would it say about the importer as it is now?"
   options={[
     { text: 'Accept the run, since the test passes and the good nights still print their old totals.', consequence: 'The total of the 15th now leaves out a sale of 1,250.00 GBP without saying so, and the check that would have caught it is gone.' },
@@ -240,7 +256,7 @@ python3 unbounded_run.py
     { text: 'Ask a second model to read the test change and say whether the agent had a good reason for it.', consequence: 'The reviewer finds the agent\'s reason plausible. The test is still weaker than the one you wrote, and nothing has run it.' },
     { text: 'Keep both changes, and add a line to the importer\'s docstring that rows it can\'t read are skipped.', consequence: 'The docstring is honest now, and the totals are still wrong on every night with a big sale.' },
   ]}>
-The agent reports `4 passed, 0 failed`. `git diff --stat` lists
+The agent reports `4 passed, 0 failed`. `git diff --cached --stat before-run` lists
 `importer.py` and `test_nights.py`, with six lines deleted from the
 test. What do you do?
 </Scenario>
@@ -250,19 +266,20 @@ test. What do you do?
 The test is one of the **deterministic gates** a project can have. A
 deterministic gate is a check whose result doesn't depend on anyone's
 judgment: tests, type checks, linters, builds and schema validation.
-Each one gives the same answer for the same input, which is why a team
-can let a failing gate block a merge. The same gates can also end an agent's loop. In
-Claude Code, a hook that runs when the agent is about to stop can run
-the test and send the agent back to work while the test fails
-(@Claude Code best practices). Using
-real test results to decide when the agent's work is done is also a
-theme of the Academy course on Claude Code (@Academy claude-code-in-action).
+A gate that isn't flaky gives the same answer for the same input, which
+is why a team can let a failing gate block a merge. The same gates can
+also end an agent's loop. In Claude Code, a hook that runs when the
+agent is about to stop can run the test and send the agent back to work
+until the test passes, up to a limit that Claude Code sets
+(@Claude Code best practices). Deciding when an agent's work is done
+from what a gate reports is also a theme of the Academy course Claude
+Code in action (@Academy claude-code-in-action).
 
 A review by a second model is a different kind of check. A fresh model
 that reads the diff can find what no gate tests: a design problem, a
 case nobody wrote a test for, a change outside the brief. But its answer
-is a judgment. It can be wrong, and it can accept the same wrong
-reasoning as the model that wrote the code. The vendor guide adds that a
+is a judgment. It can miss what the writing model missed, and its
+verdict can change from one run to the next. The vendor guide adds that a
 reviewer told to look for problems tends to find some even in good work,
 so a person weighs its findings as well (@Claude Code best practices).
 Use the second model as a second opinion next to the gates, and never
@@ -289,7 +306,7 @@ in place of them.
   options={[
     { text: 'Nothing, since the reviewer reads every line of every change and the tests only cover some of them.', why: 'Reading every line is a strength, but the verdict is still a judgment. The same change can get a different answer on another run.' },
     { text: 'Only the cost, since running the reviewer on every pull request costs more than running the tests.', why: 'Cost is a real concern, and it is not the one that matters here. The question is what can block a merge.' },
-    { text: 'The reviewer\'s verdict is a judgment that can be wrong or be persuaded, and the tests give a fixed answer.', correct: true },
+    { text: 'The reviewer\'s verdict is a judgment that can miss a fault or change between runs, and the tests give a fixed answer.', correct: true },
     { text: 'The reviewer can\'t read test files, so it has no way to tell whether a change breaks one of them.', why: 'A reviewer can read test files like any other file. That doesn\'t make its verdict repeatable.' },
   ]}>
 A colleague proposes to stop running the tests on pull requests, because
@@ -342,12 +359,12 @@ repository with one tagged commit if you haven't yet. Start your own coding
 agent inside `~/loop-me`, so that it works on the copy and not on your
 clone, and give it the brief from this lesson. Let it run, which takes a few minutes.
 
-Then check the run yourself. Run `git diff --stat before-run` and
-confirm that `test_nights.py` isn't in the list. Run
-`git diff before-run -- test_nights.py` and confirm that it doesn't
-print anything. Run `python3 test_nights.py` and confirm that it prints
+Then check the run yourself. Run `git add -A`, then
+`git diff --cached --stat before-run`, and confirm that `test_nights.py`
+isn't in the list. Run `git diff --cached before-run -- test_nights.py`
+and confirm that it doesn't print anything. Run `python3 test_nights.py` and confirm that it prints
 `4 passed, 0 failed`. A test the agent could change is a test you
-can't rely on, and these three commands show whether it changed.
+can't rely on, and these commands show whether it changed.
 
 A good result has a run that stopped within five attempts, a list of
 changed files that holds `importer.py` and nothing else, and a test you
@@ -357,12 +374,12 @@ have wanted its report to contain?
 </Exercise>
 
 <Recap>
-1. Turn a manual check into a command the agent can run and read, one that exits with status 0 on a pass and names what failed otherwise. A check the agent can run gets run on every attempt (@Academy ai-native-sdlc-playbook).
+1. Turn a manual check into a command the agent can run and read, one that exits with status 0 on a pass and names what failed otherwise. The agent can then rerun it after every change, and you no longer have to notice every mistake yourself (@Claude Code best practices).
 2. A bounded self-checking loop has a limit on attempts, after which the agent stops and reports, and a rule that the check itself is read-only.
-3. After the run, confirm with `git diff --stat` against a commit from before the run that the test didn't change, and run it yourself. A rule that denies edits to the test covers the agent's own file tools, and a script the agent runs can still write the file (@Claude Code permissions).
-4. Deterministic gates, such as tests, type checks, linters, builds and schema checks, give the same answer for the same input and can block a merge. A second model's review is a second opinion next to them and never replaces them (@Claude Code best practices).
+3. After the run, stage everything with `git add -A` and compare it with a commit from before the run. The list shows whether the test changed and which files the agent added. Then run the test yourself. A rule that denies edits to the test blocks the agent's file tools, the shell file commands it recognizes and redirects into the file. A script the agent runs can still write the file (@Claude Code permissions).
+4. Deterministic gates, such as tests, type checks, linters, builds and schema checks, give the same answer for the same input when they aren't flaky, and can block a merge. A second model's review is a second opinion next to them and never replaces them (@Claude Code best practices).
 </Recap>
 
 <Habit id="look-for-the-test-file">
-The next time an agent tells you the tests pass, run `git diff --stat` and look for a test file in the list before you read the rest of the change.
+The next time an agent tells you the tests pass, run `git status` and look for a test file among the changed and new files before you read the rest of the change.
 </Habit>
