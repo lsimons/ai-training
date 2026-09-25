@@ -1,0 +1,461 @@
+import { Choice, MultiChoice, Match, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response, Habit } from '@components/lesson';
+
+In [the lesson on self-checking loops](/coding-with-agents/self-checking-loops/)
+you gave one agent session a test to run and a rule that the test file was
+read-only. The rule was a line in your brief. A colleague who starts their
+own session on the same repository doesn't have your brief, and their agent
+has never heard of the rule. In this lesson two team rules run without
+anyone remembering them. A hook stops the agent's edit tools from changing
+the test in every Claude Code session on the project, and a CI job
+(continuous integration) runs the test on every pull request, whoever
+wrote it.
+
+The project is the same nightly sales import, with `test_nights.py` next to
+`importer.py`, before the fix. The test fails on the 15th and the 17th of
+September, because the importer splits a quoted amount such as `"1,250.00"`
+into two fields.
+
+## Block the edit with a hook
+
+Team hooks are scripts that run by themselves at fixed points in the work,
+such as before a commit or before an agent edits a file. They check a rule
+and stop the step when it breaks. The vendor guide for Claude Code puts the
+difference this way: what you write in the project instructions is advice
+the agent may follow, and a hook runs every time, whatever the agent
+decides (@Claude Code best practices). A hook enforces a rule that an
+instruction can only ask for.
+
+Claude Code has a hook event called `PreToolUse`, which runs before a tool
+call and can block it. The hook gets the call as JSON (JavaScript Object
+Notation) on its standard input, with the tool's name in `tool_name` and its arguments in
+`tool_input`. For the Edit and Write tools, `tool_input` holds the
+`file_path` of the file. When the hook exits with status 2, Claude Code
+blocks the call and shows the agent what the hook wrote to its standard
+error. A hook configured in `.claude/settings.json` belongs to the project,
+and you commit that file to the repository, so every session started in
+the project gets the hook (@Claude Code hooks).
+
+This is the setting. The `matcher` says which tools the hook runs for, here
+Edit and Write:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/protect_paths.py\""
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+And this is the part of the hook script that decides. The full script is
+`protect_paths.py` in the course repository:
+
+```python
+PROTECTED = [
+    "test_nights.py",
+    "nights/",
+    ".claude/",
+    ".github/",
+]
+
+REASON = (
+    "{path} is protected: agents may not change it. If it must change, stop and tell the user why."
+)
+```
+
+The list protects the test and the recorded nights, and also the hook, its
+settings and the CI workflow. Without the last two entries, an agent that
+is blocked could edit the setting and remove the hook. The reason names
+the file and says what to do next, because the agent reads it and decides
+its next step from it.
+
+<Predict id="feed-the-hook" title="Three edits, as the hook sees them"
+  answer={`Edit importer.py: exit status 0
+  Edit test_nights.py: exit status 2
+    test_nights.py is protected: agents may not change it. If it must change, stop and tell the user why.
+  Write nights/2026-09-15/store-09.csv: exit status 2
+    nights/2026-09-15/store-09.csv is protected: agents may not change it. If it must change, stop and tell the user why.`} run="coding-with-agents/ci-and-hooks/feed_hook.py">
+The course's script copies the project to a temporary place, adds the hook,
+and feeds it three tool calls the way Claude Code does. Run it from
+`site/examples/coding-with-agents/ci-and-hooks/` in your clone of the
+course repository, and compare what you see with the output below.
+
+```sh
+python3 feed_hook.py
+```
+
+</Predict>
+
+The examples in this lesson aren't graded. Each one is a command you run,
+with output the course checks on every build.
+
+Here is an agent that hits the hook. The transcript is illustrative and
+doesn't record a specific model's words.
+
+<Prompt model="illustrative" recorded="illustrative">
+The test fails on the 15th because the row count doesn't match. Make it
+pass.
+</Prompt>
+<Response>
+I tried to change the row check in `test_nights.py`, and a hook blocked
+the edit: "test_nights.py is protected: agents may not change it. If it
+must change, stop and tell the user why." So I stopped. The row count
+fails because `read_rows` in `importer.py` splits the quoted amount
+`"1,250.00"` into two fields. I can fix that in `importer.py`, or you
+can tell me why the test should change.
+</Response>
+
+The brief had no limits at all, and the agent still couldn't change the
+test, because the rule was in the project and not in the brief.
+
+A hook has an edge you need to know. Its `matcher` compares tool names,
+and a shell command is the Bash tool, so this hook doesn't run for
+`sed -i` on the test or for a script that writes the file (@Claude Code hooks).
+The hook blocks the agent's usual way to edit a file. It doesn't prove the
+file stayed the same. The gates and the review of the diff do that.
+
+<Choice id="the-hook-that-crashed" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['team-hooks']}
+  context="A team adds a Claude Code PreToolUse hook that should block agent edits to the migrations folder. The hook script has a bug: on some inputs it raises an exception, and Python exits with status 1."
+  title="The hook that exits with status 1" hint="Which exit status does Claude Code treat as a block, and what does it do with the others?"
+  options={[
+    { text: 'The edit goes ahead, because Claude Code treats status 1 as an error in the hook and not as a block.', correct: true },
+    { text: 'The edit is blocked, because any status other than 0 tells Claude Code that the hook found a problem.', why: 'That is the usual meaning of a failing status in a shell, and Claude Code blocks on status 2 only.' },
+    { text: 'The session stops, because Claude Code can\'t continue once one of the project\'s hooks has crashed.', why: 'The session continues. Claude Code shows a notice about the hook error and carries on with the call.' },
+    { text: 'Claude Code asks the user to approve the edit, because the hook gave it no clear decision to follow.', why: 'Asking the user is a decision a hook can return in its JSON output. A crash returns no decision.' },
+  ]}>
+The hook crashes on an edit to a migration file, and exits with status 1.
+What happens to the edit?
+</Choice>
+
+The vendor page warns about this case: status 1 is the usual failure status
+in a shell, and for Claude Code it is an error in the hook, after which the
+call goes ahead (@Claude Code hooks). So `protect_paths.py` also exits with
+status 2 when it can't read the file path from its input. Test a hook by
+making the mistake it is meant to catch, as the script above does.
+
+## Run the gates in CI
+
+The hook covers agent sessions in Claude Code. A CI job runs on the
+changes that reach the repository, from a person, an agent or a tool. CI
+integration makes the CI pipeline the shared gate for agent changes. The
+deterministic gates you met with the self-checking loop run on every pull
+request, and the team agrees that a change that fails them doesn't merge.
+
+In GitHub Actions a workflow file is stored under `.github/workflows/`,
+and a `run` step passes or fails on the exit status of its command
+(@GitHub docs workflow-syntax). A workflow that runs `on: pull_request`
+starts when a pull request is opened or reopened, and when new commits are
+pushed to it (@GitHub docs events-that-trigger-workflows). This is the job
+for the nightly import, as `checks.yml`:
+
+```yaml
+name: checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Compile the Python files
+        run: python3 -m py_compile importer.py test_nights.py
+      - name: Run the nightly test
+        run: python3 test_nights.py
+```
+
+The `uses` line names the action that checks out the code by the full
+hash of one commit, its SHA (Secure Hash Algorithm), with the version in a
+comment. The GitHub page calls the commit SHA of a released version the
+safest choice (@GitHub docs workflow-syntax). A tag can be moved to other
+code, and a commit hash can't. The course repository pins every action the
+same way. `permissions` sets what the
+job's `GITHUB_TOKEN` may do, and GitHub advises the minimum the job needs
+(@GitHub docs workflow-syntax). This job only reads the code.
+
+<Predict id="job-before-the-fix" title="The job on the unfixed import"
+  answer={`step: Compile the Python files
+  $ python3 -m py_compile importer.py test_nights.py
+  step: Run the nightly test
+  $ python3 test_nights.py
+  2026-09-14: pass
+  2026-09-15: FAIL: exit status 1; parsed 39 rows, expected 40 rows
+  2026-09-16: pass
+  2026-09-17: FAIL: exit status 1; parsed 46 rows, expected 47 rows
+  2 passed, 2 failed
+  job failed: the step exited with status 1`} run="coding-with-agents/ci-and-hooks/job_before_fix.py">
+The course's script reads the `run` lines of `checks.yml` and runs them in
+order in a fresh copy, the way the runner does, and stops at the first step
+that fails. Run it from the same directory.
+
+```sh
+python3 job_before_fix.py
+```
+
+</Predict>
+
+The job's log is what the agent gets to work from. Give it the failing
+lines and the same limits as any self-checking loop: how many attempts it
+may make, and what it may change. The hook still protects the test. The
+brief says so too, and the agent knows it before it tries. The transcript is
+illustrative.
+
+<Prompt model="illustrative" recorded="illustrative">
+The CI job `gates` fails on the step "Run the nightly test". The log says:
+`2026-09-15: FAIL: exit status 1; parsed 39 rows, expected 40 rows`, and
+the same on the 17th. Fix `importer.py` so the job passes. After each
+change, run the job's two commands, `python3 -m py_compile importer.py
+test_nights.py` and `python3 test_nights.py`, and read the output. Stop
+after five attempts, pass or fail, and show me the last output. The test,
+`nights/`, `.claude/` and `.github/` are protected by a hook. If one of them
+must change, stop and tell me why.
+</Prompt>
+<Response>
+Attempt 1: I changed `read_rows` to read each file with the `csv` module,
+and the 15th failed on converting "1,250.00" to a number. Attempt 2: I
+removed the thousands separator before the conversion. Both commands now
+pass, and the test prints `4 passed, 0 failed`. I changed only
+`importer.py`.
+</Response>
+
+Then push the fix to the pull request, and the job runs again.
+
+<Predict id="job-after-the-fix" title="The job after the agent's fix"
+  answer={`step: Compile the Python files
+  $ python3 -m py_compile importer.py test_nights.py
+  step: Run the nightly test
+  $ python3 test_nights.py
+  2026-09-14: pass
+  2026-09-15: pass
+  2026-09-16: pass
+  2026-09-17: pass
+  4 passed, 0 failed
+  job passed`} run="coding-with-agents/ci-and-hooks/job_after_fix.py">
+The course's script applies the fix from the transcript to a fresh copy and
+runs the job's steps again.
+
+```sh
+python3 job_after_fix.py
+```
+
+</Predict>
+
+The agent said the test passes on its machine, and the job now says the
+same where the whole team can see it. A reviewer reads the diff next. The
+job decides whether the change can merge, and the agent's summary doesn't.
+
+<Scenario id="the-agent-routes-around-the-hook" objective="coding-with-agents/works-in-team/follows-team-norms"
+  concepts={['team-hooks']}
+  context="A team's Claude Code project has a hook that blocks agent edits to the test file. An agent tries to change a check in the test, the hook blocks it, and the agent then offers a way around the hook."
+  title="The agent offers a way around the hook" hint="Who decided that the test file is protected, and where does a change to that decision belong?"
+  options={[
+    { text: 'Let it run the command once, since the change is small and you can read the diff of the test afterwards.', consequence: 'The test changes on your branch only. The next session in the team hits the same hook, and nobody else knows the rule was bent once.' },
+    { text: 'Tell it to fix the importer instead, and if the test really is wrong, raise that with the team.', correct: true, consequence: 'The agent fixes the importer and the test passes as it was written. The team keeps one rule for every session.' },
+    { text: 'Remove the hook from the settings for this session, and put it back once the agent has finished.', consequence: 'The hook is off for the whole session, not only for the one edit. When you forget to put it back, the commit removes the rule for everyone.' },
+    { text: 'Ask the agent to explain why the check is wrong, and let it run the command when the reason sounds good.', consequence: 'The agent\'s reason sounds good, because it wants the test to pass. The team\'s rule now depends on how well the agent argues.' },
+  ]}>
+The hook blocks the agent's edit to `test_nights.py`. The agent says: "I
+can make the same change with `sed -i` in a shell command, which the hook
+doesn't check. Should I?" What do you do?
+</Scenario>
+
+<MultiChoice id="lines-of-the-ci-fix-brief" objective="coding-with-agents/works-in-team/follows-team-norms"
+  concepts={['ci-integration']}
+  context="A CI job fails on an agent's pull request, on the step that runs the test. The developer writes a brief for the agent to fix the failure."
+  title="Which lines go into the CI fix brief?" hint="Which lines keep the gate as it is and bound the run, and which lines make the job pass by changing the job?"
+  options={[
+    { text: 'Paste the failing part of the job log, with the name of the step.', correct: true },
+    { text: 'Mark the failing step with continue-on-error so the job goes green.', why: 'The job then passes with the bug still in the code. The gate is weaker for the whole team.' },
+    { text: 'Stop after five attempts and show the last output, pass or fail.', correct: true },
+    { text: 'Push new commits until the job passes, however many that takes.', why: 'That removes the limit. Every push runs the job again, and a stuck agent keeps pushing.' },
+    { text: 'Leave the test and the workflow as they are, and stop to ask if one must change.', correct: true },
+  ]}>
+Which of these lines belong in the brief?
+</MultiChoice>
+
+<Pitfall title="The rule one session never read">
+A team wrote "never edit test files" into the brief template they share.
+One engineer used the template. Another started a session with the brief
+"make CI green", and that agent raised a timeout in the test and pushed.
+The job passed and the reviewer, who trusted the green job, merged it. The
+rule was in a document that only one of the two sessions read. A rule that
+must hold every time belongs in a hook or a CI check. The document is for
+advice.
+</Pitfall>
+
+<Match id="where-each-rule-goes" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['team-hooks', 'ci-integration']}
+  context="A team decides how to enforce three of its rules for work with coding agents. It has a Claude Code hook on agent edits, a CI job on every pull request, and a project instructions file."
+  title="Where does each rule go?" hint="Must the rule hold every time, and does it apply to agents only or to every change? Can a script check it at all?"
+  options={['A hook on the agent\'s edits', 'A CI job on every pull request', 'A line in the instructions']}
+  rows={[
+    { statement: 'An agent\'s edit to the recorded test data is stopped before it is made', option: 0, why: 'Which of the three runs before the agent\'s step, and not after the change exists?' },
+    { statement: 'Every change passes the tests before it merges, whoever wrote it', option: 1, why: 'Which of the three runs for a change a person made in their own editor?' },
+    { statement: 'Prefer a small function with a clear name to a long comment', option: 2, why: 'Can a script decide whether a name is clear?' },
+  ]}
+  rationale="A hook stops an agent's step before it happens, a CI job checks every change that reaches the repository, and the instructions hold the advice that no script can check.">
+Match each rule to the place where the team enforces it.
+</Match>
+
+## Further steps for the team
+
+The Academy course The AI-native SDLC playbook (SDLC is short for the
+development life cycle of software) goes further than one hook and one job.
+It has lessons on hooks as approval gates and on putting an AI reviewer in
+the pull request loop (@Academy ai-native-sdlc-playbook). Here are those
+ideas in our words, with what the Claude Code pages say about each.
+
+**A hook can ask a person.** A `PreToolUse` hook can also return a decision
+in JSON on its standard output, and one of the decisions is `ask`, which
+shows the user a permission prompt for that call (@Claude Code hooks). So a
+hook can put a person in the loop at one step, for example a deploy command
+or a change to a database migration, and let the rest of the work run.
+Choose those steps the way you choose any approval: the steps that can't be
+undone or that reach other people.
+
+**An agent reviews the pull request.** Claude Code has a non-interactive
+mode, `claude -p`, for use in CI and scripts (@Claude Code best practices).
+A CI job can use it to review the diff of each pull request and post
+findings ranked by how much they matter. A second job with its own prompt
+can review the same diff for security problems only, so those findings
+don't get lost among the style comments. The findings are an opinion next
+to the gates, and a person still weighs them.
+
+**A finding that comes back goes into the instructions.** The first time a
+review finds a mistake, fix it in the change. The second time the same kind
+of mistake comes back, add a line to the project instructions, or a check
+when a script can find it. The vendor guide also says to turn an
+instruction into a hook when the rule must hold every time
+(@Claude Code best practices).
+
+**A fresh session gives a second opinion.** The session that wrote a change
+tends to favor it. The vendor guide suggests a second session that reviews
+the change without the first one's history (@Claude Code best practices).
+
+**Evals in CI.** When the project is an agent or a prompt, the tests
+include evaluations of the model's answers, and they run in CI too. The
+Building agents course teaches how to score those answers, starting with
+[a rubric for what a good answer is](/building-agents/rubrics/).
+
+<Choice id="hook-or-ci-for-everyone" phase="review" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['ci-integration']}
+  context="A team has a Claude Code hook that blocks agent edits to its test data. Some team members use a different coding agent, and some edit files by hand."
+  title="A rule for every change" hint="Which of the checks runs no matter who or what made the change?"
+  options={[
+    { text: 'Copy the hook into each person\'s own user settings, so it runs in every session they start.', why: 'It then runs only in Claude Code sessions. An edit made by hand or by another agent still skips it.' },
+    { text: 'Add a line to the project instructions that says the test data must never be changed.', why: 'An instruction is advice that an agent may skip, and a person editing by hand may not read it.' },
+    { text: 'Ask each reviewer to look for changed test data in every pull request they are asked to approve.', why: 'That depends on every reviewer remembering it on every pull request.' },
+    { text: 'Add a step to the CI job that fails when a pull request changes a file under the test data folder.', correct: true },
+  ]}>
+The team wants the rule "test data doesn't change without a decision" to
+hold for every change, including changes made by hand and by other agents.
+What do they add?
+</Choice>
+
+<Sort id="hook-job-or-review" phase="review" objective="coding-with-agents/works-in-team/follows-team-norms"
+  concepts={['ci-integration']}
+  context="A developer's agent has opened a pull request. The CI job runs the tests, and the team's norm is that the job and a reviewer decide whether a change merges."
+  title="Can you merge yet?" hint="Which of these is the job's result or a reviewer's approval, and which is only a claim about the change?"
+  buckets={['Enough to merge on', 'Not enough to merge on']}
+  items={[
+    { text: 'The job passed and a reviewer approved the diff', bucket: 0 },
+    { text: 'The agent says every test passes on its machine', bucket: 1 },
+    { text: 'The job failed, and the agent says the failure is flaky', bucket: 1 },
+    { text: 'A second model read the diff and found no problems', bucket: 1 },
+  ]} />
+
+<MultiChoice id="a-hook-the-team-can-trust" phase="review" objective="coding-with-agents/works-in-team/sets-team-practice"
+  concepts={['team-hooks']}
+  context="A team writes a Claude Code PreToolUse hook that should stop agents from editing its database migrations. Claude Code blocks a tool call only when the hook exits with status 2."
+  title="A hook the team can trust" hint="For each choice, what happens on the day the agent makes the mistake, or the day the hook itself goes wrong?"
+  options={[
+    { text: 'The hook exits with status 2 when it can\'t read its input.', correct: true },
+    { text: 'The hook exits with status 1 when it finds a protected path.', why: 'Status 1 is an error in the hook, and the edit goes ahead.' },
+    { text: 'The hook\'s own script and settings are on its protected list.', correct: true },
+    { text: 'The hook prints no message, so the agent can\'t argue with it.', why: 'The agent then gets no reason and no next step, and it tries again some other way.' },
+    { text: 'Someone feeds it an edit to a migration and sees it blocked.', correct: true },
+  ]}>
+Which of these make the hook one the team can rely on?
+</MultiChoice>
+
+<Choice id="the-agent-blames-the-runner" phase="review" objective="coding-with-agents/works-in-team/follows-team-norms"
+  concepts={['ci-integration']}
+  context="A developer's agent has fixed a bug on a branch. The CI job on the pull request fails on the test step, and the team's norm is that a change merges only when the job passes and a reviewer approves."
+  title="The job fails on the agent's pull request" hint="What does the team's norm say decides whether a change merges?"
+  options={[
+    { text: 'Merge it, because the agent ran the same tests on its machine and reported that all of them passed.', why: 'The agent\'s report is a claim about the change. The job is the gate the team agreed on.' },
+    { text: 'Give the agent the failing part of the log with a limit on attempts, and merge once the job passes.', correct: true },
+    { text: 'Rerun the job until it passes once, because a test that failed only one time is probably just flaky.', why: 'A rerun without a reason hides a real failure as easily as a flaky one, and nothing was fixed.' },
+    { text: 'Ask a reviewer to approve it anyway, because the change is small and the reviewer read every line of it.', why: 'An approval is one of the two conditions, and the job is the other. Reading the diff doesn\'t run the test.' },
+  ]}>
+The agent says: "The test passes on my machine, so the CI failure must be
+the runner." What do you do?
+</Choice>
+
+<Exercise stretch="Then ask your agent, in a new session, to add a night under nights/ for the 18th. Confirm that the hook blocks it, and read the reason the agent reports back to you.">
+Make a project of your own from the course files. From the root of your
+clone of the course repository, run:
+
+```sh
+cp -R site/examples/coding-with-agents/observing-and-debugging/nightly ~/ci-me
+cp site/examples/coding-with-agents/self-checking-loops/test_nights.py ~/ci-me/
+mkdir -p ~/ci-me/.claude/hooks ~/ci-me/.github/workflows
+cp site/examples/coding-with-agents/ci-and-hooks/protect_paths.py ~/ci-me/.claude/hooks/
+cp site/examples/coding-with-agents/ci-and-hooks/settings.sample.json ~/ci-me/.claude/settings.json
+cp site/examples/coding-with-agents/ci-and-hooks/checks.yml ~/ci-me/.github/workflows/
+cd ~/ci-me
+git init
+git add .
+git commit -m "Nightly import with a hook and a CI job"
+```
+
+Test the hook first by making the mistake it catches. This command gives
+it the JSON of an edit to the test and prints its exit status, which should
+be 2:
+
+```sh
+echo '{"tool_name": "Edit", "tool_input": {"file_path": "test_nights.py"}}' | python3 .claude/hooks/protect_paths.py; echo "exit status $?"
+```
+
+Create an empty private repository on GitHub that you can delete
+afterwards, and push the copy to it. The job runs on the push to `main` and
+fails on the 15th and the 17th. Then make a branch, start Claude Code inside
+`~/ci-me`, and ask it to make the test pass without limits, as in the
+first transcript. Check that the hook stops its edit to the test. If the agent changes the
+test some other way, such as with a shell command, that is the edge of the
+matcher from earlier in the lesson: put the file back with
+`git checkout test_nights.py` and note what the agent did. Then give
+it the failing lines of the job log with the brief from this lesson, push
+its fix, and open a pull request.
+
+A good result has a hook that blocked the edit to the test, a run that
+stopped within five attempts, a pull request that changes only
+`importer.py`, and a job that passes on it. Delete the repository when you
+are done. Then answer one question: which rule in your own team is written
+down today but depends on each session reading it?
+</Exercise>
+
+<Recap>
+1. Team hooks run at fixed points, such as before an agent edits a file, and apply to every session in the project. An instruction is advice the agent may skip, and a hook runs every time (@Claude Code best practices).
+2. A Claude Code `PreToolUse` hook gets the tool call as JSON and blocks it by exiting with status 2, and the agent reads what it wrote to standard error. Status 1 is an error in the hook, after which the call goes ahead, and a matcher on Edit and Write doesn't see a shell command that writes the file (@Claude Code hooks).
+3. CI integration runs the deterministic gates on every pull request, whoever wrote the change. The job decides whether the change can merge, and the agent fixes a failing job from its log within the same limits as any self-checking loop.
+4. Pin each action in a workflow to a full commit SHA, and give the job only the permissions it needs (@GitHub docs workflow-syntax).
+5. A rule that must hold every time goes into a hook or a CI check. A review finding that comes back a second time goes into the project instructions, or into a check when a script can find it.
+</Recap>
+
+<Habit id="move-a-rule-into-a-check">
+The next time you write "always" or "never" into a brief or a project instructions file, ask whether a hook or a CI step could check that rule instead.
+</Habit>
