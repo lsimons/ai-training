@@ -249,7 +249,7 @@ const FOUNDATIONS =
 export const UNRUN_EXEMPT = new Map([
 	[
 		'coding-with-agents/reviewing-the-diff/build.py',
-		'a setup tool the learner runs with a directory of their own; the page shows no output of it',
+		'a setup tool the learner runs with a directory of their own; the page shows the command and none of its output',
 	],
 	['concepts/agent-loop/tiny_agent.py', FOUNDATIONS],
 	['concepts/retrieval/keyword_search.py', FOUNDATIONS],
@@ -279,8 +279,11 @@ const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /**
  * Whether `src` (another fixture's source) uses the module `stem`: it
  * imports it (`import stem`, `import a, stem`, `from stem import ...`) or
- * names its file (`stem.py`), which covers a fixture that runs it with
- * `subprocess` or reads it as text.
+ * names its file in a quoted string literal (`"stem.py"` or `'stem.py'`),
+ * which covers a fixture that runs it with `subprocess` or reads it as text.
+ * A mention in a docstring, a comment, a code span or a longer string
+ * (`"$ python3 stem.py"`) is not a use, so prose can't hide an unrun entry
+ * script (#460 review).
  */
 export function usesModule(src, stem) {
 	const s = escapeRe(stem);
@@ -289,7 +292,7 @@ export function usesModule(src, stem) {
 		new RegExp(`^[ \\t]*import[ \\t]+(?:[\\w.]+(?:[ \\t]+as[ \\t]+\\w+)?[ \\t]*,[ \\t]*)*${s}\\b(?!\\.)`, 'm').test(
 			src,
 		) ||
-		new RegExp(`(?<![\\w.-])${s}\\.py\\b`).test(src)
+		new RegExp(`(["'])${s}\\.py\\1`).test(src)
 	);
 }
 
