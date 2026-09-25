@@ -17,10 +17,10 @@ called, so the numbers are the same on every machine.
 
 ## What the agent knows and what it can find again
 
-A model knows two kinds of thing during a response. The first kind is in
-the context window right now: the system prompt, the messages, the tool
-results of this session. The second kind is outside the window and comes
-in only when a step of the harness reads it and puts it there. The
+During a response, a fact is either in the context window right now,
+as part of the system prompt, the messages or this session's tool
+results, or it is outside the window. A fact outside comes in only when
+a step of the harness reads it and puts it there. The
 [lesson on memory in the concepts course](/concepts/memory/#two-places-a-fact-can-be)
 called these short-term and long-term memory, and showed that "it
 remembered" always means that something was stored and read back
@@ -43,8 +43,9 @@ or the user wrote (@AEC-05). An agent often has both.
 
 **Memory storage choices** are the options for where long-term memory is
 kept and how the agent finds a fact in it again. The course this topic
-comes from names session context, key-value stores, vector databases and
-knowledge graphs, and warns that each lookup adds a delay (@AEC-05). The
+comes from names vector databases, knowledge graphs, and hybrids that
+add a key-value store for session state and quick lookups. It also notes
+that a retrieval step adds latency (@AEC-05). The
 table below is the list this course uses, with the case each one fits.
 
 | Store                          | How the agent gets a fact back                               | Fits when                                                                                   |
@@ -57,10 +58,11 @@ table below is the list this course uses, with the case each one fits.
 
 Each row trades something. The file is the easiest to read and fix, and
 it costs its full size in every request. Key-value notes are cheap to
-read one at a time, and useless when the agent doesn't know the key. An
-index finds passages in words that differ from the document, as the
-[retrieval lesson](/building-agents/retrieval-as-a-tool/) showed, and it
-can return a passage that's close but wrong. For precise questions over
+read one at a time, and useless when the agent doesn't know the key. A
+similarity index can find passages in words that differ from the
+document, which the keyword search in the
+[retrieval lesson](/building-agents/retrieval-as-a-tool/) couldn't do,
+and it can return a passage that's close but wrong. For precise questions over
 many records you need a database, and a database needs a schema and a
 query tool that someone maintains. The summary is short in every request, and whatever
 detail it dropped can't be read back.
@@ -69,7 +71,7 @@ detail it dropped can't be read back.
   concepts={['memory-storage-choices']}
   context="The lesson has a table of five memory stores: a plain file read whole, key-value notes, a searchable index over text, a database behind a tool, and a summary in the system prompt. Each row says how the agent gets a fact back and which case the store fits."
   title="Which store fits each use?"
-  hint="For each use, ask how the agent finds the fact: does it need all of it, one entry by a name it has, a passage in words it can't predict, or an answer computed over many records?"
+  hint="For each use, ask how the agent finds the fact: does it need an answer computed over many records, all of it every time, a passage in words it can't predict, or one entry by a name it already has?"
   options={['A plain file read whole', 'Key-value notes', 'A searchable index over text', 'A database behind a tool', 'A summary in the system prompt']}
   rows={[
     { statement: 'Fifteen formatting rules that every reply must follow', option: 0, why: 'Every session needs all fifteen, and fifteen lines are small. What would a lookup add?' },
@@ -102,7 +104,7 @@ into the system prompt, and the model reads it with every request.
   answer={`preferences.txt: 20 lines
   read whole into the prompt: 509 characters`} run="building-agents/agent-memory/whole.py">
 
-Run this, and compare what you see with the output below.
+Run `python3 memory.py whole`, which runs the code below, and compare what you see with the output below.
 
 ```python
 lines = load()
@@ -114,12 +116,14 @@ print(f"read whole into the prompt: {len(prompt_part)} characters")
 </Predict>
 
 The 509 characters are a short paragraph, and each request includes
-them. An index over these twenty lines would need an embedding step, a
+them. A vector index over these twenty lines would need an embedding step, a
 store and a search tool, and the agent would have to decide to search
 before it knew that a preference applied. The file is always in the
 window, so the model never has to remember to look.
 
-Add an index when volume demands it. Say the same file has collected a
+Add a search tool when volume demands it. A word search over the file,
+like the one below, is the simplest form of the searchable index row in
+the table. Say the same file has collected a
 line per project for months and now holds ten thousand lines. The
 fixture builds that grown copy in memory and compares reading it whole
 with a search tool that returns only the lines a question needs.
@@ -127,19 +131,19 @@ with a search tool that returns only the lines a question needs.
 <Predict id="show-grown" title="The grown file, whole and searched"
   answer={`grown notes: 10000 lines
   read whole into the prompt: 481545 characters
-  search_notes('date format'): 1 line, 30 characters
-    date format: 25 September 2026`} run="building-agents/agent-memory/grown.py">
+  search_notes('project 0412'): 1 line, 49 characters
+    project 0412: send the status update on Wednesday`} run="building-agents/agent-memory/grown.py">
 
-Run this, and compare what you see with the output below.
+Run `python3 memory.py grown`, which runs the code below, and compare what you see with the output below.
 
 ```python
 lines = grown_notes(load())
 prompt_part = read_whole(lines)
-found = search_notes(lines, "date format")
+found = search_notes(lines, "project 0412")
 print(f"grown notes: {len(lines)} lines")
 print(f"read whole into the prompt: {len(prompt_part)} characters")
 noun = "line" if len(found) == 1 else "lines"
-print(f"search_notes('date format'): {len(found)} {noun}, {len(read_whole(found))} characters")
+print(f"search_notes('project 0412'): {len(found)} {noun}, {len(read_whole(found))} characters")
 for line in found:
     print(f"  {line}")
 ```
@@ -147,7 +151,7 @@ for line in found:
 </Predict>
 
 The whole file is now 481545 characters in every request, and the one
-fact the task needs is 30 of them. At that size the first thing to
+line a task about project 0412 needs is 49 of them. At that size the first thing to
 change is how the file is read. The agent stops loading it whole and
 gets a tool that returns the lines a task needs. The file stays a file,
 so a person can still open it. Split the twenty lines every session
@@ -186,32 +190,33 @@ The memory tool gives the model a directory of files that it can list,
 read, create, edit, rename and delete. The tool runs on the client side.
 The model sends a request such as `view /memories`, and code in your
 application performs it on whatever storage you picked, for example one
-folder per user or rows in a database (@Claude docs memory-tool). When the tool is enabled, the
-model checks the memory directory before it starts a task and writes
-what it learns there as it works. The page describes this as loading
-information when it is needed. The window then holds what the current
-task needs (@Claude docs memory-tool). It is the plain file from the last
-section with a tool in front of it. The page also tells you to cap how
-large a memory file can grow and to limit what one read returns
-(@Claude docs memory-tool).
+folder per user or rows in a database (@Claude docs memory-tool). At the start of a task the model
+looks in its memory folder and reads the notes there. While it works, it
+adds new findings to those notes, and a later conversation picks them up
+again. The page presents this as fetching text at the moment a task
+calls for it, which leaves room in the window for the task at hand
+(@Claude docs memory-tool). It is the plain file from the last section
+with a tool in front of it. Among its safety advice, the page asks you
+to put an upper limit on the size of each memory file and on the amount
+of text one read hands back (@Claude docs memory-tool).
 
 Context editing removes old tool results from the conversation once it
 passes a size you configure, and puts a short placeholder where each
-result was. Used together with the memory tool, the model gets a warning
-before results are cleared, so it can write what matters to a memory
+result was. When context editing is used with the memory tool, the model gets a
+warning before results are cleared, so it can write what matters to a memory
 file first (@Claude docs context-editing).
 
 Compaction swaps the early part of a conversation for a summary, which
 the model writes on the vendor's server, and a long task then fits in
 the window again (@Claude docs compaction). That's the last row of the table, applied to
-the agent's own history. The memory tool page suggests using both for a
-long-running agent. The summary holds the size of the conversation down,
+the agent's own history. The memory tool page suggests turning on compaction and the memory tool
+together for a long-running agent. The summary holds the size of the conversation down,
 and anything the agent needs after the summary goes into a memory
 file first (@Claude docs memory-tool).
 
 <Choice id="what-survives-compaction" objective="building-agents/builds-agent-loop/adds-retrieval"
   concepts={['memory-storage-choices']}
-  context="The lesson describes compaction, which replaces the older turns of a conversation with a summary the model writes, and a memory tool, which lets the model write and read files that the application stores outside the conversation."
+  context="The lesson describes compaction, in which a summary takes the place of the early part of a conversation, and a memory tool, which lets the model write and read files that the application stores outside the conversation."
   title="Where does the fact go?"
   hint="Which of these places is outside the conversation that the summary replaces?"
   options={[
@@ -230,7 +235,7 @@ number be kept?
   concepts={['memory-storage-choices']}
   context="The lesson compares memory stores by how the agent gets a fact back: a plain file read whole at the start of each session, key-value notes read by an exact key, a searchable index over free text, and a database queried with filters and counts."
   title="Sort the memory uses by store"
-  hint="Does the agent need all of it every time, one entry by a name it has, a passage in words it can't predict, or an answer computed over records?"
+  hint="Does the agent need one entry by a name it has, a passage in words it can't predict, an answer computed over records, or all of it every time?"
   buckets={['A plain file read whole', 'Key-value notes', 'A searchable index over text', 'A database behind a tool']}
   items={[
     { text: 'Ten house rules for how the agent names files', bucket: 0 },
@@ -239,7 +244,7 @@ number be kept?
     { text: 'Shipments, to find which routes were late more than three times last quarter', bucket: 3 },
   ]} />
 
-<Choice id="twenty-facts-review" phase="review" objective="building-agents/builds-agent-loop/adds-retrieval"
+<Choice id="thirty-facts-review" phase="review" objective="building-agents/builds-agent-loop/adds-retrieval"
   concepts={['memory-storage-choices']}
   context="An agent needs to remember about thirty facts about each user, such as time zone and preferred reply length, and every session uses most of them."
   title="Thirty facts per user"
@@ -272,6 +277,19 @@ a tool instead of loading them whole at the start of each session?
 
 </MultiChoice>
 
+<Sort id="kept-after-compaction" phase="review" objective="building-agents/builds-agent-loop/adds-retrieval"
+  concepts={['memory-storage-choices']}
+  context="The lesson describes compaction, in which a summary written by the model takes the place of the early part of a long conversation, and a memory tool, which lets the model keep notes in files that the application stores outside the conversation."
+  title="What can the agent still read word for word?"
+  hint="Is the text in a file outside the conversation, or only in the turns that the summary takes the place of?"
+  buckets={['Still readable word for word after compaction', 'May be lost in the summary']}
+  items={[
+    { text: 'The exact wording of a tool result from an hour ago, never written anywhere else', bucket: 1 },
+    { text: 'A customer id the agent wrote to a memory file before the compaction', bucket: 0 },
+    { text: 'An error code that appeared once in an early turn', bucket: 1 },
+    { text: 'The progress log the agent keeps in its memory folder', bucket: 0 },
+  ]} />
+
 <Pitfall title="A vector database for twenty facts">
 
 A team builds an assistant that should remember each user's
@@ -280,7 +298,7 @@ the agent searches it before every reply. Each user has twenty
 preferences. The search sometimes returns the wrong three, the agent
 ignores the date format it wasn't shown, and when a user reports it,
 nobody can open the store to see what the agent believes. Twenty facts
-fit in a file that's read whole. Start there, and add an index when a
+fit in a file that's read whole. Start there, and add a search tool when a
 measurement shows the file is too large to load.
 
 </Pitfall>
@@ -292,8 +310,9 @@ twenty user preferences and can look up ten thousand support tickets.
 It keeps a running task list for one long job, and it learns facts
 during this session. For each one, pick a
 store from the table in this lesson and write one line on why each of
-the other stores costs more than it gives. Write it in a note, about
-twelve lines in total. Doing this once gives you the questions to ask
+the other stores costs more than it gives. Write it in a note of
+about twenty lines, one for each pick and one for each store you passed
+over. Doing this once gives you the questions to ask
 before you add a database to an agent.
 
 A good result picks by how the agent finds the fact. The preferences go
@@ -302,9 +321,9 @@ unpredictable words, so they need a searchable index. The task list is a
 small file the agent reads and rewrites, or a key-value entry per step.
 Facts from this session are already in the context window, so the
 question is which of them a later session needs. Those go to a memory
-file, and the rest of a long history can be compacted into a summary. Your reasons for the
-other stores name a cost: a lookup the agent must remember to make, a
-schema to maintain, detail lost in a summary. Which of your four picks
+file, and the rest of a long history can be compacted into a summary. Each reason for
+passing over a store names a cost, such as a lookup the agent must
+remember to make or a schema someone has to maintain. Which of your four picks
 would change first if the volume grew by a factor of a hundred?
 
 </Exercise>
