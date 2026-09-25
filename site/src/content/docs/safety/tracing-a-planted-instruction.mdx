@@ -42,8 +42,8 @@ only in the tools they have.
 A small program plays the agent. Its model is a rule: any paragraph of the
 page that speaks to the assistant counts as an instruction, and the agent
 does what it says with the tools it has. Real models follow a planted
-line only some of the time, and this rule makes them follow it every time,
-so the trace shows the worst case. For each permission set the program
+line only some of the time, and this rule makes them follow it every time.
+The trace then shows the worst case. For each permission set the program
 prints the tool the planted line asks for, what the agent does, and one
 line that reads `data leaves: yes` or `data leaves: no`.
 
@@ -117,7 +117,7 @@ put it as "only the combination is the attack".
 The trace adds the order of the links. Reading is the first link, and you
 can't remove it, because reading is the task. Having private data nearby is
 the second, and it is often part of the task too. Sending is the last link,
-and a summarizing task never needs it. So when you look at an agent that
+which a summarizing task has no use for. So when you look at an agent that
 reads content you didn't write, start with the tools that can send. The
 agent engineer's version of this rule is to treat every tool result as
 untrusted input and to keep the outbound tools behind a check

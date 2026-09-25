@@ -39,8 +39,8 @@ gives the same figure for the body (@Agent Skills spec)
 (@Claude docs agent-skills-overview). In Claude Code, the body stays in the
 conversation on the turns after the skill runs (@Claude Code skills). As
 [How a language model works](/concepts/how-models-work/) showed, the model
-reads everything so far each time it predicts a token, so a body that
-stays is read again on each of those turns. A file the agent never opens
+reads everything so far each time it predicts a token, so a body that's
+still in context is read again on each of those turns. A file the agent never opens
 doesn't cost any tokens (@Claude docs agent-skills-overview).
 
 <Sort id="which-stage-loads-it" objective="customizing-agents/writes-skill/discloses-progressively"

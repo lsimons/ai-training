@@ -227,7 +227,7 @@ question costs about twice what a basic question does.
 ## A question the handbook doesn't answer
 
 Question eight asks whether you can bring a dog to the office. No text
-covers it, but two texts contain the word `office`, so the search
+covers it, but two texts contain the word `office`. The search
 returns one of them, and the model gets a passage about opening hours.
 A model that isn't told to ground its answer can answer from a passage
 that doesn't cover the question, and the fix is an instruction that tells it to
@@ -262,7 +262,7 @@ passages don't cover the question: `not found`. A real model reads that
 text. The fake model obeys it through `covers`, which asks for at least
 `MIN_SHARED` keywords of the question in the answering sentence, and
 that check is what turns the second run into `not found`. An agent that
-doesn't find an answer should say that it couldn't find one (@AEC-08). The way
+fails to find an answer should say that it couldn't find one (@AEC-08). The way
 to know yours does is a test set with questions like this one, whose
 answer is in no document, with `not found` as the expected answer.
 
@@ -336,8 +336,8 @@ Copy the `retrieval-as-a-tool` folder from the repository. Add the
 question "How many days of parental leave do I get?" to `TEST_SET`, run
 `python3 agent.py basic`, and read what the basic version answers. The
 handbook has no parental leave policy. The leave text shares two
-keywords with the question, and two is what `covers` asks for, so the
-answer goes through. Then raise `MIN_SHARED` to 3 and run the step again. Doing
+keywords with the question, and two is what `covers` asks for. That's enough for the
+answer to go through. Then raise `MIN_SHARED` to 3 and run the step again. Doing
 this once shows you how a wrong passage clears a weak coverage check,
 and what a stricter one costs.
 

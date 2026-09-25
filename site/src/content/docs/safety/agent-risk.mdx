@@ -6,7 +6,7 @@ the same thing wrong may already have sent the email, deleted the folder or
 paid the invoice before you saw anything. In this lesson we look at
 what changes once an AI can *act* rather than only *answer*, and build three
 habits for deciding how far to let it: naming what an action can reach,
-giving the agent only the access the job needs, and choosing the moments
+limiting the agent to the access the job needs, and choosing the moments
 where a person must say yes first.
 
 You don't need code for this lesson. The examples are an agent with access to your
@@ -117,9 +117,9 @@ for the task in front of you, and take access away when the task is done.
 ## Human in the loop
 
 Least privilege shrinks what an agent can do. **Human in the loop** decides
-which of the things it still can do need a person to approve first. Not
-every action, or the agent is just a slow way of doing things yourself. Not
-no action, or you have handed over the keys. The skill is picking the
+which of the things it still can do need a person to approve first. Approving
+every action makes the agent a slow way of doing things yourself. Approving
+no action means you have handed over the keys. The skill is picking the
 moments.
 
 These questions sort actions quickly.
@@ -170,8 +170,8 @@ holds the only copy of a contract or which recipients are outside the
 company. The choice of where an approval belongs is still yours.
 
 <Pitfall title="Clicking through the approval">
-An approval step only protects you while you read it. An agent that asks
-before every file it touches trains you to press yes without looking, and
+An approval step only protects you while you read it. If an agent asks
+before every file it touches, it trains you to press yes without looking, and
 the one request that mattered, a send to an address you never mentioned,
 goes through with the rest. The safeguard was switched on and still failed.
 Keep the approvals to the few moments that matter. Each one then gets your

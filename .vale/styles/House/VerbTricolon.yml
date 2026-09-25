@@ -8,24 +8,25 @@
 # model, and its learners" is three possessives, not three verbs, and nouns
 # end in -s as often as verbs do. "It" joins the pronoun subjects so "it
 # reads files, edits them, and runs commands" still fires. Decided in
-# docs/prose/README.md. Each space in a pattern is `\s`, so a series split
-# by a line break still matches (issue #371, scripts/vale_linebreaks.py).
+# docs/prose/README.md. Unlike the other House rules, its patterns still use
+# literal spaces, so a series split by a line break passes. With `\s` the
+# rule reports 137 lesson sentences, most of them noun lists (issue #441).
 extends: existence
 message: "Tricolon: '%s'. Three parallel verbs in series. Restructure or vary the count."
 level: warning
 nonword: true
 tokens:
   # Syndetic: "verbing X, verbing Y, and/or verbing Z"
-  - "\\b(?:\\w+ly\\s)?\\w+ing\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+ing\\s[^,.!?]+,\\s(?:and|or)\\s(?:\\w+ly\\s)?\\w+ing\\s[^.!?]+"
-  - "\\b(?:\\w+ly\\s)?\\w+ed\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+ed\\s[^,.!?]+,\\s(?:and|or)\\s(?:\\w+ly\\s)?\\w+ed\\s[^.!?]+"
-  - "\\b(?:can|could|will|would|should|shall|may|might|must)\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:and|or)\\s(?:\\w+ly\\s)?\\w+\\s[^.!?]+"
-  - "\\b(?:[Ii]t|[Tt]hey|[Ww]e|[Yy]ou)\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:and|or)\\s(?:\\w+ly\\s)?\\w+\\s[^.!?]+"
-  - "\\bto\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:and|or)\\s(?:\\w+ly\\s)?\\w+\\s[^.!?]+"
-  - "\\bto\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\sto\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:and|or)\\sto\\s(?:\\w+ly\\s)?\\w+\\s[^.!?]+"
+  - "\\b(?:\\w+ly )?\\w+ing [^,.!?]+, (?:\\w+ly )?\\w+ing [^,.!?]+, (?:and|or) (?:\\w+ly )?\\w+ing [^.!?]+"
+  - "\\b(?:\\w+ly )?\\w+ed [^,.!?]+, (?:\\w+ly )?\\w+ed [^,.!?]+, (?:and|or) (?:\\w+ly )?\\w+ed [^.!?]+"
+  - "\\b(?:can|could|will|would|should|shall|may|might|must) (?:\\w+ly )?\\w+ [^,.!?]+, (?:\\w+ly )?\\w+ [^,.!?]+, (?:and|or) (?:\\w+ly )?\\w+ [^.!?]+"
+  - "\\b(?:[Ii]t|[Tt]hey|[Ww]e|[Yy]ou) (?:\\w+ly )?\\w+ [^,.!?]+, (?:\\w+ly )?\\w+ [^,.!?]+, (?:and|or) (?:\\w+ly )?\\w+ [^.!?]+"
+  - "\\bto (?:\\w+ly )?\\w+ [^,.!?]+, (?:\\w+ly )?\\w+ [^,.!?]+, (?:and|or) (?:\\w+ly )?\\w+ [^.!?]+"
+  - "\\bto (?:\\w+ly )?\\w+ [^,.!?]+, to (?:\\w+ly )?\\w+ [^,.!?]+, (?:and|or) to (?:\\w+ly )?\\w+ [^.!?]+"
   # Asyndetic: no conjunction before the third item
-  - "\\b(?:\\w+ly\\s)?\\w+ing\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+ing\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+ing\\s[^,.!?]+"
-  - "\\b(?:\\w+ly\\s)?\\w+ed\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+ed\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+ed\\s[^,.!?]+"
-  - "\\b(?:can|could|will|would|should|shall|may|might|must)\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+"
-  - "\\b(?:[Ii]t|[Tt]hey|[Ww]e|[Yy]ou)\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+,\\s(?:\\w+ly\\s)?\\w+\\s[^,.!?]+"
+  - "\\b(?:\\w+ly )?\\w+ing [^,.!?]+, (?:\\w+ly )?\\w+ing [^,.!?]+, (?:\\w+ly )?\\w+ing [^,.!?]+"
+  - "\\b(?:\\w+ly )?\\w+ed [^,.!?]+, (?:\\w+ly )?\\w+ed [^,.!?]+, (?:\\w+ly )?\\w+ed [^,.!?]+"
+  - "\\b(?:can|could|will|would|should|shall|may|might|must) (?:\\w+ly )?\\w+ [^,.!?]+, (?:\\w+ly )?\\w+ [^,.!?]+, (?:\\w+ly )?\\w+ [^,.!?]+"
+  - "\\b(?:[Ii]t|[Tt]hey|[Ww]e|[Yy]ou) (?:\\w+ly )?\\w+ [^,.!?]+, (?:\\w+ly )?\\w+ [^,.!?]+, (?:\\w+ly )?\\w+ [^,.!?]+"
   # Subject-verb: "the X verbs A, the Y verbs B, and the Z verbs C"
-  - "\\b[Tt]he\\s(?:\\w+\\s){1,3}\\w+s\\s[^,.!?]+,\\sthe\\s(?:\\w+\\s){1,3}\\w+s\\s[^,.!?]+,\\s(?:and|or)\\sthe\\s(?:\\w+\\s){1,3}\\w+s\\s[^.!?]+"
+  - "\\b[Tt]he (?:\\w+ ){1,3}\\w+s [^,.!?]+, the (?:\\w+ ){1,3}\\w+s [^,.!?]+, (?:and|or) the (?:\\w+ ){1,3}\\w+s [^.!?]+"

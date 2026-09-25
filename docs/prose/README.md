@@ -45,7 +45,9 @@ so a package synced earlier gets the rewrite too. It changes the
 `swap` keys and `exceptions` of `substitution` rules. The House rules
 are written with `\s` from the start, and
 `tests/test_vale_linebreaks.py` checks that they stay so and that each
-rule fires on a hit split over two lines.
+rule fires on a hit split over two lines. `House.VerbTricolon` still has
+literal spaces: with `\s` it reports 137 lesson sentences, most of them
+noun lists, and what to do about that is open in issue #441.
 
 Vale itself drops a match that crosses into an indented continuation
 line of a list item or a `>` line of a block quote, with `\s` or without

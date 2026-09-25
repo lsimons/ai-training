@@ -70,7 +70,7 @@ return {"answer": f"Here is what I found: {result}."}
 ```
 
 The fixture prints the message list, one line per message, then the stop
-reason and the answer. The tool line shows the result with `repr`, so an
+reason and the answer. The tool line shows the result with `repr`. An
 empty string prints as `''`.
 
 <Predict id="predict-empty" objective="building-agents/builds-agent-loop/defines-a-tool"
@@ -92,8 +92,8 @@ show(run("What is the balance of account 4711?", tools=with_tool(lookup_account_
 </Predict>
 
 The run finished with `end_turn`, and the answer is nonsense. An empty
-result looks like success to the model, so it reports success. Nothing
-crashed and nothing is right.
+result looks like success to the model, so it reports success. The program
+didn't crash, and the answer is still wrong.
 
 ## Say what went wrong, as data
 
@@ -244,7 +244,7 @@ attempt, and the harness decides how many attempts a step gets.
 
 ## Who decides what
 
-Each part of the program makes one kind of decision, and the design stays
+Each part of the program makes one kind of decision, and the design is
 clear as long as none of them takes over another's job (@AEC-13).
 
 - The **tool** says what went wrong. It catches what it can explain and
