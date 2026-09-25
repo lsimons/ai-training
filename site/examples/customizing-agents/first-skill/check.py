@@ -19,6 +19,8 @@ def python_env() -> "dict[str, str]":
     """
     return {
         "PATH": os.environ.get("PATH", os.defpath),
+        "LANG": "C",
+        "LC_ALL": "C",
         "PYTHONDONTWRITEBYTECODE": "1",
         "NO_COLOR": "1",
         "PYTHON_COLORS": "0",
