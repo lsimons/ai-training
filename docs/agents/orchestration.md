@@ -98,7 +98,8 @@ both, so the builder and the reviewer never talk to each other.
    revision. After `Verdict: approve`, the coordinator re-checks the fix
    commit itself: it reads the commit with `git show`, runs
    `mise run fast` on the branch, and comments
-   `re-checked by lead: <commit link>` on the issue. The re-check column
+   `re-checked by lead: <commit link>` on the issue or pull request that
+   holds the review. The re-check column
    of the wave pull request's review table links that comment. A fix that
    changes more than the findings named, or a finding too big for the
    coordinator to check, goes back to the same reviewer. A full second
