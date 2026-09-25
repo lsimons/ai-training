@@ -1,8 +1,8 @@
 id: building-agents/golden-sets
 title: A golden set is the agent's regression suite
 description: >-
-  Write a golden set of fifteen handbook questions with the qualities a good answer has, run it after
-  a one-line prompt change, and hold one item in five back for release.
+  Run a golden set of fifteen handbook questions with the qualities a good answer has, predict what a
+  one-line prompt change breaks, hold one item in five back for release, and add two items.
 mode: tutorial
 covers: building-agents/evaluation
 serves: [building-agents/evaluates-agents/builds-a-golden-set]
@@ -18,7 +18,7 @@ exercise:
   brief: >-
     Add two items to the fixture golden set, one from a past failure and one that should be refused,
     mark twenty percent of the set as held out, and run it. The output is the pass count per group.
-sources: [AEC-09]
+sources: [AEC-09, AEC-08]
 issue: 201
 minutes: 15
 notes: >-
@@ -27,5 +27,6 @@ notes: >-
   line changes what it answers. The fifteen items, the question-log proportions and the incident
   origin (run t08 of the rubrics lesson) are illustrative, written by the author. Holding one item in
   five out of tuning is this course's practice from the competency file, and AEC-09 doesn't state it,
-  so the page cites no source for it. DLAI-11, Academy building-with-the-claude-api and Academy
+  so the page cites no source for it, and the same goes for recording qualities and an item's origin.
+  AEC-08 backs the claim that an agent without a fallback for missing information may answer anyway. DLAI-11, Academy building-with-the-claude-api and Academy
   ai-native-sdlc-playbook from the plan were dropped because the page cites no claim from them.

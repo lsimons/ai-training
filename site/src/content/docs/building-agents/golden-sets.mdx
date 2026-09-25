@@ -1,10 +1,10 @@
-import { Choice, Predict, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+import { Choice, MultiChoice, Predict, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
 
-In this lesson we write a golden set for the handbook assistant and run it
-after a change to the prompt. In
+In this lesson we run a golden set for the handbook assistant after a
+change to its prompt, and then add items to it. In
 [Giving the agent a check it can run](/coding-with-agents/self-checking-loops/)
 you turned a manual check into a test that runs after every change.
-**Golden sets** do the same for an agent. A golden set is a fixed list of
+**Golden sets** do the same for an agent. A golden set is a written list of
 inputs, each with the qualities a good answer has, and a script runs all
 of them every time the prompt, the model or a tool changes.
 
@@ -12,12 +12,13 @@ The agent is the basic retrieval agent from
 [Retrieval as a tool the agent calls](/building-agents/retrieval-as-a-tool/):
 one keyword search over the twelve-document handbook, then a fake model
 that answers from the passage it gets. The fake model reads its prompt,
-so a change to the prompt changes what it does, and every run prints the
-same result without an API key. The files are in
+so a change to the prompt changes what it does. Every run prints the
+same result, and no application programming interface (API) key is
+needed. The files are in
 `site/examples/building-agents/golden-sets/`. Copy the `golden-sets`
 folder, and each step below is `python3 golden.py <step>`.
 
-## Expected qualities, not one answer
+## What a good answer has
 
 A good golden set covers the questions the agent gets in normal use, the
 unusual ones, and the ones it must not answer (@AEC-09). A set with only
@@ -26,12 +27,18 @@ clear, well-formed questions doesn't tell you what happens with real users
 from real use. A score on that mix says how the agent does on the
 questions users ask.
 
-Suppose the assistant's question log shows that about half of the
-questions are routine, a quarter are ambiguous, and one in five asks
-about something the handbook doesn't cover. The fifteen items in
+Suppose the assistant's question log shows that a bit more than half of
+the questions are routine, about a quarter are ambiguous, and the rest
+ask about something the handbook doesn't cover. The fifteen items in
 `golden-set.csv` follow that split, with eight routine items, four
-ambiguous ones and three the agent should refuse. These are four of them,
-with the columns lined up:
+ambiguous ones and three the agent should refuse. The file starts with
+this header line:
+
+```text
+id,group,question,source,mentions,may_decline,held_out,origin
+```
+
+These are four of the items, with the first six columns lined up:
 
 ```text
 id   group      question                                 source        mentions       may_decline
@@ -41,8 +48,8 @@ a02  ambiguous  How many days can I take off?            leave.txt     25 days  
 x01  refuse     Can I bring my dog to the office?
 ```
 
-Each item records what a good answer has, and it doesn't record one
-answer word for word. An agent can phrase a correct answer many ways,
+This course's rule is that each item records what a good answer has,
+and it doesn't record one answer word for word. An agent can phrase a correct answer many ways,
 and a check that compares with one reference string fails all the others.
 Here a good answer to r01 comes from `leave.txt` and contains "25 days".
 For an ambiguous question, "not found" is also a good answer, because a
@@ -89,8 +96,8 @@ python3 golden.py run
 </Predict>
 
 Every item passes. The count per group matters more than the total. A
-change that breaks the refusals and fixes two routine questions leaves
-the total the same, and the groups show the trade.
+total of 10 of 12 can mean two failed routine questions or two failed
+refusals. Those two results need different fixes.
 
 ## Change one line, and predict what fails
 
@@ -105,31 +112,36 @@ PROMPT_LINES = [
 ]
 ```
 
-A colleague finds the last line too strict and removes it. Without that
-line the fake model answers as soon as a sentence shares one keyword with
-the question, the way a model without the instruction tries to answer
-everything. The search step doesn't change, and every item gets the same
-passage as before. Run the golden set before the change goes in, and
+A colleague finds the last line too strict and removes it. An agent that
+isn't told what to do when the handbook has no answer may try to answer
+anyway (@AEC-08). The fake model copies that behavior with a keyword rule.
+With the last line in the prompt, it answers only when a sentence of the
+passage shares two or more keywords with the question, and says "not
+found" otherwise. Without the line, one shared keyword is enough. The
+search step doesn't change, and every item gets the same passage as
+before.
+
+On today's prompt, four items pass because the agent says "not found".
+For a01 the search returns no page. For a02, x01 and x02 it returns a
+page, and no sentence on it shares two keywords with the question. Run the golden set before the change goes in, and
 find out which items that line was protecting. The `changed` step runs
 the set with the first two lines only.
 
 <Predict id="predict-the-failures" objective="building-agents/evaluates-agents/builds-a-golden-set"
   concepts={['golden-sets']}
-  context="A handbook assistant searches a twelve-document handbook once per question and answers from the best passage. Its prompt has three lines, and the last one says: if the passages do not cover the question, answer exactly: not found. A golden set of twelve items (seven routine, three ambiguous, two the agent should refuse) all passed with that prompt. A refuse item passes only on not found. An ambiguous item passes on the right page or on not found."
+  context="A handbook assistant searches a twelve-document handbook once per question, and a fake model answers from the page it gets. The last line of its prompt says: if the passages do not cover the question, answer exactly: not found. With that line the model answers only when a sentence shares two or more keywords with the question, and without it one shared keyword is enough. A golden set of twelve items (seven routine, three ambiguous, two to refuse) all passed with the line. The routine items passed on the right page. Four passed on not found: for a01 the search returned no page, and for a02, x01 and x02 it returned a page with no sentence sharing two keywords. A refuse item passes only on not found. An ambiguous item passes on the right page or on not found."
   title="Which items fail without the last line?"
-  hint="On today's prompt, which items passed because the agent said not found? For each of those, did the search return a passage at all?"
+  hint="Which items passed because the agent said not found, and for which of them did the search return a page at all?"
   answer={`routine: 7 of 7
   ambiguous: 2 of 3
   refuse: 0 of 2
-  failed a02: How many days can I take off?
-    answer: Claims are filed within 30 days.
-  failed x01: Can I bring my dog to the office?
-    answer: Core hours, when everyone in the office is reachable, are 10 to 15.
-  failed x02: What is my manager's salary?
-    answer: Requests go to your manager at least two weeks ahead.`} run="building-agents/golden-sets/changed.py">
+  failed a02
+  failed x01
+  failed x02`} run="building-agents/golden-sets/changed.py">
 
-Predict the pass count per group, and which items fail, when the golden
-set runs with the last line of `PROMPT_LINES` removed. Then run it.
+Predict the pass count per group, and the id of each item that fails,
+when the golden set runs with the last line of `PROMPT_LINES` removed.
+The script prints one `failed <id>` line per failure. Then run it.
 
 ```sh
 python3 golden.py changed
@@ -137,14 +149,34 @@ python3 golden.py changed
 
 </Predict>
 
+The `answers` step prints the question and the answer for each item that
+failed.
+
+<Predict id="show-the-answers" title="What the agent answered"
+  answer={`failed a02: How many days can I take off?
+    answer: Claims are filed within 30 days.
+  failed x01: Can I bring my dog to the office?
+    answer: Core hours, when everyone in the office is reachable, are 10 to 15.
+  failed x02: What is my manager's salary?
+    answer: Requests go to your manager at least two weeks ahead.`} run="building-agents/golden-sets/answers.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 golden.py answers
+```
+
+</Predict>
+
 The routine items all pass, because each of them retrieves the right page
-and the answer sentence shares several keywords with the question. The
-items that fail are the ones where "not found" was the good answer and a
-passage came back anyway. Item a02 retrieves `expenses.txt`, because
-"days" is in the sentence about claims, and the agent now answers with
-it. Item x01 gives the same answer that run eight gave in
-[Turning good into a rubric](/building-agents/rubrics/), where the agent
-said yes to a dog. Item a01 still passes, because its search returns no
+and the answer sentence shares two or more keywords with the question.
+The items that fail are the ones where "not found" was the good answer
+and a passage came back anyway. For a02, four pages contain "days", and
+none contains "take" or "off". That's a tie, and the search takes the
+first file in alphabetical order, `expenses.txt`, ahead of `leave.txt`.
+The agent now answers with the sentence about claims. Item x01 quotes the
+same sentence that run eight used to say yes to a dog in
+[Turning good into a rubric](/building-agents/rubrics/). Item a01 still passes, because its search returns no
 passage at all. With no passage, the agent has no sentence to answer with.
 
 A person who tries the new prompt on a few routine questions sees
@@ -192,10 +224,10 @@ moves r08 into the development part and holds back a new question from
 the log in its place.
 
 The other way a set grows is from failures that reached a user. When a
-user gets a wrong answer, the question goes into the set with the
-qualities a good answer has, and the item records where it came from
-(@AEC-09). Item x01 is one of those, and its `origin` column points at
-the run it came from:
+failure shows a case the set doesn't cover, the question goes into the
+set (@AEC-09). This course also records where the item came from. Item
+x01 is one of those, and its `origin` column points at the run it came
+from:
 
 ```text
 x01,refuse,Can I bring my dog to the office?,,,no,no,run t08 of the rubrics lesson: the agent said yes to a dog
@@ -218,10 +250,42 @@ items as new kinds of question appear (@AEC-09).
     { text: 'A copy of a development item with the same question, so the two parts measure the same thing.', why: 'A copy passes whenever the original passes. It measures what the development part already measures, so it cannot show that the agent was fitted to that part.' },
   ]}>
 
-A team adds four new items to its golden set. Which one should go into
+A team has four candidate items for its golden set. Which one should go into
 the held-out part?
 
 </Choice>
+
+<Sort id="sort-dev-or-release" phase="review" objective="building-agents/evaluates-agents/builds-a-golden-set"
+  concepts={['golden-sets']}
+  context="A team splits its agent's golden set in two. One part runs after every change, and the team fixes the agent while looking at its results. The held-out part, about one item in five, runs only before a release, and nobody changes the agent while looking at it."
+  title="Which part does each item go in?"
+  hint="Has anyone changed the agent while looking at the item, or will they need to?"
+  buckets={['Runs after every change', 'Runs only before a release']}
+  items={[
+    { text: 'A question the prompt was rewritten last week to pass', bucket: 0 },
+    { text: 'The item from yesterday\'s incident, which the team is fixing now', bucket: 0 },
+    { text: 'A question drawn at random from this month\'s log that nobody has run', bucket: 1 },
+    { text: 'A held-out item the team just used to find and fix a failure', bucket: 0 },
+    { text: 'A refusal question from the log, set aside before any tuning started', bucket: 1 },
+  ]} />
+
+<MultiChoice id="what-an-item-records" phase="review" objective="building-agents/evaluates-agents/builds-a-golden-set"
+  concepts={['golden-sets']}
+  context="A handbook assistant answers staff questions from a twelve-page handbook, or says not found. A team writes golden set items for it, and a short script checks every answer without a person reading it."
+  title="What does an item record?"
+  hint="For each line, could a few lines of code check it, and would it still pass an answer worded differently?"
+  options={[
+    { text: 'The handbook page that a good answer comes from.', correct: true },
+    { text: 'A phrase that every good answer contains.', correct: true },
+    { text: 'Whether "not found" also counts as a good answer.', correct: true },
+    { text: 'The one reply that counts as correct, word for word.', why: 'A correct answer can be worded many ways, and a word-for-word check fails all but one of them.' },
+    { text: 'A note that a good answer is helpful and friendly.', why: 'A script cannot check helpful or friendly. That needs a rubric and a grader.' },
+  ]}>
+
+A team writes items for the assistant's golden set, to be checked by a
+script. Which of these should each item record?
+
+</MultiChoice>
 
 <Pitfall title="A set tuned until it passes">
 
@@ -231,21 +295,25 @@ users get wrong answers to questions like the ones the set held a month
 ago. The prompt had been rewritten around those 40 questions, and the
 set had stopped measuring anything else. A score on items the team
 tuned against says how well the agent fits those items. Keep a part of
-the set out of the tuning loop, look at it only before a release, and
-replace every held-out item you use to fix a failure.
+the set out of the tuning loop and run it only before a release. When
+you use a held-out item to fix a failure, replace it with a new one.
 
 </Pitfall>
 
 <Exercise stretch="Add a third item that you expect to fail today, run the set, and write down in its origin column which lesson or change you expect to fix it.">
 
 Copy the `golden-sets` folder and add two rows to `golden-set.csv`. The
-first comes from a past failure: pick a run from the rubrics lesson's
-transcripts where the agent went wrong, write its question with the
+first comes from a past failure: pick a run in
+`site/examples/building-agents/rubrics/transcripts/` where the agent
+went wrong, write its question with the
 source and the text a good answer mentions, and put the run in the
 `origin` column. The second is a question the handbook doesn't cover and
 the agent should refuse. Then set `held_out` so that three or four of
 the seventeen items are held out, spread across the groups. Run
-`python3 golden.py run` and `python3 golden.py release`. Adding items
+`python3 golden.py run` and `python3 golden.py release`. To see how the
+agent handles your refused question without the not-found line, set its
+`held_out` to `no` for a moment and run `python3 golden.py changed`.
+Adding items
 yourself shows what an item has to record for a script to check it
 without you.
 
@@ -254,18 +322,16 @@ seventeen in the release run and to the items that aren't held out in
 the development run. The release run has a `held out` line with three or
 four items. Your past-failure item names its source page and a phrase
 from the right answer, so it would fail if the agent repeated the old
-mistake. Did your refused question pass because the agent said "not
-found", or because the search returned nothing? Set its `held_out` to
-`no` and try it with the `changed` step to find out.
+mistake. Did your refused question pass because the model declined a
+page, or because the search returned nothing?
 
 </Exercise>
 
 <Recap>
 
 1. A golden set lists inputs with the qualities a good answer has, such
-   as the source page and a phrase it must contain, and a short script
-   checks them after every change to the prompt, the model or a tool
-   (@AEC-09).
+   as the source page and a phrase it must contain. A short script checks
+   them after every change to the prompt or the model (@AEC-09).
 2. Cover routine, unusual and out-of-scope questions (@AEC-09), in about
    the proportion users ask them, and read the pass count per group.
 3. Run the set before a change goes in. A line in the prompt can protect
@@ -273,8 +339,8 @@ found", or because the search returned nothing? Set its `held_out` to
 4. Hold about one item in five out of the tuning loop and run it only
    before a release. Replace a held-out item once you have used it to
    fix a failure.
-5. Add every failure that reached a user as an item, with a link to
-   where it came from (@AEC-09).
+5. Add every failure that reached a user as an item (@AEC-09), and
+   record where it came from.
 
 </Recap>
 
