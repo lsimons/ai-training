@@ -245,7 +245,7 @@ export function checkExamples(
  * page claim about its output can go stale with the build green.
  */
 const FOUNDATIONS =
-	'foundations page: `mise run data` rejects `<Predict run=...>` there, so the page states the output in prose';
+	'foundations page: `mise run data` rejects `<Predict run=...>` there, so the page states the output in prose until #237 picks the proof mechanism';
 export const UNRUN_EXEMPT = new Map([
 	[
 		'coding-with-agents/reviewing-the-diff/build.py',
