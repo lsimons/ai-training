@@ -1,8 +1,9 @@
 """Shows the hidden-text gate on the scratch copy, and on a file with invisible characters.
 
 It runs what `python3 scan_hidden.py ~/red-team/project` does on a fresh
-scratch folder, where it finds the planted note. Then it adds a line with a
-zero-width space, a character that shows as nothing, and runs the scan again.
+scratch folder, where it finds the planted note. Then it adds a changelog with
+a zero-width space and a Unicode tag character, two characters that show as
+nothing, and runs the scan again.
 """
 
 import os
@@ -28,8 +29,10 @@ def main() -> int:
         project = os.path.join(dest, "project")
         show_scan(project)
         with open(os.path.join(project, "docs", "changelog.md"), "w", encoding="utf-8") as handle:
-            handle.write("# Changes\n\n- Totals now round to the cent.\u200b\n")
-        print("# add docs/changelog.md, with a zero-width space at the end of line 3")
+            handle.write(
+                "# Changes\n\n- Totals now round to the cent.\u200b\n- Faster export.\U000e0041\n"
+            )
+        print("# add docs/changelog.md, with a zero-width space and a tag character")
         show_scan(project)
     return 0
 
