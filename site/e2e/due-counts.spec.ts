@@ -1,8 +1,12 @@
 /** The due review count in the sidebar and the due lines on the landing and progress pages (spec S05). */
 import type { Page } from '@playwright/test';
-import { answerChoice, expect, STORAGE_KEY, storedRecord, test } from './fixtures';
+import { expect, lessonCheckpoints, passCheckpoint, STORAGE_KEY, storedRecord, test } from './fixtures';
 
 const LESSON = 'concepts/how-models-work';
+// Finishing schedules the lesson's `first` checkpoints for review (spec S05), read from the page source.
+const FIRST = lessonCheckpoints(LESSON)
+	.filter((c) => c.phase === 'first')
+	.map((c) => c.id);
 
 /** Move every review item of the finished lesson to a due date in the past. */
 async function makeDue(page: Page) {
@@ -28,14 +32,15 @@ test('the sidebar and the landing page show the same due count once a finished l
 
 	// Finish the lesson through the page. Its items are scheduled for later, so still no count.
 	await page.goto(`${LESSON}/`);
-	await answerChoice(page, 'what-the-model-does');
-	await answerChoice(page, 'name-the-failure');
+	for (const id of FIRST) await passCheckpoint(page, id);
 	await page.locator('[data-finish]').click();
 	await expect(page.locator('[data-finish]')).toHaveText(/^Finished ✓/);
 	await expect(page.locator('[data-due-count]')).toHaveCount(0);
 	const record = await storedRecord(page);
 	const items = Object.keys(record.reviews ?? {}).filter((id) => id.startsWith(`${LESSON}#`)).length;
-	expect(items).toBe(2);
+	expect(items).toBe(FIRST.length);
+	// The counts below use the plural, and one review leaves at least one item due.
+	expect(items).toBeGreaterThan(1);
 
 	// Set a due date in the past and reload: the sidebar count and the course card agree.
 	await makeDue(page);
@@ -61,11 +66,14 @@ test('the sidebar and the landing page show the same due count once a finished l
 	await cp.locator('label[data-correct]').first().click();
 	await cp.locator('.cp-check').first().click();
 	await expect(cp.locator('.cp-feedback')).toHaveText('Correct.');
-	await expect(count).toHaveText(`${items - 1} review item due`);
+	const left = items - 1;
+	await expect(count).toHaveText(left === 1 ? '1 review item due' : `${left} review items due`);
 
 	// The progress page shows the same line, and clearing progress hides both surfaces without a reload.
 	await page.goto('progress/');
-	await expect(page.locator('[data-due-line="concepts"]')).toHaveText(`Concepts: ${items - 1} item due`);
+	await expect(page.locator('[data-due-line="concepts"]')).toHaveText(
+		left === 1 ? 'Concepts: 1 item due' : `Concepts: ${left} items due`,
+	);
 	page.once('dialog', (d) => d.accept());
 	await page.locator('[data-reset]').click();
 	await expect(page.locator('[data-message]')).toHaveText('Progress reset.');

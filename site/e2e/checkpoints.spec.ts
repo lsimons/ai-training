@@ -4,6 +4,7 @@ import {
 	drag,
 	expect,
 	lessonCheckpoints,
+	lessonExamples,
 	orderByButtons,
 	orderByDrag,
 	passRemaining,
@@ -190,17 +191,24 @@ test('scenario: a wrong decision shows its consequence, the right one passes', a
 	await expect(injection).toHaveAttribute('data-state', 'passed');
 });
 
-test('the coding lesson shows three ungraded examples CI verifies, and grades only the session', async ({ page }) => {
-	await page.goto('coding-with-agents/first-session/');
+test('the coding lesson shows its ungraded examples CI verifies, and grades only the session', async ({ page }) => {
+	const lesson = 'coding-with-agents/first-session';
+	// The examples are the ones the page source has, and each names the fixture CI runs it from.
+	const shown = lessonExamples(lesson);
+	expect(shown.length).toBeGreaterThan(0);
+	expect(shown.filter((e) => e.run === undefined)).toEqual([]);
+	await page.goto(`${lesson}/`);
 	const examples = page.locator('[data-example]');
-	await expect(examples).toHaveCount(3);
-	await expect(page.locator('.cp-verified')).toHaveCount(3);
+	await expect(examples).toHaveCount(shown.length);
+	await expect(examples.locator('.cp-verified')).toHaveCount(shown.length);
+	for (const e of shown)
+		await expect(page.locator(`[data-example][id="${e.id}"]`)).toHaveAttribute('data-run', e.run ?? '');
 	// An example is not a checkpoint: no controls, no progress record, and the output is on the page.
 	await expect(examples.locator('.cp-check')).toHaveCount(0);
 	await expect(examples.locator('[data-checkpoint]')).toHaveCount(0);
 	await expect(page.locator('#run-tests .example-output')).toHaveText('FAILED (failures=1)');
 	// The graded checkpoints are the ones the page source has, kind by kind, and the examples are none of them.
-	const checkpoints = lessonCheckpoints('coding-with-agents/first-session');
+	const checkpoints = lessonCheckpoints(lesson);
 	expect(checkpoints.length).toBeGreaterThan(0);
 	await expect(page.locator('[data-checkpoint]')).toHaveCount(checkpoints.length);
 	for (const kind of Object.values(KIND_OF_TAG)) {
@@ -268,7 +276,9 @@ test('More practice: graded and recorded apart, never needed to finish, never re
 	await expect(page.locator('#more-practice > h2')).toHaveText('More practice');
 
 	const note = page.locator('[data-finish-note]');
-	const needed = `Pass or skip ${first.length} more checkpoint${first.length === 1 ? '' : 's'} to finish this lesson.`;
+	// The lesson has more than one, so the note uses the plural.
+	expect(first.length).toBeGreaterThan(1);
+	const needed = `Pass or skip ${first.length} more checkpoints to finish this lesson.`;
 	await expect(note).toHaveText(needed);
 	const cp = page.locator(`#more-practice [data-checkpoint][id="${practice[0]?.id}"]`);
 	await expect(cp.locator('.cp-skip')).toHaveCount(0);

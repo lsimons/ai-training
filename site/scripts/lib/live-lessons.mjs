@@ -1,25 +1,31 @@
 /**
  * What the e2e specs need to know about the content without counting it by
  * hand: which lessons are live, per course and per topic, and which graded
- * checkpoints a lesson page has. A lesson is live when its lesson file under
- * site/src/data has a page under site/src/content/docs, so the course
- * percentage a spec expects depends on the content directory. The specs
- * compute their counts from here and a new lesson page needs no spec change.
+ * checkpoints and ungraded examples a lesson page has. A lesson is live when
+ * its lesson file under site/src/data has a page under site/src/content/docs,
+ * so the course percentage a spec expects depends on the content directory.
+ * The specs compute their counts from here and a new lesson page needs no
+ * spec change.
  *
  * The tree is read through `readAreaTree` and the pages through
- * `lessonPages`, the same readers `check-data` uses, and the checkpoints
- * through the tag reader the build uses. `tests/scripts/live-lessons.test.ts`
- * covers this; `e2e/fixtures.ts` wraps it with the repository paths.
+ * `lessonPages`, the same readers `check-data` uses. The checkpoints are read
+ * through the tag reader the build uses, with the id guard of the export
+ * check, and the examples through the example runner's reader.
+ * `tests/scripts/live-lessons.test.ts` covers this; `e2e/fixtures.ts` wraps
+ * it with the repository paths.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { checkpointTagsOfSource } from '../../src/lib/checkpoint-tags.ts';
 import { courseLessonIds, readAreaTree } from './area-tree.mjs';
+import { checkpointTagId } from './checkpoints.mjs';
 import { lessonPages } from './data.mjs';
+import { predictTags } from './examples.mjs';
 
 /**
  * @typedef {{ id: string, area: string, topic: string }} LiveLesson A live lesson, its area (which is its course, spec S01) and the topic it covers.
  * @typedef {{ id: string, kind: string, phase: string }} PageCheckpoint One graded checkpoint tag of a lesson page, as the page shows it.
+ * @typedef {{ id: string, run: string | undefined }} PageExample One ungraded example of a lesson page and the fixture it runs from.
  */
 
 /**
@@ -90,8 +96,30 @@ export function pageCheckpoints(contentDir, lesson) {
 	return checkpointTagsOfSource(src, lesson)
 		.filter((t) => t.phase !== 'review')
 		.map((t) => {
-			const id = t.attrs.get('id');
-			if (!id || id.expr || typeof id.value !== 'string') throw new Error(`${lesson}: <${t.tag}> without an id="..."`);
-			return { id: id.value, kind: t.kind, phase: t.phase };
+			const id = checkpointTagId(t);
+			if (id === undefined) throw new Error(`${lesson}: <${t.tag}> without an id="..."`);
+			return { id, kind: t.kind, phase: t.phase };
+		});
+}
+
+/**
+ * The ungraded examples the page of `lesson` shows, in page order: every
+ * `<Predict>` without an `objective`, as in the build (spec S03 "Examples"),
+ * each with the `run` fixture CI verifies it from, or `undefined` when it
+ * has none. The tags are read with the example runner's reader, which
+ * throws on a tag it cannot read.
+ * @param {string} contentDir
+ * @param {string} lesson `<area>/<lesson>`
+ * @returns {PageExample[]}
+ */
+export function pageExamples(contentDir, lesson) {
+	const src = readFileSync(join(contentDir, `${lesson}.mdx`), 'utf8');
+	return predictTags(src, lesson)
+		.filter((t) => !t.attrs.has('objective'))
+		.map((t) => {
+			const id = checkpointTagId(t);
+			if (id === undefined) throw new Error(`${lesson}: <Predict> example without an id="..."`);
+			const run = t.attrs.get('run')?.value;
+			return { id, run: typeof run === 'string' ? run : undefined };
 		});
 }

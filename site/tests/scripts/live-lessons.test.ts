@@ -7,6 +7,7 @@ import {
 	liveLessons,
 	liveTopicLessonIds,
 	pageCheckpoints,
+	pageExamples,
 } from '../../scripts/lib/live-lessons.mjs';
 
 const roots: string[] = [];
@@ -128,5 +129,33 @@ describe('pageCheckpoints', () => {
 				'<Choice id={\'x\'} objective="o" title="T" hint="h" concepts={[\'c1\']} options={[]}>S</Choice>\n',
 		});
 		expect(() => pageCheckpoints(content, 'a/y')).toThrow('a/y: <Choice> without an id="..."');
+	});
+});
+
+describe('pageExamples', () => {
+	it('lists the ungraded examples with their fixture and skips the graded checkpoints', () => {
+		const { content } = tree();
+		expect(pageExamples(content, 'a/x')).toEqual([{ id: 'shown', run: 'x.py' }]);
+	});
+
+	it('leaves out a graded Predict and gives an example without a fixture an undefined run', () => {
+		const { content } = tree({
+			'content/a/y.mdx': [
+				'<Predict id="graded" objective="o" title="T" hint="h" concepts={[\'c1\']} answer="1" run="g.py">S</Predict>',
+				'<Predict id="by-hand" title="T" answer="1">S</Predict>',
+				'',
+			].join('\n\n'),
+		});
+		expect(pageExamples(content, 'a/y')).toEqual([{ id: 'by-hand', run: undefined }]);
+	});
+
+	it('is empty for a page without examples', () => {
+		const { content } = tree();
+		expect(pageExamples(content, 'a/y')).toEqual([]);
+	});
+
+	it('throws on an example without an id', () => {
+		const { content } = tree({ 'content/a/y.mdx': '<Predict title="T" answer="1" run="x.py">S</Predict>\n' });
+		expect(() => pageExamples(content, 'a/y')).toThrow('a/y: <Predict> example without an id="..."');
 	});
 });

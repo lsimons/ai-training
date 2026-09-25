@@ -2,11 +2,11 @@
 import { progressPercent } from '../src/scripts/overview';
 import { emptyRecord } from '../src/scripts/progress-model';
 import {
-	answerChoice,
 	expect,
 	lessonCheckpoints,
 	liveCourseLessons,
 	liveTopicLessons,
+	passCheckpoint,
 	storageKeyFor,
 	storedRecord,
 	test,
@@ -18,25 +18,27 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const now = new Date();
 const TODAY = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 const LESSON = 'concepts/how-models-work';
+// The `first` checkpoints of the lesson, which finishing needs and schedules for review (spec S04, S05). The seed
+// and the counts below come from the page source, so a new checkpoint in the lesson changes no spec.
+const FIRST = lessonCheckpoints(LESSON)
+	.filter((c) => c.phase === 'first')
+	.map((c) => c.id);
 const finished = {
 	lessons: { [LESSON]: { state: 'finished' as const, at: TODAY } },
-	checkpoints: {
-		'concepts/how-models-work#what-the-model-does': { state: 'passed' as const, attempts: 1 },
-		'concepts/how-models-work#name-the-failure': { state: 'passed' as const, attempts: 1 },
-	},
-	reviews: {
-		'concepts/how-models-work#what-the-model-does': { stage: 1, due: TODAY, last: null, history: [], revision: 1 },
-		'concepts/how-models-work#name-the-failure': { stage: 1, due: TODAY, last: null, history: [], revision: 1 },
-	},
+	checkpoints: Object.fromEntries(FIRST.map((id) => [`${LESSON}#${id}`, { state: 'passed' as const, attempts: 1 }])),
+	reviews: Object.fromEntries(
+		FIRST.map((id) => [`${LESSON}#${id}`, { stage: 1, due: TODAY, last: null, history: [], revision: 1 }]),
+	),
 };
 
 test('finish is enabled once every checkpoint is passed, and persists across a reload', async ({ page }) => {
-	await page.goto('concepts/how-models-work/');
+	await page.goto(`${LESSON}/`);
 	const finish = page.locator('[data-finish]');
-	await expect(finish).toBeDisabled();
-	await answerChoice(page, 'what-the-model-does');
-	await expect(finish).toBeDisabled();
-	await answerChoice(page, 'name-the-failure');
+	expect(FIRST.length).toBeGreaterThan(0);
+	for (const id of FIRST) {
+		await expect(finish).toBeDisabled();
+		await passCheckpoint(page, id);
+	}
 	await expect(finish).toBeEnabled();
 	await finish.click();
 	await expect(finish).toHaveText(/^Finished ✓ \(\d{4}-\d{2}-\d{2}\)$/);
@@ -44,15 +46,17 @@ test('finish is enabled once every checkpoint is passed, and persists across a r
 	await expect(finish).toHaveText(/^Finished ✓/);
 	await expect(finish).toBeDisabled();
 	const record = await storedRecord(page);
-	expect(Object.keys(record.reviews ?? {})).toHaveLength(2);
+	expect(Object.keys(record.reviews ?? {}).sort()).toEqual(FIRST.map((id) => `${LESSON}#${id}`).sort());
 });
 
 test('the finish note counts the open checkpoints', async ({ page }) => {
 	await page.goto('building-agents/agent-loop/');
 	// Only the `first` checkpoints are needed to finish (spec S04 "Lesson states").
+	// The lesson has more than one, so the note uses the plural.
 	const open = lessonCheckpoints('building-agents/agent-loop').filter((c) => c.phase === 'first').length;
+	expect(open).toBeGreaterThan(1);
 	await expect(page.locator('[data-finish-note]')).toHaveText(
-		`Pass or skip ${open} more checkpoint${open === 1 ? '' : 's'} to finish this lesson.`,
+		`Pass or skip ${open} more checkpoints to finish this lesson.`,
 	);
 	await expect(page.locator('.recap-sources')).toHaveCount(0);
 	await expect(page.locator('.recap-next')).toHaveCount(0);
@@ -69,7 +73,9 @@ test('the course page shows the finished node, the ring and the review card', as
 	expect(live).toContain(LESSON);
 	const { percent } = progressPercent(live, { ...emptyRecord(), ...finished });
 	await expect(page.locator('[data-ring-label]')).toHaveText(`${percent}%`);
-	await expect(page.locator('[data-review-card]')).toHaveText('Review due: 2 items');
+	// Every seeded review is due today, and there is more than one, so the card uses the plural.
+	expect(FIRST.length).toBeGreaterThan(1);
+	await expect(page.locator('[data-review-card]')).toHaveText(`Review due: ${FIRST.length} items`);
 });
 
 test('nothing due shows a linked review card', async ({ page }) => {
@@ -97,11 +103,12 @@ test('the topic map colors covered topics by lesson state', async ({ page, seed 
 test('the progress page exports, resets and imports the record', async ({ page, seed, seedRaw }) => {
 	await seed(finished);
 	// A leftover version 1 record: reset must remove it too, or the next load would migrate it back.
-	await seedRaw(1, { version: 1, lessons: { 'concepts/how-models-work': { state: 'read', at: TODAY } } });
+	await seedRaw(1, { version: 1, lessons: { [LESSON]: { state: 'read', at: TODAY } } });
 	await page.goto('progress/');
 	expect(await page.locator('.progress-course').count()).toBeGreaterThan(0);
 	expect(await page.locator('.progress-lesson').count()).toBeGreaterThan(0);
-	await expect(page.locator('[data-progress-review=concepts]')).toHaveText('Review due: 2 items');
+	expect(FIRST.length).toBeGreaterThan(1);
+	await expect(page.locator('[data-progress-review=concepts]')).toHaveText(`Review due: ${FIRST.length} items`);
 	const before = await page.locator('[data-dump]').textContent();
 
 	const [download] = await Promise.all([page.waitForEvent('download'), page.locator('[data-export]').click()]);
