@@ -49,6 +49,14 @@ rule fires on a hit split over two lines. `House.VerbTricolon` still has
 literal spaces: with `\s` it reports 137 lesson sentences, most of them
 noun lists, and what to do about that is open in issue #441.
 
+The exceptions written in this repository follow the same rule. A
+multi-word entry in `accept.txt` (`[Ii]t\sis`, `Learn\sPrompting`) and a
+phrase in a `TokenIgnores` pattern (`"significant\sharm"`) use `\s`
+between their words, so the exception applies where a paragraph wraps
+between them (issue #453). `tests/test_vale_linebreaks.py` fails on an
+entry or a pattern with a literal space, and runs each one split over
+two lines.
+
 Vale itself drops a match that crosses into an indented continuation
 line of a list item or a `>` line of a block quote, with `\s` or without
 it, so a phrase split there still passes.
