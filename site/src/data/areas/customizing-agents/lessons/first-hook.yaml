@@ -12,6 +12,9 @@ assumes:
   - objective: coding-with-agents/verifies-agent-work/automates-the-check
     lesson: coding-with-agents/self-checking-loops
     section: write-the-check-as-a-test
+  - objective: customizing-agents/configures-agent/sets-permissions
+    lesson: customizing-agents/allowlists
+    section: run-two-write-the-allowlist
 sources-checked: 2026-09-25
 review-by: 2027-03-25
 after: [customizing-agents/allowlists]
@@ -24,16 +27,19 @@ exercise:
     with the message that says what to do, then make the mistake on purpose and watch it fire.
 sources: [Claude Code hooks, Claude Code hooks guide, Git docs git-diff, Git docs git-commit]
 issue: 184
-minutes: 15
+minutes: 25
 notes: >-
   The pitfall carries the rule from when-instructions-are-not-enough: a rule that must hold every
-  time is a hook, and guidance stays an instruction. The fixture repository is a tiny npm project
+  time needs a mechanism (a hook, with CI behind it), and guidance stays an instruction. The fixture repository is a tiny npm project
   whose `package.json` and `package-lock.json` are committed as `package.sample.json` and
   `package-lock.sample.json`, so no dependency tool or scanner reads them as a real project, and the
   learner renames them in their copy. `harness.py` feeds `lockfile_guard.py` the PreToolUse JSON
   that Claude Code sends, with an allow-list environment for git. The hook compares the working tree
   with HEAD, staged or not, because it runs before the command and can't know what a `git add` in
-  the same command will stage. Only the personal `.claude/settings.local.json` is used: sharing a
+  the same command will stage, and it adds untracked files. It fails closed (exit 2) on input it
+  can't read and when git can't answer, and matches `git ... commit` with a regular expression, so the
+  `if` filter is `Bash(git *)`. The page says what the text match misses and names permission rules and
+  CI as the hard controls. Only the personal `.claude/settings.local.json` is used: sharing a
   hook with a team is the ci-and-hooks lesson (#186). The exit-code contract, the event names, the
   `if` field, exec form, workspace trust and what Claude sees on a block come from
   code.claude.com/docs/en/hooks and /hooks-guide and must be re-checked by review-by.

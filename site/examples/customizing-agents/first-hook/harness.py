@@ -103,9 +103,14 @@ def run_hook(repo: Repo, command: str) -> "tuple[int, str]":
         "tool_input": {"command": command},
         "cwd": str(repo.path),
     }
+    return run_hook_raw(repo, json.dumps(call))
+
+
+def run_hook_raw(repo: Repo, stdin: str) -> "tuple[int, str]":
+    """Run the hook on any text as its input. Returns the exit code and stderr."""
     result = subprocess.run(
         [sys.executable, str(GUARD)],
-        input=json.dumps(call),
+        input=stdin,
         cwd=repo.path,
         env=repo.env,
         capture_output=True,
