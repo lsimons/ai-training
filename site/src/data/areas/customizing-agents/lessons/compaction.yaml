@@ -46,5 +46,5 @@ notes: >-
   messages to compact.` in a fresh session (costs page), and compaction instructions in CLAUDE.md
   (best-practices and costs pages), what the automatic pass keeps (how-claude-code-works and
   best-practices pages), and the auto-memory switch (memory page). Minutes raised from 10 to 15 for the hands-on session. The
-  Academy course named in the short is not cited, and none of its text is used. memory-review was
-  built in the same wave, so the opener names it as the previous lesson without a link.
+  Academy course named in the short is not cited, and none of its text is used. The opener
+  doesn't refer to memory-review, so the page doesn't depend on the merge order with it.
