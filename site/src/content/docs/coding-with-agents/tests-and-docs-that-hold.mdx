@@ -1,0 +1,449 @@
+import { Choice, MultiChoice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response, Habit } from '@components/lesson';
+
+A coding agent writes tests quickly, and they pass. That tells you the
+tests agree with the code, and it doesn't tell you they would notice if
+the code were wrong. In this lesson you break a small program on
+purpose and run the tests an agent wrote for it. Some of them still
+pass, and you rewrite one of them so it checks what the program must do.
+Then you review a change the agent made to the same program, and find
+the docs it left out of date.
+
+The program is `shop/`, a pricing module for a small web shop, in the
+course repository. It adds up the lines of an order and adds shipping:
+4.95 euros (EUR), or nothing for an order of 50.00 EUR or more.
+
+```python
+FREE_SHIPPING_FROM = 50.00
+SHIPPING = 4.95
+
+
+def shipping(amount):
+    """Return the shipping cost for an order with this subtotal."""
+    if amount >= FREE_SHIPPING_FROM:
+        return 0.0
+    return SHIPPING
+```
+
+## Break the code on purpose
+
+**Testing** with an agent means keeping tests that prove what the code
+does for its users, and reviewing the tests the agent writes as closely
+as the code. Agents produce tests readily, and many of those tests pass
+because they repeat what the code happens to do. The Academy course The
+AI-native SDLC playbook (SDLC is short for the development life cycle of
+software) makes the point that once agents write most of the code,
+review and testing are where the work waits (@Academy ai-native-sdlc-playbook).
+A quick way to review a test is to make the code wrong and see whether
+the test notices.
+
+From the root of your clone of the course repository, copy the shop to a
+place of your own, and run its tests there.
+
+```sh
+cp -R site/examples/coding-with-agents/tests-and-docs-that-hold/shop ~/shop
+cd ~/shop
+python3 test_pricing.py; echo "exit status $?"
+```
+
+<Predict id="run-the-tests" title="The agent's tests, before any change"
+  answer={`$ python3 test_pricing.py
+  test_subtotal_adds_the_lines: pass
+  test_small_order_pays_shipping: pass
+  test_large_order_ships_free: pass
+  test_total_adds_shipping: pass
+  test_total_of_a_known_order: pass
+  5 passed, 0 failed
+  exit status 0`} run="coding-with-agents/tests-and-docs-that-hold/run_tests.py">
+Run the tests in your copy and compare what you see with the output below.
+</Predict>
+
+The examples in this lesson aren't graded. Each one is a command you
+run, with output the course checks on every build.
+
+The tests are in `test_pricing.py`. `ORDER` is two items
+at 12.50 EUR and one at 20.00 EUR.
+
+```python
+ORDER = [(2, 12.50), (1, 20.00)]
+
+
+def test_subtotal_adds_the_lines():
+    assert subtotal(ORDER) == 45.00, subtotal(ORDER)
+
+
+def test_small_order_pays_shipping():
+    assert shipping(10.00) == SHIPPING, shipping(10.00)
+
+
+def test_large_order_ships_free():
+    assert shipping(FREE_SHIPPING_FROM + 10) == 0.0, shipping(FREE_SHIPPING_FROM + 10)
+
+
+def test_total_adds_shipping():
+    expected = subtotal(ORDER) + shipping(subtotal(ORDER))
+    assert total(ORDER) == expected, total(ORDER)
+
+
+def test_total_of_a_known_order():
+    assert total(ORDER) == 49.95, total(ORDER)
+```
+
+Now make a bug a customer would see on every small order. Open
+`pricing.py` in your copy and change `SHIPPING = 4.95` to
+`SHIPPING = 5.95`. Before you run the tests again, decide which ones
+still pass.
+
+<MultiChoice id="which-tests-still-pass" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['testing']}
+  context="A pricing module charges 4.95 EUR shipping below 50.00 EUR, from a constant SHIPPING. Its tests: the subtotal of a fixed order equals 45.00; shipping(10.00) equals SHIPPING; shipping(FREE_SHIPPING_FROM + 10) equals 0.0; total(ORDER) equals subtotal plus shipping of the subtotal; total(ORDER) equals 49.95."
+  title="Which tests miss the wrong price?" hint="For each test, where does the expected value come from: the test, or the code it tests?"
+  options={[
+    { text: '`test_subtotal_adds_the_lines`', correct: true },
+    { text: '`test_small_order_pays_shipping`', correct: true },
+    { text: '`test_large_order_ships_free`', correct: true },
+    { text: '`test_total_adds_shipping`', correct: true },
+    { text: '`test_total_of_a_known_order`', why: 'The 49.95 in this test is written in the test itself. With the new price the total is 50.95, and the test compares it with 49.95.' },
+  ]}>
+The constant now holds 5.95 where the shop charges 4.95. Which of the
+five tests still pass?
+</MultiChoice>
+
+<Predict id="run-after-the-break" title="The tests, with the wrong price"
+  answer={`$ python3 test_pricing.py
+  test_subtotal_adds_the_lines: pass
+  test_small_order_pays_shipping: pass
+  test_large_order_ships_free: pass
+  test_total_adds_shipping: pass
+  test_total_of_a_known_order: FAIL: got 50.95
+  4 passed, 1 failed
+  exit status 1`} run="coding-with-agents/tests-and-docs-that-hold/break_price.py">
+Run the tests in your copy again. The course's script makes the same
+change to a fresh copy and runs the tests. You can run it from
+`site/examples/coding-with-agents/tests-and-docs-that-hold/` in your
+clone.
+
+```sh
+python3 break_price.py
+```
+
+</Predict>
+
+One test out of five caught a wrong price. Two of the tests that passed
+never looked at the price, and that's fine: a test for the subtotal
+doesn't need to. The other two mirror the implementation.
+`test_small_order_pays_shipping` compares the shipping cost with
+`SHIPPING`, the same constant the code returns, so it passes whatever
+the constant holds. `test_total_adds_shipping` works out the expected
+total by calling the same functions that `total` calls. A test like
+this repeats the code, and a test that repeats the code agrees with it
+when the code is wrong.
+
+The fix is to write down, in the test, the value the program must
+produce, worked out by hand or taken from the spec. Rewrite
+`test_small_order_pays_shipping` in your copy so it states the price
+the shop charges:
+
+```python
+def test_small_order_pays_shipping():
+    assert shipping(10.00) == 4.95, shipping(10.00)
+```
+
+<Predict id="run-after-the-rewrite" title="The rewritten test, with the wrong price"
+  answer={`$ python3 test_pricing.py
+  test_subtotal_adds_the_lines: pass
+  test_small_order_pays_shipping: FAIL: got 5.95
+  test_large_order_ships_free: pass
+  test_total_adds_shipping: pass
+  test_total_of_a_known_order: FAIL: got 50.95
+  3 passed, 2 failed
+  exit status 1`} run="coding-with-agents/tests-and-docs-that-hold/rewrite_test.py">
+Run the tests with the wrong price still in `pricing.py`. The course's
+script makes both changes to a fresh copy:
+
+```sh
+python3 rewrite_test.py
+```
+
+</Predict>
+
+The rewritten test now fails, and its line names the wrong value. Put
+`SHIPPING = 4.95` back in your copy and run the tests once more: all
+five pass again, and the rewritten test now proves the price.
+
+<Choice id="rewrite-the-total-test" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['testing']}
+  context="A pricing module adds 4.95 EUR shipping to orders below 50.00 EUR, from a constant SHIPPING. A test computes the expected total of an order by calling the same functions as the code, so it passes when SHIPPING holds a wrong price."
+  title="Which rewrite would catch the wrong price?" hint="If SHIPPING held 5.95, which of these lines would still be true?"
+  options={[
+    { text: '`assert total(ORDER) == subtotal(ORDER) + SHIPPING`', why: 'The expected value still reads SHIPPING from the code. With a wrong price, both sides of the comparison change together.' },
+    { text: '`assert total([(1, 30.00)]) == 34.95`', correct: true },
+    { text: '`assert total(ORDER) > subtotal(ORDER)`', why: 'Any shipping price above zero makes this true, so 5.95 passes as well as 4.95.' },
+    { text: '`assert total(ORDER) == round(total(ORDER), 2)`', why: 'This checks that the total is rounded to cents. It passes with any price.' },
+  ]}>
+`test_total_adds_shipping` passed with the wrong price. Which line in
+its place would fail while `SHIPPING` holds 5.95?
+</Choice>
+
+<Pitfall title="The test that learned the new answer">
+An engineer asked an agent to add discount codes to a checkout. After
+the change, a test that checked the total of a known order failed by
+one cent, because the new code rounded twice. The agent changed the
+assertion to compare the totals to one decimal place, and the suite
+went green. Every order with a discount now showed a total one cent off,
+and no test said so. A change to an expected value in a test changes
+what the program promises, so review it like a change to the spec, and
+never accept one the brief didn't ask for.
+</Pitfall>
+
+## Keep the tests fast and unchanged
+
+An agent reruns the tests after every change. How long they take
+decides how many attempts fit in a loop: a one-second suite can run
+after each edit, and a twenty-minute suite gets run once at the end, or
+skipped. The example instructions file in the vendor guide for Claude
+Code has a line for this. It asks the agent to prefer running single
+tests to the whole suite, for speed (@Claude Code best practices). Give the agent the fast
+tests for the part it changes, and run the full suite before the merge.
+
+The agent also must not change the tests to get a pass. The shortest way to make a failing
+change pass is to delete the test, skip it or loosen its assertion, as
+the agent in the pitfall did. When an agent may edit the tests, the
+blast radius of one wrong change includes the check that should catch
+it. So the rule for an agent is that it never deletes or weakens a
+test. When it thinks a test is wrong, it stops and explains why, so
+that you can decide.
+
+A rule in the project instructions is a request. Claude Code reads its
+instructions file when a session starts and uses it as context, and
+nothing in the file is enforced (@Claude Code memory). The
+rule makes a weakened test less likely, and the review of the test
+files is what finds one.
+
+<Choice id="a-suite-too-slow-for-the-loop" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['testing']}
+  context="A team's full test suite takes 25 minutes. A coding agent is about to work on one module in a loop: change the code, run the tests, read the result, and try again, at most five times."
+  title="The suite is too slow for the loop" hint="Which option still gives the agent a result it can read after every change, without changing any test?"
+  options={[
+    { text: 'Let the agent mark the slowest tests as skipped for the run, and turn them back on before the merge.', why: 'The agent now edits the test files, which the loop should never touch, and the skips stay in when someone forgets to remove them.' },
+    { text: 'Run no tests in the loop, and run the full suite yourself once the agent says it is done.', why: 'The agent has no check it can run, so every mistake waits for your one run at the end.' },
+    { text: 'Run the fast tests for that module after every change, and run the full suite once before the merge.', correct: true },
+    { text: 'Run the full suite after every change, and drop the limit of five attempts so the agent has time.', why: 'Each attempt now takes 25 minutes, and without the limit the loop can run all day.' },
+  ]}>
+Which way of running the tests fits the agent's loop?
+</Choice>
+
+<Scenario id="the-assertion-got-looser" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['testing']}
+  context="A coding agent was asked to add discount codes to a pricing module and run its tests until they pass. The tests pass. In the diff of the test file, the line assert total(ORDER) == 49.95 now reads assert total(ORDER) >= 49.0."
+  title="The tests pass, and one assertion changed" hint="If you put the old assertion back, what would it say about the code as it is now?"
+  options={[
+    { text: 'Accept the change, since the new assertion still checks that the total is about right.', consequence: 'A total of 49.40 passes the new test. The order that should cost 49.95 now costs something the test no longer pins.' },
+    { text: 'Put the old assertion back, run the tests, and brief the agent again with the test file read-only.', correct: true, consequence: 'The restored test fails and prints the wrong total. The agent works on the code, against a check you trust.' },
+    { text: 'Ask the agent why it changed the test, and accept the change if its reason sounds right.', consequence: 'The agent explains that the old value was too strict. The reason is a claim, and the test is still weaker than before.' },
+    { text: 'Keep the new assertion, and add a comment above it that says why the check was loosened.', consequence: 'The comment records the weakening and doesn\'t undo it. The wrong total still passes.' },
+  ]}>
+The brief didn't ask for a change to the total of an order without a
+discount code. What do you do?
+</Scenario>
+
+## Documentation is part of the change
+
+**Documentation** is the written explanation of how a system behaves:
+the README, the pages in `docs/`, and the comments and docstrings in
+the code. An agent can write good documentation from code, and it can
+just as easily change the code and leave the documentation saying
+something else. Treat the docs as part of the change. The brief names
+what to update, the project instructions say where the docs are, and the
+review checks them.
+
+The instructions file of the shop, `AGENTS.md`, says where its docs are.
+The Claude Code guide suggests instructions files link to documentation
+and don't copy it in (@Claude Code best practices).
+
+```text
+- Run `python3 test_pricing.py` after every change, and read what it prints.
+- Never delete a test or loosen an assertion to make a change pass. If a
+  test looks wrong, stop and say why.
+- Documentation is in three places: `README.md` for customers,
+  `docs/pricing.md` for the full rules, and the docstrings in `pricing.py`.
+  A change to a price or a threshold updates all three in the same change.
+```
+
+The shop raises its free-shipping threshold. The brief and the reply
+below are illustrative and don't record a specific model's words.
+
+<Prompt model="illustrative" recorded="illustrative">
+Raise the free-shipping threshold in `pricing.py` from 50.00 EUR to
+60.00 EUR, and add a test at the new threshold. Update the documentation
+that `AGENTS.md` lists. Run `python3 test_pricing.py` after each change.
+Done when the tests pass and none of the places `AGENTS.md` lists still
+gives 50.00 EUR as the threshold.
+</Prompt>
+<Response>
+I changed `FREE_SHIPPING_FROM` to 60.00 and updated the docstring of
+`pricing.py`. I added `test_free_shipping_starts_at_sixty`, which checks
+60.00 and 59.99. The tests print `6 passed, 0 failed`.
+</Response>
+
+The reply lists the docstring and says nothing about the other two
+places. To see what the change touched, make the copy a git repository
+with one tagged commit before the run:
+
+```sh
+git init
+git add .
+git commit -m "Before the agent's change"
+git tag before-change
+```
+
+After the run, stage everything with `git add -A`, so that a file the
+agent created shows as well, and list what differs from the tag. Then
+search the three places for the old threshold.
+
+<Predict id="review-the-change" title="What the change touched, and what it missed"
+  answer={`$ git add -A
+  $ git diff --cached --stat before-change
+   pricing.py      | 4 ++--
+   test_pricing.py | 6 ++++++
+   2 files changed, 8 insertions(+), 2 deletions(-)
+  $ python3 test_pricing.py
+  test_subtotal_adds_the_lines: pass
+  test_small_order_pays_shipping: pass
+  test_large_order_ships_free: pass
+  test_total_adds_shipping: pass
+  test_total_of_a_known_order: pass
+  test_free_shipping_starts_at_sixty: pass
+  6 passed, 0 failed
+  exit status 0
+  $ grep -n "50.00" README.md docs/pricing.md pricing.py
+  README.md:5:Shipping costs 4.95 EUR. Orders of 50.00 EUR or more ship free.
+  docs/pricing.md:7:the free-shipping threshold, and free from 50.00 EUR. The threshold is`} run="coding-with-agents/tests-and-docs-that-hold/the_change.py">
+The course's script makes the agent's change to a fresh copy of the
+shop, committed and tagged `before-change` first, and runs the same
+commands you run after your own agent's run. You can run it from
+`site/examples/coding-with-agents/tests-and-docs-that-hold/` in your
+clone.
+
+```sh
+python3 the_change.py
+```
+
+</Predict>
+
+The tests pass, and the list of changed files holds no documentation
+file. The search finds the old threshold in `README.md` and in
+`docs/pricing.md`, and nothing in `pricing.py`, whose docstring the
+agent did update. A customer who reads the README expects free
+shipping on a 55.00 EUR order and pays 4.95 EUR. Send the two stale
+lines back to the agent, and review the next diff the same way.
+
+<Scenario id="before-you-approve" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['documentation']}
+  context="A coding agent raised a shop's free-shipping threshold from 50.00 EUR to 60.00 EUR. Its tests pass. The list of changed files holds pricing.py and test_pricing.py. The project instructions say the documentation is in README.md, docs/pricing.md and the docstrings in pricing.py."
+  title="The tests pass. Is the change done?" hint="Which of the places the instructions list does the list of changed files leave out?"
+  options={[
+    { text: 'Approve it, since the tests pass and the docstring next to the constant was updated as well.', consequence: 'The README still promises free shipping from 50.00 EUR, and customers pay shipping on orders the page calls free.' },
+    { text: 'Ask the agent to confirm that it updated all the documentation, and approve when it says yes.', consequence: 'The agent says yes. Its answer is a claim, and the two stale lines are still there.' },
+    { text: 'Ask the agent to write the documentation again for the whole project, from the code as it is now.', consequence: 'The next diff rewrites pages the change never touched, and you have far more to review than two lines.' },
+    { text: 'Search the places the instructions list for the old threshold, and send the stale lines back.', correct: true, consequence: 'The search finds 50.00 EUR in README.md and docs/pricing.md. The agent fixes the two lines, and the next diff shows them.' },
+  ]}>
+What do you do before you approve the change?
+</Scenario>
+
+<Choice id="a-test-that-passed-the-break" phase="review" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['testing']}
+  context="A learner reviews tests an agent wrote. They change one line of the code to make it wrong on purpose, run the tests, and one test that is about that line still passes."
+  title="A test survived the break" hint="What did the test compare the result with?"
+  options={[
+    { text: 'The test can\'t catch that bug: its expected value moves with the code, so rewrite it with a value from the spec.', correct: true },
+    { text: 'The bug can\'t matter much to users, since a test about that line passed even with the bug in place.', why: 'The test passing says something about the test. The bug is still there for users.' },
+    { text: 'The test runner didn\'t pick up the changed file, so run the tests again until the test fails as expected.', why: 'The other tests saw the change. Running the same test again gives the same result.' },
+    { text: 'The test is flaky and passes by chance, so mark it as skipped until someone has time to look at it.', why: 'A test that passes every time with the bug in place is steady, and skipping it removes a check.' },
+  ]}>
+What does that tell you about the test?
+</Choice>
+
+<Sort id="proves-or-mirrors" phase="review" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['testing']}
+  context="A reviewer sorts agent-written tests by whether they would fail if the code were wrong. A test that takes its expected value from the code it tests passes whatever that code does."
+  title="Proves behavior, or mirrors the code?" hint="Would the test still pass if the code under test returned a wrong value?"
+  buckets={['Proves behavior: it fails when the code is wrong', 'Mirrors the code: it passes whatever the code does']}
+  items={[
+    { text: 'The VAT on 100.00 EUR is 21.00 EUR, written as a number in the test', bucket: 0 },
+    { text: 'The VAT on 100.00 EUR equals 100 times the VAT_RATE constant from the code', bucket: 1 },
+    { text: 'Parsing the text 1,250.00 gives the number 1250.0', bucket: 0 },
+    { text: 'The parser\'s result equals what the test gets by running the same steps as the parser', bucket: 1 },
+    { text: 'A date in March is shown as 2027-03-14, written out in the test', bucket: 0 },
+  ]} />
+
+<Choice id="docs-left-out-of-the-diff" phase="review" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['documentation']}
+  context="A coding agent changed the retry limit of a service from 3 to 5. Its tests pass. The project instructions say the documentation is in README.md and in docs/. The list of changed files holds only retry.py and its test."
+  title="The retry limit changed" hint="Which files would say how many retries the service makes?"
+  options={[
+    { text: 'Approve it, because the retry limit is a detail of the code and not something the docs need to describe.', why: 'Operators read the docs to know how often a request is retried. If the docs give a number, it is now wrong.' },
+    { text: 'Ask a second model to read the diff and say whether the documentation needs a change as well.', why: 'The reviewer only sees the diff, which holds no documentation file, so it can\'t tell what the docs say.' },
+    { text: 'Search README.md and docs/ for the old limit, and send any stale line back to the agent.', correct: true },
+    { text: 'Add a line to the changelog yourself, and leave the rest of the documentation for a later change.', why: 'The changelog now says 5, and any page that says 3 still says 3.' },
+  ]}>
+What do you check before you approve the change?
+</Choice>
+
+<MultiChoice id="lines-that-keep-tests-honest" phase="review" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['testing']}
+  context="A team writes the project instructions a coding agent reads before it works. They want the agent to run the tests in a loop, and they want the tests to stay a check the team trusts."
+  title="Which lines keep the tests a check you trust?" hint="Which lines give the agent a check it can run after each change, and which ones let it change the check?"
+  options={[
+    { text: 'Run the tests for the module you change after every change.', correct: true },
+    { text: 'If a test fails three times, mark it as skipped and go on.', why: 'That lets the agent switch off the check whenever the check is inconvenient.' },
+    { text: 'If a test looks wrong, stop and say why, and don\'t change it.', correct: true },
+    { text: 'Update expected values in the tests to match the new output.', why: 'Then every test agrees with the code by definition, including the code that is wrong.' },
+  ]}>
+Which of these lines belong in the instructions?
+</MultiChoice>
+
+<Choice id="one-test-skipped" phase="review" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['testing']}
+  context="Before a coding agent's run, a project's tests printed 12 passed. After the run, the agent reports that the tests print 11 passed, 0 failed, 1 skipped, and that the work is done."
+  title="One test is now skipped" hint="What did the check cover before the run, and what does it cover now?"
+  options={[
+    { text: 'Nothing is wrong, since no test failed and a skipped test isn\'t counted as a failure by the runner.', why: 'The runner doesn\'t count it, and it doesn\'t run it either. The check now covers less than before.' },
+    { text: 'The agent turned a test off. Find the skip in the diff, remove it, and run all 12 tests again.', correct: true },
+    { text: 'The skipped test must be slow, so leave it skipped in the loop and run it now and then by hand.', why: 'Nothing says the test is slow. The agent changed the check, and that is yours to decide.' },
+    { text: 'The skipped test was out of date, so delete it now to keep the test report clean for the next run.', why: 'Deleting it removes the check for good, on the agent\'s word alone.' },
+  ]}>
+What does the report tell you?
+</Choice>
+
+<Exercise stretch="Then pick one test an agent wrote in your own project, break the line of code it is about on purpose, and see whether the test fails.">
+Make a fresh copy of the shop, as at the start of the lesson, and make a
+different break: in `shipping`, change `>=` to `>`. Before you run the
+tests, write down which of the five you expect to fail. Run them and
+compare. For every test that passes, name one bug in `pricing.py` it
+would not catch. Then rewrite `test_large_order_ships_free` so that it
+fails with the break in place and passes without it.
+
+For the documentation, make one more fresh copy, make it a git
+repository with one commit tagged `before-change`, and start your own
+coding agent inside that copy, so it works on the copy and not on your
+clone. Give it the brief from this lesson. When it is done, run
+`git add -A`, `git diff --cached --stat before-change`, the tests, and
+`grep -n "50.00" README.md docs/pricing.md pricing.py`.
+
+A good result has a list of expected failures that matches the run, a
+rewritten test that fails with the break and passes without it, and a
+review that names every place `AGENTS.md` lists that still gives the old
+threshold, or confirms that none does. Then answer one question: which
+test in your own project would you break first, and why that one?
+</Exercise>
+
+<Recap>
+1. Review an agent's test by making the code wrong on purpose and running it. A test that still passes takes its expected value from the code it tests, so it mirrors the implementation. Rewrite it with the value the program must produce, from the spec or worked out by hand.
+2. Keep the tests the agent runs in its loop fast, and run the full suite before the merge (@Claude Code best practices). The agent never deletes, skips or loosens a test to make a change pass. When a test looks wrong, it stops and says why.
+3. A rule in the instructions file is context for the agent, and nothing enforces it (@Claude Code memory). Read the diff of the test files to confirm that no test was deleted, skipped or loosened.
+4. Documentation is part of the change. The brief names what to update, the instructions say where the docs are, and the review searches those places for what the change made stale.
+</Recap>
+
+<Habit id="break-one-line-first">
+The next time an agent's change comes with new tests, change one line of its code to make it wrong, run the tests, and see which of them notice before you approve.
+</Habit>
