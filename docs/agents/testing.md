@@ -52,6 +52,19 @@ coverage). They cover `scripts/`, `tests/` and the Python fixtures under
   names a fixture under `site/examples/` and `mise run examples` fails on a
   mismatch. An example that can't run says so in the page (the component
   prints this when `run` is absent).
+- **Fixtures without a Predict.** `mise run examples` also fails on an
+  entry script that no page names in a `run=`, because CI would never
+  check its output. An entry script is a `.py` file directly in a lesson
+  directory, `site/examples/<area>/<lesson>/<name>.py`. The check skips a
+  helper whose name starts with `_`, a module that another `.py` file in
+  the same lesson directory imports or names as `<name>.py`, every file
+  in a subdirectory such as `fixture-repo/`, and every file that isn't
+  `.py`. Wire a new fixture to a `<Predict run=...>`. Add it to
+  `UNRUN_EXEMPT` in `site/scripts/lib/examples.mjs`, with the reason,
+  only when no Predict can run it: a fixture behind a `foundations` page,
+  where `mise run data` rejects `run=`, or a setup tool whose output the
+  page doesn't show. The list only shrinks, and the check fails on an
+  entry that a Predict now runs or that doesn't name an entry script.
 - **Links.** Internal links are root-relative. `starlight-links-validator`
   fails `mise run site-build` on a dead one, so the build is the check.
   Don't disable it.
