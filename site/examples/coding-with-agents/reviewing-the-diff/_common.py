@@ -28,8 +28,10 @@ AGENT_TEST = os.path.join(HERE, "test_due_dates.py")
 COMMIT_SUBJECT = "feat: due dates with overdue and date validation"
 
 # git runs with only these variables, so nothing in the learner's environment
-# (a GIT_DIR pointing elsewhere, GIT_EXTERNAL_DIFF, GIT_CONFIG_PARAMETERS) can
-# reach it. HOME is set per copy, below, so no user config is read either.
+# (a GIT_DIR pointing elsewhere, GIT_TEMPLATE_DIR, GIT_EXTERNAL_DIFF,
+# GIT_CONFIG_PARAMETERS) can reach it. HOME is set per copy, in `git` below,
+# so no user config is read either. reversible-changes/_common.py holds the
+# same list: keep the two in step.
 GIT_ENV_BASE = {
     "PATH": os.environ.get("PATH", ""),
     "LANG": "C",
