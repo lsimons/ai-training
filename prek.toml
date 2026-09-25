@@ -150,10 +150,11 @@ hooks = [
 
 # The prose checks of `mise run spell` and `mise run prose`, before a push
 # only, over the Markdown, MDX and data YAML the push changes. The file
-# rules match the two tasks in .mise.toml. Commits pushed straight to
-# `main` (the dispatcher's records) get no pull request run, and these
-# catch what CI would reject there (#344). `mise run lint` runs the
-# pre-commit stage, so these don't run twice in `ci`.
+# rules match the two tasks in .mise.toml. No agent pushes to `main`,
+# but a builder branch in integration mode gets no pull request run until
+# its wave branch opens one, and these catch what CI would reject there
+# before the push. `mise run lint` runs the pre-commit stage, so these
+# don't run twice in `ci`.
 [[repos]]
 repo = "local"
 hooks = [

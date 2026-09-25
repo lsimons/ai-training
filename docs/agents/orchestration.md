@@ -95,7 +95,8 @@ both, so the builder and the reviewer never talk to each other.
    designs) is reported to the maintainer instead.
 
 5. **Merge queue.** The maintainer approves each pull request in a message
-   to the coordinator, who merges with `gh pr merge --rebase`. The
+   to the coordinator, who merges with
+   `AI_TRAINING_ROLE=coordinator gh pr merge <n> --rebase`. The
    coordinator plays a chime when a pull request is ready for that call,
    which is the maintainer's preference. After every
    merge, wait a minute and list the open pull requests with their
@@ -172,7 +173,7 @@ table with one row per branch: the issue, the branch, a link to the review
 comment, and a link to the re-check comment where there was one. The
 review record is then on GitHub next to the pull request that shipped it.
 The maintainer approves the wave, and the coordinator merges it with
-`gh pr merge --rebase` as usual. The deploy happens once.
+`AI_TRAINING_ROLE=coordinator gh pr merge <n> --rebase` as usual. The deploy happens once.
 
 The cases that come up:
 
