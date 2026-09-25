@@ -49,8 +49,9 @@ x01  refuse     Can I bring my dog to the office?
 ```
 
 This course's rule is that each item records what a good answer has,
-and it doesn't record one answer word for word. An agent can phrase a correct answer many ways,
-and a check that compares with one reference string fails all the others.
+and it doesn't record one answer word for word. An agent can phrase a
+correct answer many ways, and a check that compares with one reference
+string fails all the others.
 Here a good answer to r01 comes from `leave.txt` and contains "25 days".
 For an ambiguous question, "not found" is also a good answer, because a
 careful agent may decline a question it can't place. An answer from the
@@ -123,9 +124,10 @@ before.
 
 On today's prompt, four items pass because the agent says "not found".
 For a01 the search returns no page. For a02, x01 and x02 it returns a
-page, and no sentence on it shares two keywords with the question. Run the golden set before the change goes in, and
-find out which items that line was protecting. The `changed` step runs
-the set with the first two lines only.
+page, and no sentence on it shares two keywords with the question. Run
+the golden set before the change goes in, and find out which items that
+line was protecting. The `changed` step runs the set with the first two
+lines only.
 
 <Predict id="predict-the-failures" objective="building-agents/evaluates-agents/builds-a-golden-set"
   concepts={['golden-sets']}
@@ -176,8 +178,9 @@ none contains "take" or "off". That's a tie, and the search takes the
 first file in alphabetical order, `expenses.txt`, ahead of `leave.txt`.
 The agent now answers with the sentence about claims. Item x01 quotes the
 same sentence that run eight used to say yes to a dog in
-[Turning good into a rubric](/building-agents/rubrics/). Item a01 still passes, because its search returns no
-passage at all. With no passage, the agent has no sentence to answer with.
+[Turning good into a rubric](/building-agents/rubrics/). Item a01 still
+passes, because its search returns no passage at all. With no passage,
+the agent has no sentence to answer with.
 
 A person who tries the new prompt on a few routine questions sees
 nothing wrong. The golden set shows that the line did its job on three of
@@ -264,7 +267,7 @@ the held-out part?
   items={[
     { text: 'A question the prompt was rewritten last week to pass', bucket: 0 },
     { text: 'The item from yesterday\'s incident, which the team is fixing now', bucket: 0 },
-    { text: 'A question drawn at random from this month\'s log that nobody has run', bucket: 1 },
+    { text: 'A question from this month\'s log, picked to replace a held-out item the team used for a fix', bucket: 1 },
     { text: 'A held-out item the team just used to find and fix a failure', bucket: 0 },
     { text: 'A refusal question from the log, set aside before any tuning started', bucket: 1 },
   ]} />
@@ -275,7 +278,7 @@ the held-out part?
   title="What does an item record?"
   hint="For each line, could a few lines of code check it, and would it still pass an answer worded differently?"
   options={[
-    { text: 'The handbook page that a good answer comes from.', correct: true },
+    { text: 'The page that a good answer comes from.', correct: true },
     { text: 'A phrase that every good answer contains.', correct: true },
     { text: 'Whether "not found" also counts as a good answer.', correct: true },
     { text: 'The one reply that counts as correct, word for word.', why: 'A correct answer can be worded many ways, and a word-for-word check fails all but one of them.' },
@@ -283,7 +286,8 @@ the held-out part?
   ]}>
 
 A team writes items for the assistant's golden set, to be checked by a
-script. Which of these should each item record?
+script. Which of these should an item record when the handbook covers
+its question?
 
 </MultiChoice>
 
@@ -312,18 +316,18 @@ the agent should refuse. Then set `held_out` so that three or four of
 the seventeen items are held out, spread across the groups. Run
 `python3 golden.py run` and `python3 golden.py release`. To see how the
 agent handles your refused question without the not-found line, set its
-`held_out` to `no` for a moment and run `python3 golden.py changed`.
-Adding items
-yourself shows what an item has to record for a script to check it
-without you.
+`held_out` to `no` for a moment and run `python3 golden.py changed`,
+then `python3 golden.py answers` to see what the agent said. Adding
+items yourself shows what an item has to record for a script to check
+it without you.
 
 A good result prints one pass count per group, and the counts add up to
 seventeen in the release run and to the items that aren't held out in
 the development run. The release run has a `held out` line with three or
 four items. Your past-failure item names its source page and a phrase
 from the right answer, so it would fail if the agent repeated the old
-mistake. Did your refused question pass because the model declined a
-page, or because the search returned nothing?
+mistake. Did your refused question pass because the model said "not
+found" to the page it got, or because the search returned nothing?
 
 </Exercise>
 
