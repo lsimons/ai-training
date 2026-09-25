@@ -78,14 +78,26 @@ is blocked could edit the setting and remove the hook. The reason names
 the file and says what to do next, because the agent reads it and decides
 its next step from it.
 
-<Predict id="feed-the-hook" title="Three edits, as the hook sees them"
+The hook also works when Claude Code moves the session into a worktree,
+which it creates under `.claude/worktrees/<name>/` by default. There
+`${CLAUDE_PROJECT_DIR}` still points at the project root where the session
+started, and the `cwd` field of the hook's input is the worktree
+(@Claude Code worktrees). So the script drops the `.claude/worktrees/<name>/`
+part of the path before it checks the list. Without that step, every edit in
+a worktree would match the `.claude/` entry and be blocked.
+
+<Predict id="feed-the-hook" title="Five edits, as the hook sees them"
   answer={`Edit importer.py: exit status 0
   Edit test_nights.py: exit status 2
     test_nights.py is protected: agents may not change it. If it must change, stop and tell the user why.
   Write nights/2026-09-15/store-09.csv: exit status 2
-    nights/2026-09-15/store-09.csv is protected: agents may not change it. If it must change, stop and tell the user why.`} run="coding-with-agents/ci-and-hooks/feed_hook.py">
+    nights/2026-09-15/store-09.csv is protected: agents may not change it. If it must change, stop and tell the user why.
+  Edit .claude/worktrees/fix-import/importer.py: exit status 0
+  Edit .claude/worktrees/fix-import/test_nights.py: exit status 2
+    test_nights.py is protected: agents may not change it. If it must change, stop and tell the user why.`} run="coding-with-agents/ci-and-hooks/feed_hook.py">
 The course's script copies the project to a temporary place, adds the hook,
-and feeds it three tool calls the way Claude Code does. Run it from
+and feeds it five tool calls the way Claude Code does. The last two edit
+files in a Claude Code worktree under `.claude/worktrees/`. Run it from
 `site/examples/coding-with-agents/ci-and-hooks/` in your clone of the
 course repository, and compare what you see with the output below.
 
@@ -117,7 +129,7 @@ can tell me why the test should change.
 The brief had no limits at all, and the agent still couldn't change the
 test, because the rule was in the project and not in the brief.
 
-A hook has an edge you need to know. Its `matcher` compares tool names,
+A hook has a limit you need to know. Its `matcher` compares tool names,
 and a shell command is the Bash tool, so this hook doesn't run for
 `sed -i` on the test or for a script that writes the file (@Claude Code hooks).
 The hook blocks the agent's usual way to edit a file. It doesn't prove the
@@ -129,7 +141,7 @@ file stayed the same. The gates and the review of the diff do that.
   title="The hook that exits with status 1" hint="Which exit status does Claude Code treat as a block, and what does it do with the others?"
   options={[
     { text: 'The edit goes ahead, because Claude Code treats status 1 as an error in the hook and not as a block.', correct: true },
-    { text: 'The edit is blocked, because any status other than 0 tells Claude Code that the hook found a problem.', why: 'That is the usual meaning of a failing status in a shell, and Claude Code blocks on status 2 only.' },
+    { text: 'The edit is blocked, because any status other than 0 tells Claude Code that the hook found a problem.', why: 'That is the usual meaning of a failing status in a shell. Of the exit statuses, only 2 blocks the call.' },
     { text: 'The session stops, because Claude Code can\'t continue once one of the project\'s hooks has crashed.', why: 'The session continues. Claude Code shows a notice about the hook error and carries on with the call.' },
     { text: 'Claude Code asks the user to approve the edit, because the hook gave it no clear decision to follow.', why: 'Asking the user is a decision a hook can return in its JSON output. A crash returns no decision.' },
   ]}>
@@ -180,8 +192,9 @@ jobs:
 The `uses` line names the action that checks out the code by the full
 hash of one commit, its SHA (Secure Hash Algorithm), with the version in a
 comment. The GitHub page calls the commit SHA of a released version the
-safest choice (@GitHub docs workflow-syntax). A tag can be moved to other
-code, and a commit hash can't. The course repository pins every action the
+safest choice (@GitHub docs workflow-syntax). Git can move a tag to another
+commit (@Git docs git-tag). A commit hash can't be moved, because it is
+computed from the commit itself. The course repository pins every action the
 same way. `permissions` sets what the
 job's `GITHUB_TOKEN` may do, and GitHub advises the minimum the job needs
 (@GitHub docs workflow-syntax). This job only reads the code.
@@ -255,7 +268,8 @@ python3 job_after_fix.py
 
 The agent said the test passes on its machine, and the job now says the
 same where the whole team can see it. A reviewer reads the diff next. The
-job decides whether the change can merge, and the agent's summary doesn't.
+job and the reviewer decide whether the change can merge, and the agent's
+summary doesn't.
 
 <Scenario id="the-agent-routes-around-the-hook" objective="coding-with-agents/works-in-team/follows-team-norms"
   concepts={['team-hooks']}
@@ -275,13 +289,13 @@ doesn't check. Should I?" What do you do?
 <MultiChoice id="lines-of-the-ci-fix-brief" objective="coding-with-agents/works-in-team/follows-team-norms"
   concepts={['ci-integration']}
   context="A CI job fails on an agent's pull request, on the step that runs the test. The developer writes a brief for the agent to fix the failure."
-  title="Which lines go into the CI fix brief?" hint="Which lines keep the gate as it is and bound the run, and which lines make the job pass by changing the job?"
+  title="Which lines go into the CI fix brief?" hint="Which lines keep the gate as it is and give the agent the job's own check, and which lines make the job pass without fixing the code?"
   options={[
-    { text: 'Paste the failing part of the job log, with the name of the step.', correct: true },
+    { text: 'Paste the log of the failing step, with the name of that step.', correct: true },
     { text: 'Mark the failing step with continue-on-error so the job goes green.', why: 'The job then passes with the bug still in the code. The gate is weaker for the whole team.' },
-    { text: 'Stop after five attempts and show the last output, pass or fail.', correct: true },
-    { text: 'Push new commits until the job passes, however many that takes.', why: 'That removes the limit. Every push runs the job again, and a stuck agent keeps pushing.' },
-    { text: 'Leave the test and the workflow as they are, and stop to ask if one must change.', correct: true },
+    { text: 'Run the job\'s commands on the copy after each change, before a push.', correct: true },
+    { text: 'Rerun the failed job until it passes, since the test may be flaky.', why: 'A rerun doesn\'t change the code. If the failure is real, a pass on a rerun only hides it, and nobody has read the log yet.' },
+    { text: 'Leave the workflow file as it is, and stop to ask if it must change.', correct: true },
   ]}>
 Which of these lines belong in the brief?
 </MultiChoice>
@@ -312,8 +326,8 @@ Match each rule to the place where the team enforces it.
 
 ## Further steps for the team
 
-The Academy course The AI-native SDLC playbook (SDLC is short for the
-development life cycle of software) goes further than one hook and one job.
+The Academy course The AI-native SDLC playbook (SDLC, the software
+development life cycle) goes further than one hook and one job.
 It has lessons on hooks as approval gates and on putting an AI reviewer in
 the pull request loop (@Academy ai-native-sdlc-playbook). Here are those
 ideas in our words, with what the Claude Code pages say about each.
@@ -345,8 +359,8 @@ instruction into a hook when the rule must hold every time
 tends to favor it. The vendor guide suggests a second session that reviews
 the change without the first one's history (@Claude Code best practices).
 
-**Evals in CI.** When the project is an agent or a prompt, the tests
-include evaluations of the model's answers, and they run in CI too. The
+**Evaluations run in CI too.** When the project is an agent or a prompt,
+the tests include evaluations of the model's answers. The
 Building agents course teaches how to score those answers, starting with
 [a rubric for what a good answer is](/building-agents/rubrics/).
 
@@ -379,7 +393,7 @@ What do they add?
 
 <MultiChoice id="a-hook-the-team-can-trust" phase="review" objective="coding-with-agents/works-in-team/sets-team-practice"
   concepts={['team-hooks']}
-  context="A team writes a Claude Code PreToolUse hook that should stop agents from editing its database migrations. Claude Code blocks a tool call only when the hook exits with status 2."
+  context="A team writes a Claude Code PreToolUse hook that should stop agents from editing its database migrations. Without JSON output from the hook, Claude Code blocks a tool call only when the hook exits with status 2."
   title="A hook the team can trust" hint="For each choice, what happens on the day the agent makes the mistake, or the day the hook itself goes wrong?"
   options={[
     { text: 'The hook exits with status 2 when it can\'t read its input.', correct: true },
@@ -397,7 +411,7 @@ Which of these make the hook one the team can rely on?
   title="The job fails on the agent's pull request" hint="What does the team's norm say decides whether a change merges?"
   options={[
     { text: 'Merge it, because the agent ran the same tests on its machine and reported that all of them passed.', why: 'The agent\'s report is a claim about the change. The job is the gate the team agreed on.' },
-    { text: 'Give the agent the failing part of the log with a limit on attempts, and merge once the job passes.', correct: true },
+    { text: 'Give the agent the failing part of the log with a limit on attempts, and ask for review once the job passes.', correct: true },
     { text: 'Rerun the job until it passes once, because a test that failed only one time is probably just flaky.', why: 'A rerun without a reason hides a real failure as easily as a flaky one, and nothing was fixed.' },
     { text: 'Ask a reviewer to approve it anyway, because the change is small and the reviewer read every line of it.', why: 'An approval is one of the two conditions, and the job is the other. Reading the diff doesn\'t run the test.' },
   ]}>
@@ -417,7 +431,7 @@ cp site/examples/coding-with-agents/ci-and-hooks/protect_paths.py ~/ci-me/.claud
 cp site/examples/coding-with-agents/ci-and-hooks/settings.sample.json ~/ci-me/.claude/settings.json
 cp site/examples/coding-with-agents/ci-and-hooks/checks.yml ~/ci-me/.github/workflows/
 cd ~/ci-me
-git init
+git init --initial-branch=main
 git add .
 git commit -m "Nightly import with a hook and a CI job"
 ```
@@ -431,11 +445,18 @@ echo '{"tool_name": "Edit", "tool_input": {"file_path": "test_nights.py"}}' | py
 ```
 
 Create an empty private repository on GitHub that you can delete
-afterwards, and push the copy to it. The job runs on the push to `main` and
-fails on the 15th and the 17th. Then make a branch, start Claude Code inside
+afterwards. Then push the copy to it. Put the address GitHub shows for the
+new repository in place of `<url>`:
+
+```sh
+git remote add origin <url>
+git push -u origin main
+```
+
+The job runs on the push to `main` and fails on the 15th and the 17th. Then make a branch, start Claude Code inside
 `~/ci-me`, and ask it to make the test pass without limits, as in the
 first transcript. Check that the hook stops its edit to the test. If the agent changes the
-test some other way, such as with a shell command, that is the edge of the
+test some other way, such as with a shell command, that is the limit of the
 matcher from earlier in the lesson: put the file back with
 `git checkout test_nights.py` and note what the agent did. Then give
 it the failing lines of the job log with the brief from this lesson, push
@@ -451,7 +472,7 @@ down today but depends on each session reading it?
 <Recap>
 1. Team hooks run at fixed points, such as before an agent edits a file, and apply to every session in the project. An instruction is advice the agent may skip, and a hook runs every time (@Claude Code best practices).
 2. A Claude Code `PreToolUse` hook gets the tool call as JSON and blocks it by exiting with status 2, and the agent reads what it wrote to standard error. Status 1 is an error in the hook, after which the call goes ahead, and a matcher on Edit and Write doesn't see a shell command that writes the file (@Claude Code hooks).
-3. CI integration runs the deterministic gates on every pull request, whoever wrote the change. The job decides whether the change can merge, and the agent fixes a failing job from its log within the same limits as any self-checking loop.
+3. CI integration runs the deterministic gates on every pull request, whoever wrote the change. The job and a reviewer decide whether the change can merge, and the agent fixes a failing job from its log within the same limits as any self-checking loop.
 4. Pin each action in a workflow to a full commit SHA, and give the job only the permissions it needs (@GitHub docs workflow-syntax).
 5. A rule that must hold every time goes into a hook or a CI check. A review finding that comes back a second time goes into the project instructions, or into a check when a script can find it.
 </Recap>

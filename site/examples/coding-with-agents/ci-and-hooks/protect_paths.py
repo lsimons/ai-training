@@ -6,7 +6,7 @@ file path from `tool_input.file_path`, and when the path is protected it
 prints the reason to stderr and exits with status 2. Exit status 2 is the
 one that blocks the call, and Claude Code shows the stderr text to the
 agent. Any other non-zero status is a non-blocking error and the edit goes
-ahead, so input the hook can't read also exits with status 2.
+ahead, so any input the hook can't read also exits with status 2.
 
 Copy it to `.claude/hooks/protect_paths.py` in the project.
 """
@@ -44,19 +44,35 @@ def protected(relative: str) -> bool:
     return False
 
 
+def project_path(call: dict) -> str:
+    """The edited file's path relative to the project root, with "/" separators.
+
+    CLAUDE_PROJECT_DIR stays at the root where the session started, and the
+    session's `cwd` follows the agent into a worktree. A relative file path
+    is resolved against `cwd`. A path inside a Claude Code worktree, under
+    `.claude/worktrees/<name>/`, is checked as the same path in the project.
+    """
+    file_path = call["tool_input"]["file_path"]
+    cwd = call.get("cwd") or os.getcwd()
+    if not isinstance(file_path, str) or not isinstance(cwd, str) or not file_path:
+        raise TypeError("file_path and cwd must be non-empty strings")
+    project = os.path.realpath(os.environ.get("CLAUDE_PROJECT_DIR") or cwd)
+    target = os.path.realpath(os.path.join(cwd, file_path))
+    parts = os.path.relpath(target, project).split(os.sep)
+    if parts[:2] == [".claude", "worktrees"] and len(parts) > 3:
+        parts = parts[3:]
+    return "/".join(parts)
+
+
 def main() -> None:
     try:
         call = json.load(sys.stdin)
-        file_path = call["tool_input"]["file_path"]
-    except (ValueError, KeyError, TypeError):
+        relative = project_path(call)
+    except Exception:
         block(
             "protect_paths: could not read the file path of the tool call, so the edit is blocked."
         )
         return
-    project = os.environ.get("CLAUDE_PROJECT_DIR") or call.get("cwd") or os.getcwd()
-    project = os.path.realpath(project)
-    target = os.path.realpath(os.path.join(project, file_path))
-    relative = os.path.relpath(target, project).replace(os.sep, "/")
     if protected(relative):
         block(REASON.format(path=relative))
     sys.exit(0)
