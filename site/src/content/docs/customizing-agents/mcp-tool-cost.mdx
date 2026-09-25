@@ -303,7 +303,7 @@ the server be the better choice?
   context="A team is about to add a monitoring system's MCP server to a coding agent. The system also has a CLI that the developers already use."
   title="A forty-tool server" hint="How often will the agent use the system, and what does it cost on the turns it doesn't?"
   options={[
-    { text: 'Add the server with all forty tools, because tool search keeps the cost low.', consequence: 'The names load on every turn, the agent calls the system twice a week, and a delete_alert tool sits one search away from any page the agent reads.' },
+    { text: 'Add the server with all forty tools, because tool search keeps the cost low.', consequence: 'The names load on every turn, the agent calls the system twice a week, and any search can reach a delete_alert tool, including one that a page the agent reads asks for.' },
     { text: 'Add the server and allow only the tools that read alerts.', consequence: 'Cheaper and safer than all forty. The team still pays for the tool names on every turn (every definition, where tool search is off) for a system the agent queries twice a week.' },
     { text: 'Let the agent run the CLI for alert lookups, and allow only its read commands.', correct: true, consequence: 'The agent adds no definitions to any turn, runs two commands a week, and the permission policy names each command it may run.' },
     { text: 'Give the agent no access, and paste alert text into the chat when it is needed.', consequence: 'No cost and no risk, and a developer now copies alerts by hand for a lookup the agent could do with one read command.' },
