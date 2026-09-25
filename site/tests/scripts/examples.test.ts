@@ -12,6 +12,9 @@ import {
 	predictTags,
 	pythonVersion,
 	runFixture,
+	UNRUN_EXEMPT,
+	unrunFixtures,
+	usesModule,
 	walkMdx,
 } from '../../scripts/lib/examples.mjs';
 import { type CheckpointAttr, propValue } from '../../src/lib/checkpoint-tags';
@@ -78,7 +81,7 @@ describe('predictTags', () => {
 		].join('\n');
 		expect(predictTags(src, 'f.mdx').map((t) => propValue(t.attrs, 'run'))).toEqual(['x.py']);
 		const res = checkSource('f.mdx', src, () => ({ status: 0, stdout: 'hello', stderr: '' }));
-		expect(res).toEqual({ found: 1, checked: 1, failures: [] });
+		expect(res).toEqual({ found: 1, checked: 1, failures: [], runs: ['x.py'] });
 	});
 	it('throws on a page that does not parse, naming the file', () => {
 		expect(() => predictTags('<Predict id="a" answer={`open', 'f.mdx')).toThrow(/^f\.mdx: /);
@@ -95,7 +98,7 @@ describe('checkSource', () => {
 	const ok = () => ({ status: 0, stdout: 'hello', stderr: '' });
 	it('counts a matching example', () => {
 		const res = checkSource('f.mdx', '<Predict id="a" answer="hello" run="x.py" />', ok);
-		expect(res).toEqual({ found: 1, checked: 1, failures: [] });
+		expect(res).toEqual({ found: 1, checked: 1, failures: [], runs: ['x.py'] });
 	});
 	it('accepts trailing whitespace in the answer', () => {
 		const res = checkSource('f.mdx', '<Predict id="a" answer="hello\n" run="x.py" />', ok);
@@ -135,7 +138,7 @@ describe('checkSource', () => {
 	});
 	it('checks an ungraded example (no objective) like any other run', () => {
 		const res = checkSource('f.mdx', '<Predict id="e" title="T" answer="hello" run="x.py" />', ok);
-		expect(res).toEqual({ found: 1, checked: 1, failures: [] });
+		expect(res).toEqual({ found: 1, checked: 1, failures: [], runs: ['x.py'] });
 	});
 	it('fails a tag with run="" instead of skipping it', () => {
 		const res = checkSource('f.mdx', '<Predict id="a" answer="x" run="" />', ok);
@@ -143,7 +146,12 @@ describe('checkSource', () => {
 		expect(res.failures[0]).toContain('unsupported fixture type');
 	});
 	it('ignores an honor-system predict', () => {
-		expect(checkSource('f.mdx', '<Predict id="a" title="t" />', ok)).toEqual({ found: 0, checked: 0, failures: [] });
+		expect(checkSource('f.mdx', '<Predict id="a" title="t" />', ok)).toEqual({
+			found: 0,
+			checked: 0,
+			failures: [],
+			runs: [],
+		});
 	});
 	it('runs every interpreter, labels a failure with the one that produced it, and checks the file type once', () => {
 		const interps = [
@@ -262,7 +270,7 @@ describe('runFixture and checkExamples', () => {
 		});
 	});
 	it('checks a content tree against its fixtures on both interpreters', () => {
-		const res = checkExamples(content, examples);
+		const res = checkExamples(content, examples, undefined, undefined, new Map());
 		expect(res).toMatchObject({ found: 2, checked: 4, failures: [] });
 		expect(res.interpreters).toHaveLength(2);
 		expect(res.interpreters[1]).toMatch(/^python 3\.9\./);
@@ -276,5 +284,106 @@ describe('runFixture and checkExamples', () => {
 		mkdirSync(empty);
 		const res = checkExamples(empty, examples);
 		expect(res.failures[0]).toContain('no <Predict run=...> examples found');
+	});
+});
+
+describe('usesModule', () => {
+	const uses: [string, string][] = [
+		['import agent\n', 'plain import'],
+		['import agent  # noqa: E402\n', 'import with a comment'],
+		['import os, agent\n', 'second name in an import list'],
+		['import agent as a\n', 'import as'],
+		['    from agent import run\n', 'indented from-import'],
+		['subprocess.run([sys.executable, "-m", "pytest", "test_agent.py"])\n', 'file name'],
+	];
+	it.each(uses)('%j counts as a use (%s)', (src) => {
+		const stem = src.includes('test_agent') ? 'test_agent' : 'agent';
+		expect(usesModule(src, stem)).toBe(true);
+	});
+	const misses: [string, string][] = [
+		['import agents\n', 'a longer module name'],
+		['import agent.tools\n', 'a submodule of a package with the same name'],
+		['from agent_loop import run\n', 'a module whose name starts with the stem'],
+		['# the agent loop runs here\n', 'the word in a comment'],
+		['print("my_agent.py")\n', 'a file name that ends with the stem'],
+		['x = 1  # import agent\n', 'an import in a trailing comment'],
+	];
+	it.each(misses)('%j is not a use (%s)', (src) => {
+		expect(usesModule(src, 'agent')).toBe(false);
+	});
+});
+
+describe('unrunFixtures', () => {
+	const dir = mkdtempSync(join(tmpdir(), 'unrun-'));
+	const lesson = join(dir, 'area', 'lesson');
+	mkdirSync(join(lesson, 'fixture-repo'), { recursive: true });
+	mkdirSync(join(lesson, '__pycache__'));
+	writeFileSync(join(lesson, 'run_me.py'), 'import agent\nagent.main()\n');
+	writeFileSync(join(lesson, 'agent.py'), 'def main():\n    print("hi")\n');
+	writeFileSync(join(lesson, '_common.py'), 'X = 1\n');
+	writeFileSync(join(lesson, 'tests.py'), 'import subprocess\nsubprocess.run(["python3", "test_x.py"])\n');
+	writeFileSync(join(lesson, 'test_x.py'), 'print("ok")\n');
+	writeFileSync(join(lesson, 'notes.txt'), 'data\n');
+	writeFileSync(join(lesson, 'fixture-repo', 'todo.py'), 'print("todo")\n');
+	writeFileSync(join(dir, 'ruff.toml'), '');
+	afterAll(() => rmSync(dir, { recursive: true, force: true }));
+	const runs = new Set(['area/lesson/run_me.py', 'area/lesson/tests.py']);
+
+	it('passes when every entry script is run, skipping helpers, used modules, data and deeper files', () => {
+		expect(unrunFixtures(dir, runs, new Map())).toEqual([]);
+	});
+	it('fails on an entry script that no Predict runs, naming it and the way out', () => {
+		writeFileSync(join(lesson, 'exercise.py'), 'print("prose only")\n');
+		try {
+			const failures = unrunFixtures(dir, runs, new Map());
+			expect(failures).toHaveLength(1);
+			expect(failures[0]).toMatch(/^examples\/area\/lesson\/exercise\.py: no <Predict run=\.\.\.> runs this fixture/);
+			expect(failures[0]).toContain('UNRUN_EXEMPT');
+			expect(unrunFixtures(dir, runs, new Map([['area/lesson/exercise.py', 'described in prose']]))).toEqual([]);
+		} finally {
+			rmSync(join(lesson, 'exercise.py'));
+		}
+	});
+	it('fails on a module whose only user is gone', () => {
+		expect(unrunFixtures(dir, new Set(['area/lesson/tests.py']), new Map())).toEqual([
+			expect.stringMatching(/^examples\/area\/lesson\/run_me\.py: /),
+		]);
+	});
+	it('fails on a stale or empty exemption', () => {
+		const exempt = new Map([
+			['area/lesson/run_me.py', 'run now'],
+			['area/lesson/agent.py', 'a used module'],
+			['area/lesson/fixture-repo/todo.py', 'too deep'],
+			['area/lesson/gone.py', 'deleted'],
+			['area/lesson/exercise.py', ''],
+		]);
+		writeFileSync(join(lesson, 'exercise.py'), 'print("prose only")\n');
+		try {
+			expect(unrunFixtures(dir, runs, exempt)).toEqual([
+				'UNRUN_EXEMPT area/lesson/run_me.py: a <Predict run=...> runs it now; drop the entry',
+				'UNRUN_EXEMPT area/lesson/agent.py: is a helper another fixture uses, not an entry script; drop the entry',
+				'UNRUN_EXEMPT area/lesson/fixture-repo/todo.py: names no entry script; drop the entry',
+				'UNRUN_EXEMPT area/lesson/gone.py: names no entry script; drop the entry',
+				'UNRUN_EXEMPT area/lesson/exercise.py: has no reason',
+			]);
+		} finally {
+			rmSync(join(lesson, 'exercise.py'));
+		}
+	});
+	it('is part of checkExamples once examples are found', () => {
+		const content = join(dir, 'content');
+		mkdirSync(content);
+		writeFileSync(join(content, 'p.mdx'), '<Predict id="a" answer="hi" run="area/lesson/run_me.py" />\n');
+		const run = () => ({ status: 0, stdout: 'hi', stderr: '' });
+		const interps = { list: [{ label: 'python3', cmd: 'python3' }] };
+		const res = checkExamples(content, dir, run, interps, new Map());
+		expect(res.failures).toEqual([expect.stringMatching(/^examples\/area\/lesson\/tests\.py: /)]);
+		expect(checkExamples(content, dir, run, interps, new Map([['area/lesson/tests.py', 'r']])).failures).toEqual([]);
+	});
+	it('gives every real exemption a reason', () => {
+		for (const [path, reason] of UNRUN_EXEMPT) {
+			expect(path).toMatch(/^[^/]+\/[^/]+\/[^/_][^/]*\.py$/);
+			expect(reason.length).toBeGreaterThan(20);
+		}
 	});
 });
