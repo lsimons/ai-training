@@ -1021,10 +1021,3 @@ Claude Code all settings:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/settings-reference
-Claude Code CLI reference:
-  type: reference
-  title: CLI reference
-  container: Claude Code documentation
-  author: Anthropic
-  license: Proprietary
-  url: https://code.claude.com/docs/en/cli-reference
