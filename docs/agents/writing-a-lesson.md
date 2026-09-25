@@ -635,7 +635,9 @@ Content is CC BY-SA 4.0 (`LICENSE`) and code is Apache-2.0
 - **`after` and `assumes` when a lesson goes live.** Keep `after` as the
   plan had it (spec S11 step 3), and change only `assumes`. Each
   `assumes` entry names the `lesson` and `section` that teach the
-  objective, and that lesson must be live on `main`. A page that says "as
+  objective, and that lesson must be live on `main`. `mise run data`
+  checks that the `section` is the slug of a level-two heading on that page.
+  A page that says "as
   the last lesson taught" needs an `assumes` entry for that lesson, even
   when the plan arrived with `assumes: []`.
 

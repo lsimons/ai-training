@@ -14,6 +14,7 @@ import { getAreas, isEngineering } from '@lib/areas';
 import { checkExtendsToHref } from '@lib/extends-to';
 import { checkpointsOf, type Lesson } from '@lib/lessons';
 import { bibliographySources, knownPagePaths } from '@lib/links';
+import { assumedSectionError } from '@lib/section-slugs';
 import { chooseSkillsCheck } from '@lib/skills-check';
 import { absoluteUrl, href } from '@lib/url';
 
@@ -44,6 +45,7 @@ if (isLesson) {
 	for (const c of competencies) for (const o of c.data.objectives) statements.set(o.id, o.statement);
 	// `assumes[].section` must be a `## ` heading of the target lesson. The slugs
 	// come from Starlight's own rendering, so they match the anchors it emits.
+	// `mise run data` checks the same rule earlier, and for planned lessons too.
 	const sectionSlugs = new Map<string, string[]>();
 	// A live lesson's `assumes` entries name the lesson and section that teach the objective (spec S11).
 	const assumed = (data.assumes ?? []).map((a) => {
@@ -66,11 +68,8 @@ if (isLesson) {
 		const lesson = docs.find((d) => d.id === a.lesson)!;
 		if (!statements.has(a.objective)) throw new Error(`${lessonId}: assumes unknown objective ${a.objective}`);
 		const slugs = sectionSlugs.get(a.lesson)!;
-		if (!slugs.includes(a.section)) {
-			throw new Error(
-				`${lessonId}: assumes section "${a.section}" which is not a "## " heading of ${a.lesson}; its sections are: ${slugs.join(', ')}`,
-			);
-		}
+		const sectionError = assumedSectionError(lessonId, a.lesson, a.section, slugs);
+		if (sectionError) throw new Error(sectionError);
 		return {
 			objective: a.objective,
 			statement: statements.get(a.objective)!,
