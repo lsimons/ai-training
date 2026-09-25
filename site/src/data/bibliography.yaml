@@ -1021,3 +1021,10 @@ Claude Code all settings:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/settings-reference
+Claude Code how it works:
+  type: reference
+  title: How Claude Code works
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/how-claude-code-works
