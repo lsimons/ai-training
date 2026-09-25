@@ -37,11 +37,18 @@ the branch tip) and the diff file the lead wrote there (`review.diff`).
 
 ## How to review
 
-1. `cd` into the review worktree first, and run `mise run setup` there
-   once. Every command after that runs in the worktree.
+1. Start every Bash command with `cd <review worktree> && <command>`, for example
+   `cd <review worktree> && mise run setup`, which you run once, or name
+   the worktree in the command itself (`git -C <review worktree> ...`,
+   absolute paths). A `cd` on its own does nothing for the next command:
+   "Within a subagent, `cd` commands don't persist between Bash or
+   PowerShell tool calls"
+   ([Subagents](https://code.claude.com/docs/en/sub-agents)). A reviewer
+   that runs a bare `cd` first runs every later check in the checkout the
+   session started in, which can be at another commit (#463).
 2. Run the `code-review` skill with the level first, then the review
    worktree's absolute path and the range, for example
-   `medium <worktree path> origin/main...HEAD cd into that path first and review the checkout there`.
+   `medium <worktree path> origin/main...HEAD start every Bash command with cd <worktree path> && and review the checkout there`.
    The skill reads the level only when it comes first, and it runs as a
    forked agent in the main checkout without your `cd`. Use `low` or
    `medium`. An empty result, "nothing to review", or findings on files

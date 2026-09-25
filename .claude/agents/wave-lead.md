@@ -40,7 +40,7 @@ Spawn agents by name and by nothing else:
   for a branch with code changes. A `(content and code)` branch gets both.
   Before you spawn a reviewer, create its worktree detached at the branch
   tip (`../ai-training-wt/review-<issue>`) and write the diff into it with
-  `git diff origin/main...origin/feat/<issue>-<slug> > review.diff`. Its
+  `cd ../ai-training-wt/review-<issue> && git diff origin/main...origin/feat/<issue>-<slug> > review.diff`. Its
   prompt is the issue, the branch, that worktree and the risks to probe.
 
 Judge each issue's size before you spawn its builder. Split an issue that
@@ -80,7 +80,10 @@ doesn't linger in the maintainer's agent list.
 
 Keep the wave branch in `../ai-training-wt/<wave branch>`, created from
 `origin/main`, and rebase each approved branch `--onto` it exactly as
-`orchestration.md` shows. `cspell-words.txt` and the bibliography merge
+`orchestration.md` shows. Start every command for a worktree with
+`cd <worktree> && <command>`, or name the worktree in it (`git -C <worktree> ...`,
+absolute paths): in a subagent a `cd` doesn't carry over to the next
+Bash call (`orchestration.md`, "Working with the platform"). `cspell-words.txt` and the bibliography merge
 with git's union driver. Resolve add/add conflicts in the S02 source table
 yourself by keeping every line in course order, and after the rebases drop
 a duplicate bibliography key that `mise run data` reports. Any other

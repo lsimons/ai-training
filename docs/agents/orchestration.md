@@ -259,12 +259,20 @@ The cases that come up:
   has worked for a very long time carries a huge context; for a follow-up
   on such a branch, spawn a fresh agent in a new worktree checked out on
   the branch, with the pull request and review as its whole brief.
+- In a subagent, a `cd` lasts for one Bash call: "Within a subagent, `cd`
+  commands don't persist between Bash or PowerShell tool calls"
+  ([Subagents](https://code.claude.com/docs/en/sub-agents)). A builder,
+  a reviewer and a wave lead start every command in a worktree with
+  `cd <worktree> && <command>`, or name the worktree in the command
+  (`git -C <worktree> ...`, absolute paths). A bare `cd` as the first
+  call leaves every later command in the checkout the session started in
+  (#463).
 - The `code-review` skill runs as a forked agent in the main checkout, not
   in the caller's worktree, so a reviewer that `cd`s into its review
   worktree and passes only a range gets an empty diff. The reviewer passes
   the level first, then the worktree path and the range
   (`medium <worktree path> origin/main...HEAD`), and the forked agent
-  `cd`s there first. The skill reads the level only when it comes first
+  starts each command with `cd <worktree path> && <command>`. The skill reads the level only when it comes first
   and ignores a level in any other place. The skill spawns its own
   sub-agents (angles and verifiers). Their notifications arrive at the
   coordinator too, and sometimes only there. The reviewer then gets an
