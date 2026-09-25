@@ -16,7 +16,7 @@ desk ticket. The runs are files in
 to them holds the agent's tools and instructions. The author wrote the
 runs and the grades in this lesson to show how graders agree and
 disagree, so they're illustrative and don't come from a model. Copy the
-folder, and each step below is `python3 rubric.py <step>`.
+`rubrics` folder, and each step below is `python3 rubric.py <step>`.
 
 ## One run, five scores
 
@@ -29,10 +29,14 @@ course uses five **quality pillars** per run:
 - **Faithfulness**: every claim in the answer comes from a passage or
   tool result of this run.
 - **Safety of actions**: the agent takes only the actions it may take.
-- **Efficiency**: the run uses no more searches, calls and tokens than
-  the question needs.
+- **Efficiency**: the run uses no more searches and tokens than the
+  question needs.
 - **Adherence**: the answer follows the instructions and the format it
   was given.
+
+An action the user didn't ask for is scored under safety of actions
+only. It doesn't also count against efficiency, or against adherence
+when an instruction rules it out. Each failure lowers one score.
 
 Correctness and faithfulness are split because a retrieval agent fails
 them separately. An answer can be right from what the model learned in
@@ -65,13 +69,13 @@ agent's instructions say to open a ticket only when the user asks for
 one, and this user asked a question. One score of four out of five, or
 80 percent, reads as a good run. The separate scores show that the agent
 acts without being asked, and that's the failure a team most needs to
-hear about. One number hides that kind of trade. A rubric scores each
+hear about. One number hides that kind of trade-off. A rubric scores each
 pillar on its own.
 
 <Choice id="which-pillar-fails" objective="building-agents/evaluates-agents/writes-a-rubric"
   concepts={['quality-pillars']}
   context="A handbook assistant answers staff questions with a search tool over a twelve-document handbook and must quote the sentence it relied on. In the run below it searched four times, each search returned the training text, and the answer quotes that text."
-  title="Which pillar does this run fail?" hint="Which of the five would change if the agent had stopped after the first search?"
+  title="Which pillar does this run fail?" hint="Which of the five is about what the run cost, and which are about what the answer says?"
   options={[
     { text: 'Faithfulness, because four searches mean the answer draws on more than one passage.', why: 'All four searches returned the same passage, and the quoted sentence is in it. Every claim comes from this run.' },
     { text: 'Safety of actions, because each search is an action the user did not ask for.', why: 'A search reads the handbook and changes nothing. The agent may search as often as it needs, and opening a ticket is the action the instructions limit.' },
@@ -101,7 +105,7 @@ answer: The budget is 1500 euros per year. "Every employee has a training budget
   concepts={['quality-pillars']}
   context="The lesson scores each run of a handbook assistant on five quality pillars: correctness, faithfulness to the retrieved passages, safety of actions, efficiency, and adherence to the instructions and answer format. The assistant can search the handbook and open a service desk ticket, and it must quote the sentence it relied on or answer exactly: not found."
   title="Sort the failures by pillar"
-  hint="For each one, ask what a better run would have done differently: a different answer, a different source, fewer calls, no action, or a different form."
+  hint="For each one, ask whether a better run would change the answer, the evidence for it, the steps taken, or its form."
   buckets={['Correctness', 'Faithfulness', 'Safety of actions', 'Efficiency', 'Adherence']}
   items={[
     { text: 'The question has two parts, and the answer covers the first part only', bucket: 0 },
@@ -141,8 +145,8 @@ With the first criterion, A and B agree on 3 of 12, and the scores
 differ in both directions: on some runs A scores higher, on others B
 does. Both graders read carefully. The criterion asks each of them to
 decide what "well grounded" means and where a 4 ends and a 3 starts, and
-each decides differently. Vague criteria give inconsistent scores, and a scale needs a
-description for each level (@AEC-09).
+each decides differently. Vague criteria give inconsistent scores, and
+a scale needs a description for each level (@AEC-09).
 
 The rewrite comes from reading the runs. Run ten answers the meals
 question correctly and then adds "Alcohol is not reimbursed", which no
@@ -154,7 +158,7 @@ the runs doesn't. The unit a grader checks is a claim, and a claim is
 either stated in a passage or tool result of this run, or it isn't.
 That's a question two people can answer the same way.
 
-## Anchors are examples
+## Anchor each point with an example
 
 A scale point needs a definition and an example run. A grader who
 isn't sure compares the run in front of them with the examples, which is
@@ -175,8 +179,9 @@ Grounded (faithfulness)
 ```
 
 A 0-1-2 scale is enough here, because each point is a different decision
-for the reader: does the answer hold up, does it hold up with an extra
-claim that needs removing, or does it fail. A 1-to-5 scale without
+for the reader: is every claim supported, is the answer supported with
+an extra claim that needs removing, or is the answer itself
+unsupported. A 1-to-5 scale without
 anchors gives different 3s from different graders, and a longer scale
 with anchors still needs an example for every point.
 
@@ -210,12 +215,13 @@ example for each point.
 
 A person can't read a thousand runs a day, and a rubric in daily use
 is applied by a grader that runs on its own. The grader can
-be code or a model (@Academy building-with-the-claude-api). Code checks
+be code or a model (@AEC-09). Code checks
 what can be counted: the number of searches for efficiency, and whether
 the answer is exactly `not found` when it should be. A model reads the
 answer against the passages for a criterion such as Grounded. Before a
 model judge grades at scale, compare its scores with a person's on a
-sample, and fix the rubric where they differ (@AEC-09). Here the judge's
+sample (@AEC-09). Where they differ, fix the rubric before you fix the
+judge. Here the judge's
 scores are illustrative, like the rest of the grades.
 
 <Predict id="show-judge" title="The judge against grader A"
@@ -249,9 +255,9 @@ Both disagreements come from one missing sentence in the rubric: what
 ```
 
 With that line, run six scores 2 for every grader, and run eleven scores
-0. Rerun the judge on the sample after each change to the rubric, and
-start grading at scale only once it agrees with the person as often as
-two people agree with each other. A later lesson in this course, on
+0. Rerun the judge on the sample after each change to the rubric. This
+course's rule is to start grading at scale only once the judge agrees
+with the person as often as two people agree with each other. A later lesson in this course, on
 using a model as the judge, picks up from here.
 
 <Pitfall title="A criterion written before reading a run">
@@ -267,7 +273,7 @@ criterion for each kind of failure that comes back.
 
 </Pitfall>
 
-<Exercise stretch="Give your three criteria to a colleague without the examples, ask them to score runs t04 and t05, and compare. Every point where you differ is an anchor to rewrite.">
+<Exercise stretch="Give your three criteria to a colleague without the examples, ask them to score runs t04 and t05, and compare. Every point where you differ is a definition to rewrite.">
 
 Copy the `rubrics` folder from the repository and read the twelve runs
 in `transcripts/`, with `agent.txt` for what the agent was told. Write
@@ -297,10 +303,12 @@ and what does that say about the failures this agent has shown so far?
    the same score. Vague criteria give inconsistent scores (@AEC-09).
 3. Write criteria from real runs: note what made the bad ones bad, and
    write a criterion for each kind of failure that comes back.
-4. Give each point on a scale a definition and an example run. Where
-   graders disagree, the anchor is missing a sentence (@AEC-09).
+4. Give each point on a scale a definition and an example run (@AEC-09).
+   Where graders disagree, first check whether the anchor allows two
+   readings.
 5. Before a model judge grades at scale, compare its scores with a
-   person's on a sample, and fix the rubric where they differ (@AEC-09).
+   person's on a sample (@AEC-09). Where they differ, fix the rubric
+   first.
 
 </Recap>
 
