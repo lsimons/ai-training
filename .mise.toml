@@ -55,7 +55,13 @@ osv-scanner = "2.6.0"
 # Used by `mise run mise-refresh` to verify the signature on a mise
 # release's SHASUMS256.txt (docs/agents/mise-refresh.md). 0.12 was
 # published on 2025-01-15, well past `minimum_release_age` above.
-minisign = "0.12"
+# The aqua registry entry for 0.12 lists three platforms (`supported_envs`
+# in pkgs/jedisct1/minisign/registry.yaml of aquaproj/aqua-registry), and
+# upstream ships no Intel macOS binary. `os` limits the install to those
+# three, so `mise install` skips minisign elsewhere instead of failing
+# (https://mise.jdx.dev/dev-tools/, "OS-Specific Tools"). The gap is in
+# docs/agents/mise-refresh.md.
+minisign = { version = "0.12", os = ["linux/x64", "macos/arm64", "windows"] }
 # cspell is deliberately not here. mise's `npm:` backend records no
 # checksum in mise.lock and resolves the package's dependency tree from the
 # registry at install time. It is a devDependency in site/package.json

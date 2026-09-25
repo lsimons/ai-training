@@ -2,7 +2,8 @@
 
 The signature tests run the pinned `minisign` from .mise.toml: they make a
 key pair without a password, sign a SHASUMS256.txt, and then change a byte
-of the file or the archive to see the refresh fail.
+of the file or the archive to see the refresh fail. Without minisign on
+PATH they fail, and do not skip, with a message that says how to install it.
 """
 
 import datetime
@@ -10,8 +11,13 @@ import hashlib
 import io
 import json
 import pathlib
+import shutil
 import subprocess
 import tarfile
+import tempfile
+import urllib.error
+import urllib.request
+from email.message import Message
 
 import pytest
 
@@ -22,6 +28,9 @@ ARCHIVE = f"mise-v{VERSION}-linux-x64.tar.gz"
 BASE = f"{mise_refresh.RELEASE_BASE}/v{VERSION}"
 BINARY = b"#!/bin/sh\necho fake mise\n"
 PUBLISHED = "2026-09-20T12:00:00Z"
+
+# Looked up once. Signer fails with mise_refresh.MINISIGN_HINT when it is None.
+MINISIGN = shutil.which("minisign")
 
 
 def make_archive(members: dict[str, bytes | None]) -> bytes:
@@ -48,10 +57,13 @@ class Signer:
     """A minisign key pair without a password, in a pytest tmp dir."""
 
     def __init__(self, directory: pathlib.Path) -> None:
+        if MINISIGN is None:
+            pytest.fail(f"minisign is not on PATH. {mise_refresh.MINISIGN_HINT}", pytrace=False)
+        self.minisign = MINISIGN
         self.public = directory / "test.pub"
         self.secret = directory / "test.key"
         subprocess.run(
-            ["minisign", "-G", "-W", "-p", str(self.public), "-s", str(self.secret)],
+            [self.minisign, "-G", "-W", "-p", str(self.public), "-s", str(self.secret)],
             check=True,
             capture_output=True,
         )
@@ -61,7 +73,7 @@ class Signer:
         message = directory / "to-sign.txt"
         message.write_bytes(data)
         subprocess.run(
-            ["minisign", "-S", "-s", str(self.secret), "-m", str(message)],
+            [self.minisign, "-S", "-s", str(self.secret), "-m", str(message)],
             check=True,
             capture_output=True,
         )
@@ -207,3 +219,88 @@ def test_verify_signature_names_a_missing_minisign(tmp_path: pathlib.Path) -> No
         mise_refresh.verify_signature(
             tmp_path / "a", tmp_path / "b", "RW" + "A" * 54, minisign="no-such-minisign"
         )
+
+
+def fake_urlopen(code: int) -> object:
+    def urlopen(request: urllib.request.Request, timeout: float) -> object:
+        raise urllib.error.HTTPError(request.full_url, code, "Forbidden", Message(), None)
+
+    return urlopen
+
+
+@pytest.mark.parametrize("code", [403, 429])
+def test_http_fetch_hints_at_a_rate_limit(monkeypatch: pytest.MonkeyPatch, code: int) -> None:
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen(code))
+    with pytest.raises(mise_refresh.RefreshError, match="rate limiting this address, so try again"):
+        mise_refresh.http_fetch(f"{mise_refresh.RELEASE_API}/v{VERSION}")
+
+
+def test_http_fetch_gives_no_rate_limit_hint_on_a_404(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen(404))
+    with pytest.raises(mise_refresh.RefreshError, match="HTTP Error 404") as caught:
+        mise_refresh.http_fetch(f"{BASE}/SHASUMS256.txt")
+    assert "rate limit" not in str(caught.value)
+
+
+def test_parse_published_at_rejects_a_body_that_is_not_json() -> None:
+    with pytest.raises(mise_refresh.RefreshError, match="did not return JSON"):
+        mise_refresh.parse_published_at(b"<html>rate limited</html>")
+
+
+@pytest.fixture
+def main_env(
+    signer: Signer, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[dict[str, bytes], pathlib.Path]:
+    """main() with the fake release, a doc naming the test key, and a watched temp root."""
+    files = release(signer, tmp_path)
+    doc = tmp_path / "mise-refresh.md"
+    doc.write_text(f"`minisign -Vm SHASUMS256.txt -P {signer.key}`\n")
+    temp_root = tmp_path / "temp-root"
+    temp_root.mkdir()
+    monkeypatch.setattr(mise_refresh, "PROCEDURE_DOC", doc)
+    monkeypatch.setattr(mise_refresh, "http_fetch", files.__getitem__)
+    monkeypatch.setattr(tempfile, "tempdir", str(temp_root))
+    return files, temp_root
+
+
+def test_main_prints_usage_and_exits_2_without_a_version(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert mise_refresh.main([]) == 2
+    assert "usage: mise run mise-refresh <version>" in capsys.readouterr().err
+
+
+def test_main_prints_the_report_and_removes_its_temp_dir(
+    main_env: tuple[dict[str, bytes], pathlib.Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, temp_root = main_env
+    assert mise_refresh.main([VERSION]) == 0
+    out = capsys.readouterr().out
+    assert f"sha256:    {hashlib.sha256(BINARY).hexdigest()}  (mise/bin/mise)" in out
+    assert list(temp_root.iterdir()) == []
+
+
+def test_main_prints_failed_and_exits_1_and_removes_its_temp_dir(
+    main_env: tuple[dict[str, bytes], pathlib.Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    files, temp_root = main_env
+    archive = files[f"{BASE}/{ARCHIVE}"]
+    files[f"{BASE}/{ARCHIVE}"] = archive[:-1] + bytes([archive[-1] ^ 1])
+    assert mise_refresh.main([VERSION]) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err.startswith("mise-refresh: FAILED: ")
+    assert "but the signed SHASUMS256.txt says" in captured.err
+    assert list(temp_root.iterdir()) == []
+
+
+def test_http_fetch_returns_the_body(monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: list[str] = []
+
+    def urlopen(request: urllib.request.Request, timeout: float) -> io.BytesIO:
+        seen.append(request.full_url)
+        return io.BytesIO(b"body")
+
+    monkeypatch.setattr(urllib.request, "urlopen", urlopen)
+    assert mise_refresh.http_fetch(f"{BASE}/SHASUMS256.txt") == b"body"
+    assert seen == [f"{BASE}/SHASUMS256.txt"]
