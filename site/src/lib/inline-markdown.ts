@@ -14,7 +14,7 @@ export const EMPHASIS = /\*(\S(?:[^*]*\S)?)\*/g;
 /** `[text](url)` with no title, text as group 1 and url as group 2. */
 export const LINK = /\[([^\]]+)\]\(([^)\s]+)\)/g;
 
-/** A `(@key)` citation token, as `renderProse` drops it and `lib/citations.ts` splits on it. */
+/** A `(@key)` citation token, for the `unsupportedInline` check only. It is narrower than `plugins/citation-syntax.mjs` (#379). */
 const CITATION = /\(@[A-Za-z0-9-]+\)/;
 /**
  * `_x_` or `__x__` at a word edge, so `snake_case`, a URL path segment and a lone `_` stay out.
