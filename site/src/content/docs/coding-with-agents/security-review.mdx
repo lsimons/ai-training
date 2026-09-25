@@ -1,0 +1,394 @@
+import { Choice, MultiChoice, Predict, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response, Habit } from '@components/lesson';
+
+A coding agent added a search box to a small notes app. The brief was
+short: a user types part of a title and sees their own notes that match.
+The agent wrote one new function, the tests it wrote pass, and the search
+works when you try it. In this lesson we read that change the way an
+attacker would. A static analyzer finds part of what is wrong with it,
+and we read the code for the rest. Then we brief the agent for a fix,
+with a test that proves it.
+
+Brilliant's *Coding with AI* skills map lists security and adversarial
+thinking as a skill area of its own (@Brilliant SEC). The question this
+lesson practices is the adversarial one: what happens when the input is
+hostile?
+
+## The agent's change
+
+The fixture is in `site/examples/coding-with-agents/security-review/` in
+your clone of the course repository. Copy it somewhere outside the clone,
+so that nothing you run touches the repository.
+
+```sh
+cp -R site/examples/coding-with-agents/security-review ~/security-review
+cd ~/security-review
+```
+
+`notes_search.py` is the agent's change. The route that calls
+`search_notes` passes the logged-in user's name as `owner` and the text
+from the search box as `term`. This is the whole function, with the
+admin check the agent added in the same commit:
+
+```python
+ADMIN_PASSWORD = "notes-admin-2026"
+
+
+def is_admin(password: str) -> bool:
+    """Lets the admin page in when the password matches."""
+    return password == ADMIN_PASSWORD
+
+
+def search_notes(conn: sqlite3.Connection, owner: str, term: str) -> "list[str]":
+    """Returns the titles of the owner's notes whose title contains term."""
+    query = (
+        f"SELECT title FROM notes WHERE owner = '{owner}' AND title LIKE '%{term}%' ORDER BY title"
+    )
+    try:
+        rows = conn.execute(query).fetchall()
+    except sqlite3.Error:
+        return []
+    return [row[0] for row in rows]
+```
+
+It reads cleanly and it does what the brief asked for. Keep it open while
+you read the next section.
+
+## The mistakes agents copy
+
+A model learns to write code from a large amount of public code, and
+public code contains bugs, including security bugs. In a study from 2021,
+Pearce and colleagues gave GitHub Copilot 89 coding scenarios built around
+high-risk weakness types from the Top 25 list that the MITRE Corporation
+publishes. They judged about 40
+percent of the 1,689 programs it produced to be vulnerable, and their
+explanation is that a model trained on code that nobody checked has learned the
+exploitable patterns in it (@Pearce 2022). Models have changed since that
+study, and they're still trained on public code. Look first for the
+mistakes that appear in a lot of that code:
+
+- **Unvalidated input.** A value from a form, a file or an API is used as
+  if it were trusted: a quantity that can be negative, a file name that
+  can contain `../`.
+- **String-built queries and commands.** Input is pasted into SQL or a
+  shell command, so the input can change what the query or the command
+  does.
+- **Secrets in code.** A password, token or key is written into the
+  source, where every copy of the repository has it.
+- **Permissive defaults.** A server listens on every network interface, a
+  debug mode stays on, or a file is created readable by everyone.
+- **Disabled checks.** Certificate checking is turned off to make an
+  error go away, or a test is skipped because it failed.
+- **Error handling that hides failures.** An exception is caught and
+  replaced with an empty result. A failure then looks the same as
+  "nothing found".
+
+Each of these makes the code shorter or makes an error go away. An agent
+that is told to get the task done uses them for the same reason a
+hurried person does.
+
+<MultiChoice id="lines-that-stop-review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['security-review-of-agent-output']}
+  context="The lesson lists six classic mistakes to look for in agent-written code: unvalidated input, string-built queries and commands, secrets in code, permissive defaults, disabled checks, and error handling that hides failures."
+  title="Which lines stop the review?" hint="For each line, ask what an attacker controls and what the line lets them change."
+  options={[
+    { text: '`requests.get(url, verify=False)`', correct: true },
+    { text: '`cursor.execute("SELECT title FROM notes WHERE owner = ?", (owner,))`', why: 'The owner goes to the database as a value through the placeholder, so it cannot change the query.' },
+    { text: '`os.system("convert " + name + " thumb.png")`', correct: true },
+    { text: '`token = os.environ["NOTES_API_TOKEN"]`', why: 'The token comes from the environment at run time. The source code holds only its name.' },
+    { text: '`app.run(host="0.0.0.0", debug=True)`', correct: true },
+    { text: '`except sqlite3.Error: log.exception("search failed"); raise`', why: 'The error is logged and raised again, so the failure stays visible to the caller.' },
+  ]}>
+Each line comes from a different agent-written change. Which lines show
+one of the classic mistakes?
+</MultiChoice>
+
+## What the analyzer finds
+
+A static analyzer reads source code without running it and reports
+patterns that are often mistakes. For Python, Bandit is a free,
+Apache-2.0 licensed analyzer that looks for common security problems
+(@Bandit). Bandit 1.9.4 needs Python 3.10 or newer, as
+[its PyPI page](https://pypi.org/project/bandit/) states, so check
+`python3 --version` first. Its documentation installs it with pip into a
+virtual environment. From `~/security-review`, run:
+
+```sh
+python3 -m venv .venv
+.venv/bin/pip install bandit==1.9.4
+.venv/bin/bandit -q notes_search.py
+```
+
+Bandit 1.9.4 printed this on the fixture, with the start time left out:
+
+```text
+Test results:
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'notes-admin-2026'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
+   Location: ./notes_search.py:11:17
+10	
+11	ADMIN_PASSWORD = "notes-admin-2026"
+12	
+
+--------------------------------------------------
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html
+   Location: ./notes_search.py:22:10
+21	    query = (
+22	        f"SELECT title FROM notes WHERE owner = '{owner}' AND title LIKE '%{term}%' ORDER BY title"
+23	    )
+
+--------------------------------------------------
+```
+
+The run also prints a summary with the line count and the issues per
+severity, and it exits with status 1 because it found issues.
+
+Bandit found two of the classic mistakes. B105 is a password in the
+source, which Bandit spots because the variable name contains `password`. B608 is the query
+built from strings. Bandit rates its confidence in that finding as Low.
+It reads one file and can't know where `owner` and `term` come from. You
+can, and here `term` comes from a user, so the finding is real.
+
+Bandit didn't report the `except sqlite3.Error: return []`. Its check for
+swallowed exceptions, B110, looks for an `except` block whose only
+statement is `pass` (@Bandit). This block returns an empty list, which
+hides the error just as well and matches no rule. An analyzer finds
+patterns that someone wrote a rule for. What the code means for this
+app, such as whether an empty list means that nothing matched, is a question
+only a reader can answer.
+
+<Choice id="what-bandit-missed" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['security-review-of-agent-output']}
+  context="The lesson runs the Bandit static analyzer over an agent-written search function for a notes app, which builds its SQL query with an f-string, keeps an admin password in the source, and catches database errors."
+  title="What did the analyzer miss?" hint="Look at the two issue codes in the output, then at each part of the function that no issue points to."
+  options={[
+    { text: 'The query that is built from the search text with an f-string.', why: 'That is B608 in the output, at line 22.' },
+    { text: 'The admin password that is written into the source file.', why: 'That is B105 in the output, at line 11.' },
+    { text: 'The except block that turns a database error into an empty list.', correct: true },
+    { text: 'The use of the sqlite3 module where an ORM library is expected.', why: 'The sqlite3 module is safe with placeholders, and choosing it is not a security finding.' },
+  ]}>
+Which problem in `notes_search.py` does the Bandit output above not
+report?
+</Choice>
+
+<Pitfall title="The search that finds nothing">
+Alice searches for her note "Call O'Brien about the lease" and the app
+says she has no matching notes. The apostrophe in `O'Brien` ends the
+quoted string in the SQL too early, and the database rejects the query.
+The `except` block turns that error into an empty list without logging
+it, and Bandit has no rule for the block. An attacker's failed attempts
+disappear in the same way. Read every `except` in
+agent code and ask what the user sees when it runs. An error that
+nobody handles should reach the caller or the log.
+</Pitfall>
+
+## What if the input is hostile
+
+Now ask the question at each place where data enters the function. The
+change has two inputs and one way out.
+
+- `term` comes from the search box. Anyone who can log in controls all
+  of it.
+- `owner` comes from the login session. It's trusted only as long as the
+  route takes it from the session, and a later change that reads it from
+  the URL makes it hostile too.
+- The database error goes back to the user as an empty list, so the user
+  can't tell a failure from "no match".
+
+Take `term` first. Suppose Alice types `%' OR owner != '` into the search
+box. The f-string pastes it into the query, and the `WHERE` clause becomes
+`owner = 'alice' AND title LIKE '%%' OR owner != '%'`. `AND` binds more
+tightly than `OR` in SQL.
+
+<Predict id="predict-hostile-count" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['security-review-of-agent-output']}
+  context="The lesson has a small notes database in which Alice and Bob each own two notes. An agent-written search function builds its SQL with an f-string, as WHERE owner = the user AND title LIKE the search term."
+  title="Predict how many titles come back" hint="Split the WHERE clause at OR. Which owners make the second half true?"
+  answer="4" run="coding-with-agents/security-review/hostile_count.py">
+The database holds four notes, two of Alice's and two of Bob's. How many
+titles does `search_notes(conn, "alice", "%' OR owner != '")` return?
+
+```python
+print(len(search_notes(notes_db(), "alice", "%' OR owner != '")))
+```
+
+</Predict>
+
+`hostile.py` runs the search as Alice with three terms: the ordinary one
+the brief had in mind, the hostile one, and a title with an apostrophe.
+
+<Predict id="run-hostile" title="Run the three searches"
+  answer={`'plan': ['Plan the team offsite']
+  "%' OR owner != '": ['Bank PIN reminder', "Call O'Brien about the lease", 'Plan salary review', 'Plan the team offsite']
+  "O'Brien": []`} run="coding-with-agents/security-review/hostile.py">
+From `~/security-review`, run the script and compare what you see with
+the output below.
+
+```sh
+python3 hostile.py
+```
+
+</Predict>
+
+The second line shows Bob's notes to Alice, including one about his bank
+personal identification number (PIN). The third line is the pitfall above: an ordinary search that fails
+and reports nothing. The Python documentation warns against building a
+query with string operations for this reason and gives the fix, a
+placeholder in the SQL with the values passed separately to `execute()`
+(@Python sqlite3). The database then treats the values as data, whatever
+characters they contain.
+
+The fix is small, and that makes it tempting to accept the agent's first
+version of it. Ask for a test that fails on the old code and passes on
+the new. The review then ends with proof that the fix covers what you
+found. Scaling the check to how little you watched the agent work is
+the habit the Academy's *Claude Code in action* course teaches for
+unsupervised runs (@Academy claude-code-in-action), and a failing test
+is the cheapest proof.
+
+<Scenario id="brief-the-fix" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['security-review-of-agent-output']}
+  context="An agent-written search function for a notes app builds its SQL from the search text with an f-string, and catches database errors by returning an empty list. You have found both problems and are writing the brief for the fix."
+  title="Brief the fix" hint="Which brief leaves you with evidence that the hostile term and the apostrophe now work, and nothing silenced?"
+  options={[
+    { text: 'Ask the agent to escape single quotes in term before it goes into the query.', consequence: 'The agent doubles every quote in term and the two searches work. The owner value is still pasted in unescaped, the except block still hides errors, and the next change to the query has to remember the escaping.' },
+    { text: 'Ask the agent to add a # nosec comment on the query line, because the route only passes logged-in users.', consequence: 'Bandit stops reporting B608. The query is as injectable as before, and the comment tells the next reviewer that someone checked it.' },
+    { text: 'Ask the agent to make the search secure and to fix anything else it notices.', consequence: 'The agent adds quote escaping, reformats three files and adds a dependency. You now review a larger diff with no test that shows the injection is gone.' },
+    { text: 'Ask for placeholders for both values, errors raised to the caller, and a test with the hostile term and the apostrophe that fails on the current code.', correct: true, consequence: 'The agent changes one function and adds one test file. You run the test on the old code and see it fail, then on the new code and see it pass.' },
+  ]}>
+Which brief do you give the agent?
+</Scenario>
+
+Here is a brief in that form. The pair below is illustrative: the author
+wrote both the brief and a summary of the kind of answer to expect.
+
+<Prompt model="illustrative" recorded="illustrative">
+In `notes_search.py`, `search_notes` builds its SQL with an f-string, so a
+search term such as `%' OR owner != '` returns other users' notes, and a
+term with an apostrophe fails. Change the query to use `?` placeholders
+for `owner` and `term`, and pass both values as the second argument to
+`execute()`. Remove the `except sqlite3.Error` block so errors reach the
+caller. Move `ADMIN_PASSWORD` to an environment variable. First write
+`test_notes_search.py` with two tests, the hostile term (expect an empty
+list for Alice) and `O'Brien` (expect her note), and show me that both
+fail on the current code. Don't change any other file, and don't add a
+dependency.
+</Prompt>
+<Response>
+I added test_notes_search.py with the two tests, and both fail on the
+current code. Then I changed search_notes to use placeholders and removed
+the except block, and is_admin now reads NOTES_ADMIN_PASSWORD from the
+environment. Both tests pass.
+</Response>
+
+The fixture has the result as `fixed/notes_search.py`, with the test next
+to the agent's version. `run_test.py` runs the test against each version
+in its own temporary directory.
+
+<Predict id="run-the-test" title="Run the test against both versions"
+  answer={`agent version: FAILED (failures=2)
+  fixed version: OK`} run="coding-with-agents/security-review/run_test.py">
+From `~/security-review`, run the script and compare what you see with
+the output below.
+
+```sh
+python3 run_test.py
+```
+
+</Predict>
+
+Bandit doesn't report any issue in `fixed/notes_search.py`. A clean run means
+that no rule matched. You know the fix works because of the test, and
+the test is also what stops a later change from bringing the problem
+back.
+
+## The review and the blast radius
+
+The search runs with the app's database connection. Its blast radius is
+everything that connection can read or change. For a read-only account
+that's every note in the database. For an account that can
+write, a string-built query can also delete or change notes. How long
+you spend on a security review follows the same rule as any risk
+decision: look at what the code can reach before you decide how much
+checking it needs.
+
+SQL injection and prompt injection are the same mistake in two places.
+In both, data that should only be read is placed next to instructions,
+and the reader can't tell them apart. The agent's f-string puts Alice's
+search text in the SQL. A web page an agent reads puts its text in the
+prompt. The fix for SQL is to keep data and instructions in separate
+channels with a placeholder. A prompt has no such channel, which is why
+an agent's access has to be limited instead.
+
+<Sort id="found-or-missed" phase="review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['security-review-of-agent-output']}
+  context="The lesson runs the Bandit 1.9.4 static analyzer over an agent-written search function for a notes app. Bandit has rules for a hardcoded password string, SQL built with string formatting, and an except block whose only statement is pass."
+  title="Which would Bandit report?" hint="Bandit matches patterns it has a rule for. Which of these match a rule, and which need a reader who knows the app?"
+  buckets={['Bandit reports it', 'Only a reader finds it']}
+  items={[
+    { text: 'An admin password assigned to ADMIN_PASSWORD in the source', bucket: 0 },
+    { text: 'An f-string that pastes the search text into a SELECT', bucket: 0 },
+    { text: 'An except block that returns an empty list on a database error', bucket: 1 },
+    { text: 'A route that later reads owner from the URL instead of the session', bucket: 1 },
+  ]} />
+
+<Choice id="why-placeholder" phase="review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['security-review-of-agent-output']}
+  context="An agent-written search function builds its SQL with an f-string, and a search term containing a single quote changes what the query selects. The reviewer asks for a fix."
+  title="Why a placeholder?" hint="What does the database receive in each version, and which part of it can the user's text change?"
+  options={[
+    { text: 'The placeholder sends the value separately, so the database never reads it as part of the SQL.', correct: true },
+    { text: 'The placeholder escapes every quote in the value, which is all that an injection needs removed.', why: 'Escaping is a different approach, and it depends on getting every special character right. A placeholder does not put the value into the SQL text at all.' },
+    { text: 'The placeholder makes Bandit stop reporting B608, which is how you know the query is safe.', why: 'A missing finding means no rule matched. The test that fails on the old code is what shows the fix works.' },
+    { text: 'The placeholder rejects any search term that contains SQL keywords such as OR and SELECT.', why: 'It rejects nothing. A term containing OR is searched for as text, like any other term.' },
+  ]}>
+Why does the parameterized query stop the hostile search term?
+</Choice>
+
+<Exercise stretch="Run Bandit with -r over a whole Python project you work on, pick one finding with Low confidence, and decide in writing whether it is a real problem in that code, and why.">
+Make two fresh copies of the fixture, one for the agent and one that
+keeps the agent's original version, and remove the fix and the test from
+both. The agent then starts from the change as it arrived:
+
+```sh
+cp -R site/examples/coding-with-agents/security-review ~/search-fix
+cp -R site/examples/coding-with-agents/security-review ~/search-before
+rm -r ~/search-fix/fixed ~/search-fix/test_notes_search.py ~/search-fix/run_test.py
+rm -r ~/search-before/fixed ~/search-before/test_notes_search.py ~/search-before/run_test.py
+```
+
+Run the Bandit you installed earlier,
+`~/security-review/.venv/bin/bandit`, over
+`~/search-fix/notes_search.py` and write down its findings. Then read the function yourself, list every place where input
+enters and every `except`, and note which problems Bandit missed. Start a
+coding agent session in `~/search-fix`, which is a copy you can delete,
+and give it a brief for the parameterized version with a test, in your
+own words. Before you accept the change, the agent's test must fail when
+you copy it into `~/search-before` and run it there. In `~/search-fix`
+it must pass.
+Last, run Bandit on the result.
+
+A good result is a short note with the Bandit findings, the problem it
+missed, your brief, and the two test results. The agent's diff changes
+one function and adds one test file, and it doesn't add a dependency.
+
+Reflect: which of the problems would you have found without Bandit, and
+which one would you have missed without asking what happens when the
+input is hostile?
+</Exercise>
+
+<Recap>
+1. Agents learn from public code and reproduce its common mistakes: unvalidated input, string-built queries and commands, secrets in code, permissive defaults, disabled checks, and error handling that hides failures (@Pearce 2022).
+2. A static analyzer such as Bandit finds the patterns it has rules for. Read its findings, including the ones with Low confidence, and then read the code for what it can't know.
+3. At each place where data enters, ask what happens when the input is hostile, and follow every `except` to what the user sees.
+4. Brief the fix with placeholders and a test that fails on the old code, and run that test on both versions before you accept it (@Python sqlite3).
+5. The blast radius of an injection is everything the code's connection can reach, and SQL injection is the same mistake as prompt injection: data placed where instructions go.
+</Recap>
+
+<Habit id="ask-what-if-hostile">
+The next time you review an agent's change that reads user input, find each place the input enters and ask what happens if it is hostile before you approve.
+</Habit>
