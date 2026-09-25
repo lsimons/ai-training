@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+	appliesTo,
+	branchOf,
 	featBranches,
 	lastTrustedVerdict,
 	nextStep,
@@ -42,14 +44,16 @@ describe('lastTrustedVerdict', () => {
 			comment('lsimons', 'Review.\n\nVerdict: needs changes', '2026-09-24T10:00:00Z'),
 			comment('someone-else', 'Verdict: approve', '2026-09-24T11:00:00Z'),
 		];
-		const verdict = lastTrustedVerdict(comments);
+		const verdict = lastTrustedVerdict(comments, 'feat/1-x');
 		expect(verdict?.verdict).toBe('needs changes');
 		expect(verdict?.author).toBe('lsimons');
 		expect(verdict?.commentsAfter).toBe(0);
 	});
 
 	it('returns null when only an untrusted account gave a verdict', () => {
-		expect(lastTrustedVerdict([comment('someone-else', 'Verdict: approve', '2026-09-24T11:00:00Z')])).toBeNull();
+		expect(
+			lastTrustedVerdict([comment('someone-else', 'Verdict: approve', '2026-09-24T11:00:00Z')], 'feat/1-x'),
+		).toBeNull();
 	});
 
 	it('takes the newest trusted verdict whatever the input order, and counts trusted replies after it', () => {
@@ -60,7 +64,7 @@ describe('lastTrustedVerdict', () => {
 			comment('lsimons', 'Merged into the wave.', '2026-09-24T13:00:00Z'),
 			comment('someone-else', 'Looks good!', '2026-09-24T14:00:00Z'),
 		];
-		const verdict = lastTrustedVerdict(comments);
+		const verdict = lastTrustedVerdict(comments, 'feat/1-x');
 		expect(verdict).toEqual({
 			verdict: 'approve',
 			author: 'lsimons',
@@ -70,8 +74,49 @@ describe('lastTrustedVerdict', () => {
 		});
 	});
 
+	it('applies a verdict that names a branch to that branch only', () => {
+		const comments = [
+			comment('lsimons', 'Review of -1.\n\nBranch: feat/1-x-1\nVerdict: needs changes', '2026-09-24T10:00:00Z'),
+			comment('lsimons', 'Review of -2.\n\nBranch: `feat/1-x-2`\nVerdict: approve', '2026-09-24T11:00:00Z'),
+		];
+		expect(lastTrustedVerdict(comments, 'feat/1-x-1')?.verdict).toBe('needs changes');
+		expect(lastTrustedVerdict(comments, 'feat/1-x-2')?.verdict).toBe('approve');
+		expect(lastTrustedVerdict(comments, 'feat/1-x-1')?.commentsAfter).toBe(0);
+	});
+
+	it('applies a verdict that names no branch to every branch', () => {
+		const comments = [comment('lsimons', 'Verdict: approve', '2026-09-24T10:00:00Z')];
+		expect(lastTrustedVerdict(comments, 'feat/1-x-1')?.verdict).toBe('approve');
+		expect(lastTrustedVerdict(comments, 'feat/1-x-2')?.verdict).toBe('approve');
+	});
+
+	it('counts only the replies after a verdict that apply to the branch', () => {
+		const comments = [
+			comment('lsimons', 'Branch: feat/1-x-1\nVerdict: needs changes', '2026-09-24T10:00:00Z'),
+			comment('lsimons', 'Fixed in abc123.\n\nBranch: feat/1-x-2', '2026-09-24T11:00:00Z'),
+		];
+		expect(lastTrustedVerdict(comments, 'feat/1-x-1')?.commentsAfter).toBe(0);
+		comments.push(comment('lsimons', 'Fixed in def456.\n\nBranch: feat/1-x-1', '2026-09-24T12:00:00Z'));
+		expect(lastTrustedVerdict(comments, 'feat/1-x-1')?.commentsAfter).toBe(1);
+	});
+
 	it('trusts exactly the maintainer and the bot account', () => {
 		expect([...TRUSTED_VERDICT_AUTHORS]).toEqual(['lsimons', 'lsimons-bot']);
+	});
+});
+
+describe('branchOf', () => {
+	it('reads the branch line, plain, bold or in backticks', () => {
+		expect(branchOf('Findings.\n\nBranch: feat/1-x-1\nVerdict: approve')).toBe('feat/1-x-1');
+		expect(branchOf('**Branch:** `feat/1-x-2`')).toBe('feat/1-x-2');
+		expect(branchOf('Verdict: approve')).toBeNull();
+		expect(branchOf('The branch: feat/1-x is mentioned mid-sentence')).toBeNull();
+	});
+
+	it('applies a comment to the branch it names, or to every branch when it names none', () => {
+		expect(appliesTo('Branch: feat/1-x-1', 'feat/1-x-1')).toBe(true);
+		expect(appliesTo('Branch: feat/1-x-1', 'feat/1-x-2')).toBe(false);
+		expect(appliesTo('Verdict: approve', 'feat/1-x-2')).toBe(true);
 	});
 });
 
@@ -84,15 +129,14 @@ describe('nextStep', () => {
 		commentsAfter,
 	});
 
-	it('builds an issue without a branch, reviews an unreviewed one, and joins an approved one', () => {
-		expect(nextStep([], null)).toBe('build');
-		expect(nextStep(['feat/1-x'], null)).toBe('review');
-		expect(nextStep(['feat/1-x'], v('approve'))).toBe('join');
+	it('reviews an unreviewed branch and joins an approved one', () => {
+		expect(nextStep(null)).toBe('review');
+		expect(nextStep(v('approve'))).toBe('join');
 	});
 
 	it('revises a needs-changes branch, and re-checks one the builder replied on', () => {
-		expect(nextStep(['feat/1-x'], v('needs changes'))).toBe('revise');
-		expect(nextStep(['feat/1-x'], v('needs changes', 1))).toBe('re-check');
+		expect(nextStep(v('needs changes'))).toBe('revise');
+		expect(nextStep(v('needs changes', 1))).toBe('re-check');
 	});
 });
 
@@ -142,12 +186,37 @@ describe('waveStatus', () => {
 			worktrees: [],
 		});
 		expect(status.waveBranch).toEqual({ name: 'wave/capybara-3', pushed: true });
-		expect(status.issues.map((i) => [i.issue, i.branches, i.verdict?.verdict ?? null, i.next])).toEqual([
-			[12, ['feat/12-a'], 'approve', 'join'],
-			[13, ['feat/13-b'], null, 'review'],
-			[14, [], null, 'build'],
+		expect(
+			status.issues.map((i) => [i.issue, i.next, i.branches.map((b) => [b.name, b.verdict?.verdict ?? null, b.next])]),
+		).toEqual([
+			[12, 'per-branch', [['feat/12-a', 'approve', 'join']]],
+			[13, 'per-branch', [['feat/13-b', null, 'review']]],
+			[14, 'build', []],
 		]);
 		expect(status.trustedVerdictAuthors).toEqual(['lsimons', 'lsimons-bot']);
+	});
+
+	it('gives each half of a split issue its own next step, in either order of the verdicts', () => {
+		const heads = ['feat/15-x-1', 'feat/15-x-2'];
+		const needsChanges1 = comment('lsimons', 'Branch: feat/15-x-1\nVerdict: needs changes', '2026-09-24T10:00:00Z');
+		const approve2 = comment('lsimons', 'Branch: feat/15-x-2\nVerdict: approve', '2026-09-24T11:00:00Z');
+		const later = (c: ReturnType<typeof comment>) => ({ ...c, createdAt: '2026-09-24T12:00:00Z' });
+		for (const comments of [
+			[needsChanges1, approve2],
+			[approve2, later(needsChanges1)],
+		]) {
+			const status = waveStatus({
+				waveBranch: 'wave/capybara-3',
+				issues: [15],
+				heads,
+				commentsByIssue: new Map([[15, comments]]),
+				worktrees: [],
+			});
+			expect(status.issues[0]?.branches.map((b) => [b.name, b.next])).toEqual([
+				['feat/15-x-1', 'revise'],
+				['feat/15-x-2', 'join'],
+			]);
+		}
 	});
 });
 
