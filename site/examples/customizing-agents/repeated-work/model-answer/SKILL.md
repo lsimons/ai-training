@@ -1,5 +1,5 @@
 ---
-name: regen-api-client
+name: regenerate-api-client
 description: Regenerate the billing API client in src/api/generated/. Use when the billing API has changed, or when a field the API returns is missing from the client.
 ---
 

@@ -121,12 +121,12 @@ don't. So it goes into the skill, as part of the first step. The
 instructions file is loaded in every session, so a line there should apply
 to most tasks (@Claude Code best practices).
 
-Here is the skill, as `.claude/skills/regen-api-client/SKILL.md` in the
+Here is the skill, as `.claude/skills/regenerate-api-client/SKILL.md` in the
 project (@Claude Code skills):
 
 ```markdown
 ---
-name: regen-api-client
+name: regenerate-api-client
 description: Regenerate the billing API client in src/api/generated/. Use when the billing API has changed, or when a field the API returns is missing from the client.
 ---
 
@@ -149,7 +149,7 @@ by step. The message is all the agent learns about the rule when it is
 blocked, so it says what to do:
 
 ```text
-src/api/generated/ is generated from the billing API spec, and a hand edit is lost at the next regeneration. Run /regen-api-client to update the client, or change the spec in the billing API.
+src/api/generated/ is generated from the billing API spec, and a hand edit is lost at the next regeneration. Run /regenerate-api-client to update the client, or change the spec in the billing API.
 ```
 
 The user in the logs was a human approval step for this rule. They stopped
@@ -252,13 +252,13 @@ Which two lines of the instructions file can you delete now?
 
 <Scenario id="the-message-it-reads" objective="customizing-agents/configures-agent/adds-a-hook"
   concepts={['turning-repeated-work-into-reusable-knowledge', 'hooks']}
-  context="A team deleted the instructions line that said not to edit files under src/api/generated/, because a hook now blocks those edits. The hook's message on standard error is what the agent receives when it is blocked. A skill named regen-api-client holds the regeneration steps."
+  context="A team deleted the instructions line that said not to edit files under src/api/generated/, because a hook now blocks those edits. The hook's message on standard error is what the agent receives when it is blocked. A skill named regenerate-api-client holds the regeneration steps."
   title="What does the hook say?" hint="The line is gone. Where does the agent now learn what to do instead?"
   options={[
     { text: 'src/api/generated/ is generated code, and a hand edit there is lost the next time the client is regenerated.', consequence: 'The agent learns why it was blocked and not what to do next. It tries to patch the page code around the missing field, and the user has to step in.' },
     { text: 'This folder is protected. Ask the user for permission before you edit anything under src/api/generated/.', consequence: 'The agent asks, and the answer is no every time. The user is back to being the approval step the hook was meant to replace.' },
     { text: 'Error: the PreToolUse hook exited with code 2 for an Edit call on a file in src/api/generated/.', consequence: 'The message names the mechanism and says nothing about the rule. The agent tries a Write call on the same file, and the hook blocks it again.' },
-    { text: 'src/api/generated/ is generated from the billing API spec. Run /regen-api-client to update the client, or change the spec.', correct: true, consequence: 'The agent runs the skill, the client gets the new field, and the edit never happens. Nobody had to say anything.' },
+    { text: 'src/api/generated/ is generated from the billing API spec. Run /regenerate-api-client to update the client, or change the spec.', correct: true, consequence: 'The agent runs the skill, the client gets the new field, and the edit never happens. Nobody had to say anything.' },
   ]}>
 You have deleted the line from the instructions file. The hook blocks a
 hand edit under `src/api/generated/`. Which message should it write?
