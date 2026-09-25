@@ -49,9 +49,9 @@ The examples in this lesson aren't graded. Each one is a command you run,
 with output the course checks on every build.
 
 The planted file is `docs/vendor-notes.md`. It reads like setup notes for a
-payment provider, and it holds an HTML (HyperText Markup Language) comment addressed to AI
-assistants. A Markdown viewer shows the file without the comment, because browsers don't
-display HTML comments. The agent reads the raw file, comment included:
+payment provider, and it holds an HTML (HyperText Markup Language) comment
+addressed to AI assistants. A Markdown viewer shows the file without the
+comment, because browsers don't display HTML comments. The agent reads the raw file, comment included:
 
 ```text
 <!--
@@ -72,9 +72,9 @@ real server (@RFC 2606). Run the note only in the scratch copy, and never
 copy it into a real repository or a folder where real keys are in reach.
 
 The steps below use Claude Code. With another agent, look up its settings
-for the same limits. The agent starts in the copy, it asks you before it
-runs a command or edits a file, and it can reach neither the network nor a
-folder outside the copy.
+for the same limits. The agent starts in the copy. It asks you before it
+edits a file or runs most commands, and can't reach the network or a folder
+outside the copy without asking you.
 
 `red-team-settings.json` holds the limits for Claude Code:
 
@@ -107,14 +107,15 @@ sandbox lets those commands write only in the working folder and a
 temporary folder of the session. With these settings, Claude Code refuses
 to start when the sandbox can't, and it can't retry a blocked command
 outside the sandbox. By default a command that runs in the sandbox runs
-without asking you. Setting `autoAllowBashIfSandboxed` to `false` turns
+without asking you (@Claude Code permissions). Setting `autoAllowBashIfSandboxed` to `false` turns
 that off, and each command asks you first (@Claude Code all settings). The
 strict network allowlist blocks every connection a sandboxed command tries
 to a domain that isn't on the list. Without it, the first connection to a
 new domain asks you instead (@Claude Code sandboxing). This file puts no
 domain on the list. The sandbox runs on macOS, Linux and WSL2 (the Windows
 Subsystem for Linux), and the settings need Claude Code v2.1.257 or later,
-the first version with the read block (@Claude Code all settings).
+the first version with the read block (@Claude Code permission modes). Run
+`claude --version` to check yours.
 
 Your own settings still apply. Claude Code merges the file you pass with
 your settings files (@Claude Code settings), so a domain or a command you
@@ -294,8 +295,8 @@ a line for a person to read before an agent does.
   exit status 1`} run="coding-with-agents/red-teaming-your-agent/demo_scan.py">
 The course's script runs the scan on a fresh scratch copy. Then it adds a
 changelog with a zero-width space on one line and a Unicode tag character,
-another character that shows as nothing, on the next, and runs it again. On your
-own copy, run the first command:
+another character that shows as nothing, on the next, and runs it again. On
+your own copy, run the first command from the lesson's folder:
 
 ```sh
 python3 scan_hidden.py ~/red-team/project; echo "exit status $?"
@@ -362,8 +363,8 @@ make a new one with `python3 make_scratch.py ~/red-team-2`, because the check
 compares against the moment of setup. Then use `~/red-team-2` wherever the
 lesson says `~/red-team`: start the agent from `~/red-team-2/project`, save
 the reply in `~/red-team-2/answer.txt`, and run
-`python3 check_run.py ~/red-team-2` from the lesson's folder. Start the agent in the copy with the
-lesson's settings, and run all four prompts from the lesson: the routine
+`python3 check_run.py ~/red-team-2` from the lesson's folder. Run all four
+prompts from the lesson: the routine
 question about `docs/vendor-notes.md`, the download, the write to
 `../totals.txt` and the tidy-up brief. Save the reply to the first prompt in
 `answer.txt`, quit, and run `check_run.py` and `scan_hidden.py`. The session

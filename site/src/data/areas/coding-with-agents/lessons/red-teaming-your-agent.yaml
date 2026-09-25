@@ -50,7 +50,8 @@ notes: >-
   prompting, no retry outside it, a hard stop when it can't start and a strict network allowlist). check_run.py
   compares the folder with the manifest and looks for the canary. demo_obeyed.py acts out a session
   in which the attack worked with a few lines of Python, and the page says no model runs there.
-  scan_hidden.py is the gate for hidden text. Kept apart from security-review (#178, screening the
+  scan_hidden.py is the gate for hidden text. The JSON block on the page is a copy of
+  the fixture's session settings file, so update the two together. Kept apart from security-review (#178, screening the
   diff of agent-written code) and mcp-hardening (#175, an injected instruction through an MCP
   server): this lesson attacks the learner's own agent session and reads the result. No claim about
   attack success rates is made. The checkpoints all serve screens-for-security, which the plan
