@@ -34,8 +34,8 @@ notes: >-
   safety/judges-agent-risk/names-blast-radius, used where an agent that may edit the tests widens
   the blast radius of a wrong change to the check itself. DLAI-7 was planned as inspiration only;
   the page doesn't cite it, so it is dropped from sources (it stays on the topic). Sources: Academy
-  ai-native-sdlc-playbook (review and testing become the bottleneck once agents write most code,
-  paraphrased from the public course page), Claude Code best practices (prefer single tests to the
+  ai-native-sdlc-playbook (the idea that review and testing become the slow steps when agents
+  produce most of the code, from the public course page, in our own words and with no phrase of it kept), Claude Code best practices (prefer single tests to the
   whole suite for speed, in its example instructions file; link to documentation instead of copying
   it into CLAUDE.md), Claude Code memory (instructions files are loaded each session as context,
   not enforced configuration). The fixtures under site/examples/coding-with-agents/tests-and-docs-that-hold/
@@ -44,4 +44,8 @@ notes: >-
   test to 4.95, and the_change.py raises the free-shipping threshold to 60.00 and greps the three
   documentation places the shop's AGENTS.md names. The page doesn't say "the previous lesson",
   because self-checking-loops serves automates-the-check, which this lesson also serves; the git
-  tag steps are repeated on the page instead.
+  tag steps are repeated on the page instead. The first checkpoints on reviews-others-code test two
+  ideas (tests that mirror the code, and documentation left stale), so a review alternate on one idea
+  can be asked in place of a sibling on the other. The mismatch is accepted for now, as in
+  self-checking-loops (issue #408), because the plan gives the lesson these two objectives.
+  shop/.gitignore keeps __pycache__ out of the learner's git add -A after running the tests.
