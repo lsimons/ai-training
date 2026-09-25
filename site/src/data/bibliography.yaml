@@ -944,3 +944,17 @@ Invariant tool poisoning:
   author: Luca Beurer-Kellner and Marc Fischer
   license: Proprietary
   url: https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks
+Claude Code hooks guide:
+  type: reference
+  title: Automate actions with hooks
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/hooks-guide
+Git docs git-commit:
+  type: reference
+  title: git-commit
+  container: Git reference documentation
+  author: The Git project
+  license: GPL-2.0
+  url: https://git-scm.com/docs/git-commit
