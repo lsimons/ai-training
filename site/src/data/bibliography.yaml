@@ -867,3 +867,17 @@ Claude Code hooks:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/hooks
+Claude Code security:
+  type: reference
+  title: Security
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/security
+Invariant tool poisoning:
+  type: reference
+  title: "MCP Security Notification: Tool Poisoning Attacks"
+  container: Invariant Labs blog
+  author: Luca Beurer-Kellner and Marc Fischer
+  license: Proprietary
+  url: https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks

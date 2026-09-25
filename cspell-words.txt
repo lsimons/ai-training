@@ -231,3 +231,7 @@ Shunyu
 Zhao
 hookify
 anthropics
+Beurer
+Kellner
+Luca
+HMAC

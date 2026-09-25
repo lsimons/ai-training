@@ -76,4 +76,4 @@ links:
   prerequisites: [customizing-agents/instructions, concepts/what-is-an-agent]
   related: []
   specializations: []
-sources: [AEC-14, AEC-16, DLAI-9, Academy introduction-to-model-context-protocol, Academy model-context-protocol-advanced-topics, Academy claude-code-101]
+sources: [AEC-14, AEC-16, DLAI-9, Academy introduction-to-model-context-protocol, Academy model-context-protocol-advanced-topics, Academy claude-code-101, Invariant tool poisoning]
