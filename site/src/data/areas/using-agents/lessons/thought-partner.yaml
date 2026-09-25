@@ -1,12 +1,22 @@
 id: using-agents/thought-partner
 title: Thinking a problem through with an assistant
+description: >-
+  Ask an assistant which of two job offers to take and get your own framing back as advice, then
+  brief it to argue against your lean and list what you left out, so the thinking is yours.
 mode: tutorial
 covers: using-agents/assistant-work
 serves: [using-agents/delegates-and-checks/writes-a-brief]
 introduces: [thought-partner]
 assumes:
   - objective: concepts/prompts-reliably/structures-a-prompt
+    lesson: concepts/prompt-anatomy
+    section: audience-and-purpose
   - objective: safety/verifies-output/spots-sycophancy
+    lesson: safety/asking-a-model-to-disagree
+    section: habits-on-the-prompt-side
+extends-to:
+  - label: Delegating a task to an agent
+    href: /using-agents/delegating/
 after: []
 shorts: [Why a model agrees with your framing]
 exercise:
@@ -15,9 +25,17 @@ exercise:
     Describe a decision you face in five lines, ask the assistant to argue against your preferred
     option and to list what you have not mentioned, then write down the one point that changed your
     view.
-sources: []
-issue: 139
+sources: [Sharma 2023]
 minutes: 10
 notes: >-
   The plan named the topic concepts/prompting as assumed; taken as the objective
-  concepts/prompts-reliably/structures-a-prompt.
+  concepts/prompts-reliably/structures-a-prompt, taught in prompt-anatomy "Audience and purpose",
+  because the first line of the thinking brief is a purpose sentence. spots-sycophancy points at
+  asking-a-model-to-disagree "Habits on the prompt side". That lesson strips the user's opinion out
+  of an assessment question, and this one names the lean on purpose as the target and asks for no
+  verdict, and the page says so to reconcile the two. The facts in the thinking brief are written
+  without adjectives, which keeps the safety lesson's pitfall (a counter-argument prompt that
+  carries its verdict) out of it. The plan listed DLAI-3 and two Claude Academy courses as sources;
+  the page makes no claim that needs them, so it cites only Sharma 2023 for the sycophancy finding.
+  No fixture: the learner uses a chat tool, and every exchange is illustrative. The job offers name
+  no company.
