@@ -209,7 +209,7 @@ For `release-kit`, you wanted one skill. Your team updates
 `CHANGELOG.md` only when it cuts a release. The hook would block all the
 other commits in each repository where the plugin is enabled.
 The tracker server needs a token, and you don't use that tracker. The
-skill works on its own, using only its own files.
+skill uses only the files in its own directory.
 So copy the skill. If the team decides later that every commit needs a
 changelog entry, that's a rule for the repository, and it goes into a
 hook in the repository's own settings.
