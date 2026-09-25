@@ -203,14 +203,14 @@ leave the stash alone and to commit its work in progress instead.
 What else the sessions share needs a decision before they start. Give each
 session its own copy of what it can have per worktree, such as the
 dependency install and a test database file. When a session must run a
-server, pick a port for it. Leave alone what only exists once: the stash, the `main` branch,
-which only you merge into, and a dev server on a fixed port. For the last
-one, tell the agents to run the build or the check and not to start the
-server. Claude Code also shares permission approvals between worktrees.
-In a worktree session, a "Yes, and don't ask again" answer for a command
-saves the rule in the main checkout's settings. The rule then applies in
-every worktree of the repository, except on Windows and in the other cases
-the vendor page names (@Claude Code worktrees).
+server, pick a port for it. Leave alone what only exists once: the stash,
+the `main` branch, which only you merge into, and a dev server on a fixed
+port. For the last one, tell the agents to run the build or the check and
+not to start the server. Claude Code also shares permission approvals
+between worktrees. In a worktree session, a "Yes, and don't ask again"
+answer for a command saves the rule in the main checkout's settings. The
+rule then applies in every worktree of the repository, except on Windows
+and in the other cases the vendor page names (@Claude Code worktrees).
 
 <Sort id="own-or-shared" objective="coding-with-agents/works-in-team/runs-parallel-work"
   concepts={['worktrees']}
