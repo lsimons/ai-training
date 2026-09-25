@@ -14,7 +14,7 @@ half-written rates.json. Can you ask the agent to make the download more
 reliable?
 ```
 
-The report contains a symptom, two dates and a theory. An agent handed
+The report contains a symptom, two dates, and a theory. An agent handed
 this report gets a theory to work from and a request for a fix, and the
 fix it writes is aimed at the theory. Asking for a reproduced, explained
 cause before any patch keeps the fix from becoming a second bug
@@ -25,11 +25,11 @@ cause before any patch keeps the fix from becoming a second bug
 "Sometimes" means you don't yet know what the failure depends on. The
 first step is to run the failing case again, the same way, and see
 whether it fails every time. The fixture keeps each night's exports in
-`nightly/nights/<date>/`, one comma-separated values (CSV) file per store, and the nightly job
-runs `python3 importer.py nights/<date>/*.csv` from `nightly/`. The
-course's script runs that command three times for each of the four
-nights and prints the result of each run, with the total for a night
-that passes.
+`nightly/nights/<date>/`, one comma-separated values (CSV) file per
+store, and the nightly job runs
+`python3 importer.py nights/<date>/*.csv` from `nightly/`. The course's
+script runs that command three times for each of the four nights and
+prints the result of each run, with the total for a night that passes.
 
 <Predict id="run-reproduce" title="Run each night three times"
   answer={`2026-09-14: ok ok ok (total: 22975.95 EUR)
@@ -54,8 +54,9 @@ what you do with what the commands show.
 Every rerun gives the same result as the night it reruns. The failure
 now has a precise condition: it happens every time, on the exports of
 the 15th and the 17th. Note the totals of the two good nights as well,
-because the fix must not change them. Write the steps down now, in a form someone else can follow,
-because they're the test the fix must pass at the end.
+because the fix must not change them. Write the steps down now, in a
+form someone else can follow, because they're the test the fix must pass
+at the end.
 
 ```text
 From nightly/, run: python3 importer.py nights/2026-09-15/*.csv
@@ -147,8 +148,8 @@ failing run reached that code.
   ]}>
 The agent says: "The rate download is unreliable at night. I'll add
 three retries with a pause between them, and check that `rates.json` is
-complete before it is used." The log of the rerun of the 15th is open next to it.
-What do you do?
+complete before it is used." The log of the rerun of the 15th is open
+next to it. What do you do?
 </Scenario>
 
 ## Halve what is left
@@ -186,9 +187,9 @@ python3 halve.py
 
 Keep a note of what each run ruled out, one line per run: stores 1 to 4
 are ruled out, stores 7 and 8 are ruled out, store 5 is ruled out, and
-store 6 fails alone. Halving
-works best when the failure has one cause. If both halves had failed,
-the note would show it at once, and you would halve each of them.
+store 6 fails alone. Halving works best when the failure has one cause.
+If both halves had failed, the note would show it at once, and you would
+halve each of them.
 
 Now store-06.csv is short enough to read.
 
@@ -202,12 +203,12 @@ date,store,currency,amount
 
 The fourth line has an amount of a thousand or more, which the store's
 system writes in quotes and with a comma. Read `read_rows` in
-`importer.py` with that line in mind: it splits each line on every comma,
-so `"1,250.00"` becomes two fields and the row has five. This cause
-explains the whole report: the nights that failed are the
-nights with a big sale, and nothing about the timing matters. The
-condition is now precise. The import fails when an export holds an
-amount of 1,000 or more.
+`importer.py` with that line in mind: it splits each line on every
+comma, so `"1,250.00"` becomes two fields and the row has five. This
+cause explains the whole report: the nights that failed are the nights
+with a big sale, and nothing about the timing matters. The condition is
+now precise. The import fails when an export holds an amount of 1,000 or
+more.
 
 The same halving works on commits as well as on files. When a fault
 appeared between a version that worked and one that doesn't, `git bisect`
@@ -233,22 +234,22 @@ next?
 
 Only now does the agent get the task. The brief contains everything the
 reproduction and the halving found: the command that fails, the file and
-the line, the reason, what was ruled out and what done means. The
+the line, the reason, what was ruled out, and what done means. The
 transcript is illustrative and doesn't record a specific model's words.
 
 <Prompt model="illustrative" recorded="illustrative">
 The nightly import in `nightly/importer.py` rejects the batch for
 2026-09-15 every time. To reproduce it, run
 `python3 importer.py nights/2026-09-15/*.csv` from `nightly/`. It logs
-`1 row(s) with the wrong number of fields` and exits with status 1.
-The cause is line 4 of `nights/2026-09-15/store-06.csv`, the amount
+`1 row(s) with the wrong number of fields` and exits with status 1. The
+cause is line 4 of `nights/2026-09-15/store-06.csv`, the amount
 `"1,250.00"`: `read_rows` splits on every comma, so the quoted amount
 becomes two fields. The rates download is ruled out, because a rerun
-with a complete `rates.json` fails the same way. Fix the parsing so that a quoted
-amount with a thousands separator is read as one amount, and change
-nothing else. The 17th fails with the same log line. Done when all four
-nights under `nights/` exit with status 0, and the 14th and the 16th
-still print 22975.95 EUR and 23257.33 EUR.
+with a complete `rates.json` fails the same way. Fix the parsing so that
+a quoted amount with a thousands separator is read as one amount, and
+change nothing else. The 17th fails with the same log line. Done when
+all four nights under `nights/` exit with status 0, and the 14th and the
+16th still print 22975.95 EUR and 23257.33 EUR.
 </Prompt>
 <Response>
 I changed `read_rows` to read each file with the `csv` module, which
@@ -366,11 +367,11 @@ This is the order that keeps a guessed fix out of your code, and it
 works the same for a bug in your own project.
 
 A good result has a reproduction that fails three runs of three, a note
-that the rerun of the 17th loads the rates in full, and a halving that ends at
-`store-03.csv`, where line 4 holds the amount `"2,180.40"`.
-The cause is the same as on the 15th. Then answer one question: if you
-had briefed the agent with the colleague's report as it was, what would
-it have changed?
+that the rerun of the 17th loads the rates in full, and a halving that
+ends at `store-03.csv`, where line 4 holds the amount `"2,180.40"`. The
+cause is the same as on the 15th. Then answer one question: if you had
+briefed the agent with the colleague's report as it was, what would it
+have changed?
 </Exercise>
 
 <Recap>
