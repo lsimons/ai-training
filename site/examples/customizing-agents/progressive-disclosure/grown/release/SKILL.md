@@ -48,10 +48,12 @@ it printed and what the user has to do. Don't fix the repository yourself.
 Use this section only when the user asks you to undo a release, or when a
 check after the tag shows that the release is wrong. Undo nothing else.
 
-1. Run `git describe --tags` and `git log --format='%h %s' -n 3`. The
-   newest commit must be `release: <version>`, and `git describe --tags`
-   must print exactly `v<version>`. If either is different, stop and
-   report what the two commands printed.
+1. Run `git describe --tags`, `git log --format='%h %s' -n 3` and
+   `git status --porcelain`. The newest commit must be
+   `release: <version>`, `git describe --tags` must print exactly
+   `v<version>`, and `git status --porcelain` must print nothing, or only
+   `?? __pycache__/`. If any of them is different, stop and report what
+   the three commands printed.
 2. Ask the user whether the tag or the release commit has been pushed.
    Don't decide this from the remote yourself, because a colleague may
    have fetched the tag already.
@@ -60,8 +62,7 @@ check after the tag shows that the release is wrong. Undo nothing else.
    2. Remove the release commit with `git reset --hard HEAD~1`. This also
       removes the version change and the changelog entry, and it drops
       uncommitted changes. Run it only after step 1 above showed that the
-      release commit is the newest commit, and after
-      `git status --porcelain` printed nothing, or only `?? __pycache__/`.
+      release commit is the newest commit and the working tree is clean.
    3. Run `python3 release_check.py`. It must print
       `release <previous version>: ok`. If it prints a `FAIL` line, stop
       and report it. Don't edit `release_check.py`.
@@ -73,9 +74,6 @@ check after the tag shows that the release is wrong. Undo nothing else.
       higher.
    3. In the changelog entry of the new release, add the bullet
       `Replaces <version>, which <what was wrong>.`
-   4. Give the user the command that deletes the old tag on the remote,
-      `git push --delete origin v<version>`, and leave it to them to run
-      it. Don't run it yourself.
 5. Report what you undid, each command you ran, and what
    `git describe --tags` and `git status --porcelain` print now.
 
