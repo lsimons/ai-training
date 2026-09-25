@@ -12,6 +12,7 @@ import { countsForLesson, skillsCheckNote, skillsCheckOffer } from './checkpoint
 import { bindAll, bindCheckpoint, copyForSkillsCheck, drawState } from './checkpoints';
 import { finishView, openCount, routeView, skipView } from './markdown-content-logic';
 import * as progress from './progress';
+import { requiredElement } from './required-element';
 
 /** The selector of the lesson frame the override renders. */
 export const LESSON_SELECTOR = '.lesson[data-lesson]';
@@ -117,11 +118,12 @@ export function mountLesson(root: ParentNode): boolean {
 		}
 	}
 
-	const note = skillsCard?.querySelector<HTMLElement>('[data-skills-note]');
-	const start = skillsCard?.querySelector<HTMLButtonElement>('[data-skills-start]');
-	const dismiss = skillsCard?.querySelector<HTMLButtonElement>('[data-skills-dismiss]');
-	const items = skillsCard?.querySelector<HTMLElement>('[data-skills-items]');
-	if (skillsCard && skillsItems.length > 0 && note && start && dismiss && items) {
+	if (skillsCard && skillsItems.length > 0) {
+		// The card's parts: the override always renders them with the card.
+		const note = requiredElement(skillsCard, '[data-skills-note]');
+		const start = requiredElement<HTMLButtonElement>(skillsCard, '[data-skills-start]');
+		const dismiss = requiredElement<HTMLButtonElement>(skillsCard, '[data-skills-dismiss]');
+		const items = requiredElement(skillsCard, '[data-skills-items]');
 		note.textContent = SKILLS_NOTE;
 		offerSkillsCheck();
 		start.addEventListener('click', () => {

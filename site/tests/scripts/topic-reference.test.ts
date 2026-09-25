@@ -50,10 +50,9 @@ describe('mountTopicReference', () => {
 		expect(state(root, 'concepts/a')).toEqual({ unlocked: 'true', lockedHidden: true, bodyHidden: false });
 		expect(state(root, 'concepts/b')).toEqual({ unlocked: 'false', lockedHidden: false, bodyHidden: true });
 	});
-	it('sets the flag on a section without its note or body', () => {
+	it('throws on a section without the locked note the component renders', () => {
 		document.body.innerHTML = '<div data-reference="t"><section data-reference-lesson="x"></section></div>';
-		mountTopicReference(document.body);
-		expect(document.body.querySelector<HTMLElement>('section')?.dataset.unlocked).toBe('false');
+		expect(() => mountTopicReference(document.body)).toThrow('missing [data-reference-locked]');
 	});
 	it('returns false on a page without the component', () => {
 		document.body.innerHTML = '<p>other</p>';

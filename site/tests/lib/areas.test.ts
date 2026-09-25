@@ -40,10 +40,10 @@ describe('areas', () => {
 			/names area concepts, but .*area\.yaml does not exist/,
 		);
 		await expect(
-			run({ areas: [{ ...areas[0], data: { ...areas[0]!.data, group: 'engineering' } }, ...areas.slice(1)] }),
+			run({ areas: [{ ...areas[0], data: { ...areas[0]?.data, group: 'engineering' } }, ...areas.slice(1)] }),
 		).rejects.toThrow(/says group engineering, but groups\.yaml lists it under foundations/);
 		await expect(
-			run({ groups: [{ ...groups[0], data: { ...groups[0]!.data, areas: ['concepts', 'safety'] } }, groups[1]] }),
+			run({ groups: [{ ...groups[0], data: { ...groups[0]?.data, areas: ['concepts', 'safety'] } }, groups[1]] }),
 		).rejects.toThrow(/using-agents\/area\.yaml exists, but no group/);
 		vi.doUnmock('astro:content');
 		vi.resetModules();

@@ -148,11 +148,12 @@ export function planLevels(entries: PlanEntry[], area: string): Map<string, numb
 	const byId = new Map(entries.map((e) => [e.id, e]));
 	const level = new Map<string, number>();
 	const visit = (e: PlanEntry, seen: Set<string>): number => {
-		if (level.has(e.id)) return level.get(e.id)!;
+		const known = level.get(e.id);
+		if (known !== undefined) return known;
 		if (seen.has(e.id)) return 0;
 		seen.add(e.id);
-		const deps = dependenciesOf(e, area).filter((id) => byId.has(id));
-		const depth = deps.length ? Math.max(...deps.map((id) => visit(byId.get(id)!, seen))) + 1 : 0;
+		const deps = dependenciesOf(e, area).flatMap((id) => byId.get(id) ?? []);
+		const depth = deps.length ? Math.max(...deps.map((d) => visit(d, seen))) + 1 : 0;
 		level.set(e.id, depth);
 		return depth;
 	};

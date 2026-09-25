@@ -156,6 +156,12 @@ describe('mountLesson', () => {
 		q('[data-skills-dismiss]').click();
 		expect(card.hidden).toBe(true);
 	});
+	it('throws when the skills card lacks a part the override renders with it', () => {
+		progress.setComfort('more');
+		page();
+		q('[data-skills-note]').remove();
+		expect(() => mountLesson(document)).toThrow('missing [data-skills-note]');
+	});
 	it('hides the card when every skills item is passed in the body first', () => {
 		progress.setComfort('more');
 		page();

@@ -101,10 +101,15 @@ describe('isLive', () => {
 describe('dependenciesOf', () => {
 	it('reads a live entry from its page assumes, within the area, and a coming entry from after', async () => {
 		const plan = await getCoursePlan('safety');
-		expect(dependenciesOf(plan[0]!, 'safety')).toEqual([]);
+		const at = (i: number) => {
+			const e = plan[i];
+			if (!e) throw new Error(`no plan entry ${i}`);
+			return e;
+		};
+		expect(dependenciesOf(at(0), 'safety')).toEqual([]);
 		// deeper also assumes concepts/how-models-work, outside the area.
-		expect(dependenciesOf(plan[1]!, 'safety')).toEqual(['safety/agent-risk']);
-		expect(dependenciesOf(plan[2]!, 'safety')).toEqual(['safety/deeper']);
+		expect(dependenciesOf(at(1), 'safety')).toEqual(['safety/agent-risk']);
+		expect(dependenciesOf(at(2), 'safety')).toEqual(['safety/deeper']);
 	});
 	it('drops a self reference, another area and repeats', () => {
 		const e = entry({ id: 'x/a', after: ['x/a', 'x/b', 'y/c', 'x/b'] });
