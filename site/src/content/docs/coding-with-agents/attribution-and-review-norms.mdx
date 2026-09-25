@@ -73,7 +73,7 @@ do you do before anyone reviews it?
   title="Ready for review?" hint="Which of these did you do yourself, and which only repeat what the agent reported?"
   options={[
     { text: 'You read every changed line and can explain each one.', correct: true },
-    { text: 'The description quotes the agent\'s summary that all tests pass.', why: 'That is what the agent said. The description should say what you ran and what you saw.' },
+    { text: 'The pull request description quotes the agent\'s summary that all tests pass.', why: 'That is what the agent said. The description should say what you ran and what you saw.' },
     { text: 'The description names what the agent wrote and what you checked.', correct: true },
     { text: 'You skipped the CI run because the agent ran the full suite locally.', why: 'The agent\'s run is part of the change under review. CI is the gate for every change, whoever wrote it.' },
     { text: 'You moved the agent\'s side tidy-up into its own pull request.', correct: true },
