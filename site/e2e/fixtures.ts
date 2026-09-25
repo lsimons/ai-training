@@ -201,8 +201,7 @@ export async function solveCheckpoint(cp: Locator) {
 	} else {
 		throw new Error(`solveCheckpoint: no solver for the ${kind} checkpoint ${name}`);
 	}
-	// `first()`: once answered, the review page adds a "Next item" button with the same class.
-	await cp.locator('.cp-check').first().click();
+	await cp.locator('.cp-check').click();
 }
 
 /**
