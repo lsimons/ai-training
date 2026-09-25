@@ -31,4 +31,4 @@ notes: >-
   after the review note on issue #138 found the course does not state it. The page states it as the
   lesson's own rule, and the Academy course is not cited. Vendor claims on logging, model IDs and
   retirement come from public Anthropic documentation pages. The "A model update as a dependency
-  upgrade" short is the section "A model change is a change".
+  upgrade" short is the section "Treat a model change like any other upgrade".

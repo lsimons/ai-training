@@ -18,13 +18,14 @@ you need.
 
 **Logging and audit** means recording what an agent was asked, which tools
 it called and what it changed, so that a person can reconstruct the session
-later and judge it. A course on evaluating agents lists the same parts:
+later and judge it. The Agent Engineer Course, in its module on evaluating
+agents, lists the same parts:
 the user's input and the agent's output, each tool call with its result,
 and the errors (@AEC-09). This is the log of the Monday session, one line
 per event:
 
 ```text
-# support agent log, 2026-09-22
+# support agent log, 2026-09-21
 # time | session | model | event | target | text
 09:02:11 | s-418 | assistant-2026-09 | prompt | u-17 | Answer the new emails in the support inbox. Send replies to order-status questions. Leave any email about a refund as a draft for a person.
 09:02:14 | s-418 | assistant-2026-09 | tool read_inbox | - | 3 new: E-201, E-202, E-203
@@ -116,10 +117,10 @@ reads a sample every week, a few sessions picked at random, even when
 nothing has gone wrong. The Monday refund reply was the first one a
 customer complained about, and a weekly sample is how the team finds the
 second one before the customer does. Once an organization runs many
-agents, the agent engineering course asks for audit trails for two uses:
-finding out why something failed, and showing auditors the facts (@AEC-10).
-This lesson adds its own rule: for a workflow a regulator can ask about, a
-tool that doesn't keep such a record is the wrong tool.
+agents, the same course, in its module on guardrails, asks for audit trails
+for two uses: finding out why something failed, and showing auditors the
+facts (@AEC-10). For a workflow a regulator can ask about, a tool that
+doesn't keep such a record is the wrong tool.
 
 <Choice id="where-the-log-lives" objective="safety/judges-agent-risk/sets-oversight"
   concepts={['logging-and-audit']}
@@ -150,7 +151,22 @@ still gives a record the team can trust after the next incident?
     { text: 'tool save_draft | E-203 | We are sorry your order arrived damaged.', bucket: 2 },
   ]} />
 
-## A model change is a change
+<Scenario id="the-log-in-the-work-folder" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['logging-and-audit']}
+  context="The lesson says an agent's log is kept where the agent cannot change or delete it, and one named person reads a sample every week. A team finds that its agent writes the log to a file in the agent's own work folder."
+  title="The log is in the agent's folder"
+  hint="If the agent makes a mistake next month, which copy of the record could the agent itself have changed?"
+  options={[
+    { text: 'Leave it there, since the agent has written a complete log so far.', consequence: 'Next month a session goes wrong, and the file has a gap where the send should be. Nobody can tell whether the agent never logged it or removed the line later.' },
+    { text: 'Have the agent write to a separate system it cannot edit or delete.', correct: true, consequence: 'After the next incident the team reads a record the agent could not touch, and the weekly reader has the same record to sample.' },
+    { text: 'Ask the agent to promise in its instructions never to edit the file.', consequence: 'An instruction is text the model may or may not follow, and a planted instruction in an email can override it. The file stays open to the agent.' },
+    { text: 'Delete the log each week after the named person has read a sample.', consequence: 'The sample is read, and the rest of the week is gone. When a customer complains a month later, there is nothing left to reconstruct.' },
+  ]}>
+A team finds that its agent writes its log to a file in its own work
+folder, where it can also edit files. What should the team change?
+</Scenario>
+
+## Treat a model change like any other upgrade
 
 The team's logs from the week before show a different model name on every
 line, `assistant-2026-06`. The vendor moved the agent to `assistant-2026-09`
@@ -161,10 +177,14 @@ group. The model is outside the team's control. The team treats a new
 version like an upgrade of any other part it depends on.
 
 **Pin the version where you can.** Some vendors let you name the exact
-version. On Anthropic's API, each model ID names a fixed version, and the
-model behind that ID stays the same for as long as the ID exists. The
-shorter aliases for some older models move to the newest snapshot
-(@Claude docs model-ids-and-versions). A pin doesn't last forever. When a
+version. When a program calls Anthropic's models directly through its API
+(application programming interface), each model ID names a fixed version,
+and the model behind that ID stays the same for as long as the ID exists.
+The shorter aliases for some older models move to the newest snapshot
+(@Claude docs model-ids-and-versions). The same page says that the systems
+around a pinned model, such as its safety filters, can still change, and
+that this now and then shifts its answers a little. A pin doesn't last
+forever either. When a
 version is retired, requests to it fail. Anthropic gives customers who use a
 publicly released model at least 60 days' notice, and advises testing the
 replacement on your own tasks well before the date
@@ -178,8 +198,9 @@ past emails, each marked "send" or "draft" by the rule in the request.
 
 **Rerun it on every change.** When the version changes, run the task set
 on the new version, compare it with the old one, and read every row that
-differs before the agent goes back on live work. A course on shipping
-agents gives the same rule for any agent change: no new version goes live
+differs before the agent goes back on live work. The Agent Engineer
+Course, in its module on going to production, gives the same rule for any
+agent change: no new version goes live
 until it passes the tests, including the cases that passed before
 (@AEC-11).
 
@@ -232,6 +253,21 @@ Read it against the agreed column, and then decide. The team adds a line to
 the request for emails that ask for money back, and reruns the set before
 the agent goes back on the inbox.
 
+<Choice id="a-row-that-differs" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['model-change-risk']}
+  context="The lesson runs a task set of past emails, each with an agreed action, send or draft, on an old and a new model version, and prints only the rows where the two versions differ. Each row that differs is read against the agreed action."
+  title="A row that differs"
+  hint="Which column says what the right action is, and which version matches it in this row?"
+  options={[
+    { text: 'The new version is worse on this email, because it changed the action.', why: 'A change is not a regression by itself. Compare each version with the agreed column before you call a row worse.' },
+    { text: 'The new version is worse on this email, because it sent the reply.', why: 'Sending is right for an order-status question. The agreed column says send here.' },
+    { text: 'The old version is better on this email, because the team ran it first.', why: 'Both versions ran on the same email in the same task set. The order of the runs says nothing about which action is right.' },
+    { text: 'The new version is better on this email, because it matches the agreed action.', correct: true },
+  ]}>
+The rerun prints this row: "T9, Has order 2210 shipped yet?, agreed send,
+old draft, new send". What does the row tell the team?
+</Choice>
+
 <Pitfall title="The update nobody noticed">
 The vendor announced the new model version in a release note, and nobody on
 the support team reads release notes, so the change reached live work on a
@@ -262,7 +298,7 @@ next Monday. What does the team do this week?
   title="What does the pin buy?"
   hint="Does a pinned version stay available forever, and what should happen before the team moves off it?"
   options={[
-    { text: 'The agent never changes, so the team can drop its task set.', why: 'A pinned version is retired at some point, and the team then has to move. Without a task set it moves blind.' },
+    { text: 'The agent never changes, so the team can drop its task set.', why: 'A pinned version is retired at some point, and the team then has to move. Without a task set it moves blind, and small changes around a pinned model can still shift its answers.' },
     { text: 'The vendor now checks the team\'s own tasks before any change.', why: 'The vendor tests on its own tasks. Nobody but the team knows which emails must stay drafts.' },
     { text: 'Time to rerun the task set on the next version before moving.', correct: true },
     { text: 'Nothing, because every model version answers each email the same way.', why: 'The task set above shows two emails handled differently by two versions. The same instructions can act differently on a new version.' },
@@ -289,6 +325,6 @@ your answers did you have to guess, and who can confirm it this week?
 2. A log shows what the agent did and which model version did it. It never shows why the model wrote a sentence, but the version narrows the question.
 3. Check that the log holds the text of what was sent. Some tools leave it out until someone turns it on (@Claude Code monitoring).
 4. Keep the log where the agent can't edit it, and name one person who reads a weekly sample. A log nobody reads doesn't catch anything.
-5. A model change is a change. Pin the version where you can, keep a task set of past tasks with agreed results, and rerun it before a new version goes live (@Claude docs model-ids-and-versions).
+5. Treat a new model version like an upgrade of any other part. Pin the version where you can, keep a task set of past tasks with agreed results, and rerun it before a new version goes live (@Claude docs model-ids-and-versions).
 6. A pinned version is retired with notice, so the rerun is needed later anyway (@Claude docs model-deprecations). Read each row that differs against the agreed result.
 </Recap>
