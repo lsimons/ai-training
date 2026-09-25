@@ -23,9 +23,16 @@ and #342. `.claude/settings.json` registers them.
   commands and rejects everything else, and any redirect to a file but
   `/dev/null`. It allows `mise run` only for the check tasks in
   `REVIEW_TASKS` in `scripts/agent_hooks.py`. `fast` and `ci` aren't in
-  that list, because their `lint` step runs fixers. The hook catches
-  mistakes and isn't a sandbox, since the branch under review defines the
-  tasks it runs.
+  that list, because their `lint` step runs fixers. It checks the command
+  inside each `$(...)`, backtick pair and process substitution (`<(...)`,
+  `>(...)`, `=(...)`) as a command of its own. It rejects a command it
+  can't read: an unclosed quote, `$((...))`, the zsh flags `${(e)X}` and
+  `${~X}`, any other unquoted `(` or `)` (zsh glob qualifiers such as
+  `*(e:...:)` run code), and an unquoted brace expansion such as
+  `{-o,out.txt}`. In a `sed -n` script a `$` is only the last-line address
+  or the anchor before a regex's closing `/`. The hook catches mistakes
+  and isn't a sandbox, since the branch under review defines the tasks it
+  runs.
 - `format-file.sh`, PostToolUse on Edit and Write. It runs Biome on an
   edited file under `site/` and ruff on an edited `.py` file, in the
   worktree that holds the file, and never fails the tool call.
