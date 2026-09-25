@@ -53,8 +53,9 @@ NEEDED = [
 def undo(row: Row) -> str:
     """Return whether the row's actions can be undone.
 
-    Reading changes nothing. A move or a rename can be moved or renamed
-    back. A delete with no trash cannot be restored, and a message that
+    Reading changes nothing. On this drive a move never replaces a file:
+    two files with the same name stay side by side, so a move or a rename
+    can be moved or renamed back. A delete with no trash cannot be restored, and a message that
     someone has read cannot be taken back.
     """
     if row.kind == "read":
