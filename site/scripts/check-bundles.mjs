@@ -4,11 +4,15 @@
  * dist/data/lessons/<area>/<lesson>.json files must be one per lesson page,
  * carry every field spec S08 "Format" names, and hold every fenced code block
  * of their page unchanged. The logic and the list of what it rejects are in
- * scripts/lib/bundles.mjs, which tests/scripts/bundles-export.test.ts covers;
- * this file only reports.
+ * scripts/lib/bundles.mjs, which tests/scripts/bundles-export.test.ts covers.
+ *
+ * The same run checks every built HTML page for a `(@key)` citation that no
+ * renderer resolved (scripts/lib/rendered-citations.mjs, covered by
+ * tests/scripts/rendered-citations.test.ts). This file only reports.
  */
 import { join } from 'node:path';
 import { checkBundles } from './lib/bundles.mjs';
+import { checkRenderedCitations } from './lib/rendered-citations.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
 const { errors, bundles } = checkBundles(
@@ -16,6 +20,8 @@ const { errors, bundles } = checkBundles(
 	join(root, 'src/content/docs'),
 	join(root, 'src/data'),
 );
+const rendered = checkRenderedCitations(join(root, 'dist'));
+errors.push(...rendered.errors);
 
 if (errors.length) {
 	for (const e of errors) console.error(`bundles: ${e}`);
@@ -23,3 +29,6 @@ if (errors.length) {
 	process.exit(1);
 }
 console.log(`bundles: ${bundles} bundle${bundles === 1 ? '' : 's'} under dist/data/lessons, one per lesson page`);
+console.log(
+	`bundles: ${rendered.pages} HTML page${rendered.pages === 1 ? '' : 's'} under dist, no unresolved citation`,
+);
