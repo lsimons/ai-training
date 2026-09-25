@@ -166,8 +166,8 @@ The table lists the whole week by the first step that went wrong.
 Five of the ten failures are one kind, a date the tool couldn't read.
 Searches that missed the page with the answer come next with three, and
 the stop rule caused two. Your names for the kinds may differ from
-these, and the count is what matters. With categories named after where the run went
-wrong, one of them is five of ten.
+these, and the count is what matters. With categories named after where
+the run went wrong, one of them is five of ten.
 
 <Match id="classify-the-failures" objective="building-agents/evaluates-agents/grades-trajectories"
   concepts={['error-analysis', 'trajectory-evaluation']}
@@ -240,9 +240,8 @@ you." as the whole answer, from run a29, and the team lead forwards it
 to the team. On Monday the team fixes the stop rule instead of the date
 parameter. The stop rule is a real fault, and its fix reaches two of the
 ten failures. The five date failures keep happening for another week,
-because nobody counted. The latest failure
-is the one people remember. Count the failures of the week by kind before
-you choose what to fix.
+because nobody counted. The latest failure is the one people remember.
+Count the failures of the week by kind before you choose what to fix.
 
 </Pitfall>
 
@@ -284,10 +283,10 @@ A failure that reached a user shows a case the tests didn't have, and it
 goes into the test set (@AEC-09). In
 [A golden set is the agent's regression suite](/building-agents/golden-sets/)
 an item records the qualities a good answer has, so a correct reply
-worded differently still passes. So
-each of the ten failures adds one item: the question as the user asked
-it, what a correct answer must say, what it must not say when there is a
-wrong answer to rule out, and the run it came from. The items from a03
+worded differently still passes. Each of the ten failures adds one item:
+the question as the user asked it, what a correct answer must say, what
+it must not say when there is a wrong answer to rule out, and the run it
+came from. The items from a03
 and a11 are:
 
 ```text
@@ -378,7 +377,7 @@ python3 errors.py week2
 
 </Predict>
 
-<Exercise stretch="Change search_handbook in agent.py so that it finds the page with the answer for the most common kind you found. The answers in the fixture are scripted, so the grades in week2 don't change. Check the tool results instead: run python3 errors.py show b15 and the other runs of that kind, and check that the search now returns the page with the answer. Then run show a01 and show a04, two runs that passed, and check that they still get their page.">
+<Exercise stretch="Change search_handbook so that show b15 and the other runs of that kind get the page with the answer, and show a01 and show a04 still get theirs.">
 
 Read the ten transcripts of week 2 with `python3 errors.py show b02` and
 the other run ids. For each run, write one line with the first step that
@@ -387,6 +386,9 @@ say which single fix would change the most runs. Then write the golden-set
 item each failure adds: the question in the user's words, what a correct
 answer must say, and the run it came from. The count picks the fix, and
 the most recent run is only one of ten.
+The answers in the fixture are scripted, so a change to `agent.py`
+doesn't change the grades that `week2` prints. The tool results in
+`show` do change.
 
 A good result has five search misses as the largest kind: b02, b09, b15,
 b23 and b33. The words in each question ("working remotely", "wifi",
@@ -394,9 +396,8 @@ b23 and b33. The words in each question ("working remotely", "wifi",
 answer, or they match another page. In b15 only the word form differs
 ("taxi" and "taxis"). b23 has two problems: "leave" matches the wrong
 page, and "bike" misses "bikes". The other three use another word for
-the same thing. So one change to the
-search can reach at most five runs, if it handles both word forms and
-other words. Two runs, b12 and b38, ended on a note, the stop rule that
+the same thing. So one change to the search can reach at most five
+runs, if it handles both word forms and other words. Two runs, b12 and b38, ended on a note, the stop rule that
 nobody fixed after week 1. Two more, b05 and b27, sent a date in the
 right format and the wrong year. In b19 the calendar said closed, and the
 model answered that the office is open. Your names may differ. Check that
