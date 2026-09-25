@@ -870,10 +870,10 @@ Claude Code hooks:
 Madaan 2023:
   type: paper
   title: "Self-Refine: Iterative Refinement with Self-Feedback"
-  container: arXiv preprint 2303.17651
+  container: Advances in Neural Information Processing Systems 36 (NeurIPS 2023)
   author: Aman Madaan, Niket Tandon, Prakhar Gupta and 13 others
   license: CC BY 4.0
-  url: https://arxiv.org/abs/2303.17651
+  url: https://proceedings.neurips.cc/paper_files/paper/2023/hash/91edff07232fb1b55a505a9e9f6c0ff3-Abstract-Conference.html
 Huang 2023:
   type: paper
   title: Large Language Models Cannot Self-Correct Reasoning Yet

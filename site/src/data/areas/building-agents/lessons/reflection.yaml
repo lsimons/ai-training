@@ -26,7 +26,8 @@ review-by: 2027-03-25
 minutes: 15
 notes: >-
   The drafts are four answers of the handbook assistant from the rubrics lesson, with the passages
-  from the retrieval-as-a-tool handbook, and the critic and reviser in
+  from the retrieval-as-a-tool handbook. The laptop draft proposes its ticket where run five opened
+  one, so the critic reads the reply before any tool runs. The critic and reviser in
   site/examples/building-agents/reflection/agent.py are fakes written by hand. The exercise's
   model answer is model_answer.py in the same folder, and its round counts are pasted into the
   exercise text. The loop with no cap ends on the character budget, the stand-in for a run that
