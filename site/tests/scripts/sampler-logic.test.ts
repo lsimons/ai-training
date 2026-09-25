@@ -36,15 +36,16 @@ describe('probs', () => {
 describe('pick', () => {
 	const d: [string, number][] = [
 		['a', 0.5],
-		['b', 0.3],
-		['c', 0.2],
+		['b', 0.25],
+		['c', 0.25],
 	];
+	// Binary-exact probabilities, so each boundary is tested at exactly its cumulative value.
 	it('takes the first token whose cumulative probability reaches r', () => {
 		expect(pick(d, 0)).toBe('a');
 		expect(pick(d, 0.5)).toBe('a');
 		expect(pick(d, 0.51)).toBe('b');
-		expect(pick(d, 0.79)).toBe('b');
-		expect(pick(d, 0.81)).toBe('c');
+		expect(pick(d, 0.75)).toBe('b');
+		expect(pick(d, 0.76)).toBe('c');
 		expect(pick(d, 0.999)).toBe('c');
 	});
 	it('falls back to the top token when rounding leaves r above the total', () => {
