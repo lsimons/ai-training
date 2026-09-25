@@ -44,40 +44,69 @@ NOT_RUN = {
     "customizing-agents/testing-a-skill/clones.py",
 }
 
-NOT_GIT_FIXTURE_DIRS = {
+NOT_GIT_FIXTURES = {
     # changelog_guard.py runs `git diff --cached` as a plugin hook. Nothing in
-    # the course runs it: the learner only reads it.
-    "customizing-agents/plugins/release-kit/scripts",
+    # the course runs it: the learner only reads it. The entry is the file, so
+    # a later fixture in the same directory that runs git is still reported.
+    "customizing-agents/plugins/release-kit/scripts/changelog_guard.py",
 }
-SUBPROCESS_FUNCTIONS = {"run", "Popen", "call", "check_call", "check_output"}
+SUBPROCESS_FUNCTIONS = {
+    "run",
+    "Popen",
+    "call",
+    "check_call",
+    "check_output",
+    "getoutput",
+    "getstatusoutput",
+}
+SKIPPED_DIRS = {".venv", "node_modules", "__pycache__"}
 
 
-def _is_git_program(node: ast.expr) -> bool:
-    """`"git"`, or a path that ends in `/git`, as a string literal."""
-    return (
-        isinstance(node, ast.Constant)
-        and isinstance(node.value, str)
-        and (node.value == "git" or node.value.endswith("/git"))
-    )
+def _without(assigned: dict[str, list[ast.expr]], name: str) -> dict[str, list[ast.expr]]:
+    """The assignments minus one name, so that resolving `x = x + [...]` stops."""
+    return {key: values for key, values in assigned.items() if key != name}
+
+
+def _is_git_name(value: str) -> bool:
+    return value == "git" or value.endswith("/git")
+
+
+def _is_git_program(node: ast.expr, assigned: dict[str, list[ast.expr]]) -> bool:
+    """The program of a command line is git.
+
+    That is `"git"` or a path ending in `/git` as a string literal, a name
+    the same file assigns such a literal to, or `shutil.which("git")`.
+    """
+    if isinstance(node, ast.Constant):
+        return isinstance(node.value, str) and _is_git_name(node.value)
+    if isinstance(node, ast.Name):
+        rest = _without(assigned, node.id)
+        return any(_is_git_program(value, rest) for value in assigned.get(node.id, []))
+    if isinstance(node, ast.Call) and node.args:
+        func = node.func
+        name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", None)
+        return name == "which" and _is_git_program(node.args[0], assigned)
+    return False
 
 
 def _is_git_command(node: ast.expr, assigned: dict[str, list[ast.expr]]) -> bool:
     """Whether a subprocess argument is a git command line.
 
-    It covers a list or tuple literal whose first element is "git" (with or
-    without `*args` after it), that literal with `+` something after it, a
-    command string such as "git status", and a name that the same file
-    assigns one of those to.
+    It covers a list or tuple literal whose first element is git as
+    `_is_git_program` reads it (with or without `*args` after it), that
+    literal with `+` something after it, a command string such as
+    "git status", and a name that the same file assigns one of those to.
     """
     if isinstance(node, ast.List | ast.Tuple):
-        return bool(node.elts) and _is_git_program(node.elts[0])
+        return bool(node.elts) and _is_git_program(node.elts[0], assigned)
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
         return _is_git_command(node.left, assigned)
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         words = node.value.split()
-        return bool(words) and _is_git_program(ast.Constant(words[0]))
+        return bool(words) and _is_git_name(words[0])
     if isinstance(node, ast.Name):
-        return any(_is_git_command(value, {}) for value in assigned.get(node.id, []))
+        rest = _without(assigned, node.id)
+        return any(_is_git_command(value, rest) for value in assigned.get(node.id, []))
     return False
 
 
@@ -106,9 +135,12 @@ def _is_subprocess_call(call: ast.Call, modules: set[str], functions: set[str]) 
     return isinstance(func, ast.Name) and func.id in functions
 
 
-def runs_git(source: str) -> bool:
+def runs_git(source: str, filename: str = "<source>") -> bool:
     """Whether Python source calls a `subprocess` function with a git command line."""
-    tree = ast.parse(source)
+    try:
+        tree = ast.parse(source, filename=filename)
+    except SyntaxError as error:
+        raise ValueError(f"{filename} does not parse, so git discovery stops: {error}") from error
     modules, functions = _subprocess_callers(tree)
     assigned: dict[str, list[ast.expr]] = {}
     for node in ast.walk(tree):
@@ -135,18 +167,31 @@ def runs_git(source: str) -> bool:
     return False
 
 
-def git_running_dirs(root: pathlib.Path) -> set[str]:
-    """Every directory under root, relative to it, that holds a `.py` file which runs git."""
-    return {
-        path.parent.relative_to(root).as_posix()
-        for path in root.rglob("*.py")
-        if runs_git(path.read_text(encoding="utf-8"))
-    }
+def git_running_files(root: pathlib.Path) -> set[str]:
+    """Every `.py` file under root, relative to it, that runs git.
+
+    Installed packages and caches (SKIPPED_DIRS) are not searched.
+    """
+    found: set[str] = set()
+    for directory, dirnames, filenames in root.walk():
+        dirnames[:] = sorted(name for name in dirnames if name not in SKIPPED_DIRS)
+        for filename in sorted(filenames):
+            if not filename.endswith(".py"):
+                continue
+            path = directory / filename
+            relative = path.relative_to(root).as_posix()
+            if runs_git(path.read_text(encoding="utf-8"), relative):
+                found.add(relative)
+    return found
 
 
 def missing_git_fixture_dirs(root: pathlib.Path) -> list[str]:
-    """The directories that run git but are neither in GIT_FIXTURE_DIRS nor exempted."""
-    return sorted(git_running_dirs(root) - set(GIT_FIXTURE_DIRS) - set(NOT_GIT_FIXTURE_DIRS))
+    """The directories with a file that runs git, outside GIT_FIXTURE_DIRS and NOT_GIT_FIXTURES."""
+    dirs = {
+        pathlib.PurePosixPath(name).parent.as_posix()
+        for name in git_running_files(root) - NOT_GIT_FIXTURES
+    }
+    return sorted(dirs - set(GIT_FIXTURE_DIRS))
 
 
 def _fixtures() -> list[pathlib.Path]:
@@ -202,8 +247,12 @@ def test_every_example_directory_that_runs_git_is_listed() -> None:
 
 
 def test_every_listed_directory_still_runs_git() -> None:
-    found = git_running_dirs(EXAMPLES)
-    stale = sorted(name for name in [*GIT_FIXTURE_DIRS, *NOT_GIT_FIXTURE_DIRS] if name not in found)
+    files = git_running_files(EXAMPLES)
+    dirs = {pathlib.PurePosixPath(name).parent.as_posix() for name in files}
+    stale = sorted(
+        [name for name in GIT_FIXTURE_DIRS if name not in dirs]
+        + [name for name in NOT_GIT_FIXTURES if name not in files]
+    )
     assert stale == []
 
 
@@ -221,6 +270,38 @@ def test_a_planted_directory_that_runs_git_is_reported_missing(tmp_path: pathlib
     assert missing_git_fixture_dirs(tmp_path) == ["some-area/new-lesson"]
 
 
+GIT_STATUS = 'import subprocess\nsubprocess.run(["git", "status"])\n'
+
+
+def _plant(root: pathlib.Path, relative: str, source: str) -> None:
+    path = root / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(source, encoding="utf-8")
+
+
+def test_a_new_git_file_next_to_an_exempted_one_is_reported_missing(
+    tmp_path: pathlib.Path,
+) -> None:
+    for exempted in NOT_GIT_FIXTURES:
+        _plant(tmp_path, exempted, GIT_STATUS)
+    assert missing_git_fixture_dirs(tmp_path) == []
+    exempted_dir = pathlib.PurePosixPath(next(iter(NOT_GIT_FIXTURES))).parent
+    _plant(tmp_path, f"{exempted_dir}/new_fixture.py", GIT_STATUS)
+    assert missing_git_fixture_dirs(tmp_path) == [str(exempted_dir)]
+
+
+def test_installed_and_cached_directories_are_skipped(tmp_path: pathlib.Path) -> None:
+    for skipped in (".venv/lib/tool.py", "a/node_modules/pkg/tool.py", "a/__pycache__/tool.py"):
+        _plant(tmp_path, skipped, GIT_STATUS)
+    assert missing_git_fixture_dirs(tmp_path) == []
+
+
+def test_a_file_that_does_not_parse_names_the_file(tmp_path: pathlib.Path) -> None:
+    _plant(tmp_path, "some-area/new-lesson/broken.py", "def (:\n")
+    with pytest.raises(ValueError, match=r"some-area/new-lesson/broken\.py"):
+        missing_git_fixture_dirs(tmp_path)
+
+
 @pytest.mark.parametrize(
     "source",
     [
@@ -234,6 +315,11 @@ def test_a_planted_directory_that_runs_git_is_reported_missing(tmp_path: pathlib
         'import subprocess\nCMD = ["git", "status"]\nsubprocess.run(CMD)\n',
         'import subprocess as sp\nsp.call(["git", "status"])\n',
         'from subprocess import run as sh\nsh(["git", "status"])\n',
+        'import subprocess\nGIT = "git"\nsubprocess.run([GIT, "status"])\n',
+        'import shutil\nimport subprocess\nsubprocess.run([shutil.which("git"), "status"])\n',
+        'import subprocess\nsubprocess.getoutput("git status")\n',
+        'import subprocess\nsubprocess.getstatusoutput("git status")\n',
+        'import subprocess\nGIT = "git"\nCMD = [GIT]\nCMD = CMD + ["log"]\nsubprocess.run(CMD)\n',
     ],
     ids=[
         "list",
@@ -245,6 +331,11 @@ def test_a_planted_directory_that_runs_git_is_reported_missing(tmp_path: pathlib
         "name",
         "alias",
         "from-import",
+        "name-element",
+        "which",
+        "getoutput",
+        "getstatusoutput",
+        "reassigned-name",
     ],
 )
 def test_the_discovery_finds_each_call_form(source: str) -> None:
