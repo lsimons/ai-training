@@ -1,0 +1,231 @@
+import { Choice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+When a chat assistant answers, you read its text against what you asked
+for before you use it. An
+[agent](/concepts/assistant-or-agent/#one-test-what-can-it-do-without-another-prompt)
+goes further than text, because it moves files, deletes them and sends messages, and
+by the time you read its reply those things have already happened. In this
+lesson we check an agent by looking at its effects. A recorded session is
+replayed as changes to a folder, and we compare those changes with the
+request. The last section is about the one step of a session that should
+wait for you before it runs.
+
+## Read the effects against the request
+
+Someone asks an agent to tidy a shared team folder. This is the request,
+word for word:
+
+```text
+Move this week's meeting notes into 2026-meetings, with the date at the
+start of each file name.
+```
+
+The agent works for a minute and replies:
+
+```text
+Done. I moved the three meeting notes into 2026-meetings and put the date first.
+```
+
+The folder, the files and the session are invented for this lesson, and
+the agent's steps were written to show the kind of extra step agents
+take. A short program replays the recorded steps on a copy of the folder
+and prints the folder before and after the session.
+
+```text
+before:
+  2026-meetings/
+  budget-2027.txt
+  notes-monday.txt
+  notes-thursday-copy.txt
+  notes-thursday.txt
+  notes-tuesday.txt
+
+after:
+  2026-meetings/2026-09-21-notes-monday.txt
+  2026-meetings/2026-09-22-notes-tuesday.txt
+  2026-meetings/2026-09-24-notes-thursday.txt
+  budget-2027.txt
+```
+
+Before you read on, look for each name of the before list in the after
+list. A file may have a new name there, or a folder in front of it.
+
+<Predict id="which-file-is-gone" objective="safety/verifies-output/calibrates-trust"
+  concepts={['trust-but-verify-for-agents']}
+  context="An agent was asked to move this week's meeting notes into the folder 2026-meetings with the date at the start of each name. Before the session the folder held 2026-meetings (empty), budget-2027.txt, notes-monday.txt, notes-thursday-copy.txt, notes-thursday.txt and notes-tuesday.txt. After it, the folder held 2026-meetings/2026-09-21-notes-monday.txt, 2026-meetings/2026-09-22-notes-tuesday.txt, 2026-meetings/2026-09-24-notes-thursday.txt and budget-2027.txt."
+  title="Which file is gone?"
+  hint="Take the before list one line at a time. For each name, is there a line in the after list with the same name, with or without a date in front and a folder name before it?"
+  answer="notes-thursday-copy.txt">
+One file from the before list isn't in the after list under any name or
+in any folder. Type its name as the before list shows it.
+</Predict>
+
+The program goes on to list every effect of the session and to mark each
+one as asked for or not. It skips the steps where the agent only read a
+file or listed the folder, because those leave the folder as it was.
+
+```text
+effects, checked against the request:
+  asked      moved notes-monday.txt -> 2026-meetings/2026-09-21-notes-monday.txt
+  asked      moved notes-tuesday.txt -> 2026-meetings/2026-09-22-notes-tuesday.txt
+  asked      moved notes-thursday.txt -> 2026-meetings/2026-09-24-notes-thursday.txt
+  NOT ASKED  deleted notes-thursday-copy.txt (2 lines in it were in no other file)
+  NOT ASKED  sent a message to all-staff: "The meeting notes for this week are now in 2026-meetings."
+
+agent's summary: "Done. I moved the three meeting notes into 2026-meetings and put the date first."
+effects: 5, asked for: 3, not asked for: 2
+effects the summary mentions: 3 of 5
+effects the after listing cannot show: 1 (the message)
+```
+
+The moves of the Monday, Tuesday and Thursday notes are what the request
+asked for, and they're right. The
+agent also deleted the Thursday copy, probably because the name looked like
+a duplicate. The copy wasn't a duplicate: it held the two action items
+someone added after the meeting, and they were in no other file. Then the
+agent told the whole company where the notes are, and the request mentioned
+no message at all.
+
+This is the first of the checking habits from earlier in this course, read
+the output against the request, applied to an agent
+([Checking habits](/safety/checking-habits/#the-routine)). With a chat
+answer, the output is the text. With an agent, the output is the set of
+things that are different in the world after the session, and the request
+is the list you check each one against.
+
+## What to inspect
+
+An agent's effects on your work come in the kinds below, and each kind
+needs a different place to look.
+
+**What changed.** A file that was edited, renamed or moved. Compare the
+folder before and after, as the program did, and open one changed file to
+see that its contents are what you expect. You can put a changed file back
+if you have the old version.
+
+**What was deleted.** A file that's gone. The after list doesn't show it,
+so you find it only by going through the before list, as you did above.
+Ask whether the deleted file held anything that exists nowhere else, and
+whether it went to a bin you can restore from.
+
+**What was sent.** A message, an email, a shared link, a posted comment. A
+send doesn't change your folder at all, and the program's last line
+counts the message as the one effect the after listing can't show. You find
+sends in the sent folder, in the channel or in the activity record of the
+agent, if it keeps one. Once someone has read a message, you can't make them
+unread it.
+
+Anthropic's AI Fluency course treats judging an AI's work as a skill of its
+own, which it calls discernment, and it applies that skill to how the AI
+went about the task and to what it produced
+(@Academy ai-fluency-framework-foundations). For an agent, the effects are
+where you see how it went about the task.
+
+<Pitfall title="Reading the summary as the record">
+The agent's summary said it moved three files and dated them. Both claims
+were true, and it left out two of the five effects. A summary is text the
+model writes at the end of the session, produced the same way as any other
+answer, so it can be fluent, accurate in every sentence and still
+incomplete. Harvard's CS50 course lets students tell an answer that staff
+have checked from a raw answer by its AI helper (@CS50x). The summary is
+a raw answer about the agent's own work, and nobody has checked it. Read
+the effects first, and read the summary afterwards to see what it left out.
+</Pitfall>
+
+## Pause before the step you can't undo
+
+Checking after the session works for effects you can undo. Moves and
+renames are like that, and so is a new file in your own folder. Let the
+agent do those steps on its own, and check the result against the request
+when it's done. Stopping it before every one of them costs you time, and
+after the tenth approval you stop reading what you approve.
+
+Some steps can't be undone by any check afterwards. A message that someone
+has read, a file deleted with no bin to restore it from, a payment, a page
+published to the public: for these, checking after the session only tells
+you what went wrong. They're the steps where the agent should stop and
+show you what it is about to do, and wait for a yes. In the session above,
+the message was a step of that kind, and so was the deletion if the
+folder has no bin. The agent took both without asking.
+
+This is what **"trust but verify" for agents** means in practice. The same
+agent, in the same session, gets to move files on its own and has to stop
+before it sends. You decide how far to trust it one action at a time, from
+what that action costs if it goes wrong, and a step that went well doesn't
+make the next step safe.
+
+<Scenario id="where-the-pause-goes" objective="safety/verifies-output/calibrates-trust"
+  concepts={['trust-but-verify-for-agents']}
+  context="A recorded agent session has four steps, in this order: read the three meeting notes of the week, write a draft update into a new file in the user's folder, correct the spelling in that draft, and send the update by email to a client. The user may place one pause, where the agent stops, shows what it is about to do and waits for approval."
+  title="Where does the one pause go?"
+  hint="For each step, ask what you could do about it if it went wrong: undo it in a second, or only find out about it afterwards?"
+  options={[
+    { text: 'Before it reads the three meeting notes.', consequence: 'Reading changes nothing, so you approve a step that could not go wrong. The email then goes to the client without anyone looking at it.' },
+    { text: 'Before it writes the draft into a new file.', consequence: 'A new file in your own folder is deleted in a second if it is wrong. You approve it, and the email still goes out unseen.' },
+    { text: 'Before it sends the update to the client.', correct: true, consequence: 'The agent shows you the draft and the address. You see that it quotes an internal budget figure from the notes, take the line out and then approve the send.' },
+    { text: 'After the email, when you look in the sent folder.', consequence: 'You find the internal budget figure in the sent email. The client has already read it, and the check only tells you what went wrong.' },
+  ]}>
+You ask an agent to turn this week's meeting notes into a short update
+for a client. The agent's plan has four steps. It reads the three notes
+and writes a draft into a new file. Then it corrects the spelling in the
+draft and emails the update to the client. You can put one pause in the session. Where does it go?
+</Scenario>
+
+<Sort id="pause-or-check-after" phase="review" objective="safety/verifies-output/calibrates-trust"
+  concepts={['trust-but-verify-for-agents']}
+  context="The lesson says an agent may take a step on its own and be checked afterwards when the step is easy to undo, and must stop and wait for approval before a step that cannot be undone once it has happened. The learner sorts agent steps into the two groups."
+  title="Let it run, or pause first?"
+  hint="If the step went wrong, could you put things back yourself afterwards, or would someone else already have seen it, received it or lost it?"
+  buckets={['Let it run, check afterwards', 'Pause before it runs']}
+  items={[
+    { text: 'Rename twenty files in a copy of a folder', bucket: 0 },
+    { text: 'Post an announcement in the all-staff channel', bucket: 1 },
+    { text: 'Save a reply in your drafts folder without sending it', bucket: 0 },
+    { text: 'Pay a supplier invoice from the team account', bucket: 1 },
+    { text: 'Add a row to a spreadsheet only you use', bucket: 0 },
+    { text: 'Permanently delete the old versions of a contract', bucket: 1 },
+  ]} />
+
+<Choice id="what-the-listing-misses" phase="review" objective="safety/verifies-output/calibrates-trust"
+  concepts={['trust-but-verify-for-agents']}
+  context="An agent was asked to sort a shared folder. It finished with a summary saying it moved the files, and the learner has compared the folder before and after with the request and found every change was asked for. The learner has time for one more check before calling the task done."
+  title="What is still unchecked?"
+  hint="Which kind of effect leaves nothing behind in the folder you compared?"
+  options={[
+    { text: 'Read the summary again, line by line, for anything it hides.', why: 'The summary is the agent\'s own account of its work. Reading it again tells you what it says, and it left effects out once already.' },
+    { text: 'Ask the agent whether it did anything else in the session.', why: 'The answer is another summary written by the same agent, and nobody has checked it either.' },
+    { text: 'Look in the sent messages for anything the agent sent.', correct: true },
+    { text: 'Compare the after listing with the request one more time.', why: 'You did that already, and the listing shows only files. A second pass finds nothing the first one could not.' },
+  ]}>
+An agent sorted a shared folder and says it moved the files. You compared
+the folder before and after with your request, and every change was one
+you asked for. You have time for one more check. Which one?
+</Choice>
+
+<Exercise stretch="Do the same for a task you would hand to an agent this month, before it runs, and decide whether the pause should be one step earlier.">
+Pick one agent task you have seen, done or read about: an agent that
+sorted a folder, answered emails, updated a spreadsheet, booked a meeting.
+In a note, write the request in one sentence. Under it, list the effects
+you would inspect afterwards, in two groups: what changed (and what was
+deleted), and what was sent. Then name the one step that should wait for a
+person before it runs, and add a sentence on why that step can't be fixed
+afterwards.
+
+A good result has at least one entry under "sent", even if you have to
+think about it (a calendar invite and a shared link are sends), and the
+paused step is one whose effect reaches another person or can't be
+restored. Which effect on your list would the agent's own summary most
+likely leave out?
+</Exercise>
+
+<Recap>
+1. When an agent acts, verification moves from reading its text to checking its effects: what changed, what was deleted, what was sent.
+2. Compare the before and after with the request, one effect at a time. A deleted file shows only in the before list, and a sent message shows in neither.
+3. The agent's summary is a raw answer about its own work. Read the effects first and the summary afterwards (@CS50x).
+4. Let the agent take steps you can undo on its own and check them afterwards. Put the pause before the step that can't be undone, such as a send, a permanent deletion or a payment.
+5. Trust is granted per action, by what the action costs if it goes wrong, and never once for the whole tool (@Academy ai-fluency-framework-foundations).
+</Recap>
+
+<Habit id="effects-before-summary">
+The next time an agent finishes a task for you, look at what changed and what it sent before you read its summary.
+</Habit>
