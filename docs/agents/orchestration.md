@@ -248,14 +248,18 @@ The cases that come up:
 - The `code-review` skill runs as a forked agent in the main checkout, not
   in the caller's worktree, so a reviewer that `cd`s into its review
   worktree and passes only a range gets an empty diff. The reviewer passes
-  the worktree path and the range in the skill's arguments, and the forked
-  agent `cd`s there first. The skill spawns its own sub-agents (angles and
+  the level first, then the worktree path and the range
+  (`medium <worktree path> origin/main...HEAD`), and the forked agent
+  `cd`s there first. The skill reads the level only in first place and
+  otherwise runs at `low`. A reviewer whose first skill reply names another
+  level runs it once more. The skill spawns its own sub-agents (angles and
   verifiers). Their notifications arrive at the coordinator too, and
   sometimes only there. The reviewer then gets an empty result from the
-  skill. Ignore the notifications at the coordinator, act on the
-  reviewer's consolidated verdict, and tell every reviewer to run the
-  skill once and review by hand from `review.diff` when it returns
-  nothing.
+  skill. Ignore the notifications at the coordinator and act on the
+  reviewer's consolidated verdict. An empty skill result on a non-empty
+  `review.diff` is a failed run: the reviewer doesn't run it again, says
+  so in the review, and bases the verdict on a hand review of
+  `review.diff`, never on the empty result.
 - GitHub reports `mergeable: UNKNOWN` for about a minute after every merge.
   Wait and list again. A pull request in `CONFLICTING` state gets no
   `pull_request` CI run at all, so a builder that pushes into a conflict
