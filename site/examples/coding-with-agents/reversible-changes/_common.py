@@ -42,26 +42,22 @@ run_todo = _spec_driven.run_todo
 in_copy = _spec_driven.in_copy
 _replace = _spec_driven._replace
 
-# Variables that would point git at another repository than the copy's own.
-GIT_LOCATION_VARIABLES = (
-    "GIT_DIR",
-    "GIT_WORK_TREE",
-    "GIT_INDEX_FILE",
-    "GIT_COMMON_DIR",
-    "GIT_PREFIX",
-    "GIT_OBJECT_DIRECTORY",
-    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
-)
-
-GIT_ENV = dict(
-    {key: value for key, value in os.environ.items() if key not in GIT_LOCATION_VARIABLES},
-    GIT_AUTHOR_NAME="Learner",
-    GIT_AUTHOR_EMAIL="learner@example.com",
-    GIT_COMMITTER_NAME="Learner",
-    GIT_COMMITTER_EMAIL="learner@example.com",
-    GIT_CONFIG_GLOBAL=os.devnull,
-    GIT_CONFIG_SYSTEM=os.devnull,
-)
+# git runs with only these variables, so nothing in the learner's environment
+# (a GIT_DIR pointing elsewhere, GIT_TEMPLATE_DIR, GIT_EXTERNAL_DIFF,
+# GIT_CONFIG_PARAMETERS) can reach it. HOME is set per copy, in `git` below,
+# so no user config is read either. reviewing-the-diff/_common.py holds the
+# same list: keep the two in step.
+GIT_ENV_BASE = {
+    "PATH": os.environ.get("PATH", ""),
+    "LANG": "C",
+    "LC_ALL": "C",
+    "GIT_AUTHOR_NAME": "Learner",
+    "GIT_AUTHOR_EMAIL": "learner@example.com",
+    "GIT_COMMITTER_NAME": "Learner",
+    "GIT_COMMITTER_EMAIL": "learner@example.com",
+    "GIT_CONFIG_GLOBAL": os.devnull,
+    "GIT_CONFIG_SYSTEM": os.devnull,
+}
 
 # Increment 2: `overdue`, with today from TODO_TODAY or the clock.
 
@@ -126,15 +122,11 @@ BAD_DATE_DISPATCH_AFTER = """    elif command == "due" and len(argv) == 4 and ar
 
 
 def git(repo: str, *args: str) -> "subprocess.CompletedProcess[str]":
-    """Runs one git command in the copy, with a fixed identity and no user config.
-
-    GIT_CONFIG_GLOBAL and GIT_CONFIG_SYSTEM point at /dev/null, so no user setting
-    such as commit signing reaches the copy.
-    """
+    """Runs one git command in the copy, with a fixed identity and no user config."""
     result = subprocess.run(
-        ["git", *args],
+        ["git", "-c", "commit.gpgsign=false", *args],
         cwd=repo,
-        env=GIT_ENV,
+        env=dict(GIT_ENV_BASE, HOME=os.path.dirname(repo)),
         capture_output=True,
         text=True,
     )
