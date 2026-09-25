@@ -37,12 +37,12 @@ and why, what was tried and ruled out, and where the files are. The next
 session reads the file and starts from it.
 
 Claude Code can also reopen an old conversation. `claude --continue`
-opens your last conversation again, and `claude --resume` shows the saved
-conversations so that you can pick one (@Claude Code best practices). That helps when you continue the same
-work on the same computer, because Claude Code keeps the conversations as
-files on your own computer, in `~/.claude/projects/`
-(@Claude Code how it works). A
-colleague on another machine can't resume them. A resumed conversation also
+opens your last conversation in this directory again, and
+`claude --resume` shows the saved conversations so that you can pick one
+(@Claude Code best practices). That helps when you continue the same work
+on the same computer, because Claude Code keeps the conversations as files
+on your own computer, in `~/.claude/projects/` (@Claude Code how it works).
+A colleague on another machine can't resume them. A resumed conversation also
 brings back its whole history, and that includes the approaches that went
 wrong. The best-practices page gives advice for the case where you have
 corrected the agent more than twice on the same problem: clear the
