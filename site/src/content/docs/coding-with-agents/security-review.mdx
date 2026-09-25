@@ -68,13 +68,12 @@ on code that nobody checked has learned the exploitable patterns in it
 trained on public code. The list below is this course's own, of mistakes
 that appear in a lot of that code:
 
-- **Unvalidated input.** A value from a form, a file or an application programming
-  interface (API) is used as
-  if it were trusted: a quantity that can be negative, a file name that
-  can contain `../`.
-- **String-built queries and commands.** Input is pasted into an SQL (Structured Query
-  Language) query or a shell command, so the input can change what the query or the command
-  does.
+- **Unvalidated input.** A value from a form, a file or an application
+  programming interface (API) is used as if it were trusted: a quantity
+  that can be negative, a file name that can contain `../`.
+- **String-built queries and commands.** Input is pasted into an SQL
+  (Structured Query Language) query or a shell command, so the input can
+  change what the query or the command does.
 - **Secrets in code.** A password, token or key is written into the
   source, where every copy of the repository has it.
 - **Permissive defaults.** A server listens on every network interface, a
@@ -236,8 +235,9 @@ python3 hostile.py
 </Predict>
 
 The second line shows Bob's notes to Alice, including one about his bank
-login. The third line is the pitfall above: an ordinary search that fails and reports nothing. The Python documentation warns against building a
-query with string operations for this reason and gives the fix, a
+login. The third line is the pitfall above: an ordinary search that
+fails and reports nothing. The Python documentation warns against
+building a query with string operations for this reason and gives the fix, a
 placeholder in the SQL with the values passed separately to `execute()`
 (@Python sqlite3). The database then treats the values as data, whatever
 characters they contain.
@@ -301,7 +301,7 @@ python3 run_test.py
 
 </Predict>
 
-In the same recorded run, Bandit reported no issue for
+In a second recorded run the same day, Bandit reported no issue for
 `fixed/notes_search.py` and exited with status 0. A clean run means that
 no rule matched. You know the fix works because of the test, and
 the test is also what stops a later change from bringing the problem
@@ -342,7 +342,7 @@ an agent's access has to be limited instead.
   context="An agent-written search function in Python builds its SQL with an f-string, and a search term containing a single quote changes what the query selects. The fix uses the placeholders of the sqlite3 module, which passes each value to SQLite separately from the SQL text."
   title="Why a placeholder?" hint="What does the database receive in each version, and which part of it can the user's text change?"
   options={[
-    { text: 'With sqlite3 the value goes to the database separately, so it is never read as part of the SQL.', correct: true },
+    { text: 'The placeholder sends the value to SQLite separately, so it is never read as part of the SQL.', correct: true },
     { text: 'The placeholder escapes every quote in the value, which is all that an injection needs removed.', why: 'Escaping is a different approach, and it depends on getting every special character right. A placeholder does not put the value into the SQL text at all.' },
     { text: 'The placeholder makes Bandit stop reporting B608, which is how you know the query is safe.', why: 'A missing finding means no rule matched. The test that fails on the old code is what shows the fix works.' },
     { text: 'The placeholder rejects any search term that contains SQL keywords such as OR and SELECT.', why: 'It rejects nothing. A term containing OR is searched for as text, like any other term.' },
@@ -374,7 +374,7 @@ shows.
     { text: 'Do not change any other file, and do not add a dependency.', why: 'That keeps the diff small enough to review. It says nothing about whether the injection is gone.' },
     { text: 'Use placeholders for both values and pass them to execute().', why: 'That is the fix itself. The brief still needs something that shows the fix covers the hostile term.' },
     { text: 'Write a test with the hostile term that fails on the current code.', correct: true },
-    { text: 'Run the static analyzer again when the change is done.', why: 'A clean run means that no rule matched. It does not show that the hostile term now returns only Alice\'s notes.' },
+    { text: 'Run the static analyzer again when the change is done.', why: 'A clean run means that no rule matched. It does not show that the hostile term now returns only the user\'s own notes.' },
   ]}>
 Which line of the brief gives you proof that the fix works?
 </Choice>
@@ -386,7 +386,9 @@ user input without trusting a clean analyzer run.
 From the root of your clone of the course repository, make two fresh
 copies of the fixture, one for the agent and one that keeps the agent's
 original version. Remove the fix and the test from both, so that the
-agent starts from the change as it arrived:
+agent starts from the change as it arrived. If `~/search-fix` or
+`~/search-before` exists from an earlier try, delete it first, or `cp`
+puts the new copy inside the old one.
 
 ```sh
 cp -R site/examples/coding-with-agents/security-review ~/search-fix
