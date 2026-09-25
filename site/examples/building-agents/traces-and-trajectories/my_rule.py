@@ -4,10 +4,13 @@
 happened, and returns one reason per broken rule. An empty list is a pass.
 
 A model record has "kind": "model" and "asked", the tool it asked for, or
-"answer" on the last call. A tool record has "kind": "tool", "tool", "args"
-and "result". `python3 trajectory.py exercise` runs this over the eight runs.
+"answer" on the last call. That last model record also has "answer", the text
+of the reply. A tool record has "kind": "tool", "tool", "args" and "result".
+`python3 trajectory.py exercise` runs this over the eight runs.
 
-The starter checks one rule. Add the others.
+The starter checks one rule. Add the others. For the stretch, add a second
+function beside this one, `dates_grounded(trace)`, which returns its reasons
+the same way, and the exercise step runs it too.
 """
 
 
