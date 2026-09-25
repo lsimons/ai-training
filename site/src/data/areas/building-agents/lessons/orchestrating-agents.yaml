@@ -10,7 +10,10 @@ serves:
   - building-agents/orchestrates-agents/justifies-orchestration-cost
   - building-agents/orchestrates-agents/composes-patterns
 introduces: [code-vs-model-driven-orchestration, sequential-hierarchical-collaborative]
-assumes: []
+assumes:
+  - objective: building-agents/builds-agent-loop/implements-the-loop
+    lesson: building-agents/agent-loop
+    section: the-loop
 after: [building-agents/plan-or-react]
 shorts: [Subagents with fresh context]
 exercise:
