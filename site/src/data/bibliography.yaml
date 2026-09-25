@@ -813,7 +813,7 @@ Yao 2022:
   url: https://arxiv.org/abs/2210.03629
 Turpin 2023:
   type: paper
-  title: "Language Models Don't Always Say What They Think: Unfaithful Explanations in Chain-of-Thought Prompting"
+  title: "Language Models Don't Always Say What They Think"
   container: Advances in Neural Information Processing Systems 36 (NeurIPS 2023)
   author: Miles Turpin, Julian Michael, Ethan Perez and Samuel R. Bowman
   license: CC BY 4.0
