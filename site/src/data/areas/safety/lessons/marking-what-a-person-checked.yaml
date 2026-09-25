@@ -1,10 +1,20 @@
 id: safety/marking-what-a-person-checked
 title: Marking what a person has checked
+description: >-
+  Why an answer a person has checked and one nobody has checked look the same unless someone marks
+  the difference, how CS50 marks the answers of its AI tutor, and how to put a light "checked by"
+  line into a team's process and sample whether it gets filled in.
 mode: explanation
 covers: safety/verification
 serves: [safety/verifies-output/checks-claims, safety/verifies-output/keeps-a-check-habit]
 introduces: [endorsed-answers]
-assumes: []
+assumes:
+  - objective: safety/verifies-output/checks-claims
+    lesson: safety/following-the-source
+    section: when-the-walk-cannot-finish
+  - objective: safety/verifies-output/calibrates-trust
+    lesson: safety/when-the-tool-is-usually-right
+    section: build-the-check-in
 after: [safety/following-the-source]
 shorts: [Endorsed answers in the CS50 tutor]
 exercise:
@@ -12,6 +22,19 @@ exercise:
   brief: >-
     Take a template your team uses for AI-assisted work and decide where a "checked by" field goes,
     how light it must be to get filled in, and how you would sample whether it is.
-sources: []
+sources: [CS50x, Liu 2024b, Academy ai-fluency-framework-foundations]
 issue: 126
 minutes: 15
+notes: >-
+  Explanation mode with no fixture and no widget. The CS50 facts come from Liu 2024b, read on
+  2026-09-25 from the authors' PDF on the Harvard publications page: every answer the CS50 Duck
+  posts on the course forum can be endorsed, amended or deleted by a staff member, and in Fall 2023
+  staff endorsed 70 of its 180 answers, which the authors say understates its accuracy. The paper
+  is the source for the endorsement claims, because the CS50x course page does not describe the
+  forum. The key is Liu 2024b because Liu 2024 is already the lost-in-the-middle paper. CS50 text
+  is not adapted, and no sentence is quoted. The earlier lessons checking-habits and
+  following-the-source each mention the CS50 marks in one sentence and point here. The assumes
+  entries name following-the-source for marking a claim unverified and when-the-tool-is-usually-right
+  for building the check into the process, the two ideas this lesson extends to a team. The team,
+  the template and the help page answer are invented. The Academy course is linked and its
+  Discernment framing paraphrased, with no text copied.

@@ -1,0 +1,267 @@
+import { Choice, MultiChoice, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+In this lesson we look at two answers to the same question and ask which
+one you would act on. The words are the same, and one line is different.
+This lesson is about that line, a visible mark that says a person checked
+the answer, and what it names. The first half
+is about why the mark matters to the next reader. The second half is about
+putting the mark into a team's process so that it is still there when the
+careful colleague is on holiday.
+
+## Two answers to one question
+
+Suppose your organization has an internal help page where staff ask
+questions about policies, and a chat assistant drafts the answers. Two
+colleagues ask the same question in the same week: "How many days of leave
+can I carry over into next year?" The page and both answers are invented
+for this lesson.
+
+```text
+Answer 1
+You can carry over up to five days of unused leave. Days you carry
+over must be taken before 31 March, or they are lost.
+```
+
+```text
+Answer 2
+You can carry over up to five days of unused leave. Days you carry
+over must be taken before 31 March, or they are lost.
+
+Checked by the HR policy team on 12 January, against the leave
+policy, section 4.2.
+```
+
+Most people would book their holiday on the second answer and ask again
+about the first, even though the text of the two is identical. The reason is the last line. It names the team that read the
+answer and the document they compared it with, and it gives the date. If
+the policy changed in February, you know where to look.
+
+The first answer isn't wrong. It may be exactly right. What it tells you
+is that nobody has said so. And here is the problem in most documents
+that an assistant helped write: they look like the first answer, and the
+reader treats them like the second. A report, a briefing or an email
+usually has no mark at all. The reader then assumes the author checked
+everything in it.
+
+An earlier lesson, [Following a claim back to its
+source](/safety/following-the-source/#when-the-walk-cannot-finish), said
+that a claim you can't check in time is marked unverified or taken out.
+That gives a document three states for each claim: checked, marked as not
+checked, and unmarked. The first two tell the reader the truth. The third
+looks like the first.
+
+<Choice id="unmarked-to-the-next-reader" objective="safety/verifies-output/checks-claims"
+  concepts={['endorsed-answers']}
+  context="A colleague used a chat assistant to draft a shared report. One figure in it came from the assistant, the colleague could not check it before the deadline, and it stayed in the report with no note of any kind."
+  title="What the next reader sees"
+  hint="Put yourself in the place of someone who opens the report next week. What is different about this figure, from where they sit?"
+  options={[
+    { text: 'A figure they can spot as the assistant\'s, because model output reads differently.', why: 'The assistant writes in the same fluent style as the rest of the report, and the colleague may have edited around it. Nothing in the wording gives it away.' },
+    { text: 'A figure they will check themselves, because checking is part of reading a report.', why: 'A reader acts on a report and seldom opens its sources. Most readers assume the author did that part.' },
+    { text: 'A figure that is probably wrong, because nobody has checked it yet.', why: 'Unchecked is a different state from wrong. The figure may be right, and the reader still has no way to know which it is.' },
+    { text: 'A figure that looks the same as every checked figure in the report.', correct: true },
+  ]}>
+A colleague leaves a figure from an assistant in a shared report without
+checking it and without a note. What does the next reader of the report
+see?
+</Choice>
+
+## Endorsed answers
+
+Harvard's CS50 course, an introduction to computer science, gives its
+students an AI tutor (@CS50x). The course team describes in a paper how
+the tutor also answers questions on the course's discussion forum, and
+how staff handle those answers (@Liu 2024b). A staff member can endorse
+any answer the tutor posts, correct it, or delete it, and the paper shows
+a forum answer with a staff endorsement on it. A student reading the
+forum can tell an answer a person has checked from one that came straight
+from the model. The course team
+says the endorsement step is how they keep people in charge of what the
+tutor tells students.
+
+That is what this course calls an **endorsed answer**: an answer a
+qualified person has reviewed and marked as correct, shown differently
+from raw model output. The mark doesn't make the answer better. It tells
+the reader which answers a person stands behind, and so which ones they
+can act on without checking.
+
+The same paper has a second finding that is just as useful. In one
+semester, staff endorsed 70 of the tutor's 180 forum answers. Read
+quickly, that says the tutor was right less than half the time. The
+authors reject that reading and expect the real accuracy was higher.
+They point to changes in how students used the forum that semester, and
+they call their explanations guesses until they have reviewed the answers
+(@Liu 2024b). An answer without the mark is an answer
+nobody marked, and it can be right or wrong. So the count of marks
+measures how much reviewing happened. It says little about how good the
+answers were. Keep that in mind for the last section of this lesson,
+because it applies to your own team's marks too.
+
+The idea transfers from a course forum to a team. Separate what the model
+said from what a person has checked, and make the difference visible in
+the document itself, where the next reader sees it. A useful mark says
+who checked, when, and against what.
+
+- **Who checked it.** A name or a role, so the reader knows who to ask.
+- **When.** A date, because facts such as prices and policies change.
+- **Against what.** The source the checker compared it with, so the next
+  reader can open it too.
+
+"Checked" on its own answers none of these. "Checked by the finance lead
+on 3 March against the first-quarter ledger" answers all of them, and it
+still fits on one line. A mark can also cover part of a document: "the
+figures in section 2 were checked against the ledger, and the market
+estimate in section 3 was not checked". That is the unverified note from
+the earlier lesson, and it sits next to the endorsement it limits.
+
+Anthropic's AI Fluency course treats discernment, the skill of judging
+what a model produced, as something a person does on every exchange
+(@Academy ai-fluency-framework-foundations). An endorsement is where that
+judgment becomes visible to someone else. Without the mark, your
+discernment helps you and stops at your desk.
+
+<MultiChoice id="marks-that-tell-the-reader" phase="review" objective="safety/verifies-output/checks-claims"
+  concepts={['endorsed-answers']}
+  context="The lesson says that a claim in a document a model helped write is checked, marked as not checked, or unmarked, and that only the first two tell the next reader the truth. A useful mark says who checked, when, and against what."
+  title="Which lines tell the reader what was checked?"
+  hint="For each line, ask what a reader who opens the document next month learns from it about who checked what."
+  options={[
+    { text: 'Figures checked by the finance lead on 3 March against the Q1 ledger.', correct: true },
+    { text: 'Checked and approved by the team before it was sent to the client.', why: 'Checked by whom on the team, when, and against what? The reader can\'t follow it up, and a quick skim would get the same line.' },
+    { text: 'Market size from the assistant, not yet checked against a source.', correct: true },
+    { text: 'No line at all, since the author of every report checks the drafts.', why: 'The next reader may not know the author. Without a line, the careful author\'s report looks the same as a careless one.' },
+  ]}>
+A team adds one of these lines to the reports it writes with an assistant.
+Which lines tell the next reader which claims a person checked, and
+against what?
+</MultiChoice>
+
+## Put the mark in the process
+
+On a team, a mark that depends on one careful person has the weakness of
+every personal habit: it leaves with that person, and it fails on the day
+they are busy. The lesson [When the tool is usually
+right](/safety/when-the-tool-is-usually-right/#build-the-check-in) said to
+build the check into the process. For marking, there are a few places the
+check can go, and a team usually needs one or two of them.
+
+- **A template field.** The team's report or briefing template gets one
+  line near the top: checked by, date, against. An empty field is visible
+  to everyone who opens the document.
+- **A review step.** Before a document leaves the team, the reviewer
+  fills in that line, and the author doesn't. The person who wrote a text
+  is the worst placed to see what is missing from it.
+- **A checklist item.** Where the team already has a checklist for
+  sending work out, one item says "the checked-by line names a source".
+  Add it to a list people already use, and skip a new list.
+
+The check has to be light enough that people fill it in on a busy
+afternoon. One line with three blanks gets filled in. A form with twelve
+questions gets ticked. If a team finds the line is often empty, the fix
+is to make it lighter or to move it to the step where the work already
+stops, such as the reviewer's read before sending.
+
+<Pitfall title="The heavy check that nobody does">
+A team that had a wrong number go to a client added a sign-off form to
+its template: twelve questions about sources, figures, names and dates,
+each with a box to tick. For two weeks people answered them. By the
+second month everyone ticked all twelve boxes in a few seconds, and the
+team lead read "all twelve ticked" as twelve checks done. That is worse
+than having no form, because before it everyone knew that nobody checked
+systematically, and now everyone believes somebody did. A check that is
+too heavy to do gets skipped, and a skipped check that still shows as
+done makes people stop looking. Make it light enough to do every time,
+and then find out whether it is done.
+</Pitfall>
+
+<Scenario id="where-the-check-goes" objective="safety/verifies-output/keeps-a-check-habit"
+  concepts={['endorsed-answers']}
+  context="A team of eight writes client briefings from a shared template, and most drafts now start with a chat assistant. Two people on the team check every figure carefully, and the others rely on them. The team lead wants the checking to keep working when those two are away."
+  title="Checking that survives a holiday"
+  hint="Which option still works in the week the two careful colleagues are both on leave, and which one lets the team lead find out whether it worked?"
+  options={[
+    { text: 'The two careful colleagues run a training session on checking, and everyone agrees to check more carefully from now on.', consequence: 'The session is useful for a month. The checking still lives in people\'s heads, and in the busy week before a holiday it slips again. Nobody can tell from a briefing whether it was checked.' },
+    { text: 'A form of fifteen questions about sources and figures goes at the end of the template, and the author fills it in for every briefing.', consequence: 'After a few weeks the boxes are ticked by habit. The author checks their own text, and the team lead reads the ticks as checks that did not happen.' },
+    { text: 'The template gets one line, "checked by, date, against", that the reviewer fills in, and the lead samples three briefings a month.', correct: true, consequence: 'The line is on every briefing, and an empty one is visible. The monthly sample shows whether the named sources say what the briefings say, whoever is on leave.' },
+    { text: 'The assistant is told to end every briefing with a line saying which of its claims it has verified.', consequence: 'The model marks its own output in the same fluent voice as the rest. The line looks like an endorsement, and no person has looked at anything.' },
+  ]}>
+A team of eight writes client briefings from a shared template, and most
+drafts start with an assistant. Two colleagues check every figure, and
+the rest rely on them. What change keeps the checking working when those
+two are away?
+</Scenario>
+
+## Find out whether it happens
+
+A field in a template tells you that people were asked to check. It
+doesn't tell you that they did. The CS50 count showed the other side of
+this: a count of marks tells you how much marking happened, and nothing
+more. To learn whether the check is real, look at a few documents.
+
+**Sample a few documents a month.** Pick three documents that an
+assistant helped write, at random or from a fixed day, and read them with
+the checked-by line in mind. Is the line filled in? Does it name a source you can open? Open that source, pick one
+claim, and see whether it says what the document says. A filled line
+whose source doesn't support the claim tells you the line has become a
+ritual, which is the pitfall above. An empty line tells you the check is
+too heavy or sits at the wrong step.
+
+Keep the sample small and fixed in advance, so it runs in the busy months
+too. A sample of three a month won't catch every mistake, and that isn't
+its job. It tells you whether the process you designed is the process
+people follow.
+
+**Make it normal to report a caught mistake.** When a check catches
+something, say so, without naming who missed it. A short note in the
+team channel works: "caught this month: an invented policy number, a
+price from last year's list". A team that shares its catches learns which
+checks find mistakes and which kinds of claim the assistant gets wrong.
+A team that hides them, because a caught mistake feels like an
+embarrassment, doesn't learn either of those. Its members also stop
+mentioning what they catch, so the same kind of mistake is caught again
+and again, one person at a time.
+
+<Sort id="stays-or-leaves" phase="review" objective="safety/verifies-output/keeps-a-check-habit"
+  concepts={['endorsed-answers']}
+  context="The lesson says that a check held by one person leaves with that person and fails on a busy day, and that a check built into the team's process, light enough to do and sampled to see whether it is done, keeps running."
+  title="Which checks keep running?"
+  hint="For each check, imagine the person who started it has moved to another team. Is the check still there next month?"
+  buckets={['Keeps running when its owner is away', 'Leaves with the person who holds it']}
+  items={[
+    { text: 'A "checked by, date, against" line in the report template that the reviewer fills in', bucket: 0 },
+    { text: 'A sample of three documents each month, on the team calendar with a rotating owner', bucket: 0 },
+    { text: 'An item on the existing send-out checklist that says the checked-by line names a source', bucket: 0 },
+    { text: 'One senior colleague who always re-reads the numbers before a report goes out', bucket: 1 },
+    { text: 'A reminder at the team meeting to check what the assistant wrote', bucket: 1 },
+  ]} />
+
+<Exercise stretch="Show your line and your sampling plan to one colleague who uses the template, and ask them how long filling it in would take on their busiest day. Change the line if the answer is more than a minute.">
+Take a template your team uses for work an assistant often helps with: a
+report, a briefing, a reply to a client, a meeting summary. If you have
+none, use the last document of that kind you sent. In a short note,
+decide where a "checked by" line goes in the template and who fills it
+in. Write the line itself in the fewest words that still name the
+checker, the date and the source. Then plan a sample to see whether the
+line gets filled in, with the number of documents per month and the
+person who reads them. Twenty minutes is enough.
+
+A good result is the line as it would appear in the template, with two
+sentences on who fills it in and when and one on the sample. A line that
+takes more than a minute to fill in is too heavy for a busy day. What
+would the sample need to find for you to decide the
+line had become a ritual?
+</Exercise>
+
+<Recap>
+1. To the next reader, an answer a person has checked and one nobody has checked look the same until someone marks the difference, and an unmarked claim reads as a checked one.
+2. An endorsed answer is one a qualified person has reviewed and marked, shown apart from raw model output. On CS50's course forum, staff endorse the AI tutor's answers they have checked, so students can see which ones a person stands behind (@Liu 2024b).
+3. A useful mark says who checked, when, and against what. "Checked" on its own says none of these.
+4. A missing mark means nobody marked the answer, which is a different thing from wrong. A count of marks measures how much reviewing happened (@Liu 2024b).
+5. Put the mark in the process, as a template line, a review step or a checklist item, and keep it light enough to fill in on a busy day. A heavy check gets ticked without being done, and then everyone assumes it happened.
+6. Sample a few documents a month to see whether the check is done, and make it normal to report a caught mistake. A habit held by one person leaves with that person.
+</Recap>
+
+<Habit id="say-what-you-checked">
+The next time you send a document an assistant helped write, add one line
+that names what you checked and the source you checked it against.
+</Habit>

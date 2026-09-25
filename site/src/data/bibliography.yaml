@@ -734,3 +734,10 @@ MCP filesystem server:
   author: Anthropic and the MCP contributors
   license: MIT
   url: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+Liu 2024b:
+  type: paper
+  title: "Teaching CS50 with AI: Leveraging Generative Artificial Intelligence in Computer Science Education"
+  container: Proceedings of the 55th ACM Technical Symposium on Computer Science Education V. 1 (SIGCSE 2024), 750-756
+  author: Rongxin Liu, Carter Zenke, Charlie Liu and 3 others
+  license: Copyright held by the authors, publication rights licensed to ACM
+  url: https://doi.org/10.1145/3626252.3630938
