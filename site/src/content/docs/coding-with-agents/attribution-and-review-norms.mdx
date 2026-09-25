@@ -3,8 +3,9 @@ import { Choice, MultiChoice, Predict, Scenario, Sort, Pitfall, Exercise, Recap,
 An agent fixed a bug in the nightly sales import, the tests pass, and you
 are about to open a pull request. A reviewer reads what you send this
 week and decides how closely to look. Someone who reads the history a
-year from now wants to know who made the change and who checked it. In this lesson we write the commit message and the
-pull request for both readers. The first half covers the team's review
+year from now wants to know who made the change and who checked it. In
+this lesson we write the commit message and the pull request for both
+readers. The first half covers the team's review
 agreements, and the second half covers how the commit says that an agent
 helped, and what only a person may add to it.
 
@@ -16,8 +17,8 @@ commit holds them in a form that tools can read.
 ## Before you ask for a review
 
 Review norms are the agreements a team makes on how agent-assisted
-changes are reviewed. Teams write them down in different words, and most
-lists have four points.
+changes are reviewed. Teams write them down in different words. These
+are the points most of them share.
 
 **The author reads every line first.** You asked for the change, and you
 are its first reviewer. The steps are the ones from
@@ -36,11 +37,11 @@ you saw.
 to look, and the diff is what gets merged. A description written by an
 agent can describe the change it meant to make and not the one it made.
 An agent's change goes through the same gates as any other change: the
-CI run and a reviewer's approval. "The agent tested it" doesn't replace either, because the
-agent's tests are part of the change under review.
+CI run and a reviewer's approval. "The agent tested it" doesn't replace
+either, because the agent's tests are part of the change under review.
 
-**The change is small enough to read.** An agent can produce a thousand
-lines in the time a person reviews fifty. A diff that's too large to
+**The change is small enough to read.** An agent writes code much faster
+than a person can review it. A diff that's too large to
 read gets skimmed or blocked. Split it before you ask. Put a mechanical
 rename in its own pull request, and keep each change to one purpose. A
 tidy-up the agent made on the side belongs in a separate pull request, or
@@ -69,7 +70,7 @@ do you do before anyone reviews it?
 
 <MultiChoice id="before-you-request-review" phase="review" objective="coding-with-agents/works-in-team/follows-team-norms"
   concepts={['review-norms']}
-  context="You are about to request a review of a pull request in which a coding agent wrote most of the change."
+  context="You are about to request a review of a pull request in which a coding agent wrote most of the change. The agent also tidied up an unrelated file on the side."
   title="Ready for review?" hint="Which of these did you do yourself, and which only repeat what the agent reported?"
   options={[
     { text: 'You read every changed line and can explain each one.', correct: true },
@@ -106,11 +107,11 @@ one person when the message ends with a `Co-authored-by: name <email>`
 line for each of them (@GitHub docs creating-a-commit-with-multiple-authors).
 The Linux kernel asks for an `Assisted-by` tag that names the AI help, in
 a format its guideline gives (@Linux coding assistants). Claude Code adds
-a `Co-Authored-By` trailer to its commits by default, and a project can
-change or remove it with the `attribution` setting. Its documentation
-also says that your own instructions about attribution, in a file such as
-`CLAUDE.md`, come before that default (@Claude Code all settings). Check
-the form the project asks for, and check that the agent writes it.
+a `Co-Authored-By` trailer to its commits by default. Its
+`attribution.commit` setting changes that trailer to the one the project
+asks for, and an empty value removes it (@Claude Code all settings).
+Whatever the agent is, check the form the project asks for, and read the
+trailer block of each commit before you push it.
 
 The commit's author is still you. Git records an author for every commit,
 the identity of the person who made it unless someone sets another one
@@ -123,6 +124,13 @@ agent wrote `commit-message.txt`, and `trailers.py` runs
 `git interpret-trailers --parse` on it, which prints only the lines git
 reads as trailers.
 
+<Predict id="predict-the-trailers" objective="coding-with-agents/works-in-team/attributes-honestly"
+  concepts={['attribution']}
+  context="A script runs git interpret-trailers --parse on a commit message an agent wrote, and prints only the lines git reads as trailers."
+  title="Which lines are trailers?" hint="Which paragraph does git look at, and what is in that one?"
+  answer="Signed-off-by: Coding Agent <agent@example.com>" run="coding-with-agents/attribution-and-review-norms/trailers.py">
+This is the agent's commit message:
+
 ```text
 fix: read quoted amounts in the nightly import
 
@@ -134,13 +142,8 @@ I also tidied up the date parsing while I was in the file.
 Signed-off-by: Coding Agent <agent@example.com>
 ```
 
-<Predict id="predict-the-trailers" objective="coding-with-agents/works-in-team/attributes-honestly"
-  concepts={['attribution']}
-  context="An agent wrote a commit message with an Assisted-by line in the middle of the body and a Signed-off-by line with its own name as the last paragraph. A script prints the lines git reads as trailers."
-  title="Which lines are trailers?" hint="Git reads trailers only from the last paragraph. Which lines are in it?"
-  answer="Signed-off-by: Coding Agent <agent@example.com>" run="coding-with-agents/attribution-and-review-norms/trailers.py">
-What does the script print for the agent's message? Copy the directory,
-run the script, and type the output.
+Before you run it, write down what the script prints for this message.
+Then copy the directory and run it to check.
 
 ```sh
 python3 trailers.py
@@ -156,35 +159,34 @@ commits misses this one.
 
 The `Signed-off-by` trailer is older than coding agents. `git commit -s`
 adds one with the committer's name, and the git documentation says that
-what it means depends on the project. In many projects it certifies the
-Developer Certificate of Origin (DCO) (@Git docs git-commit). The DCO is
-a short statement in four parts. In our words: I wrote the contribution,
-or it is based on work I may submit under the project's license, or
-someone who could certify one of those gave it to me unchanged, and I
-agree that a public record of the contribution and of my sign-off is
-kept (@DCO).
+what it means depends on the project. In the Linux kernel and Git
+projects, and in others that adopted it, it certifies the Developer
+Certificate of Origin (DCO) (@Git docs git-commit). The DCO is a short
+statement in four parts. In our words: I made the contribution, in whole
+or in part, and have the right to submit it under the project's license,
+or it is based on earlier open-source work I may submit, or someone who
+certified one of these gave it to me and I didn't change it. And I agree
+that the contribution and my sign-off are kept on public record (@DCO).
 
 Each part is a statement about a person's rights and knowledge, and an
 agent has neither. The Linux kernel guideline says it directly: an AI
-agent must not add a `Signed-off-by` tag, and the human who submits the
-change reviews the code, checks the licensing, adds their own sign-off
-and takes responsibility for the contribution (@Linux coding assistants).
+agent must not add a `Signed-off-by` tag. The person who submits the
+change reads the code, makes sure its license allows it, signs off in
+their own name and answers for the result (@Linux coding assistants).
 Sign off yourself only after you have read the change, because the
 sign-off says you know where the code came from.
 
-This course's own repository is a worked example. Its agents end every
-commit with the same two trailers, and no agent writes a sign-off. The
-last commit on `main` when this lesson was written ended like this:
+This course's own repository is a worked example. The last commit on
+`main` when this lesson was written ended like this:
 
 ```text
 Co-Authored-By: lsimons-bot <bot@leosimons.com>
 Assisted-by: Claude:claude-opus-5-5
 ```
 
-The `Co-Authored-By` line names a bot account that the maintainer owns,
-so the agent's work shows up under one account on GitHub. The
-`Assisted-by` line names the agent and the model. The maintainer is the
-author of record, and every change reaches `main` through a pull request.
+The `Co-Authored-By` line names a bot account, and the `Assisted-by`
+line names the agent and the model. The commit's author is the
+maintainer, and the message has no sign-off.
 
 <Choice id="honest-attribution" objective="coding-with-agents/works-in-team/attributes-honestly"
   concepts={['attribution']}
@@ -196,35 +198,36 @@ author of record, and every change reaches `main` through a pull request.
     { text: '`Assisted-by: Claude:claude-sonnet-4-6` and `Signed-off-by: Ana Costa <ana@example.com>`, added after she read it.', correct: true },
     { text: '`Assisted-by: Claude:claude-sonnet-4-6` alone, since a person signing off on code she did not type would be dishonest.', why: 'The project requires a sign-off, and a person may give one for code she read and may submit. Without it the commit is refused.' },
   ]}>
-An agent wrote the change and Ana read every line and ran the tests. Which
-trailer block does the commit end with?
+Ana's project requires a DCO sign-off on every commit and asks for an
+`Assisted-by` trailer when AI helped. An agent wrote the change, and Ana
+read every line and ran the tests. Which trailer block does the commit
+end with?
 </Choice>
 
-<Sort id="sort-the-trailer-lines" phase="review" objective="coding-with-agents/works-in-team/attributes-honestly"
+<Sort id="sort-the-trailer-blocks" phase="review" objective="coding-with-agents/works-in-team/attributes-honestly"
   concepts={['attribution']}
-  context="A project asks for an Assisted-by trailer when AI helped and a DCO sign-off from the person who submits the change. Each item is a line an agent-assisted commit might end with."
-  title="Keep it or drop it?" hint="Who can truthfully give each line, and does the project ask for it?"
-  buckets={['Keep in the commit', 'Drop it']}
+  context="A project requires a DCO sign-off from the person who submits a change and asks for an Assisted-by trailer when AI helped. Each item describes how an agent-assisted commit message ends. You read the diff before you signed off."
+  title="Push it or fix it?" hint="For each ending, does git read the Assisted-by line as a trailer, and could the person named in the sign-off truthfully give it?"
+  buckets={['Ready to push', 'Fix it first']}
   items={[
-    { text: 'Assisted-by with the agent and model', bucket: 0 },
-    { text: 'Signed-off-by with the agent\'s name', bucket: 1 },
-    { text: 'Signed-off-by with your name, added after you read the diff', bucket: 0 },
-    { text: 'Signed-off-by with your name, added before you read the diff', bucket: 1 },
-    { text: 'Signed-off-by with the name of the colleague who wrote the brief', bucket: 1 },
+    { text: 'A last paragraph with Assisted-by for the agent and your own Signed-off-by', bucket: 0 },
+    { text: 'Assisted-by in the middle of the body, and your own Signed-off-by as the last paragraph', bucket: 1 },
+    { text: 'A last paragraph with Assisted-by for the agent and a Signed-off-by in the agent\'s name', bucket: 1 },
+    { text: 'A last paragraph with only your own Signed-off-by', bucket: 1 },
+    { text: 'A last paragraph with Assisted-by and the Signed-off-by of the colleague who wrote the brief', bucket: 1 },
   ]} />
 
-<Choice id="where-the-trailer-goes" phase="review" objective="coding-with-agents/works-in-team/attributes-honestly"
+<Choice id="which-ending" phase="review" objective="coding-with-agents/works-in-team/attributes-honestly"
   concepts={['attribution']}
-  context="A commit message has a subject line, a body paragraph, and room for more. The author wants tools that read git trailers to count the commit as agent-assisted."
-  title="Where does the line go?" hint="Where does git look for trailers in a commit message?"
+  context="A project requires a DCO sign-off from the person who submits a change and asks for an Assisted-by trailer when AI helped. An agent wrote the change, and you read the diff and ran the tests."
+  title="Which ending?" hint="Where does git look for trailers, and who can truthfully give a sign-off?"
   options={[
-    { text: 'In the subject line, after the summary, so it shows in every one-line log.', why: 'Git does not read trailers from the subject. A one-line log shows it, and a tool that reads trailers does not.' },
-    { text: 'In the last paragraph of the message, after a blank line, as `Assisted-by: ...`.', correct: true },
-    { text: 'Anywhere in the body, as long as the line starts with `Assisted-by:`.', why: 'A line in the middle of the body is text. Git reads trailers only from the last paragraph.' },
-    { text: 'In the pull request description only, because the commit history is not the place for tool names.', why: 'The pull request is for the reviewer. The commit carries the record into the history, where the description does not follow.' },
+    { text: 'An `Assisted-by` line in the body paragraph, and your own `Signed-off-by` as the last paragraph.', why: 'The sign-off is right, and the Assisted-by line is only text there. Git reads trailers from the last paragraph, so tools miss the agent.' },
+    { text: 'A subject line that ends in "(AI-assisted)", and your own `Signed-off-by` as the last paragraph.', why: 'A one-line log shows the note, and a tool that reads trailers does not. The project asked for an Assisted-by trailer.' },
+    { text: 'A last paragraph with `Assisted-by` for the agent and a `Signed-off-by` in the agent\'s name.', why: 'The Assisted-by trailer is in the right place, and the agent cannot certify the DCO. Only a person can sign off.' },
+    { text: 'A last paragraph with `Assisted-by` for the agent and your own `Signed-off-by`.', correct: true },
   ]}>
-Where in the commit message does the `Assisted-by` line go so that git
-reads it as a trailer?
+How does the commit message end?
 </Choice>
 
 <Exercise stretch="Look at the last ten commits in a repository your team uses with agents. Count how many name the agent in a trailer, and how many say so only in the body or not at all.">
@@ -235,8 +238,9 @@ ran the tests. Write both as you would send them, in a copy of the
 directory. Then run `python3 trailers.py` with your message file as its
 argument to see which trailers git finds.
 
-Take out the agent's sign-off. If your project asks for one, add your own
-with `git commit -s` once you have read the change, and not before.
+Take out the agent's sign-off. If your project asks for a sign-off, write
+your own `Signed-off-by` line in the file, the line `git commit -s` would
+add. In real work, add it only once you have read the change.
 Decide what to do with the date-parsing tidy-up: take it out of this
 change, or name it in both texts.
 
@@ -254,8 +258,8 @@ assumed without it?
 <Recap>
 1. Before you ask for review, read every line yourself and split a change that's too large to read. The pull request says what the agent did and what you checked, and the change goes through the same review and CI gates as any other.
 2. Reviewers read the diff, and the description tells them where to look. Answer for the whole change as its author, including the parts the agent wrote.
-3. Put the attribution in a trailer in the last paragraph of the commit message, in the form the project asks for, such as `Assisted-by` or `Co-authored-by` (@Git docs git-interpret-trailers).
-4. A `Signed-off-by` line often certifies the Developer Certificate of Origin, which only a person can give. An agent never signs off, and you sign off only after you have read the change (@Linux coding assistants).
+3. Put the attribution in a trailer in the last paragraph of the commit message (@Git docs git-interpret-trailers), in the form the project asks for, such as `Assisted-by` or `Co-authored-by`.
+4. In a project that uses the Developer Certificate of Origin, a `Signed-off-by` line certifies it, and only a person can give that. An agent never signs off, and you sign off only after you have read the change (@Linux coding assistants).
 </Recap>
 
 <Habit id="read-the-trailer-block">
