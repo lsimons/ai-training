@@ -1,0 +1,7 @@
+{
+  "name": "shelf-notes",
+  "version": "1.0.0",
+  "description": "Keeps short notes in a JSON file.",
+  "main": "notes.js",
+  "license": "MIT"
+}
