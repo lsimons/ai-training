@@ -200,6 +200,18 @@ worktree. No merge conflict and no error showed it. Tell every session to
 leave the stash alone and to commit its work in progress instead.
 </Pitfall>
 
+What else the sessions share needs a decision before they start. Give each
+session its own copy of what it can have per worktree, such as the
+dependency install and a test database file. When a session must run a
+server, pick a port for it. Leave alone what only exists once: the stash, the `main` branch,
+which only you merge into, and a dev server on a fixed port. For the last
+one, tell the agents to run the build or the check and not to start the
+server. Claude Code also shares permission approvals between worktrees.
+In a worktree session, a "Yes, and don't ask again" answer for a command
+saves the rule in the main checkout's settings. The rule then applies in
+every worktree of the repository, except on Windows and in the other cases
+the vendor page names (@Claude Code worktrees).
+
 <Sort id="own-or-shared" objective="coding-with-agents/works-in-team/runs-parallel-work"
   concepts={['worktrees']}
   context="A developer runs two coding agent sessions in two git worktrees of one clone on one laptop, and sorts what each session could change into what each worktree has for itself and what all sessions share."
@@ -295,18 +307,6 @@ Both branches are finished, and each check passed on its own branch. What
 do you do?
 </Scenario>
 
-What else the sessions share needs a decision before they start. Give each
-session its own copy of what it can have per worktree: the dependency
-install, a test database file, a port you pick for it when it must run a
-server. Leave alone what only exists once: the stash, the `main` branch,
-which only you merge into, and a dev server on a fixed port. For the last
-one, tell the agents to run the build or the check and not to start the
-server. Claude Code also shares permission approvals between worktrees.
-When you answer "Yes, and don't ask again" for a command in a worktree
-session, the rule is saved in the main checkout's settings and applies in
-every worktree of the repository, except on Windows and in the other cases
-the vendor page names (@Claude Code worktrees).
-
 ## How this course is built
 
 Many pages of this course are written by agent sessions that run side by
@@ -355,7 +355,7 @@ You write the brief for the docs session. Which of these lines do you put in it?
     { text: 'Ask the first session to review the second branch, because it knows the code that was merged.', why: 'That session may be on its next task, and a reading of the diff doesn\'t run the examples. The check on the rebased branch does.' },
     { text: 'Merge it now, and run the full check on main afterwards, where both changes are together.', why: 'A failure on main then reaches everyone who pulls it. The rebased branch is the place to find it first.' },
   ]}>
-The rebase is clean. What comes next?
+What comes next, now that the rebase is clean?
 </Choice>
 
 <Choice id="whose-stash" phase="review" objective="coding-with-agents/works-in-team/runs-parallel-work"
