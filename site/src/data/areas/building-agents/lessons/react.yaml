@@ -28,7 +28,7 @@ sources-checked: 2026-09-25
 review-by: 2027-03-25
 minutes: 12
 notes: >-
-  The fake model writes one line of reasoning before each tool request. Predict the trace. Most
+  The fake model writes one line of reasoning before each tool request. Run the trace. Most
   tool-using loops are this pattern whether or not the reasoning is shown. The loop in
   site/examples/building-agents/react/agent.py is the one from stopping-the-loop, unchanged, and
   the exercise adds a thought to that lesson's three fake models, which are the "same three tasks"
