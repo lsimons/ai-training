@@ -3,8 +3,9 @@ import { Choice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from
 In this lesson we count what a second and a third agent cost, and we
 decide when a design with more agents should replace one agent. In a
 pipeline, code runs three agents one after another, and each one gets
-what the one before it wrote. In a manager design, a model calls two workers as tools and
-decides when each one runs. The previous lesson builds both in code.
+what the one before it wrote. In a manager design, a model calls two
+workers as tools and decides when each one runs. The previous lesson
+builds both with fake models.
 Here both answer a task that one agent can also do, and we run them
 next to one agent that does the same work alone and count the
 difference.
@@ -72,8 +73,9 @@ each agent reads it again. The manager has three calls of its own, and
 each one reads the manager's whole conversation so far, the email
 included. The manager also copies the notes of `lookup` into its call to
 the writer, and it writes the writer's reply again as its own answer.
-Each of its calls re-reads the email, its own earlier calls and the
-worker results, so 718 of its 1225 tokens are repeats.
+Its later calls re-read the email, its own earlier calls and the worker
+results, and every agent re-reads the shop text, so 718 of its 1225
+tokens are repeats.
 
 The pipeline costs only 1.4 times the one-agent design here, partly
 because the writer and the checker never read the email. The next
@@ -157,10 +159,10 @@ window holds, or the context is full of old tool results before the
 agent reaches the question. The agent can load text just in time: it
 reads a file or searches when it needs a fact, and it doesn't take
 everything in at the start. With compaction, the API writes a
-summary of the early part of a conversation and sends that summary in
+summary of the early part of a conversation, and the summary takes the
 place of those turns. A long agent task then uses fewer tokens and
-still fits in the window (@Claude docs compaction). Claude Platform 101 teaches
-more patterns for managing the context of a long-running agent
+still fits in the window (@Claude docs compaction). Claude Platform 101
+teaches more patterns for managing the context of a long-running agent
 (@Academy claude-platform-101). When the work is still too large after
 you try those patterns, a second agent can read a large part of it in
 its own context and send back a short summary.
