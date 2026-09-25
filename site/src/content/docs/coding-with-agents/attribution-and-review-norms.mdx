@@ -27,8 +27,8 @@ and think it is right. If they find a line you never read, they learn
 that your request meant less than that.
 
 **The description says what the agent did and what you verified.** Name
-the part the agent wrote, the checks you ran yourself, and what you did
-not check. "The agent ran the tests" reports what the agent said. "I ran
+the part the agent wrote, the checks you ran yourself, and what you
+didn't check. "The agent ran the tests" reports what the agent said. "I ran
 the tests, and the new one fails on `main` and passes here" reports what
 you saw.
 
@@ -40,7 +40,7 @@ CI run and a reviewer's approval. "The agent tested it" doesn't replace either, 
 agent's tests are part of the change under review.
 
 **The change is small enough to read.** An agent can produce a thousand
-lines in the time a person reviews fifty. A diff that is too large to
+lines in the time a person reviews fifty. A diff that's too large to
 read gets skimmed or blocked. Split it before you ask. Put a mechanical
 rename in its own pull request, and keep each change to one purpose. A
 tidy-up the agent made on the side belongs in a separate pull request, or
@@ -244,7 +244,7 @@ A good result: the message says what changed and why, and ends with one
 trailer paragraph that `trailers.py` prints in full, `Assisted-by` in the
 form this lesson used or the form your team uses. The pull request says
 what the agent wrote, what you ran yourself and what you saw, and what
-you did not check. A reviewer could tell from it where to look hardest.
+you didn't check. A reviewer could tell from it where to look hardest.
 
 Reflect: which sentence in your pull request would you have left out if
 this exercise had not asked for it, and what would the reviewer have
@@ -252,7 +252,7 @@ assumed without it?
 </Exercise>
 
 <Recap>
-1. Before you ask for review, read every line yourself and split a change that is too large to read. The pull request says what the agent did and what you checked, and the change goes through the same review and CI gates as any other.
+1. Before you ask for review, read every line yourself and split a change that's too large to read. The pull request says what the agent did and what you checked, and the change goes through the same review and CI gates as any other.
 2. Reviewers read the diff, and the description tells them where to look. Answer for the whole change as its author, including the parts the agent wrote.
 3. Put the attribution in a trailer in the last paragraph of the commit message, in the form the project asks for, such as `Assisted-by` or `Co-authored-by` (@Git docs git-interpret-trailers).
 4. A `Signed-off-by` line often certifies the Developer Certificate of Origin, which only a person can give. An agent never signs off, and you sign off only after you have read the change (@Linux coding assistants).
