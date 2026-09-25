@@ -26,15 +26,13 @@ and #342. `.claude/settings.json` registers them.
   edited file under `site/` and ruff on an edited `.py` file, in the
   worktree that holds the file, and never fails the tool call.
 
-The layers cover different things, and JSON has no comments, so this file
-says it:
+JSON has no comments, so this file says what each layer covers:
 
 - The deny rules in `settings.json` stop the forms they spell out:
   `Edit` on `settings.json` itself, `gh repo delete`, and `gh api -X DELETE`
   when `-X DELETE` comes right after `api`. They miss other flag forms and
-  places, such as `gh api <path> --method DELETE`. The Claude Code
-  permissions page says a deny rule stops the command text it matches and
-  not the same program run in another form
+  places, such as `gh api <path> --method DELETE`. A deny rule stops only
+  the command text it matches
   (<https://code.claude.com/docs/en/permissions>, "What a Bash rule
   doesn't match").
 - The allow rules run the commands they match without a prompt. The rule
@@ -43,5 +41,5 @@ says it:
 - The guard hook reads every part of a compound command and covers the
   flag forms the deny rules miss. A hook that exits 2 blocks the call even
   when an allow rule matches it (same page, "Extend permissions with
-  hooks"). It matches shell text, so it catches mistakes and not an agent
-  that works around it on purpose.
+  hooks"). It matches shell text, so an agent that works around it on
+  purpose gets past it.
