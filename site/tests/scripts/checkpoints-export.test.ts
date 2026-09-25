@@ -2,7 +2,13 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { checkAlternates, checkCheckpoints, conceptIds, pageCheckpointIds } from '../../scripts/lib/checkpoints.mjs';
+import {
+	checkAlternates,
+	checkCheckpoints,
+	checkpointTagId,
+	conceptIds,
+	pageCheckpointIds,
+} from '../../scripts/lib/checkpoints.mjs';
 
 const roots: string[] = [];
 afterAll(() => {
@@ -204,5 +210,17 @@ describe('helpers', () => {
 		const broken = PAGE.replace('<Choice id="one"', '<Choice id="one" {...rest}');
 		const { errors } = check(tree(GOOD, { 'content/a/x.mdx': broken }));
 		expect(errors[0]).toMatch(/a\/x: <Choice> has a spread prop/);
+	});
+});
+
+describe('checkpointTagId', () => {
+	const tag = (attrs: [string, { value: unknown; expr: boolean }][]) => ({ attrs: new Map(attrs) });
+	it('returns a string id written as id="..."', () => {
+		expect(checkpointTagId(tag([['id', { value: 'one', expr: false }]]))).toBe('one');
+	});
+	it('returns undefined for a missing id, an expression id and a non-string id', () => {
+		expect(checkpointTagId(tag([]))).toBeUndefined();
+		expect(checkpointTagId(tag([['id', { value: 'one', expr: true }]]))).toBeUndefined();
+		expect(checkpointTagId(tag([['id', { value: true, expr: false }]]))).toBeUndefined();
 	});
 });
