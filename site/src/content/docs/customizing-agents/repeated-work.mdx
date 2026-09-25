@@ -100,8 +100,8 @@ on what the step is and what one miss costs.
   instruction is a request. The agent weighs it against everything else in
   its context. A hook runs on its event every time, whatever the model
   remembers (@Claude Code features). A hand edit under `src/api/generated/`
-  is lost the next time anyone regenerates the client, and nobody sees it
-  go.
+  is lost the next time anyone regenerates the client, and nobody notices
+  when it disappears.
 - **An example to copy goes into a context file.** **Context files** are
   files the team keeps for the agent to read, reviewed like code. The
   `useApi()` snippet is a pattern to copy. It belongs in a short file such
@@ -169,7 +169,7 @@ as reading the diff of the regenerated client before it is committed.
     { text: 'The three commands that regenerate the API client, in their order', bucket: 1 },
     { text: 'No edit to a file under src/api/generated/, on any task', bucket: 2 },
     { text: 'The useApi() snippet that shows how a page calls the billing API', bucket: 3 },
-    { text: 'Commit messages follow Conventional Commits', bucket: 0 },
+    { text: 'The tests run with npm test, and the API tests with npm test -- src/api', bucket: 0 },
     { text: 'No commit of a file named .env, which holds the local secrets', bucket: 2 },
   ]} />
 
@@ -268,7 +268,7 @@ hand edit under `src/api/generated/`. Which message should it write?
   title="Where does it move?" hint="Is it a fact for most tasks, steps in an order, a rule that must hold every time, or a pattern to copy?"
   options={['Project instructions', 'Skill', 'Hook', 'Context file']}
   rows={[
-    { statement: 'The package manager is pnpm, and npm must not be used', option: 0, why: 'Does this apply to most tasks, and is it a single fact?' },
+    { statement: 'The project uses pnpm as its package manager', option: 0, why: 'Does this apply to most tasks, and is it a single fact?' },
     { statement: 'The five steps to add a new language to the site, in order', option: 1, why: 'Is this a list of steps that only some tasks need?' },
     { statement: 'No change to a file under migrations/, which another team owns', option: 2, why: 'What happens if the agent skips this once?' },
     { statement: 'A complete test file that shows how the team mocks the payment service', option: 3, why: 'Is this steps to follow or a pattern to copy?' },
@@ -313,7 +313,8 @@ is work on paper, and it takes about ten minutes. It trains the question to
 ask the next time you type an explanation you have typed before.
 
 A good result places the four steps as this lesson did, and your file keeps
-the lines for the tests, the linter, the commit messages and the folders.
+the lines for Node, the tests and the linter, the commit messages and the
+folders.
 Compare with the files in `model-answer/`. Your wording will differ, and
 the places should be the same. If you placed a step somewhere else, write
 the reason down and check it against the four questions above. Which
