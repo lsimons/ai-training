@@ -253,6 +253,7 @@ const RED_TEAM_TOOL =
 export const UNRUN_EXEMPT = new Map([
 	['building-agents/planning/model_answer.py', MODEL_ANSWER],
 	['building-agents/reflection/model_answer.py', MODEL_ANSWER],
+	['building-agents/orchestrating-agents/model_answer.py', MODEL_ANSWER],
 	['coding-with-agents/red-teaming-your-agent/check_run.py', RED_TEAM_TOOL],
 	['coding-with-agents/red-teaming-your-agent/make_scratch.py', RED_TEAM_TOOL],
 	['coding-with-agents/red-teaming-your-agent/scan_hidden.py', RED_TEAM_TOOL],

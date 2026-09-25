@@ -1,5 +1,9 @@
 id: building-agents/orchestrating-agents
 title: Orchestration in code or by a model
+description: >-
+  Run three fake agents as a pipeline in code and then under a manager model that calls two of them
+  as tools, name the sequential, hierarchical and collaborative arrangements, and stop the run with
+  a report when a fault hits a boundary.
 mode: tutorial
 covers: building-agents/orchestration
 serves:
@@ -15,10 +19,20 @@ exercise:
     Inject a fault at each boundary of the fixture's manager-and-workers arrangement (an empty plan
     from the manager, a tool error from a worker) and make the orchestrator stop and report. The
     output is the two traces.
-sources: [Academy claude-platform-101, Academy introduction-to-subagents]
-issue: 209
+sources: [AEC-07, AEC-18, Claude Code subagents, Academy introduction-to-subagents]
+sources-checked: 2026-09-26
+review-by: 2027-03-26
 minutes: 15
 notes: >-
-  A sequential pipeline written in code, then a manager fake model that delegates to two workers as
-  tools. Predict the handoff messages and which agent runs when in each arrangement. The token
-  comparison waits for the next lesson (Academy introduction-to-subagents, Academy claude-platform-101).
+  The fixture in site/examples/building-agents/orchestrating-agents/agent.py handles one customer
+  message about the kettle from order 1042 of the planning lesson's shop. The pipeline is three
+  fake agents run by the program: lookup, writer, checker. The manager arrangement is one fake
+  manager model with two workers called as tools: lookup and writer. The orchestration-tax lesson
+  models the same two arrangements for its token comparison, so keep the shapes in step. The
+  handoff Predict shows a fact (the office address) lost at the first boundary. The page shows the
+  worker-error check, and the exercise has the learner write the empty-plan check;
+  model_answer.py is one answer. Academy claude-platform-101 from the plan was dropped because the
+  page cites no claim from it. Each first checkpoint has a review alternate on its idea: the
+  handoff Predict and the lost-fact Choice, the code-or-model Choice and the nightly-report
+  Scenario, the arrangement Sort and the which-arrangement Choice, the guarded-error Predict and
+  the after-the-error Choice.

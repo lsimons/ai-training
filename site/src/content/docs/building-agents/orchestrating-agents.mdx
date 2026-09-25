@@ -1,0 +1,473 @@
+import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+In this lesson one customer message goes through three fake agents in two
+arrangements. First a program runs the agents in a fixed order and passes
+each output to the next. Then a fake manager model decides which agent
+runs when, and it calls the other agents as tools. After that we name the
+arrangements, and we break the manager version at each boundary to see
+what reaches the customer.
+
+The customer is from the small shop in
+[Writing the plan before taking the steps](/building-agents/planning/),
+and the message is about the kettle from order 1042. The agents and the
+manager are fake models written by hand. The runs show how each
+arrangement passes work along, and they don't show how well a real model
+does it. The complete program is
+`site/examples/building-agents/orchestrating-agents/agent.py` in the
+repository. Copy the `orchestrating-agents` folder, and each step below is
+`python3 agent.py <step>`.
+
+## A pipeline written in code
+
+The message is "My kettle from order 1042 stopped working. Please send
+the replacement to my office address this time." The agents are
+`lookup`, `writer` and `checker`. `lookup` reads the message, looks up the order and writes a brief of one
+line. `writer` writes the reply from the brief. `checker` reads the reply
+and approves it or rejects it. Here are the first two, each a fake model
+call with text in and text out.
+
+```python
+def lookup(message: str) -> str:
+    """Reads the customer's message, looks up the order and writes a one-line brief."""
+    order_id = order_id_in(message)
+    order = ORDERS[order_id]
+    wish = "refund" if "money back" in message else "replacement"
+    days = order["days_since_delivery"]
+    return f"order {order_id}, {order['item']}, delivered {days} days ago, wants a {wish}"
+
+
+def writer(brief: str) -> str:
+    """Writes the reply to the customer from the brief."""
+    parts = brief.split(", ")
+    if len(parts) == 4 and parts[0].startswith("order "):
+        order, item, wish = parts[0], parts[1], parts[3].replace("wants a ", "")
+        return (
+            f"Dear customer, we are sorry that your {item} broke. "
+            f"A {wish} for {order} is on its way."
+        )
+    return "Dear customer, we are sorry about the problem. We will get back to you soon."
+```
+
+The order data says the kettle was delivered 12 days ago. The program
+decides who runs when, and it always runs `lookup`, then `writer`, then
+`checker`.
+
+```python
+def pipeline(message: str) -> list:
+    messages = [("customer", "lookup", message)]
+    brief = lookup(message)
+    messages.append(("lookup", "writer", brief))
+    draft = writer(brief)
+    messages.append(("writer", "checker", draft))
+    verdict = checker(draft)
+    messages.append(("checker", "program", verdict))
+    if verdict == "approved":
+        messages.append(("program", "customer", draft))
+    return messages
+```
+
+This is orchestration in code. The Agent Engineer Course calls it
+deterministic: the flow is written down in advance, so it runs the same
+way every time, is easy to step through, and doesn't spend a model call
+on deciding what comes next (@AEC-18). The messages from one agent to the
+next are the handoffs. The `handoffs` step prints those two, each as
+`sender -> receiver: 'text'`.
+
+<Predict id="predict-handoffs" objective="building-agents/orchestrates-agents/justifies-orchestration-cost"
+  concepts={['code-vs-model-driven-orchestration']}
+  context="In the lesson, a program runs three fake agents in a fixed order on one customer message: My kettle from order 1042 stopped working. Please send the replacement to my office address this time. The lookup agent returns a brief of the form order ID, item, delivered N days ago, wants a WISH, where the wish is refund if the message says money back and replacement otherwise. The order data says the kettle was delivered 12 days ago. The writer agent splits the brief at each comma and space. With four parts it returns: Dear customer, we are sorry that your ITEM broke. A WISH for ORDER is on its way. Here ORDER is the first part of the brief, such as order 1042. The output is one line per handoff, as sender -> receiver: and the text in single quotes, first from lookup to writer and then from writer to checker."
+  title="Predict the handoffs"
+  hint="What does lookup put in its brief, and which part of the customer's message has no place in it?"
+  answer={`lookup -> writer: 'order 1042, kettle, delivered 12 days ago, wants a replacement'
+  writer -> checker: 'Dear customer, we are sorry that your kettle broke. A replacement for order 1042 is on its way.'`} run="building-agents/orchestrating-agents/handoffs.py">
+
+What are the two handoff messages? Predict the output, then run it.
+
+```sh
+python3 agent.py handoffs
+```
+
+</Predict>
+
+The brief has no place for the office address, so the address is lost at
+the first boundary. The checker approves the reply, because it sees only
+the draft, and the draft reads well. Here is the whole run.
+
+<Predict id="run-pipeline" title="The whole pipeline"
+  answer={`customer -> lookup: 'My kettle from order 1042 stopped working. Please send the replacement to my office address this time.'
+  lookup -> writer: 'order 1042, kettle, delivered 12 days ago, wants a replacement'
+  writer -> checker: 'Dear customer, we are sorry that your kettle broke. A replacement for order 1042 is on its way.'
+  checker -> program: 'approved'
+  program -> customer: 'Dear customer, we are sorry that your kettle broke. A replacement for order 1042 is on its way.'`} run="building-agents/orchestrating-agents/pipeline.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 agent.py pipeline
+```
+
+</Predict>
+
+A fact can be dropped at each boundary between agents. The Agent
+Engineer Course lists this among the weaknesses of a pipeline, because a
+mistake early in the line travels forward to the agents after it
+(@AEC-07). One agent that read the message and wrote the reply would have
+had the address in its context. The pipeline made three model calls and
+two handoffs, and it lost a fact on the way. Add a second agent when it
+can do something the first can't, such as work with a focused prompt,
+its own small set of tools or other permissions (@AEC-07). The next
+lesson counts what each arrangement costs in tokens.
+
+## A manager that delegates to workers
+
+Now a model decides who runs when. A manager model gets the customer's
+message, and it can call two workers, `lookup` and `writer`, the way an
+agent calls tools. The loop around the manager runs each worker call the
+manager asks for, and gives the result back to the manager. The manager
+does the checker's work itself. Here is the fake manager.
+
+```python
+def manager(history: list) -> dict:
+    last = history[-1]
+    if last["from"] == "customer":
+        return {"calls": [{"worker": "lookup", "task": last["text"]}]}
+    if last["from"] == "lookup":
+        # Like a real model, it passes on what it got, an error message included.
+        brief = last["text"] if last["ok"] else last["error"]
+        return {"calls": [{"worker": "writer", "task": brief}]}
+    return {"answer": last["text"]}
+```
+
+Each reply either asks for worker calls or gives the answer. The loop
+runs a worker the way a harness runs a tool, and turns its result into a
+dictionary with `ok` and either `text` or `error`.
+
+```python
+for _ in range(max_turns):
+    reply = model(history)
+    problem = check_reply(reply)
+    if problem:
+        stop(problem)
+        return
+    if "answer" in reply or not reply.get("calls"):
+        show("manager", "customer", reply.get("answer", ""))
+        return
+    for call in reply["calls"]:
+        show("manager", call["worker"], call["task"])
+        result = run_worker(workers, call["worker"], call["task"])
+        show(call["worker"], "manager", result)
+        history.append({"from": call["worker"], **result})
+        problem = check_result(call["worker"], result)
+        if problem:
+            stop(problem)
+            return
+```
+
+`check_reply` and `check_result` are the checks at the two boundaries,
+and for now neither of them stops a run. The `manager` step runs the
+same message.
+
+<Predict id="run-manager" title="The manager and its workers"
+  answer={`manager -> lookup: 'My kettle from order 1042 stopped working. Please send the replacement to my office address this time.'
+  lookup -> manager: {'ok': True, 'text': 'order 1042, kettle, delivered 12 days ago, wants a replacement'}
+  manager -> writer: 'order 1042, kettle, delivered 12 days ago, wants a replacement'
+  writer -> manager: {'ok': True, 'text': 'Dear customer, we are sorry that your kettle broke. A replacement for order 1042 is on its way.'}
+  manager -> customer: 'Dear customer, we are sorry that your kettle broke. A replacement for order 1042 is on its way.'`} run="building-agents/orchestrating-agents/manager.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 agent.py manager
+```
+
+</Predict>
+
+The customer gets the same reply, and the address is still lost. This
+time a model decided who ran when. Each line that starts with
+`manager ->` comes from a model call that picked the next agent, and a
+real manager could pick another order, skip a worker or call one twice.
+So orchestration by a model can handle a task whose steps nobody wrote
+down in advance. In exchange, the same input can take a different path,
+which is harder to debug, and each decision is one more model call
+(@AEC-18).
+
+Claude Code uses this arrangement for its subagents. The main
+conversation hands a task to a subagent, and the subagent starts with a
+fresh context window of its own. It doesn't see the conversation so far,
+and it returns only a summary of its work (@Claude Code subagents). The
+Academy course on subagents presents this as a way to keep the main
+context window clean (@Academy introduction-to-subagents). It also means
+that a fact the task text doesn't mention is out of the subagent's reach.
+The task text is the handoff, as the brief was in the pipeline.
+
+<Choice id="code-or-model" objective="building-agents/orchestrates-agents/justifies-orchestration-cost"
+  concepts={['code-vs-model-driven-orchestration']}
+  context="A team handles expense claims with three agents. Every claim goes through the same three steps in the same order: read the receipt, check the amount against the policy, and write the approval note."
+  title="Who decides the order?"
+  hint="Does anything about the order of the steps change from one claim to the next?"
+  options={[
+    { text: 'A manager model that decides for each claim which agent runs next, so it can adapt to odd claims.', why: 'The order is the same for every claim, so the manager makes a decision the team already knows. Each decision costs a model call and can go wrong.' },
+    { text: 'A program that runs the three agents in a fixed order and passes each output to the next one.', correct: true },
+    { text: 'Three peer agents in one shared conversation that agree among themselves who goes next.', why: 'The peers negotiate an order that never changes. Of the three arrangements this one is the hardest to predict and to debug.' },
+    { text: 'A manager model with the three agents as tools and a list of the order in its prompt.', why: 'The prompt asks a model to follow an order that the program could enforce. The model can still skip a step or repeat one.' },
+  ]}>
+
+How should the team coordinate the three agents?
+
+</Choice>
+
+## Sequential, hierarchical and collaborative
+
+The pipeline and the manager are two of the common arrangements, and
+the Agent Engineer Course describes them with a third (@AEC-07).
+
+- **Sequential.** The agents form a pipeline, and each one works on the
+  output of the one before it. The pipeline above is sequential.
+- **Hierarchical.** A manager splits the task, hands the parts to worker
+  agents and puts their results together. The manager above is
+  hierarchical, with two workers.
+- **Collaborative.** Peer agents share a workspace or a conversation,
+  read each other's work and agree on a result, with none of them in
+  charge.
+
+The coordination gets harder in that order. The course rates it low for
+a pipeline, medium for a manager and its workers, and high for a group
+of peers, and it lists endless discussion among the risks of the last
+(@AEC-07). The arrangements also combine, and a step of a pipeline can
+itself be a manager with workers. The course advises starting with one
+agent, then a pipeline if the task has stages, and a system of many
+agents only when one agent has shown that it can't do the task
+(@AEC-18).
+
+<Sort id="name-the-arrangement" objective="building-agents/orchestrates-agents/composes-patterns"
+  concepts={['sequential-hierarchical-collaborative']}
+  context="The lesson names three arrangements of agents. In a sequential one, each agent works on the output of the one before it. In a hierarchical one, a manager hands parts of a task to workers and combines their results. In a collaborative one, peer agents share a workspace or conversation, with none in charge."
+  title="Name the arrangement"
+  hint="Who decides what each agent works on: a fixed order, a manager, or the peers among themselves?"
+  buckets={['Sequential', 'Hierarchical', 'Collaborative']}
+  items={[
+    { text: 'A program sends each scanned letter to an extractor, then a classifier, then a filing agent', bucket: 0 },
+    { text: 'A lead agent splits a research question and hands each part to a search agent', bucket: 1 },
+    { text: 'Three reviewer agents post findings in one shared thread and reply to each other until they agree', bucket: 2 },
+    { text: 'A coding agent starts one helper for the tests and one for the docs, and merges what they return', bucket: 1 },
+    { text: 'An editing agent always gets the text of the drafting agent and passes its edit to a layout agent', bucket: 0 },
+    { text: 'A planning agent and a critic agent take turns in a shared document, and neither assigns work to the other', bucket: 2 },
+  ]} />
+
+## A fault at each boundary
+
+The manager version has two boundaries: the manager's reply to the loop,
+and a worker's result to the manager. We break each one. At the first,
+the manager's reply asks for no worker and doesn't answer either, which
+is an empty plan. At the second, the order service times out, and the
+`lookup` worker returns an error. Here is the empty plan.
+
+<Predict id="run-empty-plan" title="An empty plan from the manager"
+  answer={`manager -> customer: ''`} run="building-agents/orchestrating-agents/empty_plan.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 agent.py empty_plan
+```
+
+</Predict>
+
+The loop takes a reply with no calls as the end of the run, and the
+customer gets an empty message. Here is the timeout.
+
+<Predict id="run-tool-error" title="A tool error from a worker"
+  answer={`manager -> lookup: 'My kettle from order 1042 stopped working. Please send the replacement to my office address this time.'
+  lookup -> manager: {'ok': False, 'error': 'order service timed out'}
+  manager -> writer: 'order service timed out'
+  writer -> manager: {'ok': True, 'text': 'Dear customer, we are sorry about the problem. We will get back to you soon.'}
+  manager -> customer: 'Dear customer, we are sorry about the problem. We will get back to you soon.'`} run="building-agents/orchestrating-agents/tool_error.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 agent.py tool_error
+```
+
+</Predict>
+
+The manager passed the error text to the writer as if it were a brief,
+and the customer got a polite reply that promises nothing. Nobody in the
+shop knows that the lookup failed. Each run ends with a message to the
+customer, and neither message is true to what happened. The course asks
+for a check of each agent's output before the next agent gets it, so
+that a bad result doesn't travel on (@AEC-18). The guarded run passes
+`stop_on_error` as the check for worker results.
+
+```python
+def stop_on_error(worker: str, result: dict) -> Optional[str]:
+    """Stops the run when a worker returns an error."""
+    if not result["ok"]:
+        return f"{worker} failed: {result['error']}"
+    return None
+```
+
+When a check returns a text, `stop` prints it after `stopped: ` and then
+prints `nothing was sent to the customer`. The check runs in the loop,
+after the worker's result is shown and before the manager's next turn.
+
+<Predict id="predict-guarded-error" objective="building-agents/orchestrates-agents/composes-patterns"
+  concepts={['sequential-hierarchical-collaborative']}
+  context="In the lesson, a fake manager model delegates to two workers that it calls as tools: lookup, then writer. The loop prints each message as sender -> receiver: and the content, with a worker result shown as a dictionary with ok and text, or ok and error. In this run the lookup worker returns {'ok': False, 'error': 'order service timed out'}. The loop checks each worker result after it prints it and before the manager's next turn. The check returns the worker name, then failed:, then the error. On a check that returns a text, the loop prints stopped: and the text, then the line nothing was sent to the customer, and ends. The customer message starts: My kettle from order 1042."
+  title="Predict the report"
+  hint="Which line does the loop print before the check runs, and does the manager get another turn after it?"
+  answer={`manager -> lookup: 'My kettle from order 1042 stopped working. Please send the replacement to my office address this time.'
+  lookup -> manager: {'ok': False, 'error': 'order service timed out'}
+  stopped: lookup failed: order service timed out
+  nothing was sent to the customer`} run="building-agents/orchestrating-agents/guarded.py">
+
+The `lookup` worker times out again, and this time the loop checks each
+worker result. What does the run print? Predict the output, then run it.
+
+```sh
+python3 agent.py guarded
+```
+
+</Predict>
+
+The run stops at the boundary where the fault happened, and the report
+names the worker and the error. A person or a retry policy can act on
+that. The writer never ran, and the customer got nothing false.
+
+<Pitfall title="A manager model for steps that never change">
+A team builds a manager model to run a workflow of four steps that always
+run in the same order, because a manager with workers looked more
+capable. The manager makes a model call before each step to choose the
+step the team already knew, and one day it skips one. The trace shows a
+choice at every turn, and none of them was needed. Rule: when the steps
+and their order are known in advance, write the order in code, and keep
+a model for the parts where the next step depends on what the last one
+found.
+</Pitfall>
+
+The guarded loop has a check for worker results, and its check for the
+manager's reply, `stop_on_empty_plan`, lets every reply through. The
+`exercise` step runs both faults with the guarded loop.
+
+<Predict id="run-exercise" title="Both faults before the exercise"
+  answer={`fault: empty plan from the manager
+  manager -> customer: ''
+  fault: tool error from the lookup worker
+  manager -> lookup: 'My kettle from order 1042 stopped working. Please send the replacement to my office address this time.'
+  lookup -> manager: {'ok': False, 'error': 'order service timed out'}
+  stopped: lookup failed: order service timed out
+  nothing was sent to the customer`} run="building-agents/orchestrating-agents/exercise.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 agent.py exercise
+```
+
+</Predict>
+
+<Exercise stretch="Add a check for the writer's result as well: stop when the draft doesn't name the order the customer wrote about. Run tool_error with that check alone and see which boundary now catches the fault.">
+
+In your copy of the `orchestrating-agents` folder, write
+`stop_on_empty_plan` so that it returns a text when the manager's reply
+has no worker calls and no answer, and `None` otherwise. Run
+`python3 agent.py exercise`. The output is the two traces, one per
+fault. Writing the check yourself shows that the boundary checks belong
+to the code around the model, whoever decides the order.
+
+A good result: the empty plan trace ends with a `stopped:` line that
+says the manager returned an empty plan, then
+`nothing was sent to the customer`, and the tool error trace is as it
+was. `python3 agent.py manager` still prints the reply to the customer.
+Compare with `python3 model_answer.py` in the same folder. Which other
+boundary in this arrangement could pass a bad result on, and what would
+its check look for? The opening comment of `model_answer.py` gives one
+answer.
+
+</Exercise>
+
+<Recap>
+
+1. In orchestration by code, a program decides which agent runs when.
+   It runs the same way every time and costs no model call to decide
+   (@AEC-18).
+2. In orchestration by a model, a manager decides and calls the other
+   agents as tools. It can handle steps nobody planned, and the same
+   input can take another path (@AEC-18).
+3. A fact can be lost at each handoff. Add a second agent when it can
+   do something the first can't (@AEC-07).
+4. Sequential, hierarchical and collaborative arrangements get harder to
+   coordinate in that order (@AEC-07). Check the result at each boundary
+   in code, and stop with a report when it is wrong.
+
+</Recap>
+
+<Habit id="read-the-handoff">
+The next time you hand a task to a subagent or a second agent, read the
+task text it gets and check that it holds every fact the work depends on.
+</Habit>
+
+<Choice id="where-the-fact-was-lost" phase="review" objective="building-agents/orchestrates-agents/justifies-orchestration-cost"
+  concepts={['code-vs-model-driven-orchestration']}
+  context="A program runs three agents in a fixed order on support tickets. A reader agent writes a one-line summary of the ticket, a translator translates the summary, and a checker reviews the translation for grammar. The checker sees only the translation. One ticket says the customer writes on behalf of their father, who owns the account."
+  title="Where was the fact lost?"
+  hint="Which agent was the last one to see the whole ticket?"
+  options={[
+    { text: 'The reader left it out of the summary, and the checker never sees the ticket.', correct: true },
+    { text: 'The translator dropped it, because the checker only looks at the grammar.', why: 'The translator gets the summary, and the fact was missing from the summary already.' },
+    { text: 'The checker dropped it while it fixed the grammar of the translation.', why: 'The checker gets the translation, which already lacked the fact. It can only approve or fix what it is given.' },
+    { text: 'The program dropped it when it passed the summary on to the translator.', why: 'The program passes on the text it gets, unchanged. The fact was missing from that text.' },
+  ]}>
+
+The reply goes to the customer as if they owned the account. Where was
+the fact lost, and why didn't the agents after it notice?
+
+</Choice>
+
+<Scenario id="the-nightly-report" phase="review" objective="building-agents/orchestrates-agents/justifies-orchestration-cost"
+  concepts={['code-vs-model-driven-orchestration']}
+  context="A team runs a report every night with three agents: one fetches the sales numbers, one computes the totals, and one writes the summary. The steps and their order are the same every night. A developer proposes a manager model that calls the three agents as tools."
+  title="The nightly report"
+  hint="What would the manager decide each night that the team doesn't know already?"
+  options={[
+    { text: 'Use the manager model, because it can handle a night when something unusual happens.', consequence: 'Most nights it calls the three agents in the usual order, with a model call before each one. One night it skips the totals, and the summary reports raw numbers.' },
+    { text: 'Use the manager model and log each of its choices, to review them later.', consequence: 'The logs show the same order every night. The team pays for a decision it already knew and reads logs to confirm it.' },
+    { text: 'Write the three steps as a program, and keep a model inside each step.', correct: true, consequence: 'The report runs the same way every night. When a step fails, the trace shows which step it was.' },
+    { text: 'Let the three agents share one conversation and agree each night on who goes first.', consequence: 'The agents spend calls agreeing on an order that never changes. One night they disagree, and the report is late.' },
+  ]}>
+
+The team asks you which design to build. What do you recommend?
+
+</Scenario>
+
+<Choice id="which-arrangement-is-it" phase="review" objective="building-agents/orchestrates-agents/composes-patterns"
+  concepts={['sequential-hierarchical-collaborative']}
+  context="Four agents write a market report. Each can read and write one shared document. Any agent may add a section or ask another agent a question in the document, and none of them assigns work to the others."
+  title="Which arrangement is it?"
+  hint="Is there a fixed order, a manager, or neither?"
+  options={[
+    { text: 'Sequential, because each agent builds on text that another agent wrote before it.', why: 'In a sequential arrangement a fixed order decides who works next. Here any agent may write at any time.' },
+    { text: 'Hierarchical, because one shared document holds the parts and puts the result together.', why: 'A hierarchical arrangement has a manager that assigns the parts. A document assigns nothing, and none of the agents does either.' },
+    { text: 'Collaborative, because peer agents share a workspace and none of them is in charge.', correct: true },
+    { text: 'Hierarchical, because the agent that writes the first section decides what the others do.', why: 'Nothing in the setup gives the first writer that role. Every agent may add a section or ask a question.' },
+  ]}>
+
+Which of the three arrangements from the lesson is this?
+
+</Choice>
+
+<Choice id="after-the-worker-error" phase="review" objective="building-agents/orchestrates-agents/composes-patterns"
+  concepts={['sequential-hierarchical-collaborative']}
+  context="A manager model delegates to two workers that it calls as tools, a search worker and a summary worker. The loop around the manager checks each worker result before the manager's next turn, and on an error it prints a stop line with the worker and the error and sends nothing. The search worker returns an error that the search index is unavailable."
+  title="After the worker error"
+  hint="Where does the check run, and who gets the next turn?"
+  options={[
+    { text: 'The manager passes the error text to the summary worker, and the user gets a summary of it.', why: 'That is the run without the check. With the check, the loop stops before the manager sees the result.' },
+    { text: 'The loop retries the search worker until it works, and then the run carries on as before.', why: 'A retry is a different policy, and this loop has none. The check returns a text, and the run stops.' },
+    { text: 'The manager gets the error on its next turn and writes an apology to the user instead.', why: 'The check runs in the loop and stops the run before the manager has another turn.' },
+    { text: 'The loop stops, reports that the search worker failed with that error, and sends nothing.', correct: true },
+  ]}>
+
+What happens after the search worker returns the error?
+
+</Choice>
