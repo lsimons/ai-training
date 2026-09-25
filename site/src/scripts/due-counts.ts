@@ -1,7 +1,8 @@
 /**
  * Due review counts per course for the surfaces outside the course page
- * (spec S05 "Where reviews surface"): the sidebar count next to each course
- * and the "Concepts: 3 items due" lines on the landing and progress pages.
+ * (spec S05 "Where reviews surface"): the sidebar count next to each course,
+ * the "Concepts: 3 items due" lines on the landing and progress pages, and
+ * the review link label on a course card and the course page.
  * DOM-free; `day` is a parameter so tests can pin it. The count is the same
  * `dueReviewIdsOn` the course page card uses, uncapped.
  */
@@ -28,6 +29,11 @@ export function dueByCourse(
 /** The landing and progress page line: "Concepts: 3 items due". */
 export function dueLine(course: DueCourse): string {
 	return `${course.title}: ${course.due} ${course.due === 1 ? 'item' : 'items'} due`;
+}
+
+/** The review link on a course card and the course page: "Review due: 2 items" or "Review: nothing due yet". */
+export function reviewDueLabel(due: number): string {
+	return due ? `Review due: ${due} item${due === 1 ? '' : 's'}` : 'Review: nothing due yet';
 }
 
 /** The screen-reader text after the sidebar count, so the link reads "Concepts 3 review items due". */

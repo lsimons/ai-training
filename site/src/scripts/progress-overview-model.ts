@@ -43,11 +43,6 @@ export function knownIds(catalog: readonly CatalogCourse[]): KnownIds {
 	};
 }
 
-/** The review link on a course card and the course page: "Review due: 2 items" or "Review: nothing due yet". */
-export function reviewDueLabel(due: number): string {
-	return due ? `Review due: ${due} item${due === 1 ? '' : 's'}` : 'Review: nothing due yet';
-}
-
 /** The hover text of one checkpoint square: "c1: passed" or "c1: not attempted". */
 export function checkpointTitle(checkpointId: string, entry: CheckpointEntry | undefined): string {
 	return `${checkpointId}: ${entry?.state ?? 'not attempted'}`;
