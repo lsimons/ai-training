@@ -554,6 +554,9 @@ def test_review_bash_through_main(capsys: pytest.CaptureFixture[str]) -> None:
         "sed -n 1,20p scripts/agent_hooks.py",
         "sed -n '/^## Now/,/^## Change/p' docs/agents/testing.md",
         "sed -ne '$p' -e '1p' file",
+        "sed -n '/foo$/p' file",
+        "sed -n '/foo$/,$p' file",
+        "for f in a b; do sed -n 1p $f; done",
         "sed -nE 10,12p a b",
         "git diff --stat | sort | uniq -c",
         "sort -u -k 2 names.txt",
@@ -586,6 +589,12 @@ def test_review_bash_allows_the_read_only_commands_of_388(command: str) -> None:
         "sed -n '1w out.txt' file.md",
         "sed -n '1p;w out' file.md",
         "sed -n '1e rm -rf .' file.md",
+        "X=$'a/w pwn\\n/a'; sed -n \"/$X/p\" f",
+        'sed -n "/${X}/p" f',
+        "sed -n /$(echo a)/p f",
+        "sed -n $p f",
+        "sed -n $'1p\\nw pwn' f",
+        "sed -n '/`x`/p' f",
         "sed s/a/b/ file.md",
         "sed -n",
         "sed -n -e",
@@ -593,6 +602,8 @@ def test_review_bash_allows_the_read_only_commands_of_388(command: str) -> None:
         "sort -uo out.txt names.txt",
         "sort --output=out.txt names.txt",
         "sort --compress-program=sh names.txt",
+        "sort --out=x names.txt",
+        "sort --compress=sh names.txt",
         "uniq names.txt out.txt",
         "mise tasks run site-format",
         "mise tasks add x",
@@ -615,3 +626,20 @@ def test_review_bash_rejects_the_writers_of_388(command: str) -> None:
     code, message = agent_hooks.review_bash({"tool_input": {"command": command}})
     assert code == 2
     assert "not a review command" in message
+
+
+def test_review_bash_names_the_allowed_tasks_and_sed_in_the_block_message() -> None:
+    code, message = agent_hooks.review_bash({"tool_input": {"command": "mise run site-format"}})
+    assert code == 2
+    assert "py-test" in message
+    assert "sed -n" in message
+
+
+def test_review_bash_message_shows_the_expansion_as_written() -> None:
+    _, message = agent_hooks.review_bash({"tool_input": {"command": "sed -n $p f"}})
+    assert "`sed -n $p f`" in message
+
+
+def test_mark_expansions_skips_single_quotes_and_escaped_dollars() -> None:
+    marked = agent_hooks.mark_expansions("echo \\$a '$b' \"$c '$d'\" ${e} $/")
+    assert marked == "echo \\$a '$b' \"\x00c '\x00d'\" \x00{e} $/"
