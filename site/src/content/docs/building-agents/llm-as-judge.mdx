@@ -3,7 +3,7 @@ import { Choice, MultiChoice, Match, Predict, Sort, Scenario, Pitfall, Exercise,
 In this lesson a judge grades runs of the handbook assistant against a
 rubric, and we check its grades against a person's before we trust
 them. Then we look at numbers that rise while the agent stays the same,
-and at the one that tells the truth about a prompt change.
+and at the number that shows what a prompt change did.
 
 The runs come from the handbook assistant of
 [Turning good into a rubric](/building-agents/rubrics/), the retrieval
@@ -15,12 +15,12 @@ and four held out, as in
 [A golden set is the agent's regression suite](/building-agents/golden-sets/).
 The author wrote the runs and the person's grades to show where a judge
 and a person differ, so they're illustrative and don't come from a
-model. Copy the `llm-as-judge` folder, and each step below is
-`python3 grade.py <step>`.
+model. Copy the `llm-as-judge` folder, and run each step below from
+inside it as `python3 grade.py <step>`.
 
 ## A judge made of rules
 
-A person can read a few dozen runs a day. **LLM as judge**, where LLM
+A person can't read a thousand runs a day. **LLM as judge**, where LLM
 stands for large language model, means a model grades the runs instead.
 The judge gets the question, the agent's answer and the criteria, and
 often a reference answer that lists what a good answer contains
@@ -107,28 +107,30 @@ python3 grade.py agreement
 
 </Predict>
 
-The two numbers point at one criterion. On Quoted the judge agrees with
-the person on every run, because checking whether a sentence appears
-word for word in the passage doesn't depend on how long the answer is.
-On Complete it differs three times, each time upward and each time on
-an answer of more than 40 words. Run three gives the meal limit and
-leaves out the claim deadline, in a friendly paragraph. The search in
-run eleven returned the laptops page, and the answer doesn't name an owner,
-but it gets a 1 for its length. Runs five and nine are long too, and
-on those two the judge and the person agree, because both answers cover
-every part of the question. Length raises the score of an answer that
-misses a part, and an answer that misses nothing is already at 2.
+Both disagreement counts are on one criterion. On Quoted the judge
+agrees with the person on every run, because checking whether a sentence
+appears word for word in the passage doesn't depend on how long the
+answer is. On Complete it differs three times, each time upward and each
+time on an answer of more than 40 words. Run three gives the meal limit
+and leaves out the claim deadline, in a friendly paragraph. The search
+in run eleven returned the laptops page, and the answer doesn't name an
+owner, but it gets a 1 for its length. Runs five and nine are long too,
+and on those two the judge and the person agree, because both answers
+cover every part of the question. Length raises the score of an answer
+that misses a part, and an answer that misses nothing is already at 2.
 
-The fix goes where the disagreement is. For a model judge, that's the
+The fix goes where the disagreement is. The person applied the rubric
+without trouble, so the rubric is clear, and the judge is what needs the
+fix. For a model judge, that's the
 Complete criterion in the judge's instructions: say that length and
 politeness don't add points, have the judge list each part of the
 reference answer and mark it found or missing before it scores, and
 then run the same sample again. Keep the Quoted criterion as it is,
 because it agrees on every run. The rubrics lesson set the bar: the
 judge is ready for a criterion when it agrees with the person about as
-often as two people agree with each other. Model judges can also miss a
-wrong fact they have no knowledge to check (@AEC-09), and the reference answer is
-what gives it that knowledge here.
+often as two people agree with each other. Model judges can also miss
+a wrong fact they have no knowledge to check (@AEC-09), and the
+reference answer is what gives them that knowledge here.
 
 <Choice id="where-to-fix-the-judge" objective="building-agents/evaluates-agents/writes-a-rubric"
   concepts={['llm-as-judge']}
@@ -150,20 +152,22 @@ Complete, all upward and all on long answers. What do you change first?
 ## Numbers that rise while the agent stays the same
 
 A team that tracks a number starts to change the agent until the number
-goes up. If the number can go up while the quality stays the same, that's
-often how it goes up, even when nobody means it to. So pick **metrics that cannot be
-gamed** in that way: each one moves only when the quality it stands for
-moves. Answer length, keyword presence and the agent's own report of
-success are easy to raise. A test the agent can't see, a person's spot
-check and an outcome measured later for the user are harder.
+goes up. If the number can go up while the quality stays the same,
+that's often how it goes up, even when nobody means it to. So pick
+**metrics that cannot be gamed** in that way: each one moves only when
+the quality it stands for moves. Answer length, keyword presence and the
+agent's own report of success are easy to raise. A test the agent can't
+see, a person's spot check and an outcome measured later for the user
+are harder.
 
 A teammate adds a line to the agent's prompt that asks for full answers
 that close with an offer of more help. The fixture adds the same closing
-sentence to each development answer in code, and the rest of each
-answer is unchanged. The sentence names the question's topic, and an
-answer of `not found` doesn't get one. The `metrics` step prints four numbers for the development runs,
-before and after that change. Keyword presence is the share of answers
-that name the question's topic word, from `reference.csv`.
+sentence to each development answer in code, and the rest of each answer
+is unchanged. The sentence names the question's topic, and an answer of
+`not found` doesn't get one. The `metrics` step prints four numbers for
+the development runs, before and after that change. Keyword presence is
+the share of answers that name the question's topic word, from
+`reference.csv`.
 
 <Predict id="show-the-metrics" title="Four numbers, before and after"
   answer={`                    before      after
@@ -182,14 +186,16 @@ python3 grade.py metrics
 
 No answer gained a fact, and three of the four numbers went up. The
 mean length nearly doubled because every answer except the `not found`
-one got a closing sentence.
-Keyword presence went from 7 to 11 of 12, because the closing sentence
-names the topic whether the answer is right or wrong. Run eleven counted
-as a hit even before the change: it names the payments team and not
-its owner. The judge's Complete
-score rose from 21 to 23, because two short answers that miss a part
-are now over 40 words. The person's score didn't move, because the
-person reads for the parts of the question.
+one got a closing sentence. Keyword presence went from 7 to 11 of 12,
+because the closing sentence names the topic whether the answer is
+right or wrong. Run eleven counted as a hit even before the change: it
+names the payments team and not its owner.
+
+The judge's Complete score rose from 21 to 23, because two short
+answers that miss a part are now over 40 words. The fixture keeps the
+person's grades, because the closing sentence adds no part of the
+reference answer, and a person who reads for the parts of the question
+gives the same scores.
 
 Each easy number has a partner that measures the quality it was meant
 to show. Length stands for completeness, so pair it with the parts of
@@ -202,21 +208,21 @@ at the runs before you report either.
 
 <Match id="pair-the-metrics" objective="building-agents/evaluates-agents/avoids-gamed-metrics"
   concepts={['metrics-that-cannot-be-gamed']}
-  context="A team runs a handbook assistant that answers staff questions. It tracks three numbers that can rise while the agent gets no better, and it wants a second number for each that rises only when the agent really improves."
+  context="A team runs a handbook assistant that answers staff questions. It tracks three numbers that can rise while the agent gets no better, and it wants a second number for each that is hard to raise unless the agent really improves."
   title="Which partner catches each number?"
-  hint="For each number, ask how it could go up with the agent unchanged, and which partner wouldn't go up that way."
+  hint="For each number, ask what quality the team reads it as, and which partner measures that quality itself."
   options={[
     'The pass rate on held-out items that nobody tunes against',
     'A person scoring the same runs with the same rubric',
     'The share of users who don\'t ask the same question again within a week',
   ]}
   rows={[
-    { statement: 'The golden set pass rate, after a month of prompt changes made while watching those items', option: 0, why: 'The prompt was fitted to the items the team watched. Which items has nobody fitted the prompt to?' },
-    { statement: 'The model judge\'s score, after answers got longer and the judge favors long answers', option: 1, why: 'The held-out items get the same longer answers and the same judge. Who scores without the judge\'s bias?' },
+    { statement: 'The golden set pass rate after a month of prompt changes made while watching those items, read as how well the agent answers questions it hasn\'t seen', option: 0, why: 'The prompt was fitted to the items the team watched. Which items has nobody fitted the prompt to?' },
+    { statement: 'The model judge\'s score after answers got longer, when the judge favors long answers, read as the score a person would give', option: 1, why: 'The held-out items get the same longer answers and the same judge. Which partner is the score the judge is meant to match?' },
     { statement: 'The share of conversations the agent marks as resolved, read as a sign that the user\'s problem went away', option: 2, why: 'A score of the reply says how good the reply is, and a held-out item has only the reply too. Who knows whether the problem went away?' },
   ]}
   rationale="Each partner measures the quality that the first number was meant to show, in a way the change that raised the first number doesn't reach.">
-Match each number with the partner that doesn't rise the way it did.
+Match each number with the partner that measures the quality the team reads it as.
 </Match>
 
 ## Check the change on the held-out runs
@@ -254,13 +260,13 @@ python3 grade.py held_out
 
 The development score went from 18 to 22 of 24, and the held-out score
 stayed at 6 of 8. Held-out runs h01 and h02 are two-part questions too,
-about opening hours and about train tickets and meals, and the new line
-has no example for them, so they still miss a part. The line fixed the
+about opening hours and about laptops, and the new line has no example
+for them, so they still miss a part. The line fixed the
 four runs it names. Report the held-out result as the effect of the
 change, and write a line that asks for both parts without naming
-topics. Four held-out runs is a small number, so in a real set, where
-about one item in five is held out, the same comparison has more items
-behind it.
+topics. Four held-out runs is a small sample. A real set holds back
+about one item in five of many more items, and the same comparison then
+has more runs behind it.
 
 <Choice id="what-to-report" objective="building-agents/evaluates-agents/avoids-gamed-metrics"
   concepts={['metrics-that-cannot-be-gamed']}
@@ -297,26 +303,26 @@ Which of these steps belong before the judge grades at scale?
 
 <Scenario id="judge-model-changed" phase="review" objective="building-agents/evaluates-agents/writes-a-rubric"
   concepts={['llm-as-judge']}
-  context="A team calibrated a model judge against a person's scores in the spring, and it agreed on 23 of 25 sampled runs. The team has now moved the judge to a newer model, and the nightly scores went up by six points the next day. The agent itself has not changed."
+  context="A team calibrated a model judge against a person's scores in the spring, and it agreed on 23 of 25 sampled runs. The team has now moved the judge to a newer model, and the nightly scores went up by six percentage points the next day. The agent itself has not changed."
   title="The judge moved to a new model"
   hint="What changed between the two nights, and what did the spring calibration measure?"
   options={[
-    { text: 'Report the six points as an improvement of the agent in this week\'s update.', consequence: 'The agent is the same as the day before. The gain comes from the judge, and the report credits a change nobody made.' },
+    { text: 'Report the six percentage points as an improvement of the agent in this week\'s update.', consequence: 'The agent is the same as the day before. The gain comes from the judge, and the report credits a change nobody made.' },
     { text: 'Grade last spring\'s sample with the new judge and compare it with the person again.', correct: true, consequence: 'The new judge scores long answers higher and agrees on 18 of 25. The team fixes its instructions before it trusts the nightly number.' },
-    { text: 'Subtract six points from every nightly score so it matches the spring numbers.', consequence: 'The shift isn\'t the same on every run. Some scores are still wrong after the subtraction, and nobody knows which.' },
+    { text: 'Subtract six percentage points from every nightly score so it matches the spring numbers.', consequence: 'The shift isn\'t the same on every run. Some scores are still wrong after the subtraction, and nobody knows which.' },
   ]}>
 
-The nightly judge scores rose six points the day the judge moved to a
-new model, with the agent unchanged. What do you do?
+The nightly judge scores rose six percentage points the day the judge
+moved to a new model, with the agent unchanged. What do you do?
 
 </Scenario>
 
 <Sort id="can-it-rise-alone" phase="review" objective="building-agents/evaluates-agents/avoids-gamed-metrics"
   concepts={['metrics-that-cannot-be-gamed']}
-  context="A team tracks numbers about a handbook assistant that answers staff questions. It wants to know which numbers can go up while the agent answers no better, and which go up only when the answers improve."
-  title="Can the number rise with the agent unchanged?"
-  hint="For each number, try to think of a change to the wording or format of the replies that raises it and adds no correct fact."
-  buckets={['Can rise with no better answers', 'Rises only with better answers']}
+  context="A team tracks numbers about a handbook assistant that answers staff questions. It wants to know which numbers can go up while the agent answers no better, and which are hard to raise unless the answers improve."
+  title="Easy or hard to raise with the agent unchanged?"
+  hint="For each number, try to think of a cheap change to the wording or format of the replies that raises it and adds no correct fact."
+  buckets={['Easy to raise with no better answers', 'Hard to raise without better answers']}
   items={[
     { text: 'Mean number of words per answer', bucket: 0 },
     { text: 'Share of answers that name the topic of the question', bucket: 0 },
@@ -348,9 +354,11 @@ agree on 27, and grades every night from then on. Half a year later the
 vendor retires the judge's model, and the team moves the judge to the
 newer one with the same instructions. The nightly score goes up, and the
 team reads it as progress. The new model has its own biases, and the
-calibration was a measurement of the old one. Grade the same sample
-again each time the model behind the judge changes, and compare it
-with the person before you trust a single nightly score (@AEC-09).
+calibration was a measurement of the old one. A judge's scores need a
+comparison with a person's before anyone trusts them (@AEC-09). This
+course repeats that comparison each time the model behind the judge
+changes: grade the same sample again, and compare it with the person
+before you trust a single nightly score.
 
 </Pitfall>
 
@@ -363,8 +371,8 @@ score. For each one, describe a change to the agent's replies that
 would raise it while the agent answers no better, using a run from
 `runs/` as the example. Then pair each number with a second number
 that the same change doesn't raise. Naming the change for each number
-makes the way it can be gamed concrete, before a real change finds it
-for you.
+makes the way it can be gamed concrete, before a real change raises
+it.
 
 A good result names a concrete change for each number, such as a
 closing sentence or a restated question, and shows it on a run. Each
