@@ -30,6 +30,8 @@ sources:
   - Academy ai-native-sdlc-playbook
   - Claude Code best practices
   - Claude Code hooks
+  - Claude Code worktrees
+  - Git docs git-tag
   - GitHub docs workflow-syntax
   - GitHub docs events-that-trigger-workflows
 issue: 186
@@ -51,6 +53,6 @@ notes: >-
   The assumes entry on automates-the-check is added because the page opens from the
   self-checking-loops fixture and bound. The fixtures under
   site/examples/coding-with-agents/ci-and-hooks/ load self-checking-loops/_common.py with importlib
-  for the copy and the fix, add the hook, its settings and checks.yml, feed the hook three tool
-  calls, and run the `run` lines of checks.yml before and after the fix. They run no git. Evals in
+  for the copy and the fix, add the hook, its settings and checks.yml, feed the hook five tool
+  calls (two in a worktree under .claude/worktrees/, per Claude Code worktrees), and run the `run` lines of checks.yml before and after the fix. They run no git. Evals in
   CI point at building-agents/rubrics, the live lesson that covers building-agents/evaluation.

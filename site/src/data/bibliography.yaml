@@ -881,3 +881,17 @@ GitHub docs events-that-trigger-workflows:
   author: GitHub
   license: CC BY 4.0
   url: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
+Git docs git-tag:
+  type: reference
+  title: git-tag
+  container: Git reference documentation
+  author: The Git project
+  license: GPL-2.0
+  url: https://git-scm.com/docs/git-tag
+Claude Code worktrees:
+  type: reference
+  title: Run parallel sessions with worktrees
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/worktrees
