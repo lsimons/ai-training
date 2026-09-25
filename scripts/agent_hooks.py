@@ -679,8 +679,9 @@ def extract_substitutions(command: str) -> tuple[str, list[str]]:
 
     Raises `ValueError` for text the hook rejects without a closer look:
     an unclosed quote or substitution, a nested backtick, arithmetic
-    `$((...))`, the zsh parameter flags `${(e)X}` and `${~X}` (and `$~X`),
-    which evaluate or glob a variable's value, any other unquoted `(` or
+    `$((...))`, the zsh parameter flags `${(e)X}`, `${~X}` and `$~X`, which
+    evaluate or glob a variable's value, and `${=X}`, `${^X}` and `${+X}`,
+    which also start a combined flag such as `${^~X}`, any other unquoted `(` or
     `)`, which covers the zsh glob qualifiers that run code (`*(e:...:)`,
     `*(+f)`), and an unquoted brace expansion such as `{-o,out.txt}` or
     `{1..3}`, which turns one word the hook reads into several.
@@ -707,7 +708,7 @@ def scan_substitutions(text: str, i: int, stop: str, inner: list[str]) -> tuple[
             out.append(text[i : i + 2])
             i += 2
             continue
-        if pair == "$~" or text[i : i + 3] in ("${(", "${~"):
+        if pair == "$~" or re.match(r"\$\{[(=^~+]", text[i : i + 3]):
             raise ValueError("a zsh parameter flag that evaluates or globs a value")
         if pair == "$(" or (not quoted and pair in SUBSTITUTION_STARTS):
             if text[i : i + 3] == "$((":
@@ -955,6 +956,9 @@ def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
         reason = unreadable("substitutions nested too deep")
     except ValueError as error:
         reason = unreadable(str(error))
+    except RuntimeError:
+        # `Path.expanduser` raises it for an unknown user (`cd ~nosuchuser`).
+        reason = unreadable("a `~user` directory that doesn't exist")
     if reason:
         return 2, f"Blocked by the code-reviewer hook: {reason}"
     return 0, ""
