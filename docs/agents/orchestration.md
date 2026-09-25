@@ -245,12 +245,17 @@ The cases that come up:
   has worked for a very long time carries a huge context; for a follow-up
   on such a branch, spawn a fresh agent in a new worktree checked out on
   the branch, with the pull request and review as its whole brief.
-- The `code-review` skill spawns its own sub-agents (angles and verifiers).
-  Their notifications arrive at the coordinator too, and sometimes only
-  there. The reviewer then gets an empty result from the skill. Ignore the
-  notifications at the coordinator, act on the reviewer's consolidated
-  verdict, and tell every reviewer to fall back on its own probing when the
-  skill returns nothing.
+- The `code-review` skill runs as a forked agent in the main checkout, not
+  in the caller's worktree, so a reviewer that `cd`s into its review
+  worktree and passes only a range gets an empty diff. The reviewer passes
+  the worktree path and the range in the skill's arguments, and the forked
+  agent `cd`s there first. The skill spawns its own sub-agents (angles and
+  verifiers). Their notifications arrive at the coordinator too, and
+  sometimes only there. The reviewer then gets an empty result from the
+  skill. Ignore the notifications at the coordinator, act on the
+  reviewer's consolidated verdict, and tell every reviewer to run the
+  skill once and review by hand from `review.diff` when it returns
+  nothing.
 - GitHub reports `mergeable: UNKNOWN` for about a minute after every merge.
   Wait and list again. A pull request in `CONFLICTING` state gets no
   `pull_request` CI run at all, so a builder that pushes into a conflict
