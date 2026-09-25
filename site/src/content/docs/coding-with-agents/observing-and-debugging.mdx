@@ -1,0 +1,378 @@
+import { Choice, MultiChoice, Match, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response, Habit } from '@components/lesson';
+
+In this lesson you get a bug report that says "sometimes fails", and you
+turn it into a confirmed cause before a coding agent changes a line. The
+program is a small nightly import that adds up the sales exports of eight
+stores. The course keeps it as a fixture, so everyone debugs the same
+code and the same data. Here is the report.
+
+```text
+The nightly sales import failed on Tuesday the 15th and on Thursday the
+17th, and ran fine on the 14th and the 16th. Nobody changed the code. I
+think the exchange-rate download is sometimes late at night and leaves a
+half-written rates.json. Can you ask the agent to make the download more
+reliable?
+```
+
+The report contains a symptom, two dates, and a theory. An agent handed
+this report gets a theory to work from and a request for a fix, and the
+fix it writes is aimed at the theory. Asking for a reproduced, explained cause before
+any patch keeps the fix from becoming a second bug (@Brilliant VER).
+
+## Reproduce it first
+
+"Sometimes" means you don't yet know what the failure depends on. The
+first step is to run the failing case again, the same way, and see
+whether it fails every time. The fixture keeps each night's exports in
+`nightly/nights/<date>/`, one CSV file per store, and the nightly job
+runs `python3 importer.py nights/<date>/*.csv` from `nightly/`. The
+course's script runs that command three times for each of the four
+nights and prints the result of each run.
+
+<Predict id="run-reproduce" title="Run each night three times"
+  answer={`2026-09-14: ok ok ok
+  2026-09-15: rejected rejected rejected
+  2026-09-16: ok ok ok
+  2026-09-17: rejected rejected rejected`} run="coding-with-agents/observing-and-debugging/reproduce.py">
+In a clone of the course repository, from
+`site/examples/coding-with-agents/observing-and-debugging/`, run the
+reproduction script.
+
+```sh
+python3 reproduce.py
+```
+
+</Predict>
+
+The examples in this lesson aren't graded. Each one is a command you
+run, with output the course checks on every build. The checkpoints ask
+what you do with what the commands show.
+
+Every rerun gives the same result as the night it reruns. The failure
+isn't "sometimes" any more. It is "always, on the exports of the 15th and
+the 17th". Write the steps down now, in a form someone else can follow,
+because they're the test the fix must pass at the end.
+
+```text
+From nightly/, run: python3 importer.py nights/2026-09-15/*.csv
+Expected: a total in euros, exit status 0
+Actual: the batch is rejected, exit status 1
+Reruns: 3 of 3 fail. The 14th and the 16th pass 3 of 3.
+```
+
+<Choice id="what-the-reruns-show" objective="coding-with-agents/verifies-agent-work/observes-and-debugs"
+  concepts={['isolating-a-fault']}
+  context="A nightly import of store sales exports failed on two nights of four. Every night reads the same rates.json file. The learner reran each night's exports three times: two nights passed every time and two failed every time."
+  title="What do the reruns tell you?" hint="What is different between the runs that pass and the runs that fail, and what is the same?"
+  options={[
+    { text: 'That the rates file was half-written on the 15th and the 17th and still is today.', why: 'All four nights read the same rates.json. A broken rates file would make every night fail, and two of them pass.' },
+    { text: 'That the failure follows the exports of the 15th and the 17th, because the same input fails on every run.', correct: true },
+    { text: 'That the failure follows the time of day, and the reruns happened to land on a calm moment.', why: 'Twelve runs at one time of day split exactly along the nights. Timing would not sort the results by input.' },
+    { text: 'That nothing is known yet, because a fault that fails only sometimes can never be made to fail on demand.', why: 'It was just made to fail on demand, six times out of six on two inputs.' },
+  ]}>
+The 15th and the 17th fail three runs of three, and the 14th and the
+16th pass three runs of three. What does that tell you about the cause?
+</Choice>
+
+## Read what the system recorded
+
+Observing a running system means looking at what the program did, and
+not only at what its code says it should do: the log it writes, the
+files it reads, the output and the exit status. The code tells you what
+should happen, and the log tells you what did (@Brilliant VER). The
+importer writes one log line per step. Put the log of a failing night
+next to the log of a good one.
+
+<Predict id="run-night-log" title="The log of a good night and a failing one"
+  answer={`$ python3 importer.py nights/2026-09-14/*.csv
+  INFO reading 8 files
+  INFO rates: 3 currencies loaded
+  INFO parsed 46 rows
+  INFO total: 22975.95 EUR
+  exit status 0
+  $ python3 importer.py nights/2026-09-15/*.csv
+  INFO reading 8 files
+  INFO rates: 3 currencies loaded
+  INFO parsed 39 rows
+  ERROR 1 row(s) with the wrong number of fields, batch rejected
+  exit status 1`} run="coding-with-agents/observing-and-debugging/night_log.py">
+The course's script runs the importer on the 14th and on the 15th, from
+`nightly/`, and prints each log with its exit status. You can also run
+the two commands it shows yourself, from `nightly/`, and follow each one
+with `echo $?`.
+
+```sh
+python3 night_log.py
+```
+
+</Predict>
+
+Read the two logs line by line. Both read eight files, and both load
+three currencies from the rates file. The failing run gets past the
+rates step and stops at the next one, where one row has the wrong number
+of fields. The colleague's theory is ruled out by the log itself: on the
+failing night the rates loaded, and the failure came after them. Write
+that down too, with the evidence, so nobody has to rule it out again.
+
+The log doesn't say which of the eight files holds the bad row. It
+narrowed the cause from the whole program to one step, and the step
+still has eight suspects.
+
+<Pitfall title="The handler the request never reached">
+An engineer gets a report that the checkout page sometimes shows an
+error. The coding agent reads the order handler, finds a field that
+could be missing, and starts to rewrite the handler with more checks. The
+engineer opens the service's request log first, and the failing requests
+aren't in it. A proxy in front of the service rejected them, because
+their headers were too large, so the handler never saw them. The rewrite
+would have passed its tests and changed nothing for the user. Before
+anyone changes the code a theory points at, check in the log that the
+failing run reached that code.
+</Pitfall>
+
+<Scenario id="the-agent-wants-retries" objective="coding-with-agents/verifies-agent-work/observes-and-debugs"
+  concepts={['observing-a-running-system']}
+  context="A nightly import failed on some nights. A colleague blamed a late download of the exchange rates. The log of a failing run shows the rates loading, then one row with the wrong number of fields and the batch rejected. The agent now proposes a fix for the download."
+  title="The agent proposes retries" hint="On the failing night, did the run get as far as the code the agent wants to change, and did that step succeed?"
+  options={[
+    { text: 'Let it add the retries, since a more reliable download is useful even if it isn\'t this bug.', consequence: 'The change ships, the 15th still fails the same way, and you have one more diff to review with no evidence behind it.' },
+    { text: 'Ask it to add detailed logging to the download, so the next failing night shows what the download did.', consequence: 'The next failing log shows the download working in more detail. The fault is in a later step, and you have waited a night to learn it.' },
+    { text: 'Ask it to rewrite the import to be more tolerant, so that one bad row no longer rejects the batch.', consequence: 'The total now leaves out a sale without saying so. The fault is hidden rather than found, and the rule that a partial night never prints a total is gone.' },
+    { text: 'Stop it and point at the log, where the rates load on the failing night and the parsing step fails after them.', correct: true, consequence: 'The download is ruled out with evidence. The question left is which of the eight files holds the bad row, and nobody has changed any code yet.' },
+  ]}>
+The agent says: "The rate download is unreliable at night. I'll add
+three retries with a pause between them, and check that `rates.json` is
+complete before it is used." The log of the 15th is open next to it.
+What do you do?
+</Scenario>
+
+## Halve what is left
+
+Isolating a fault means narrowing it down to its cause in steps, where
+each step changes one thing and gives one observation. With eight files
+to suspect, the fastest way is to halve them. Run the importer on half
+of the files. If that half passes, the bad row is in the other half, and
+if it fails, the bad row is in this one. Each run rules out half of what
+is left, so eight files take three runs, and a fourth run confirms the
+last one. The shell pattern `store-0[1-4].csv` picks four files by name.
+
+```sh
+cd nightly
+python3 importer.py nights/2026-09-15/store-0[1-4].csv
+python3 importer.py nights/2026-09-15/store-0[5-6].csv
+python3 importer.py nights/2026-09-15/store-05.csv
+python3 importer.py nights/2026-09-15/store-06.csv
+```
+
+<Predict id="run-halve" title="Halve the files of the 15th"
+  answer={`store-01 to store-04: ok
+  store-05 and store-06: rejected
+  store-05: ok
+  store-06: rejected`} run="coding-with-agents/observing-and-debugging/halve.py">
+The course's script runs the four commands above and prints `ok` or
+`rejected` for each.
+
+```sh
+python3 halve.py
+```
+
+</Predict>
+
+Keep a note of what each run ruled out, one line per run: stores 1 to 4
+are ruled out, store 5 is ruled out, and store 6 fails alone. Halving
+works best when the failure has one cause. If both halves had failed,
+the note would show it at once, and you would halve each of them.
+
+Now store-06.csv is short enough to read.
+
+```text
+date,store,currency,amount
+2026-09-15,store-06,GBP,449.30
+2026-09-15,store-06,GBP,642.20
+2026-09-15,store-06,GBP,"1,250.00"
+2026-09-15,store-06,GBP,432.53
+```
+
+The fourth line has an amount of a thousand or more, which the store's
+system writes in quotes and with a comma. Read `read_rows` in
+`importer.py` with that line in mind: it splits each line on every comma,
+so `"1,250.00"` becomes two fields and the row has five. That is a
+cause, and it explains the whole report: the nights that failed are the
+nights with a big sale, and nothing about the timing matters. The
+condition is now precise. The import fails when an export holds an
+amount of 1,000 or more.
+
+The same halving works on commits as well as on files. When a fault
+appeared between a version that worked and one that doesn't, `git bisect`
+does a binary search over the commits between them. It checks out one
+commit at a time, you mark it good or bad, and it stops at the commit
+that brought the fault in (@Git docs git-bisect).
+
+<Choice id="the-next-run" objective="coding-with-agents/verifies-agent-work/observes-and-debugs"
+  concepts={['isolating-a-fault']}
+  context="A nightly import rejects the batch for one night of eight store exports, and the log does not say which file holds the bad row. The learner is narrowing it down by halving and has just seen the first four files pass on their own."
+  title="Which run comes next?" hint="After that result, which files are still suspects, and what is half of them?"
+  options={[
+    { text: 'The importer on store-05 and store-06 only, because the bad row is now among stores 5 to 8, and half of that is two files.', correct: true },
+    { text: 'The importer on stores 1 to 4 once more, because one passing run of a failure that seemed random proves nothing.', why: 'The reruns already showed that the same input gives the same result every time. A second run of this half would tell you nothing new.' },
+    { text: 'The importer on store-01 alone, because the first file is where a bad row most often turns up in a batch.', why: 'Store-01 was in the half that passed. That run already ruled it out.' },
+    { text: 'The importer on stores 5 to 8 with a change that makes it skip bad rows, to see whether the total then looks right.', why: 'That run changes two things at once, and a skipped row hides the fault instead of locating it.' },
+  ]}>
+On the 15th, `store-0[1-4].csv` passes on its own. Which run do you do
+next?
+</Choice>
+
+## Brief the agent with the cause
+
+Only now does the agent get the task. The brief contains everything the
+reproduction and the halving found: the command that fails, the file and
+the line, the reason, what was ruled out, and what done means. The
+transcript is illustrative and doesn't record a specific model's words.
+
+<Prompt model="illustrative" recorded="illustrative">
+The nightly import in `nightly/importer.py` rejects the batch for
+2026-09-15 every time. To reproduce it, run
+`python3 importer.py nights/2026-09-15/*.csv` from `nightly/`. It logs
+`1 row(s) with the wrong number of fields` and exits with status 1.
+The cause is line 4 of `nights/2026-09-15/store-06.csv`, the amount
+`"1,250.00"`: `read_rows` splits on every comma, so the quoted amount
+becomes two fields. The rates download is ruled out, because the log of
+the failing run shows the rates loaded. Fix the parsing so that a quoted
+amount with a thousands separator is read as one amount, and change
+nothing else. The 17th fails with the same log line. Done when all four
+nights under `nights/` exit with status 0, and the 14th and the 16th
+still print 22975.95 EUR and 23257.33 EUR.
+</Prompt>
+<Response>
+I changed `read_rows` to read each file with the `csv` module, which
+keeps a quoted field together, and removed the comma from the amount
+before it is turned into a number. Nothing else changed. All four nights
+now pass.
+</Response>
+
+The response is a claim, and the reproduction steps are the check. Run
+them again yourself, on every night, and compare the totals of the
+nights that already passed. The course's script applies the same fix to
+a copy of `nightly/` and reruns the reproduction.
+
+<Predict id="run-after-fix" title="The reproduction, after the fix"
+  answer={`2026-09-14: ok, total: 22975.95 EUR
+  2026-09-15: ok, total: 18505.15 EUR
+  2026-09-16: ok, total: 23257.33 EUR
+  2026-09-17: ok, total: 23213.13 EUR`} run="coding-with-agents/observing-and-debugging/after_fix.py">
+Run the script that applies the fix on a copy and prints each night's
+result and total.
+
+```sh
+python3 after_fix.py
+```
+
+</Predict>
+
+The two failing nights pass, and the two good nights print the same
+totals as before. The fix is verified against the steps that showed the
+fault, and not against the agent's summary of it.
+
+<MultiChoice id="what-the-brief-holds" objective="coding-with-agents/verifies-agent-work/observes-and-debugs"
+  concepts={['isolating-a-fault']}
+  context="A nightly import of store sales exports fails on two nights. The learner has reproduced the failure, ruled out the rates download from the log and halved the files down to one row with a quoted amount of 1,250.00. Now the learner writes the brief for the coding agent."
+  title="What goes into the brief?" hint="Which lines let the agent check its own fix, and which lines send it to work on something already ruled out?"
+  options={[
+    { text: 'The command that fails and the output it gives now.', correct: true },
+    { text: 'The colleague\'s theory about the rates download, as a second thing to fix.', why: 'The log ruled the download out. Giving it to the agent as work invites a change with no evidence behind it.' },
+    { text: 'The file and the line with the quoted amount, and why a split on commas breaks it.', correct: true },
+    { text: 'Permission to change whatever the agent needs to change until the import passes.', why: 'Passing can mean skipping the bad row. The brief says what to fix and what to leave alone.' },
+    { text: 'All four nights pass, and the totals of the good nights stay the same.', correct: true },
+  ]}>
+Which of these belong in the brief you give the agent?
+</MultiChoice>
+
+<Sort id="observed-or-assumed" phase="review" objective="coding-with-agents/verifies-agent-work/observes-and-debugs"
+  concepts={['observing-a-running-system']}
+  context="A nightly import of store sales exports failed on two nights. The learner collects what is known before briefing a coding agent, and separates what was seen from what was only said or believed."
+  title="Seen, or only said?" hint="For each line, did someone run something and look at the result?"
+  buckets={['Seen in a run of the program', 'Said or believed, not checked yet']}
+  items={[
+    { text: 'The failing run logs the rates as loaded', bucket: 0 },
+    { text: 'The download is often late at night', bucket: 1 },
+    { text: 'Three reruns of the 15th are rejected', bucket: 0 },
+    { text: 'The agent reports that all four nights pass', bucket: 1 },
+    { text: 'On the 15th, store-05 on its own passes', bucket: 0 },
+  ]} />
+
+<Match id="what-each-result-rules-out" phase="review" objective="coding-with-agents/verifies-agent-work/observes-and-debugs"
+  concepts={['isolating-a-fault']}
+  context="A nightly import of eight store sales exports fails on some nights. The learner reruns the failing night, reads its log and halves the files, and records after each observation what it ruled out."
+  title="What does each result rule out?" hint="For each result, which suspect could not have produced it?"
+  options={['Timing or chance', 'The rates download', 'Four of the eight exports', 'The parsing step']}
+  rows={[
+    { statement: 'Three reruns of the failing night give the same result as the night itself', option: 0, why: 'Which kind of cause would give a different result on a rerun?' },
+    { statement: 'The log of the failing night shows the rates loaded before the error', option: 1, why: 'Which step did the run complete before it failed?' },
+    { statement: 'Stores 1 to 4 pass when run on their own', option: 2, why: 'Which files could hold the bad row if these pass?' },
+  ]}
+  rationale="Each result rules out one suspect, and the note of what was ruled out is what keeps the search from going back to it." />
+
+<Choice id="three-changes-at-once" phase="review" objective="coding-with-agents/verifies-agent-work/observes-and-debugs"
+  concepts={['isolating-a-fault']}
+  context="A colleague is debugging a fault that appears on some runs. They make three changes in one go and the fault stops appearing in the runs they try."
+  title="Three changes at once" hint="If one of the three changes is undone, can you say whether the fault comes back?"
+  options={[
+    { text: 'That the parser change was the fix, since the parser is the most likely place for this kind of fault.', why: 'Likely is a guess. Nothing in the runs separates the parser change from the other two.' },
+    { text: 'That the fault is fixed and verified, since the symptom no longer shows up in the runs they tried.', why: 'Verified against what? Without the reproduction steps, the runs may simply not have hit the failing input.' },
+    { text: 'That one of the three changes, or two of them together, removed the symptom, and not which one or why.', correct: true },
+    { text: 'That the cache change was the fix, since caches are the usual cause of a fault that comes and goes.', why: 'A usual cause is a place to look, not a result. The runs changed three things and observed one outcome.' },
+  ]}>
+A colleague changes the parser, turns off a cache and raises the log
+level, all at once, and the fault no longer shows up. What do they know?
+</Choice>
+
+<Scenario id="the-agent-says-fixed" phase="review" objective="coding-with-agents/verifies-agent-work/observes-and-debugs"
+  concepts={['observing-a-running-system']}
+  context="The learner briefed a coding agent with a reproduced cause and written reproduction steps for a nightly import that failed on two of four nights. The agent now reports the fix is done and the tests pass."
+  title="The agent says it is fixed" hint="Which of these produces a result you saw, from the steps that showed the fault?"
+  options={[
+    { text: 'Close the report, since the agent ran the tests and they pass.', consequence: 'The tests are the ones that existed while the bug was there. None of them fed the importer a quoted amount.' },
+    { text: 'Run the reproduction steps yourself on all four nights and compare the totals of the good nights.', correct: true, consequence: 'The failing nights pass, and the good nights print the totals they printed before. The report can be closed with that evidence.' },
+    { text: 'Ask the agent to confirm that it ran the failing command, and close the report when it says yes.', consequence: 'The agent says yes. That is a second claim from the same source, and you still haven\'t seen a run.' },
+    { text: 'Read the diff, and close the report when the change to the parser looks right to you.', consequence: 'The diff looks right. Whether the failing night passes, and whether the good totals moved, is still unknown.' },
+  ]}>
+The agent reports: "Fixed, and all tests pass." Which check do you do
+before you close the report?
+</Scenario>
+
+<Exercise stretch="Then start your own coding agent inside `~/debug-me`, brief it with what you found, and verify its fix against your reproduction steps. Compare its diff with the fix the lesson describes.">
+From the root of your clone of the course repository, copy the
+fixture's `nightly/` directory to a place of your own, and work only in
+the copy.
+
+```sh
+cp -R site/examples/coding-with-agents/observing-and-debugging/nightly ~/debug-me
+cd ~/debug-me
+```
+
+Take the 17th, which the lesson left alone, through the same steps. Spend
+about ten minutes. Write the reproduction steps, with how many reruns
+failed. Compare its log with a good night's and write one line on what
+the log rules out. Halve the eight files, one run at a time, and keep a
+line per run for what it ruled out. Then read the file that is left.
+This is the order that keeps a guessed fix out of your code, and it
+works the same for a bug in your own project.
+
+A good result has a reproduction that fails three runs of three, a note
+that the rates loaded on the 17th, and a halving that ends at
+`store-03.csv`, where line 4 holds the amount `"2,180.40"`.
+The cause is the same as on the 15th. Then answer one question: if you
+had briefed the agent with the colleague's report as it was, what would
+it have changed?
+</Exercise>
+
+<Recap>
+1. Reproduce the fault before anyone changes code. Rerun the failing input and write the steps down, and "sometimes fails" becomes a precise condition and the test the fix has to pass (@Brilliant VER).
+2. Observing a running system means reading what it recorded, the log, the output and the exit status, next to a run that worked. The log shows how far the failing run got, and a theory about a step the run completed is ruled out.
+3. Isolating a fault means halving the suspects: one change, one observation, and a note of what was ruled out. The same halving over commits is `git bisect` (@Git docs git-bisect).
+4. Brief the agent with the reproduced, explained cause and a done-criterion from the reproduction, and verify the fix by running those steps yourself.
+</Recap>
+
+<Habit id="rerun-before-you-fix">
+The next time a bug report says a thing sometimes fails, rerun the failing case three times and write down the steps before you open the code or ask an agent for a fix.
+</Habit>
