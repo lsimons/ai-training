@@ -1,11 +1,19 @@
 id: customizing-agents/testing-a-skill
 title: Testing a skill from a fresh session
+description: >-
+  Run the release skill from the last lesson in a clean clone and a new session, read the transcript
+  for where the agent hesitated, asked or guessed, turn each place into a check, a failure step or a
+  sharper success test, and run it again.
 mode: tutorial
 covers: customizing-agents/skills
 serves: [customizing-agents/writes-skill/packages-a-procedure]
 introduces: []
 assumes:
   - objective: coding-with-agents/ships-with-agent/runs-a-session
+    lesson: coding-with-agents/first-session
+    section: sessions-and-context
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 after: [customizing-agents/first-skill]
 shorts: []
 exercise:
@@ -13,9 +21,19 @@ exercise:
   brief: >-
     Run the release skill from a fresh session in a clean clone, note where the agent hesitated or
     asked, and add the missing check or failure step.
-sources: []
+sources:
+  - Claude docs best-practices
+  - Claude Code skills
+  - Claude Code memory
 issue: 165
-minutes: 10
+minutes: 15
 notes: >-
   Introduces no concept: deepens writing-a-good-skill: watch an agent use the skill on a real task
-  and revise where it went wrong.
+  and revise where it went wrong. The fixtures in `site/examples/customizing-agents/testing-a-skill/`
+  build git repositories from the first-skill fixture package, which they never change, with an
+  allow-list git environment. The revised skill is committed there at `release/SKILL.md`, and the
+  page shows its new sections. The transcript on the page is illustrative, written by the course.
+  Vendor facts to re-check by review-by: the Claude A / Claude B testing loop and the advice not to
+  assume tools are installed (platform skill best-practices page), skill edits picked up in the
+  running session (code.claude.com skills), and CLAUDE.md loading from parent directories and auto
+  memory on by default and per repository (code.claude.com memory).

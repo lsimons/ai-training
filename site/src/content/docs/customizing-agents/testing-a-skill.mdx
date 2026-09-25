@@ -1,0 +1,337 @@
+import { Choice, Match, Predict, Sort, Pitfall, Exercise, Recap, Habit, Prompt, Response } from '@components/lesson';
+
+The last lesson ended with a release skill that works in the directory it
+was written in. This lesson runs it somewhere else: a clean clone, and a
+new session that has none of the conversation you had while you wrote it.
+Anthropic's guide to writing skills describes the same loop. One session
+helps you write the skill, a fresh one uses it on a real task, and you
+watch where the fresh one struggles and bring that back into the file
+(@Claude docs best-practices).
+
+First you run the skill and read the transcript for the places where the
+agent hesitated, asked you something or guessed. Then you turn each of
+those places into a line in the skill, run it again and compare the two
+runs. Two short Python scripts show what the agent sees in each
+repository, and the course checks their output on every build.
+
+## Run it where it wasn't written
+
+A clean clone is a copy of the package with its own git repository and
+nothing else. It has none of the author's tags, history or uncommitted
+files. Make one outside the course repository. Claude Code reads the
+`CLAUDE.md` files in the directory it starts in and in every directory
+above it (@Claude Code memory), so a copy inside the course repository
+gets the course's own agent instructions as well. Run these commands from
+the top of your copy of the course repository, so that the first one
+finds the package.
+
+```sh
+cp -R site/examples/customizing-agents/first-skill/fixture-package ~/notes-clean
+cd ~/notes-clean
+git init -q
+git add .
+git commit -q -m "Import the notes package"
+```
+
+The copy contains the release skill from the last lesson at
+`.claude/skills/release/SKILL.md`. Start your agent in `~/notes-clean`,
+in a new session, and type `/release 0.4.0`. In Claude Code the skill's
+directory name is the command you type (@Claude Code skills), and in
+another agent you can ask for release 0.4.0 in plain words. The skill
+changes files, commits and tags, and that's why it runs in this copy and
+nowhere else.
+
+Step 3 of the skill says to write one changelog bullet per change since the
+previous release and to read `git log` for the list. The first script builds two
+repositories and asks each one what step 3 needs. The author's repository
+has the package committed as release 0.3.0, a `v0.3.0` tag on that commit,
+and one change after it. The clean clone is the one you just made.
+
+<Predict id="what-step-3-sees" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill']}
+  context="A release skill tells the agent to write one changelog bullet per change since the previous release, using git log. A script builds two repositories from the same package: the author's, with the release tagged v0.3.0 and one commit after it, and a clean clone with the package committed once as 'Import the notes package' and no tags. For each it prints the last release tag from git describe, and the commits since it, or the whole log when there is no tag."
+  title="What does step 3 have to work with?" hint="Which of the two repositories has a tag for git describe to find? Without a tag, what is left in the log?"
+  answer={`author's repository
+    last release tag: v0.3.0
+    commits since it: Document where notes are stored
+  clean clone
+    last release tag: none
+    whole log: Import the notes package`}
+  run="customizing-agents/testing-a-skill/fresh_clone.py">
+Predict the output for both repositories. The script prints `none` where
+`git describe --tags --abbrev=0` fails.
+
+```sh
+python3 fresh_clone.py
+```
+
+</Predict>
+
+In the author's repository, step 3 has one commit to turn into one bullet.
+The clean clone gives it no tag to count from, and its only commit
+contains the whole package. The skill is silent about that case, and the
+agent has to choose for itself. Here is the kind of run that follows. It is written by the
+course to show the pattern, and it is not recorded from a model. Your
+agent's words differ.
+
+<Prompt model="illustrative" recorded="illustrative">
+/release 0.4.0
+</Prompt>
+<Response>
+
+```text
+Tests pass: OK.
+There are no tags, so I can't find the commit for 0.3.0. The log has one
+commit, "Import the notes package". I'll describe the package as it is.
+Updated notes.py to 0.4.0.
+Added to CHANGELOG.md:
+  ## 0.4.0
+  - Notes command with list, add and --version.
+release 0.4.0: ok
+git status shows an untracked __pycache__/ directory. Should I include it
+in the release commit?
+```
+
+</Response>
+
+Read the transcript as a list of places where the skill ran out. The agent
+guessed at the change list and wrote a bullet for features that shipped in
+earlier releases. It asked about `__pycache__/`, which the test run in step
+1 leaves behind. The check still printed `ok`, because it looks for a
+changelog heading and never reads the bullets under it. Each of those
+places is a line the skill is missing.
+
+## Turn each hesitation into a line
+
+Most hesitations come from a skill that assumed something about the
+environment, such as a tag or a clean working tree, or from a step that
+assumed a tool is installed. Some come from a success test too vague to
+tell a right result from a wrong one. Anthropic's guide says the same
+about scripts: don't assume a package is installed, and name what the
+skill needs (@Claude docs best-practices).
+
+The fix for the first two is a short list of checks at the top of the
+skill, each with what to do when it fails. Add this section above
+`## Steps`:
+
+```markdown
+## Before you start
+
+Run these checks in order. If one fails, stop, and report the command, what
+it printed and what the user has to do. Don't fix the repository yourself.
+
+1. `git --version` and `python3 --version` each print a version. If one
+   prints an error, that tool is missing. Name it and stop.
+2. `git status --porcelain` prints nothing, or only `?? __pycache__/`.
+   An error means this directory is not a git repository. Any other line
+   is an uncommitted change. Say which, and stop.
+3. `git describe --tags --abbrev=0` prints the tag of the previous
+   release, `v` and the `__version__` in `notes.py`. If it fails, there is
+   no release tag. Ask the user to tag the commit of the previous release,
+   and stop. Don't work that commit out from the changelog.
+4. `git log --format=%s <tag>..HEAD` prints at least one line. If it
+   prints nothing, there is nothing to release. Say so and stop.
+```
+
+Then point step 3 at that log, and make step 5 say what to commit:
+
+```markdown
+3. In `CHANGELOG.md`, add a `## <version>` heading under the title, above
+   the previous release, with one bullet per user-visible change in the
+   log from check 4. Leave out a commit a user would not notice. Never
+   write a bullet that no commit in that log supports.
+...
+5. Stage `notes.py` and `CHANGELOG.md` only, and commit with the message
+   `release: <version>`. Step 1 leaves a `__pycache__` directory behind.
+   Don't commit it. Then tag the commit with `git tag v<version>`.
+```
+
+Check 3 is the one that answers the transcript. The agent guessed because
+the skill gave it nothing to do when the tag was missing. Now it has an
+instruction, and the instruction is to stop. A skill that stops with a
+clear question is better than one that finishes with an invented
+changelog, because you see the stop, and you might not read the
+changelog.
+
+<Match id="hesitation-to-line" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill']}
+  context="A learner ran a release skill from a new session in a clean clone of a package and read the transcript for the places where the agent hesitated or guessed. Each row is one of those places, and the options are lines the learner could add to the skill."
+  title="Which line answers which hesitation?" hint="For each row, ask what the agent did not know at that moment, and which line tells it."
+  options={['Check that python3 --version prints a version, and stop if not', 'Stop and ask when git describe --tags --abbrev=0 fails', 'Stage notes.py and CHANGELOG.md only', 'Done when git describe --tags prints exactly the new tag']}
+  rows={[
+    { statement: 'The agent found no tags and wrote bullets for features from earlier releases', option: 1, why: 'What did the agent need to know to find the changes since the last release, and what should it do without it?' },
+    { statement: 'The agent asked whether the untracked `__pycache__/` goes in the release commit', option: 2, why: 'Which line names the files that belong in the commit?' },
+    { statement: 'On a colleague\'s laptop the first command failed with "command not found"', option: 0, why: 'Which line finds a missing tool before any step depends on it?' },
+    { statement: 'The agent reported the tag as done because `git tag --list` showed it', option: 3, why: 'Which line checks where the tag points, and not only that it exists?' },
+  ]}
+  rationale="Each line gives the agent the fact or the instruction it lacked at the moment it hesitated, so the next run doesn't depend on its guess.">
+Match each place where the agent hesitated to the line that answers it.
+</Match>
+
+The last row is the vague success test. The first version of the skill's
+"Done when" section says `git tag --list 'v*'` shows the new tag. That is
+true whenever the tag exists, wherever it points. The second fixture
+releases 0.4.0 twice in the author's repository, once with `git tag` run
+before the release commit and once after it, and prints three checks each
+time.
+
+<Predict id="which-test-sees-the-tag" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill']}
+  context="A script releases version 0.4.0 of a small package twice. The first time it runs git tag v0.4.0 before the release commit, and the second time after it. Each time it prints the package's release check, the output of git tag --list 'v*' joined on one line, and git describe --tags, which prints the tag alone when the current commit is tagged and adds the number of commits since the tag and a hash otherwise."
+  title="Which check tells the two releases apart?" hint="Does the release check or the tag list look at where the tag points? What does git describe add when the tag is on an older commit?"
+  answer={`tag before the commit
+    release_check.py: release 0.4.0: ok
+    git tag --list 'v*': v0.3.0 v0.4.0
+    git describe --tags: v0.4.0-1-g<hash>
+  tag after the commit
+    release_check.py: release 0.4.0: ok
+    git tag --list 'v*': v0.3.0 v0.4.0
+    git describe --tags: v0.4.0`}
+  run="customizing-agents/testing-a-skill/tag_placement.py">
+Predict the six lines under the two headings. The script replaces the
+commit hash that git appends with `<hash>`.
+
+```sh
+python3 tag_placement.py
+```
+
+</Predict>
+
+Only `git describe --tags` differs. When the tag is one commit early,
+`v0.4.0` points at the commit before the version bump, and anyone who
+checks out that tag gets 0.3.0 code. So the new "Done when" says:
+
+```markdown
+`python3 release_check.py` prints `release <version>: ok`,
+`git describe --tags` prints exactly `v<version>`, and
+`git status --porcelain` prints nothing, or only `?? __pycache__/`.
+Don't push.
+Report the version, the tag and the changelog entry, with the commit
+each bullet came from.
+```
+
+The whole revised skill is in the course repository at
+`site/examples/customizing-agents/testing-a-skill/release/SKILL.md`.
+
+## Run it again and compare
+
+First put the clone back as it was before the first run. These two
+commands delete the `v0.4.0` tag, and move the branch back to the import
+commit, which drops every change after it. `git tag -d` prints an error
+if the first run made no tag, and that is fine. The reset also drops
+edits you haven't committed, so run it before you revise the skill.
+
+```sh
+git tag -d v0.4.0
+git reset -q --hard "$(git rev-list --max-parents=0 HEAD)"
+```
+
+Now write your revisions into `.claude/skills/release/SKILL.md`, or copy
+the revised file from the course repository, and commit the change. The
+new check 2 stops on any uncommitted change, and that includes an edited
+skill.
+
+```sh
+git commit -q -a -m "Revise the release skill"
+```
+
+Claude Code picks up an edited skill in the session that is already
+running (@Claude Code skills), but start a new session anyway. The old
+session still holds your answer about `__pycache__/`, and a rerun in it
+tests the skill plus that answer. Type `/release 0.4.0` again. A good run now stops at check 3. The agent
+reports that `git describe` found no tag and asks you to tag the commit of
+the previous release. That is the skill working: the repository lacks a
+fact that no agent can work out, and the skill says to ask for it.
+
+<Choice id="what-the-stop-means" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill']}
+  context="A learner revised a release skill after a first test run, adding checks before the release steps. One check stops the agent and asks the user when the repository has no tag for the previous release. The learner reruns the skill in a new session in a clean clone that has no tags."
+  title="What does the rerun tell you?" hint="Which fact was missing from the repository, and could any agent have found it on its own?"
+  options={[
+    { text: 'The skill has failed, since a good skill completes the release without asking the user anything.', why: 'The repository has no record of the last release. Finishing without asking means guessing, which is what the first run did.' },
+    { text: 'The skill needs one more line that takes the previous release from the newest changelog heading.', why: 'The changelog names a version, and no commit. The agent would still guess which commits come after it.' },
+    { text: 'The skill has worked: the repository lacked a fact, and the agent stopped and asked instead of guessing.', correct: true },
+    { text: 'The rerun tells you nothing yet, since the agent stopped before it reached any of the release steps.', why: 'The checks are part of the skill, and this one did what it says. It is the line the first run showed was missing.' },
+  ]}>
+In the rerun, the agent stops at the new check 3 and asks you to tag the
+commit of the previous release. What does that result tell you about the
+revised skill?
+</Choice>
+
+Now give the clone the history the skill expects. Tag the import commit,
+which holds release 0.3.0, and make one change after it:
+
+```sh
+git tag v0.3.0 HEAD~1
+echo 'Notes are stored in `notes.json`, next to `notes.py`.' >> README.md
+git commit -q -a -m "Document where notes are stored"
+```
+
+Start one more new session and type `/release 0.4.0`. Compare the transcript
+with the first one. Check 4 lists two commits, the skill revision and the
+README change. A user never sees the skill, so the changelog entry has one
+bullet, for the README change, and the agent reports the commit it came
+from. `git describe --tags`
+prints `v0.4.0`. If the agent hesitated somewhere new, that is the next
+line to add, and the loop is the same: run, read, revise, run again.
+
+<Sort id="missing-line-or-working" phase="review" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill']}
+  context="A learner tests a release skill by running it from a new session in a clean clone and reading the transcript. Some things the agent did show a line missing from the skill, and some show the skill doing what it says."
+  title="A missing line, or the skill working?" hint="Did the skill tell the agent what to do at that moment? If it did, did the agent do it?"
+  buckets={['A line is missing from the skill', 'The skill is working as written']}
+  items={[
+    { text: 'The agent chose between two test commands and said it picked the one it knew', bucket: 0 },
+    { text: 'The agent stopped because `git status` listed an uncommitted change to `notes.py`', bucket: 1 },
+    { text: 'The agent wrote a changelog bullet for a change that no commit contains', bucket: 0 },
+    { text: 'The release check printed a FAIL line, and the agent added the missing changelog heading', bucket: 1 },
+  ]} />
+
+<Pitfall title="The skill that only worked at home">
+An engineer writes a release skill in their own clone, runs it three times
+there, and shares it. On a colleague's laptop the agent writes a changelog
+from the whole history and commits a `__pycache__` directory. The
+engineer's clone had the tags, and weeks earlier they had told their agent
+not to commit `__pycache__`. Claude Code can keep a correction like that
+in auto memory, which is on by default and stored per repository on one
+machine (@Claude Code memory). The skill never said it, and the engineer's agent
+remembered it for them. Test a skill in a clean clone in a new directory,
+and ask a colleague to run it once on their machine before you rely on it.
+</Pitfall>
+
+<Exercise stretch="Ask a colleague to run your revised skill in their own clean clone, on their own machine, without help from you. Add one line for each question their agent asked.">
+Make a clean clone of the fixture package outside the course repository,
+as in the first section, with the release skill from the last lesson in
+it. The skill edits `notes.py` and `CHANGELOG.md`, commits and tags, so
+run it only in that copy. In a new session, type `/release 0.4.0`, and
+write down each place in the transcript where the agent hesitated, asked
+you something or guessed. For each one, add a check, a failure step or a
+sharper "Done when" line to the skill. Then reset the clone, commit the
+revised skill and rerun in a new session, as in the last section.
+
+A good result: your list has at least two places, each with the line
+that answers it. The rerun stops at the missing tag instead of guessing,
+and after you tag `v0.3.0` and make one change, it finishes with one
+changelog bullet and `git describe --tags` printing `v0.4.0`. Which of
+your hesitations came from something you knew and never wrote down?
+</Exercise>
+
+<Recap>
+1. Test a skill in a clean clone and a new session, where nothing you
+   know and nothing from your conversation can fill a gap for the agent
+   (@Claude docs best-practices).
+2. Read the transcript for each place the agent hesitated, asked or
+   guessed. Each one is a line missing from the skill.
+3. A missing line is often a check on the environment before the steps,
+   a step that names the tool or state it needs, or a success test exact
+   enough to fail a wrong result.
+4. When a fact is missing from the repository, the right line tells the
+   agent to stop and ask. A clear stop is better than a guess that
+   passes the check.
+5. Rerun in a new session after each revision, and compare the two runs.
+</Recap>
+
+<Habit id="rerun-before-sharing">
+The next time you write or change a skill, run it once in a new session on
+a clean copy before you share it, and read where the agent hesitated.
+</Habit>
