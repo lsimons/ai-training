@@ -1,0 +1,6 @@
+question: Who approves a replacement laptop for the payments team?
+call: search_docs(query='approves replacement laptop payments team')
+result: laptops.txt: Laptops. Laptops are replaced every four years. The cost center owner of your team approves a replacement laptop before that, see the team pages. Report a lost laptop to the service desk the same day.
+call: search_docs(query='cost center owner payments team')
+result: payments-team.txt: Payments team. The payments team builds the checkout and billing services. The cost center owner of the payments team is Maria Duarte, head of platform.
+answer: Maria Duarte approves it, as the cost center owner of the payments team. "The cost center owner of the payments team is Maria Duarte, head of platform."

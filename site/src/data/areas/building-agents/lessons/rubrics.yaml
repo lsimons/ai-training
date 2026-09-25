@@ -1,11 +1,16 @@
 id: building-agents/rubrics
 title: Turning good into a rubric
+description: >-
+  Score twelve runs of a handbook assistant on five quality pillars, rewrite "well grounded" as an
+  anchored 0-1-2 criterion two graders agree on, and check it against a model judge on a sample.
 mode: explanation
 covers: building-agents/evaluation
 serves: [building-agents/evaluates-agents/writes-a-rubric]
 introduces: [quality-pillars, rubrics]
 assumes:
   - objective: coding-with-agents/verifies-agent-work/reviews-others-code
+    lesson: coding-with-agents/reviewing-the-diff
+    section: the-criteria-item-by-item
 after: [building-agents/retrieval-as-a-tool]
 shorts: []
 exercise:
@@ -13,10 +18,16 @@ exercise:
   brief: >-
     Read the fixture's twelve retrieval-agent transcripts, write three criteria with anchored 0-1-2
     scales, and score two transcripts with them. Compare your scores with the model answer's.
-sources: []
+sources:
+  - AEC-09
+  - Academy building-with-the-claude-api
 issue: 200
 minutes: 15
 notes: >-
   Correctness, faithfulness, safety, efficiency and adherence as separate scores, because one number
   hides the trade. A rubric written from real outputs. Checkpoints are choice and repair on weak
-  criteria.
+  criteria. The twelve transcripts under site/examples/building-agents/rubrics/transcripts/ are
+  written for this lesson against the retrieval-as-a-tool handbook, and the grades in the grades file are
+  illustrative, written by the author, with no model called. DLAI-11 and Brilliant VER from the plan
+  were dropped because the page cites no claim from them; the Academy course is cited only for
+  grading by code or by a model, which its prompt evaluation lesson titles state.

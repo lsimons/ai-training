@@ -1,0 +1,4 @@
+question: How many days of annual leave do I get?
+call: search_docs(query='annual leave days')
+result: leave.txt: Annual leave. Every employee accrues 25 days of annual leave per year. Unused days carry over until 31 March. Requests go to your manager at least two weeks ahead.
+answer: You get 25 days per year. "Every employee accrues 25 days of annual leave per year."

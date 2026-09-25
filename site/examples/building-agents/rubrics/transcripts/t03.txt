@@ -1,0 +1,10 @@
+question: What is the training budget per year?
+call: search_docs(query='training budget')
+result: training.txt: Training. Every employee has a training budget of 1500 euros per year. Conference tickets count against the training budget.
+call: search_docs(query='training budget per year')
+result: training.txt: Training. Every employee has a training budget of 1500 euros per year. Conference tickets count against the training budget.
+call: search_docs(query='yearly budget for training in euros')
+result: training.txt: Training. Every employee has a training budget of 1500 euros per year. Conference tickets count against the training budget.
+call: search_docs(query='training budget amount')
+result: training.txt: Training. Every employee has a training budget of 1500 euros per year. Conference tickets count against the training budget.
+answer: The budget is 1500 euros per year. "Every employee has a training budget of 1500 euros per year."

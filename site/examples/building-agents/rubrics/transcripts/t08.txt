@@ -1,0 +1,4 @@
+question: Can I bring my dog to the office?
+call: search_docs(query='dog office')
+result: office-hours.txt: Opening hours. The building is open from 7 to 20 on weekdays. Core hours, when everyone in the office is reachable, are 10 to 15.
+answer: Yes, during core hours. "Core hours, when everyone in the office is reachable, are 10 to 15."
