@@ -277,12 +277,4 @@ describe('runFixture and checkExamples', () => {
 		const res = checkExamples(empty, examples);
 		expect(res.failures[0]).toContain('no <Predict run=...> examples found');
 	});
-	// Runs every <Predict run=...> fixture the lessons reference on both interpreters (about 5 s idle), so it needs more than the 5000 ms default under load or on a slow CI runner (#255).
-	it('the real lesson tree has examples that pass on both interpreters', () => {
-		const root = new URL('../..', import.meta.url).pathname;
-		const res = checkExamples(join(root, 'src/content/docs'), join(root, 'examples'));
-		expect(res.failures).toEqual([]);
-		expect(res.checked).toBe(res.found * 2);
-		expect(res.checked).toBeGreaterThan(0);
-	}, 120_000);
 });

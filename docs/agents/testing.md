@@ -182,11 +182,12 @@ under Biome, the strict tsconfig flags and the coverage include set.
 default of 5000 ms, and unit and component tests keep it: a test that
 needs longer is doing too much. The one case for a per-test timeout is a
 sweep over external processes, where the time goes to subprocesses the
-test can't make faster. The pattern is the last test in
-`site/tests/scripts/examples.test.ts`, which runs every `<Predict run=...>`
-fixture on both interpreters and passes `120_000` as the third argument to
-`it()`, with a comment above it saying why. Give the timeout to that one
-test, and leave the default for the rest of the file.
+test can't make faster. No test takes one now. The sweep over every
+`<Predict run=...>` fixture runs in `mise run examples`, outside Vitest,
+and `site/tests/scripts/examples.test.ts` checks `site/scripts/lib/examples.mjs`
+against temporary fixture trees only (#330). A new sweep test passes its
+timeout in milliseconds as the third argument to `it()`, with a comment
+above it saying why, and the rest of its file keeps the default.
 
 ## A second build needs a second worktree
 
