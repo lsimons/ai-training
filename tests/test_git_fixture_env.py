@@ -6,8 +6,9 @@ allow-list environment: `GIT_ENV_BASE` in the coding-with-agents fixtures'
 one of them twice, once plainly and once with variables that change what git
 does: a template directory whose pre-commit hook fails, extra config through
 GIT_CONFIG_PARAMETERS, an external diff program and GIT_DIFF_OPTS. The output
-must match byte for byte. The reversible-changes and testing-a-skill fixtures print
-no diff, so for them only the failing template hook shows a leak.
+must match byte for byte. The reversible-changes and testing-a-skill
+fixtures print no diff, so for them only the failing template hook shows a
+leak.
 """
 
 import os
