@@ -38,8 +38,7 @@ the branch tip) and the diff file the lead wrote there (`review.diff`).
    outside the worktree, while `review.diff` isn't empty, is a failed
    run. Don't run it again. Say in the review that the skill run failed,
    review by hand from `review.diff`, and base the verdict on that hand
-   review alone. Otherwise, when the skill's first reply names another
-   level, run it once more with the level first.
+   review alone.
 3. Read `docs/agents/testing.md` and check that each new assertion sits in
    the right layer and follows "Rules from review".
 4. Probe the risks the prompt names, and these every time:
