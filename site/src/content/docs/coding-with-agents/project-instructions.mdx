@@ -192,8 +192,7 @@ there is in
 and this section is about when to add one. Claude Code's documentation
 gives a similar trigger for its own instructions file: a mistake the agent
 has made before, or a correction you already gave in an earlier session
-(@Claude Code memory). The agent-engineering course says
-the same about `AGENTS.md`: start small, and add a line when you see an
+(@Claude Code memory). The agent-engineering course says the same about `AGENTS.md`: start small, and add a line when you see an
 agent repeat a mistake (@AEC-15).
 
 A correction in the next brief fixes one session. The line in the file
@@ -283,8 +282,8 @@ other. The agent starts to break rules that are in the file, and the team
 adds emphasis to those rules, which makes the file longer again. Claude
 Code's documentation names this failure: a file that is too long gets
 half its rules ignored, and in a long file, a rule the agent keeps
-breaking is a sign the file needs pruning (@Claude Code best practices). The agent-engineering
-course adds that a stale line misleads the agent more than a missing one
+breaking is a sign the file needs pruning (@Claude Code best practices).
+The agent-engineering course adds that a stale line misleads the agent more than a missing one
 (@AEC-15). The rule: each time you add a line, delete the lines the agent
 gets right without them and the lines that no longer describe the
 project.
@@ -301,8 +300,9 @@ file you just fixed is in the context, and so are forty tool outputs after
 it.
 
 Context rot is the drop in how well the agent follows its instructions as
-the context window fills. **Avoiding context rot** is keeping the context lean so the agent keeps
-following its instructions and keeps the goal in view. These habits keep
+the context window fills. **Avoiding context rot** is keeping the context
+lean so the agent keeps following its instructions and keeps the goal in
+view. These habits keep
 a session lean.
 
 - One task per session. When `rename` is done and committed, start a new
@@ -321,7 +321,8 @@ a session lean.
   (@Claude Code best practices).
 
 The instructions file makes a restart cheap. Claude Code reads the root
-instructions file from disk again after `/compact`, and an instruction you gave only in the conversation can be lost in the summary
+instructions file from disk again after `/compact`, and an instruction you
+gave only in the conversation can be lost in the summary
 (@Claude Code memory). A rule in the file comes back in the next session.
 A rule you typed in chat does not. Anthropic's course *Claude Code in
 action* has a module on steering long sessions for more on this
@@ -345,10 +346,10 @@ What do you do?
 The instructions file also holds the reasons behind the project's
 structure, at least where to find them. Suppose the `remove` session
 proposed moving the list from `todos.json` into an SQLite database, and
-you said no: one JavaScript Object Notation (JSON) file keeps the program to the standard library, and
-the diff of `todos.json` shows every change in review. That reason is now
-in a transcript, and the next session that finds the JSON file slow will
-propose the database again.
+you said no: one JavaScript Object Notation (JSON) file keeps the program
+to the standard library, and the diff of `todos.json` shows every change
+in review. That reason is now in a transcript, and the next session that
+finds the JSON file slow will propose the database again.
 
 Write the decision down in the repository and point at it from the file.
 One line in `AGENTS.md` is enough for the pointer:
@@ -380,7 +381,7 @@ Where should the decision and its reasons go?
 
 <MultiChoice id="which-lines-belong" phase="review" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
   concepts={['project-instructions', 'avoiding-context-rot']}
-  context="A coding agent made the same mistake in two sessions on one repository, and the engineer is choosing what to do about it. The repository has a short instructions file that the agent loads at the start of every session."
+  context="A coding agent made the same mistake in two sessions on one repository, and the engineer is choosing what to do about it. The repository has a short instructions file that the agent loads at the start of every session. The file already has the rule 'Do not edit todos.json', and in both sessions the agent changed todos.json by running the program to try a command."
   title="Which responses fix the repeated mistake?" hint="Which of these reach the next session, and are specific enough to check?"
   options={[
     { text: 'Add one line to the instructions file that names the action and what to do instead.', correct: true },
@@ -433,7 +434,7 @@ the one thing that went wrong in both. It may be `todos.json`, as on this
 page, or something else your agent does, such as a wrong test command or
 a file it edits that the task didn't need. Write the one line that fixes
 it, specific enough to check. Delete the copy and copy the fixture again.
-Change the one line in its `AGENTS.md`, commit it with the command above,
+Add or change the one line in its `AGENTS.md`, commit it with the command above,
 then start a fresh session with the brief of session 2. Check
 `git status --short` again.
 
