@@ -64,6 +64,24 @@ export function splitCitations(text) {
 }
 
 /**
+ * The position of every citation token in `text`, in order, as the index of
+ * its `(` and the length through its `)`. It finds the same tokens as
+ * `splitCitations`, so a plugin that must leave citations alone, such as
+ * remark-terms.mjs, skips exactly the text remark-citations.mjs resolves.
+ * @param {string} text
+ * @returns {Array<{ index: number, length: number }>}
+ */
+export function citationSpans(text) {
+	/** @type {Array<{ index: number, length: number }>} */
+	const spans = [];
+	for (const m of text.matchAll(CITATION)) {
+		if (!isCitation(m[1] ?? '')) continue;
+		spans.push({ index: /** @type {number} */ (m.index), length: m[0].length });
+	}
+	return spans;
+}
+
+/**
  * The citation keys in `source`, in order of first appearance. This scans raw
  * text, so it also sees a `(@key)` inside a code block, which the remark
  * plugin leaves alone; the data check accepts that, because no lesson shows

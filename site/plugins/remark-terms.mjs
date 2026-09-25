@@ -12,7 +12,9 @@
  * Matching is case-insensitive on the concept name as a whole phrase, with an
  * optional plural `s` or `es`, and straight quotes in a name also match the
  * curly quotes remark-smartypants produces. Headings, links, code and the
- * inside of MDX components are never marked (see mdast-walk.mjs). When two
+ * inside of MDX components are never marked (see mdast-walk.mjs), and neither
+ * is the key of a `(@key)` citation, which remark-citations.mjs resolves
+ * after this plugin and which must stay one text run for it. When two
  * covered topics define the same concept name, the first covered topic's
  * concept is the one linked.
  *
@@ -22,6 +24,7 @@
  * cannot see the component-rendered glossary anchors and excludes them, so
  * this check is what covers that exclusion.
  */
+import { citationSpans } from './citation-syntax.mjs';
 import { walkText } from './mdast-walk.mjs';
 
 const GLOSSARY_LINK = /^\/glossary\/#(.+)$/;
@@ -78,14 +81,49 @@ export function remarkTerms({ topics, lessons, docsDir }) {
 
 /**
  * Split one text node around the first mention of each still-unmarked
- * concept. At one position the longest concept name wins.
+ * concept, outside its citation tokens. A citation token is copied through
+ * unchanged, so a key such as `Claude Code subagents` is not split by a
+ * term inside it.
  * @param {{ type: 'text', value: string }} node
  * @param {Array<{ id: string, name: string, definition: string, pattern: RegExp }>} pending
  */
 function markTerms(node, pending) {
+	const value = node.value;
 	/** @type {any[]} */
 	const out = [];
-	let rest = node.value;
+	let marked = false;
+	/** @param {any[]} parts */
+	const append = (parts) => {
+		for (const part of parts) {
+			const prev = out.at(-1);
+			if (part.type === 'text' && prev?.type === 'text') prev.value += part.value;
+			else out.push(part.type === 'text' ? { type: 'text', value: part.value } : part);
+		}
+	};
+	let last = 0;
+	for (const span of [...citationSpans(value), { index: value.length, length: 0 }]) {
+		const plain = markPlain(value.slice(last, span.index), pending);
+		if (plain.some((part) => part.type !== 'text')) marked = true;
+		append(plain);
+		append([{ type: 'text', value: value.slice(span.index, span.index + span.length) }]);
+		last = span.index + span.length;
+	}
+	if (!marked) return [node];
+	return out.filter((part) => part.type !== 'text' || part.value.length > 0);
+}
+
+/**
+ * Split a run of plain text, which holds no citation token, around the first
+ * mention of each still-unmarked concept. At one position the longest
+ * concept name wins.
+ * @param {string} text
+ * @param {Array<{ id: string, name: string, definition: string, pattern: RegExp }>} pending
+ * @returns {any[]}
+ */
+function markPlain(text, pending) {
+	/** @type {any[]} */
+	const out = [];
+	let rest = text;
 	while (pending.length > 0 && rest.length > 0) {
 		/** @type {{ index: number, length: number, concept: (typeof pending)[number] } | null} */
 		let best = null;
@@ -110,7 +148,6 @@ function markTerms(node, pending) {
 		});
 		rest = rest.slice(best.index + best.length);
 	}
-	if (out.length === 0) return [node];
 	if (rest.length > 0) out.push({ type: 'text', value: rest });
 	return out;
 }
