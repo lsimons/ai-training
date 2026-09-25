@@ -1,10 +1,17 @@
 id: building-agents/orchestration-tax
 title: What every extra agent costs
+description: >-
+  Count the tokens that a pipeline and a manager with workers spend on handoffs and repeated context
+  next to a single agent, name the rest of the tax, ask what one agent can't do, and compare both
+  designs on the same golden set.
 mode: explanation
 covers: building-agents/orchestration
 serves: [building-agents/orchestrates-agents/justifies-orchestration-cost]
 introduces: [orchestration-tax]
-assumes: []
+assumes:
+  - objective: building-agents/evaluates-agents/builds-a-golden-set
+    lesson: building-agents/golden-sets
+    section: what-a-good-answer-has
 after: [building-agents/orchestrating-agents, building-agents/golden-sets]
 shorts: []
 exercise:
@@ -12,12 +19,34 @@ exercise:
   brief: >-
     Given the fixture's scores and token counts for a three-agent design and a single agent on the
     same golden set, decide which to keep and write where the score difference came from.
-sources: [Academy claude-platform-101]
+sources:
+  - AEC-07
+  - AEC-18
+  - Academy claude-platform-101
+  - Claude docs compaction
+  - Claude docs tool-search-tool
+  - Claude docs agent-skills-overview
 issue: 210
 minutes: 12
+sources-checked: 2026-09-26
+review-by: 2027-03-26
 notes: >-
-  Handoff tokens, latency, information lost at each boundary and new failure modes, with the token
-  count of each arrangement from the previous lesson's fixture as the worked example. Before a
-  second agent, name what the single agent cannot do, and check whether compaction or just-in-time
-  loading fixes it inside one context first (Academy claude-platform-101). Checkpoints are scenario
-  and choice.
+  Explanation mode. The fixture in site/examples/building-agents/orchestration-tax/ is self-contained:
+  the orchestrating-agents lesson (#209) was written in parallel and prints no token counts, so this
+  fixture builds its own versions of the same two arrangements with the same agent names, a
+  code-driven pipeline of three fake agents (lookup, writer, checker) and a manager fake model that
+  calls lookup and writer as tools, with worker results as {"ok": true, "text": ...}, next to a
+  single-agent baseline. The shop's first two orders and its stock match the planning lesson's shop.
+  The page says the arrangements are the ones from the previous lesson and never that the numbers
+  are the ones that lesson printed. The counter labels each piece of text a call reads as new,
+  handoff or repeat, and counts a word or punctuation mark as one token. The shop, the orders and the
+  twelve golden-set emails are illustrative, written by the author. The pipeline scores 10 of 12 and
+  the single agent 9 of 12: the pipeline gains three from the stock line in the lookup prompt and
+  loses two because the lookup notes drop a second request, and the exercise asks the learner to
+  find that. The single agent with the stock line scores 12 of 12, the stretch. AEC-07 uses the name
+  orchestration tax for human review time, and the page says so and counts the system cost. Academy
+  claude-platform-101 is cited only for teaching context-management patterns for a long-running
+  agent, from its public outline. The vendor claims on compaction, tool search and skills cite the
+  Claude Platform documentation pages. Academy introduction-to-subagents from the topic sources was
+  not used. The two first checkpoints test different ideas (what one agent can't do, and measuring
+  before choosing), and each has its own review alternate.
