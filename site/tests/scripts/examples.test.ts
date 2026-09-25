@@ -294,7 +294,8 @@ describe('usesModule', () => {
 		['import os, agent\n', 'second name in an import list'],
 		['import agent as a\n', 'import as'],
 		['    from agent import run\n', 'indented from-import'],
-		['subprocess.run([sys.executable, "-m", "pytest", "test_agent.py"])\n', 'file name'],
+		['subprocess.run([sys.executable, "-m", "pytest", "test_agent.py"])\n', 'file name in double quotes'],
+		["shutil.copy(os.path.join(HERE, 'agent.py'), dst)\n", 'file name in single quotes'],
 	];
 	it.each(uses)('%j counts as a use (%s)', (src) => {
 		const stem = src.includes('test_agent') ? 'test_agent' : 'agent';
@@ -307,6 +308,10 @@ describe('usesModule', () => {
 		['# the agent loop runs here\n', 'the word in a comment'],
 		['print("my_agent.py")\n', 'a file name that ends with the stem'],
 		['x = 1  # import agent\n', 'an import in a trailing comment'],
+		['"""Imports the loop from agent.py and prints it."""\n', 'the file name in a docstring'],
+		['# Run `python3 agent.py` first.\n', 'the file name in a backtick code span'],
+		['print("$ python3 agent.py")\n', 'the file name inside a longer string'],
+		['print("agent.py\')\n', 'mismatched quotes'],
 	];
 	it.each(misses)('%j is not a use (%s)', (src) => {
 		expect(usesModule(src, 'agent')).toBe(false);
