@@ -169,8 +169,8 @@ if "in_stock" in latest and latest["in_stock"] == 0:
 return None
 ```
 
-When the model returns a changed plan, `work` gives it the next version
-number, so the first plan is v1 and the first revision is v2.
+When the model returns a changed plan, `work` gives it the next
+version number, so the first plan is v1 and the first revision is v2.
 `show_plan` prints a `plan vN:` line and then one numbered line per
 step, with `[x]` for a step that has run and `[ ]` for an open one. The
 `revise_only` step runs the first three steps, gives the model the
@@ -178,7 +178,7 @@ results and prints only the plan it gets back.
 
 <Predict id="predict-revised-plan" objective="building-agents/orchestrates-agents/picks-a-pattern"
   concepts={['planning']}
-  context="In the lesson, a fake model writes a five-step plan to replace a broken kettle from order 1042: look up the order, read the returns policy, check the stock, send a replacement, and email the customer that a new kettle has shipped. After each step the model gets the plan and the results back. When a stock result says the shop has none in stock, it keeps the steps that have run and replaces the rest with a refund of the order and an email that the item is refunded. Step three returns in_stock 0 and restock_days 21. The output is the plan the model returns: a line plan vN: with the next version number after v1, then one line per step with its number, [x] for a step that has run or [ ] for an open one, and the step text."
+  context="In the lesson, a fake model writes a five-step plan to replace a broken kettle from order 1042: look up the order, read the returns policy, check the stock, send a replacement, and email the customer that a new kettle has shipped. After each step the model gets the plan and the results back. When a stock result says the shop has none in stock, it keeps the steps that have run and replaces the rest with a refund of the order and an email that the item is refunded. Step three returns in_stock 0 and restock_days 21. The plan v1 steps read: Look up order 1042; Read the returns policy; Check that a kettle is in stock; Send a replacement kettle; Email the customer that a new kettle has shipped. The reply writes its new steps as Refund order, then the order id, and Email the customer that the item is refunded, with the item name in place of item. The output is the plan the model returns: a line plan vN: with the next version number after v1, then one line per step with its number, [x] for a step that has run or [ ] for an open one, and the step text."
   title="Predict the revised plan"
   hint="Which steps have run and stay as they are, and which rule in the reply matches the result of step three?"
   answer={`plan v2:
@@ -251,7 +251,6 @@ run step by step, with a check of the plan after each major step
 result isn't what the plan expected, and the exercise asks for that as
 a stretch.
 
-
 ## The moment to correct the plan
 
 Before step one runs, the plan is five lines of text and the shop is
@@ -275,9 +274,9 @@ nothing.
   concepts={['planning']}
   context="An agent that sends a monthly newsletter writes a plan of three steps before it starts: pick the list of all customers as the audience, send the newsletter to that audience in batches of 1,000, and report how many were sent. The team wanted it sent to subscribers only, and a person on the team can read the plan and the progress of each step."
   title="When is the fix cheapest?"
-  hint="At which point has nobody received the newsletter yet?"
+  hint="Which moves in the run can't be undone?"
   options={[
-    { text: 'After the first batch of step two, from the progress of the run.', why: 'The progress shows the wrong audience, and 1,000 customers who did not subscribe already have the newsletter.' },
+    { text: 'After the first batch of step two, from the progress of the plan.', why: 'The progress shows the wrong audience, and 1,000 customers who did not subscribe already have the newsletter.' },
     { text: 'After the run, from the trace of tool calls and their results.', why: 'The trace shows the send to all customers after it happened. The fix is now an apology to every customer who got it.' },
     { text: 'At the next evaluation run, when the team reviews last month\'s sends.', why: 'The evaluation finds the wrong audience weeks later, after every customer has the newsletter.' },
     { text: 'Before step one runs, by changing the audience in the written plan.', correct: true },
@@ -303,11 +302,11 @@ first call would have done anyway.
 
 A written list is also one choice among several for keeping track.
 Claude Code has tools for a task list, and on newer models it leaves
-them out by default. The documentation gives two reasons: a newer model
-can follow long work without the list, and the tool definitions cost
-context (@Claude Code tools reference). The plan in this lesson is written for
-someone to read it: the person who approves it, and the code that runs
-it step by step.
+them out by default. The documentation says a newer model keeps track
+of work with many steps without the list, and that the tool definitions
+take up space in the context (@Claude Code tools reference). The plan
+in this lesson is written for someone to read it: the person who
+approves it, and the code that runs it step by step.
 
 <Choice id="which-task-gets-a-plan" objective="building-agents/orchestrates-agents/picks-a-pattern"
   concepts={['planning']}
