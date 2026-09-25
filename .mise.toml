@@ -334,9 +334,18 @@ run = "lychee --no-progress --config .lychee.toml ."
 # splits (issue #371). The same step runs before every `prose` run
 # (`prose-widen`), so a package synced before the script existed is
 # rewritten too.
+#
+# The first step removes .vale/styles/.vale-config/ when a package left it
+# there (issue #450): while it exists, `vale sync` unpacks into
+# .vale/styles/.vale-config/styles/ instead. So `setup`, which runs this
+# task when `prose-check-packages` fails, repairs such a checkout.
 [tasks.prose-sync]
 description = "Fetch the pinned Vale style packages (network)"
-run = ["vale sync", "scripts/vale_linebreaks.py .vale.ini .vale-extended.ini"]
+run = [
+  "scripts/prose_eval.py --clear-config-dir",
+  "vale sync",
+  "scripts/vale_linebreaks.py .vale.ini .vale-extended.ini",
+]
 
 # Rewrites the literal spaces in the synced Vale patterns to `\s`
 # (scripts/vale_linebreaks.py, issue #371). Local, and a second run changes
