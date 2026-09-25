@@ -34,4 +34,7 @@ notes: >-
   stock, and the exercise's surprise is a recalled toaster, which the lesson's reviser has no rule
   for. The plan-then-execute versus reactive trade-off is left to plan-or-react, and this lesson
   only compares the call counts of follow and work. Academy building-with-the-claude-api from the
-  plan was dropped because the page cites no claim from it.
+  plan was dropped because the page cites no claim from it. The planned Order checkpoint on the
+  moves of a planning round was replaced in review by a Choice on when to correct the plan, so that
+  each first checkpoint has a review alternate on the same idea: the Predict and the stale-plan
+  Choice, the which-task Choice and the Sort, the when-to-correct Choice and the Scenario.

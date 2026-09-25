@@ -870,10 +870,10 @@ Claude Code hooks:
 Wang 2023:
   type: paper
   title: "Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models"
-  container: Annual Meeting of the Association for Computational Linguistics (ACL 2023), arXiv preprint 2305.04091
+  container: "Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) (ACL 2023), 2609-2634"
   author: Lei Wang, Wanyu Xu, Yihuai Lan and 4 others
   license: CC BY 4.0
-  url: https://arxiv.org/abs/2305.04091
+  url: https://aclanthology.org/2023.acl-long.147/
 Claude Code tools reference:
   type: reference
   title: Tools reference
