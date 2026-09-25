@@ -79,9 +79,9 @@ the file and says what to do next, because the agent reads it and decides
 its next step from it.
 
 The hook also works when Claude Code moves the session into a worktree,
-which it creates under `.claude/worktrees/<name>/` by default. There
-`${CLAUDE_PROJECT_DIR}` still points at the project root where the session
-started, and the `cwd` field of the hook's input is the worktree
+which by default is a directory under `.claude/worktrees/`. In a worktree,
+`${CLAUDE_PROJECT_DIR}` keeps the directory the session started in, while
+the `cwd` in the hook's input changes to the worktree
 (@Claude Code worktrees). So the script drops the `.claude/worktrees/<name>/`
 part of the path before it checks the list. Without that step, every edit in
 a worktree would match the `.claude/` entry and be blocked.
@@ -141,7 +141,7 @@ file stayed the same. The gates and the review of the diff do that.
   title="The hook that exits with status 1" hint="Which exit status does Claude Code treat as a block, and what does it do with the others?"
   options={[
     { text: 'The edit goes ahead, because Claude Code treats status 1 as an error in the hook and not as a block.', correct: true },
-    { text: 'The edit is blocked, because any status other than 0 tells Claude Code that the hook found a problem.', why: 'That is the usual meaning of a failing status in a shell. Of the exit statuses, only 2 blocks the call.' },
+    { text: 'The edit is blocked, because any status other than 0 tells Claude Code that the hook found a problem.', why: 'That is the usual meaning of a failing status in a shell. Claude Code blocks the call on status 2 and treats the other failing statuses as errors in the hook.' },
     { text: 'The session stops, because Claude Code can\'t continue once one of the project\'s hooks has crashed.', why: 'The session continues. Claude Code shows a notice about the hook error and carries on with the call.' },
     { text: 'Claude Code asks the user to approve the edit, because the hook gave it no clear decision to follow.', why: 'Asking the user is a decision a hook can return in its JSON output. A crash returns no decision.' },
   ]}>
@@ -293,7 +293,7 @@ doesn't check. Should I?" What do you do?
   options={[
     { text: 'Paste the log of the failing step, with the name of that step.', correct: true },
     { text: 'Mark the failing step with continue-on-error so the job goes green.', why: 'The job then passes with the bug still in the code. The gate is weaker for the whole team.' },
-    { text: 'Run the job\'s commands on the copy after each change, before a push.', correct: true },
+    { text: 'Run the job\'s commands in the working copy after each change, before a push.', correct: true },
     { text: 'Rerun the failed job until it passes, since the test may be flaky.', why: 'A rerun doesn\'t change the code. If the failure is real, a pass on a rerun only hides it, and nobody has read the log yet.' },
     { text: 'Leave the workflow file as it is, and stop to ask if it must change.', correct: true },
   ]}>
