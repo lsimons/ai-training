@@ -273,8 +273,7 @@ The cases that come up:
   findings on files outside the worktree, on a non-empty `review.diff` is
   a failed run: the reviewer doesn't run it again, says so in the review,
   and bases the verdict on a hand review of `review.diff`, never on the
-  skill result. Otherwise, a reviewer whose first skill reply names another
-  level runs it once more.
+  skill result.
 - GitHub reports `mergeable: UNKNOWN` for about a minute after every merge.
   Wait and list again. A pull request in `CONFLICTING` state gets no
   `pull_request` CI run at all, so a builder that pushes into a conflict
