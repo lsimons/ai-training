@@ -43,7 +43,7 @@ DRAFTS = {
         "lost laptop to the service desk the same day.",
         "subject": "lost laptop",
         "draft": 'Report it to the service desk the same day. "Report a lost laptop to the '
-        'service desk the same day." I have opened a ticket for you.',
+        'service desk the same day." I will open a ticket for you.',
     },
     "dog": {
         "question": "Can I bring my dog to the office?",
