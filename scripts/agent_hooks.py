@@ -20,6 +20,11 @@ works around it on purpose. It splits the command at `&&`, `||`, `;`, `|`
 and newlines outside quotes, skips here-document bodies (a commit message
 is data), follows `cd`, and reads `git -C <dir>`.
 
+Besides pushes, merges and discarding commands, it rejects a long `sleep`,
+polling (a `gh` loop, or a `sleep` before `tail`, `cat` or `ls`),
+`--no-verify`, deletes on GitHub, and an `rm` that leaves `.scratch/`
+(#391).
+
 No agent pushes to `main` (#353): every change reaches it through a pull
 request. `gh pr merge` is allowed only when `AI_TRAINING_ROLE` names a
 role that may merge, either in the hook's environment or as a prefix on
@@ -228,6 +233,143 @@ def sleep_seconds(words: Sequence[str]) -> float:
     return total
 
 
+READ_COMMANDS = frozenset({"tail", "cat", "ls"})
+COMMIT_VALUE_FLAGS = frozenset({"-m", "-F", "-c", "-C", "-t", "--message", "--file", "--template"})
+COMMIT_SHORT_VALUE = frozenset("mFcCtuS")
+SCRATCH = ".scratch"
+
+
+def sleeps_then_reads(segments: Sequence[Segment]) -> bool:
+    """True when a `sleep` comes before a `tail`, `cat` or `ls` in one command.
+
+    That is how a builder polls a command it started in the background
+    (`sleep 55 && tail -5 out.txt`), and a foreground run replaces it.
+    """
+    slept = False
+    for seg in segments:
+        if seg.words[0] == "sleep":
+            slept = True
+        elif slept and seg.words[0] in READ_COMMANDS:
+            return True
+    return False
+
+
+def skips_hooks(sub: str, args: Sequence[str]) -> bool:
+    """True when `git commit` or `git push` arguments turn the git hooks off.
+
+    Both take `--no-verify`, and git accepts a long option cut to any
+    unambiguous prefix (`--no-veri`). For `git commit` only, `-n` is the
+    same option, also inside a group of short flags (`-an`). For `git push`,
+    `-n` is `--dry-run`.
+    """
+    if sub not in {"commit", "push"}:
+        return False
+    skip_next = False
+    for arg in args:
+        if skip_next:
+            skip_next = False
+            continue
+        if arg == "--":
+            return False
+        if len(arg) >= len("--no-veri") and "--no-verify".startswith(arg):
+            return True
+        if sub != "commit":
+            continue
+        if arg in COMMIT_VALUE_FLAGS:
+            skip_next = True
+        elif re.match(r"^-[A-Za-z]", arg):
+            for flag in arg[1:]:
+                if flag == "n":
+                    return True
+                if flag in COMMIT_SHORT_VALUE:
+                    break
+    return False
+
+
+def gh_deletes(words: Sequence[str]) -> bool:
+    """True for `gh repo delete` and for a `gh api` call with the DELETE method.
+
+    gh reads flags anywhere after the subcommand, and the method as
+    `-X DELETE`, `-XDELETE`, `-X=DELETE`, `--method DELETE` or
+    `--method=DELETE`.
+    """
+    if words[:1] != ["gh"]:
+        return False
+    if words[1:3] == ["repo", "delete"]:
+        return True
+    if words[1:2] != ["api"]:
+        return False
+    rest = list(words[2:])
+    for i, arg in enumerate(rest):
+        following = rest[i + 1] if i + 1 < len(rest) else ""
+        if arg in {"-X", "--method"}:
+            method = following
+        elif arg.startswith("--method="):
+            method = arg.removeprefix("--method=")
+        elif arg.startswith("-X"):
+            method = arg.removeprefix("-X").removeprefix("=")
+        else:
+            continue
+        if method.upper() == "DELETE":
+            return True
+    return False
+
+
+def rm_leaves_scratch(words: Sequence[str], cwd: str) -> str | None:
+    """The first `rm` target outside `.scratch/` when another target is inside it, or None.
+
+    `settings.json` lets `rm -rf .scratch/*` run without a prompt, and that
+    rule also matches `rm -rf .scratch/x ../other` and `rm -rf .scratch/../..`.
+    Every target of an `rm` that names `.scratch` must resolve inside a
+    `.scratch` directory. A target with `$` or a backtick can't be resolved
+    from the text, so it counts as outside.
+    """
+    if words[:1] != ["rm"]:
+        return None
+    targets: list[str] = []
+    options = True
+    for arg in words[1:]:
+        if options and arg == "--":
+            options = False
+        elif options and arg.startswith("-") and arg != "-":
+            continue
+        else:
+            targets.append(arg)
+    if not any(SCRATCH in Path(t).parts for t in targets):
+        return None
+    for target in targets:
+        if "$" in target or "`" in target:
+            return target
+        resolved = Path(cwd, Path(target).expanduser()).resolve()
+        if SCRATCH not in resolved.parts:
+            return target
+    return None
+
+
+def check_hooks_and_deletes(segment: Segment) -> str | None:
+    """The reason a simple command is rejected by the rules of #391, or None."""
+    words = segment.words
+    if gh_deletes(words):
+        return (
+            "`gh repo delete` and `gh api` with the DELETE method delete work on GitHub. "
+            "No agent deletes a repository, a branch, a comment or a release. Report what "
+            "should go, and leave the deletion to the maintainer."
+        )
+    parsed = git_args(words, segment.cwd)
+    if parsed and parsed[0] and skips_hooks(parsed[0][0], parsed[0][1:]):
+        return (
+            "`--no-verify` (or `git commit -n`) skips the git hooks, and the hooks are "
+            "checks. Fix what the hook reports, run `mise run fast`, and commit again."
+        )
+    outside = rm_leaves_scratch(words, segment.cwd)
+    if outside is not None:
+        return (
+            f"`rm` of `{outside}` with a `.scratch` target: every target must be inside "
+            "`.scratch/` in your worktree. Remove the other paths in a separate command."
+        )
+    return None
+
+
 def check_segment(
     segment: Segment,
     env: Mapping[str, str],
@@ -250,6 +392,9 @@ def check_segment(
             "maintainer asked to merge. Report the pull request as ready instead. A role "
             f"that may merge prefixes the command with `{ROLE_VAR}=<role>`."
         )
+    reason = check_hooks_and_deletes(segment)
+    if reason:
+        return reason
     parsed = git_args(words, segment.cwd)
     if parsed is None:
         return None
@@ -300,6 +445,12 @@ def check_command(
             "(`gh pr checks <n> --watch`, `gh run watch <id>`), or end your turn and let "
             "the notifications wake you. Reviews come back in the reviewer's hand-back, so "
             "never poll a pull request for comments."
+        )
+    if sleeps_then_reads(segments):
+        return (
+            "`sleep` and then `tail`, `cat` or `ls` polls a command that runs in the "
+            "background. Run the command in the foreground instead, with a long Bash "
+            "timeout (600000 ms for `mise run fast`), and read its output when it ends."
         )
     for segment in segments:
         reason = check_segment(segment, env, main_checkout, branch_of)
