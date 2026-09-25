@@ -14,7 +14,8 @@ Three entry points, each reading the hook's JSON event on stdin:
   `tail`, `wc`, `sort`, `uniq`, `sed -n` with print scripts, and `for`
   loops over these, with no redirect to a file. The command inside each
   `$(...)`, backtick pair or process substitution is checked the same
-  way. Anything else exits 2, and so does a command it can't read.
+  way. `git -c`, `git --output` and assignments (`NAME=value`) are
+  rejected. Anything else exits 2, and so does a command it can't read.
 - `format` (PostToolUse on Edit and Write) runs Biome on an edited file
   under `site/` and ruff on an edited `.py` file. It never fails the tool
   call: a formatter that is missing or errors is skipped.
@@ -108,10 +109,15 @@ def tokens(command: str, strict: bool = False) -> list[str]:
         return command.split()
 
 
-def split_segments(command: str, cwd: str, strict: bool = False) -> list[Segment]:
+def split_segments(
+    command: str, cwd: str, strict: bool = False, keep_assignments: bool = False
+) -> list[Segment]:
     """The simple commands of a shell line, with `cd` followed for the ones after it.
 
-    `strict` is passed to `tokens`.
+    Assignment prefixes (`NAME=value cmd`) are dropped, and the value of the
+    role variable becomes the segment's role. With `keep_assignments` they
+    stay in the words, so the review hook sees them (#415). `strict` is
+    passed to `tokens`.
     """
     segments: list[Segment] = []
     here = cwd
@@ -125,7 +131,7 @@ def split_segments(command: str, cwd: str, strict: bool = False) -> list[Segment
         while words and words[0] in KEYWORDS:
             words = words[1:]
         role: str | None = None
-        while words and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", words[0]):
+        while not keep_assignments and words and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", words[0]):
             name, _, value = words[0].partition("=")
             if name == ROLE_VAR:
                 role = value
@@ -836,8 +842,34 @@ def uniq_writes(args: Sequence[str]) -> bool:
     return operands > 1
 
 
+GIT_OUTPUT_COMMANDS = frozenset({"diff", "log", "show"})
+
+
+def git_sets_config(options: Sequence[str]) -> bool:
+    """True when git's global options set a config value (`-c k=v`, `--config-env`).
+
+    A config value such as `core.fsmonitor` or `diff.external` runs a
+    program, so a reviewer's git takes its config from the files only (#415).
+    """
+    return any(word.startswith(("-c", "--config-env")) for word in options)
+
+
+def is_git_output_option(word: str) -> bool:
+    """True for `--output` of `git diff|log|show`, which writes the output to a file.
+
+    git 2.55 rejects an abbreviation such as `--outp=f`, but a prefix counts
+    too, in case a git version accepts it.
+    """
+    name = word.split("=", 1)[0]
+    return len(name) > len("--") and "--output".startswith(name)
+
+
 def review_allows(words: Sequence[str]) -> bool:
-    """True when a simple command is one the code reviewer may run."""
+    """True when a simple command is one the code reviewer may run.
+
+    An assignment prefix (`GIT_EXTERNAL_DIFF=sh git diff`) or an
+    assignment on its own (`PATH=.; ls`) is never one (#415).
+    """
     if words[0] in {"cd", "done"}:
         return True
     if words[0] == "for":
@@ -857,7 +889,11 @@ def review_allows(words: Sequence[str]) -> bool:
     if words[0] == "git":
         parsed = git_args(words, ".")
         args = parsed[0] if parsed else []
-        return bool(args) and ("git", args[0]) in REVIEW_COMMANDS
+        if not args or ("git", args[0]) not in REVIEW_COMMANDS:
+            return False
+        return not git_sets_config(words[1 : len(words) - len(args)]) and not (
+            args[0] in GIT_OUTPUT_COMMANDS and any(map(is_git_output_option, args[1:]))
+        )
     return any(tuple(words[: len(allowed)]) == allowed for allowed in REVIEW_COMMANDS)
 
 
@@ -880,7 +916,8 @@ def review_reason(command: str) -> str | None:
     # The splitter reads the `&` of `2>&1` as an operator, so drop the
     # redirects writes_a_file allows before splitting.
     harmless = re.sub(r"(\d*|&)>>?(&(\d+|-)|\s*/dev/null)", " ", outer)
-    for segment in split_segments(mark_expansions(harmless), ".", strict=True):
+    segments = split_segments(mark_expansions(harmless), ".", strict=True, keep_assignments=True)
+    for segment in segments:
         if segment.role is not None or not review_allows(segment.words):
             allowed = ", ".join(" ".join(c) for c in REVIEW_COMMANDS)
             tasks = ", ".join(REVIEW_TASKS)
