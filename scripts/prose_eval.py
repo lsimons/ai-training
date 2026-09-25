@@ -7,19 +7,24 @@ the decisions are in docs/prose/.
 
 Usage: scripts/prose_eval.py <package> [out-dir]
        scripts/prose_eval.py --check-packages <ini> [<ini> ...]
+       scripts/prose_eval.py --clear-config-dir
 The first form writes <out-dir>/<package>.json and <out-dir>/wordcount.tsv
 (default out-dir: docs/prose/reports/<package>).
 Every package pinned in .vale-eval.ini must already be synced into
 .vale/styles (`mise run prose-eval-sync`), or the script stops.
 The second form only runs that check, for the named configs, and is what
 the `prose-check-packages` task in .mise.toml runs before `prose` and
-`prose-extended`, so one parser reads every Vale config here.
+`prose-extended`, so one parser reads every Vale config here. It also
+fails when .vale/styles/.vale-config/ exists (issue #450).
+The third form removes that one directory, and `prose-eval-sync` runs it
+after its `vale sync`.
 """
 
 import collections
 import json
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 from collections.abc import Callable, Sequence
@@ -45,6 +50,20 @@ STYLES = pathlib.Path(__file__).resolve().parent.parent / ".vale" / "styles"
 EVAL_SYNC = "mise run prose-eval-sync"
 MAIN_SYNC = "mise run setup"
 CHECK_FLAG = "--check-packages"
+CLEAR_FLAG = "--clear-config-dir"
+
+# `vale sync` copies a package's own `.vale.ini` into
+# `<StylesPath>/.vale-config/`, and Vale reads every file there before the
+# project's config ("What sync does" and "Ordering" on
+# https://docs.vale.sh/keys/packages). The Harper zip pinned in
+# .vale-eval.ini ships one that sets `StylesPath = styles` and
+# `BasedOnStyles = Harper` for `[*]`. Left in place after
+# `prose-eval-sync`, it makes the next `vale sync` unpack into
+# `.vale/styles/.vale-config/styles/` and adds Harper to every lint run
+# (issue #450). None of the configs here relies on a package's `.vale.ini`,
+# so the directory is removed after the eval sync and the check rejects it.
+CONFIG_DIR = STYLES / ".vale-config"
+CLEAR_COMMAND = f"scripts/prose_eval.py {CLEAR_FLAG}"
 
 # A package URL on a `Packages` line ends in `<name>.zip`, and Vale unpacks
 # it to `<StylesPath>/<name>/`: "A package's name is the archive's file name
@@ -142,8 +161,41 @@ def sync_command(ini: pathlib.Path) -> str:
     return EVAL_SYNC if ini.name == EVAL_INI.name else MAIN_SYNC
 
 
+def check_no_config_dir(styles: pathlib.Path) -> None:
+    """Exit with the commands that clear it when `<styles>/.vale-config` exists."""
+    config_dir = styles / CONFIG_DIR.name
+    if config_dir.exists() or config_dir.is_symlink():
+        sys.exit(
+            f"prose: {config_dir}/ exists, so Vale merges the package configs in it "
+            "into every run and `vale sync` unpacks into the wrong directory. "
+            f"Run '{CLEAR_COMMAND}', then 'mise run prose-sync'."
+        )
+
+
+def clear_config_dir(config_dir: pathlib.Path) -> None:
+    """Remove the `.vale-config` directory that `vale sync` leaves under the styles path.
+
+    Only a real directory named `.vale-config` is removed. A symlink or a
+    file there stops the script instead, so the removal never follows a
+    link out of .vale/styles/.
+    """
+    if config_dir.name != CONFIG_DIR.name:
+        sys.exit(f"prose: refusing to remove {config_dir}: not a {CONFIG_DIR.name} directory")
+    if config_dir.is_symlink() or (config_dir.exists() and not config_dir.is_dir()):
+        sys.exit(f"prose: {config_dir} is not a plain directory. Remove it by hand.")
+    if not config_dir.exists():
+        print(f"prose: {config_dir}/ not present, nothing to remove")
+        return
+    shutil.rmtree(config_dir)
+    print(f"prose: removed {config_dir}/")
+
+
 def check_packages_synced(ini: pathlib.Path, styles: pathlib.Path) -> None:
-    """Exit with a message naming the sync command when a package is missing."""
+    """Exit with a message naming the sync command when a package is missing.
+
+    Also exits when `<styles>/.vale-config` exists (`check_no_config_dir`).
+    """
+    check_no_config_dir(styles)
     try:
         names = pinned_packages(ini)
     except UnsupportedPackageError as exc:
@@ -244,6 +296,9 @@ def main(argv: Sequence[str]) -> None:
         sys.exit(__doc__)
     if argv[1] == CHECK_FLAG:
         check_configs(argv[2:])
+        return
+    if argv[1] == CLEAR_FLAG:
+        clear_config_dir(CONFIG_DIR)
         return
     package = argv[1]
     out_dir = pathlib.Path(argv[2] if len(argv) > 2 else f"docs/prose/reports/{package}")

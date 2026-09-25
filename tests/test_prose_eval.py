@@ -287,3 +287,88 @@ def test_styles_path_is_resolved_from_the_repository_root(
         monkeypatch.undo()
         importlib.reload(prose_eval)
     assert styles == REPO_ROOT / ".vale" / "styles"
+
+
+def synced_styles(tmp_path: pathlib.Path) -> pathlib.Path:
+    styles = tmp_path / "styles"
+    for name in ("write-good", "ai-tells"):
+        (styles / name).mkdir(parents=True)
+    return styles
+
+
+def test_check_packages_synced_exits_when_the_vale_config_dir_exists(
+    tmp_path: pathlib.Path,
+) -> None:
+    # Issue #450: every package directory is still there, so only the
+    # .vale-config check catches the redirected sync.
+    ini = write_ini(tmp_path)
+    styles = synced_styles(tmp_path)
+    (styles / ".vale-config" / "styles").mkdir(parents=True)
+    with pytest.raises(SystemExit) as exc:
+        prose_eval.check_packages_synced(ini, styles)
+    message = str(exc.value)
+    assert f"{styles / '.vale-config'}/ exists" in message
+    assert "scripts/prose_eval.py --clear-config-dir" in message
+    assert "mise run prose-sync" in message
+
+
+def test_main_check_packages_exits_when_the_vale_config_dir_exists(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    styles = synced_styles(tmp_path)
+    (styles / ".vale-config").mkdir()
+    monkeypatch.setattr(prose_eval, "STYLES", styles)
+    with pytest.raises(SystemExit) as exc:
+        prose_eval.main(["prose_eval.py", "--check-packages", str(write_ini(tmp_path))])
+    assert "--clear-config-dir" in str(exc.value)
+
+
+def test_clear_config_dir_removes_only_that_directory(
+    tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    styles = synced_styles(tmp_path)
+    config_dir = styles / ".vale-config"
+    (config_dir / "styles" / "Google").mkdir(parents=True)
+    (config_dir / "5-Harper.ini").write_text("StylesPath = styles\n")
+    prose_eval.clear_config_dir(config_dir)
+    assert not config_dir.exists()
+    assert sorted(p.name for p in styles.iterdir()) == ["ai-tells", "write-good"]
+    assert "removed" in capsys.readouterr().out
+    prose_eval.check_packages_synced(write_ini(tmp_path), styles)
+
+
+def test_clear_config_dir_without_the_directory_is_a_no_op(
+    tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    styles = synced_styles(tmp_path)
+    prose_eval.clear_config_dir(styles / ".vale-config")
+    assert "nothing to remove" in capsys.readouterr().out
+    assert sorted(p.name for p in styles.iterdir()) == ["ai-tells", "write-good"]
+
+
+def test_clear_config_dir_refuses_another_name(tmp_path: pathlib.Path) -> None:
+    styles = synced_styles(tmp_path)
+    with pytest.raises(SystemExit, match="refusing to remove"):
+        prose_eval.clear_config_dir(styles / "write-good")
+    assert (styles / "write-good").is_dir()
+
+
+def test_clear_config_dir_does_not_follow_a_symlink(tmp_path: pathlib.Path) -> None:
+    styles = synced_styles(tmp_path)
+    target = tmp_path / "elsewhere"
+    target.mkdir()
+    (target / "keep.txt").write_text("keep\n")
+    (styles / ".vale-config").symlink_to(target, target_is_directory=True)
+    with pytest.raises(SystemExit, match="not a plain directory"):
+        prose_eval.clear_config_dir(styles / ".vale-config")
+    assert (target / "keep.txt").exists()
+    with pytest.raises(SystemExit, match="exists"):
+        prose_eval.check_no_config_dir(styles)
+
+
+def test_main_clear_config_dir_targets_the_styles_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    removed: list[pathlib.Path] = []
+    monkeypatch.setattr(prose_eval, "clear_config_dir", removed.append)
+    prose_eval.main(["prose_eval.py", "--clear-config-dir"])
+    assert removed == [prose_eval.STYLES / ".vale-config"]
+    assert prose_eval.CONFIG_DIR == REPO_ROOT / ".vale" / "styles" / ".vale-config"
