@@ -36,7 +36,7 @@ notes: >-
   the page doesn't cite it, so it is dropped from sources (it stays on the topic). Sources: Academy
   ai-native-sdlc-playbook (the idea that review and testing become the slow steps when agents
   produce most of the code, from the public course page, in our own words and with no phrase of it kept), Claude Code best practices (prefer single tests to the
-  whole suite for speed, in its example instructions file; link to documentation instead of copying
+  whole suite for speed, in its example instructions file; link to detailed documentation instead of copying
   it into CLAUDE.md), Claude Code memory (instructions files are loaded each session as context,
   not enforced configuration). The fixtures under site/examples/coding-with-agents/tests-and-docs-that-hold/
   are self-contained: shop/ is a pricing module with five agent-written tests, two of which mirror
