@@ -1,5 +1,8 @@
 id: safety/sizing-the-blast-radius
 title: Sizing an agent's blast radius
+description: >-
+  Read an agent's permission list as read, write and send rows, cut it down to the task, and put the
+  one approval on the row that can't be undone.
 mode: tutorial
 covers: safety/agent-risk
 serves:
@@ -8,6 +11,11 @@ serves:
 introduces: []
 assumes:
   - objective: concepts/recognizes-agents/names-the-loop
+    lesson: concepts/agent-loop
+    section: a-model-in-a-loop-with-two-tools
+extends-to:
+  - label: Tracing a planted instruction to the tool that leaks
+    href: /safety/tracing-a-planted-instruction/
 after: [safety/agent-risk, safety/checking-what-an-agent-changed]
 shorts: []
 exercise:
@@ -15,10 +23,12 @@ exercise:
   brief: >-
     Pick a task you would like an agent to do. Write its permission list as read, write and send
     rows, cross out what the task does not need, and mark the row where a person approves.
-sources: []
+sources: [AEC-10]
 issue: 130
 minutes: 15
 notes: >-
-  Introduces no concept: deepens blast-radius, permissions-and-least-privilege and human-in-the-loop
-  with a fixture that reads a permission list and prints what it reaches, who is affected and which
-  actions cannot be undone.
+  Introduces no concept: deepens blast-radius, permissions-and-least-privilege and human-in-the-loop.
+  The page shows the output of the fixture site/examples/safety/sizing-the-blast-radius/reach.py in
+  text fences, because safety is a foundations area and the page carries no Predict run. The fixture
+  is CI proof only, and how CI asserts a hidden fixture against a foundations page is decided in
+  #237. The team, folders and head counts are invented.
