@@ -247,3 +247,8 @@ HMAC
 Wanyu
 Yihuai
 backordered
+Pearce
+Baleegh
+venv
+nosec
+fetchall

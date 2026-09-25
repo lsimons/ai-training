@@ -972,3 +972,24 @@ Claude Code tools reference:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/tools-reference
+Pearce 2022:
+  type: paper
+  title: "Asleep at the Keyboard? Assessing the Security of GitHub Copilot's Code Contributions"
+  container: 2022 IEEE Symposium on Security and Privacy (SP 2022), 754-768
+  author: Hammond Pearce, Baleegh Ahmad, Benjamin Tan and 2 others
+  license: Copyright IEEE
+  url: https://doi.org/10.1109/SP46214.2022.9833571
+Bandit:
+  type: reference
+  title: Bandit documentation
+  container: PyCQA
+  author: PyCQA
+  license: Apache-2.0
+  url: https://bandit.readthedocs.io/en/latest/
+Python sqlite3:
+  type: reference
+  title: sqlite3 - DB-API 2.0 interface for SQLite databases
+  container: The Python Standard Library documentation
+  author: Python Software Foundation
+  license: PSF License Version 2
+  url: https://docs.python.org/3/library/sqlite3.html

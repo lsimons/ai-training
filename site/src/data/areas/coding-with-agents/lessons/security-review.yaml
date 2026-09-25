@@ -1,12 +1,19 @@
 id: coding-with-agents/security-review
 title: Reading agent code as if the input were hostile
+description: >-
+  Run a static analyzer over an agent-written search function, find the string-built query it
+  reports and the swallowed error it misses, and brief the agent for a parameterized fix with a test.
 mode: tutorial
 covers: coding-with-agents/quality
 serves: [coding-with-agents/verifies-agent-work/screens-for-security]
 introduces: [security-review-of-agent-output]
 assumes:
   - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
   - objective: safety/judges-agent-risk/recognizes-injection
+    lesson: safety/agent-risk
+    section: prompt-injection-when-the-data-gives-orders
 after: [coding-with-agents/tests-and-docs-that-hold]
 shorts: [the classic mistakes agents copy from their training data]
 exercise:
@@ -14,7 +21,12 @@ exercise:
   brief: >-
     Run a static analyzer over an agent-written fixture change, find the string-built query and the
     swallowed error it misses, and brief the agent for the parameterized version with a test.
-sources: [Academy claude-code-in-action, Brilliant SEC]
+sources: [Academy claude-code-in-action, Brilliant SEC, Pearce 2022, Bandit, Python sqlite3]
 issue: 178
 minutes: 15
-notes: "Sources: Brilliant SEC-3, Academy claude-code-in-action (paraphrased)."
+sources-checked: 2026-09-25
+review-by: 2027-03-25
+notes: >-
+  Sources: Brilliant SEC-3, Academy claude-code-in-action (paraphrased). The Bandit output on the
+  page was produced by Bandit 1.9.4 on 2026-09-25 and is pasted, because Bandit is not part of the
+  repo toolchain. Re-run it when the review date comes.
