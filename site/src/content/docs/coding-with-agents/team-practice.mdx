@@ -28,7 +28,7 @@ the documentation advises keeping personal preferences out of it
 (@Claude Code memory). A change to the practice is then a change to a
 file, and it gets a diff and a review like any other change.
 
-The practice section of that file says four things:
+The practice section of that file says:
 
 - what agents may do, and what every change must pass before it merges,
 - how agent work is attributed in commits and pull requests,
@@ -46,7 +46,7 @@ team keeps in versioned files that the agents read
 (@Academy ai-native-sdlc-playbook).
 
 <Choice id="where-the-practice-lives" objective="coding-with-agents/works-in-team/sets-team-practice"
-  concepts={['review-norms', 'attribution']}
+  concepts={['review-norms']}
   context="A team of five engineers uses coding agents on one repository, and nothing about how they use the agents is written down yet."
   title="Where does the answer go?" hint="Which of these places do the agents load, and which of them can the whole team read and change?"
   options={[
@@ -136,21 +136,20 @@ practice from them in the exercise at the end of the lesson.
 The practice also changes when the mistakes change. When a review finds
 the same kind of mistake a second time, it gets a line, as the
 [lesson on hooks and CI](/coding-with-agents/ci-and-hooks/) said. A rule
-whose reason is gone comes out: the directory it protects was removed, or
-a check now catches the mistake. The Claude Code documentation advises
-reading the instructions files again from time to time to take out rules
-that are old or contradict each other. It adds that every extra line takes
-up context and makes the agent follow the file less closely
-(@Claude Code memory).
+whose reason is gone comes out, for example because the thing it guarded
+no longer exists. The Claude Code documentation advises reading the
+instructions files again from time to time to take out rules that are old
+or contradict each other. It adds that a longer file uses more context and
+the agent follows it less well (@Claude Code memory).
 
-This course's repository keeps its rules for the agents that write lessons
-in the prompt of the wave lead, the agent that coordinates each group of
-builders. Many of the rules name the incident behind them. The one on
-fixtures that run git says that a fixture passes git a fixed list of
-environment variables, and names issue #169, where a fixture that removed
-some variables let an inherited one install a hook. Two rules end with a
-note of the form "(remove after #311)", the issue whose fix makes the rule
-unnecessary (@AI Training wave lead prompt).
+This course's repository keeps some of its rules for the agents that
+write lessons in its authoring guide, and several of them name the
+incident behind them. The rule that every number a fixture prints is
+pasted from the fixture's output, and never worked out by hand, gives its
+reason: in one group of agent branches, several had a number worked out
+by hand that the fixture contradicted. The rule to check every invented
+name comes from a made-up freight company that turned out to be real
+(@AI Training writing-a-lesson).
 
 <Pitfall title="Thirty rules for the agents they imagined">
 A team wrote its agent practice in a one-hour meeting, before anyone had
@@ -160,7 +159,8 @@ agents committed generated files from the build folder, and reviewers
 approved pull requests they had only skimmed. The thirty rules missed
 both mistakes, and nobody could say which rules were still needed. Write
 the practice from the incidents you have, add a rule when a new mistake
-shows up, and take out each rule that has no incident behind it.
+shows up, and take out each rule that has no incident or day-one decision
+behind it.
 </Pitfall>
 
 <Scenario id="the-rule-that-never-fired" objective="coding-with-agents/works-in-team/sets-team-practice"
@@ -192,10 +192,11 @@ names the agent in a trailer, and only a person signs off.
 Each of these agreements goes in the file with its reason, so the people
 and the agents know it. The file doesn't enforce anything. The Claude
 Code documentation says that the agent reads its instructions files as
-guidance and that nothing in them is enforced. To block an action whatever
-the agent decides, it points to a `PreToolUse` hook (@Claude Code memory). So an agreement that must hold every time also
-gets a hook or a CI check, as the lesson on hooks and CI showed. An
-agreement that needs a person's judgment, such as whether the author read
+guidance and that nothing in them is enforced. For an action that must
+never happen, it recommends a `PreToolUse` hook, which runs before the
+tool call and can stop it (@Claude Code memory). So an agreement that
+must hold every time also gets a hook or a CI check, as the lesson on
+hooks and CI showed. An agreement that needs a person's judgment, such as whether the author read
 every line, stays in the file and in the review.
 
 This course's repository does both for the stash. Its page on
@@ -210,7 +211,7 @@ hook in the repository rejects the command (@AI Training orchestration).
   options={['Agents never edit tests/recorded/, and a hook blocks it', 'Agents check pages with the build and never start the dev server', 'Agent commits end with an Assisted-by trailer in the last paragraph', 'Agents write at most 200 lines in one session']}
   rows={[
     { statement: 'An agent edited the recorded test data until a failing test passed, and the pull request was approved', option: 0, why: 'Which rule stops the edit itself, before the test data changes?' },
-    { statement: 'Two sessions in worktrees of one clone used the same port, and one checked pages the other served', option: 1, why: 'What does the port have that each worktree has only once, and which rule keeps sessions off it?' },
+    { statement: 'Two sessions in worktrees of one clone used the same port, and one checked pages the other served', option: 1, why: 'Which resource do all worktrees on one machine share, and which rule keeps sessions off it?' },
     { statement: 'An agent put its trailer in the middle of the body, and the count of agent-assisted commits missed it', option: 2, why: 'Where does git read trailers from, and which rule names that place?' },
   ]}
   rationale="Each rule the team keeps names the incident it came from. The limit on lines has no incident behind it, so it stays out of the practice.">
@@ -233,15 +234,15 @@ Match each incident to the rule it supports.
 <MultiChoice id="a-rule-worth-its-line" phase="review" objective="coding-with-agents/works-in-team/sets-team-practice"
   concepts={['review-norms']}
   context="A team adds rules to the practice section of its project instructions file, the file every agent session loads, after incidents with coding agents."
-  title="A rule worth its line" hint="For each property, does it help a reader know why the rule is there and whether a change breaks it?"
+  title="What a rule in the file has" hint="For each property, does it help a reader know why the rule is there and whether a change breaks it?"
   options={[
-    { text: 'It names the incident that it came from.', correct: true },
+    { text: 'It names the incident or decision it came from.', correct: true },
     { text: 'It is precise enough to tell when a change breaks it.', correct: true },
     { text: 'It says which hook or CI check enforces it, if any.', correct: true },
     { text: 'It covers every risk the team could think of in a meeting.', why: 'Imagined risks guard against the wrong things, and the section grows until nobody reads it.' },
     { text: 'It is worded by each engineer in their own user file.', why: 'Then each engineer has a different rule, and the team never reviews them together.' },
   ]}>
-Which of these give a rule in the practice section a reason to stay?
+Which of these should a rule in the practice section have?
 </MultiChoice>
 
 <Choice id="the-push-to-main" phase="review" objective="coding-with-agents/works-in-team/sets-team-practice"
@@ -300,19 +301,19 @@ should also enforce it, and which one. Drop the rule that no incident
 supports. Delete `~/invoices` when you are done, and run the script again
 to start over.
 
-A good result has three rules, each tied to one of the three commits that
-take back or repair a change, and none of them as vague as the draft's
+A good result has three rules, each tied to one of the two reverts or
+the fix, and none of them as vague as the draft's
 lines. The rule with no incident behind it is gone, and the section is
 shorter than a screen. A colleague who reads only the section could say
 why each rule is there. Then answer one question: which rule of your own
-team's practice could nobody tie to an incident, and what would happen if
-you took it out?
+team's practice could nobody tie to an incident or a decision, and what
+would happen if you took it out?
 </Exercise>
 
 <Recap>
-1. Write the team's practice for agent use in the project instructions file, where every person and every agent session reads it. It says what agents may do and what every change passes, how agent work is attributed and reviewed, and which directories and commands are off limits (@Claude Code memory).
+1. Write the team's practice for agent use in the project instructions file, where every person and every agent session reads it (@Claude Code memory). It says what agents may do and what every change passes, how agent work is attributed and reviewed, and which directories and commands are off limits.
 2. Make the gate and the attribution form decisions at the start. Write every other rule from an incident the team has seen, and name the incident next to the rule.
-3. Add a rule when a mistake comes back, and remove a rule when its reason is gone or no incident supports it (@AI Training wave lead prompt).
+3. Add a rule when a mistake comes back. Remove a rule when its reason is gone or no incident or day-one decision is behind it, and read the file again from time to time to find those rules (@Claude Code memory).
 4. The file states each agreement and its reason. An agreement that must hold every time also gets a hook or a CI check, and one that needs a person's judgment stays with the review.
 </Recap>
 
