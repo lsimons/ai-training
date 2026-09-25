@@ -1,11 +1,27 @@
 id: customizing-agents/progressive-disclosure
 title: Loading only what the skill needs
+description: >-
+  Measure what the release skill costs at each loading stage, move its rollback procedure into a
+  reference file the skill points to, and measure again, so the common path stays small.
 mode: tutorial
 covers: customizing-agents/skills
 serves: [customizing-agents/writes-skill/discloses-progressively]
 introduces: [progressive-disclosure]
 assumes:
   - objective: concepts/explains-models/explains-generation
+    lesson: concepts/how-models-work
+    section: one-token-at-a-time
+  - objective: concepts/explains-models/explains-generation
+    lesson: concepts/context-window
+    section: count-the-tokens-of-a-page
+  - objective: customizing-agents/writes-skill/packages-a-procedure
+    lesson: customizing-agents/first-skill
+    section: pass-one-the-directory-and-the-description
+  - objective: customizing-agents/writes-skill/packages-a-procedure
+    lesson: customizing-agents/testing-a-skill
+    section: run-it-again-and-compare
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 after: [customizing-agents/first-skill]
 shorts:
   - Counting the tokens a skill costs on every turn (Academy introduction-to-agent-skills)
@@ -14,6 +30,24 @@ exercise:
   brief: >-
     Measure the release skill's token count, move the rollback procedure into a reference file the
     skill points to, and measure again.
-sources: []
+sources:
+  - AEC-17
+  - Agent Skills spec
+  - Claude docs agent-skills-overview
+  - Claude docs best-practices
+  - Claude Code skills
 issue: 167
 minutes: 15
+notes: >-
+  The fixtures are in `site/examples/customizing-agents/progressive-disclosure/`. `grown/release/`
+  is the revised release skill from testing-a-skill with a rollback section added, and
+  `split/release/` is the same skill with that section moved into `rollback.md` and a pointer left in
+  its place. `measure.py` estimates tokens per loading stage with the same four-characters-per-token
+  rule as the concepts/context-window counter, and `before.py` and `after.py` run it on the two
+  directories for `mise run examples`. The fixtures only read files. Vendor facts to re-check by
+  review-by: the three loading stages and the figures of about 100 tokens of metadata per skill and
+  under 5000 tokens for the body (agentskills.io specification and the platform Agent Skills
+  overview agree), the body staying in the conversation on later turns and supporting files read
+  only when needed (code.claude.com skills), and keeping references one level deep from SKILL.md
+  (agentskills.io specification and the platform best-practices page). The Academy course named in
+  the short is not cited on the page, and none of its text is used.
