@@ -31,7 +31,7 @@ exercise:
     Set up a restricted agent with exactly two permissions (read a file, write a file) in a throwaway
     folder, plant an instruction in a recipe page it will read, predict what it does, run it, and
     compare. Stretch: add a third permission that sends, rerun, and write down what changed.
-sources: [AEC-10, Claude Code setup, Claude Code cli reference, Claude Code permissions]
+sources: [AEC-10, Claude Code setup, Claude Code cli reference, Claude Code permissions, Claude Code security]
 issue: 212
 minutes: 20
 sources-checked: 2026-09-26
@@ -47,8 +47,10 @@ notes: >-
   addresses in the ticket). Runs c and d answer a ticket the page's author opened, with the last
   paragraph rewritten to copy another customer's order into the reply, because every call that needs
   is allowed; c adds an output filter for bank account numbers (IBAN) and d an approval gate on every
-  outbound call. lookup_order is left unscoped on purpose, and section four says the scope from the
-  previous lesson would have refused the planted lookup. Guard records use the outline format of
+  outbound call. lookup_order is left unscoped on purpose, and section four says that the scope the
+  previous lesson gave it would have refused the planted lookup. The opener says the previous lesson
+  cut the tool list and this one starts again from the full list, and section two says why this team
+  keeps fetch_url (tickets link pages the agent must read). Guard records use the outline format of
   traces-and-trajectories without latency and cost. The tickets, orders, names and account number
   are illustrative. The exercise page keeps the recipe and changes the last paragraph to a local file
   write, the line the original agent-risk exercise planted, so the base run stays inside the two
@@ -56,6 +58,8 @@ notes: >-
   --disallowedTools "mcp__*", --permission-mode default) were run on 2.1.281 and the session listed
   only Read and Write. The plan put the Match on mitigates-agent-risks; it went on layers-defenses,
   because pairing each layer with what it catches and misses is that objective's second behavior,
-  and mitigates-agent-risks has the approval Predict and the send_email Scenario instead. Brilliant
+  and mitigates-agent-risks has the approval Predict and the send_email Scenario instead. The review
+  Scenario on overnight filter hits is on layers-defenses, because it evidences monitoring, that
+  objective's third behavior. Brilliant
   SEC and Academy claude-platform-101 from the plan were dropped because the page cites no claim from
   them. The short is still to write.
