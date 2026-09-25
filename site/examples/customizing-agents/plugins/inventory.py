@@ -108,7 +108,7 @@ def report(plugin: Path) -> list[str]:
             description = fields.get("description", "")
             if kind == "agents":
                 tools = fields.get("tools", "").strip("[]").replace('"', "")
-                out.append(f"  {part}, tools: {tools or 'all of the main session'}")
+                out.append(f"  {part}, tools: {tools or 'every tool subagents can use'}")
             else:
                 out.append(f"  {part}")
             if kind == "agents" or model_can_invoke(fields):
