@@ -734,3 +734,10 @@ MCP filesystem server:
   author: Anthropic and the MCP contributors
   license: MIT
   url: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+Claude docs best-practices:
+  type: reference
+  title: Skill authoring best practices
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
