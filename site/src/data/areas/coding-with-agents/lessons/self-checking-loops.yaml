@@ -47,8 +47,9 @@ notes: >-
   site/examples/coding-with-agents/self-checking-loops/ copy the observing-and-debugging nightly/
   directory to a temporary place, add test_nights.py, tag a commit before-run, and apply either
   the bounded run's fix with the CSV module or an unbounded run that skips bad rows and deletes the row check from
-  the test. The test counts the data rows itself so that a skip-the-row fix fails. The fix's text
-  is read with ast from observing-and-debugging/after_fix.py, so the two lessons can't drift. The
+  the test. The test counts the data rows itself so that a skip-the-row fix fails. The fix's two
+  text edits are read with ast from observing-and-debugging/after_fix.py, and only the added
+  `import csv` line is repeated in _common.py. The
   checkpoints all serve automates-the-check, but they test four ideas (a runnable check, the lines
   of the loop brief, a changed test, and gate against opinion), so a review alternate can be asked
   in place of a sibling on another idea. The mismatch is accepted for now because the plan gives

@@ -28,7 +28,7 @@ agent a check with a pass or fail result. A test suite is one, and a
 script that compares the output with a known good result is another. The agent can then
 rerun the check after each change and stop once it passes
 (@Claude Code best practices). The Academy course The AI-native SDLC
-playbook, where SDLC stands for the life cycle of software development, teaches
+playbook (SDLC is short for the development life cycle of software) teaches
 the same idea in a lesson on giving the agent a feedback loop
 (@Academy ai-native-sdlc-playbook).
 
@@ -304,10 +304,10 @@ in place of them.
   context="A team runs its test suite on every pull request and blocks the merge when it fails. It has also added a second model that reviews every pull request."
   title="A reviewer in place of the tests" hint="Which of the two checks gives the same answer for the same change every time?"
   options={[
-    { text: 'Nothing, since the reviewer reads every line of every change and the tests only cover some of them.', why: 'Reading every line is a strength, but the verdict is still a judgment. The same change can get a different answer on another run.' },
+    { text: 'Nothing, since the reviewer reads every line of every change and the tests only cover some of them.', why: 'Reading every line is not the same as catching every fault, and the tests run the code the reviewer only reads.' },
     { text: 'Only the cost, since running the reviewer on every pull request costs more than running the tests.', why: 'Cost is a real concern, and it is not the one that matters here. The question is what can block a merge.' },
     { text: 'The reviewer\'s verdict is a judgment that can miss a fault or change between runs, and the tests give a fixed answer.', correct: true },
-    { text: 'The reviewer can\'t read test files, so it has no way to tell whether a change breaks one of them.', why: 'A reviewer can read test files like any other file. That doesn\'t make its verdict repeatable.' },
+    { text: 'The reviewer can\'t read test files, so it has no way to tell whether a change breaks one of them.', why: 'A reviewer can read test files like any other file.' },
   ]}>
 A colleague proposes to stop running the tests on pull requests, because
 the second model now reviews each one. What is wrong with the proposal?
@@ -381,5 +381,5 @@ have wanted its report to contain?
 </Recap>
 
 <Habit id="look-for-the-test-file">
-The next time an agent tells you the tests pass, run `git status` and look for a test file among the changed and new files before you read the rest of the change.
+The next time an agent tells you the tests pass, look for a test file among the files it changed before you read the rest of the change. Use `git status` for work it didn't commit, and `git diff --stat` against the commit you started from when it made commits.
 </Habit>
