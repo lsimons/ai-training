@@ -1,0 +1,52 @@
+Session 3, September 22: show the partial refunds on the order page
+
+This log was written for the lesson "Turning repeated work into something the
+agent keeps". No model produced it. The project is a small web shop frontend.
+Its instructions file is instructions-before.md, one folder up. A line that
+starts with "User:" or "Agent:" is a message. A line that starts with "$ " is
+a command the agent ran, and the lines under it are its output.
+
+User: An order can now have partial refunds. The billing API returns a list of them. Show the list on the order page.
+
+Agent: The generated client needs the new `refunds` field. I'll add it to `src/api/generated/models/Order.ts`.
+
+User: Don't edit files under src/api/generated/ by hand. Change the spec or regenerate the client.
+
+Agent: I'll regenerate it.
+
+$ npm run generate
+npm error Missing script: "generate"
+
+$ make api-client
+make: *** [api-client] Error 1: SPEC_URL is not set
+
+User: Set SPEC_URL to https://billing.example.com/staging/openapi.json, the staging spec.
+
+$ SPEC_URL=https://billing.example.com/staging/openapi.json make api-client
+Generated 43 files in src/api/generated
+
+$ npm run lint
+src/api/generated/models/Refund.ts
+  7:1  error  Expected indentation of 2 spaces  indent
+✖ 1 problem (1 error, 0 warnings)
+
+$ npm run format -- src/api/generated
+Formatted 43 files
+
+$ npm test -- src/api
+Tests: 19 passed, 19 total
+
+Agent: I'll add a `RefundList` component that fetches the refunds and prints each amount with `refund.amount.toFixed(2)`.
+
+User: Amounts from the billing API are in cents. Use formatMoney() from src/lib/money.ts, which divides by 100 and adds the currency.
+
+User: And call the API the way this snippet does, through useApi(), so the page gets the loading and error states:
+
+    const { data, error, loading } = useApi(() => ordersApi.listRefunds(orderId));
+    if (loading) return <Spinner />;
+    if (error) return <ApiError error={error} />;
+
+Agent: Done. `RefundList` uses `useApi()` and `formatMoney()`.
+
+$ npm test
+Tests: 121 passed, 121 total

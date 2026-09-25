@@ -1210,3 +1210,10 @@ pnpm supply chain:
   author: Zoltan Kochan and contributors
   license: MIT
   url: https://pnpm.io/supply-chain-security
+Claude Code features:
+  type: reference
+  title: Extend Claude Code
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/features-overview
