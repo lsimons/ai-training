@@ -711,6 +711,11 @@ def test_review_bash_rejects_a_substitution_that_runs_another_command(command: s
         ('echo "${(e)X}"', "zsh parameter flag"),
         ("ls ${~X}", "zsh parameter flag"),
         ("ls $~X", "zsh parameter flag"),
+        ("for X in '*(e:touch pwn:)'; do ls ${^~X}; done", "zsh parameter flag"),
+        ("ls ${=~X}", "zsh parameter flag"),
+        ("ls ${+~X}", "zsh parameter flag"),
+        ("touch x; cd ~nosuchuser", "`~user` directory"),
+        ("git -C ~nosuchuser status", "`~user` directory"),
         ("X=$'a/w pwn\\n/a'; sed -n \"/$~X/p\" f", "zsh parameter flag"),
         ("echo $((1+2))", "arithmetic expansion"),
         ("uniq names.txt{,.out}", "brace expansion"),
@@ -808,3 +813,11 @@ def test_split_segments_keeps_assignments_only_when_asked() -> None:
     assert kept[0].words == ["X=1", "git", "diff"]
     dropped = agent_hooks.split_segments("X=1 git diff", ".")
     assert dropped[0].words == ["git", "diff"]
+
+
+@pytest.mark.parametrize(
+    "command", ["touch x; cd ~nosuchuser", "touch x; git -C ~nosuchuser status"]
+)
+def test_review_bash_blocks_an_unknown_home_directory_with_exit_2(command: str) -> None:
+    # `Path.expanduser` raises `RuntimeError`, and exit 1 wouldn't block.
+    assert agent_hooks.review_bash({"tool_input": {"command": command}})[0] == 2
