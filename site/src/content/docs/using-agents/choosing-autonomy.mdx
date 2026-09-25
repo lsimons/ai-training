@@ -1,0 +1,260 @@
+import { Choice, MultiChoice, Match, Sort, Scenario, Repair, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+In the lesson on delegating you added one line to the brief, and the line
+set how much the agent may do before it comes back to you. This lesson
+explains that choice. We name three settings and show that the setting
+follows from what a wrong step costs. Then we look at the first run of a
+new kind of task, and at the end you write the setting as one sentence the
+agent can follow.
+
+The tasks come from the calibration team at Brindlewick Instruments, the
+fictional company from the earlier lessons. You don't need an agent open for
+this lesson.
+
+## Settings you write into the brief
+
+The concepts course placed a workflow on a scale by asking who decides the
+next step, and named three points on it: the system suggests, the system
+acts and asks before anything hard to undo, and the system runs
+unattended ([Who decides the next step](/concepts/autonomy-scale/#three-points-on-one-scale)).
+When you delegate one task, the same three points become three settings
+you write into the brief (@DLAI-11).
+
+- **Draft only.** The agent gathers and drafts, and you decide and take
+  every action yourself. Next week has one free calibration slot, and
+  a pair of customers want it. Mira asks the agent to lay out both requests with their due
+  dates. She decides who gets the slot and writes to both customers
+  herself.
+- **Act, and ask before anything that can't be undone.** The agent does
+  the ordinary steps on its own and stops for a yes at each step that
+  can't be taken back. Mira asks the agent to answer twelve customers who
+  want to know when their instruments come back. It looks up each date,
+  writes each reply, and asks before it sends each one.
+- **Run to completion.** The agent finishes the whole task, and you check
+  the result afterwards. Mira asks the agent for a summary of this
+  week's team meeting in her own notes file. It writes the summary, and she
+  reads it the next morning.
+
+In the lesson on delegating the same three settings were called "human
+decides", "agent proposes, human approves" and "agent acts, human
+reviews after". The names differ and the settings are the same.
+
+<Match id="three-tasks-three-settings" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy']}
+  context="The lesson names three settings for a delegated task: draft only (you take every action), act and ask before anything that can't be undone, and run to completion (you check the result afterwards). The tasks come from a fictional calibration team."
+  title="Which setting fits each task?" hint="For each task, find the step that goes wrong worst. Can you take that step back, and does it reach anyone but you?"
+  options={['Draft only', 'Act, and ask before anything that cannot be undone', 'Run to completion']}
+  rows={[
+    { statement: 'Summarize the team meeting into your own notes file', option: 2, why: 'A wrong line in your own notes reaches nobody else, and you fix it when you read it. Which setting lets the agent finish on its own?' },
+    { statement: 'Look up the return dates and reply to twelve customers', option: 1, why: 'The lookups and the drafts are cheap to redo. Only the send reaches a customer. Which setting stops at that step alone?' },
+    { statement: 'Choose which of two customers gets the one free slot next week', option: 0, why: 'The task is a judgment about customers, and you answer for it. Which setting leaves the choice and the action with you?' },
+  ]}
+  rationale="Each setting stops the agent at the step where a mistake stops being cheap: never, before each send, or before the choice itself.">
+Match each task to the setting it needs.
+</Match>
+
+## The cost of a wrong step sets the level
+
+The setting comes from what a wrong step costs and how easily you can
+undo it. The **blast radius** from the safety course answers the cost
+part: say what the step can reach, including the things you didn't mean
+it to reach ([Blast radius](/safety/agent-risk/#blast-radius)). The undo
+part asks whether a wrong step can be taken back once it has happened.
+
+- When every step is cheap and can be undone, the agent may run to
+  completion. A wrong summary in your own notes costs you one reread.
+- When most steps are cheap and a few can't be taken back, the agent acts
+  and asks before those few. A wrong lookup costs a redo, and a wrong
+  reply that has been sent is in a customer's inbox.
+- When the task is a choice only you may make, such as a judgment about
+  a person or a customer, the agent gathers and drafts, and you decide
+  and act. A wrong choice costs trust, and once you announce it you can't
+  take it back.
+
+How capable the agent seems plays no part in the cost or the undo. Suppose
+Mira's agent writes twenty replies to customers, and all twenty are right.
+That tells her the agent is good at this task. It doesn't change what the
+twenty-first reply costs if it gives a customer the wrong return date. The
+customer still plans around the date, and a correction email later doesn't
+take the first one out of their inbox. The meeting summary is the other
+half of the pair. Mira lets it run unattended from the first day. The
+reason is what a wrong summary reaches, which is only her own notes.
+
+<Scenario id="twenty-good-replies" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy', 'blast-radius']}
+  context="A team member has an agent that looks up return dates and writes replies to customers, and it asks before it sends each reply. Twenty replies in a row have been correct."
+  title="Twenty good replies" hint="Did the twenty good replies change what one wrong reply costs, or only how likely it is?"
+  options={[
+    { text: 'Let the agent send on its own, because twenty correct replies show that it handles this task well.', consequence: 'Reply twenty-three gives a date the lab cannot meet. The customer books a site visit around it, and you hear about it from the customer.' },
+    { text: 'Keep the approval before each send, because a wrong reply to a customer costs what it did on the first day.', correct: true, consequence: 'Each approval takes a few seconds. Reply twenty-three has a date that looks wrong, and you catch it before it leaves.' },
+    { text: 'Let the agent send on its own, and read every sent reply at the end of the day to catch any mistake.', consequence: 'You find the wrong date at six in the evening. The customer read it at ten in the morning, and a sent reply cannot be called back.' },
+    { text: 'Keep the approval only for customers you have not written to before, because regular customers know the lab.', consequence: 'The wrong date goes to a regular customer, who trusts it all the more. A wrong date costs a regular customer as much as a new one.' },
+  ]}>
+A colleague has watched the agent write twenty correct replies to
+customers in a row, each one approved before it went out. They suggest
+that it is time to let it send on its own. What do you do?
+</Scenario>
+
+## The first run of a new kind of task
+
+Cost and undo give the setting you work toward. On the first run of a
+new kind of task you also don't know how the agent reads the input, which
+source it picks, or how it handles an odd case. A mistake in the first
+step then carries into every later step, and you find it at the end. So
+add check-ins for the first runs: ask the agent to show its plan before
+it starts, and to stop after the first item. Each one costs you a minute,
+and a misreading then costs one item instead of the whole task.
+
+When a few results have passed your review against the brief without a
+surprise, drop the extra check-ins one at a time
+(@Academy introduction-to-claude-cowork). That's how autonomy widens as
+results pass. It widens up to the setting that cost and undo gave, and
+stops there. A task whose send reaches a customer keeps its approval
+before the send, whatever the number of results that passed.
+
+<Choice id="first-stock-report" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy']}
+  context="The lesson says that on the first run of a new kind of task you add check-ins, such as seeing the plan and stopping after the first item, on top of the setting the task needs. The task here ends in a send to a manager."
+  title="The first stock report" hint="Where in this task would a misreading of the counts first show, and which setting shows it to you there?"
+  options={[
+    { text: 'Show the plan and stop after the first storeroom, and ask again before sending the report.', correct: true },
+    { text: 'Ask only before sending the report, because the send is the one step that cannot be undone.', why: 'That is the setting for later runs. On a first run, a misread count shows only in the finished report, and every section is built on it.' },
+    { text: 'Draft only, so the agent writes the report and you send it yourself after reading it.', why: 'This moves the send to you, which the approval already did. It does not show you the work any earlier than the finished report.' },
+    { text: 'Run to completion, because the report only copies numbers from the counts into a table.', why: 'The report goes to the director, and a wrong number in it cannot be unread. The send needs a yes on every run, and the first run needs more.' },
+  ]}>
+Sam wants the agent to turn the monthly counts from four storerooms into
+a stock report and send it to the operations director. It's the first
+time anyone has given the agent this task. Which setting fits this first
+run?
+</Choice>
+
+## The boundary in one sentence
+
+The setting only works when the agent can follow it, and the agent
+follows what the brief says. Write the setting as one sentence with two
+parts: what the agent may do on its own, and the step where it stops and
+asks. "Look up the dates and write the replies on your own, and ask me
+before you send any of them" is one such sentence. The agent can check
+each step against it, and so can you when you review.
+
+<Pitfall title="A boundary nobody can check">
+Sam writes "tidy the shared drafts folder, but be careful with anything
+important" and starts the agent. The agent decides that files older than
+a year aren't important and deletes them. One of them is the only copy of
+a signed certificate. The brief had a boundary, but the boundary didn't
+name a step, so the agent drew its own line where Sam would never have
+drawn it. The rule:
+if you can't say the boundary in one sentence that names the step where
+the agent stops, you haven't chosen a setting yet, and the agent
+chooses one for you.
+</Pitfall>
+
+<MultiChoice id="which-boundaries-hold" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy']}
+  context="The lesson asks for the autonomy setting to be written as one sentence that says what the agent may do on its own and names the step where it stops and asks."
+  title="Which boundaries can the agent follow?" hint="For each line, could the agent tell from the words alone whether its next step needs a yes?"
+  options={[
+    { text: 'Draft and save the replies on your own, and stop before sending any of them.', correct: true },
+    { text: 'Work through the replies carefully, and check with me on anything that seems important.', why: 'Important to whom? The agent decides what counts, so the stop falls where the agent puts it.' },
+    { text: 'Rename and move the files in the copy on your own, and ask before deleting any file.', correct: true },
+    { text: 'Use your own judgment about when a step is big enough that you should stop and ask.', why: 'This hands the choice of setting back to the agent. The brief names no step, so nothing can be checked.' },
+    { text: 'Go ahead with the whole folder, and ask me whenever you are not sure about a file.', why: 'An agent that is wrong is often sure. The stop depends on how the agent feels, and no step is named.' },
+  ]}>
+Which of these lines are boundaries that an agent can follow and that you
+can check afterwards?
+</MultiChoice>
+
+<Repair id="write-the-boundary" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy']}
+  title="Write the boundary" hint="Which step in this task can't be taken back, and what may the agent do before it?"
+  broken={`Tidy up the shared drafts folder, but be careful with anything important.`}
+  model={`Move and rename the files in the shared drafts folder on your own, and stop and ask me before you delete any file.`}>
+Rewrite Sam's line as one sentence that says what the agent may do on its
+own and names the step where it stops and asks.
+</Repair>
+
+<Sort id="sort-by-cost" phase="review" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy']}
+  context="Each item is a task you could delegate to an agent. The three settings are draft only (you take every action), act and ask before anything that can't be undone, and run to completion (you check the result afterwards). The setting follows from what a wrong step costs and how easily it is undone."
+  title="Sort by the cost of a wrong step" hint="For each task, find the worst wrong step. Does it reach anyone but you, and can it be taken back?"
+  buckets={['Draft only', 'Act, and ask before anything that cannot be undone', 'Run to completion']}
+  items={[
+    { text: 'Decide whether a colleague\'s leave request is approved', bucket: 0 },
+    { text: 'Choose which of two suppliers gets next year\'s contract', bucket: 0 },
+    { text: 'Find the overdue certificates and email a reminder to each customer', bucket: 1 },
+    { text: 'Clear out last year\'s files from the shared drive', bucket: 1 },
+    { text: 'Sort your own saved articles into folders by topic', bucket: 2 },
+    { text: 'Summarize a long report into your own notes', bucket: 2 },
+  ]} />
+
+<Choice id="after-six-reports" phase="review" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy']}
+  context="An agent writes a monthly stock report that is sent to a manager. On the first runs it showed its plan, stopped after the first storeroom, and asked before sending. Six reports in a row have passed review."
+  title="After six good reports" hint="Which check-ins were there because the task was new, and which one is there because of what the send reaches?"
+  options={[
+    { text: 'Drop every check-in, the approval before the send included, since six reports have passed.', why: 'Six good reports say the agent reads the counts well. A wrong report sent to the director costs the same as it did on the first run.' },
+    { text: 'Keep every check-in, because a report that goes to the director should never get less attention.', why: 'The plan and first-storeroom stops were for the unknowns of a new task, and six reports have answered them. Stops you no longer need train you to approve without reading.' },
+    { text: 'Drop the plan and the first-storeroom stops, and keep asking before each report is sent.', correct: true },
+  ]}>
+The agent has written six monthly stock reports, and each one passed
+review. Which check-ins do you keep?
+</Choice>
+
+<Choice id="boundary-that-names-a-step" phase="review" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy']}
+  context="The lesson asks for the autonomy setting to be written as one sentence that says what the agent may do on its own and names the step where it stops and asks."
+  title="Which line sets the boundary?" hint="Which line lets you point at one step and say whether it needed a yes?"
+  options={[
+    { text: 'Book the travel as you see fit, and check with me on anything that looks expensive.', why: 'Expensive is the agent\'s call here. The line names no step, so neither of you can check where the stop was.' },
+    { text: 'Find the trains and fill in the booking on your own, and ask me before you pay for any ticket.', correct: true },
+    { text: 'Book the travel carefully and ask me whenever you are unsure which option I would prefer.', why: 'An agent is often sure when it is wrong. The stop depends on how the agent feels about a choice, and no step is named.' },
+  ]}>
+You delegate booking the train travel for a site visit. Which line in the
+brief sets a boundary the agent can follow?
+</Choice>
+
+<MultiChoice id="what-sets-the-level" phase="review" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy']}
+  context="A delegated task can be set to draft only, to act and ask before anything that can't be undone, or to run to completion. A team is choosing the setting for an agent that files supplier invoices and answers the suppliers."
+  title="What decides the setting?" hint="Which of these would still be true on the day the agent makes its first mistake?"
+  options={[
+    { text: 'What a wrong payment or a wrong reply to a supplier would cost the team.', correct: true },
+    { text: 'How many invoices the agent has already handled without a single error.', why: 'A clean record says a mistake is less likely. It says nothing about what the next mistake costs.' },
+    { text: 'Whether a wrong step can be taken back, as a misfiled invoice can be moved.', correct: true },
+    { text: 'How capable the newest model behind the agent seemed in the vendor demo.', why: 'Capability changes how often the agent is wrong. A wrong payment costs the same whichever model made it.' },
+  ]}>
+Which of these should decide how much the agent may do before it asks?
+</MultiChoice>
+
+<Exercise stretch="Take one task you delegated in the last month and write its boundary sentence. Then say whether the brief you actually sent contained that sentence, and what the agent did at the step it names.">
+Take these tasks from the calibration team. On paper or in a note, put
+each one under draft only, act and ask before anything that can't be
+undone, or run to completion.
+
+1. Summarize this week's calibration notes into your own notes file.
+2. Rename the scanned certificates in a copy of the folder by date.
+3. Answer twelve customers who asked when their instruments come back.
+4. Remove old drafts from the team's shared drive.
+5. Decide which team member covers the weekend shift next month.
+6. Choose which of two job applicants the team invites back.
+
+Then write the one-sentence boundary for tasks 3 and 4, in the form of
+what the agent may do on its own and the step where it stops and asks.
+It takes ten minutes, and it is the same choice you make each time you
+delegate. In a good result each placement names the worst wrong step and
+says whether it can be taken back, and each boundary sentence names one
+step that you could point at in a review. Which of the six would you give
+more check-ins on the first run, and which check-ins?
+</Exercise>
+
+<Recap>
+1. Most delegated tasks fit one of draft only, act and ask before anything that can't be undone, or run to completion (@DLAI-11).
+2. The setting follows from how costly a wrong step is and how easily it is undone. Name the blast radius of the worst step to judge the cost.
+3. Good results say the agent is capable. They don't change what one wrong step costs, so they don't move the setting past what the cost allows.
+4. On the first run of a new kind of task, add check-ins such as the plan and the first item, and drop them as results pass review (@Academy introduction-to-claude-cowork).
+5. Write the setting as one sentence: what the agent may do on its own, and the step where it stops and asks.
+</Recap>
+
+<Habit id="write-the-stop-step">
+The next time you delegate a task that sends, deletes, pays or publishes, write in the brief the one step where the agent stops and asks.
+</Habit>
