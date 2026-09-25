@@ -21,7 +21,9 @@ and #342. `.claude/settings.json` registers them.
 - `review-bash.sh`, PreToolUse on Bash in the `code-reviewer` agent only,
   registered in that agent's frontmatter. It allows the read-only review
   commands and rejects everything else, and any redirect to a file but
-  `/dev/null`.
+  `/dev/null`. It allows `mise run` only for the check tasks in
+  `REVIEW_TASKS` in `scripts/agent_hooks.py`. `fast` and `ci` aren't in
+  that list, because their `lint` step runs fixers.
 - `format-file.sh`, PostToolUse on Edit and Write. It runs Biome on an
   edited file under `site/` and ruff on an edited `.py` file, in the
   worktree that holds the file, and never fails the tool call.

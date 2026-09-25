@@ -542,3 +542,76 @@ def test_review_bash_through_main(capsys: pytest.CaptureFixture[str]) -> None:
     assert agent_hooks.main(["agent_hooks.py", "review-bash"], event, {}) == 2
     assert "code-reviewer hook" in capsys.readouterr().err
     assert agent_hooks.review_bash({"tool_input": {}}) == (0, "")
+
+
+# The read-only commands and the named check tasks of #388.
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "cat site/astro.config.mjs",
+        "sed -n 1,20p scripts/agent_hooks.py",
+        "sed -n '/^## Now/,/^## Change/p' docs/agents/testing.md",
+        "sed -ne '$p' -e '1p' file",
+        "sed -nE 10,12p a b",
+        "git diff --stat | sort | uniq -c",
+        "sort -u -k 2 names.txt",
+        "uniq -f 1 names.txt",
+        "echo ---",
+        "git ls-files '*.mdx' | wc -l",
+        "mise tasks",
+        "mise tasks --name-only",
+        "mise tasks info site-test",
+        "for f in a.md b.md; do echo $f; sed -n 1,3p $f; done",
+        "for f in $(git ls-files '*.md')\ndo\n  head -1 $f\ndone | sort",
+        "mise run setup",
+        "mise run py-test",
+        "mise run site-test",
+        "mise run data 2>&1 | tail -5",
+    ],
+)
+def test_review_bash_allows_the_read_only_commands_of_388(command: str) -> None:
+    assert agent_hooks.review_bash({"tool_input": {"command": command}}) == (0, "")
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "sed -i s/a/b/ file.md",
+        "sed -i.bak -n 1p file.md",
+        "sed -ni 1p file.md",
+        "sed --in-place -n 1p file.md",
+        "sed -n 1p file.md -i",
+        "sed -n '1w out.txt' file.md",
+        "sed -n '1p;w out' file.md",
+        "sed -n '1e rm -rf .' file.md",
+        "sed s/a/b/ file.md",
+        "sed -n",
+        "sed -n -e",
+        "sort -o out.txt names.txt",
+        "sort -uo out.txt names.txt",
+        "sort --output=out.txt names.txt",
+        "sort --compress-program=sh names.txt",
+        "uniq names.txt out.txt",
+        "mise tasks run site-format",
+        "mise tasks add x",
+        "mise tasks edit lint",
+        "for f in *.md; do sed -i s/a/b/ $f; done",
+        "for f in a; do rm $f; done",
+        "for ((i=0; i<3; i++)); do echo $i; done",
+        "mise run site-format",
+        "mise run py-format",
+        "mise run lint",
+        "mise run site-install",
+        "mise run py-install",
+        "mise run fast",
+        "mise run ci",
+        "mise run",
+        "mise run site-test site-format",
+    ],
+)
+def test_review_bash_rejects_the_writers_of_388(command: str) -> None:
+    code, message = agent_hooks.review_bash({"tool_input": {"command": command}})
+    assert code == 2
+    assert "not a review command" in message
