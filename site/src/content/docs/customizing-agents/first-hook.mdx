@@ -131,7 +131,9 @@ def main() -> int:
             raise TypeError("command and cwd must be strings")
     except (ValueError, KeyError, TypeError, AttributeError):
         print(
-            "Blocked: the lockfile hook couldn't read the tool call it was given.", file=sys.stderr
+            "Blocked: the lockfile hook couldn't read the tool call it was given.\n"
+            "Check the hook's entry in .claude/settings.local.json.",
+            file=sys.stderr,
         )
         return 2
     if not COMMIT.search(command):
@@ -152,22 +154,37 @@ def main() -> int:
 ```
 
 `COMMIT` matches `git`, then any options, then `commit`, so
-`git -C . commit` counts as well as `git commit`. `changed_files` runs
-`git diff --name-only HEAD`, which lists every file in the working tree
+`git -C . commit` counts as well as `git commit`. `changed_files` finds
+the root of the repository and runs every git command from there, so the
+paths it compares are the same when the agent works in a subdirectory.
+It runs `git diff --name-only HEAD`, which lists every file in the working tree
 that differs from the last commit, staged or not (@Git docs git-diff),
 and adds the untracked files that git doesn't ignore. The hook needs all
 of them, because it runs before the command. When the agent sends
 `git add package-lock.json && git commit` as one command, nothing is
 staged yet at the moment the hook looks. The price is that an unstaged
 lockfile edit also blocks a commit of some other file, until you commit
-or undo the edit. `problem`
-walks the changed files, and for each `package-lock.json` it checks that
+or undo the edit. `problem` walks the changed files, and for each `package-lock.json` it checks that
 the `package.json` in the same directory changed too. If one didn't, it
 returns the message, and `main` prints it to standard error and exits
 with 2. When the input isn't a tool call it can read, or git can't say
 what changed, `main` also exits with 2 and says so. A hook that lets the
 commit through whenever something goes wrong inside it would fail
 silently, and nobody would notice until the bad commit.
+
+The fixture `subdir.py` adds a second package, `app/`, as in a
+monorepo with more than one package, and runs the hook with `cwd` in `app/`. First
+`app/package.json` changes and `app/package-lock.json` is new and
+untracked. Then, after a commit of both, the lockfile changes alone.
+
+<Predict id="hook-in-a-subdirectory" title="The hook from a subdirectory"
+  answer={`manifest changed, new untracked lockfile: exit 0
+  lockfile changed alone: exit 2
+  Blocked: app/package-lock.json changed and app/package.json did not.`} run="customizing-agents/first-hook/subdir.py">
+From the root of the course repository, run
+`python3 site/examples/customizing-agents/first-hook/subdir.py` and
+compare what you see with the output below.
+</Predict>
 
 The script is fast because it does almost nothing. It returns at once
 for any command that isn't a commit, and a commit costs it one
@@ -281,7 +298,7 @@ A text match has limits. A commit run through a shell alias, a script
 such as `./release.sh`, or a spelling the pattern doesn't know gets past
 it. The hook reads the command, and it can't see what a script does
 inside. So this hook catches a mistake, the kind an agent makes while it
-works as asked. It isn't a wall. The vendor's advice for a hard allow or
+works as asked. It doesn't stop a determined command. The vendor's advice for a hard allow or
 deny is a permission rule (@Claude Code hooks), and for a rule the
 project can't do without, add a check in CI (continuous integration)
 that runs on every push, whatever made the commit. The hook tells the
@@ -290,9 +307,11 @@ gets past.
 
 If the script path in `args` has a typo, `python3` can't open the file
 and exits with 2, so Claude Code blocks every git command with Python's
-error as the reason. The same typo in a shell-form entry, one that runs
-the script by its path with no `args`, makes the shell exit with 127, a
-non-blocking error, and the commit runs. The fixture `failures.py`
+error as the reason. The interpreter exits with 2 whichever form starts
+it. The code 127 comes from a shell that can't find the script itself:
+a shell-form entry, one with no `args`, that runs the script by its
+mistyped path makes the shell exit with 127, a non-blocking error, and
+the commit runs. The fixture `failures.py`
 shows both, next to a hook that got input it couldn't read.
 
 <Predict id="three-failures" title="When the hook itself goes wrong"
@@ -432,9 +451,9 @@ and the two files disagreed for a week before a reviewer noticed. The
 instruction was a request, and the agent weighed it against everything
 else in its context. The rule from
 [When instructions aren't enough](/customizing-agents/instructions/#when-instructions-arent-enough):
-a rule that must hold every time needs a mechanism, such as a hook for
-the moment of the mistake and a CI check behind it, and guidance that
-may bend stays an instruction.
+a rule that must hold every time is a hook, and guidance that may bend
+stays an instruction. With CI added, the hook catches the mistake while
+the agent works, and a CI check behind it catches what the hook misses.
 </Pitfall>
 
 <Exercise stretch="Change the hook's final return 2 to return 1, reset the copy with git checkout -- ., and send the same brief again. This time Claude Code asks you to approve the commit: approve it, and find the hook error notice in the transcript. Then check git log: the commit went through. Change the code back.">

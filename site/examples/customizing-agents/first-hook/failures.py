@@ -10,8 +10,10 @@ exists to block.
    with code 2, so Claude Code blocks every matching command, with Python's
    error as the reason.
 3. The settings entry is in shell form and runs the script by a mistyped
-   path. The shell can't find it and exits with code 127, a non-blocking
-   error, so the commit runs.
+   path, with no interpreter in front. The shell can't find it and exits
+   with code 127, a non-blocking error, so the commit runs. The code comes
+   from who reports the missing file: `python3` exits with 2 whichever form
+   starts it.
 """
 
 import subprocess
