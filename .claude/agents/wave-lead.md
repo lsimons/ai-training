@@ -54,8 +54,9 @@ is reviewed in its own worktree, `review-<issue>-1` and `-2`, with its own
 A builder that stops at its turn limit pushes its branch, posts a comment
 on the issue whose first line is `Unfinished: <branch>` followed by the
 list of what is left, and hands back that list. Spawn a fresh builder on
-the same branch and worktree, with that list as its brief. Its reply
-with a `Branch:` line for that branch marks the branch finished.
+the same branch and worktree, with that list as its brief, and tell it to
+post an issue comment with a `Branch:` line for that branch when it
+finishes. That comment marks the branch finished.
 
 A reviewer returns its review as its final text, ending in a `Verdict:`
 line and the attribution lines. Post that text on the ISSUE yourself
@@ -148,7 +149,8 @@ stopped before it could report. Don't restart the wave:
 2. An issue with no pushed branch has `next: build`. Otherwise its
    `next` is `per-branch`, and you act on each branch's `next`: `build`
    (a builder stopped at its turn limit, so a fresh builder takes the
-   branch with its `unfinished.left` list as the brief), `join`
+   branch with its `unfinished.left` list as the brief, and posts an issue
+   comment with a `Branch:` line when it finishes), `join`
    (approved, joins the wave as it is, and you never redo, re-review or
    rebuild it), `lead-re-check` (approved, and the builder replied with a
    fix commit that no `re-checked by lead` comment followed, so you read

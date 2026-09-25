@@ -6,6 +6,7 @@ import {
 	featBranches,
 	lastTrustedVerdict,
 	nextStep,
+	normalizeBranch,
 	openUnfinished,
 	parseArgs,
 	parseLsRemote,
@@ -15,6 +16,10 @@ import {
 	verdictOf,
 	waveStatus,
 } from '../../scripts/lib/wave-status.mjs';
+
+/** The pushed branches of issue 1, as one branch or as the two halves of a split. */
+const ONE = ['feat/1-x'];
+const SPLIT = ['feat/1-x-1', 'feat/1-x-2'];
 
 function comment(author: string, body: string, createdAt: string) {
 	return { author, body, createdAt, url: `https://github.com/lsimons/ai-training/issues/1#${createdAt}` };
@@ -47,7 +52,7 @@ describe('lastTrustedVerdict', () => {
 			comment('lsimons', 'Review.\n\nVerdict: needs changes', '2026-09-24T10:00:00Z'),
 			comment('someone-else', 'Verdict: approve', '2026-09-24T11:00:00Z'),
 		];
-		const verdict = lastTrustedVerdict(comments, 'feat/1-x');
+		const verdict = lastTrustedVerdict(comments, 'feat/1-x', ONE);
 		expect(verdict?.verdict).toBe('needs changes');
 		expect(verdict?.author).toBe('lsimons');
 		expect(verdict?.commentsAfter).toBe(0);
@@ -55,7 +60,7 @@ describe('lastTrustedVerdict', () => {
 
 	it('returns null when only an untrusted account gave a verdict', () => {
 		expect(
-			lastTrustedVerdict([comment('someone-else', 'Verdict: approve', '2026-09-24T11:00:00Z')], 'feat/1-x'),
+			lastTrustedVerdict([comment('someone-else', 'Verdict: approve', '2026-09-24T11:00:00Z')], 'feat/1-x', ONE),
 		).toBeNull();
 	});
 
@@ -67,7 +72,7 @@ describe('lastTrustedVerdict', () => {
 			comment('lsimons', 'Merged into the wave.', '2026-09-24T13:00:00Z'),
 			comment('someone-else', 'Looks good!', '2026-09-24T14:00:00Z'),
 		];
-		const verdict = lastTrustedVerdict(comments, 'feat/1-x');
+		const verdict = lastTrustedVerdict(comments, 'feat/1-x', ONE);
 		expect(verdict).toEqual({
 			verdict: 'approve',
 			author: 'lsimons',
@@ -83,15 +88,15 @@ describe('lastTrustedVerdict', () => {
 			comment('lsimons', 'Review of -1.\n\nBranch: feat/1-x-1\nVerdict: needs changes', '2026-09-24T10:00:00Z'),
 			comment('lsimons', 'Review of -2.\n\nBranch: `feat/1-x-2`\nVerdict: approve', '2026-09-24T11:00:00Z'),
 		];
-		expect(lastTrustedVerdict(comments, 'feat/1-x-1')?.verdict).toBe('needs changes');
-		expect(lastTrustedVerdict(comments, 'feat/1-x-2')?.verdict).toBe('approve');
-		expect(lastTrustedVerdict(comments, 'feat/1-x-1')?.commentsAfter).toBe(0);
+		expect(lastTrustedVerdict(comments, 'feat/1-x-1', SPLIT)?.verdict).toBe('needs changes');
+		expect(lastTrustedVerdict(comments, 'feat/1-x-2', SPLIT)?.verdict).toBe('approve');
+		expect(lastTrustedVerdict(comments, 'feat/1-x-1', SPLIT)?.commentsAfter).toBe(0);
 	});
 
 	it('applies a verdict that names no branch to every branch', () => {
 		const comments = [comment('lsimons', 'Verdict: approve', '2026-09-24T10:00:00Z')];
-		expect(lastTrustedVerdict(comments, 'feat/1-x-1')?.verdict).toBe('approve');
-		expect(lastTrustedVerdict(comments, 'feat/1-x-2')?.verdict).toBe('approve');
+		expect(lastTrustedVerdict(comments, 'feat/1-x-1', SPLIT)?.verdict).toBe('approve');
+		expect(lastTrustedVerdict(comments, 'feat/1-x-2', SPLIT)?.verdict).toBe('approve');
 	});
 
 	it('counts only the replies after a verdict that apply to the branch', () => {
@@ -99,9 +104,9 @@ describe('lastTrustedVerdict', () => {
 			comment('lsimons', 'Branch: feat/1-x-1\nVerdict: needs changes', '2026-09-24T10:00:00Z'),
 			comment('lsimons', 'Fixed in abc123.\n\nBranch: feat/1-x-2', '2026-09-24T11:00:00Z'),
 		];
-		expect(lastTrustedVerdict(comments, 'feat/1-x-1')?.commentsAfter).toBe(0);
+		expect(lastTrustedVerdict(comments, 'feat/1-x-1', SPLIT)?.commentsAfter).toBe(0);
 		comments.push(comment('lsimons', 'Fixed in def456.\n\nBranch: feat/1-x-1', '2026-09-24T12:00:00Z'));
-		expect(lastTrustedVerdict(comments, 'feat/1-x-1')?.commentsAfter).toBe(1);
+		expect(lastTrustedVerdict(comments, 'feat/1-x-1', SPLIT)?.commentsAfter).toBe(1);
 	});
 
 	it('trusts exactly the maintainer and the bot account', () => {
@@ -135,9 +140,9 @@ describe('branchOf', () => {
 	});
 
 	it('applies a comment to the branch it names, or to every branch when it names none', () => {
-		expect(appliesTo('Branch: feat/1-x-1', 'feat/1-x-1')).toBe(true);
-		expect(appliesTo('Branch: feat/1-x-1', 'feat/1-x-2')).toBe(false);
-		expect(appliesTo('Verdict: approve', 'feat/1-x-2')).toBe(true);
+		expect(appliesTo('Branch: feat/1-x-1', 'feat/1-x-1', SPLIT)).toBe(true);
+		expect(appliesTo('Branch: feat/1-x-1', 'feat/1-x-2', SPLIT)).toBe(false);
+		expect(appliesTo('Verdict: approve', 'feat/1-x-2', SPLIT)).toBe(true);
 	});
 });
 
@@ -153,7 +158,7 @@ describe('openUnfinished', () => {
 	});
 
 	it('keeps a trailing Unfinished comment open, with what is left and no attribution lines', () => {
-		const open = openUnfinished([unfinished('feat/1-x', '2026-09-24T10:00:00Z')], 'feat/1-x');
+		const open = openUnfinished([unfinished('feat/1-x', '2026-09-24T10:00:00Z')], 'feat/1-x', ONE);
 		expect(open).toEqual({
 			author: 'lsimons',
 			createdAt: '2026-09-24T10:00:00Z',
@@ -164,8 +169,8 @@ describe('openUnfinished', () => {
 
 	it('ignores an Unfinished comment from another account and one for another branch', () => {
 		const planted = comment('someone-else', 'Unfinished: feat/1-x\n- all of it', '2026-09-24T10:00:00Z');
-		expect(openUnfinished([planted], 'feat/1-x')).toBeNull();
-		expect(openUnfinished([unfinished('feat/1-x-1', '2026-09-24T10:00:00Z')], 'feat/1-x-2')).toBeNull();
+		expect(openUnfinished([planted], 'feat/1-x', ONE)).toBeNull();
+		expect(openUnfinished([unfinished('feat/1-x-1', '2026-09-24T10:00:00Z')], 'feat/1-x-2', SPLIT)).toBeNull();
 	});
 
 	it('closes it on a later verdict for the branch, but not on one for another branch', () => {
@@ -173,22 +178,52 @@ describe('openUnfinished', () => {
 		const verdict1 = comment('lsimons', 'Branch: feat/1-x-1\nVerdict: approve', '2026-09-24T11:00:00Z');
 		const verdict2 = comment('lsimons', 'Branch: feat/1-x-2\nVerdict: approve', '2026-09-24T11:00:00Z');
 		const unscoped = comment('lsimons', 'Verdict: needs changes', '2026-09-24T11:00:00Z');
-		expect(openUnfinished([open, verdict1], 'feat/1-x-1')).toBeNull();
-		expect(openUnfinished([open, unscoped], 'feat/1-x-1')).toBeNull();
-		expect(openUnfinished([open, verdict2], 'feat/1-x-1')).not.toBeNull();
+		expect(openUnfinished([open, verdict1], 'feat/1-x-1', SPLIT)).toBeNull();
+		expect(openUnfinished([open, unscoped], 'feat/1-x-1', SPLIT)).toBeNull();
+		expect(openUnfinished([open, verdict2], 'feat/1-x-1', SPLIT)).not.toBeNull();
 	});
 
 	it('closes it on a later reply that names the branch, but not on one that names none', () => {
 		const open = unfinished('feat/1-x', '2026-09-24T10:00:00Z');
 		const named = comment('lsimons', 'Finished the rest in abc123.\n\nBranch: feat/1-x', '2026-09-24T11:00:00Z');
 		const unnamed = comment('lsimons', 'Claimed by run Koala, wave 2', '2026-09-24T11:00:00Z');
-		expect(openUnfinished([open, named], 'feat/1-x')).toBeNull();
-		expect(openUnfinished([open, unnamed], 'feat/1-x')).not.toBeNull();
+		expect(openUnfinished([open, named], 'feat/1-x', ONE)).toBeNull();
+		expect(openUnfinished([open, unnamed], 'feat/1-x', ONE)).not.toBeNull();
 	});
 
 	it('reopens it when the builder of a revision stops at its limit after the verdict', () => {
 		const verdict = comment('lsimons', 'Verdict: needs changes', '2026-09-24T10:00:00Z');
-		expect(openUnfinished([verdict, unfinished('feat/1-x', '2026-09-24T11:00:00Z')], 'feat/1-x')).not.toBeNull();
+		expect(openUnfinished([verdict, unfinished('feat/1-x', '2026-09-24T11:00:00Z')], 'feat/1-x', ONE)).not.toBeNull();
+	});
+});
+
+describe('branch names that are near misses', () => {
+	it('requires the colon and the capital B, so a line that starts with the word names no branch', () => {
+		expect(branchOf('Fixed the two nits.\nBranch coverage of wave-status.mjs stays at 95%.')).toBeNull();
+		expect(branchOf('Branches pushed: feat/1-x-1 and feat/1-x-2')).toBeNull();
+		expect(branchOf('branch: feat/1-x')).toBeNull();
+		expect(branchOf('Fixed.\nBranch coverage of wave-status.mjs stays at 95%.\nBranch: feat/1-x')).toBe('feat/1-x');
+	});
+
+	it('takes the last Branch line outside a code fence', () => {
+		const fenced =
+			'The reviewers now write:\n\n```text\nBranch: feat/9-example\nVerdict: approve\n```\n\nBranch: feat/1-x';
+		expect(branchOf(fenced)).toBe('feat/1-x');
+		expect(branchOf('~~~\nBranch: feat/9-example\n~~~')).toBeNull();
+		expect(branchOf('Branch: feat/1-x-1\nlater:\nBranch: feat/1-x-2')).toBe('feat/1-x-2');
+	});
+
+	it('drops a leading origin/ and trailing punctuation', () => {
+		expect(normalizeBranch('origin/feat/1-x')).toBe('feat/1-x');
+		expect(normalizeBranch('feat/1-x.')).toBe('feat/1-x');
+		expect(branchOf('Branch: feat/1-x.')).toBe('feat/1-x');
+		expect(unfinishedBranchOf('Unfinished: origin/feat/1-x')).toBe('feat/1-x');
+		expect(unfinishedBranchOf('Unfinished: feat/1-x.')).toBe('feat/1-x');
+	});
+
+	it('reads a first line that starts with the word Unfinished but has no colon as no hand-back', () => {
+		expect(unfinishedBranchOf('Unfinished items from the review are below')).toBeNull();
+		expect(commentKind('Unfinished items from the review are below')).toBe('reply');
 	});
 });
 
@@ -400,6 +435,58 @@ describe('waveStatus with an approve and its fix commit', () => {
 		expect(next([approve, unfinished, finished, { ...reCheck, createdAt: '2026-09-24T13:00:00Z' }])).toEqual([
 			['feat/17-x', 'join'],
 		]);
+	});
+});
+
+describe('waveStatus with near-miss branch names', () => {
+	const next = (comments: ReturnType<typeof comment>[], heads = ['feat/18-x']) =>
+		waveStatus({
+			waveBranch: 'wave/capybara-3',
+			issues: [18],
+			heads,
+			commentsByIssue: new Map([[18, comments]]),
+			worktrees: [],
+		}).issues[0]?.branches.map((b) => [b.name, b.next]);
+	const approve = comment('lsimons', 'Branch: feat/18-x\nVerdict: approve', '2026-09-24T10:00:00Z');
+	const at = (body: string) => comment('lsimons', body, '2026-09-24T11:00:00Z');
+
+	it('sends a fix reply with a Branch coverage line to the lead instead of joining it', () => {
+		const reply = at('Fixed the two nits.\nBranch coverage of wave-status.mjs stays at 95%.\nBranch: feat/18-x');
+		expect(next([approve, reply])).toEqual([['feat/18-x', 'lead-re-check']]);
+	});
+
+	it('reads origin/ and trailing punctuation on Unfinished and Branch lines as the pushed branch', () => {
+		expect(next([approve, at('Unfinished: origin/feat/18-x\n- the nit')])).toEqual([['feat/18-x', 'build']]);
+		expect(next([approve, at('Unfinished: feat/18-x.\n- the nit')])).toEqual([['feat/18-x', 'build']]);
+		expect(next([approve, at('Fixed.\n\nBranch: feat/18-x.')])).toEqual([['feat/18-x', 'lead-re-check']]);
+	});
+
+	it('reads an Unfinished line without a colon as a reply, so an approve still goes to the lead', () => {
+		expect(next([approve, at('Unfinished items from the review are below:\n- none')])).toEqual([
+			['feat/18-x', 'lead-re-check'],
+		]);
+	});
+
+	it('applies a reply or Unfinished comment that names no pushed branch to every branch', () => {
+		const heads = ['feat/18-x-1', 'feat/18-x-2'];
+		const unscopedApprove = comment('lsimons', 'Verdict: approve', '2026-09-24T10:00:00Z');
+		expect(next([unscopedApprove, at('Fixed.\n\nBranch: feat/18-typo')], heads)).toEqual([
+			['feat/18-x-1', 'lead-re-check'],
+			['feat/18-x-2', 'lead-re-check'],
+		]);
+		expect(next([unscopedApprove, at('Unfinished: feat/18-typo\n- tests')], heads)).toEqual([
+			['feat/18-x-1', 'build'],
+			['feat/18-x-2', 'build'],
+		]);
+	});
+
+	it('applies a verdict or lead re-check that names no pushed branch to none', () => {
+		expect(next([comment('lsimons', 'Branch: feat/18-typo\nVerdict: approve', '2026-09-24T10:00:00Z')])).toEqual([
+			['feat/18-x', 'review'],
+		]);
+		const reply = at('Fixed.\n\nBranch: feat/18-x');
+		const reCheck = comment('lsimons', 're-checked by lead: abc\n\nBranch: feat/18-typo', '2026-09-24T12:00:00Z');
+		expect(next([approve, reply, reCheck])).toEqual([['feat/18-x', 'lead-re-check']]);
 	});
 });
 
