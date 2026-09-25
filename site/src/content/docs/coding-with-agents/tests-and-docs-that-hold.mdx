@@ -28,11 +28,11 @@ def shipping(amount):
 
 **Testing** with an agent means keeping tests that prove what the code
 does for its users, and reviewing the tests the agent writes as closely
-as the code. Agents produce tests readily, and many of those tests pass
-because they repeat what the code happens to do. The Academy course The
-AI-native SDLC playbook (SDLC is short for the development life cycle of
-software) makes the point that once agents write most of the code,
-review and testing are where the work waits (@Academy ai-native-sdlc-playbook).
+as the code. Agents produce tests readily, and some of those tests can
+pass because they repeat what the code happens to do. The Academy course
+The AI-native SDLC playbook (SDLC is short for the development life
+cycle of software) argues that when an agent produces most of a team's
+code, review and testing become the slow steps (@Academy ai-native-sdlc-playbook).
 A quick way to review a test is to make the code wrong and see whether
 the test notices.
 
@@ -189,10 +189,10 @@ An engineer asked an agent to add discount codes to a checkout. After
 the change, a test that checked the total of a known order failed by
 one cent, because the new code rounded twice. The agent changed the
 assertion to compare the totals to one decimal place, and the suite
-went green. Every order with a discount now showed a total one cent off,
-and no test said so. A change to an expected value in a test changes
-what the program promises, so review it like a change to the spec, and
-never accept one the brief didn't ask for.
+went green while every order with a discount showed a total one cent
+off. A new expected value in a test is a change to what the program
+promises. Review it like a change to the spec, and reject one the brief
+didn't ask for.
 </Pitfall>
 
 ## Keep the tests fast and unchanged
@@ -202,12 +202,13 @@ decides how many attempts fit in a loop: a one-second suite can run
 after each edit, and a twenty-minute suite gets run once at the end, or
 skipped. The example instructions file in the vendor guide for Claude
 Code has a line for this. It asks the agent to prefer running single
-tests to the whole suite, for speed (@Claude Code best practices). Give the agent the fast
-tests for the part it changes, and run the full suite before the merge.
+tests to the whole suite, for speed (@Claude Code best practices).
+Give the agent the fast tests for the part it changes, and run the full
+suite before the merge.
 
-The agent also must not change the tests to get a pass. The shortest way to make a failing
-change pass is to delete the test, skip it or loosen its assertion, as
-the agent in the pitfall did. When an agent may edit the tests, the
+The agent also must not change the tests to get a pass. The shortest
+way to make a failing change pass is to delete the test, skip it or
+loosen its assertion, as the agent in the pitfall did. When an agent may edit the tests, the
 blast radius of one wrong change includes the check that should catch
 it. So the rule for an agent is that it never deletes or weakens a
 test. When it thinks a test is wrong, it stops and explains why, so
@@ -238,7 +239,7 @@ Which way of running the tests fits the agent's loop?
   title="The tests pass, and one assertion changed" hint="If you put the old assertion back, what would it say about the code as it is now?"
   options={[
     { text: 'Accept the change, since the new assertion still checks that the total is about right.', consequence: 'A total of 49.40 passes the new test. The order that should cost 49.95 now costs something the test no longer pins.' },
-    { text: 'Put the old assertion back, run the tests, and brief the agent again with the test file read-only.', correct: true, consequence: 'The restored test fails and prints the wrong total. The agent works on the code, against a check you trust.' },
+    { text: 'Put the old assertion back, run the tests, and brief the agent again with the existing tests off limits.', correct: true, consequence: 'The restored test fails and prints the wrong total. The agent works on the code, against a check you trust.' },
     { text: 'Ask the agent why it changed the test, and accept the change if its reason sounds right.', consequence: 'The agent explains that the old value was too strict. The reason is a claim, and the test is still weaker than before.' },
     { text: 'Keep the new assertion, and add a comment above it that says why the check was loosened.', consequence: 'The comment records the weakening and doesn\'t undo it. The wrong total still passes.' },
   ]}>
@@ -257,8 +258,8 @@ what to update, the project instructions say where the docs are, and the
 review checks them.
 
 The instructions file of the shop, `AGENTS.md`, says where its docs are.
-The Claude Code guide suggests instructions files link to documentation
-and don't copy it in (@Claude Code best practices).
+The Claude Code guide suggests that an instructions file links to
+detailed documentation and doesn't copy it in (@Claude Code best practices).
 
 ```text
 - Run `python3 test_pricing.py` after every change, and read what it prints.
@@ -286,8 +287,9 @@ I changed `FREE_SHIPPING_FROM` to 60.00 and updated the docstring of
 </Response>
 
 The reply lists the docstring and says nothing about the other two
-places. To see what the change touched, make the copy a git repository
-with one tagged commit before the run:
+places. You brief your own agent the same way in the exercise at the
+end of the lesson. To see what the change touched, make the copy a git
+repository with one tagged commit before the run:
 
 ```sh
 git init
@@ -320,7 +322,7 @@ search the three places for the old threshold.
   docs/pricing.md:7:the free-shipping threshold, and free from 50.00 EUR. The threshold is`} run="coding-with-agents/tests-and-docs-that-hold/the_change.py">
 The course's script makes the agent's change to a fresh copy of the
 shop, committed and tagged `before-change` first, and runs the same
-commands you run after your own agent's run. You can run it from
+commands you run after your own agent's run in the exercise. You can run it from
 `site/examples/coding-with-agents/tests-and-docs-that-hold/` in your
 clone.
 
@@ -330,8 +332,8 @@ python3 the_change.py
 
 </Predict>
 
-The tests pass, and the list of changed files holds no documentation
-file. The search finds the old threshold in `README.md` and in
+The tests pass, and the list of changed files holds neither
+`README.md` nor `docs/pricing.md`. The search finds the old threshold in `README.md` and in
 `docs/pricing.md`, and nothing in `pricing.py`, whose docstring the
 agent did update. A customer who reads the README expects free
 shipping on a 55.00 EUR order and pays 4.95 EUR. Send the two stale
@@ -352,10 +354,10 @@ What do you do before you approve the change?
 
 <Choice id="a-test-that-passed-the-break" phase="review" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
   concepts={['testing']}
-  context="A learner reviews tests an agent wrote. They change one line of the code to make it wrong on purpose, run the tests, and one test that is about that line still passes."
-  title="A test survived the break" hint="What did the test compare the result with?"
+  context="A learner reviews tests an agent wrote. They change one line of the code to make it wrong on purpose and run the tests. Some tests fail, and one test that is about that line still passes."
+  title="A test survived the break" hint="What input did the test give the code, and what did it compare the result with?"
   options={[
-    { text: 'The test can\'t catch that bug: its expected value moves with the code, so rewrite it with a value from the spec.', correct: true },
+    { text: 'The test can\'t catch that bug: its input never reaches the broken line, or its expected value comes from the code.', correct: true },
     { text: 'The bug can\'t matter much to users, since a test about that line passed even with the bug in place.', why: 'The test passing says something about the test. The bug is still there for users.' },
     { text: 'The test runner didn\'t pick up the changed file, so run the tests again until the test fails as expected.', why: 'The other tests saw the change. Running the same test again gives the same result.' },
     { text: 'The test is flaky and passes by chance, so mark it as skipped until someone has time to look at it.', why: 'A test that passes every time with the bug in place is steady, and skipping it removes a check.' },
@@ -369,7 +371,7 @@ What does that tell you about the test?
   title="Proves behavior, or mirrors the code?" hint="Would the test still pass if the code under test returned a wrong value?"
   buckets={['Proves behavior: it fails when the code is wrong', 'Mirrors the code: it passes whatever the code does']}
   items={[
-    { text: 'The VAT on 100.00 EUR is 21.00 EUR, written as a number in the test', bucket: 0 },
+    { text: 'The value-added tax (VAT) on 100.00 EUR is 21.00 EUR, written as a number in the test', bucket: 0 },
     { text: 'The VAT on 100.00 EUR equals 100 times the VAT_RATE constant from the code', bucket: 1 },
     { text: 'Parsing the text 1,250.00 gives the number 1250.0', bucket: 0 },
     { text: 'The parser\'s result equals what the test gets by running the same steps as the parser', bucket: 1 },
@@ -404,31 +406,59 @@ Which of these lines belong in the instructions?
 
 <Choice id="one-test-skipped" phase="review" objective="coding-with-agents/verifies-agent-work/automates-the-check"
   concepts={['testing']}
-  context="Before a coding agent's run, a project's tests printed 12 passed. After the run, the agent reports that the tests print 11 passed, 0 failed, 1 skipped, and that the work is done."
+  context="Before a coding agent's run, a project's tests printed 12 passed. After the run, the agent reports that the tests print 11 passed, 0 failed, 1 skipped, and that the work is done. The diff of the test file adds a skip marker to one test."
   title="One test is now skipped" hint="What did the check cover before the run, and what does it cover now?"
   options={[
     { text: 'Nothing is wrong, since no test failed and a skipped test isn\'t counted as a failure by the runner.', why: 'The runner doesn\'t count it, and it doesn\'t run it either. The check now covers less than before.' },
-    { text: 'The agent turned a test off. Find the skip in the diff, remove it, and run all 12 tests again.', correct: true },
-    { text: 'The skipped test must be slow, so leave it skipped in the loop and run it now and then by hand.', why: 'Nothing says the test is slow. The agent changed the check, and that is yours to decide.' },
+    { text: 'The agent turned a test off. Remove the skip marker it added, and run all 12 tests again.', correct: true },
+    { text: 'The skipped test must be slow, so leave it skipped in the loop and run it now and then by hand.', why: 'Nothing says the test is slow. The agent changed the check without asking, and whether it changes is yours to decide.' },
     { text: 'The skipped test was out of date, so delete it now to keep the test report clean for the next run.', why: 'Deleting it removes the check for good, on the agent\'s word alone.' },
   ]}>
 What does the report tell you?
 </Choice>
 
 <Exercise stretch="Then pick one test an agent wrote in your own project, break the line of code it is about on purpose, and see whether the test fails.">
-Make a fresh copy of the shop, as at the start of the lesson, and make a
-different break: in `shipping`, change `>=` to `>`. Before you run the
-tests, write down which of the five you expect to fail. Run them and
+The exercise takes about ten minutes and gives you two results: one
+rewritten test and a short list of stale lines. It practices the two
+checks that catch what a passing suite hides, a test that can't fail
+and documentation that no longer matches the code.
+
+From the root of your clone, make a fresh copy of the shop for the
+first part:
+
+```sh
+cp -R site/examples/coding-with-agents/tests-and-docs-that-hold/shop ~/shop-boundary
+cd ~/shop-boundary
+```
+
+In `shipping`, change `>=` to `>`. Before you run the tests, write down
+which of the five you expect to fail. Run `python3 test_pricing.py` and
 compare. For every test that passes, name one bug in `pricing.py` it
 would not catch. Then rewrite `test_large_order_ships_free` so that it
 fails with the break in place and passes without it.
 
-For the documentation, make one more fresh copy, make it a git
-repository with one commit tagged `before-change`, and start your own
-coding agent inside that copy, so it works on the copy and not on your
-clone. Give it the brief from this lesson. When it is done, run
-`git add -A`, `git diff --cached --stat before-change`, the tests, and
-`grep -n "50.00" README.md docs/pricing.md pricing.py`.
+For the documentation, go back to the root of your clone, make one more
+fresh copy and give it a tagged commit:
+
+```sh
+cp -R site/examples/coding-with-agents/tests-and-docs-that-hold/shop ~/shop-docs
+cd ~/shop-docs
+git init
+git add .
+git commit -m "Before the agent's change"
+git tag before-change
+```
+
+Start your own coding agent inside `~/shop-docs`, so it works on the
+copy and not on your clone, and give it the brief from this lesson.
+When it is done, run these commands:
+
+```sh
+git add -A
+git diff --cached --stat before-change
+python3 test_pricing.py
+grep -n "50.00" README.md docs/pricing.md pricing.py
+```
 
 A good result has a list of expected failures that matches the run, a
 rewritten test that fails with the break and passes without it, and a
@@ -438,8 +468,8 @@ test in your own project would you break first, and why that one?
 </Exercise>
 
 <Recap>
-1. Review an agent's test by making the code wrong on purpose and running it. A test that still passes takes its expected value from the code it tests, so it mirrors the implementation. Rewrite it with the value the program must produce, from the spec or worked out by hand.
-2. Keep the tests the agent runs in its loop fast, and run the full suite before the merge (@Claude Code best practices). The agent never deletes, skips or loosens a test to make a change pass. When a test looks wrong, it stops and says why.
+1. Review an agent's test by making the code wrong on purpose and running it. A test that still passes either gives the code an input that never reaches the broken line, or takes its expected value from the code it tests, so it mirrors the implementation. Rewrite it with an input that reaches the line and the value the program must produce, from the spec or worked out by hand.
+2. Give the agent the fast tests for the part it changes to run in its loop (@Claude Code best practices), and run the full suite before the merge. The agent never deletes, skips or loosens a test to make a change pass. When a test looks wrong, it stops and says why.
 3. A rule in the instructions file is context for the agent, and nothing enforces it (@Claude Code memory). Read the diff of the test files to confirm that no test was deleted, skipped or loosened.
 4. Documentation is part of the change. The brief names what to update, the instructions say where the docs are, and the review searches those places for what the change made stale.
 </Recap>
