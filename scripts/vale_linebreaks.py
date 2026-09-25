@@ -46,9 +46,11 @@ skipped. A space inside a character class (`[- ]`) becomes `\\s` too,
 which also admits a line break there, as intended.
 """
 
+import os
 import pathlib
 import re
 import sys
+import tempfile
 from collections.abc import Sequence
 
 import prose_eval
@@ -241,8 +243,31 @@ def run(inis: Sequence[pathlib.Path], styles: pathlib.Path) -> list[pathlib.Path
             if widened == text:
                 continue
             changed.append(rule)
-            rule.write_text(widened, encoding="utf-8")
+            write_atomically(rule, widened)
     return changed
+
+
+def write_atomically(path: pathlib.Path, text: str) -> None:
+    """Replace `path` with `text` so that a reader sees the old file or the new one.
+
+    Two pre-push Vale hooks, or two batches of one hook, can read a rule
+    while this script rewrites it (issue #454). The text goes to a temporary
+    file in the same directory, which `Path.replace` (a call to
+    `os.replace`) then moves over `path` in one step. The temporary name
+    does not end in `.yml`, so a parallel run does not read it as a rule.
+    The new file keeps the mode of the old one.
+    """
+    mode = path.stat().st_mode
+    handle, name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    temp = pathlib.Path(name)
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8") as out:
+            out.write(text)
+        temp.chmod(mode)
+        temp.replace(path)
+    except BaseException:
+        temp.unlink(missing_ok=True)
+        raise
 
 
 def main(argv: Sequence[str]) -> int:

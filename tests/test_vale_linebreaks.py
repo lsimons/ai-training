@@ -306,10 +306,13 @@ def test_an_unwidened_rule_misses_the_split_hit(tmp_path: pathlib.Path) -> None:
     assert fires("It says no\nmore than that.\n")
 
 
-# The pre-push Vale hooks in prek.toml run the same steps as the `depends`
-# of `mise run prose`: the package check, then the rewrite, then Vale
-# (issue #454). Without the rewrite a checkout synced by a bare `vale sync`
-# passes a line-split hit on a push that `mise run prose` rejects.
+# The pre-push Vale hooks in prek.toml run the package check and the
+# rewrite from the `depends` of `mise run prose`, in that order, and then
+# Vale (issue #454). They don't run `prose-check-configs`. Without the
+# rewrite a checkout synced by a bare `vale sync` passes a line-split hit on
+# a push that `mise run prose` rejects. The hooks set `require_serial` and
+# the rewrite replaces each file in one step, so two copies of a hook don't
+# read a rule file while the other writes it.
 PACKAGE_CHECK = "scripts/prose_eval.py --check-packages .vale.ini .vale-extended.ini"
 WIDEN = "scripts/vale_linebreaks.py .vale.ini .vale-extended.ini"
 
@@ -327,37 +330,56 @@ def _vale_hook_problem(entry: str) -> str:
         return "does not widen the packages before vale"
     if widen_at < check_at:
         return "widens before the package check"
+    if f"{PACKAGE_CHECK} && {WIDEN} && vale " not in entry:
+        return "does not join the steps with &&"
     return ""
 
 
-def _prek_vale_hooks() -> dict[str, str]:
-    """The `entry` of each prek.toml hook that runs Vale, by hook id.
+def _prek_hook_keys() -> dict[str, dict[str, object]]:
+    """The `entry` and `require_serial` of each prek.toml hook, by hook id.
 
     prek.toml writes a hook as an inline table over several lines, which is
-    TOML 1.1 and which `tomllib` in Python 3.14 rejects, so the `id` and
-    `entry` lines are read directly. Each is one basic string on its own
-    line, and its escapes (`\\"`) are also JSON escapes.
+    TOML 1.1 and which `tomllib` in Python 3.14 rejects, so the `id`,
+    `entry` and `require_serial` lines are read directly. Each value is on
+    its own line, and its escapes (`\\"`) are also JSON escapes.
     """
     import json
 
-    hooks: dict[str, str] = {}
+    hooks: dict[str, dict[str, object]] = {}
     hook_id = ""
     for line in (REPO_ROOT / "prek.toml").read_text(encoding="utf-8").splitlines():
         key, _, value = line.strip().partition(" = ")
         if key == "id":
             hook_id = json.loads(value.rstrip(","))
-        elif key == "entry":
-            entry = json.loads(value.rstrip(","))
-            if " vale " in f" {entry}":
-                hooks[hook_id] = entry
+            hooks[hook_id] = {}
+        elif key in ("entry", "require_serial"):
+            hooks[hook_id][key] = json.loads(value.rstrip(","))
     return hooks
+
+
+def _prek_vale_hooks() -> dict[str, dict[str, object]]:
+    """The keys of each prek.toml hook whose `entry` runs Vale, by hook id."""
+    return {
+        hook_id: keys
+        for hook_id, keys in _prek_hook_keys().items()
+        if " vale " in f" {keys.get('entry', '')}"
+    }
 
 
 def test_the_prek_vale_hooks_widen_the_packages_before_vale() -> None:
     hooks = _prek_vale_hooks()
     assert sorted(hooks) == ["vale", "vale-yaml"]
-    for hook_id, entry in hooks.items():
+    for hook_id, keys in hooks.items():
+        entry = keys["entry"]
+        assert isinstance(entry, str), hook_id
         assert _vale_hook_problem(entry) == "", hook_id
+
+
+def test_the_prek_vale_hooks_run_one_copy_at_a_time() -> None:
+    hooks = _prek_vale_hooks()
+    assert sorted(hooks) == ["vale", "vale-yaml"]
+    for hook_id, keys in hooks.items():
+        assert keys.get("require_serial") is True, hook_id
 
 
 @pytest.mark.parametrize(
@@ -368,7 +390,55 @@ def test_the_prek_vale_hooks_widen_the_packages_before_vale() -> None:
         (f"sh -c '{WIDEN} && vale \"$@\"' --", "does not check"),
         (f"sh -c '{WIDEN} && {PACKAGE_CHECK} && vale \"$@\"' --", "widens before"),
         ("sh -c 'cspell \"$@\"' --", "does not run vale"),
+        (f"sh -c '{PACKAGE_CHECK} ; {WIDEN} ; vale \"$@\"' --", "does not join"),
+        (f"sh -c '{PACKAGE_CHECK} && {WIDEN} || vale \"$@\"' --", "does not join"),
     ],
 )
 def test_vale_hook_problem_names_a_hook_that_skips_the_rewrite(entry: str, problem: str) -> None:
     assert _vale_hook_problem(entry).startswith(problem)
+
+
+def test_run_replaces_a_rule_in_one_step(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ini = tmp_path / "vale.ini"
+    ini.write_text("Packages = https://example.test/Pkg.zip\n")
+    (tmp_path / "Pkg").mkdir()
+    rule = tmp_path / "Pkg" / "Rule.yml"
+    rule.write_text(EXISTENCE)
+    rule.chmod(0o644)
+    replaced: list[tuple[str, str]] = []
+    real_replace = vale_linebreaks.os.replace
+
+    def watch_replace(src: str, dst: str) -> None:
+        # Before the replace the rule still holds its old text, and the new
+        # text is complete in a file that no `*.yml` glob matches.
+        assert rule.read_text() == EXISTENCE
+        assert pathlib.Path(src).read_text() == EXISTENCE_WIDENED
+        assert pathlib.Path(src).parent == rule.parent
+        assert not pathlib.Path(src).name.endswith(".yml")
+        replaced.append((str(src), str(dst)))
+        real_replace(src, dst)
+
+    monkeypatch.setattr(vale_linebreaks.os, "replace", watch_replace)
+    assert vale_linebreaks.run([ini], tmp_path) == [rule]
+    assert replaced == [(replaced[0][0], str(rule))]
+    assert rule.read_text() == EXISTENCE_WIDENED
+    assert rule.stat().st_mode & 0o777 == 0o644
+    assert sorted(path.name for path in (tmp_path / "Pkg").iterdir()) == ["Rule.yml"]
+
+
+def test_a_failed_write_keeps_the_rule_and_leaves_no_temp_file(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    rule = tmp_path / "Rule.yml"
+    rule.write_text(EXISTENCE)
+
+    def fail_replace(src: str, dst: str) -> None:
+        raise OSError("disk full")
+
+    monkeypatch.setattr(vale_linebreaks.os, "replace", fail_replace)
+    with pytest.raises(OSError, match="disk full"):
+        vale_linebreaks.write_atomically(rule, EXISTENCE_WIDENED)
+    assert rule.read_text() == EXISTENCE
+    assert [path.name for path in tmp_path.iterdir()] == ["Rule.yml"]
