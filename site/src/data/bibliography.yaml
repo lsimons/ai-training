@@ -797,3 +797,10 @@ Claude docs model-deprecations:
   author: Anthropic
   license: Proprietary
   url: https://platform.claude.com/docs/en/about-claude/model-deprecations
+Git docs git-bisect:
+  type: reference
+  title: git-bisect
+  container: Git reference documentation
+  author: The Git project
+  license: GPL-2.0
+  url: https://git-scm.com/docs/git-bisect

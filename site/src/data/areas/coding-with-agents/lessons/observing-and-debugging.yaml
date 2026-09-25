@@ -1,5 +1,10 @@
 id: coding-with-agents/observing-and-debugging
 title: Reproducing a fault before the agent fixes it
+description: >-
+  Turn a "sometimes fails" report against a nightly sales import into a rerun that fails every time,
+  read the log of a failing run next to a good one to rule out the suspected cause, halve the
+  exports until one row is left, and only then brief the agent with the confirmed cause and check
+  the fix against the same reproduction.
 mode: tutorial
 covers: coding-with-agents/verification
 serves: [coding-with-agents/verifies-agent-work/observes-and-debugs]
@@ -13,7 +18,17 @@ exercise:
     Turn a "sometimes fails" report against the fixture into reproduction steps, read the log to
     rule out one cause, halve the remaining ones, and only then brief the agent with the confirmed
     cause.
-sources: [Brilliant VER]
+sources: [Brilliant VER, Git docs git-bisect]
 issue: 172
 minutes: 15
-notes: "Sources: Brilliant VER-4, VER-5."
+notes: >-
+  Sources: Brilliant VER-4, VER-5 (ideas and codes only), Git docs git-bisect for what `git bisect`
+  does. The fixture under site/examples/coding-with-agents/observing-and-debugging/ is a nightly
+  import that adds up eight stores' CSV exports and rejects the batch when a row has the wrong
+  number of fields. It splits lines on every comma, so an amount of a thousand or more, which the
+  exports write in quotes with a thousands separator, becomes five fields. The planted rows are
+  store-06 on 2026-09-15 (worked in the lesson) and store-03 on 2026-09-17 (left for the exercise).
+  The "sometimes" in the report is the input, not timing, and the reproduction shows that with
+  three reruns per night. The importer reads only committed files and writes nothing, so the
+  fixtures run it in place, and after_fix.py patches a temporary copy. The data files were
+  generated once with a seeded script and committed as they are.
