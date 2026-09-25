@@ -118,8 +118,9 @@ TOOLS = {
     },
 }
 
-# After week 1 the team changed one line, the description of the date parameter.
-# The runs of week 2 were made with this schema.
+# After week 1 the team changed one line, the description of the date parameter, to
+# this text. TOOLS above keeps the week 1 description that the lesson shows. The scripted
+# replies of week 2 already send dates as YYYY-MM-DD, so this constant only documents it.
 DATE_PARAMETER_WEEK_2 = "The day to check, as YYYY-MM-DD, for example 2026-12-24."
 
 # The loop gives up after this many tool calls.
