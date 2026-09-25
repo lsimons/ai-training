@@ -166,16 +166,19 @@ wave.
   control back. You still own step 4 of "Session completion": report the
   result when it arrives, and fix a failure.
 - When the auto-mode classifier blocks a change to agent settings, ask one
-  yes-or-no question that names the change ("May I write these 12 rules to
-  `.claude/settings.json`?"). A yes never overrides a deny rule. When one
-  applies, give the maintainer the finished file or patch, never a list to
-  type.
+  yes-or-no question that names the change ("May I add these 12 rules to
+  `.claude/agents/builder.md`?"), and after a yes retry the same edit.
+  Never route it through another tool. A deny rule, such as the one on
+  `.claude/settings.json`, stays: give the maintainer the finished patch to
+  apply in one step, never a list to type.
 - Merging nits issues, setting labels and closing duplicates are routine
   triage: do them and report them.
-- Before filing that Claude Code can't do something, read its docs and
-  changelog yourself, and cite the page in the issue.
+- Before filing that Claude Code can't do something, check
+  `https://code.claude.com/docs/` and `CHANGELOG.md` in
+  `anthropics/claude-code` yourself, and cite the page in the issue. A
+  `claude-code-guide` answer isn't a source.
 - Every status update lists the agents still running and the worktrees
-  that exist.
+  that exist, or says there are none.
 
 ## Session completion
 
