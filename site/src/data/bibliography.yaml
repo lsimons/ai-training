@@ -867,3 +867,17 @@ Claude Code hooks:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/hooks
+Claude Code hooks guide:
+  type: reference
+  title: Automate actions with hooks
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/hooks-guide
+Git docs git-commit:
+  type: reference
+  title: git-commit
+  container: Git reference documentation
+  author: The Git project
+  license: GPL-2.0
+  url: https://git-scm.com/docs/git-commit
