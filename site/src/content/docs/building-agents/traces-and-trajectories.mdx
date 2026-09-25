@@ -19,15 +19,15 @@ model repeats one path. So each of the fixture's eight runs has its
 own scripted model, the list of requests that run makes, while the
 tools are real functions over a small table of invoices and payments.
 The files are in `site/examples/building-agents/traces-and-trajectories/`.
-Copy the `traces-and-trajectories` folder, and each step below is
-`python3 trajectory.py <step>`. No application programming interface
+Copy the `traces-and-trajectories` folder and `cd` into the copy. Each
+step below is `python3 trajectory.py <step>`, run from there. No application programming interface
 (API) key is needed.
 
 ## Give the loop a trace
 
 In [Reproducing a fault before the agent fixes it](/coding-with-agents/observing-and-debugging/)
-you read a program's log to see what it did, and not what its code says
-it should do. An agent needs the same record, and one log line per step
+you read a program's log to find out what it did. An agent needs the
+same record, and one log line per step
 isn't enough. **Observability** for an agent means that each model call is
 recorded with its input, its output, its duration and its token counts.
 Each tool call is recorded with its arguments and its result, whether
@@ -58,7 +58,8 @@ trace.append(
 A model call gets a record of the same kind, with `"kind": "model"`,
 what the model asked for in `asked` (a tool name, or `answer` on the
 call that ends the run), its token counts, its latency and its cost.
-The `run` field ties the records of one run together, and `span`
+That last model record also has `answer`, the text of the reply. The
+`run` field ties the records of one run together, and `span`
 numbers them in order.
 
 The `outline` step prints one line per record of run r1. A model call
@@ -123,10 +124,10 @@ after the operation and the model, such as `chat` and the model name,
 and a tool call is a span named `execute_tool` and the tool name. The
 token counts go in `gen_ai.usage.input_tokens` and
 `gen_ai.usage.output_tokens`. The conventions are still marked as in
-development (@OpenTelemetry GenAI spans). They treat tool arguments,
-tool results and the messages as sensitive: each is an opt-in
-attribute, and by default an instrumentation shouldn't record the
-content at all (@OpenTelemetry GenAI spans). This fixture records
+development (@OpenTelemetry GenAI spans). They mark the messages, the
+tool arguments and the tool results as sensitive, and an
+instrumentation should record them only when the user opts in
+(@OpenTelemetry GenAI spans). This fixture records
 everything because its data is made up. For a production agent, decide
 who may read a trace before you record what users typed.
 
@@ -161,7 +162,7 @@ breaks a rule prints as `fail` and the rule name.
 
 <Predict id="which-run-fails" objective="building-agents/evaluates-agents/grades-trajectories"
   concepts={['trajectory-evaluation']}
-  context="Two runs of an invoice assistant answer Has invoice 2207 been paid? with the same correct sentence. Run r1 searched, got account ACC-1042, looked up payments on ACC-1042 and answered. Run r2 searched and got ACC-1042, then looked up payments three times on ACC-1024 and once on ACC-1042, then answered. An answer grader checks the answer for a phrase. A path grader has two rules: search-first (the first tool call is a search) and same-account (every payment lookup uses an account the search returned)."
+  context="Two runs of an invoice assistant answer Has invoice 2207 been paid? with the same correct sentence. Run r1 searched, got account ACC-1042, looked up payments on ACC-1042 and answered. Run r2 searched and got ACC-1042, then looked up payments three times on ACC-1024 and once on ACC-1042, then answered. An answer grader checks the answer for a phrase. A path grader has two rules: search-first (the first tool call is a search) and same-account (every payment lookup uses an account the search returned). The grader prints one line per run, such as r1 answer: pass, path: pass, and a path that breaks a rule prints as fail followed by the rule name."
   title="Which run does the path grader fail?"
   hint="Which grader reads only the last sentence, and which of the two rules can a run that searched first still break?"
   answer={`r1 answer: pass, path: pass
@@ -205,8 +206,21 @@ Run r2 took 4317 ms and cost $0.00612, against 2055 ms and $0.00209 for
 r1. Run r5 answered about invoice 2208 correctly, but it never searched:
 it guessed that the invoice belongs to ACC-1024 and looked up that
 account. The guess was right this time, and on another invoice the same
-guess reads the wrong customer's payments. The answer grader passes seven of the
-eight runs, and it fails only r7.
+guess reads the wrong customer's payments. The answer grader passes
+seven of the eight runs, and it fails only r7.
+
+<Pitfall title="Grading only the final answer">
+
+A team grades its invoice assistant by the answer alone, and the score
+stays at 100 percent for a month. Then a customer asks why they got
+three payment reminders for an invoice they had already paid. The agent
+had called `send_reminder` on lookups whenever a payment list was slow
+to load, and every answer it gave was still right. The answer score
+could never show it, because the reminders were in the path. Record a
+trace for every run, and grade the path the agent took as well as the
+answer.
+
+</Pitfall>
 
 ## Write down the expected path
 
@@ -302,8 +316,8 @@ python3 trajectory.py show_r7
 
 </Predict>
 
-The scores say that r7 took a good path and gave a wrong answer. The
-transcript says where it went wrong: the payments list has invoice 2207,
+By its two grades, r7 took a good path and gave a wrong answer.
+Reading the transcript shows where it went wrong: the payments list has invoice 2207,
 paid on 2026-09-02, and the model answered that it was not paid. The
 tools and the path worked, so a fix to the tools or to the path rules
 won't help. The fault is in how the model read the result. The second
@@ -334,9 +348,9 @@ account and an amount, and the payments list is empty. The model made
 up "due on 2026-09-30", and a colleague who reads the answer may tell
 the customer that date. Both graders passed r8, because the answer
 contains `has not been paid` and the path is the expected one with one
-retry. The trace shows one more thing the pass hides: r8 took 5819 ms,
-and the timeout was 3000 ms of that. Turn the failure you found by reading
-into a new check, for example that every date in the answer appears in
+retry. The trace also shows a cost that neither grade reports: r8
+took 5819 ms, and the timeout was 3000 ms of that. Turn the failure you found by reading into a
+new check, for example that every date in the answer appears in
 a tool result. Add the question to the golden set too.
 
 <Scenario id="scores-unchanged" objective="building-agents/evaluates-agents/grades-trajectories"
@@ -367,7 +381,7 @@ do you do before the release tomorrow?
     { text: 'The reply says an invoice is unpaid, and the payment list shows it paid', bucket: 0 },
     { text: 'The agent looked up payments on an account the search never returned', bucket: 1 },
     { text: 'The agent emailed the customer a reminder while answering a lookup', bucket: 1 },
-    { text: 'The reply adds a due date that no tool returned', bucket: 2 },
+    { text: 'A correct reply that adds a due date no tool returned', bucket: 2 },
     { text: 'The agent guessed the account and never searched for the invoice', bucket: 1 },
   ]} />
 
@@ -390,12 +404,12 @@ time. How do you grade the two runs?
 
 </Choice>
 
-<Order id="order-the-trace" phase="review" objective="building-agents/evaluates-agents/grades-trajectories"
-  concepts={['observability']}
-  context="An invoice assistant answers Has invoice 2207 been paid? with two tools: search_invoices finds the invoice and its account, and get_payments lists the payments on that account. Its loop writes one trace record per model call and one per tool call."
-  title="Order the records of a good run"
-  hint="What does the loop do right after each tool result comes back?"
-  steps={['Model call that asks for search_invoices', 'search_invoices with number 2207', 'Model call that asks for get_payments', 'get_payments with the account the search returned', 'Model call that writes the answer']} />
+<Order id="order-the-grading" phase="review" objective="building-agents/evaluates-agents/grades-trajectories"
+  concepts={['trajectory-evaluation', 'observability']}
+  context="A team builds the evaluation of an agent that looks up invoices. It has written the expected path for the lookup task: which tools, in what order, which tools never, and a limit on the number of tool calls."
+  title="Order the grading of the runs"
+  hint="Which step needs the output of the one before it?"
+  steps={['Record a trace of every model call and tool call for each run', 'Grade each trace against the expected path, and each answer against its phrase', 'Read the full transcripts of a sample of the runs that passed both grades', 'Write a new check for the failure the reading found', 'Run the new check over every recorded trace']} />
 
 <Choice id="what-reading-finds" phase="review" objective="building-agents/evaluates-agents/grades-trajectories"
   concepts={['trajectory-evaluation']}
@@ -414,26 +428,13 @@ still be in those runs, for a person who reads the transcripts to find?
 
 </Choice>
 
-<Pitfall title="Grading only the final answer">
-
-A team grades its invoice assistant by the answer alone, and the score
-stays at 100 percent for a month. Then a customer asks why they got
-three payment reminders for an invoice they had already paid. The agent
-had called `send_reminder` on lookups whenever a payment list was slow
-to load, and every answer it gave was still right. The answer score
-could never show it, because the reminders were in the path. Record a
-trace for every run, grade the path against the expected path for the
-task, and grade the answer as well.
-
-</Pitfall>
-
-<Exercise stretch="Add a rule to my_rule.py that every date in the answer appears in a tool result, and check that it fails r8 and no other run.">
+<Exercise stretch="Add a separate check to my_rule.py, a function dates_grounded(trace) beside expected_path, that fails a run when a date in its answer appears in no tool result. The exercise step runs it too. Check that it fails r8 and no other run.">
 
 Copy the `traces-and-trajectories` folder and open `my_rule.py`. It
 has one function, `expected_path(trace)`, which gets the records of one
 run in order and returns one reason per broken rule. An empty list is a
 pass. The starter checks one rule, at most three tool calls, and its
-output is in the last section.
+output is in the section "Write down the expected path".
 Add the other four rules of the expected path from this lesson: search
 once and first, look up payments only on the account the search
 returned, use no tool other than the two lookups, and end with an
@@ -443,8 +444,8 @@ list you can check from the trace alone.
 
 A good result fails four runs and passes four. Run r2 fails for the
 wrong account and for five tool calls, r4 for `send_reminder`, r5 for
-not searching first and r6 for searching twice. Runs r1, r3, r7 and r8
-pass. If r8 fails, your rule counts the retry after the timeout as a
+not searching first and for a lookup on an account it never searched
+for, and r6 for searching twice. Runs r1, r3, r7 and r8 pass. If r8 fails, your rule counts the retry after the timeout as a
 wasted step. Which of the four runs that pass your rule would you still
 not ship, and what would have told you?
 
@@ -453,8 +454,8 @@ not ship, and what would have told you?
 <Recap>
 
 1. A trace records every model call and every tool call of one run,
-   with its arguments, result, latency and cost, under one run id
-   (@AEC-09).
+   with its arguments, result, latency and token counts (@AEC-09).
+   The fixture also records the cost of each call.
 2. Two runs with the same correct answer can take very different paths,
    and a grader that reads only the answer passes both (@AEC-09).
 3. Write down the expected path for each kind of task: which tools, in

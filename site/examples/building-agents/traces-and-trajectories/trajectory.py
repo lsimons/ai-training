@@ -92,9 +92,17 @@ def transcript(run_id: str) -> None:
 
 
 def step_exercise() -> None:
-    """Your rule in my_rule.py over the eight runs."""
+    """Your rules in my_rule.py over the eight runs."""
     for run in agent.run_all():
         reasons = my_rule.expected_path(run["trace"])
+        print(f"{run['id']} {'pass' if not reasons else 'fail: ' + '; '.join(reasons)}")
+    # The stretch check, once you have written it.
+    dates_grounded = getattr(my_rule, "dates_grounded", None)
+    if dates_grounded is None:
+        return
+    print("dates_grounded:")
+    for run in agent.run_all():
+        reasons = dates_grounded(run["trace"])
         print(f"{run['id']} {'pass' if not reasons else 'fail: ' + '; '.join(reasons)}")
 
 
