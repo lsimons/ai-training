@@ -610,7 +610,6 @@ def test_review_bash_allows_the_read_only_commands_of_388(command: str) -> None:
         "mise tasks edit lint",
         "for f in *.md; do sed -i s/a/b/ $f; done",
         "for f in a; do rm $f; done",
-        "for ((i=0; i<3; i++)); do echo $i; done",
         "mise run site-format",
         "mise run py-format",
         "mise run lint",
@@ -643,3 +642,116 @@ def test_review_bash_message_shows_the_expansion_as_written() -> None:
 def test_mark_expansions_skips_single_quotes_and_escaped_dollars() -> None:
     marked = agent_hooks.mark_expansions("echo \\$a '$b' \"$c '$d'\" ${e} $/")
     assert marked == "echo \\$a '$b' \"\x00c '\x00d'\" \x00{e} $/"
+
+
+# Command and process substitution, zsh expansions and brace expansion (#414).
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "for f in $(git ls-files site); do wc -l $f; done",
+        "cat <(git log --oneline -3)",
+        "echo `git log -1 --format=%h`",
+        'echo "$(git log -1 --format=%h)"',
+        "git diff $(git log -1 --format=%h origin/main) --stat",
+        "echo $(echo $(git log -1 --format=%h))",
+        "grep -E '(a|b){1,3}' file",
+        'grep -n "f(x)" file',
+        "grep -n a\\(b file",
+        "echo $'a (b)\\tc'",
+        "git show HEAD@{1} --stat",
+        "sed -n '/x$/p' file",
+        "sed -n '$p' file",
+        "echo '`' '$(x)'",
+    ],
+)
+def test_review_bash_checks_substitutions_and_allows_read_ones(command: str) -> None:
+    assert agent_hooks.review_bash({"tool_input": {"command": command}}) == (0, "")
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "echo $(rm -rf .)",
+        "for f in $(touch x); do :; done",
+        "cat <(touch x)",
+        "echo `touch x`",
+        "cat =(touch x)",
+        'echo "$(touch x)"',
+        'echo "`touch x`"',
+        "echo ${X:-$(touch x)}",
+        "echo $(echo $(touch x))",
+        "echo $(git diff > out.txt)",
+        "$(echo git) diff",
+        "mise run $(echo site-format)",
+        "sed -n /$(echo a)/p f",
+        "X=$'a/w pwn\\n/a'; sed -n \"/$=X/p\" f",
+        "X=$'a/w pwn\\n/a'; sed -n \"/$^X/p\" f",
+        "X=$'a/w pwn\\n/a'; sed -n \"/$+X/p\" f",
+        "sed -n '/a$b/p' f",
+    ],
+)
+def test_review_bash_rejects_a_substitution_that_runs_another_command(command: str) -> None:
+    code, message = agent_hooks.review_bash({"tool_input": {"command": command}})
+    assert code == 2
+    assert "not a review command" in message or "redirects output" in message
+
+
+@pytest.mark.parametrize(
+    ("command", "what"),
+    [
+        ("ls *(e:'touch pwn':)", "unquoted `(`"),
+        ("ls *(+f)", "unquoted `(`"),
+        ("grep x *(.)", "unquoted `(`"),
+        ("for ((i=0; i<3; i++)); do echo $i; done", "unquoted `(`"),
+        ("(cd site && ls)", "unquoted `(`"),
+        ("ls )", "unquoted `)`"),
+        ("X='$(touch x)'; echo ${(e)X}", "zsh parameter flag"),
+        ('echo "${(e)X}"', "zsh parameter flag"),
+        ("ls ${~X}", "zsh parameter flag"),
+        ("ls $~X", "zsh parameter flag"),
+        ("X=$'a/w pwn\\n/a'; sed -n \"/$~X/p\" f", "zsh parameter flag"),
+        ("echo $((1+2))", "arithmetic expansion"),
+        ("uniq names.txt{,.out}", "brace expansion"),
+        ("sort {-o,out.txt} names.txt", "brace expansion"),
+        ("sort -{o,out.txt} names.txt", "brace expansion"),
+        ("sed -n 1p f {-i,}", "brace expansion"),
+        ("cat f{1..3}", "brace expansion"),
+        ("echo $(git log", "unclosed quote or substitution"),
+        ('echo "a', "unclosed quote or substitution"),
+        ("echo 'a", "unclosed quote"),
+        ("echo $'a\\'", "unclosed quote"),
+        ("echo `git log", "unclosed backtick"),
+        ("echo `echo \\`touch x\\``", "nested backtick"),
+        ("echo " + "$(" * 1000 + ")" * 1000, "nested too deep"),
+    ],
+)
+def test_review_bash_rejects_what_it_cannot_read(command: str, what: str) -> None:
+    code, message = agent_hooks.review_bash({"tool_input": {"command": command}})
+    assert code == 2
+    assert "can't check a command" in message
+    assert what in message
+
+
+def test_review_bash_rejects_a_command_shlex_cannot_split() -> None:
+    # The scanner accepts `$'...'` with an escaped quote, but shlex doesn't
+    # know that quoting and raises on the quote it reads as unclosed.
+    code, message = agent_hooks.review_bash({"tool_input": {"command": "echo $'a\\'b'"}})
+    assert code == 2
+    assert "can't check a command with No closing quotation" in message
+
+
+def test_review_bash_message_names_the_inner_command_and_shows_the_substitution() -> None:
+    _, message = agent_hooks.review_bash({"tool_input": {"command": "echo $(touch x)"}})
+    assert "`touch x` is not a review command" in message
+    _, message = agent_hooks.review_bash({"tool_input": {"command": "$(echo git) diff"}})
+    assert "`$(...) diff` is not a review command" in message
+
+
+def test_extract_substitutions_returns_the_outer_and_inner_commands() -> None:
+    outer, inner = agent_hooks.extract_substitutions(
+        'for f in $(git ls-files "$(echo a)"); do cat <(head `echo b`); done'
+    )
+    assert outer == "for f in \x01; do cat \x01; done"
+    assert inner == ["echo a", 'git ls-files "\x01"', "echo b", "head \x01"]
