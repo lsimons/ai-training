@@ -122,12 +122,12 @@ places is a line the skill is missing.
 
 ## Turn each hesitation into a line
 
-In this run the hesitations came from a skill that assumed something
-about the environment, such as a tag or a clean working tree. In other
-runs they come from a step that assumes a tool is installed, or from a
-success test too vague to tell a right result from a wrong one. Anthropic's guide says the same
-about scripts: don't assume a package is installed, and name what the
-skill needs (@Claude docs best-practices).
+In this run the hesitations came from a skill that assumed something about
+the environment, such as a tag or a clean working tree. In other runs they
+come from a step that assumes a tool is installed, or from a success test
+too vague to tell a right result from a wrong one. Anthropic's guide says
+the same about scripts: don't assume a package is installed, and name what
+the skill needs (@Claude docs best-practices).
 
 The fix for the first two is a short list of checks at the top of the
 skill, each with what to do when it fails. Add this section above
@@ -349,9 +349,10 @@ from the whole history and commits a `__pycache__` directory. The
 engineer's clone had the tags, and weeks earlier they had told their agent
 not to commit `__pycache__`. Claude Code can keep a correction like that
 in auto memory, which is on by default and stored per repository on one
-machine (@Claude Code memory). The skill never said it, and the
-engineer's agent remembered it for them. Test a skill in a clean clone in a new directory,
-and ask a colleague to run it once on their machine before you rely on it.
+machine (@Claude Code memory). The skill never said it, and the engineer's
+agent remembered it for them. Test a skill in a clean clone in a new
+directory, and ask a colleague to run it once on their machine before you
+rely on it.
 </Pitfall>
 
 <Exercise stretch="Ask a colleague to run your revised skill in their own clean clone, on their own machine, without help from you. Add one line for each question their agent asked.">
@@ -375,10 +376,11 @@ your hesitations came from something you knew and never wrote down?
 </Exercise>
 
 <Recap>
-1. Test a skill in a clean clone and a new session, with auto memory off,
-   so the conversation you had while writing it can't fill a gap for the
-   agent (@Claude docs best-practices). Your personal instructions still
-   load, and a colleague's machine is the test without them.
+1. Test a skill in a clean clone and a new session, with auto memory off
+   (@Claude Code memory), so the conversation you had while writing it
+   can't fill a gap for the agent (@Claude docs best-practices). Your
+   personal instructions still load, and a colleague's machine is the test
+   without them.
 2. Read the transcript for each place the agent hesitated, asked or
    guessed. Each one is a line missing from the skill.
 3. A missing line is often a check on the environment before the steps,
