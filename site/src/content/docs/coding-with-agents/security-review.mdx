@@ -171,8 +171,8 @@ below has the steps.
     { text: 'The except block that turns a database error into an empty list.', correct: true },
     { text: 'The use of the sqlite3 module where an object-relational mapper is expected.', why: 'The sqlite3 module is safe with placeholders, and choosing it is not a security finding.' },
   ]}>
-Bandit has rules for hardcoded passwords, for SQL built from strings, and
-for an `except` block whose only statement is `pass`. Which problem in
+Bandit has rules that catch hardcoded passwords, SQL built from strings,
+and an `except` block whose only statement is `pass`. Which problem in
 `notes_search.py` does it not report?
 </Choice>
 

@@ -155,8 +155,9 @@ def main() -> int:
 
 `COMMIT` matches `git`, then any options, then `commit`, so
 `git -C . commit` counts as well as `git commit`. `changed_files` finds
-the root of the repository and runs every git command from there, so the
-paths it compares are the same when the agent works in a subdirectory.
+the root of the repository and runs every git command from there. The
+paths it compares are then the same when the agent works in a
+subdirectory.
 It runs `git diff --name-only HEAD`, which lists every file in the working tree
 that differs from the last commit, staged or not (@Git docs git-diff),
 and adds the untracked files that git doesn't ignore. The hook needs all
@@ -257,8 +258,8 @@ for command in BOTH_FILES:
 The third line is the one to remember, and the fourth shows the pattern
 at work. `--no-verify` tells git to skip
 its own `pre-commit` and `commit-msg` hooks (@Git docs git-commit). This
-hook belongs to Claude Code and runs before git starts, so the flag
-changes nothing for it.
+hook belongs to Claude Code and runs before git starts. The flag changes
+nothing for it.
 
 Now register the hook. Create `.claude/settings.local.json` in your copy.
 The fixture's `.gitignore` already keeps that file out of commits.

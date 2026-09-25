@@ -118,9 +118,9 @@ isn't told what to do when the handbook has no answer may try to answer
 anyway (@AEC-08). The fake model copies that behavior with a keyword rule.
 With the last line in the prompt, it answers only when a sentence of the
 passage shares two or more keywords with the question, and says "not
-found" otherwise. Without the line, one shared keyword is enough. The
-search step doesn't change, and every item gets the same passage as
-before.
+found" otherwise. Without the line, one shared keyword is enough. The line
+has no effect on the search step, which gives every item the same passage
+as before.
 
 On today's prompt, four items pass because the agent says "not found".
 For a01 the search returns no page. For a02, x01 and x02 it returns a
@@ -191,8 +191,9 @@ leaves out.
 
 A team that runs the same set after each change learns its items. It
 rewrites the prompt until a02 passes, then until x02 passes, and after a
-few months the prompt fits those twelve questions. The score doesn't drop,
-but it says less and less about the questions users ask. This course keeps
+few months the prompt fits those twelve questions. While the score stays
+where it was, it says less and less about the questions users ask. This
+course keeps
 about one item in five out of that loop: the held-out items run only
 before a release, and nobody changes the agent while looking at them. In
 `golden-set.csv` they have `held_out` set to `yes`, one per group.

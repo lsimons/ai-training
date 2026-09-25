@@ -4,7 +4,7 @@ In [the lesson on self-checking loops](/coding-with-agents/self-checking-loops/)
 you gave one agent session a test to run and a rule that the test file was
 read-only. The rule was a line in your brief. A colleague who starts their
 own session on the same repository doesn't have your brief, and their agent
-has never heard of the rule. In this lesson two team rules run without
+doesn't know about the rule. In this lesson two team rules run without
 anyone remembering them. A hook stops the agent's edit tools from changing
 the test in every Claude Code session on the project, and a CI job
 (continuous integration) runs the test on every pull request, whoever
@@ -110,7 +110,7 @@ python3 feed_hook.py
 The examples in this lesson aren't graded. Each one is a command you run,
 with output the course checks on every build.
 
-Here is an agent that hits the hook. The transcript is illustrative and
+The transcript below, of an agent that hits the hook, is illustrative and
 doesn't record a specific model's words.
 
 <Prompt model="illustrative" recorded="illustrative">
