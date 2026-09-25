@@ -94,6 +94,15 @@ both, so the builder and the reviewer never talk to each other.
    maintainer's decision (strike a spec feature, choose between two
    designs) is reported to the maintainer instead.
 
+   After `Verdict: needs changes`, the same reviewer re-checks the
+   revision. After `Verdict: approve` that lists only should-fix or nit
+   items, the coordinator re-checks the fix commit itself: `git show` of
+   the commit and the one `mise` task that covers its files
+   (`testing.md` says which). It spawns no second reviewer, and the
+   re-check column of the review table says `re-checked by lead` with a
+   link to the fix commit. A full second review of a one-line fix costs
+   15 to 20 minutes and 1 to 3M tokens.
+
 5. **Merge queue.** The maintainer approves each pull request in a message
    to the coordinator, who merges with
    `AI_TRAINING_ROLE=coordinator gh pr merge <n> --rebase`. The
