@@ -35,12 +35,12 @@ leave an issue "for later" without saying what later means.
 
 ## The four outcomes
 
-| Outcome                    | When                                                                | What the comment holds                                                                   |
-| -------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `ready-for-agent`          | Every decision the work needs is made, with the answer written down | The decisions, the files to touch, and a "done when" an agent can check                  |
-| `ready-for-agent`, blocked | Fully specified, waits on another issue or an open pull request     | `blocked by #N (PR #M)` and the instruction to confirm the merge before starting         |
-| `ready-for-human`          | The next step is something only the maintainer can do               | The one action, stated so the maintainer can do it without rereading the issue           |
-| Closed                     | Not worth doing, superseded, or split into children                 | The reason, or the list of child issues and the entries that were dropped, each with why |
+| Outcome                    | When                                                                | What the comment holds                                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ready-for-agent`          | Every decision the work needs is made, with the answer written down | The decisions, the files to touch, and a "done when" an agent can check                                                                        |
+| `ready-for-agent`, blocked | Fully specified, waits on another issue or an open pull request     | `blocked by #N (PR #M)` and the instruction to confirm the merge before starting                                                               |
+| `ready-for-human`          | The next step is something only the maintainer can do               | The one action, stated so the maintainer can do it without rereading the issue. A decision holds what "What a maintainer decision needs" lists |
+| Closed                     | Not worth doing, superseded, or split into children                 | The reason, or the list of child issues and the entries that were dropped, each with why                                                       |
 
 A "write the spec" issue is a valid `ready-for-agent` outcome when the
 decisions are made and only the writing is left. Put the decisions in the
@@ -87,6 +87,8 @@ Some steps need a machine, an account or a judgment an agent here doesn't
 have: a network trace with a firewall and a proxy, a licensing release from
 a source, a check of every article reference in a lesson about law. State
 the step as the one action on the issue and label it `ready-for-human`.
+An issue that asks the maintainer to decide holds what the next section
+lists.
 Don't turn it into an agent task by guessing around it, and don't raise it
 again in later sessions unless asked. Some of these are "when I get to
 it" items for the maintainer, and that is a fine state for an issue to be
