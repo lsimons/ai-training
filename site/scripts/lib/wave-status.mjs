@@ -1,7 +1,8 @@
 /**
  * The state of a wave for a resuming lead (`mise run wave-status`, #351):
- * per issue, its pushed `feat/<issue>-*` branches and the last review verdict,
- * plus the wave branch and the local worktrees. Pure functions over what
+ * per issue, its pushed `feat/<issue>-*` branches, and per branch the last
+ * review verdict that applies to it and the next step (#417), plus the wave
+ * branch and the local worktrees. Pure functions over what
  * scripts/wave-status.mjs fetches, so tests/scripts/wave-status.test.ts can
  * feed them planted comments.
  *
@@ -9,6 +10,11 @@
  * Anyone can comment on a public issue, and a lead never redoes a branch
  * with an approve verdict, so a `Verdict: approve` from another account
  * must not end a review. Every agent here posts with the maintainer's token.
+ *
+ * A comment with a `Branch: <name>` line applies to that branch only, so the
+ * two halves of a split issue (`feat/<issue>-<slug>-1` and `-2`) each get
+ * their own verdict. A comment without one applies to every branch of the
+ * issue.
  */
 
 /** The accounts whose `Verdict:` comments a lead acts on. */
@@ -16,6 +22,9 @@ export const TRUSTED_VERDICT_AUTHORS = Object.freeze(['lsimons', 'lsimons-bot'])
 
 /** A `Verdict:` line anywhere in a comment, as the reviewers end their reviews. */
 const VERDICT_LINE = /^\s*\**Verdict:?\**:?\s*\**\s*(approve|needs changes)\b/im;
+
+/** A `Branch:` line, as the reviewers write it next to their `Verdict:` line. */
+const BRANCH_LINE = /^\s*\**Branch:?\**:?\s*\**\s*`?([^\s`*]+)`?/im;
 
 /**
  * @typedef {{ author: string, body: string, createdAt: string, url: string }} IssueComment
@@ -36,15 +45,44 @@ export function verdictOf(body) {
 }
 
 /**
- * The last verdict from a trusted account, with the number of trusted
- * comments after it (a builder's reply to a `needs changes`), or null.
- * Comments from other accounts are ignored entirely.
+ * The branch a comment names on a `Branch:` line, or null when it names none.
+ * @param {string} body
+ */
+export function branchOf(body) {
+	return BRANCH_LINE.exec(body)?.[1] ?? null;
+}
+
+/**
+ * Whether a comment applies to a branch: it names that branch, or none.
+ * @param {string} body
+ * @param {string} branch
+ */
+export function appliesTo(body, branch) {
+	const named = branchOf(body);
+	return named === null || named === branch;
+}
+
+/**
+ * The comments from trusted accounts, oldest first. Comments from other
+ * accounts are dropped entirely.
  * @param {IssueComment[]} comments
+ * @param {readonly string[]} trusted
+ */
+function trustedInOrder(comments, trusted) {
+	return comments.filter((c) => trusted.includes(c.author)).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+/**
+ * The last trusted verdict that applies to a branch, with the number of
+ * trusted comments after it that apply to the branch too (a builder's reply
+ * to a `needs changes`), or null.
+ * @param {IssueComment[]} comments
+ * @param {string} branch
  * @param {readonly string[]} [trusted]
  * @returns {Verdict | null}
  */
-export function lastTrustedVerdict(comments, trusted = TRUSTED_VERDICT_AUTHORS) {
-	const own = comments.filter((c) => trusted.includes(c.author)).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+export function lastTrustedVerdict(comments, branch, trusted = TRUSTED_VERDICT_AUTHORS) {
+	const own = trustedInOrder(comments, trusted).filter((c) => appliesTo(c.body, branch));
 	for (let i = own.length - 1; i >= 0; i--) {
 		const c = /** @type {IssueComment} */ (own[i]);
 		const verdict = verdictOf(c.body);
@@ -96,13 +134,12 @@ export function parseWorktrees(output) {
 }
 
 /**
- * What a resuming lead does with a branch, in the words of the template's
- * "Resuming a half-done wave": join as it is, revise, review, or build.
- * @param {string[]} branches
- * @param {Verdict | null} verdict
+ * What a resuming lead does with a pushed branch, in the words of
+ * "Resuming a half-done wave" in .claude/agents/wave-lead.md: join as it
+ * is, revise, re-check or review. An issue without a pushed branch is `build`.
+ * @param {Verdict | null} verdict the last verdict that applies to the branch
  */
-export function nextStep(branches, verdict) {
-	if (branches.length === 0) return 'build';
+export function nextStep(verdict) {
 	if (!verdict) return 'review';
 	if (verdict.verdict === 'approve') return 'join';
 	return verdict.commentsAfter > 0 ? 're-check' : 'revise';
@@ -118,9 +155,12 @@ export function waveStatus({ waveBranch, issues, heads, commentsByIssue, worktre
 		trustedVerdictAuthors: [...TRUSTED_VERDICT_AUTHORS],
 		waveBranch: { name: waveBranch, pushed: heads.includes(waveBranch) },
 		issues: issues.map((issue) => {
-			const branches = featBranches(heads, issue);
-			const verdict = lastTrustedVerdict(commentsByIssue.get(issue) ?? []);
-			return { issue, branches, verdict, next: nextStep(branches, verdict) };
+			const comments = commentsByIssue.get(issue) ?? [];
+			const branches = featBranches(heads, issue).map((name) => {
+				const verdict = lastTrustedVerdict(comments, name);
+				return { name, verdict, next: nextStep(verdict) };
+			});
+			return { issue, next: branches.length === 0 ? 'build' : 'per-branch', branches };
 		}),
 		worktrees,
 	};

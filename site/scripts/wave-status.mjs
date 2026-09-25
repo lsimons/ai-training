@@ -2,8 +2,8 @@
 /**
  * The state of a wave for a resuming lead (`mise run wave-status -- <wave-branch> <issue>...`):
  * prints JSON with the wave branch, each issue's pushed `feat/<issue>-*`
- * branches and its last `Verdict:` comment from a trusted account, the next
- * step for it, and the local worktrees. The rules are in scripts/lib/wave-status.mjs,
+ * branches, per branch the last `Verdict:` comment from a trusted account
+ * that applies to it and the next step, and the local worktrees. The rules are in scripts/lib/wave-status.mjs,
  * which tests/scripts/wave-status.test.ts covers. This file runs git and gh and prints.
  */
 import { execFileSync } from 'node:child_process';

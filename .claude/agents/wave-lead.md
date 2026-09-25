@@ -132,17 +132,20 @@ stopped before it could report. Don't restart the wave:
 
 1. Run `mise run wave-status -- <wave branch> <every issue of the wave>`.
    It prints JSON: whether the wave branch was pushed, per issue the
-   pushed `feat/<issue>-*` branches, the last `Verdict:` comment from a
-   trusted account (`lsimons` or `lsimons-bot`) and a `next` step, and the
-   local worktrees. A verdict from any other account doesn't count,
+   pushed `feat/<issue>-*` branches, per branch the last `Verdict:`
+   comment from a trusted account (`lsimons` or `lsimons-bot`) that
+   applies to it and a `next` step, and the local worktrees. A comment
+   with a `Branch:` line applies to that branch only, and one without
+   applies to every branch of the issue. A verdict from any other account doesn't count,
    because anyone can comment on a public issue, so never read the
    verdicts from the issue yourself.
-2. Act on each issue's `next`: `join` (approved, joins the wave as it is,
-   and you never redo, re-review or rebuild it), `revise` (the revision is
-   still owed), `re-check` (the builder replied, so the reviewer checks
-   again), `review` (pushed but unreviewed) or `build` (no branch yet).
-   A split issue has one `next` for both halves, so ignore it and send
-   each pushed half to review again (per-branch verdicts are #417).
+2. An issue with no pushed branch has `next: build`. Otherwise its
+   `next` is `per-branch`, and you act on each branch's `next`: `join`
+   (approved, joins the wave as it is, and you never redo, re-review or
+   rebuild it), `revise` (the revision is still owed), `re-check` (the
+   builder replied, so the reviewer checks again) or `review` (pushed but
+   unreviewed). The two halves of a split issue can have different steps,
+   so one half can wait in `revise` while the other joins.
 3. Reuse a listed worktree that is on the branch you need, and re-create
    the wave worktree (from `origin/<wave branch>` if it was pushed, else
    from `origin/main`) if it is missing.
