@@ -148,6 +148,26 @@ has nothing to say.
   Work outside your task becomes an issue, and you leave the fix for
   later.
 
+## Interactive sessions
+
+These rules are for a session the maintainer works in directly, outside a
+wave.
+
+- After a push, start `mise run ci-watch` in the background and hand
+  control back. You still own step 4 of "Session completion": report the
+  result when it arrives, and fix a failure.
+- When the auto-mode classifier blocks a change to agent settings, ask one
+  yes-or-no question that names the change ("May I write these 12 rules to
+  `.claude/settings.json`?"). A yes never overrides a deny rule. When one
+  applies, give the maintainer the finished file or patch, never a list to
+  type.
+- Merging nits issues, setting labels and closing duplicates are routine
+  triage: do them and report them.
+- Before filing that Claude Code can't do something, read its docs and
+  changelog yourself, and cite the page in the issue.
+- Every status update lists the agents still running and the worktrees
+  that exist.
+
 ## Session completion
 
 Work isn't complete until every change is committed, pushed, and CI
