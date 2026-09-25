@@ -12,7 +12,9 @@ Three entry points, each reading the hook's JSON event on stdin:
   `gh pr diff|view`, `gh issue view`, `mise tasks`, `mise run` of a check
   task in `REVIEW_TASKS`, `cd`, `ls`, `grep`, `cat`, `echo`, `head`,
   `tail`, `wc`, `sort`, `uniq`, `sed -n` with print scripts, and `for`
-  loops over these, with no redirect to a file. Anything else exits 2.
+  loops over these, with no redirect to a file. The command inside each
+  `$(...)`, backtick pair or process substitution is checked the same
+  way. Anything else exits 2, and so does a command it can't read.
 - `format` (PostToolUse on Edit and Write) runs Biome on an edited file
   under `site/` and ruff on an edited `.py` file. It never fails the tool
   call: a formatter that is missing or errors is skipped.
@@ -88,8 +90,12 @@ def strip_heredocs(command: str) -> str:
     return "\n".join(kept)
 
 
-def tokens(command: str) -> list[str]:
-    """Shell words and control operators, with quotes respected and newlines kept."""
+def tokens(command: str, strict: bool = False) -> list[str]:
+    """Shell words and control operators, with quotes respected and newlines kept.
+
+    On unbalanced quotes the words are split at whitespace, or with `strict`
+    the `ValueError` is raised, so the review hook can reject the command.
+    """
     lexer = shlex.shlex(strip_heredocs(command), posix=True, punctuation_chars=";&|\n")
     lexer.whitespace = " \t\r"
     lexer.whitespace_split = True
@@ -97,15 +103,20 @@ def tokens(command: str) -> list[str]:
     try:
         return list(lexer)
     except ValueError:
+        if strict:
+            raise
         return command.split()
 
 
-def split_segments(command: str, cwd: str) -> list[Segment]:
-    """The simple commands of a shell line, with `cd` followed for the ones after it."""
+def split_segments(command: str, cwd: str, strict: bool = False) -> list[Segment]:
+    """The simple commands of a shell line, with `cd` followed for the ones after it.
+
+    `strict` is passed to `tokens`.
+    """
     segments: list[Segment] = []
     here = cwd
     current: list[str] = []
-    for token in [*tokens(command), ";"]:
+    for token in [*tokens(command, strict), ";"]:
         if token not in OPERATORS and not set(token) <= set(";&|\n"):
             current.append(token)
             continue
@@ -546,7 +557,10 @@ REVIEW_TASKS = (
 # `mise tasks` subcommands that change or run something.
 MISE_TASKS_WRITERS = frozenset({"add", "edit", "run", "r"})
 
-SED_ADDRESS = r"(\d+|\$|/(?:[^/\\]|\\.)*/)"
+# A `$` is the last-line address or the anchor right before a regex's
+# closing `/`. Any other `$` in a sed script comes from the shell, such as
+# the zsh `/$~X/p` (#414).
+SED_ADDRESS = r"(\d+|\$|/(?:[^/\\$]|\\.)*\$?/)"
 SED_PRINT = re.compile(rf"{SED_ADDRESS}(,{SED_ADDRESS})?p(;{SED_ADDRESS}(,{SED_ADDRESS})?p)*")
 
 
@@ -613,9 +627,10 @@ def mark_expansions(command: str) -> str:
     """The command with the `$` of each shell expansion replaced by `EXPANSION`.
 
     A `$` starts an expansion outside single quotes and without a backslash
-    before it, when a name, a digit, `{`, `(`, a quote or a special
-    parameter follows. The `$` of the sed last-line address (`'$p'`) and of
-    a regex anchor (`/foo$/`) stays.
+    before it, when a name, a digit, `{`, `(`, a quote, a special parameter
+    or a zsh parameter flag (`$=X`, `$~X`, `$^X`, `$+X`) follows. The `$` of
+    the sed last-line address (`'$p'`) and of a regex anchor (`/foo$/`)
+    stays.
     """
     out: list[str] = []
     quote = ""
@@ -633,11 +648,133 @@ def mark_expansions(command: str) -> str:
             quote = "" if quote else '"'
         elif char == "'" and not quote:
             quote = "'"
-        elif char == "$" and re.match(r"[A-Za-z0-9_{('\"@*#?!$-]", command[i + 1 : i + 2]):
+        elif char == "$" and re.match(r"[A-Za-z0-9_{('\"@*#?!$=~^+-]", command[i + 1 : i + 2]):
             char = EXPANSION
         out.append(char)
         i += 1
     return "".join(out)
+
+
+# Stands for a command or process substitution that `extract_substitutions`
+# took out of a review command (#414). The block message shows it as `$(...)`.
+SUBSTITUTION = "\x01"
+SUBSTITUTION_STARTS = ("$(", "<(", ">(", "=(")
+BRACE_WORD_END = frozenset(" \t\n;|&<>()}")
+
+
+def extract_substitutions(command: str) -> tuple[str, list[str]]:
+    """The command with each substitution replaced by `SUBSTITUTION`, and the inner commands.
+
+    The substitutions are `$(...)`, backticks, and the process substitutions
+    `<(...)`, `>(...)` and zsh's `=(...)`, also inside double quotes and
+    nested. The review hook checks each inner command like a command of its
+    own, so `for f in $(git ls-files site)` passes and `echo $(rm -rf .)`
+    doesn't.
+
+    Raises `ValueError` for text the hook rejects without a closer look:
+    an unclosed quote or substitution, a nested backtick, arithmetic
+    `$((...))`, the zsh parameter flags `${(e)X}` and `${~X}` (and `$~X`),
+    which evaluate or glob a variable's value, any other unquoted `(` or
+    `)`, which covers the zsh glob qualifiers that run code (`*(e:...:)`,
+    `*(+f)`), and an unquoted brace expansion such as `{-o,out.txt}` or
+    `{1..3}`, which turns one word the hook reads into several.
+    """
+    inner: list[str] = []
+    outer, _ = scan_substitutions(command, 0, "", inner)
+    return outer, inner
+
+
+def scan_substitutions(text: str, i: int, stop: str, inner: list[str]) -> tuple[str, int]:
+    """Scan `text` from `i` to the unquoted `stop` (`)`, `"`, or "" for the end of the text).
+
+    Returns the scanned text with its substitutions replaced and the index
+    after `stop`, and appends each inner command to `inner`.
+    """
+    quoted = stop == '"'
+    out: list[str] = []
+    while i < len(text):
+        char = text[i]
+        pair = text[i : i + 2]
+        if char == stop:
+            return "".join(out), i + 1
+        if char == "\\":
+            out.append(text[i : i + 2])
+            i += 2
+            continue
+        if pair == "$~" or text[i : i + 3] in ("${(", "${~"):
+            raise ValueError("a zsh parameter flag that evaluates or globs a value")
+        if pair == "$(" or (not quoted and pair in SUBSTITUTION_STARTS):
+            if text[i : i + 3] == "$((":
+                raise ValueError("an arithmetic expansion")
+            body, i = scan_substitutions(text, i + 2, ")", inner)
+            inner.append(body)
+            out.append(SUBSTITUTION)
+            continue
+        if char == "`":
+            body, i = backtick_body(text, i + 1)
+            inner.append(scan_substitutions(body, 0, "", inner)[0])
+            out.append(SUBSTITUTION)
+            continue
+        if not quoted:
+            if char == '"':
+                body, i = scan_substitutions(text, i + 1, '"', inner)
+                out.append(f'"{body}"')
+                continue
+            end = quote_end(text, i)
+            if end is not None:
+                out.append(text[i:end])
+                i = end
+                continue
+            if char in "()":
+                raise ValueError(f"an unquoted `{char}`")
+            if char == "{" and text[i - 1 : i] != "$" and is_brace_expansion(text, i):
+                raise ValueError("a brace expansion")
+        out.append(char)
+        i += 1
+    if stop:
+        raise ValueError("an unclosed quote or substitution")
+    return "".join(out), i
+
+
+def quote_end(text: str, i: int) -> int | None:
+    """The index after the `'...'` or `$'...'` string at `i`, or None when none starts there.
+
+    Raises `ValueError` when the quote isn't closed.
+    """
+    if text[i] == "'":
+        end = text.find("'", i + 1)
+        if end < 0:
+            raise ValueError("an unclosed quote")
+        return end + 1
+    if text[i : i + 2] == "$'":
+        j = i + 2
+        while j < len(text) and text[j] != "'":
+            j += 2 if text[j] == "\\" else 1
+        if j >= len(text):
+            raise ValueError("an unclosed quote")
+        return j + 1
+    return None
+
+
+def backtick_body(text: str, i: int) -> tuple[str, int]:
+    """The command between backticks that starts at `i`, and the index after the closing one."""
+    j = i
+    while j < len(text) and text[j] != "`":
+        if text[j : j + 2] == "\\`":
+            raise ValueError("a nested backtick")
+        j += 2 if text[j] == "\\" else 1
+    if j >= len(text):
+        raise ValueError("an unclosed backtick")
+    return text[i:j], j + 1
+
+
+def is_brace_expansion(text: str, i: int) -> bool:
+    """True when the `{` at `i` opens a brace expansion such as `{a,b}` or `{1..3}`."""
+    j = i + 1
+    while j < len(text) and text[j] not in BRACE_WORD_END:
+        j += 1
+    body = text[i + 1 : j]
+    return text[j : j + 1] == "}" and ("," in body or ".." in body)
 
 
 def sed_prints_only(args: Sequence[str]) -> bool:
@@ -670,7 +807,9 @@ def sed_prints_only(args: Sequence[str]) -> bool:
     return (
         quiet
         and bool(scripts)
-        and all(SED_PRINT.fullmatch(s) and EXPANSION not in s and "`" not in s for s in scripts)
+        and all(
+            SED_PRINT.fullmatch(s) and not {EXPANSION, SUBSTITUTION, "`"} & set(s) for s in scripts
+        )
     )
 
 
@@ -702,8 +841,8 @@ def review_allows(words: Sequence[str]) -> bool:
     if words[0] in {"cd", "done"}:
         return True
     if words[0] == "for":
-        # The loop header. The body segments are checked one by one, but a
-        # command substitution in the word list isn't checked (#414).
+        # The loop header. The body segments are checked one by one, and
+        # review_reason checks a substitution in the word list (#414).
         return len(words) >= 2 and words[1].isidentifier() and words[2:3] in ([], ["in"])
     if words[0] == "sed":
         return sed_prints_only(words[1:])
@@ -722,31 +861,65 @@ def review_allows(words: Sequence[str]) -> bool:
     return any(tuple(words[: len(allowed)]) == allowed for allowed in REVIEW_COMMANDS)
 
 
-def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
-    """Exit code and message for the code reviewer's PreToolUse event on Bash."""
-    tool_input: Mapping[str, Any] = event.get("tool_input") or {}
-    command = tool_input.get("command")
-    if not isinstance(command, str):
-        return 0, ""
+def review_reason(command: str) -> str | None:
+    """The reason the code reviewer may not run a command, or None when it may.
+
+    Each command or process substitution in it is checked as a command of
+    its own (#414).
+    """
     if writes_a_file(command):
-        return 2, (
-            "Blocked by the code-reviewer hook: the command redirects output to a file. "
-            "A reviewer never writes files. Read the output instead, or send it to /dev/null."
+        return (
+            "the command redirects output to a file. A reviewer never writes files. "
+            "Read the output instead, or send it to /dev/null."
         )
+    outer, inner = extract_substitutions(command)
+    for body in inner:
+        reason = review_reason(body)
+        if reason:
+            return reason
     # The splitter reads the `&` of `2>&1` as an operator, so drop the
     # redirects writes_a_file allows before splitting.
-    harmless = re.sub(r"(\d*|&)>>?(&(\d+|-)|\s*/dev/null)", " ", command)
-    for segment in split_segments(mark_expansions(harmless), "."):
+    harmless = re.sub(r"(\d*|&)>>?(&(\d+|-)|\s*/dev/null)", " ", outer)
+    for segment in split_segments(mark_expansions(harmless), ".", strict=True):
         if segment.role is not None or not review_allows(segment.words):
             allowed = ", ".join(" ".join(c) for c in REVIEW_COMMANDS)
             tasks = ", ".join(REVIEW_TASKS)
             shown = " ".join(segment.words).replace(EXPANSION, "$")
-            return 2, (
-                f"Blocked by the code-reviewer hook: `{shown}` is not a "
-                f"review command. A reviewer runs only {allowed}, sed -n with p scripts, "
-                f"for loops over these, cd, and mise run with one of {tasks}. "
-                "A reviewer never edits."
+            shown = shown.replace(SUBSTITUTION, "$(...)")
+            return (
+                f"`{shown}` is not a review command. A reviewer runs only {allowed}, "
+                "sed -n with p scripts, for loops over these, cd, and mise run with one "
+                f"of {tasks}. A reviewer never edits."
             )
+    return None
+
+
+def unreadable(what: str) -> str:
+    """The block message for a command the review checks can't read."""
+    return (
+        f"the hook can't check a command with {what}. Write the command without it: "
+        "quote a `(`, `)` or `{` that is text, and run the commands one by one."
+    )
+
+
+def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
+    """Exit code and message for the code reviewer's PreToolUse event on Bash.
+
+    A command the checks can't read, such as one with an unclosed quote or
+    a zsh glob qualifier, is blocked too: only exit 2 blocks the call.
+    """
+    tool_input: Mapping[str, Any] = event.get("tool_input") or {}
+    command = tool_input.get("command")
+    if not isinstance(command, str):
+        return 0, ""
+    try:
+        reason = review_reason(command)
+    except RecursionError:
+        reason = unreadable("substitutions nested too deep")
+    except ValueError as error:
+        reason = unreadable(str(error))
+    if reason:
+        return 2, f"Blocked by the code-reviewer hook: {reason}"
     return 0, ""
 
 
