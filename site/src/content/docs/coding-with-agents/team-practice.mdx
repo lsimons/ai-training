@@ -7,9 +7,9 @@ agreed how a change says what the agent did. The
 run by themselves, and the
 [lesson on parallel sessions](/coding-with-agents/parallel-sessions/)
 kept sessions away from what they share. This last lesson of the course
-adds no new idea. We write those agreements down as the team's practice
-for agent use, from the mistakes the team has seen, and decide which of
-them a check enforces.
+doesn't add a new idea. We write those agreements down as the team's practice
+for agent use, starting from the mistakes the team has seen. Then we
+decide which of them a check enforces.
 
 ## Why the practice is written down
 
@@ -69,7 +69,7 @@ trailer. The other lines come from incidents. An incident is a change the
 team had to take back or repair, and each one shows a mistake that
 happened on this project, with these people and these agents. A rule
 written from an incident guards against a mistake the team knows it
-makes. Write the incident next to the rule, so a reader knows why the
+makes. Write the incident next to the rule. A reader then knows why the
 rule is there and can tell when the reason is gone.
 
 The fixture for this lesson is a small invoice project in the course
@@ -157,10 +157,10 @@ A team wrote its agent practice in a one-hour meeting, before anyone had
 used an agent on the code. It had thirty rules on which files an agent
 may read and how many lines it may write. In the first two months the
 agents committed generated files from the build folder, and reviewers
-approved pull requests they had only skimmed. None of the thirty rules
-covered either, and nobody could say which rules were still needed. Write
+approved pull requests they had only skimmed. The thirty rules missed
+both mistakes, and nobody could say which rules were still needed. Write
 the practice from the incidents you have, add a rule when a new mistake
-shows up, and take out a rule that no incident supports.
+shows up, and take out each rule that has no incident behind it.
 </Pitfall>
 
 <Scenario id="the-rule-that-never-fired" objective="coding-with-agents/works-in-team/sets-team-practice"
@@ -241,7 +241,7 @@ Match each incident to the rule it supports.
     { text: 'It covers every risk the team could think of in a meeting.', why: 'Imagined risks guard against the wrong things, and the section grows until nobody reads it.' },
     { text: 'It is worded by each engineer in their own user file.', why: 'Then each engineer has a different rule, and the team never reviews them together.' },
   ]}>
-Which of these make a rule in the practice section worth keeping?
+Which of these give a rule in the practice section a reason to stay?
 </MultiChoice>
 
 <Choice id="the-push-to-main" phase="review" objective="coding-with-agents/works-in-team/sets-team-practice"
