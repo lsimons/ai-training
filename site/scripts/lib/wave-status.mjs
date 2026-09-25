@@ -21,6 +21,15 @@
  * `build` again, with that list as the brief, until a later trusted comment
  * finishes it: a verdict that applies to the branch, or a builder reply that
  * names the branch on a `Branch:` line.
+ *
+ * The builder, the reviewers and the lead all post as the same trusted
+ * accounts, so the kind of a comment comes from its text (#420): a `Verdict:`
+ * line is a review, an `Unfinished:` first line is a builder at its turn
+ * limit, a line starting `re-checked by lead` is the lead's check of a fix
+ * commit, and any other trusted comment after a verdict is a builder reply.
+ * An approve with a builder reply after it and no lead re-check after that
+ * reply is `lead-re-check`, so a resumed lead never joins a fix commit that
+ * nobody read.
  */
 
 /** The accounts whose `Verdict:` comments a lead acts on. */
@@ -35,13 +44,17 @@ const BRANCH_LINE = /^\s*\**Branch:?\**:?\s*\**\s*`?([^\s`*]+)`?/im;
 /** The first line of a builder's hand-back at its turn limit. */
 const UNFINISHED_LINE = /^\s*\**Unfinished:?\**:?\s*\**\s*`?([^\s`*]+)`?/i;
 
+/** The lead's comment after it read an approved branch's fix commit. */
+const LEAD_RE_CHECK_LINE = /^\s*\**re-checked by lead\b/im;
+
 /** The attribution lines at the end of every agent comment. */
 const ATTRIBUTION_LINE = /^\s*(Co-Authored-By|Assisted-by):/i;
 
 /**
  * @typedef {{ author: string, body: string, createdAt: string, url: string }} IssueComment
  * @typedef {{ verdict: 'approve' | 'needs changes', author: string, createdAt: string, url: string,
- *   commentsAfter: number }} Verdict
+ *   commentsAfter: number, leadReCheck: string | null }} Verdict
+ * @typedef {'verdict' | 'unfinished' | 'lead-re-check' | 'reply'} CommentKind
  * @typedef {{ author: string, createdAt: string, url: string, left: string }} Unfinished
  * @typedef {{ path: string, branch: string | null, head: string | null }} Worktree
  */
@@ -55,6 +68,19 @@ export function verdictOf(body) {
 	const match = VERDICT_LINE.exec(body);
 	if (!match?.[1]) return null;
 	return match[1].toLowerCase() === 'approve' ? 'approve' : 'needs changes';
+}
+
+/**
+ * What a trusted comment is, from its text alone, since every agent posts as
+ * the same accounts. A verdict wins over the other kinds.
+ * @param {string} body
+ * @returns {CommentKind}
+ */
+export function commentKind(body) {
+	if (verdictOf(body)) return 'verdict';
+	if (unfinishedBranchOf(body) !== null) return 'unfinished';
+	if (LEAD_RE_CHECK_LINE.test(body)) return 'lead-re-check';
+	return 'reply';
 }
 
 /**
@@ -115,10 +141,12 @@ export function openUnfinished(comments, branch, trusted = TRUSTED_VERDICT_AUTHO
 	/** @type {Unfinished | null} */
 	let open = null;
 	for (const c of trustedInOrder(comments, trusted)) {
-		const unfinished = unfinishedBranchOf(c.body);
-		if (unfinished !== null) {
-			if (unfinished === branch) open = { author: c.author, createdAt: c.createdAt, url: c.url, left: leftOf(c.body) };
-		} else if (verdictOf(c.body) ? appliesTo(c.body, branch) : branchOf(c.body) === branch) {
+		const kind = commentKind(c.body);
+		if (kind === 'unfinished') {
+			if (unfinishedBranchOf(c.body) === branch) {
+				open = { author: c.author, createdAt: c.createdAt, url: c.url, left: leftOf(c.body) };
+			}
+		} else if (kind === 'verdict' ? appliesTo(c.body, branch) : kind === 'reply' && branchOf(c.body) === branch) {
 			open = null;
 		}
 	}
@@ -136,24 +164,33 @@ function trustedInOrder(comments, trusted) {
 }
 
 /**
- * The last trusted verdict that applies to a branch, with the number of
- * trusted comments after it that apply to the branch too (a builder's reply
- * to a `needs changes`), or null.
+ * The last trusted verdict that applies to a branch, or null. With it:
+ * `commentsAfter`, the number of trusted comments after it that apply to the
+ * branch and aren't a lead re-check (a builder's reply, or an `Unfinished:`
+ * hand-back), and `leadReCheck`, the url of a `re-checked by lead` comment
+ * that came after the last of those, or null.
  * @param {IssueComment[]} comments
  * @param {string} branch
  * @param {readonly string[]} [trusted]
  * @returns {Verdict | null}
  */
 export function lastTrustedVerdict(comments, branch, trusted = TRUSTED_VERDICT_AUTHORS) {
-	const own = trustedInOrder(comments, trusted).filter((c) => appliesTo(c.body, branch));
-	for (let i = own.length - 1; i >= 0; i--) {
-		const c = /** @type {IssueComment} */ (own[i]);
+	/** @type {Verdict | null} */
+	let last = null;
+	for (const c of trustedInOrder(comments, trusted)) {
+		if (!appliesTo(c.body, branch)) continue;
+		const kind = commentKind(c.body);
 		const verdict = verdictOf(c.body);
 		if (verdict) {
-			return { verdict, author: c.author, createdAt: c.createdAt, url: c.url, commentsAfter: own.length - 1 - i };
+			last = { verdict, author: c.author, createdAt: c.createdAt, url: c.url, commentsAfter: 0, leadReCheck: null };
+		} else if (last && kind === 'lead-re-check') {
+			last.leadReCheck = c.url;
+		} else if (last) {
+			last.commentsAfter += 1;
+			last.leadReCheck = null;
 		}
 	}
-	return null;
+	return last;
 }
 
 /**
@@ -199,7 +236,8 @@ export function parseWorktrees(output) {
 /**
  * What a resuming lead does with a pushed branch, in the words of
  * "Resuming a half-done wave" in .claude/agents/wave-lead.md: build the rest,
- * join as it is, revise, re-check or review. An issue without a pushed
+ * join as it is, check the fix commit of an approve (`lead-re-check`), revise,
+ * re-check or review. An issue without a pushed
  * branch is `build` too.
  * @param {Verdict | null} verdict the last verdict that applies to the branch
  * @param {Unfinished | null} [unfinished] the branch's open `Unfinished:` comment
@@ -207,7 +245,9 @@ export function parseWorktrees(output) {
 export function nextStep(verdict, unfinished = null) {
 	if (unfinished) return 'build';
 	if (!verdict) return 'review';
-	if (verdict.verdict === 'approve') return 'join';
+	if (verdict.verdict === 'approve') {
+		return verdict.commentsAfter > 0 && verdict.leadReCheck === null ? 'lead-re-check' : 'join';
+	}
 	return verdict.commentsAfter > 0 ? 're-check' : 'revise';
 }
 
