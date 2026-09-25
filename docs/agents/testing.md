@@ -174,8 +174,6 @@ under Biome, the strict tsconfig flags and the coverage include set. A part
 of the page the component always renders is looked up with
 `requiredElement` or `requiredData` (`site/src/scripts/required-element.ts`),
 which throw with the selector when the markup and the script disagree.
-`widgets/InstructionsBuilder.astro`, `widgets/Sampler.astro` and
-`lesson/TutorBlock.astro` still hold their logic inline (#447).
 
 ## Timeouts
 
