@@ -1,7 +1,7 @@
 import { Choice, Match, MultiChoice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
 
-The previous lesson covered the agent's memory notes and the context files
-it reads at the start of every session. This lesson is about what happens
+Claude Code reads `CLAUDE.md` and its auto-memory notes at the start of
+every session (@Claude Code memory). This lesson is about what happens
 inside one long session, when the conversation gets too long for the window
 and the agent replaces it with a summary. We load a session log with three
 facts planted in it and compact it on command, with instructions for what
@@ -61,10 +61,11 @@ Everything that was said in the conversation goes into the summary, and
 that includes a rule you typed in the chat. One cause the memory page names
 for an instruction that disappeared after compaction is that it was given
 only in the conversation, and the page says to put such a rule in
-`CLAUDE.md` (@Claude Code memory). A rule with `paths:` in its front matter, or a
-`CLAUDE.md` in a subdirectory, is loaded into the conversation when the
-agent reads a matching file. So it is summarized away too, and comes back
-only when the agent reads such a file again (@Claude Code context window).
+`CLAUDE.md` (@Claude Code memory). A rule with `paths:` in its front
+matter, or a `CLAUDE.md` in a subdirectory, is loaded into the
+conversation when the agent reads a matching file. So it is summarized
+away too, and comes back only when the agent reads such a file again
+(@Claude Code context window).
 
 So a compaction puts at risk each fact that exists only in the chat. In
 this lesson that means a rule you set, a decision with its reason, and an
@@ -116,10 +117,9 @@ variable `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` turns it off
 (@Claude Code memory). With auto-memory on, the agent could save the
 decision from the log as a memory note. That note comes back after a
 compaction whatever the summary says, so the check would no longer test
-the summary. A message
-such as "Saved 1 memory" means the agent wrote a memory note
-(@Claude Code memory). If you see one, auto-memory is still on, so start
-again in a new folder with the command below.
+the summary. A message such as "Saved 1 memory" means the agent wrote a
+memory note (@Claude Code memory). If you see one, auto-memory is still
+on, so start again in a new folder with the command below.
 
 ```sh
 mkdir -p ~/compaction-practice
@@ -297,7 +297,7 @@ keep it. What do you do?
 <Scenario id="the-rule-comes-back" phase="review" objective="customizing-agents/configures-agent/manages-memory"
   concepts={['compaction']}
   context="In a long Claude Code session the user said once, in the first message, that no change may touch the migrations/ folder, which another team owns. The session was compacted without instructions, and the rule is in no file."
-  title="The agent wants to edit a migration" hint="Where is the rule now, and which place does every later session and every compaction read again?"
+  title="The agent wants to edit a migration" hint="Is the rule still anywhere the agent can read it, and will it be there after the next compaction?"
   options={[
     { text: 'Approve it, because the rule was only for the first part of the session.', consequence: 'The rule was for all of the work. The agent edits a migration that the database team owns, and their review finds a change they never asked for.' },
     { text: 'Stop it, state the rule again, and add the rule to the project-root CLAUDE.md.', correct: true, consequence: 'The agent leaves migrations/ alone. The rule is now in a file that Claude Code reads again after each compaction and in each new session.' },
@@ -334,13 +334,13 @@ compact, tell the summary to keep decisions, open items and rules, and ask
 the agent afterwards what it still knows.
 </Pitfall>
 
-<Exercise stretch="Repeat the session in a new folder, run /compact with no instructions, write summary.md the same way, and compare the two results from check_summary.py.">
+<Exercise stretch="Repeat the session in a new folder with auto-memory off, run /compact with no instructions, write summary.md the same way, and compare the two results from check_summary.py.">
 If you followed the steps above, your `~/compaction-practice/summary.md`
 is the exercise, and you can go to the result below. Otherwise do them
 now: paste `transcript.md` into a new Claude Code session in an empty
 folder with auto-memory off, ask one or two questions, and compact with
-the instructions from the section "Compact on command, and check". Then have the agent write `summary.md` and run
-`check_summary.py` on it. The folder is empty, so the agent has no project
+the instructions from the section "Compact on command, and check". Then
+have the agent write `summary.md` and run `check_summary.py` on it. The folder is empty, so the agent has no project
 files to change. The steps show you what survives a compaction you
 directed, in about ten minutes.
 
