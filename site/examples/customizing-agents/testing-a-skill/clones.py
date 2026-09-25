@@ -121,8 +121,9 @@ def copy_committed(source: Path, dest: Path, env: dict[str, str], course: Path) 
     runs from its top level and reads `source` as a path in that repository,
     so a `.git` a learner made inside `source` is never the one read. Local
     edits and untracked files in `source` never reach `dest`, and a note on
-    stderr says when there are some. Returns None when the copy is written,
-    or, writing nothing, why it couldn't be: git's own error where git failed.
+    stderr says when there are some, or that `git status` failed. Returns
+    None when the copy is written, or, writing nothing, why it couldn't be:
+    git's own error where git failed.
     """
     top = _git_bytes(course, env, "rev-parse", "--show-toplevel")
     if top.returncode != 0:
@@ -157,7 +158,13 @@ def copy_committed(source: Path, dest: Path, env: dict[str, str], course: Path) 
         if mode == "100755":
             target.chmod(0o755)
     status = _git_bytes(toplevel, env, "--no-optional-locks", "status", "--porcelain", "--", prefix)
-    if status.returncode == 0 and status.stdout.strip():
+    if status.returncode != 0:
+        print(
+            f"note: git status failed for {source}, so the copy can't say whether"
+            f" it has uncommitted changes ({_failure(status)})",
+            file=sys.stderr,
+        )
+    elif status.stdout.strip():
         print(
             f"note: {source} has uncommitted changes, and the copy takes the"
             " committed version without them",
