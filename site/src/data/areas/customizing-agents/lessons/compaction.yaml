@@ -1,11 +1,16 @@
 id: customizing-agents/compaction
 title: Directing the summary before compaction
+description: >-
+  Load a session log with three planted facts, compact it on command with instructions that name
+  decisions, open items and rules, and check which facts the summary kept.
 mode: tutorial
 covers: customizing-agents/memory
 serves: [customizing-agents/configures-agent/manages-memory]
 introduces: [compaction]
 assumes:
   - objective: concepts/explains-models/explains-grounding
+    lesson: concepts/memory
+    section: when-the-window-holds-too-much
 after: [customizing-agents/memory-review]
 shorts:
   - Context rot in a long session, and what a compaction summary drops (Academy claude-code-101)
@@ -14,6 +19,29 @@ exercise:
   brief: >-
     Load the fixture transcript that holds three planted facts, ask for a summary that names open
     items and decisions, compact on command, and check which of the three facts survived.
-sources: []
+sources:
+  - AEC-05
+  - Claude Code context window
+  - Claude Code commands
+  - Claude Code memory
+  - Claude Code costs
+  - Claude Code best practices
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 issue: 192
-minutes: 10
+minutes: 15
+notes: >-
+  The fixtures are in `site/examples/customizing-agents/compaction/`. `transcript.md` is a session
+  log written for the lesson with three planted facts (a rule, a decision, an open item).
+  `check_summary.py` matches the words that name each fact in a summary file, and `unguided.py` and
+  `directed.py` run it on the two author-written samples in `samples/` for `mise run examples`.
+  Which facts a real compaction keeps can't be asserted, so the page has the learner check their own
+  `summary.md` and says the samples are not model output. The learner pastes the log instead of
+  having the agent read the file, because Claude Code re-reads recently used files after a
+  compaction. Vendor facts to re-check by review-by: `/compact [instructions]` (commands page),
+  automatic compaction near the limit and the focus instructions (context-window page), what is
+  re-injected after compaction (context-window table and memory troubleshooting), `Not enough
+  messages to compact.` in a fresh session (costs page), and compaction instructions in CLAUDE.md
+  (best-practices and costs pages). Minutes raised from 10 to 15 for the hands-on session. The
+  Academy course named in the short is not cited, and none of its text is used. memory-review was
+  not on main when this page was written, so the opener mentions it in plain words without a link.
