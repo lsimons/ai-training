@@ -1,0 +1,20 @@
+name: Sam
+language: English, short sentences
+date format: 25 September 2026
+time zone: Europe/Lisbon
+units: metric
+currency: euro
+reply length: under 150 words
+tone: plain, no small talk
+greeting: none
+sign-off: none
+lists: numbered when order matters
+code style: Python, type hints
+editor: Neovim
+meetings: never before 10:00
+calendar: ask before accepting
+email drafts: leave in drafts, never send
+reports: one page, table first
+names: first names only
+questions: one at a time
+corrections: say what changed
