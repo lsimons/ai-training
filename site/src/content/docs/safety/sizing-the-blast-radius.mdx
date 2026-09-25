@@ -40,13 +40,14 @@ Who can see each place
 
 A small program reads the list. For each row it prints who the row
 reaches and whether its actions can be undone. Its rule for undo is the
-plain one. Reading doesn't change anything, so there is nothing to undo. A move or
-a rename can be moved or renamed back. A delete with no trash can't be
+plain one. Reading doesn't change anything, so there is nothing to undo. On
+this drive a move never replaces a file: two files with the same name stay
+side by side, so a move or a rename can be moved or renamed back. A delete with no trash can't be
 restored, and a message that someone has read can't be taken back.
 
 <Predict id="predict-rows-without-undo" objective="safety/judges-agent-risk/names-blast-radius"
   concepts={['blast-radius', 'permissions-and-least-privilege']}
-  context="An agent that should tidy one shared folder was given six rows of permissions: 1 read every folder of the team drive, 2 create, move and rename in every folder, 3 delete with no trash in every folder, 4 read your mailbox, 5 send mail from your address to any address, 6 post in the all-staff chat channel. Reading changes nothing, a move or rename can be reversed, a delete with no trash cannot be restored and a message someone read cannot be taken back."
+  context="An agent that should tidy one shared folder was given six rows of permissions: 1 read every folder of the team drive, 2 create, move and rename in every folder, 3 delete with no trash in every folder, 4 read your mailbox, 5 send mail from your address to any address, 6 post in the all-staff chat channel. Reading changes nothing, on this drive a move never replaces a file, so a move or rename can be reversed, a delete with no trash cannot be restored and a message someone read cannot be taken back."
   title="Which rows can't be undone?"
   hint="Go down the list and ask of each row: if the agent did this by mistake, could you put things back the way they were?"
   answer="3 5 6">
@@ -79,8 +80,8 @@ The task is about one folder that 5 people use. The list reaches files of
 people in the chat channel, and anyone with a mail address. Three rows
 can't be undone, and two of them send something to other people. That's
 the **blast radius** of this agent: what a wrong step can reach with the
-access it has. The request says "tidy one folder", and the request doesn't
-set the size. The list does.
+access it has. The request says "tidy one folder", and the list sets
+the size.
 
 Look at the last line of the report. One wrong step, such as a reply to a
 mail that the agent took for an instruction, can reach anyone. The tidy-up
@@ -98,7 +99,7 @@ does to the world.
   can be put back, like a move, and some can't, like a delete with no
   trash.
 - **Send** rows deliver something to another person or system. Once
-  it has been read, you can't take it back.
+  the message has been read, you can't take it back.
 
 Then go down the rows and ask one question of each: does the task need
 this? Cross out every row where the answer is no, and narrow every row you
@@ -127,13 +128,11 @@ anyone with an address to 5 people, and one row that can't be undone is
 left.
 
 <Pitfall title="Granting the whole drive to save a click">
-The setup screen offers "this folder" or "the whole drive", and the whole
-drive is one click with no path to type. The person picks it, because the
-agent might help with other folders later. A month later they ask the same
-agent to remove duplicates in a different folder. It finds two files with
-the same name, one in that folder and one in a colleague's folder, and
-deletes the colleague's copy. The agent made an ordinary mistake, and the
-convenient grant decided whose file it hit. Grant the folder the task is
+The setup screen offers "this folder" or "the whole drive", and the person
+picks the whole drive because it needs no path. Later the agent removes
+duplicates in another folder and takes a file with the same name in a
+colleague's folder for a copy. Because the grant covered the whole drive,
+the mistake deleted a colleague's file. Grant the folder the task is
 about, and grant again when the next task needs more.
 </Pitfall>
 
@@ -141,8 +140,8 @@ about, and grant again when the next task needs more.
 
 After the cut, one row is left that can't be undone: row 3, the delete.
 A person approves right before the agent deletes. The moves
-and renames in row 2 don't need an approval, because a wrong move can be
-moved back. Row 1 doesn't change anything. An approval on every move would ask the
+and renames in row 2 don't need an approval, because on this drive a wrong move can
+be moved back. Row 1 doesn't change anything. An approval on every move would ask the
 person dozens of times, and after the tenth time they stop reading. Keep
 the approvals few, and each one gets read.
 
@@ -164,15 +163,15 @@ folder called `duplicates`, and a person empties that folder after
 looking at it. The agent then has no row that can't be undone, and the
 person does the delete. Sorting the work by whether it can be undone
 is a standard step before you hand work to an agent (@AEC-10), and the move
-to a folder puts this delete on the side that can.
+to a folder puts this delete on the side that can be undone.
 
 <Choice id="which-row-gets-the-approval" objective="safety/judges-agent-risk/chooses-human-in-loop"
   concepts={['human-in-the-loop']}
   context="An agent tidies one shared folder with three permission rows: 1 read the folder, 2 create, move and rename files in it, 3 delete files in it with no trash. Its task is to sort the files by month and remove duplicate copies."
   title="Where does the person approve?"
-  hint="Which row is the only one whose mistake you can't put back, and what would you need to see to tell a real duplicate from a wrong one?"
+  hint="Which of the three rows would you most want to stop before it runs, and what would you need in front of you to decide?"
   options={[
-    { text: 'Before each move and rename in row 2, with the old and new path shown for each file.', why: 'A wrong move can be moved back. Dozens of prompts for steps you can reverse train the person to click yes without reading.' },
+    { text: 'Before each move and rename in row 2, with the old and new path shown for each file.', why: 'On this drive a wrong move can be moved back. Dozens of prompts for steps you can reverse train the person to click yes without reading.' },
     { text: 'Before the delete in row 3, with each file shown next to the copy that stays.', correct: true },
     { text: 'Before the agent reads the folder in row 1, with the list of files it will open.', why: 'Reading changes nothing in the folder. The approval would land on the one row with nothing to undo.' },
     { text: 'Once at the start, when the person approves the plan to sort and remove duplicates.', why: 'The plan does not say which files the agent will later call duplicates, and that choice is where it goes wrong.' },
@@ -210,7 +209,7 @@ people with a step that can't be undone?
   hint="Where is the step that can't be taken back, and what would tell you in a few seconds that the batch is wrong?"
   options={[
     { text: 'An approval before each invoice is drafted, showing the customer name.', consequence: 'You approve 40 drafts in a row, each one reversible. By the thirtieth you click yes without reading, and the send goes out with no check at all.' },
-    { text: 'An approval before the send, showing the count, the total and three sample invoices.', correct: true, consequence: 'The total is twice last month. One sample shows a price per hour where a price per day belongs. You stop the send and fix the spreadsheet.' },
+    { text: 'An approval before the send, showing the count, the total and three sample invoices.', correct: true, consequence: 'The total is twice last month. One sample bills 16 hours at the day rate. You stop the send and fix the spreadsheet.' },
     { text: 'An approval before the send, with the prompt "Send invoices? yes / no".', consequence: 'You click yes, because nothing in the prompt looks wrong. Nothing in it could look wrong, and 40 customers get an invoice with the wrong rate.' },
   ]}>
 An agent drafts this month's customer invoices from a spreadsheet and can
@@ -225,7 +224,8 @@ permission list the agent would get from the boxes you tick by habit. Write
 each row as read, write or send, with the place it applies to. Cross out every
 row the task doesn't need, narrow the rest to the place the task is about,
 and mark the one row where a person approves, with a line on what that
-person sees.
+person sees. Writing the rows yourself shows you what the agent could
+reach before it reaches anything.
 
 A good result has at least one crossed-out row you would have granted
 without thinking, and a marked row that can't be undone or that reaches
@@ -239,7 +239,7 @@ unchecked list reach that you hadn't thought of?
 1. Write an agent's access as read, write and send rows, each with a place, and ask of each row who it reaches and whether it can be undone.
 2. The tools and places an agent is connected to set its blast radius, whatever the request says.
 3. Cross out every row the task doesn't need and narrow the rest to the place the task is about. The agent does the same task, and a wrong step reaches fewer people.
-4. Put the approval right before the row that can't be undone or that reaches other people, and show the approver the evidence to judge it, such as the files themselves or a count with samples.
+4. Put the approval right before the step that can't be undone or that reaches other people, and show the approver the evidence to judge it, such as the files themselves or a count with samples.
 </Recap>
 
 <Habit id="write-the-permission-rows">
