@@ -12,7 +12,8 @@ worktree, on one branch, and you hand back a pushed branch. `AGENTS.md` is
 already loaded, so don't `cat` it. Your prompt names the issue, the branch
 (`feat/<issue>-<slug>`), the worktree (`../ai-training-wt/<branch>`), the
 collision list for your issue and the filing rule of the run. Load the
-`build` skill and assign the issue to yourself.
+`build` skill and assign the issue to yourself. The last section says
+where this repo overrides that skill.
 
 ## Setup and done
 
@@ -87,3 +88,22 @@ Review finds these in almost every first pass. Check each one yourself.
   Co-Authored-By: lsimons-bot <bot@leosimons.com>
   Assisted-by: Claude:<the model you are running>
   ```
+
+## Where this repo differs from the `build` and `complete` skills
+
+The `build` skill ends in the `complete` skill. Here these rules replace it.
+
+- "Done" is what "Setup and done" says. Don't ask what complete means.
+- Commit and push on your own branch only. No agent pushes to `main`.
+- Open a pull request only when your prompt asks for one. Integration mode
+  depends on branches that have none.
+- The gate is `mise run fast`. The wave runs `mise run ci`.
+- Every push rebases on `origin/main` and uses `--force-with-lease`, as
+  "Rules" says. Skip `git pull --rebase && git push`.
+- Builders never merge. Skip the merge, local `main` and worktree removal
+  steps. The wave lead merges with the `AI_TRAINING_ROLE=` prefix.
+- Follow the filing rule in your prompt. A `/wave --no-filing` run lists
+  follow-ups in the final text and files none.
+- When you find `main` red, you fix it, whoever broke it (`AGENTS.md`,
+  "Session completion"). Fix it on your branch and say so in your final
+  text.
