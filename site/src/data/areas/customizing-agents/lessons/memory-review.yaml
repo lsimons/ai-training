@@ -1,11 +1,18 @@
 id: customizing-agents/memory-review
 title: Reading what the agent remembers
+description: >-
+  Read the auto-memory notes a coding agent keeps for a project, delete the two that have gone
+  stale, and move a team fact into a context file that the instruction file imports.
 mode: tutorial
 covers: customizing-agents/memory
 serves: [customizing-agents/configures-agent/manages-memory]
 introduces: [auto-memory, context-files]
 assumes:
   - objective: concepts/explains-models/explains-grounding
+    lesson: concepts/memory
+    section: where-products-keep-the-notes
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 after: [customizing-agents/first-skill]
 shorts:
   - The instruction file's import syntax for pulling context files in (Academy claude-code-101)
@@ -14,6 +21,24 @@ exercise:
   brief: >-
     Open the agent's memory notes for the fixture project, delete the two planted stale facts, and
     move the one fact the team should share into a context file the agent reads.
-sources: []
+sources:
+  - Claude Code memory
+  - Claude Code context window
+  - Claude Code all settings
+  - Claude Code CLI reference
+  - AEC-05
 issue: 189
 minutes: 15
+notes: >-
+  The planted notes are `site/examples/customizing-agents/memory-review/notes/`, which the learner
+  copies to `~/memory-review-notes` and loads with `claude --settings` and `autoMemoryDirectory`, so
+  their own memory folders stay untouched. The two stale notes are checkable in the fixture copy:
+  `git branch --list done-v2` prints nothing and `grep -c todos.json test_todo.py` prints 0. The
+  import example project is `imports/` next to them, and `imports.py` applies the vendor's import
+  rules to it (relative to the importing file, code spans skipped, recursive). Memory folder location,
+  the MEMORY.md index and topic files, the four note types, the 200-line or 25KB load limit, topic
+  files read on demand, `/memory`, `/context` and the `@path` rules come from
+  code.claude.com/docs/en/memory. The load limit is also on code.claude.com/docs/en/context-window.
+  `autoMemoryDirectory` is from code.claude.com/docs/en/settings-reference and `--settings` from
+  code.claude.com/docs/en/cli-reference. The import depth limit is not quoted, because only the memory
+  page states it. The prompt response is illustrative and the page says so.

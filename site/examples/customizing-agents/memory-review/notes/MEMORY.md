@@ -1,0 +1,4 @@
+- [Diff first](user_diff_first.md) — show the diff before explaining a change
+- [done is being rewritten](project_done_rewrite.md) — leave done() alone; the rewrite is on the done-v2 branch
+- [Tests touch the data](project_tests_touch_data.md) — back up todos.json before a test run and restore it after
+- [Item length](project_item_length.md) — keep item text at 80 characters or fewer for the phone widget
