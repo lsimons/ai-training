@@ -166,23 +166,23 @@ sends the line back as input in every later round of the run.
 The loops in this course already alternate a model decision with an
 action and its result: the model decides on an action, the loop runs it,
 and the model decides the next action from the result. The pattern adds
-the written reason between the result and the next decision. Some
-models write that reason on their own. On Claude, a model that supports
-interleaved thinking can write its
-reasoning after each tool result and before the next call. The API
-returns that reasoning as a summary, or as an empty field when the
-`display` setting is `omitted`, and it bills the full reasoning in both
-cases (@Claude docs thinking). The choice you make as the builder is
-whether the reasoning appears in a form you can read and keep.
+the written reason between the result and the next decision. Some models
+write that reason on their own. On Claude, a model that supports
+interleaved thinking can write its reasoning after each tool result and
+before the next call. The API returns that reasoning as a summary, or as
+an empty field when the `display` setting is `omitted`, and it bills the
+full reasoning in both cases (@Claude docs thinking). The choice you
+make as the builder is whether the reasoning appears in a form you can
+read and keep.
 
-A task gains from the extra tokens when its next step depends on what
-an earlier result said. The agent then chooses
-between tools as it goes. The refund is such a task: the order decides
-whether the refund tool is right. When the calls are the same whatever
-the results say, as with one export per table every night, the line
-doesn't change a call, and a fixed script or a plan fits the job
-better. People who review or debug the runs have a second reason to keep
-the line, because it shows them where the agent went wrong.
+A task gains from the extra tokens when its next step depends on what an
+earlier result said. The agent then chooses between tools as it goes.
+The refund is such a task: the order decides whether the refund tool is
+right. When the calls are the same whatever the results say, as with one
+export per table every night, the line doesn't change a call, and a
+fixed script or a plan fits the job better. People who review or debug
+the runs have a second reason to keep the line, because it shows them
+where the agent went wrong.
 
 <Choice id="which-task-gains" objective="building-agents/orchestrates-agents/picks-a-pattern"
   concepts={['react']}
@@ -211,8 +211,7 @@ for answers they were pushed toward (@Turpin 2023). On Claude, the
 thinking you get back is a summary or an empty field, and no display
 setting returns the raw reasoning (@Claude docs thinking). Rule: check
 what the agent did in the round lines, the calls and their results, and
-read the thought as the model's
-explanation of them.
+read the thought as the model's explanation of them.
 </Pitfall>
 
 <Exercise stretch="Give model_alternates a thought that names the fix it tried last and the result it saw, and check whether a reader of that trace could spot the alternation before the step limit.">
