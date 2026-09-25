@@ -25,7 +25,9 @@ import sys
 
 import notes_token
 
-PROTOCOL_VERSIONS = ("2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28")
+# The revisions whose tools messages this server implements. A client that asks
+# for a later one gets 2025-06-18 back, and may accept it or disconnect.
+PROTOCOL_VERSIONS = ("2024-11-05", "2025-03-26", "2025-06-18")
 NAME_SCHEMA = {"type": "string", "description": "A note's file name, such as standup.md"}
 
 TOOLS = [
@@ -58,10 +60,19 @@ NEEDS = {"list_notes": "read", "read_note": "read", "share_note": "share"}
 
 
 def note_path(folder, name):
-    """Return the path of note `name`, or None when the name leaves the folder."""
+    """Return (path, problem) for note `name`. `problem` is None for a note the server may serve.
+
+    The name must be a plain file name, the real path (after symbolic links)
+    must be directly in the folder, and the file must be a Markdown note.
+    """
     if not isinstance(name, str) or name != os.path.basename(name) or name in ("", ".", ".."):
-        return None
-    return os.path.join(folder, name)
+        return None, "Refused: name outside the notes folder"
+    path = os.path.realpath(os.path.join(folder, name))
+    if os.path.dirname(path) != folder:
+        return None, "Refused: name outside the notes folder"
+    if not name.endswith(".md"):
+        return None, "Refused: not a Markdown note"
+    return path, None
 
 
 def run_tool(folder, name, arguments):
@@ -69,14 +80,17 @@ def run_tool(folder, name, arguments):
     if name == "list_notes":
         notes = sorted(n for n in os.listdir(folder) if n.endswith(".md"))
         return "\n".join(notes), False
-    path = note_path(folder, arguments.get("name"))
+    path, problem = note_path(folder, arguments.get("name"))
     if path is None:
-        return "Refused: name outside the notes folder", True
+        return str(problem), True
     if not os.path.isfile(path):
-        return f"No note called {arguments.get('name')}", True
+        return "No such note", True
     if name == "read_note":
-        with open(path, encoding="utf-8") as handle:
-            return handle.read(), False
+        try:
+            with open(path, encoding="utf-8") as handle:
+                return handle.read(), False
+        except UnicodeDecodeError:
+            return "Refused: the note is not UTF-8 text", True
     return f"Sent {arguments['name']} to {arguments.get('to')}", False
 
 
@@ -86,7 +100,9 @@ def call(folder, name, arguments):
     if problem is not None:
         return f"Refused: {problem}", True, owner
     if name not in NEEDS:
-        return f"Unknown tool {name}", True, owner
+        return "Unknown tool", True, owner
+    if not isinstance(arguments, dict):
+        return "Refused: arguments must be an object", True, owner
     if NEEDS[name] not in (scope or "").split("+"):
         return f"Refused: token scope is {scope}, and {name} needs {NEEDS[name]}", True, owner
     text, is_error = run_tool(folder, name, arguments)
@@ -133,7 +149,9 @@ def answer(folder, message):
         result = {"tools": TOOLS}
     elif method == "tools/call":
         name = params.get("name")
-        arguments = params.get("arguments") or {}
+        arguments = params.get("arguments")
+        if arguments is None:
+            arguments = {}
         text, is_error, owner = call(folder, name, arguments)
         log(name, arguments, owner, text, is_error)
         result = {"content": [{"type": "text", "text": text}], "isError": is_error}

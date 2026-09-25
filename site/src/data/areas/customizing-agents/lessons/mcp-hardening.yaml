@@ -23,12 +23,13 @@ exercise:
   kind: do
   brief: >-
     Give the fixture server a read-only, short-lived token, turn on tool-call logging, plant an
-    instruction in one file that asks the agent to write elsewhere, and show in the log that the
-    write was refused or asked about.
+    instruction in one note that asks the agent to send the note to an outside address, and show in
+    the log or the transcript that the send was refused or asked about.
 sources:
   - MCP specification
   - Claude Code mcp
   - Claude Code security
+  - Claude Code permission modes
   - Invariant tool poisoning
 issue: 175
 minutes: 15
@@ -47,4 +48,7 @@ notes: >-
   usage for audit" come from the 2025-06-18 spec (authorization and tools pages), the revision the
   bibliography pins; the latest revision is 2026-07-28. In a trial with a small model the model
   noticed the planted line and did not call share_note, so the exercise has the learner ask for the
-  send directly as a second run. Tool poisoning and shadowing come from the Invariant Labs post.
+  send directly as a second run. Tool poisoning and shadowing come from the Invariant Labs post. The permission-modes page states that Manual mode (`default`) runs only reads
+  without a prompt, that Pro, Max and Team plans start in auto mode, and that no mode auto-approves a
+  requiresUserInteraction tool, which needs v2.1.199 or later (mcp page). show_log.py quotes every
+  argument value so model text can't forge a log line.
