@@ -19,10 +19,9 @@ you need.
 **Logging and audit** means recording what an agent was asked, which tools
 it called and what it changed, so that a person can reconstruct the session
 later and judge it. The Agent Engineer Course, in its module on evaluating
-agents, lists the same parts:
-the user's input and the agent's output, each tool call with its result,
-and the errors (@AEC-09). This is the log of the Monday session, one line
-per event:
+agents, lists the same parts: the user's input and the agent's output, each
+tool call with its result, and the errors (@AEC-09). This is the log of the
+Monday session, one line per event:
 
 ```text
 # support agent log, 2026-09-21
@@ -153,7 +152,7 @@ still gives a record the team can trust after the next incident?
 
 <Scenario id="the-log-in-the-work-folder" phase="review" objective="safety/judges-agent-risk/sets-oversight"
   concepts={['logging-and-audit']}
-  context="The lesson says an agent's log is kept where the agent cannot change or delete it, and one named person reads a sample every week. A team finds that its agent writes the log to a file in the agent's own work folder."
+  context="A team finds that its agent writes the log to a file in the agent's own work folder."
   title="The log is in the agent's folder"
   hint="If the agent makes a mistake next month, which copy of the record could the agent itself have changed?"
   options={[
@@ -184,10 +183,9 @@ The shorter aliases for some older models move to the newest snapshot
 (@Claude docs model-ids-and-versions). The same page says that the systems
 around a pinned model, such as its safety filters, can still change, and
 that this now and then shifts its answers a little. A pin doesn't last
-forever either. When a
-version is retired, requests to it fail. Anthropic gives customers who use a
-publicly released model at least 60 days' notice, and advises testing the
-replacement on your own tasks well before the date
+forever either. When a version is retired, requests to it fail. Anthropic
+gives customers who use a publicly released model at least 60 days' notice,
+and advises testing the replacement on your own tasks well before the date
 (@Claude docs model-deprecations). If your team uses a chat product that
 picks the model for you, ask the vendor whether you can choose the version
 and how you hear about a change.
@@ -196,13 +194,12 @@ and how you hear about a change.
 with the result a person agreed was right. The support team's set is eight
 past emails, each marked "send" or "draft" by the rule in the request.
 
-**Rerun it on every change.** When the version changes, run the task set
-on the new version, compare it with the old one, and read every row that
-differs before the agent goes back on live work. The Agent Engineer
-Course, in its module on going to production, gives the same rule for any
-agent change: no new version goes live
-until it passes the tests, including the cases that passed before
-(@AEC-11).
+**Rerun it on every change.** When the version changes, run the task set on
+the new version, compare it with the old one, and read every row that
+differs before the agent goes back on live work. The Agent Engineer Course,
+in its module on going to production, gives the same rule for any agent
+change: no new version goes live until it passes the tests, including the
+cases that passed before (@AEC-11).
 
 After the Monday reply, the team ran its task set on both versions. This
 is what the agent did with each email on each version:
@@ -264,7 +261,7 @@ the agent goes back on the inbox.
     { text: 'The old version is better on this email, because the team ran it first.', why: 'Both versions ran on the same email in the same task set. The order of the runs says nothing about which action is right.' },
     { text: 'The new version is better on this email, because it matches the agreed action.', correct: true },
   ]}>
-The rerun prints this row: "T9, Has order 2210 shipped yet?, agreed send,
+The rerun prints a new row: "Has order 2210 shipped yet?, agreed send,
 old draft, new send". What does the row tell the team?
 </Choice>
 
