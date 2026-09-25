@@ -5,7 +5,7 @@
 
 # CI pins mise to this release (`version` and `sha256` on every mise-action
 # step). This is a floor and requires at least that version locally.
-# Refresh them together; see AGENTS.md, Supply chain.
+# Refresh them together: docs/agents/mise-refresh.md (`mise run mise-refresh`).
 min_version = "2026.9.12"
 
 [settings]
@@ -52,6 +52,10 @@ vale = "3.20.0"
 # keep in step: the CI `vuln` job runs `mise run vuln` through mise-action,
 # so this pin is the single source of truth for local and CI alike.
 osv-scanner = "2.6.0"
+# Used by `mise run mise-refresh` to verify the signature on a mise
+# release's SHASUMS256.txt (docs/agents/mise-refresh.md). 0.12 was
+# published on 2025-01-15, well past `minimum_release_age` above.
+minisign = "0.12"
 # cspell is deliberately not here. mise's `npm:` backend records no
 # checksum in mise.lock and resolves the package's dependency tree from the
 # registry at install time. It is a devDependency in site/package.json
@@ -594,6 +598,18 @@ for lock in $locks; do
 done
 exit "$status"
 """
+
+# The download, verify and hash steps of docs/agents/mise-refresh.md for one
+# mise release (#331). It verifies SHASUMS256.txt with the pinned minisign
+# and the key in that doc's `minisign -Vm` command, checks the linux-x64
+# archive against it and prints the sha256 of `mise/bin/mise` and the
+# release date. It downloads into a temporary directory that it removes,
+# edits no file and fails on a bad signature or a hash mismatch. The logic
+# is in scripts/mise_refresh.py. Network; not part of `ci`.
+[tasks.mise-refresh]
+description = "Verify a mise release and print the sha256 CI pins: mise run mise-refresh <version> (network)"
+usage = 'arg "<version>" help="The mise release, for example 2026.9.12"'
+run = 'scripts/mise_refresh.py "$usage_version"'
 
 [tasks.ci-watch]
 description = "Watch GitHub Actions CI for the current branch; exits non-zero on failure"
