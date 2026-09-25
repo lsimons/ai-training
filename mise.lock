@@ -236,6 +236,52 @@ checksum = "sha256:32975d1493ee1a975d6bb41e4fb56fe419cb442ded628bb772ba2e614acfa
 url = "https://github.com/lycheeverse/lychee/releases/download/lychee-v0.24.2/lychee-x86_64-pc-windows-msvc.zip"
 url_api = "https://api.github.com/repos/lycheeverse/lychee/releases/assets/409959491"
 
+[[tools.minisign]]
+version = "0.12"
+backend = "aqua:jedisct1/minisign"
+
+[tools.minisign."platforms.linux-x64"]
+checksum = "sha256:9a599b48ba6eb7b1e80f12f36b94ceca7c00b7a5173c95c3efc88d9822957e73"
+url = "https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-linux.tar.gz"
+url_api = "https://api.github.com/repos/jedisct1/minisign/releases/assets/220886623"
+provenance = "minisign"
+
+[tools.minisign."platforms.linux-x64-baseline"]
+checksum = "sha256:9a599b48ba6eb7b1e80f12f36b94ceca7c00b7a5173c95c3efc88d9822957e73"
+url = "https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-linux.tar.gz"
+url_api = "https://api.github.com/repos/jedisct1/minisign/releases/assets/220886623"
+provenance = "minisign"
+
+[tools.minisign."platforms.linux-x64-musl"]
+checksum = "sha256:9a599b48ba6eb7b1e80f12f36b94ceca7c00b7a5173c95c3efc88d9822957e73"
+url = "https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-linux.tar.gz"
+url_api = "https://api.github.com/repos/jedisct1/minisign/releases/assets/220886623"
+provenance = "minisign"
+
+[tools.minisign."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:9a599b48ba6eb7b1e80f12f36b94ceca7c00b7a5173c95c3efc88d9822957e73"
+url = "https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-linux.tar.gz"
+url_api = "https://api.github.com/repos/jedisct1/minisign/releases/assets/220886623"
+provenance = "minisign"
+
+[tools.minisign."platforms.macos-arm64"]
+checksum = "sha256:89000b19535765f9cffc65a65d64a820f433ef6db8020667f7570e06bf6aac63"
+url = "https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-macos.zip"
+url_api = "https://api.github.com/repos/jedisct1/minisign/releases/assets/220895743"
+provenance = "minisign"
+
+[tools.minisign."platforms.windows-x64"]
+checksum = "sha256:37b600344e20c19314b2e82813db2bfdcc408b77b876f7727889dbd46d539479"
+url = "https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-win64.zip"
+url_api = "https://api.github.com/repos/jedisct1/minisign/releases/assets/220886631"
+provenance = "minisign"
+
+[tools.minisign."platforms.windows-x64-baseline"]
+checksum = "sha256:37b600344e20c19314b2e82813db2bfdcc408b77b876f7727889dbd46d539479"
+url = "https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-win64.zip"
+url_api = "https://api.github.com/repos/jedisct1/minisign/releases/assets/220886631"
+provenance = "minisign"
+
 [[tools.osv-scanner]]
 version = "2.6.0"
 backend = "aqua:google/osv-scanner"

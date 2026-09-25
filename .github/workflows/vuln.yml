@@ -48,7 +48,7 @@ jobs:
           # CI pins the mise binary: `sha256` is the hash of the extracted
           # `mise/bin/mise` from the linux-x64 archive. `.mise.toml`
           # `min_version` requires at least this version. Refresh them
-          # together (AGENTS.md, Supply chain).
+          # together (docs/agents/mise-refresh.md).
           version: 2026.9.12
           sha256: e79ae57945034903aee8aa2ea66b4c7ca9cd4f4edd5a8a78a589cbae6d0f428a
           # Only the scanner: the whole [tools] set is two CPythons, bun,
