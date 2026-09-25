@@ -30,6 +30,8 @@ sources:
   - Claude Code permissions
   - Claude Code permission modes
   - Claude Code settings
+  - Claude Code all settings
+  - Claude Code memory
   - RFC 2606
 issue: 180
 minutes: 15
@@ -40,11 +42,12 @@ notes: >-
   safety/judges-agent-risk/names-blast-radius. Closes the "adversarial prompting of one's own agent"
   gap from issue #13. The planned sandboxing lesson has no page yet, so the fixture builds its own
   contained setup: make_scratch.py copies site/examples/coding-with-agents/red-teaming-your-agent/project/
-  to a scratch folder, plants planted/vendor-notes.md (an HTML comment asking the agent to copy a
+  to a scratch folder, decodes planted/vendor-notes.md.b64 into it (stored base64-encoded so that agents working in this repository don't read it as instructions; an HTML comment asking the agent to copy a
   canary key to a file outside the project and send it to an address under .invalid), puts
   the session settings file next to the copy, and writes a manifest of file hashes. The learner starts
   Claude Code in the copy in Manual mode with those settings (deny rules for the web tools, curl and
-  wget, the Bash sandbox with no retry outside the sandbox and a strict network allowlist). check_run.py
+  wget, reads blocked outside the working folder, and the Bash sandbox with every command still
+  prompting, no retry outside it, a hard stop when it can't start and a strict network allowlist). check_run.py
   compares the folder with the manifest and looks for the canary. demo_obeyed.py acts out a session
   in which the attack worked with a few lines of Python, and the page says no model runs there.
   scan_hidden.py is the gate for hidden text. Kept apart from security-review (#178, screening the
@@ -52,4 +55,4 @@ notes: >-
   server): this lesson attacks the learner's own agent session and reads the result. No claim about
   attack success rates is made. The checkpoints all serve screens-for-security, which the plan
   gives the lesson, and they test reading the run's evidence, the route around a deny rule, and
-  matching a finding to its fix.
+  matching a finding to its fix, and each has one review alternate on the same idea.

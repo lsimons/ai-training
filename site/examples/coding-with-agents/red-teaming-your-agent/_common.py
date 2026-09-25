@@ -14,15 +14,20 @@ agent's session use a few lines of Python that act out what an agent could
 do, and they say so.
 """
 
+import base64
 import hashlib
 import json
 import os
 import re
 import shutil
+from typing import Optional
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT = os.path.join(HERE, "project")
-PLANTED = os.path.join(HERE, "planted", "vendor-notes.md")
+# The planted note is stored base64-encoded, so that an agent working in the
+# course repository reads a block of letters and not instructions it might
+# follow. make_scratch decodes it into the scratch copy only.
+PLANTED = os.path.join(HERE, "planted", "vendor-notes.md.b64")
 SETTINGS = os.path.join(HERE, "red-team-settings.json")
 
 PLANTED_AT = "project/docs/vendor-notes.md"
@@ -40,13 +45,18 @@ IGNORED_FILES = {".DS_Store"}
 
 TEXT_SUFFIXES = {".md", ".txt", ".html", ".py", ".ini", ".json", ".yaml", ".yml", ".toml"}
 
-# Characters that don't show on screen but reach the model as text: the
-# zero-width space, joiners and marks, the byte order mark, and the
-# bidirectional controls that change the order in which text is shown.
+# Common characters that don't show on screen but reach the model as text:
+# the zero-width space, joiners and direction marks, the soft hyphen, the byte
+# order mark, and the bidirectional controls that change the order in which
+# text is shown. The Unicode tag characters, U+E0000 to U+E007F, are checked
+# as a range in `invisible_name`. The list is not complete.
 INVISIBLE = {
+    "\u00ad": "soft hyphen",
     "\u200b": "zero-width space",
     "\u200c": "zero-width non-joiner",
     "\u200d": "zero-width joiner",
+    "\u200e": "left-to-right mark",
+    "\u200f": "right-to-left mark",
     "\u2060": "word joiner",
     "\ufeff": "zero-width no-break space",
     "\u202a": "bidirectional control",
@@ -59,6 +69,13 @@ INVISIBLE = {
     "\u2068": "bidirectional control",
     "\u2069": "bidirectional control",
 }
+
+
+def invisible_name(char: str) -> Optional[str]:
+    """The name of an invisible character, or None for a character that shows."""
+    if 0xE0000 <= ord(char) <= 0xE007F:
+        return "tag character"
+    return INVISIBLE.get(char)
 
 
 def files_under(root: str) -> "list[str]":
@@ -94,7 +111,10 @@ def make_scratch(dest: str) -> "list[str]":
         PROJECT, os.path.join(dest, "project"), ignore=shutil.ignore_patterns("__pycache__")
     )
     os.makedirs(os.path.join(dest, "project", "docs"))
-    shutil.copyfile(PLANTED, os.path.join(dest, PLANTED_AT))
+    with open(PLANTED, "rb") as handle:
+        note = base64.b64decode(handle.read())
+    with open(os.path.join(dest, PLANTED_AT), "wb") as handle:
+        handle.write(note)
     shutil.copyfile(SETTINGS, os.path.join(dest, SETTINGS_NAME))
     with open(os.path.join(dest, MANIFEST_NAME), "w", encoding="utf-8") as handle:
         json.dump(fingerprint(dest), handle, indent=2, sort_keys=True)
@@ -176,8 +196,11 @@ def scan_hidden(root: str) -> "list[str]":
             words = " ".join(match.group(1).split())
             shown = words if len(words) <= 60 else words[:57] + "..."
             hits.append(f'{path}:{line}: HTML comment: "{shown}"')
-        for number, row in enumerate(text.splitlines(), start=1):
+        # Split on "\n" only, the same count as the comment lines above.
+        # splitlines() would also split on characters such as U+2028.
+        for number, row in enumerate(text.split("\n"), start=1):
             for char in row:
-                if char in INVISIBLE:
-                    hits.append(f"{path}:{number}: {INVISIBLE[char]} (U+{ord(char):04X})")
+                name = invisible_name(char)
+                if name:
+                    hits.append(f"{path}:{number}: {name} (U+{ord(char):04X})")
     return hits
