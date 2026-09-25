@@ -1,0 +1,423 @@
+import { Choice, MultiChoice, Predict, Repair, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response, Habit } from '@components/lesson';
+
+In this lesson we read two sessions a coding agent ran on the same small
+repository and find the one mistake it made in both. We fix that mistake
+once, with one line in the file the agent reads at the start of every
+session. Then we start a fresh session and check that it follows the line
+without being told. The last two sections are about keeping a session
+lean enough that the agent keeps following the file, and about recording
+a decision where the next session finds it.
+
+The file is the project's **project instructions**, `AGENTS.md` or
+`CLAUDE.md` at the root of the repository. How to write one from nothing,
+and what belongs in it, is the subject of
+[the customizing-agents lesson on AGENTS.md](/customizing-agents/instructions/).
+This lesson starts where that one stops: the file exists, and you are the
+engineer who runs sessions against it and notices what it fails to say.
+
+The file works because the agent grounds its work in what is in its
+context, as [the retrieval lesson](/concepts/retrieval/) showed for a chat
+model. A rule in the instructions file is in the context of every
+session. A correction you typed in an earlier session is not. Where this
+lesson names a Claude Code feature it says so, and the vendor pages are
+checked on the date shown above the lesson.
+
+## The file the agent reads first
+
+The fixture is the to-do program from *Telling the agent where the task is
+and where it stops*, after its `undo` change. `docs/SPEC.md` now specifies
+two more commands that nobody has built: `rename <n> <text>` and
+`remove <n>`. The repository is in the course repository under
+`site/examples/coding-with-agents/project-instructions/fixture-repo/`.
+Copy that directory to a place of its own and change into it. Then give
+the copy one commit, so that `git status` can show what a session changed:
+
+```sh
+git init -q && git add -A && git commit -qm start
+```
+
+Delete the copy and copy again to reset. Then read the instructions file.
+
+<Predict id="run-agents-md" title="Read the instructions file"
+  answer={`# Agent instructions for todo
+
+  - Python 3, standard library only. No new dependencies.
+  - Tests use \`unittest\`. Run them with \`python3 -m unittest -q\`.
+  - \`docs/SPEC.md\` is the specification for the commands. Follow it.
+  - \`legacy/\` is the old single-file version, kept for reference. Never edit it
+    and never import it.
+  - Do not edit \`todos.json\`; the tests use their own lists.`} run="coding-with-agents/project-instructions/instructions.py">
+Print the file from inside the copy.
+
+```sh
+cat AGENTS.md
+```
+
+</Predict>
+
+Five rules, each one a fact the agent can't read from the code. That is a
+good file by the measure of the customizing-agents lesson, and it is
+short.
+
+A coding agent loads this file before your first message. Claude Code
+loads its instructions files at the start of every session, reads
+`AGENTS.md` when the repository has no `CLAUDE.md`, and in an interactive
+session prints a line that names the `AGENTS.md` it loaded
+(@Claude Code memory). Its `/context` command shows what is in the
+context window, so you can confirm the file is there
+(@Claude Code best practices). Other agents have their own file names and
+their own way to show it. With any agent you can check what it took from
+the file by asking before the task starts, for example "What does the
+instructions file say about `todos.json`?". An agent that answers with
+the last rule has the file in its context.
+
+Having the file in context is one thing. Doing what the file means is
+another, and the sessions below show the gap.
+
+## One mistake, two sessions
+
+The course has the logs of two sessions on fresh copies of the fixture.
+The first added `rename`, and the second added `remove`. Each had a short, scoped brief
+and the verification command. The logs are in the course repository, in
+`sessions/` next to `fixture-repo/`, so an agent that works in your copy
+never reads them. They are illustrative: the author wrote them to show
+what such sessions look like, and the course runs the program to check
+every output line in them.
+
+```text
+you: Add the remove command that docs/SPEC.md specifies. Done when
+     python3 -m unittest -q prints OK.
+
+read AGENTS.md
+read docs/SPEC.md
+read todo.py
+read test_todo.py
+edit todo.py: add remove(items, number) after undo, and a remove branch
+     in main after the undo branch
+write test_remove.py
+run python3 -m unittest -q
+  OK
+run python3 todo.py remove 3
+  removed #3: Renew the passport
+run python3 todo.py list
+  1. [ ] Buy milk
+  2. [x] Call the plumber
+  3. [ ] Water the plants
+  2 open, 1 done
+
+agent: remove is in todo.py, with two tests in test_remove.py. The suite
+     passes, and I ran the command against the list to confirm it works.
+```
+
+That is the second log. Each session on its own looks fine: the agent
+read the instructions first, followed the spec, and wrote and ran tests.
+A mistake that repeats doesn't show in one session. It shows when you put
+two next to each other and look for what they have in common. Start with
+the commands the agent ran against the program.
+
+<Predict id="run-repeated" title="List what the agent ran in both sessions"
+  answer={`sessions/session-1.txt:run python3 todo.py rename 1 "Buy oat milk"
+  sessions/session-1.txt:run python3 todo.py list
+  sessions/session-2.txt:run python3 todo.py remove 3
+  sessions/session-2.txt:run python3 todo.py list`} run="coding-with-agents/project-instructions/repeated.py">
+Run this from `site/examples/coding-with-agents/project-instructions/` in
+the course repository.
+
+```sh
+grep -H '^run python3 todo.py' sessions/*.txt
+```
+
+</Predict>
+
+In both sessions the agent tried the new command by hand, which is a good
+habit, and it ran the command with no `TODO_FILE`. `docs/SPEC.md` says the
+program then reads and writes `todos.json` next to the scripts, the list
+committed to the repository. `git status` at the end of each session shows
+the result. The course replays both sessions on fresh copies and prints it.
+
+<Predict id="run-replay" title="What each session left behind"
+  answer={`session-1.txt
+   M todo.py
+   M todos.json
+  ?? test_rename.py
+  session-2.txt
+   M todo.py
+   M todos.json
+  ?? test_remove.py`} run="coding-with-agents/project-instructions/replay.py">
+The course applies each session's change to its own copy and runs every
+command in the log the way the agent ran it. It fails if an output differs
+from the log. Then it runs this in each copy.
+
+```sh
+git status --short
+```
+
+</Predict>
+
+`todos.json` changed in both sessions, and neither report mentions it.
+Session 1 renamed an item in the committed list, and session 2 deleted
+one. A reviewer who reads the diff catches it. The next session makes the
+same mistake again, because nothing it loads says otherwise.
+
+<Choice id="why-the-rule-missed" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['project-instructions']}
+  context="A small repository has an eight-line instructions file whose last rule is 'Do not edit todos.json; the tests use their own lists.' In two sessions a coding agent read that file first, added a command, and then tried the command by running the program with no TODO_FILE, which rewrote the committed todos.json."
+  title="Why didn't the rule stop it?" hint="What does the rule forbid, and what did the agent do to the file?"
+  options={[
+    { text: 'The agent never loaded the instructions file in these two sessions.', why: 'Both logs open with the agent reading AGENTS.md, and the file is in its context from the start.' },
+    { text: 'The rule is lost among the other lines, because the file is too long.', why: 'The file is eight lines. A rule gets lost in a long file, and this one is short.' },
+    { text: 'The rule forbids editing the file, and the agent changed it by running the program.', correct: true },
+    { text: 'The test suite wrote to the file when the agent ran it after the change.', why: 'The tests build their own lists, and the replay shows the change comes from the two commands the agent ran.' },
+  ]}>
+Both sessions read `AGENTS.md`, and both left `todos.json` changed. What
+went wrong?
+</Choice>
+
+## Fix it once, in the file
+
+A mistake the agent makes in two sessions is a fact about the project
+that the instructions file doesn't state yet. Claude Code's documentation
+gives the same trigger for adding to its instructions file: the same
+mistake a second time, or a correction you type again that you typed in an
+earlier session (@Claude Code memory). The agent-engineering course says
+the same about `AGENTS.md`: start small, and add a line when you see an
+agent repeat a mistake (@AEC-15).
+
+A correction in the next brief fixes one session. The line in the file
+reaches each session after it, including a teammate's, because the file is
+in the repository. So the fix goes in the file, and it is one line.
+
+The line needs to be specific enough that you can check the agent against
+it. The existing rule says what not to do in words the agent read
+narrowly. The fix names both ways the file changes and says what to do
+instead. Claude Code's documentation says that the more specific and
+concise the instructions are, the more consistently the agent follows
+them (@Claude Code memory). Replace the last line of `AGENTS.md` with
+this one:
+
+```md
+- Never change `todos.json`, by hand or by running `todo.py`. To try a command, copy it first: `cp todos.json /tmp/todos.json`, then run `TODO_FILE=/tmp/todos.json python3 todo.py ...`.
+```
+
+<Repair id="repair-the-rule" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['project-instructions']}
+  title="Fix the rule" hint="What did the agent do that the rule doesn't name, and what should it do instead?"
+  broken={`- Tests must not touch production data.`}
+  model={`- Run the tests with \`python3 -m unittest -q\` only. Never run \`seed.py\` or point \`DATABASE_URL\` at anything but \`test.db\`, which the tests create and delete.`}>
+In another project, the agent ran `seed.py` against the shared database
+in two sessions to "check the data", although `AGENTS.md` has the line
+below. Rewrite the line so it names the action the agent took and what to
+do instead.
+</Repair>
+
+Commit the line. The next session then starts from it. Start a fresh session and give it the brief of session 2, word
+for word. The brief says nothing about `todos.json`.
+
+```sh
+git commit -qam "docs: say how to try a command without changing todos.json"
+```
+
+<Prompt model="illustrative" recorded="illustrative">
+Add the remove command that docs/SPEC.md specifies. Done when
+python3 -m unittest -q prints OK.
+</Prompt>
+<Response>
+I read `AGENTS.md`, `docs/SPEC.md`, `todo.py` and `test_todo.py`.
+
+Added `remove(items, number)` to `todo.py` after `undo`, and a `remove`
+branch in `main`. Added `test_remove.py` with two tests.
+`python3 -m unittest -q` prints `OK`.
+
+I tried the command on a copy of the list, as `AGENTS.md` says:
+`cp todos.json /tmp/todos.json`, then
+`TODO_FILE=/tmp/todos.json python3 todo.py remove 3`, which printed
+`removed #3: Renew the passport`. `todos.json` is unchanged.
+</Response>
+
+Like the logs, this exchange is illustrative, and your agent phrases it
+differently. Check the repository, because the report is the agent's
+account of what it did.
+
+<Predict id="run-fresh" title="What the fresh session left behind"
+  answer={`removed #3: Renew the passport
+   M todo.py
+  ?? test_remove.py`} run="coding-with-agents/project-instructions/fresh.py">
+The course commits the new line in its own copy, applies the change of
+session 2, runs the command the way the new line says, and then runs
+`git status`.
+
+```sh
+cp todos.json /tmp/todos.json
+TODO_FILE=/tmp/todos.json python3 todo.py remove 3
+git status --short
+```
+
+</Predict>
+
+The command still printed the message the spec asks for, and
+`todos.json` is gone from the list of changed files. The brief was the same
+as in session 2. The one thing that changed is a line in the file the
+agent loads before the brief, and later sessions load that line too.
+
+<Pitfall title="The file that grew a line per mistake">
+For a year, a team adds a line to its instructions file after each
+mistake and never removes one. The file grows to three pages, some
+of them about code that no longer exists and two that contradict each
+other. The agent starts to break rules that are in the file, and the team
+adds emphasis to those rules, which makes the file longer again. Claude
+Code's documentation names this failure: a file that is too long gets
+half its rules ignored, and a rule the agent keeps breaking is a sign the
+file needs pruning (@Claude Code best practices). The agent-engineering
+course adds that a stale line misleads the agent more than a missing one
+(@AEC-15). The rule: each time you add a line, delete the lines the agent
+gets right without them and the lines that no longer describe the
+project.
+</Pitfall>
+
+## Keep the session lean
+
+The instructions file is loaded once, at the start. Everything after it
+in the session goes into the same context window: every file the agent
+reads, every command output, every correction. As that window fills, the
+agent follows earlier instructions less well, and Claude Code's
+documentation says so for its own tool (@Claude Code best practices). The
+file you just fixed is in the context, and so are forty tool outputs after
+it.
+
+**Avoiding context rot** is keeping the context lean so the agent keeps
+following its instructions and keeps the goal in view. These habits keep
+a session lean.
+
+- One task per session. When `rename` is done and committed, start a new
+  session for `remove`. Claude Code has `/clear` for this, and its
+  documentation advises clearing between unrelated tasks
+  (@Claude Code best practices).
+- Summaries instead of raw logs. Paste the three lines of a failing test
+  that matter, or ask the agent for a short account of a long log.
+- Point at files by path instead of pasting them. The agent reads a file
+  when it needs it.
+- When the agent ignores a rule it followed an hour ago, or you have
+  corrected the same thing twice, compact or restart. Claude Code
+  compacts the conversation on its own near the limit, and `/compact`
+  with instructions does it when you choose. Its documentation advises a
+  fresh session with a better prompt after two failed corrections
+  (@Claude Code best practices).
+
+The instructions file makes a restart cheap. Claude Code reads the root instructions file from disk again after `/compact`, and an
+instruction you gave only in the conversation can be lost in the summary
+(@Claude Code memory). A rule in the file comes back in the next session.
+A rule you typed in chat does not. Anthropic's course *Claude Code in
+action* has a module on steering long sessions for more on this
+(@Academy claude-code-in-action).
+
+<Scenario id="rules-ignored" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['avoiding-context-rot', 'project-instructions']}
+  context="An engineer has worked with a coding agent in one session for two hours, on three unrelated tasks. The project's instructions file says legacy/ is never edited. The agent just edited a file in legacy/, and the engineer has already corrected the same thing twice in this session."
+  title="The agent edits legacy/ again" hint="What has changed since the start of the session, when the agent followed the rule?"
+  options={[
+    { text: 'Tell it a third time, in capitals, that legacy/ is off limits.', consequence: 'The correction joins two others in a full context. The agent may follow it for a while, and the session is longer still.' },
+    { text: 'Paste the whole instructions file into the chat again.', consequence: 'The file is already in the context. A second copy adds more text to a window that is already too full.' },
+    { text: 'Add emphasis to every rule in the instructions file.', consequence: 'When every line is emphasized none stands out, and this rule was clear. The problem is the session, not the file.' },
+    { text: 'Revert the edit, then start a fresh session with a brief that says what you learned.', correct: true, consequence: 'The new session loads the instructions file into an empty context, and the rule about legacy/ is followed again.' },
+  ]}>
+What do you do?
+</Scenario>
+
+## Record the decision where the agent reads it
+
+The instructions file also holds the reasons behind the project's
+structure, at least where to find them. Suppose the `remove` session
+proposed moving the list from `todos.json` into an SQLite database, and
+you said no: one JSON file keeps the program to the standard library, and
+the diff of `todos.json` shows every change in review. That reason is now
+in a transcript, and the next session that finds the JSON file slow will
+propose the database again.
+
+Write the decision down in the repository and point at it from the file.
+One line in `AGENTS.md` is enough for the pointer:
+
+```md
+- The list stays one JSON file. Read `docs/decisions/` before you change how `store.py` saves it.
+```
+
+The next lesson, *Staying the engineer who understands the system*, shows
+the decisions folder and a decision file in full. The part that belongs
+here is the direction: a decision you want every session to respect goes
+in a file the session loads or is pointed at, because the transcript of
+the session where you made it is in nobody's context.
+
+<Choice id="where-the-decision-goes" objective="coding-with-agents/ships-with-agent/keeps-understanding"
+  concepts={['project-instructions']}
+  context="An engineer and a coding agent agreed in a session to keep a program's data in one JSON file instead of a database, for two reasons the engineer explained. The engineer wants every later session, including a teammate's, to respect the decision."
+  title="Where does the reason go?" hint="Which of these does a teammate's fresh session load or get pointed at?"
+  options={[
+    { text: 'A decision file in the repository, with a line in the instructions file that points at it.', correct: true },
+    { text: 'The transcript of the session with the decision, linked from the next pull request.', why: 'A fresh session loads the files in the repository and the instructions file. It never reads a transcript linked from an old pull request.' },
+    { text: 'The agent\'s private memory on the engineer\'s own machine, where it keeps its notes.', why: 'Some agents keep notes for one user on one machine. A teammate\'s session on another machine never loads them.' },
+    { text: 'The engineer\'s next brief, which repeats the reason whenever the store comes up.', why: 'That works while the engineer remembers, and only for the engineer\'s own sessions.' },
+  ]}>
+Where should the decision and its reasons go?
+</Choice>
+
+<MultiChoice id="which-lines-belong" phase="review" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['project-instructions', 'avoiding-context-rot']}
+  context="A coding agent made the same mistake in two sessions on one repository, and the engineer is choosing what to do about it. The repository has a short instructions file that the agent loads at the start of every session."
+  title="Which responses fix the repeated mistake?" hint="Which of these reach the next session, and are specific enough to check?"
+  options={[
+    { text: 'Add one line to the instructions file that names the action and what to do instead.', correct: true },
+    { text: 'Correct the agent in the chat each time it happens, in the words that worked last time.', why: 'A correction in the chat reaches one session. The next session starts without it.' },
+    { text: 'Replace a vague rule in the file with one that names the command the agent ran.', correct: true },
+    { text: 'Add a paragraph to the file that explains the history of the problem in full.', why: 'A long explanation makes the file longer without making the rule easier to check, and a long file gets its rules ignored.' },
+  ]}>
+Which of these fix the mistake for every later session?
+</MultiChoice>
+
+<Sort id="where-it-lives" phase="review" objective="coding-with-agents/ships-with-agent/keeps-understanding"
+  concepts={['project-instructions']}
+  context="A fresh coding agent session loads the project's instructions file at its start and can read any file in the repository. It does not read transcripts of earlier sessions or notes outside the repository."
+  title="Will the next session know?" hint="Is the reason in a file the fresh session loads, or in one it is pointed at?"
+  buckets={['A fresh session finds it', 'A fresh session never sees it']}
+  items={[
+    { text: 'A decision file in docs/decisions/ that the instructions file points at', bucket: 0 },
+    { text: 'A line in the instructions file that states the decision', bucket: 0 },
+    { text: 'The reasons you gave the agent in yesterday\'s session', bucket: 1 },
+    { text: 'A note about the decision in your personal notebook', bucket: 1 },
+  ]}>
+Sort each place a team might keep an architecture decision.
+</Sort>
+
+<Exercise stretch="Do the same in a repository of your own: read your last two agent sessions side by side, find one thing the agent got wrong in both, and add or rewrite one line of the instructions file. Delete one line in the same edit that the agent gets right without it.">
+Run the two sessions yourself. Reset the copy of the fixture, start your
+coding agent in it, and give it the brief of session 1 from
+`sessions/session-1.txt`. When it is done, save its report and the output
+of `git status --short`. Reset the copy, start a fresh session, and do the
+same with the brief of session 2. Plan on fifteen minutes.
+
+Put the two reports and the two status lists next to each other and find
+the one thing that went wrong in both. It may be `todos.json`, as on this
+page, or something else your agent does, such as a wrong test command or
+a file it edits that the task didn't need. Write the one line that fixes
+it, specific enough to check, in `AGENTS.md`, and commit it. Then reset
+everything else, start a fresh session with the brief of session 2, and
+check `git status --short` again.
+
+A good result: the fresh session's status no longer shows the mistake,
+the brief was word for word the one from before, and `AGENTS.md` is one
+line different from the original. Delete the copy when you are done. Then
+answer one question: if your agent made no mistake in both sessions, what
+did you check to be sure, and what would you add to the file if a third
+session made one?
+</Exercise>
+
+<Recap>
+1. The project instructions file is loaded at the start of every session, so a rule there reaches every later session, and a correction in the chat reaches one (@Claude Code memory).
+2. A mistake that repeats shows when you put two sessions side by side. Fix it once, with one line in the file (@AEC-15).
+3. Write the line so you can check the agent against it: name the action the agent took and what to do instead.
+4. A long file gets its rules ignored. When you add a line, delete the ones the agent no longer needs (@Claude Code best practices).
+5. Keep the context lean: one task per session, summaries instead of raw logs, and compact or restart when the agent stops following rules it followed earlier.
+6. Record a decision in the repository and point at it from the instructions file, because the next session never reads the transcript where you made it.
+</Recap>
+
+<Habit id="two-sessions-one-line">
+The next time you correct a coding agent, check whether you made the same correction in an earlier session, and if you did, put it in the instructions file as one line.
+</Habit>

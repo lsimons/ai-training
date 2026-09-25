@@ -1,0 +1,26 @@
+# Session 1. An illustrative log, written for the lesson. The command
+# outputs are what the fixture prints.
+
+you: Add the rename command that docs/SPEC.md specifies. Done when
+     python3 -m unittest -q prints OK.
+
+read AGENTS.md
+read docs/SPEC.md
+read todo.py
+read test_todo.py
+edit todo.py: add rename(items, number, text) after undo, and a rename
+     branch in main after the undo branch
+write test_rename.py
+run python3 -m unittest -q
+  OK
+run python3 todo.py rename 1 "Buy oat milk"
+  renamed #1: Buy oat milk
+run python3 todo.py list
+  1. [ ] Buy oat milk
+  2. [x] Call the plumber
+  3. [x] Renew the passport
+  4. [ ] Water the plants
+  2 open, 2 done
+
+agent: rename is in todo.py, with two tests in test_rename.py. The suite
+     passes, and I tried the command once to check the message.
