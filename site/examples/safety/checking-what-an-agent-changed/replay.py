@@ -133,7 +133,7 @@ def replay() -> str:
         f"effects: {len(effects)}, asked for: {len(asked)}, "
         f"not asked for: {len(effects) - len(asked)}",
         f"effects the summary mentions: {len(mentioned)} of {len(effects)}",
-        f"effects the after listing cannot show: {len(unseen)} (the message)",
+        f"effects a before-and-after comparison cannot show: {len(unseen)} (the message)",
     ]
     return "\n".join(out)
 
