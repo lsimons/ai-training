@@ -1,0 +1,4 @@
+question: What is the meal limit on a work trip, and how long do I have to file the claim?
+call: search_docs(query='meal limit work trip claim')
+result: expenses.txt: Expenses. Meals on a work trip are reimbursed up to 40 euros per day with a receipt. Claims are filed within 30 days. Train tickets are booked through the travel desk.
+answer: Thank you for asking about meals on work trips. The company handbook has a clear rule on this, and it applies to every employee who travels for work. The limit is 40 euros per day, and you need to keep the receipt. "Meals on a work trip are reimbursed up to 40 euros per day with a receipt." I hope this helps you plan your next trip.

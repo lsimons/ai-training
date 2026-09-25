@@ -1,0 +1,5 @@
+question: How many days of annual leave do I get, and until when can I carry them over?
+result: leave.txt: Annual leave. Every employee accrues 25 days of annual leave per year. Unused days carry over until 31 March. Requests go to your manager at least two weeks ahead.
+reference: 25 days;31 March
+answer A: You get 25 days per year. "Every employee accrues 25 days of annual leave per year."
+answer B: Thanks for your question about annual leave, which is one of the topics people ask about most. The handbook is clear on this point: you get 25 days of annual leave per year, the same as every other employee. "Every employee accrues 25 days of annual leave per year." I hope this helps you plan your time off.

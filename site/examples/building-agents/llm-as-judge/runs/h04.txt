@@ -1,0 +1,4 @@
+question: Where do I keep my passwords?
+call: search_docs(query='keep passwords')
+result: security.txt: Security. Passwords are kept in the company password manager. Forward a phishing email to the security team and delete it afterwards.
+answer: In the company password manager. "Passwords are kept in the company password manager."

@@ -1,12 +1,18 @@
 id: building-agents/llm-as-judge
 title: A model as the grader
+description: >-
+  Have a stand-in judge with a length bias grade runs of a handbook assistant, compare its scores
+  with a person's, and pair numbers that rise on their own with ones that catch them.
 mode: tutorial
 covers: building-agents/evaluation
 serves:
   - building-agents/evaluates-agents/writes-a-rubric
   - building-agents/evaluates-agents/avoids-gamed-metrics
 introduces: [llm-as-judge, metrics-that-cannot-be-gamed]
-assumes: []
+assumes:
+  - objective: building-agents/evaluates-agents/builds-a-golden-set
+    lesson: building-agents/golden-sets
+    section: hold-some-back-and-add-past-failures
 after: [building-agents/rubrics, building-agents/golden-sets]
 shorts: [Judge biases and calibration]
 exercise:
@@ -14,11 +20,18 @@ exercise:
   brief: >-
     For three metrics on the fixture (answer length, keyword presence, judge score) describe one way
     each could rise with the agent unchanged, then pair each with a metric that would catch it.
-sources: []
+sources: [AEC-09]
 issue: 204
 minutes: 15
 notes: >-
   A fake judge with a built-in length bias grades the fixture transcripts against the rubric.
   Predict which of two answers it prefers, then compare its grades with the human grades in the
   fixture and see where they disagree. Expert-level objective on gamed metrics served here and in
-  the deploy gate lesson.
+  the deploy gate lesson. The judge in site/examples/building-agents/llm-as-judge/grade.py is a
+  few rules that stand in for a model, and the page says so. The sixteen runs, the reference
+  answers, the tuned answers and the person's grades are illustrative, written by the author, with
+  no model called. AEC-09 backs what a judge is given, the length and position biases, missed
+  facts, and calibration against human scores. Pairing each easy number with a partner, and the
+  easy and hard examples, come from the concept definition and the competency file, so the page
+  cites no source for them. DLAI-11, Brilliant VER and Academy building-with-the-claude-api from
+  the plan were dropped because the page cites no claim from them.

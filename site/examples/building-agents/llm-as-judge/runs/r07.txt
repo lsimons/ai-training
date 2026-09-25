@@ -1,0 +1,4 @@
+question: What is my training budget, and do conference tickets count against it?
+call: search_docs(query='training budget conference tickets')
+result: training.txt: Training. Every employee has a training budget of 1500 euros per year. Conference tickets count against the training budget.
+answer: Good question, and one that many people ask when they plan their year. Every employee gets the same yearly amount for courses and other learning, so you have the same budget as your colleagues. Your budget is 1500 euros per year. "Every employee has a training budget of 1500 euros per year." Talk to your manager about how you want to use it.
