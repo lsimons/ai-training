@@ -1,12 +1,21 @@
 id: customizing-agents/mcp-hardening
 title: Hardening a tool connection
+description: >-
+  Give a notes server a read-only token that expires in an hour, turn on its tool-call log, plant an
+  instruction in one note, and read in the log which control stopped the send it asked for.
 mode: tutorial
 covers: customizing-agents/mcp
 serves: [customizing-agents/connects-tools-safely/hardens-a-connection]
 introduces: []
 assumes:
   - objective: safety/judges-agent-risk/recognizes-injection
+    lesson: safety/agent-risk
+    section: prompt-injection-when-the-data-gives-orders
   - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 after: [customizing-agents/mcp-first-server]
 shorts:
   - Tool poisoning across servers, one worked example
@@ -16,9 +25,26 @@ exercise:
     Give the fixture server a read-only, short-lived token, turn on tool-call logging, plant an
     instruction in one file that asks the agent to write elsewhere, and show in the log that the
     write was refused or asked about.
-sources: []
+sources:
+  - MCP specification
+  - Claude Code mcp
+  - Claude Code security
+  - Invariant tool poisoning
 issue: 175
 minutes: 15
 notes: >-
-  Introduces no concept: hands-on for mcp-security: scoped credentials, gated outbound abilities and
-  a reviewed log.
+  Introduces no concept: hands-on for mcp-security (scoped credentials, gated outbound abilities and a
+  reviewed log). The fixtures under site/examples/customizing-agents/mcp-hardening/ are a real stdio
+  MCP server in the standard library (notes_server.py) with list_notes, read_note and share_note, an
+  HMAC-signed token with a scope, an expiry and an owner (notes_token.py, issue_token.py), and a JSON
+  lines log (show_log.py). share_note sends nothing. The server takes its folder from its command line
+  and never sends roots/list, so the page says so and has the learner start the agent inside the notes
+  copy, where Claude Code's own write boundary also sits (code.claude.com/docs/en/security). The server
+  marks share_note with _meta anthropic/requiresUserInteraction, which makes Claude Code ask on every
+  call even with an allow rule (code.claude.com/docs/en/mcp, checked with Claude Code 2.1.281 in -p
+  mode, where the call was held for approval). The --env syntax for claude mcp add and local scope in
+  ~/.claude.json come from the same mcp page. The short-lived token advice and "clients should log tool
+  usage for audit" come from the 2025-06-18 spec (authorization and tools pages), the revision the
+  bibliography pins; the latest revision is 2026-07-28. In a trial with a small model the model
+  noticed the planted line and did not call share_note, so the exercise has the learner ask for the
+  send directly as a second run. Tool poisoning and shadowing come from the Invariant Labs post.
