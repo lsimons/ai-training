@@ -276,7 +276,7 @@ what the task needs, and add that directory, and only that one.
   options={[
     { text: 'The model misread the tool and picked the wrong one, so the tool description needs a rewrite.', why: 'list_directory is the right tool for the question that was asked. The path was the problem, and the description said nothing wrong.' },
     { text: 'The server refused a path outside its allowed list, which is the scope doing its job.', correct: true },
-    { text: 'The client blocked the call under a permission rule, so a rule on the list tool is too strict.', why: 'A client denial comes from the client, in the client\'s own words, and no server result is produced (@Claude Code permissions). Here the result came back from the server with isError set.' },
+    { text: 'The client blocked the call under a permission rule, so a rule on the list tool is too strict.', why: 'A client denial comes from the client, in the client\'s own words, and no server result is produced. Here the result came back from the server with isError set.' },
     { text: 'The stdio transport dropped the message, so the server should be restarted.', why: 'A transport failure shows up as a connection error in the client, and this call got a complete answer with a reason in it.' },
   ]}>
 The transcript shows `list_directory(path="/tmp")` answered with
