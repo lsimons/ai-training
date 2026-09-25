@@ -1,5 +1,9 @@
 id: coding-with-agents/tests-and-docs-that-hold
 title: Tests that prove behavior and docs that stay current
+description: >-
+  Break a small pricing module on purpose to find the agent-written tests that mirror the code,
+  rewrite one so it proves the price, keep the tests fast and whole in the agent's loop, and review
+  a change for the documentation it left stale.
 mode: tutorial
 covers: coding-with-agents/quality
 serves:
@@ -8,6 +12,11 @@ serves:
 introduces: [testing, documentation]
 assumes:
   - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
+extends-to:
+  - label: Reviewing what the agent pulled in
+    href: /coding-with-agents/dependency-review/
 after: [coding-with-agents/self-checking-loops]
 shorts: [a test that mirrors the implementation]
 exercise:
@@ -15,9 +24,24 @@ exercise:
   brief: >-
     Break the fixture on purpose and run its agent-written tests, keep the ones that fail, rewrite
     one that passed, and check which documentation the change left stale.
-sources: [Academy ai-native-sdlc-playbook, DLAI-7]
+sources: [Academy ai-native-sdlc-playbook, Claude Code best practices, Claude Code memory]
 issue: 176
 minutes: 15
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 notes: >-
   The plan named the topic safety/agent-risk as assumed; taken as the objective
-  safety/judges-agent-risk/names-blast-radius. Sources: DLAI-7 as inspiration, Academy ai-native-sdlc-playbook.
+  safety/judges-agent-risk/names-blast-radius, used where an agent that may edit the tests widens
+  the blast radius of a wrong change to the check itself. DLAI-7 was planned as inspiration only;
+  the page doesn't cite it, so it is dropped from sources (it stays on the topic). Sources: Academy
+  ai-native-sdlc-playbook (review and testing become the bottleneck once agents write most code,
+  paraphrased from the public course page), Claude Code best practices (prefer single tests to the
+  whole suite for speed, in its example instructions file; link to documentation instead of copying
+  it into CLAUDE.md), Claude Code memory (instructions files are loaded each session as context,
+  not enforced configuration). The fixtures under site/examples/coding-with-agents/tests-and-docs-that-hold/
+  are self-contained: shop/ is a pricing module with five agent-written tests, two of which mirror
+  the implementation. break_price.py sets SHIPPING to 5.95, rewrite_test.py also pins the small-order
+  test to 4.95, and the_change.py raises the free-shipping threshold to 60.00 and greps the three
+  documentation places the shop's AGENTS.md names. The page doesn't say "the previous lesson",
+  because self-checking-loops serves automates-the-check, which this lesson also serves; the git
+  tag steps are repeated on the page instead.
