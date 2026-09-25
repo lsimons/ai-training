@@ -31,6 +31,10 @@
  *   carries `title` or `description`;
  * - a lesson or course page has a citation token (`(@`) in a component prop
  *   string, which the citation plugin never renders (`propCitations`);
+ * - a lesson file, live or planned, has an `assumes` entry whose `section`
+ *   is not a `## ` heading slug of the named lesson's page
+ *   (`checkAssumedSections`); an entry whose lesson has no page yet is
+ *   skipped, and the build rejects a live page that names one;
  * - a lesson page in the `foundations` group shows a surface that needs a
  *   programmer (spec S03 "Foundations audience"): a `<Predict run=...>`, a
  *   fenced block tagged `sh`, `bash`, `shell`, `python` or `json`, or the
@@ -51,6 +55,7 @@ import { citationKeys, hasMultipleKeys, multipleKeysMessage } from '../../plugin
 import { jsxElements, literalOf, parseMdx, propValue } from '../../src/lib/checkpoint-tags.ts';
 import { checkExtendsToHref, checkExternalSourceHref } from '../../src/lib/extends-to.ts';
 import { unsupportedInline } from '../../src/lib/inline-markdown.ts';
+import { assumedSectionError, sectionSlugs } from '../../src/lib/section-slugs.ts';
 import { allTopics, courseLessonIds, readAreaTree } from './area-tree.mjs';
 import { predictTags } from './examples.mjs';
 
@@ -210,6 +215,37 @@ export function checkFoundationsAudience(tree, contentDir, pageIds, exempt = FOU
 			errors.push(
 				`scripts/lib/data.mjs: FOUNDATIONS_EXEMPT lists ${id} (#${issue}), which is not a foundations lesson page, so remove the line`,
 			);
+		}
+	}
+	return errors;
+}
+
+/**
+ * The `assumes[].section` rule (spec S11): in every lesson file, live or
+ * planned, an entry that names a `lesson` and a `section` names a `## `
+ * heading of that lesson's page, by the slug the build gives it
+ * (`src/lib/section-slugs.ts`). An entry whose lesson has no page under
+ * `contentDir` (`pageIds`) is skipped: the section can't exist yet, and the
+ * build's `MarkdownContent.astro` rejects a live page that names one.
+ * `rel` turns a data file path into the form `checkData` prints. Returns
+ * error strings in the format `checkData` uses.
+ */
+export function checkAssumedSections(tree, contentDir, pageIds, rel) {
+	const errors = [];
+	const pages = new Set(pageIds);
+	const slugsOf = new Map();
+	for (const a of tree.areas) {
+		for (const { data: l, file } of a.lessons) {
+			for (const x of l?.assumes ?? []) {
+				if (!x?.lesson || !x?.section || !pages.has(x.lesson)) continue;
+				if (!slugsOf.has(x.lesson)) {
+					// Without the frontmatter, which remark-parse would read as a `---` rule and a heading.
+					const src = readFileSync(join(contentDir, `${x.lesson}.mdx`), 'utf8').replace(/^---\n[\s\S]*?\n---\n/, '');
+					slugsOf.set(x.lesson, sectionSlugs(parseMdx(src)));
+				}
+				const error = assumedSectionError(rel(file), x.lesson, x.section, slugsOf.get(x.lesson));
+				if (error) errors.push(error);
+			}
 		}
 	}
 	return errors;
@@ -611,6 +647,7 @@ export function checkData(dataDir, contentDir, { foundationsExempt = FOUNDATIONS
 	for (const e of checkBehaviorCitations(tree, rel)) fail(e);
 	for (const e of checkSourceHrefs(tree, rel)) fail(e);
 	for (const e of checkFoundationsAudience(tree, contentDir, pages.keys(), foundationsExempt)) fail(e);
+	for (const e of checkAssumedSections(tree, contentDir, pages.keys(), rel)) fail(e);
 	for (const a of tree.areas) {
 		const index = join(contentDir, a.dir, 'index.mdx');
 		if (!existsSync(index)) continue;

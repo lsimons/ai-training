@@ -24,6 +24,14 @@
     "cspell-words.txt",
     ".vale/styles"
   ],
+  "overrides": [
+    {
+      "filename": "site/src/data/areas/*/lessons/*.yaml",
+      "ignoreRegExpList": [
+        "/^\\s*section: [a-z0-9-]+$/gm"
+      ]
+    }
+  ],
   "languageSettings": [
     {
       "languageId": "markdown,mdx",
