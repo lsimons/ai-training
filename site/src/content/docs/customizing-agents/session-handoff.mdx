@@ -1,0 +1,365 @@
+import { Choice, Match, MultiChoice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+A coding session often ends before the work does. The next session, yours
+tomorrow or a colleague's, starts without the conversation. In this lesson
+we end a session with a handoff file and measure what it saves: the number
+of turns a fresh session needs before it does useful work, first from the
+diff alone and then from the handoff.
+
+The lesson uses Claude Code, and the files are in the course repository at
+`site/examples/customizing-agents/session-handoff/`. `session.md` is the log
+of a session that stopped halfway, written for this lesson.
+`setup_practice.py` builds a practice repository in the state that session
+left behind, and `check_handoff.py` checks a handoff file. Both are short
+Python scripts. The first builds its repository in a new directory that
+you name, and the second only reads the file you give it. Run the commands in this lesson
+from that directory. In the `cd` line, replace `<course-repo>` with the
+path to your copy of the course repository.
+
+```sh
+cd <course-repo>/site/examples/customizing-agents/session-handoff
+```
+
+## What the next session starts from
+
+In Claude Code, each new session starts with a fresh context window and
+without the conversation of earlier sessions (@Claude Code how it works).
+At its start it loads `CLAUDE.md` and the auto-memory notes
+(@Claude Code memory). Everything else it learns from the repository, and
+that includes the changes that aren't committed yet.
+
+The agent course draws the line between a session and its state. The
+session is the full history of messages, tool calls and results. The state
+is a short summary of the facts that matter, which is quicker to use than
+the history (@AEC-05). A **session handoff** is that state, written to a
+file before the session ends: what was done, what is left, what was decided
+and why, what was tried and ruled out, and where the files are. The next
+session reads the file and starts from it.
+
+Claude Code can also reopen an old conversation. `claude --continue` picks
+up the most recent one, and `claude --resume` lets you choose one from a
+list (@Claude Code best practices). That helps when you continue the same
+work on the same computer, because the conversations are saved on your own
+machine, under `~/.claude/projects/` (@Claude Code how it works). A
+colleague on another machine can't resume them. A resumed conversation also
+brings back its whole history, and that includes the approaches that went
+wrong. After you correct the agent more than twice on the same problem, the
+best-practices page advises a clean session with a better prompt that
+includes what you learned (@Claude Code best practices). A handoff file is
+that better prompt, written down.
+
+<Choice id="what-a-new-session-has" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['session-handoff']}
+  context="In Claude Code, a session ended yesterday with work left to do. During it the user ruled out an approach in the chat. Auto-memory is turned off. Today a new session starts in the same repository, without --continue or --resume."
+  title="What does the new session know?" hint="Which of these is in a file that the new session reads, and which exists only in yesterday's conversation?"
+  options={[
+    { text: 'All of yesterday\'s conversation, because Claude Code saves every conversation on your machine.', why: 'The conversation is saved, and a new session still starts without it. Only --continue or --resume opens it again.' },
+    { text: 'The repository with its uncommitted changes, and nothing about why you ruled out the approach.', correct: true },
+    { text: 'The files the old session read, because Claude Code loads them again when a new session starts.', why: 'A new session loads CLAUDE.md and the auto-memory notes. It reads the other files only when it opens them itself.' },
+    { text: 'Only the last commit on main, because a new session ignores the changes that are not committed.', why: 'The agent reads the working tree, including the uncommitted changes, and git status and git diff show them.' },
+  ]}>
+Yesterday's session ended before the work was done, and nobody wrote
+anything down. What does today's new session have to go on?
+</Choice>
+
+## Start from the diff alone
+
+Read `session.md` first. In it a user and an agent work on a bug in a small
+report service: the export writes a report created at midnight on 1 March
+in Auckland as 11:00 on 28 February. The agent first changes the test to
+expect the wrong time. The user rules that out, and then rules out the
+server's time zone too. Three decisions follow, each with a reason. The
+session stops before any code is changed, and the edit to the test is
+still there.
+
+Build two practice repositories from the same state, one for this section
+and one for the rest of the lesson. The script refuses a directory that
+already exists.
+
+```sh
+python3 setup_practice.py ~/handoff-diff-only
+python3 setup_practice.py ~/handoff-practice
+```
+
+Here is what a fresh session finds in either of them: the output of
+`git status --short`, `git diff --stat=60` and the tests.
+
+<Predict id="what-the-diff-shows" title="Look at the practice repository"
+  answer={` M test_reports.py
+   test_reports.py | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+  tests: OK`}
+  run="customizing-agents/session-handoff/diff_only.py">
+Run these in `~/handoff-diff-only`, and compare with the output below. The
+last line is the verdict of `python3 -m unittest -q`.
+
+```sh
+git status --short
+git diff --stat=60
+python3 -m unittest -q
+```
+
+</Predict>
+
+The repository shows one changed line in a test and a green suite. It
+doesn't show that the change was ruled out, or why, or what the fix
+should look like. Now let a fresh session work from that. Start Claude
+Code in `~/handoff-diff-only` with two settings. The environment variable
+`CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` turns auto-memory off
+(@Claude Code memory), so no memory note can carry facts from one practice
+session to the next. `--permission-mode default` starts Manual mode, where
+the agent reads files freely and asks before each edit or command
+(@Claude Code permission modes), so you see each step it wants to take.
+
+```sh
+cd ~/handoff-diff-only
+CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 claude --permission-mode default
+```
+
+Type this as your first message:
+
+```text
+Continue the work in progress in this repository.
+```
+
+Count your turns: each message you type is one, and the first message
+counts. Useful work has started when the agent undoes the edit to the
+test, or starts to change `format_ts()` so that each time keeps its own
+offset. If the agent asks a question, answer it from `session.md`, and
+count the answer. Stop after five turns if useful work hasn't started, and
+write down "more than 5". Then leave with `/exit` and write down your
+count. A model answers differently each time, so your count may differ
+from a colleague's.
+
+<Scenario id="the-agent-says-done" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['session-handoff']}
+  context="A new Claude Code session starts in a repository where yesterday's session left one uncommitted edit: a test's expected value changed to match the code. The user ruled that edit out in yesterday's chat, and nothing was written down."
+  title="The fresh session says it is done" hint="Where is the reason that the edit is wrong, and what does the agent need so that the next session doesn't ask again?"
+  options={[
+    { text: 'Approve the commit, because the tests pass and the diff is only one line.', consequence: 'The commit makes the wrong expected value part of main. The export still writes Auckland reports on the wrong day, and now no test fails on it.' },
+    { text: 'Ask the agent to run the tests once more before it commits the change.', consequence: 'The tests pass again, because the edited test now expects the wrong time. You learn nothing that the agent didn\'t already say.' },
+    { text: 'Tell the agent to read the log of yesterday\'s session under ~/.claude/projects/ and work it out.', consequence: 'The agent spends several turns reading a long file of tool output. It may find the ruling, and the next session has to read the same file again.' },
+    { text: 'Tell the agent that the test edit was ruled out and why, and write the reason down for the next session.', correct: true, consequence: 'The agent undoes the edit and the test fails again, as it should. The reason is in a file now, so no later session has to be told a third time.' },
+  ]}>
+The fresh session answers: "The expected value in `test_export_timezone`
+was updated to match the UTC output, and all 4 tests pass. Shall I commit
+the change?" What do you do?
+</Scenario>
+
+## Write the handoff before the session ends
+
+A handoff is written by the session that did the work, before it ends. In
+this lesson that session is the one in `session.md`, so you replay it and
+then ask for the handoff. Start Claude Code in `~/handoff-practice` with
+the same two settings.
+
+```sh
+cd ~/handoff-practice
+CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 claude --permission-mode default
+```
+
+Open `session.md` in an editor, copy from the first `**User:**` line to
+the end, and paste it as your first message. If the agent asks to edit a
+file, answer no. Then ask for the handoff:
+
+```text
+Write HANDOFF.md for the next session on this work. Name the current state and the next step, every decision with its reason, the failing test, what was tried and ruled out and why, and the files to look at. Use only this conversation and the repository, and change no other file.
+```
+
+Approve the edit that writes `HANDOFF.md`, and leave with `/exit`. If
+Claude Code prints a message such as "Saved 1 memory", auto-memory is
+still on (@Claude Code memory). Then build a new practice repository with
+another name and start again.
+
+Check the file from the course directory:
+
+```sh
+cd <course-repo>/site/examples/customizing-agents/session-handoff
+python3 check_handoff.py ~/handoff-practice/HANDOFF.md
+```
+
+The script looks for the words that name each fact the next session needs
+and prints `named` or `missing`. It only matches words, so open the file
+and read it before you trust a `missing`. The course repository has two
+handoffs written for the lesson, and no model produced them.
+`samples/files-only.md` lists the changed file and the files to read, and
+it has no decisions.
+
+<Predict id="check-the-files-only-handoff" title="Check the handoff that lists files"
+  answer={`samples/files-only.md
+    state, undo the edit to test_reports.py: missing
+    decision, keep each offset, for customers: missing
+    decision, UTC stays Z, for billing: missing
+    decision, no offset means UTC: missing
+    failing test, test_export_timezone: missing
+    ruled out, the server's time zone: missing
+    where the fix goes, format_ts(): named
+  named 1 of 7`}
+  run="customizing-agents/session-handoff/files_only.py">
+Run this, and compare with the output below.
+
+```sh
+python3 check_handoff.py samples/files-only.md
+```
+
+</Predict>
+
+A fresh session that reads this file learns where to look and still
+repeats the test edit. `samples/full.md` has a section for the state,
+the decisions with their reasons, what was ruled out, and the next steps
+in order.
+
+<Predict id="check-the-full-handoff" title="Check the full handoff"
+  answer={`samples/full.md
+    state, undo the edit to test_reports.py: named
+    decision, keep each offset, for customers: named
+    decision, UTC stays Z, for billing: named
+    decision, no offset means UTC: named
+    failing test, test_export_timezone: named
+    ruled out, the server's time zone: named
+    where the fix goes, format_ts(): named
+  named 7 of 7`}
+  run="customizing-agents/session-handoff/full.py">
+Run this, and compare with the output below.
+
+```sh
+python3 check_handoff.py samples/full.md
+```
+
+</Predict>
+
+If your `HANDOFF.md` misses a fact that is really gone, add it by hand.
+The handoff is yours to correct before the next session reads it.
+
+<MultiChoice id="what-goes-in" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['session-handoff']}
+  context="A session on a time zone bug ends before the fix. The user ruled out one approach in the chat and made a decision with a reason. The agent is about to write HANDOFF.md for the next session."
+  title="Which lines earn their place?" hint="Which of these can the next session not find in the code, the tests or the diff?"
+  options={[
+    { text: 'Ruled out: converting to the server\'s time zone, because the servers run in UTC.', correct: true },
+    { text: 'Changed: test_reports.py, one line in the test for the time zone export.', why: 'git status and git diff show this in one command. The line tells the next session nothing it can\'t see.' },
+    { text: 'Decision: UTC stays in the Z form, because the billing import reads only that form.', correct: true },
+    { text: 'Output: the complete text of the last test run, with the trace of the failure.', why: 'The next session can run the tests again in one step. The raw output adds length and no reason.' },
+  ]}>
+Which two lines tell the next session something it can't find in the
+repository?
+</MultiChoice>
+
+## Start fresh from the handoff
+
+Now start a new session in `~/handoff-practice`, with the same two
+settings as before, and type:
+
+```text
+Read HANDOFF.md and continue the work.
+```
+
+Count the turns until useful work starts, by the same rule as before, and
+leave with `/exit`. Compare the two counts. With a handoff that names the
+ruled-out edit, the agent can start on the next step in its first answer.
+Without it, the agent may commit the wrong test, or you spend turns
+telling it what the log says. One pair of counts says little on its own,
+because a model answers differently each time. The handoff changes what
+the agent knows at its first turn, and that holds on every run.
+
+The handoff is for this piece of work, and it goes where the work is. Keep
+`HANDOFF.md` on the branch until the work is done, and delete it with the
+last commit. A fact that outlives the work belongs somewhere else. A
+decision with lasting reasons, such as the `Z` form for the billing
+import, goes in a decision file, as
+[Keep the reasons where the agent reads them](/coding-with-agents/keeping-understanding/#keep-the-reasons-where-the-agent-reads-them)
+described. A rule that every session needs goes in the project-root
+`CLAUDE.md`, which each session loads at its start (@Claude Code memory).
+
+<Sort id="diff-or-handoff" phase="review" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['session-handoff']}
+  context="A session on a time zone bug in a report service ended before the fix, with one uncommitted edit to a test. A new session starts in the same repository tomorrow, without the old conversation."
+  title="Can the next session see it?" hint="Can git status, git diff or a test run show this, or was it only said in the chat?"
+  buckets={['The next session finds it in the repository', 'Only a handoff can tell the next session']}
+  items={[
+    { text: 'Which file has a change that is not committed', bucket: 0 },
+    { text: 'Whether the tests pass right now', bucket: 0 },
+    { text: 'That the edit to the test was ruled out, and why', bucket: 1 },
+    { text: 'That the server\'s time zone was tried and rejected', bucket: 1 },
+    { text: 'That the database team confirmed old rows are UTC', bucket: 1 },
+  ]} />
+
+<Match id="where-it-goes" phase="review" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['session-handoff', 'context-files']}
+  context="A developer ends a Claude Code session on a bug fix that continues tomorrow. Each row is a piece of information from the session, and the options are places to put it."
+  title="Where does each fact go?" hint="Is the fact needed for this piece of work only, for every session on the project, or can the next session see it anyway?"
+  options={['Leave it out, the repository shows it', 'HANDOFF.md, for the next session on this work', 'The project-root CLAUDE.md, for every session']}
+  rows={[
+    { statement: 'The full output of the last test run', option: 0, why: 'What does the next session get when it runs the tests itself?' },
+    { statement: 'The approach you tried this afternoon and rejected, with the reason', option: 1, why: 'Is this needed after the bug is fixed?' },
+    { statement: 'The team rule that no session changes files under migrations/', option: 2, why: 'Which file does Claude Code load at the start of every session?' },
+  ]}
+  rationale="A handoff holds what the next session on this work can't see, and a rule for every session goes in a file that each session loads.">
+Match each piece of information to where it goes before the session ends.
+</Match>
+
+<Scenario id="the-colleague-takes-over" phase="review" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['session-handoff']}
+  context="A developer's Claude Code session on a bug is halfway done and has ruled out two approaches in the chat. A colleague takes the work over tomorrow on their own computer, while the developer is away."
+  title="A colleague takes over" hint="Which of these can the colleague's own session read tomorrow, on another computer?"
+  options={[
+    { text: 'Tell the colleague to run claude --continue in the repository tomorrow.', consequence: 'The conversation is saved on your machine, so the colleague\'s --continue has nothing of yours to resume. Their session starts fresh.' },
+    { text: 'Have the agent write HANDOFF.md with the decisions and the ruled-out approaches, and push it on the branch.', correct: true, consequence: 'The colleague\'s session reads the file at its first turn and starts on the next step, without trying the two approaches again.' },
+    { text: 'Commit the work so far, with a commit message that says the fix is still in progress.', consequence: 'The commit shows what changed. The colleague\'s session doesn\'t learn which approaches were ruled out, and tries the first of them again.' },
+    { text: 'Leave the work as it is, because the agent will work it out from the code.', consequence: 'The code shows what exists, not what was rejected. The colleague\'s session spends its first turns on an approach you already ruled out.' },
+  ]}>
+You leave tomorrow, and a colleague continues the bug on their own
+computer. What do you do before you close the session?
+</Scenario>
+
+<Pitfall title="The handoff that listed only files">
+A developer ends the session with a handoff that lists the changed files,
+the files to read and "tests pass". The next morning a fresh session
+reads it, sees the edited test and the green suite, and commits the edit
+that was ruled out the day before. Every line of the handoff was true, and
+none of them said what was decided or why. A list of files repeats what
+`git status` shows. Write the decisions with their reasons and what was
+ruled out, because those facts are in no file.
+</Pitfall>
+
+<Exercise stretch="Write a second handoff by hand for the same session, from the log alone and without the agent. Start a new practice repository from it and compare its count with the first.">
+If you followed the steps above, you have the exercise: your
+`HANDOFF.md`, its result from `check_handoff.py`, and two counts. Otherwise
+do the steps now: build two practice repositories, count the turns of a
+fresh session in the first, replay `session.md` in the second and have
+the agent write `HANDOFF.md`, and count the turns of a fresh session that
+starts from it. The agent works in copies that the script built, and in
+Manual mode it asks before each edit. The steps take about fifteen minutes and
+show you what a handoff saves in turns.
+
+A good result: `HANDOFF.md` names the ruled-out test edit, the server's
+time zone, the three decisions with their reasons and the failing test,
+and the fresh session starts useful work in its first turn or second
+turn. The count without a handoff is higher, or the agent went wrong
+where you didn't correct it. When you are done, delete the two practice
+directories. In your own last session that stopped halfway, what did you
+rule out that no file shows?
+</Exercise>
+
+<Recap>
+1. A new Claude Code session starts without the old conversation. It
+   loads `CLAUDE.md` and auto-memory and reads the rest from the repository
+   (@Claude Code how it works) (@Claude Code memory).
+2. A session handoff is the state of the work written to a file before the
+   session ends: what is done, what is left, the decisions with their
+   reasons, what was ruled out, and where the files are (@AEC-05).
+3. The diff shows what changed. The reasons and the rejected approaches are
+   only in the conversation, so they are what the handoff must hold.
+4. Resuming works on your own machine, and it brings back the approaches
+   that went wrong too. A handoff works for any session and for a colleague
+   (@Claude Code how it works) (@Claude Code best practices).
+5. Keep the handoff with the work and delete it when the work is done. Move
+   a lasting decision to a decision file and a rule for every session to
+   `CLAUDE.md`.
+</Recap>
+
+<Habit id="write-the-handoff-before-you-stop">
+The next time you stop a session before the work is done, have the agent
+write a handoff with the decisions and what was ruled out, and read it
+before you close the session.
+</Habit>

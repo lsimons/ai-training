@@ -267,6 +267,10 @@ export const UNRUN_EXEMPT = new Map([
 		'customizing-agents/mcp-hardening/issue_token.py',
 		'the learner runs it to make a token for their own session; its output holds the current time, and the page shows the command and none of its output',
 	],
+	[
+		'customizing-agents/session-handoff/setup_practice.py',
+		'a setup tool the learner runs with a directory of their own; its output holds that path, and diff_only.py runs the same build and checks the output the page shows',
+	],
 	['safety/assessing-a-use-case/score_use_cases.py', FOUNDATIONS],
 	['safety/checking-habits/totals.py', FOUNDATIONS],
 	['safety/checking-what-an-agent-changed/replay.py', FOUNDATIONS],
