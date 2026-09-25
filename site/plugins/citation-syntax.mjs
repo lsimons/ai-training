@@ -86,6 +86,14 @@ export function citationSpans(text) {
  * text, so it also sees a `(@key)` inside a code block, which the remark
  * plugin leaves alone; the data check accepts that, because no lesson shows
  * the syntax in code.
+ *
+ * It can also disagree with the plugin in the other direction. A hard break
+ * (two trailing spaces before the newline) or a line that starts a block
+ * inside `(@...)` splits the token over two remark nodes, so the page shows
+ * the literal token while this function still returns its key, and
+ * `mise run data` passes. The unresolved citation check on the built pages
+ * (scripts/lib/rendered-citations.mjs, run by `mise run bundles`) rejects
+ * such a page.
  * @param {string} source
  * @returns {string[]}
  */
