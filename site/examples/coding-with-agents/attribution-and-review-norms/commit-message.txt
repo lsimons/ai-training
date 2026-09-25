@@ -1,0 +1,8 @@
+fix: read quoted amounts in the nightly import
+
+The importer split "1,250.00" into two fields. It now reads each row
+with the csv module, so a quoted amount stays one field.
+Assisted-by: Claude:claude-sonnet-4-6
+I also tidied up the date parsing while I was in the file.
+
+Signed-off-by: Coding Agent <agent@example.com>

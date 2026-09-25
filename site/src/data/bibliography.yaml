@@ -1021,3 +1021,31 @@ Claude Code all settings:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/settings-reference
+Git docs git-interpret-trailers:
+  type: reference
+  title: git-interpret-trailers
+  container: Git reference documentation
+  author: The Git project
+  license: GPL-2.0
+  url: https://git-scm.com/docs/git-interpret-trailers
+GitHub docs creating-a-commit-with-multiple-authors:
+  type: reference
+  title: Creating a commit with multiple authors
+  container: GitHub documentation
+  author: GitHub
+  license: CC BY 4.0
+  url: https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors
+DCO:
+  type: reference
+  title: Developer Certificate of Origin, version 1.1
+  container: developercertificate.org
+  author: The Linux Foundation and its contributors
+  license: Verbatim copies only
+  url: https://developercertificate.org/
+Linux coding assistants:
+  type: reference
+  title: AI Coding Assistants
+  container: The Linux kernel documentation
+  author: The kernel development community
+  license: GPL-2.0
+  url: https://docs.kernel.org/process/coding-assistants.html
