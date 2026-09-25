@@ -45,13 +45,15 @@ Spawn agents by name and by nothing else:
 Judge each issue's size before you spawn its builder. Split an issue that
 touches more than one lesson or more than about 10 files into two builders
 with disjoint files, on branches `feat/<issue>-<slug>-1` and `-2`, and say
-so in the wave plan. Split into two halves at most. Each half is reviewed
-in its own worktree, `review-<issue>-1` and `-2`, with its own
+so in the wave plan. Split into two halves at most. An issue too big for
+two halves leaves the wave, and your report names it for triage. Each half
+is reviewed in its own worktree, `review-<issue>-1` and `-2`, with its own
 `review.diff`.
 
 A builder that stops at its turn limit pushes its branch and hands back a
 list of what is left. Spawn a fresh builder on the same branch and
-worktree, with that list as its brief.
+worktree, with that list as its brief. Marking an unfinished branch is
+issue #418.
 
 A reviewer returns its review as its final text, ending in a `Verdict:`
 line. Post that text on the ISSUE yourself with `gh issue comment`, then
