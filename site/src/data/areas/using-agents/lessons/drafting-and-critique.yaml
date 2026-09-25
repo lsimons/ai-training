@@ -25,9 +25,10 @@ shorts: [Grading against stated criteria]
 exercise:
   kind: do
   brief: >-
-    Brief the assistant for a short email (audience, purpose, two points that must appear, tone),
-    then hand the draft back as "a colleague's text" with three stated criteria and ask for problems
-    only. Compare the two answers.
+    Brief the assistant for a short email (audience, purpose, two points that must appear, tone,
+    length) with two or three done-criteria, and mark every fact in the draft as from the brief, a
+    placeholder or added by the model. Then paste the draft into a fresh chat as a colleague's text
+    with those criteria, and ask for problems only, pass or fail per criterion.
 sources: [Sharma 2023]
 issue: 142
 minutes: 15
@@ -35,9 +36,9 @@ notes: >-
   The plan listed DLAI-3 and two Claude Academy courses as sources. The page makes no claim that
   needs them, so it cites only Sharma 2023, whose feedback-sycophancy experiment (section 3.1) found
   more positive feedback when the user says they wrote or like a text and more negative feedback
-  when they say they did not write it. That is the basis for calling the text a colleague's. The
-  advice to open a fresh chat for the critique is the author's inference from the same finding and
-  is worded as advice. The critique criteria are the done-criteria of the drafting brief, which
+  when they say they did not write it. That is the basis for calling the text a colleague's, and
+  the page says the framing leans the critique harsh, so the learner judges each finding. The
+  fresh chat keeps the earlier praise and the draft request out of what the model reads. The critique criteria are the done-criteria of the drafting brief, which
   ties writes-a-brief ("done-criteria are written before the work starts") to reviews-against-brief
   (walking the criteria one by one). No fixture: the learner uses a chat tool, and every exchange
   is illustrative. The example email names no company or person.
