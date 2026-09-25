@@ -173,7 +173,8 @@ table with one row per branch: the issue, the branch, a link to the review
 comment, and a link to the re-check comment where there was one. The
 review record is then on GitHub next to the pull request that shipped it.
 The maintainer approves the wave, and the coordinator merges it with
-`AI_TRAINING_ROLE=coordinator gh pr merge <n> --rebase` as usual. The deploy happens once.
+`AI_TRAINING_ROLE=coordinator gh pr merge <n> --rebase` as usual. The
+deploy happens once.
 
 The cases that come up:
 
