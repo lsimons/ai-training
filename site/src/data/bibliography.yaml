@@ -867,3 +867,24 @@ Claude Code hooks:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/hooks
+Claude Code costs:
+  type: reference
+  title: Manage costs effectively
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/costs
+Claude Code commands:
+  type: reference
+  title: Commands
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/commands
+Claude docs tool-search-tool:
+  type: reference
+  title: Tool search tool
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool
