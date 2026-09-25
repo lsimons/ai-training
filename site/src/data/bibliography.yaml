@@ -1014,3 +1014,10 @@ RFC 2606:
   author: Eastlake and Panitz
   license: Copyright Internet Society
   url: https://www.rfc-editor.org/rfc/rfc2606
+Claude Code all settings:
+  type: reference
+  title: All settings
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/settings-reference
