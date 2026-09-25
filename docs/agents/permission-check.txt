@@ -1,9 +1,0 @@
-Permission check
-================
-
-A scratch file used to test whether an agent session can complete the
-full loop: create a branch, create an issue, open a pull request, and
-merge it.
-
-Created: 2026-09-25
-Delete this file once the check is done.
