@@ -12,6 +12,7 @@ import {
 	liveLessons as liveLessonList,
 	liveTopicLessonIds,
 	pageCheckpoints,
+	pageExamples,
 } from '../scripts/lib/live-lessons.mjs';
 import { STORAGE_KEY, storageKeyFor, VERSION } from '../src/scripts/progress-model';
 
@@ -46,6 +47,14 @@ export function liveTopicLessons(topic: string): string[] {
  */
 export function lessonCheckpoints(lesson: string): { id: string; kind: string; phase: string }[] {
 	return pageCheckpoints(CONTENT_DIR, lesson);
+}
+
+/**
+ * The ungraded examples a lesson page shows, `{ id, run }` in page order, read from its MDX source: every
+ * `<Predict>` without an `objective`, with the fixture CI verifies it from.
+ */
+export function lessonExamples(lesson: string): { id: string; run: string | undefined }[] {
+	return pageExamples(CONTENT_DIR, lesson);
 }
 
 /** A partial progress record to seed before the first navigation. */
@@ -166,23 +175,31 @@ export async function passRemaining(page: Page) {
 	const ids = (
 		await page.locator('[data-checkpoint]:not([data-state="passed"])').evaluateAll((els) => els.map((el) => el.id))
 	).filter((id) => id !== '');
-	for (const id of ids) {
-		const cp = page.locator(`[data-checkpoint][id="${id}"]`);
-		const kind = await cp.getAttribute('data-kind');
-		if (kind === 'predict') {
-			const answer = await cp.locator('.cp-predict').getAttribute('data-answer');
-			if (answer === null) throw new Error(`passRemaining: predict ${id} has no data-answer to type`);
-			await cp.locator('textarea').fill(answer);
-		} else if (kind === 'choice' || kind === 'scenario') {
-			await cp.locator('label[data-correct]').click();
-		} else if (kind === 'order') {
-			await orderByButtons(cp);
-		} else {
-			throw new Error(`passRemaining: no solver for the ${kind} checkpoint ${id}`);
-		}
-		await cp.locator('.cp-check').click();
-		await expect(cp).toHaveAttribute('data-state', 'passed');
+	for (const id of ids) await passCheckpoint(page, id);
+}
+
+/**
+ * Pass the checkpoint `id` of the page on its first try, with the solver for its kind (see `passRemaining`).
+ * Another kind throws.
+ */
+export async function passCheckpoint(page: Page, id: string) {
+	const cp = page.locator(`[data-checkpoint][id="${id}"]`);
+	// Hydrated: the script sets `data-state` when it binds the checkpoint.
+	await expect(cp).toHaveAttribute('data-state', /./);
+	const kind = await cp.getAttribute('data-kind');
+	if (kind === 'predict') {
+		const answer = await cp.locator('.cp-predict').getAttribute('data-answer');
+		if (answer === null) throw new Error(`passCheckpoint: predict ${id} has no data-answer to type`);
+		await cp.locator('textarea').fill(answer);
+	} else if (kind === 'choice' || kind === 'scenario') {
+		await cp.locator('label[data-correct]').click();
+	} else if (kind === 'order') {
+		await orderByButtons(cp);
+	} else {
+		throw new Error(`passCheckpoint: no solver for the ${kind} checkpoint ${id}`);
 	}
+	await cp.locator('.cp-check').click();
+	await expect(cp).toHaveAttribute('data-state', 'passed');
 }
 
 /**

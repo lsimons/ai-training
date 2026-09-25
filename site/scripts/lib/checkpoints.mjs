@@ -119,6 +119,21 @@ export function conceptIds(dataDir) {
 }
 
 /**
+ * The `id` of a checkpoint tag as the page uses it: a string written as
+ * `id="..."`. `undefined` for a missing id, an `id={...}` expression or a
+ * value that is not a string, which the export check reports as an error.
+ * `live-lessons.mjs` uses the same guard, so the e2e specs and this check
+ * agree on which tags have an id.
+ * @param {{ attrs: Map<string, { value: unknown, expr: boolean }> }} tag
+ * @returns {string | undefined}
+ */
+export function checkpointTagId(tag) {
+	const id = tag.attrs.get('id');
+	if (!id || id.expr || typeof id.value !== 'string') return undefined;
+	return id.value;
+}
+
+/**
  * `<lesson>#<id>` for every checkpoint tag in every lesson page under
  * `contentDir`, read with the same reader the build uses. A tag the reader
  * rejects fails the build first, so it is reported here as an error rather
@@ -134,9 +149,9 @@ export function pageCheckpointIds(contentDir, dataDir) {
 		if (!lessons.has(lesson)) continue;
 		try {
 			for (const t of checkpointTagsOfSource(readFileSync(p, 'utf8'), lesson)) {
-				const id = t.attrs.get('id');
-				if (!id || id.expr || typeof id.value !== 'string') errors.push(`${lesson}: <${t.tag}> without an id="..."`);
-				else out.add(`${lesson}#${id.value}`);
+				const id = checkpointTagId(t);
+				if (id === undefined) errors.push(`${lesson}: <${t.tag}> without an id="..."`);
+				else out.add(`${lesson}#${id}`);
 			}
 		} catch (e) {
 			errors.push(e.message);
