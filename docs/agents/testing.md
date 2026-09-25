@@ -129,14 +129,15 @@ For a one-off check of the built site prefer `mise run site-preview` or
   `site/e2e/`, one spec file per mechanism. Seed progress with the `seed`
   fixture instead of clicking through an earlier flow, and use auto-waiting
   `expect(locator)` assertions rather than sleeps. A count of live lessons
-  in a course or a topic, or of the checkpoints on a lesson page, comes from
-  `liveCourseLessons`, `liveTopicLessons` or `lessonCheckpoints` in
+  in a course or a topic, of the checkpoints on a lesson page, or of its
+  ungraded examples, comes from `liveCourseLessons`, `liveTopicLessons`,
+  `lessonCheckpoints` or `lessonExamples` in
   `site/e2e/fixtures.ts` (over `site/scripts/lib/live-lessons.mjs`), never
   from a literal, so a new lesson page or checkpoint doesn't change a spec.
-  `passRemaining` passes whatever checkpoints a page still has open, for
-  the kinds it has a solver for (`predict`, `choice`, `scenario` and
-  `order`), and throws on any other kind, so a lesson that gains one says
-  so.
+  `passRemaining` passes whatever checkpoints a page still has open, and
+  `passCheckpoint` passes one by its id. Both work for the kinds with a
+  solver (`predict`, `choice`, `scenario` and `order`), and throw on any
+  other kind, so a lesson that gains one says so.
 - **A code example's output** is already asserted: `<Predict run="..." answer="...">` names the fixture and `mise run examples` compares it, so it gets no separate test.
 
 ## Rules from review

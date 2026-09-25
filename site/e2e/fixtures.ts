@@ -136,14 +136,6 @@ export async function storedRecord(page: Page, key = STORAGE_KEY): Promise<Recor
 	return page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? '{}'), key);
 }
 
-/** Answer a choice or scenario checkpoint with its correct option and press Check. */
-export async function answerChoice(page: Page, id: string) {
-	const cp = page.locator(`#${id}`);
-	await cp.locator('label[data-correct]').click();
-	await cp.locator('.cp-check').click();
-	await expect(cp).toHaveAttribute('data-state', 'passed');
-}
-
 /** Move each row of an `order` checkpoint up with its button until the rows are in `data-pos` order. */
 export async function orderByButtons(cp: Locator) {
 	const items = cp.locator('ol li');
@@ -161,10 +153,9 @@ export async function orderByButtons(cp: Locator) {
 
 /**
  * Pass every checkpoint of the page that is not passed yet, each on its first
- * try, in page order. A `predict` gets the answer the page carries in
- * `data-answer`, a `choice` or `scenario` its correct option, and an `order`
- * is sorted with the buttons. Another kind throws, so a lesson that gains one
- * says so instead of failing on a later assertion.
+ * try, in page order, with `solveCheckpoint`. A kind it has no solver for
+ * throws, so a lesson that gains one says so instead of failing on a later
+ * assertion.
  */
 export async function passRemaining(page: Page) {
 	// Wait for hydration: a checkpoint has no `data-state` until the script binds it, and a seeded pass
@@ -184,22 +175,34 @@ export async function passRemaining(page: Page) {
  */
 export async function passCheckpoint(page: Page, id: string) {
 	const cp = page.locator(`[data-checkpoint][id="${id}"]`);
+	await solveCheckpoint(cp);
+	await expect(cp).toHaveAttribute('data-state', 'passed');
+}
+
+/**
+ * Answer the checkpoint `cp` correctly by its `data-kind` and press Check, once the script has bound it. A
+ * `predict` gets the answer the page carries in `data-answer`, a `choice` or `scenario` its correct option, and
+ * an `order` is sorted with the buttons. Another kind throws. It takes a locator, so it also solves the item the
+ * review page serves, which has no id of its own.
+ */
+export async function solveCheckpoint(cp: Locator) {
 	// Hydrated: the script sets `data-state` when it binds the checkpoint.
 	await expect(cp).toHaveAttribute('data-state', /./);
 	const kind = await cp.getAttribute('data-kind');
+	const name = (await cp.getAttribute('data-progress-id')) ?? (await cp.getAttribute('id'));
 	if (kind === 'predict') {
 		const answer = await cp.locator('.cp-predict').getAttribute('data-answer');
-		if (answer === null) throw new Error(`passCheckpoint: predict ${id} has no data-answer to type`);
+		if (answer === null) throw new Error(`solveCheckpoint: predict ${name} has no data-answer to type`);
 		await cp.locator('textarea').fill(answer);
 	} else if (kind === 'choice' || kind === 'scenario') {
 		await cp.locator('label[data-correct]').click();
 	} else if (kind === 'order') {
 		await orderByButtons(cp);
 	} else {
-		throw new Error(`passCheckpoint: no solver for the ${kind} checkpoint ${id}`);
+		throw new Error(`solveCheckpoint: no solver for the ${kind} checkpoint ${name}`);
 	}
-	await cp.locator('.cp-check').click();
-	await expect(cp).toHaveAttribute('data-state', 'passed');
+	// `first()`: once answered, the review page adds a "Next item" button with the same class.
+	await cp.locator('.cp-check').first().click();
 }
 
 /**
