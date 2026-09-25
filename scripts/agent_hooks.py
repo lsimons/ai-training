@@ -604,6 +604,42 @@ def writes_a_file(command: str) -> bool:
     )
 
 
+# Stands for the `$` of a shell expansion in the words `review_bash` checks,
+# so a sed script built from a variable is rejected (#388 review).
+EXPANSION = "\x00"
+
+
+def mark_expansions(command: str) -> str:
+    """The command with the `$` of each shell expansion replaced by `EXPANSION`.
+
+    A `$` starts an expansion outside single quotes and without a backslash
+    before it, when a name, a digit, `{`, `(`, a quote or a special
+    parameter follows. The `$` of the sed last-line address (`'$p'`) and of
+    a regex anchor (`/foo$/`) stays.
+    """
+    out: list[str] = []
+    quote = ""
+    i = 0
+    while i < len(command):
+        char = command[i]
+        if quote == "'":
+            if char == "'":
+                quote = ""
+        elif char == "\\":
+            out.append(command[i : i + 2])
+            i += 2
+            continue
+        elif char == '"':
+            quote = "" if quote else '"'
+        elif char == "'" and not quote:
+            quote = "'"
+        elif char == "$" and re.match(r"[A-Za-z0-9_{('\"@*#?!$-]", command[i + 1 : i + 2]):
+            char = EXPANSION
+        out.append(char)
+        i += 1
+    return "".join(out)
+
+
 def sed_prints_only(args: Sequence[str]) -> bool:
     """True for `sed -n` with print-only scripts (`1,20p`, `/a/,/b/p`).
 
@@ -631,14 +667,18 @@ def sed_prints_only(args: Sequence[str]) -> bool:
         i += 1
     if not scripts and operands:
         scripts.append(operands.pop(0))
-    return quiet and bool(scripts) and all(SED_PRINT.fullmatch(s) for s in scripts)
+    return (
+        quiet
+        and bool(scripts)
+        and all(SED_PRINT.fullmatch(s) and EXPANSION not in s and "`" not in s for s in scripts)
+    )
 
 
 def sort_writes(args: Sequence[str]) -> bool:
     """True when `sort` writes a file (`-o`) or runs a program (`--compress-program`)."""
     return any(
-        word.startswith(("--output", "--compress-program"))
-        or re.fullmatch(r"-[a-zA-Z]*o.*", word) is not None
+        # GNU and BSD sort accept any unambiguous prefix of a long option.
+        word.startswith(("--o", "--co")) or re.fullmatch(r"-[a-zA-Z]*o.*", word) is not None
         for word in args
     )
 
@@ -662,8 +702,8 @@ def review_allows(words: Sequence[str]) -> bool:
     if words[0] in {"cd", "done"}:
         return True
     if words[0] == "for":
-        # The loop header: its word list is data, and the body segments
-        # are checked one by one.
+        # The loop header. The body segments are checked one by one, but a
+        # command substitution in the word list isn't checked (#414).
         return len(words) >= 2 and words[1].isidentifier() and words[2:3] in ([], ["in"])
     if words[0] == "sed":
         return sed_prints_only(words[1:])
@@ -696,12 +736,13 @@ def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
     # The splitter reads the `&` of `2>&1` as an operator, so drop the
     # redirects writes_a_file allows before splitting.
     harmless = re.sub(r"(\d*|&)>>?(&(\d+|-)|\s*/dev/null)", " ", command)
-    for segment in split_segments(harmless, "."):
+    for segment in split_segments(mark_expansions(harmless), "."):
         if segment.role is not None or not review_allows(segment.words):
             allowed = ", ".join(" ".join(c) for c in REVIEW_COMMANDS)
             tasks = ", ".join(REVIEW_TASKS)
+            shown = " ".join(segment.words).replace(EXPANSION, "$")
             return 2, (
-                f"Blocked by the code-reviewer hook: `{' '.join(segment.words)}` is not a "
+                f"Blocked by the code-reviewer hook: `{shown}` is not a "
                 f"review command. A reviewer runs only {allowed}, sed -n with p scripts, "
                 f"for loops over these, cd, and mise run with one of {tasks}. "
                 "A reviewer never edits."

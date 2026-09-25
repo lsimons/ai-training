@@ -23,9 +23,10 @@ these, and `mise run` of one check task (`setup`, `py-lint`,
 `py-typecheck`, `py-test`, `prose`, `spell`, `examples`, `data`,
 `site-check`, `site-lint`, `site-test`, `site-build`, `checkpoints`,
 `bundles`). `fast`, `ci` and the formatters are blocked, because they can
-rewrite files. It rejects a redirect to any file but `/dev/null`. The platform may not
-give you the Grep and Glob tools next to Bash, so search with `grep -rn`
-and list with `ls`. `AGENTS.md` is already loaded, so don't read it again.
+rewrite files. It rejects a redirect to any file but `/dev/null`. The
+platform may not give you the Grep and Glob tools next to Bash, so search
+with `grep -rn` and list with `ls`. `AGENTS.md` is already loaded, so
+don't read it again.
 
 Your prompt names the issue, the branch, the review worktree (detached at
 the branch tip) and the diff file the lead wrote there (`review.diff`).
