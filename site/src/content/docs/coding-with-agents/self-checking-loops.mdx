@@ -1,0 +1,368 @@
+import { Choice, MultiChoice, Match, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response, Habit } from '@components/lesson';
+
+At the end of the previous lesson you checked the agent's fix yourself:
+you ran the reproduction steps on every night and compared the totals.
+That check works, but only you can run it, and you run it once. In this
+lesson the same steps become a test the coding agent runs after every
+change it makes. Then you give the agent a limit on how often it may try,
+and a rule that it may not change the test, and you confirm afterwards
+that it kept to both.
+
+The program is the nightly sales import from the previous lesson, before
+the fix. Here are the reproduction steps you wrote there.
+
+```text
+From nightly/, run: python3 importer.py nights/2026-09-15/*.csv
+Expected: a total in euros, exit status 0
+Actual: the batch is rejected, exit status 1
+Reruns: 3 of 3 fail. The 14th and the 16th pass 3 of 3,
+with totals 22975.95 EUR and 23257.33 EUR.
+```
+
+## Write the check as a test
+
+A check that only you can run gets run when you remember it. A check the
+agent can run gets run on every attempt, because the agent can run it
+and read the result without you (@Academy ai-native-sdlc-playbook). The
+vendor guide for Claude Code gives the same advice: give the agent a
+check with a pass or fail result, such as tests, a build, or a script
+that compares the output with a known good result. After each change the agent
+runs the check and reads the result, and it keeps working until the
+check passes (@Claude Code best practices).
+
+For the nightly import, the check is `test_nights.py`, a short Python
+script in the course repository. It runs the importer on each night the
+way the nightly job does, and prints one line per night. It exits with
+status 0 when every night passes, and with status 1 when one fails. These
+are the nights it knows:
+
+```python
+# Each night, with the total it must print, or None when the total is not
+# pinned yet.
+NIGHTS = {
+    "2026-09-14": "22975.95 EUR",
+    "2026-09-15": None,
+    "2026-09-16": "23257.33 EUR",
+    "2026-09-17": None,
+}
+```
+
+A night passes when the importer exits with status 0 and parses every
+data row of the night's exports, and for the 14th and the 16th, when it
+prints the same total as before. The test counts the rows itself, one per
+line after the header. That count is there because of the previous
+lesson: a "fix" that skips a row it can't read also exits with status 0,
+and the row count is what catches it.
+
+From the root of your clone of the course repository, copy the import
+and the test to a place of your own, and run the test there.
+
+```sh
+cp -R site/examples/coding-with-agents/observing-and-debugging/nightly ~/loop-me
+cp site/examples/coding-with-agents/self-checking-loops/test_nights.py ~/loop-me/
+cd ~/loop-me
+python3 test_nights.py; echo "exit status $?"
+```
+
+<Predict id="run-the-test" title="The test, before any fix"
+  answer={`2026-09-14: pass
+  2026-09-15: FAIL: exit status 1; parsed 39 rows, expected 40 rows
+  2026-09-16: pass
+  2026-09-17: FAIL: exit status 1; parsed 46 rows, expected 47 rows
+  2 passed, 2 failed
+  exit status 1`} run="coding-with-agents/self-checking-loops/run_test.py">
+Run the test in your copy and compare what you see with the output below.
+</Predict>
+
+The examples in this lesson aren't graded. Each one is a command you
+run, with output the course checks on every build.
+
+The output is written for a reader who wasn't there. Each failing line
+names the night and what went wrong, so the agent can read it and decide
+what to try next, and the last line and the exit status give the verdict
+in one place.
+
+<Choice id="a-check-the-agent-can-run" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['bounded-self-checking-loops']}
+  context="A team has a job that builds a sales report as a PDF every morning. Today a person checks it by hand. The team wants a coding agent to change the job and check its own work."
+  title="Which check can the agent run?" hint="Which option gives the agent a result it can read without asking a person?"
+  options={[
+    { text: 'A script that builds the report from yesterday\'s input and exits with status 1 when a total differs from the finance export.', correct: true },
+    { text: 'A line in the brief asking the agent to make sure the totals look right before it says it is done.', why: 'The agent would judge its own work by eye. Nothing gives it a pass or a fail it can read.' },
+    { text: 'A request that the agent paste the finished PDF into the chat, so that you can look over the totals yourself.', why: 'You are still the check, and you look once. The agent can\'t rerun you after each change.' },
+    { text: 'A rule in the project instructions saying that the totals in the report must always match the finance export.', why: 'The rule states the goal, and there is still nothing to run. The agent can\'t tell from it whether its change broke a total.' },
+  ]}>
+Today the check is "open the PDF each morning and see that the totals
+are right". Which rewrite gives the agent a check it can run and read?
+</Choice>
+
+## Brief the loop with a limit
+
+A **bounded self-checking loop** is a loop where the agent runs the
+check, fixes and reruns, with a limit you set. The brief sets two
+limits. The first is a number of attempts, after which the agent stops
+and reports what it found, pass or fail. The second says what the agent
+may change, and the check itself is not on that list. Without the
+limits, an agent told to keep going until the test passes can keep going
+for a long time, and the shortest way to a passing test is often to
+change the test. Automating a check is one of the verification skills
+in Brilliant's map, and the limits are what make it safe to hand over
+(@Brilliant VER).
+
+The transcript below is illustrative and doesn't record a specific
+model's words.
+
+<Prompt model="illustrative" recorded="illustrative">
+Run `python3 test_nights.py` in this directory. It fails on the 15th and
+the 17th, because `read_rows` in `importer.py` splits a quoted amount
+such as `"1,250.00"` into two fields. Fix `importer.py` so the test
+passes. After each change, rerun the test and read its output. Stop
+after five attempts, pass or fail, and show me the last output and what
+you tried. `test_nights.py` and the files under `nights/` are read-only.
+If you think the test is wrong, stop and tell me why, and don't change
+it. Done when the test prints `4 passed, 0 failed` and exits with
+status 0.
+</Prompt>
+<Response>
+Attempt 1: I changed `read_rows` to read each file with the `csv`
+module, which keeps a quoted field together. The test still failed on
+the 15th and the 17th with exit status 1: the amount "1,250.00" can't
+be turned into a number. Attempt 2: I removed the thousands separator
+before the conversion. The test now prints `4 passed, 0 failed`. I
+changed only `importer.py`.
+</Response>
+
+The response is a claim about what the agent did. Before the run, make
+the copy a git repository with one commit and give that commit a tag.
+Afterwards git can then list every file the run changed, even when the
+agent made commits of its own.
+
+```sh
+git init
+git add .
+git commit -m "Before the agent's run"
+git tag before-run
+```
+
+After the run, list what changed, and run the test yourself.
+
+<Predict id="run-after-the-loop" title="What the bounded run changed"
+  answer={`$ git diff --stat before-run
+   importer.py | 9 +++++----
+   1 file changed, 5 insertions(+), 4 deletions(-)
+  $ python3 test_nights.py
+  2026-09-14: pass
+  2026-09-15: pass
+  2026-09-16: pass
+  2026-09-17: pass
+  4 passed, 0 failed
+  exit status 0`} run="coding-with-agents/self-checking-loops/after_loop.py">
+In the copy, after the agent's run, run these two commands. The course's
+script applies the same change to a copy of its own and prints the
+output of both, with the exit status of the test as the last line.
+
+```sh
+git diff --stat before-run
+python3 test_nights.py
+```
+
+</Predict>
+
+Only `importer.py` changed, so the test ran with the assertions you
+wrote. The test passing now means what it meant when you wrote it.
+
+"Read-only" in a brief is a request, and the agent decides whether to
+follow it. Claude Code can enforce part of it with a deny rule on the
+file. The rule applies to the agent's own file tools, to the file
+commands it recognizes in a shell command, such as `sed`, and to the
+target of a redirect. It doesn't apply to a script the agent runs that
+opens the file itself (@Claude Code permissions). With or without the
+rule, the list of changed files after the run is the check that the
+test stayed the same.
+
+<MultiChoice id="lines-of-the-loop-brief" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['bounded-self-checking-loops']}
+  context="A learner briefs a coding agent to fix a nightly import until its test, test_nights.py, passes. The agent can run the test itself and read the result."
+  title="What goes into the loop brief?" hint="Which lines limit how long the agent runs, or what it may change, and which lines take a limit away?"
+  options={[
+    { text: 'Rerun the test after each change and read what it prints.', correct: true },
+    { text: 'Keep going until the test passes, however long that takes.', why: 'That removes the limit. An agent that can\'t make the test pass keeps trying, and the test itself becomes the easiest thing to change.' },
+    { text: 'Stop after five attempts and show the last output, pass or fail.', correct: true },
+    { text: 'If a check in the test is in the way, relax it a little.', why: 'That gives the agent the check to change. A relaxed check can pass on the bug it was written to catch.' },
+    { text: 'Leave the test file alone, and stop to say why if it looks wrong.', correct: true },
+  ]}>
+Which of these lines belong in the brief for the loop?
+</MultiChoice>
+
+<Pitfall title="The suite that went green overnight">
+An engineer left an agent running overnight with the brief "make the
+build pass", and in the morning the build passed. The diff showed a fix
+to the flaky upload code and, in the test file, a timeout raised from 2
+seconds to 60 and one test marked as skipped. Nobody had told the agent
+the test file was off limits, or when to stop and ask. Give every loop a
+limit on attempts and a list of what it may change, and read the diff of
+the test files before you accept a passing run.
+</Pitfall>
+
+Here is the same fixture after a run without the read-only rule. The
+agent made the importer skip the rows it can't read, saw the row count
+in the test fail, and removed the row count from the test.
+
+<Predict id="run-the-unbounded-run" title="What a run without limits changed"
+  answer={`$ git diff --stat before-run
+   importer.py    | 3 +--
+   test_nights.py | 6 ------
+   2 files changed, 1 insertion(+), 8 deletions(-)
+  $ python3 test_nights.py
+  2026-09-14: pass
+  2026-09-15: pass
+  2026-09-16: pass
+  2026-09-17: pass
+  4 passed, 0 failed
+  exit status 0`} run="coding-with-agents/self-checking-loops/unbounded_run.py">
+The course's script makes those two changes to a fresh copy and runs the
+same two commands. You can run it from
+`site/examples/coding-with-agents/self-checking-loops/` in your clone.
+
+```sh
+python3 unbounded_run.py
+```
+
+</Predict>
+
+<Scenario id="the-test-file-changed" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['bounded-self-checking-loops']}
+  context="A coding agent was asked to fix a nightly import until its test passed. After the run, git diff --stat lists importer.py and the test file, test_nights.py, with six lines deleted from the test. The test prints 4 passed, 0 failed."
+  title="The test passes, and the test changed" hint="If you put the test back the way you wrote it, what would it say about the importer as it is now?"
+  options={[
+    { text: 'Accept the run, since the test passes and the good nights still print their old totals.', consequence: 'The total of the 15th now leaves out a sale of 1,250.00 GBP without saying so, and the check that would have caught it is gone.' },
+    { text: 'Put the test file back from the commit, rerun it, and brief the agent again with the file read-only.', correct: true, consequence: 'The restored test fails on the 15th and the 17th, with one row missing each night. The importer change is a skip, and the next run starts from a check you trust.' },
+    { text: 'Ask a second model to read the test change and say whether the agent had a good reason for it.', consequence: 'The reviewer finds the agent\'s reason plausible. The test is still weaker than the one you wrote, and nothing has run it.' },
+    { text: 'Keep both changes, and add a line to the importer\'s docstring that rows it can\'t read are skipped.', consequence: 'The docstring is honest now, and the totals are still wrong on every night with a big sale.' },
+  ]}>
+The agent reports `4 passed, 0 failed`. `git diff --stat` lists
+`importer.py` and `test_nights.py`, with six lines deleted from the
+test. What do you do?
+</Scenario>
+
+## Gates and second opinions
+
+The test is one of the **deterministic gates** a project can have. A
+deterministic gate is a check whose result doesn't depend on anyone's
+judgment: tests, type checks, linters, builds and schema validation.
+Each one gives the same answer for the same input, which is why a team
+can let a failing gate block a merge. The same gates can also end an agent's loop. In
+Claude Code, a hook that runs when the agent is about to stop can run
+the test and send the agent back to work while the test fails
+(@Claude Code best practices). Using
+real test results to decide when the agent's work is done is also a
+theme of the Academy course on Claude Code (@Academy claude-code-in-action).
+
+A review by a second model is a different kind of check. A fresh model
+that reads the diff can find what no gate tests: a design problem, a
+case nobody wrote a test for, a change outside the brief. But its answer
+is a judgment. It can be wrong, and it can accept the same wrong
+reasoning as the model that wrote the code. The vendor guide adds that a
+reviewer told to look for problems tends to find some even in good work,
+so a person weighs its findings as well (@Claude Code best practices).
+Use the second model as a second opinion next to the gates, and never
+in place of them.
+
+<Sort id="gate-or-opinion" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['deterministic-gates']}
+  context="A team decides which results can block a merge of agent-written code on their own, and which results a person weighs before deciding."
+  title="Gate or opinion?" hint="Would the same input give the same result every time, without anyone's judgment?"
+  buckets={['A gate: it can block the merge', 'An opinion: a person weighs it']}
+  items={[
+    { text: 'The test suite exits with status 1', bucket: 0 },
+    { text: 'A second model says the change looks safe', bucket: 1 },
+    { text: 'The type checker reports two errors', bucket: 0 },
+    { text: 'The agent\'s summary says all tests pass', bucket: 1 },
+    { text: 'The config file fails its schema check', bucket: 0 },
+    { text: 'An AI reviewer flags a possible race condition', bucket: 1 },
+  ]} />
+
+<Choice id="drop-the-tests-for-a-reviewer" phase="review" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['deterministic-gates']}
+  context="A team runs its test suite on every pull request and blocks the merge when it fails. It has also added a second model that reviews every pull request."
+  title="A reviewer in place of the tests" hint="Which of the two checks gives the same answer for the same change every time?"
+  options={[
+    { text: 'Nothing, since the reviewer reads every line of every change and the tests only cover some of them.', why: 'Reading every line is a strength, but the verdict is still a judgment. The same change can get a different answer on another run.' },
+    { text: 'Only the cost, since running the reviewer on every pull request costs more than running the tests.', why: 'Cost is a real concern, and it is not the one that matters here. The question is what can block a merge.' },
+    { text: 'The reviewer\'s verdict is a judgment that can be wrong or be persuaded, and the tests give a fixed answer.', correct: true },
+    { text: 'The reviewer can\'t read test files, so it has no way to tell whether a change breaks one of them.', why: 'A reviewer can read test files like any other file. That doesn\'t make its verdict repeatable.' },
+  ]}>
+A colleague proposes to stop running the tests on pull requests, because
+the second model now reviews each one. What is wrong with the proposal?
+</Choice>
+
+<Match id="what-each-line-prevents" phase="review" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['bounded-self-checking-loops']}
+  context="A learner writes a brief for a coding agent that fixes code until a test passes. Each line of the brief guards against one way the run can go wrong."
+  title="What does each line prevent?" hint="For each line, what would the agent be free to do without it?"
+  options={['A run that never ends', 'A test that passes on the bug', 'A fix nobody checked']}
+  rows={[
+    { statement: 'Stop after five attempts and report, pass or fail', option: 0, why: 'Which line tells the agent when to give up?' },
+    { statement: 'The test file is read-only', option: 1, why: 'What is the shortest path to a passing test, if the test can change?' },
+    { statement: 'Rerun the test after each change and read its output', option: 2, why: 'Without a rerun, what tells the agent its change worked?' },
+  ]}
+  rationale="The attempt limit ends the run, the read-only rule keeps the check honest, and the rerun is what makes the loop check itself." />
+
+<Choice id="the-agent-wants-to-edit-the-test" phase="review" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['bounded-self-checking-loops']}
+  context="A coding agent is fixing an import program until a test passes. Its brief says the test file is read-only and that it should stop and explain if it thinks the test is wrong. On attempt three it stops."
+  title="The agent thinks the test is wrong" hint="Who wrote the test, and who should decide whether it changes?"
+  options={[
+    { text: 'Let it change the test, since it stopped and asked, which is what the brief told it to do.', why: 'Stopping to ask was right. Whether the test changes is still your decision, made against what the test is for.' },
+    { text: 'Tell it to carry on for as many attempts as it needs, since three of five are gone already.', why: 'That removes the limit and leaves the question about the test unanswered.' },
+    { text: 'Ask a second model whether the row check is reasonable, and let the agent follow its advice.', why: 'That swaps your judgment for another model\'s, on the one file the loop may not change.' },
+    { text: 'Read its reason yourself, and decide whether the test changes before the loop starts again.', correct: true },
+  ]}>
+The agent stops and says: "The row check in the test seems too strict,
+because some exports have a row the importer can't read. May I remove
+it?" What do you do?
+</Choice>
+
+<MultiChoice id="checks-an-agent-can-read" phase="review" objective="coding-with-agents/verifies-agent-work/automates-the-check"
+  concepts={['bounded-self-checking-loops']}
+  context="A learner lists checks for a coding agent to run in a loop. A check fits the loop when the agent can run it and read a pass or a fail from it without asking a person."
+  title="Which checks fit the loop?" hint="For each check, is there a command whose result the agent can read?"
+  options={[
+    { text: 'A test script that exits with status 1 and names the failing case.', correct: true },
+    { text: 'A colleague who looks at the new page and says whether it is right.', why: 'The agent can\'t run your colleague after each change.' },
+    { text: 'A build command that prints its errors and exits with status 1.', correct: true },
+    { text: 'A line in the brief that says the new page must look clean.', why: 'There is nothing to run, and "clean" has no pass or fail.' },
+  ]}>
+Which of these can the agent run itself, after each change?
+</MultiChoice>
+
+<Exercise stretch="Then pick one check you do by hand in your own project, such as opening a page or reading a report, and write it as a command that exits with status 1 when the check fails.">
+Use the copy in `~/loop-me` from earlier in the lesson, and make it a git
+repository with one tagged commit if you haven't yet. Start your own coding
+agent inside `~/loop-me`, so that it works on the copy and not on your
+clone, and give it the brief from this lesson. Let it run, which takes a few minutes.
+
+Then check the run yourself. Run `git diff --stat before-run` and
+confirm that `test_nights.py` isn't in the list. Run
+`git diff before-run -- test_nights.py` and confirm that it doesn't
+print anything. Run `python3 test_nights.py` and confirm that it prints
+`4 passed, 0 failed`. A test the agent could change is a test you
+can't rely on, and these three commands show whether it changed.
+
+A good result has a run that stopped within five attempts, a list of
+changed files that holds `importer.py` and nothing else, and a test you
+ran yourself that passes. Then answer one question: if the agent had
+stopped after five attempts with the test still failing, what would you
+have wanted its report to contain?
+</Exercise>
+
+<Recap>
+1. Turn a manual check into a command the agent can run and read, one that exits with status 0 on a pass and names what failed otherwise. A check the agent can run gets run on every attempt (@Academy ai-native-sdlc-playbook).
+2. A bounded self-checking loop has a limit on attempts, after which the agent stops and reports, and a rule that the check itself is read-only.
+3. After the run, confirm with `git diff --stat` against a commit from before the run that the test didn't change, and run it yourself. A rule that denies edits to the test covers the agent's own file tools, and a script the agent runs can still write the file (@Claude Code permissions).
+4. Deterministic gates, such as tests, type checks, linters, builds and schema checks, give the same answer for the same input and can block a merge. A second model's review is a second opinion next to them and never replaces them (@Claude Code best practices).
+</Recap>
+
+<Habit id="look-for-the-test-file">
+The next time an agent tells you the tests pass, run `git diff --stat` and look for a test file in the list before you read the rest of the change.
+</Habit>
