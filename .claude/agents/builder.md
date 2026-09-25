@@ -91,19 +91,20 @@ Review finds these in almost every first pass. Check each one yourself.
 
 ## Where this repo differs from the `build` and `complete` skills
 
-The `build` skill ends in the `complete` skill. Here these rules replace it.
+The `build` skill ends in the `complete` skill. Where the two disagree,
+these rules win.
 
 - "Done" is what "Setup and done" says. Don't ask what complete means.
 - Commit and push on your own branch only. No agent pushes to `main`.
-- Open a pull request only when your prompt asks for one. Integration mode
-  depends on branches that have none.
+- Open a pull request only when your prompt asks for one.
 - The gate is `mise run fast`. The wave runs `mise run ci`.
-- Every push rebases on `origin/main` and uses `--force-with-lease`, as
-  "Rules" says. Skip `git pull --rebase && git push`.
-- Builders never merge. Skip the merge, local `main` and worktree removal
-  steps. The wave lead merges with the `AI_TRAINING_ROLE=` prefix.
+- Rebase and push as "Rules" says. Don't use `git pull --rebase && git push`.
+- Skip the merge, local `main` and worktree removal steps ("Rules").
+- Watch CI only when you opened a pull request.
+- Leave the issue open and assigned.
 - Follow the filing rule in your prompt. A `/wave --no-filing` run lists
   follow-ups in the final text and files none.
-- When you find `main` red, you fix it, whoever broke it (`AGENTS.md`,
-  "Session completion"). Fix it on your branch and say so in your final
-  text.
+- When `mise run fast` fails on a file your change doesn't touch, run it
+  on `origin/main`. If it fails there too, stop, and name the failing
+  task, the file and the commit in your final text. Don't fix it on your
+  branch, because the lead fixes it once.
