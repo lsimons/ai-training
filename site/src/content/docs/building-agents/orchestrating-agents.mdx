@@ -23,8 +23,8 @@ The message is "My kettle from order 1042 stopped working. Please send
 the replacement to my office address this time." The agents are
 `lookup`, `writer` and `checker`. `lookup` reads the message, looks up
 the order and writes a brief of one line. `writer` writes the reply from
-the brief. `checker` reads the reply and approves it or rejects it. Here are the first two, each a fake model
-call with text in and text out.
+the brief. `checker` reads the reply and approves it or rejects it. Here
+are the first two, each a fake model call with text in and text out.
 
 ```python
 def lookup(message: str) -> str:
@@ -69,9 +69,9 @@ def pipeline(message: str) -> list:
 This is orchestration in code, which the Agent Engineer Course calls
 deterministic. The flow is written down in advance, so it runs the same
 way every time and you can step through it like other code. Deciding
-what comes next costs no model call (@AEC-18). The messages from one agent to the
-next are the handoffs. The `handoffs` step prints those two, each as
-`sender -> receiver: 'text'`.
+what comes next costs no model call (@AEC-18). The messages from one
+agent to the next are the handoffs. The `handoffs` step prints those
+two, each as `sender -> receiver: 'text'`.
 
 <Predict id="predict-handoffs" objective="building-agents/orchestrates-agents/justifies-orchestration-cost"
   concepts={['code-vs-model-driven-orchestration']}
@@ -125,8 +125,7 @@ message, and it can call two workers, `lookup` and `writer`, the way an
 agent calls tools. The loop around the manager runs each worker call the
 manager asks for, and gives the result back to the manager. This
 arrangement has no checker, and the manager's last reply goes to the
-customer. Here is
-the fake manager.
+customer. Here is the fake manager.
 
 ```python
 def manager(history: list) -> dict:
@@ -194,10 +193,11 @@ which is harder to debug, and each decision is one more model call
 (@AEC-18).
 
 Claude Code uses this arrangement for its subagents. A subagent that
-gets a task from the main conversation begins with an empty context
-window. The messages exchanged so far aren't in it. When it finishes, the main conversation gets back a short summary instead
-of everything the subagent read (@Claude Code subagents). The Academy
-course on subagents gives this as the reason to delegate: the main
+gets a task from the main conversation begins with a new context window
+of its own. The messages exchanged so far aren't in it. When it
+finishes, the main conversation gets back a short summary instead of
+everything the subagent read (@Claude Code subagents). The Academy
+course on subagents gives this as a reason to delegate: the main
 conversation holds less text and doesn't drift from its topic
 (@Academy introduction-to-subagents). It also means that a fact from the
 conversation that the task text doesn't mention is out of the subagent's

@@ -25,6 +25,7 @@ exercise:
 sources: [AEC-07, AEC-18, Claude Code subagents, Academy introduction-to-subagents]
 sources-checked: 2026-09-26
 review-by: 2027-03-26
+issue: 209
 minutes: 15
 notes: >-
   The fixture in site/examples/building-agents/orchestrating-agents/agent.py handles one customer
