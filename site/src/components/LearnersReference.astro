@@ -35,54 +35,7 @@ const catalog: ReferenceArea[] = (await getAreas()).map((a) => ({
 </div>
 
 <script>
-	import * as progress from '@scripts/progress';
-	import { finishedByArea, type ReferenceArea } from '@scripts/reference';
+	import { mountLearnersReference } from '@scripts/learners-reference';
 
-	const root = document.querySelector<HTMLElement>('[data-learners-reference]');
-	if (root) {
-		const catalog: ReferenceArea[] = JSON.parse(root.dataset.catalog!);
-		const base = root.dataset.base!.replace(/\/$/, '');
-		const empty = root.querySelector<HTMLElement>('[data-reference-empty]')!;
-		const areas = root.querySelector<HTMLElement>('[data-reference-areas]')!;
-
-		function link(path: string, text: string): HTMLAnchorElement {
-			const a = document.createElement('a');
-			a.href = `${base}${path}`;
-			a.textContent = text;
-			return a;
-		}
-
-		function draw() {
-			const finished = finishedByArea(catalog, progress.load());
-			empty.hidden = finished.length > 0;
-			areas.replaceChildren(
-				...finished.map((area) => {
-					const section = document.createElement('section');
-					section.className = 'reference-area';
-					section.dataset.referenceArea = area.area;
-					const h = document.createElement('h2');
-					h.textContent = area.title;
-					section.appendChild(h);
-					const ul = document.createElement('ul');
-					for (const lesson of area.lessons) {
-						const li = document.createElement('li');
-						li.dataset.referenceFinished = lesson.id;
-						li.appendChild(link(`/${lesson.id}/`, lesson.title));
-						if (lesson.topics.length) {
-							li.append(' · reference: ');
-							lesson.topics.forEach((t, i) => {
-								if (i > 0) li.append(', ');
-								li.appendChild(link(`/topics/${t.id}/#reference`, t.name));
-							});
-						}
-						ul.appendChild(li);
-					}
-					section.appendChild(ul);
-					return section;
-				}),
-			);
-		}
-		draw();
-		document.addEventListener(progress.EVENT, draw);
-	}
+	mountLearnersReference(document);
 </script>
