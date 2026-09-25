@@ -317,9 +317,8 @@ Add this line at the end of `AGENTS.md`, with nothing after the path:
 ```
 
 Then delete `~/memory-review-notes/project_item_length.md` and its line
-from `MEMORY.md`, so
-the fact is in one place. Commit the two repository files, which is the
-step that makes the fact reviewed and shared.
+from `MEMORY.md`, so the fact is in one place. Commit the two repository
+files, which is the step that makes the fact reviewed and shared.
 
 ```sh
 git add AGENTS.md docs/decisions.md && git commit -q -m "Record the item length decision"
@@ -327,13 +326,14 @@ git add AGENTS.md docs/decisions.md && git commit -q -m "Record the item length 
 
 Quit the session and start a new one with the same `claude --settings`
 command. Run `/context`: its list of memory files shows the instruction
-files the session loaded, and `AGENTS.md` is in it (@Claude Code memory).
-The list may leave out `docs/decisions.md`, so the real check is a
-question. Ask the agent the limit on item text and which file states it.
-The answer names `docs/decisions.md`. The notes folder holds `MEMORY.md`
-and `user_diff_first.md`, plus any note the agent saved this session. Memory notes and context files
-keep facts from one session for the next. The next lesson covers what
-happens inside one long session when it is compacted.
+files the session loaded, and `AGENTS.md` is in it
+(@Claude Code memory). The list may leave out `docs/decisions.md`, so
+the real check is a question. Ask the agent the limit on item text and
+which file states it. The answer names `docs/decisions.md`. The notes folder holds
+`MEMORY.md` and `user_diff_first.md`, plus any note the agent saved this
+session. Memory notes and context files keep facts from one session for
+the next. The next lesson covers what happens inside one long session
+when it is compacted.
 
 <Sort id="where-each-note-goes" objective="customizing-agents/configures-agent/manages-memory"
   concepts={['auto-memory', 'context-files']}
