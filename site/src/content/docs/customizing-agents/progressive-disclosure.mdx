@@ -58,11 +58,12 @@ doesn't cost any tokens (@Claude docs agent-skills-overview).
 ## Measure the skill as it stands
 
 The directory `grown/release/` holds the release skill from the previous
-lesson with the new section added. It is called "When a release goes
-wrong" and has five numbered steps. A release that nobody has pushed yet
-is undone with `git tag -d` and a reset. For a release that was pushed, the
-agent leaves the remote tag alone and makes a new fix release. The section is between the release steps and "Done
-when". The agent reads it on every release.
+lesson with the new section added. It is called "When a release goes wrong"
+and has five numbered steps. A release that nobody has pushed yet is undone
+with `git tag -d` and a reset. For a release that was pushed, the agent
+leaves the remote tag alone and makes a new fix release. The section is
+between the release steps and "Done when". The agent reads it on every
+release.
 
 The script `measure.py` prints one line per stage. For the first stage it
 counts the `name` and `description` lines of the front matter. The second
@@ -102,8 +103,8 @@ python3 measure.py grown/release
 
 The first line is small, and it should be. A description of two short
 sentences is far below the figure of about 100 tokens. The second line is
-the one to read. A release loads all 1256 tokens of `SKILL.md`, and the rollback
-steps are part of them even when the release goes right.
+the one to read. A release loads all 1256 tokens of `SKILL.md`, and the
+rollback steps are part of them even when the release goes right.
 
 ## Move the rollback into a reference file
 
@@ -157,9 +158,9 @@ that says only "see `rollback.md`" gives the agent no way to tell whether
 this run needs the file, so it may read it every time, or never.
 Anthropic's guide says to watch for this when you test a skill: an agent
 that never opens a bundled file may be missing a clear enough signal in
-`SKILL.md` (@Claude docs best-practices). The agent reads the pointer only in
-a run where the skill has loaded. An undo asked for in a new session loads
-the skill only if its description names that request.
+`SKILL.md` (@Claude docs best-practices). The agent reads the pointer only
+in a run where the skill has loaded. An undo asked for in a new session
+loads the skill only if its description names that request.
 
 The course repository has the result in `split/release/`. Measure it, and
 then measure your copy with `python3 measure.py ~/skill-copy/release`. If
@@ -198,8 +199,9 @@ python3 measure.py split/release
 The description didn't change, so the first line is still 39. A release
 that goes right now loads 852 tokens where it loaded 1295. A rollback reads
 both files and loads 1368, a little more than before, because the agent
-reads the pointer and the new file's heading as well as the steps. The split makes the common run
-cheaper, and the rare run pays a small amount extra.
+reads the pointer and the new file's heading as well as the steps. The
+split makes the common run cheaper, and the rare run pays a small amount
+extra.
 
 <Choice id="where-the-table-goes" objective="customizing-agents/writes-skill/discloses-progressively"
   concepts={['progressive-disclosure']}
@@ -254,12 +256,12 @@ Match each session to what it loads of the release skill.
 </Match>
 
 <Pitfall title="The skill that grew one section at a time">
-A team's release skill starts at forty lines. Over six months people add
-a note on urgent fixes and a table of past incidents. Later come the
-rollback steps and a paragraph on the old release tool. Each change is
-small enough that nobody objects in review. The body ends up three times
-its first size, and a release loads all of it, although most runs need
-only the first forty lines. Someone also adds trigger words for each new case to the
+A team's release skill starts at forty lines. Over six months people add a
+note on urgent fixes and a table of past incidents. Later come the rollback
+steps and a paragraph on the old release tool. Each change is small enough
+that nobody objects in review. The body ends up three times its first size,
+and a release loads all of it, although most runs need only the first forty
+lines. Someone also adds trigger words for each new case to the
 description, which every session pays for. Each change looked cheap, and
 nobody measured the sum. Measure the skill each time you add to it, and
 keep in the body only what every run needs.
