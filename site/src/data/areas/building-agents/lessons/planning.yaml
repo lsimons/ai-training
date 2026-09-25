@@ -1,10 +1,16 @@
 id: building-agents/planning
 title: Writing the plan before taking the steps
+description: >-
+  Have the fake model write a numbered plan before any tool runs, work through it, and see a stale
+  plan send a false email until the model revisits the plan after each step.
 mode: tutorial
 covers: building-agents/patterns
 serves: [building-agents/orchestrates-agents/picks-a-pattern]
 introduces: [planning]
-assumes: []
+assumes:
+  - objective: building-agents/builds-agent-loop/implements-the-loop
+    lesson: building-agents/agent-loop
+    section: the-loop
 after: [building-agents/react]
 shorts: []
 exercise:
@@ -12,9 +18,20 @@ exercise:
   brief: >-
     Make the fixture planner revise its list when step three returns a surprise, instead of running
     the stale step four. The output is the plan before and after the revision.
-sources: []
-issue: 207
+sources:
+  - AEC-06
+  - AEC-04
+  - Wang 2023
+  - Claude Code permission modes
+  - Claude Code tools reference
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 minutes: 15
 notes: >-
   The fake model writes a step list, works through it and updates it. Predict the plan after a step
-  reveals a new fact.
+  reveals a new fact. The fixture in site/examples/building-agents/planning/agent.py reuses the
+  shop of the react lesson with three new tools. The surprise in the lesson is a kettle out of
+  stock, and the exercise's surprise is a recalled toaster, which the lesson's reviser has no rule
+  for. The plan-then-execute versus reactive trade-off is left to plan-or-react, and this lesson
+  only compares the call counts of follow and work. Academy building-with-the-claude-api from the
+  plan was dropped because the page cites no claim from it.
