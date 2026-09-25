@@ -12,8 +12,8 @@ assumes:
     lesson: safety/agent-risk
     section: human-in-the-loop
   - objective: safety/judges-agent-risk/sets-oversight
-    lesson: safety/eu-ai-act
-    section: what-each-role-owes
+    lesson: safety/writing-an-ai-policy
+    section: the-one-page-template
 after: [using-agents/chat-agent-or-automation]
 shorts: [A human path when the tool is down]
 exercise:
@@ -30,8 +30,8 @@ issue: 164
 minutes: 10
 notes: >-
   The plan named the topic safety/governance as assumed; taken as the objective
-  safety/judges-agent-risk/sets-oversight, which the live eu-ai-act lesson teaches in its section
-  on what each role owes (writing-an-ai-policy, the other lesson that serves it, is planned). The
+  safety/judges-agent-risk/sets-oversight, which the writing-an-ai-policy lesson teaches in its
+  one-page template section, where approvals, logging and escalation each name a person. The
   planned after lesson chat-agent-or-automation is ordering only, and the page never refers to it.
   The process uses Brindlewick Instruments, the fictional company from the earlier lessons, and no
   person in it has a name. Academy building-effective-human-agent-teams is cited for accountability
