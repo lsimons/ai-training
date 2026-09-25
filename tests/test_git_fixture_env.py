@@ -2,8 +2,9 @@
 
 Each of these fixtures runs git with an allow-list environment:
 `GIT_ENV_BASE` in the coding-with-agents fixtures' `_common.py`, and
-`git_env` in testing-a-skill's `clones.py` and in
-attribution-and-review-norms' `trailers.py`. Most of them build a fresh
+`git_env` in testing-a-skill's `clones.py`, in
+attribution-and-review-norms' `trailers.py` and in team-practice's
+`history.py`. Most of them build a fresh
 repository and run git in it. `trailers.py` runs `git interpret-trailers`
 in an empty directory and builds no repository. This runs every one of
 them twice, once plainly and once with variables that change what git
@@ -39,6 +40,7 @@ GIT_FIXTURE_DIRS = [
     "coding-with-agents/reversible-changes",
     "coding-with-agents/reviewing-the-diff",
     "coding-with-agents/self-checking-loops",
+    "coding-with-agents/team-practice",
     "customizing-agents/first-hook",
     "customizing-agents/session-handoff",
     "customizing-agents/testing-a-skill",
