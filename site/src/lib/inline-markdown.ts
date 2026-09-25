@@ -39,7 +39,13 @@ export function unsupportedInline(md: string): string[] {
 	const prose = md.replace(CODE_SPAN, '');
 	const found: string[] = [];
 	if (UNDERSCORE_EMPHASIS.test(prose)) found.push('underscore emphasis');
-	const spans = [...prose.matchAll(STRONG), ...prose.matchAll(EMPHASIS)];
+	// Emphasis is read after strong runs are replaced, as `renderProse` (`lib/reference.ts`) does, so the
+	// stars of a strong run can't delimit emphasis: in `2*3 **a**(@K)**b**` the emphasis pattern alone takes
+	// `*3 **` and then `*(@K)*`. The replacement keeps each strong run's text between two NUL characters,
+	// which are neither `*` nor space, so emphasis around a strong run, as in `***a (@K)***`, still matches.
+	const strong = [...prose.matchAll(STRONG)];
+	const withoutStrong = prose.replace(STRONG, '\0$1\0');
+	const spans = [...strong, ...withoutStrong.matchAll(EMPHASIS)];
 	if (spans.some((m) => citationSpans(m[1] ?? '').length > 0)) found.push('strong or emphasis around a citation');
 	if (LINK_WITH_TITLE.test(prose)) found.push('link with a title');
 	return found;
