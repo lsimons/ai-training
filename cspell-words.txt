@@ -257,3 +257,4 @@ Panitz
 unsandboxed
 developercertificate
 worktreeinclude
+SIGOPS
