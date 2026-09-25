@@ -95,8 +95,6 @@ def test_merge_needs_a_merging_role() -> None:
 @pytest.mark.parametrize(
     "command",
     [
-        "git stash",
-        "git stash push -m x",
         "git reset --hard",
         "git reset --hard origin/main",
         "git checkout -- .",
@@ -110,9 +108,39 @@ def test_discarding_commands_are_rejected_in_the_main_checkout(command: str) -> 
     assert "main checkout" in reason
 
 
-@pytest.mark.parametrize("command", ["git stash", "git reset --hard", "git checkout -- ."])
+@pytest.mark.parametrize("command", ["git reset --hard", "git checkout -- ."])
 def test_discarding_commands_pass_in_a_worktree(command: str) -> None:
     assert check(command, cwd=WORKTREE) is None
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git stash",
+        "git stash push -m x",
+        "git stash -m x",
+        "git stash save x",
+        "git stash pop",
+        "git stash apply",
+        "git stash drop",
+        "git stash clear",
+        "git stash create",
+        "git stash store abc",
+        "git stash branch b",
+    ],
+)
+@pytest.mark.parametrize("cwd", [MAIN, WORKTREE])
+def test_stash_changes_are_rejected_in_every_worktree(command: str, cwd: str) -> None:
+    reason = check(command, cwd=cwd)
+    assert reason is not None
+    assert "shares one stash" in reason
+    assert "git worktree add --detach" in reason
+
+
+@pytest.mark.parametrize("command", ["git stash list", "git stash show", "git stash show -p"])
+@pytest.mark.parametrize("cwd", [MAIN, WORKTREE])
+def test_stash_list_and_show_pass_in_every_worktree(command: str, cwd: str) -> None:
+    assert check(command, cwd=cwd) is None
 
 
 def test_cd_and_dash_c_move_the_check_into_the_main_checkout() -> None:
@@ -239,9 +267,9 @@ def test_main_checkout_and_branch_lookups_against_a_real_repository(repo: Path) 
     assert agent_hooks.current_branch(str(repo / "missing")) == ""
 
 
-def test_default_lookups_block_stash_in_the_main_checkout_only(repo: Path) -> None:
+def test_default_lookups_block_stash_in_every_worktree(repo: Path) -> None:
     assert agent_hooks.check_command("git stash", str(repo / "main"), {}) is not None
-    assert agent_hooks.check_command("git stash", str(repo / "wt"), {}) is None
+    assert agent_hooks.check_command("git stash", str(repo / "wt"), {}) is not None
     assert agent_hooks.check_command("git push", str(repo / "main"), {}) is not None
 
 

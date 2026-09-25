@@ -298,8 +298,9 @@ under `../ai-training-wt/`. Untracked files aren't in that patch unless
 
 The Bash guard hook (`.claude/hooks/README.md`) rejects a force push, any
 push to `main`, `gh pr merge` from anyone but the wave lead, the
-dispatcher or a coordinator, and `git stash`, `git reset --hard` or
-`git checkout -- .` in the main checkout. The wave lead and a coordinator
+dispatcher or a coordinator, and `git stash` in every worktree except
+`git stash list` and `git stash show`. It rejects `git reset --hard` or
+`git checkout -- .` only in the main checkout. The wave lead and a coordinator
 prefix a merge with `AI_TRAINING_ROLE=<role>`.
 
 ## What a builder prompt says about history
