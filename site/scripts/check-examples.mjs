@@ -4,8 +4,9 @@
  * answer="...">` in a lesson names a fixture under site/examples/. This runs
  * each fixture and fails if its stdout is not the answer shown to the
  * learner, and fails on an entry script under site/examples/ that no
- * Predict runs and UNRUN_EXEMPT does not list (#460). The logic is in scripts/lib/examples.mjs, which
- * tests/scripts/examples.test.ts covers; this file only reports.
+ * Predict runs and UNRUN_EXEMPT does not list (#460). The logic is in
+ * scripts/lib/examples.mjs, which tests/scripts/examples.test.ts covers;
+ * this file only reports.
  */
 import { join } from 'node:path';
 import { checkExamples, UNRUN_EXEMPT } from './lib/examples.mjs';
