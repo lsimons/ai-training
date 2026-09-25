@@ -18,8 +18,8 @@ exercise.
 
 An MCP client talks to a local server over the *stdio* transport: it
 starts the server as a child process and exchanges one message per line
-over the process's standard input and output, in JSON-RPC (a remote
-procedure call format in JSON). The server may log to standard error,
+over the process's standard input and output, in JSON-RPC, a format for
+Remote Procedure Calls (RPC) in JSON. The server may log to standard error,
 and it may write nothing else to standard output (@MCP specification).
 A session opens with an `initialize` handshake in which client and server
 agree on a protocol version and exchange their capabilities, and the
