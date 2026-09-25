@@ -762,3 +762,10 @@ Liu 2024b:
   author: Rongxin Liu, Carter Zenke, Charlie Liu and 3 others
   license: Copyright held by the authors, publication rights licensed to ACM
   url: https://doi.org/10.1145/3626252.3630938
+Claude docs best-practices:
+  type: reference
+  title: Skill authoring best practices
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
