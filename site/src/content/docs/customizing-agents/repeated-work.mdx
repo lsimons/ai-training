@@ -2,14 +2,14 @@ import { Choice, MultiChoice, Match, Predict, Scenario, Sort, Pitfall, Exercise,
 
 This lesson closes the course with one decision. We read three sessions in
 which a coding agent works on the same small project, and we find what the
-user had to explain in more than one of them. Then we give each repeated
-explanation a place where the agent finds it next time: the project
-instructions, a skill, a hook or a context file. Last, we delete the lines
-of the instructions file that a hook now enforces, so the file gets
-shorter as the mechanisms take over.
+user had to explain in more than one of them. Each repeated explanation
+then moves to the project instructions, a skill, a hook or a context file,
+where the agent finds it next time. Last, we delete the lines of the
+instructions file that a hook now enforces. The file gets shorter as the
+mechanisms take over.
 
 The files are in the course repository at
-`site/examples/customizing-agents/repeated-work/`. The three session logs
+`site/examples/customizing-agents/repeated-work/`. The session logs
 are in `sessions/`, and `instructions-before.md` is the project's
 instructions file as it was during the sessions. The course wrote the logs
 for this lesson, and no model produced them. `find_repeats.py` is a short
@@ -25,7 +25,7 @@ from a billing API through a client that a generator writes into
 `src/api/generated/`. In each of the three sessions the billing API has a
 new field, so the agent must regenerate the client before it can use the
 field. Each session works out again how to do that. The user corrects the
-agent along the way, and some of the corrections are the same each time.
+agent in each session, and some of the corrections are the same each time.
 
 The script compares the three logs. It prints each message the user sent
 in more than one session, and each command the agent ran in all three.
@@ -57,12 +57,13 @@ python3 find_repeats.py
 Read the output as a list of costs. Each line under the first heading is
 something the user typed again that a file could have said once. The
 commands under the second heading are the agent's search for the
-procedure. It tries `npm run generate`, which doesn't exist, then the
-`make` target without the variable it needs, and only then the command
-that works. Then it finds out, from a lint error, that the generated files
-must be formatted. The same search happens in each of the three sessions.
+procedure. The first attempt is `npm run generate`, a script that doesn't
+exist. The `make` target comes next, without the variable it needs, and
+only after that the command that works. A lint error then shows that the
+generated files must be formatted. The same search happens in each of the
+three sessions.
 
-That is the symptom to look for in your own sessions: the same
+That's the symptom to look for in your own sessions: the same
 explanation, given twice. The fix is **turning repeated work into reusable
 knowledge**. You move the explanation to a place the agent reads without
 being told, so that no later session needs it. The Agent Engineer Course
@@ -82,7 +83,7 @@ the agent had the rule. It didn't follow it every time.
 
 ## A place for each repeated step
 
-Four kinds of repeated step each have their own place. The choice depends
+Each kind of repeated step has its own place. The choice depends
 on what the step is and what one miss costs.
 
 - **A fact that every task needs goes into the project instructions.**
@@ -112,11 +113,11 @@ on what the step is and what one miss costs.
 
 Claude Code also lets a skill hold reference material, such as a style
 guide (@Claude Code features). This lesson keeps skills for procedures and
-context files for examples, so the question "what is this?" has one
+context files for examples, so the question "what's this?" has one
 answer.
 
-The staging URL is a fact, but the only task that needs it is the
-regeneration. So it goes into the skill, as part of the first step. The
+The staging URL is a fact that the regeneration needs and other tasks
+don't. So it goes into the skill, as part of the first step. The
 instructions file is loaded in every session, so a line there should apply
 to most tasks (@Claude Code best practices).
 
@@ -139,9 +140,9 @@ Done when `npm run lint` reports no problems and the API tests pass.
 The hook is a `PreToolUse` hook with the matcher `Edit|Write`, so Claude
 Code runs it before every file edit and every file write. The hook gets the
 tool call as JSON, and for these tools `tool_input.file_path` holds the
-absolute path of the file. When the path has `/src/api/generated/` in it,
-the hook writes a message to standard error and exits with code 2. The
-edit doesn't happen, and Claude gets the message as the reason
+absolute path of the file. For a path with `/src/api/generated/` in it,
+the hook writes a message to standard error and exits with code 2, which
+stops the edit and gives Claude the message as the reason
 (@Claude Code hooks). [Writing a hook that blocks a
 mistake](/customizing-agents/first-hook/) builds a hook of this kind step
 by step. The message is all the agent learns about the rule when it is
@@ -203,16 +204,17 @@ edit in all three sessions. What do you change?
 
 ## Delete what the hook now enforces
 
-With the hook in place, the line "Never edit files under
-`src/api/generated/`" in the instructions file does no work. The hook
-stops the edit whether the line is there or not, and the hook's message
-tells the agent what to do. The line still costs context in every session.
-The best-practices page advises cutting a line the agent doesn't need to
-behave well, or replacing it with a hook (@Claude Code best practices). The same page warns that a long
-instructions file makes the agent miss the rules that matter.
+With the hook in place, the agent doesn't need the line "Never edit files
+under `src/api/generated/`" in the instructions file. The hook stops the
+edit whether the line is there or not, and the hook's message tells the
+agent what to do. The line still costs context in every session. The
+best-practices page advises cutting a line the agent doesn't need to
+behave well, or replacing it with a hook (@Claude Code best practices).
+The same page warns that a long instructions file makes the agent miss the
+rules that matter.
 
-The same goes for the long regeneration paragraph. The skill holds the
-procedure now, with each step on its own line, so the paragraph can go.
+The long regeneration paragraph can go too. The skill holds the procedure
+now, with each step on its own line.
 The fact about amounts in cents and the pointer to the example file come
 in. Here is the change to the instructions file:
 
@@ -226,7 +228,7 @@ in. Here is the change to the instructions file:
  - Pages live in `src/pages/`, shared components in `src/components/`.
 ```
 
-Delete a line only when a mechanism enforces all of it. The lint line
+Delete a rule from the file only when a hook enforces the whole rule. The lint line
 stays, because no hook in this project runs the linter. If a hook checked
 only part of a rule, the line would stay for the rest. And a line you
 delete in favor of a hook depends on that hook being registered on each
