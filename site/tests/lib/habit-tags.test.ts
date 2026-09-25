@@ -1,5 +1,4 @@
-import { parseMdx } from '@lib/checkpoint-tags';
-import { assertHabitId, HABIT_ID, habitTagsOfSource, MAX_HABITS, sectionSlugsIn, slugOf } from '@lib/habit-tags';
+import { assertHabitId, HABIT_ID, habitTagsOfSource, MAX_HABITS } from '@lib/habit-tags';
 import { describe, expect, it } from 'vitest';
 
 const page = (habits: string, before = '') =>
@@ -45,6 +44,8 @@ describe('habitTagsOfSource (spec S07 "Authoring")', () => {
 		);
 		const withH3 = `### Deeper still\n\n${page('<Habit id="deeper-still">\nT.\n</Habit>')}`;
 		expect(() => habitTagsOfSource(withH3, 'x/y')).toThrow(/habit id "deeper-still" is also a heading slug/);
+		const repeated = `## Review\n\n### Review\n\n${page('<Habit id="review-1">\nT.\n</Habit>')}`;
+		expect(() => habitTagsOfSource(repeated, 'x/y')).toThrow(/habit id "review-1" is also a heading slug/);
 		const withCheckpoint = page('<Habit id="pick-one">\nT.\n</Habit>', '<Choice id="pick-one" />\n\n');
 		expect(() => habitTagsOfSource(withCheckpoint, 'x/y')).toThrow(/habit id "pick-one" is also a checkpoint id/);
 	});
@@ -57,17 +58,5 @@ describe('habitTagsOfSource (spec S07 "Authoring")', () => {
 	});
 	it('names the lesson on a parse error', () => {
 		expect(() => habitTagsOfSource('<Habit id="a">', 'x/y')).toThrow(/^x\/y: /);
-	});
-});
-
-describe('section slugs', () => {
-	it('slugs a heading the way Starlight does for plain headings', () => {
-		expect(slugOf('Blast radius')).toBe('blast-radius');
-		expect(slugOf('Prompt injection: when the data gives orders')).toBe('prompt-injection-when-the-data-gives-orders');
-		expect(slugOf('  Human in the loop ')).toBe('human-in-the-loop');
-	});
-	it('reads the headings at every depth', () => {
-		const src = '# Title\n\n## One two\n\n### Three\n\nText\n\n## Four';
-		expect(sectionSlugsIn(parseMdx(src), src)).toEqual(['title', 'one-two', 'three', 'four']);
 	});
 });

@@ -9,6 +9,7 @@
  */
 import { KIND_OF_TAG } from './checkpoint-rules';
 import { attrsOf, childrenSource, jsxElements, type MdxNode, parseMdx, stringProp } from './checkpoint-tags';
+import { headingSlugs } from './section-slugs';
 
 export const HABIT_TAG = 'Habit';
 /** Zero, one or two habits per lesson (spec S07 "Authoring"). */
@@ -21,39 +22,6 @@ export interface HabitInfo {
 	id: string;
 	/** The children of the tag, as Markdown source. */
 	text: string;
-}
-
-/**
- * The slug Starlight gives a `## ` heading, for the ASCII headings the lessons
- * have: lower case, punctuation removed, spaces to hyphens. Starlight uses
- * `github-slugger`, and this mirrors its rules for that input.
- */
-export function slugOf(heading: string): string {
-	return heading
-		.trim()
-		.toLowerCase()
-		.replace(/[^\p{L}\p{N}\s-]/gu, '')
-		.replace(/\s+/g, '-');
-}
-
-/**
- * The slugs of every heading in `tree`, at any depth, read from `src` (a
- * heading node's children are its text). Each one is a DOM id on the page,
- * so a habit id must differ from all of them.
- */
-export function sectionSlugsIn(tree: MdxNode, src: string): string[] {
-	const out: string[] = [];
-	const walk = (node: MdxNode) => {
-		if (node.type === 'heading') {
-			const start = node.children?.[0]?.position?.start.offset;
-			const end = node.children?.at(-1)?.position?.end.offset;
-			if (start !== undefined && end !== undefined) out.push(slugOf(src.slice(start, end)));
-			return;
-		}
-		for (const child of node.children ?? []) walk(child);
-	};
-	walk(tree);
-	return out;
 }
 
 /** Throws unless `id` is a lowercase kebab-case slug, naming `where`. */
@@ -76,7 +44,8 @@ export function habitTagsIn(tree: MdxNode, src: string, where: string): HabitInf
 	if (habits.length > MAX_HABITS)
 		throw new Error(`${where}: ${habits.length} <${HABIT_TAG}> tags; a lesson has at most ${MAX_HABITS}`);
 	const recapEnd = Math.max(-1, ...elements.filter((n) => n.name === 'Recap').map((n) => n.position?.end.offset ?? -1));
-	const slugs = new Set(sectionSlugsIn(tree, src));
+	// The ids the build gives the headings (`lib/section-slugs.ts`), so a repeated heading's `-1` counts too.
+	const slugs = new Set(headingSlugs(tree));
 	// A checkpoint's section id is its `id` too (`CheckpointShell.astro`), so a habit id must differ from those as well.
 	const checkpointIds = new Set(
 		elements
