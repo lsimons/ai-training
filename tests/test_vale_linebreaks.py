@@ -16,6 +16,7 @@ import pytest
 import vale_linebreaks
 
 import prose_eval
+import vale_configs
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 STYLES = REPO_ROOT / ".vale" / "styles"
@@ -304,3 +305,173 @@ def test_an_unwidened_rule_misses_the_split_hit(tmp_path: pathlib.Path) -> None:
     assert not fires("It says no\nmore than that.\n")
     (styles / "Rule.yml").write_text(vale_linebreaks.widen_rule((styles / "Rule.yml").read_text()))
     assert fires("It says no\nmore than that.\n")
+
+
+# Issue #453: the multi-word accept entries and the `TokenIgnores` phrases
+# are written with `\s`, so they apply where a line break splits them. Each
+# case runs Vale on the committed accept list or the committed ignore, and
+# again with the entry's `\s` put back to a space, which must report the
+# split text. That second run shows that the case tests the widening.
+ACCEPT = STYLES / "config" / "vocabularies" / "ai-training" / "accept.txt"
+
+
+def _accept_entries() -> list[str]:
+    lines = ACCEPT.read_text(encoding="utf-8").splitlines()
+    return [line for line in lines if line.strip() and not line.startswith("#")]
+
+
+def _vale_with(
+    tmp_path: pathlib.Path,
+    rules: list[str],
+    text: str,
+    *,
+    accept: list[str],
+    token_ignores: str = "",
+) -> list[str]:
+    """The checks that fire on `text` with `rules` on, `accept` as the vocabulary.
+
+    Vale.Terms runs in every call, since a vocabulary always feeds it. A
+    package rule is widened the way `prose-sync` widens it.
+    """
+    styles = tmp_path / "styles"
+    for rule in rules:
+        style, name = rule.split(".")
+        (styles / style).mkdir(parents=True, exist_ok=True)
+        source = STYLES / style / f"{name}.yml"
+        assert source.is_file(), f"{source} is missing: run 'mise run setup'"
+        target = styles / style / f"{name}.yml"
+        target.write_text(
+            vale_linebreaks.widen_rule(source.read_text(encoding="utf-8"), str(source))
+        )
+    vocab = styles / "config" / "vocabularies" / "T"
+    vocab.mkdir(parents=True, exist_ok=True)
+    (vocab / "accept.txt").write_text("\n".join(accept) + "\n")
+    levels = "".join(f"{rule} = error\n" for rule in rules)
+    ignores = f"TokenIgnores = {token_ignores}\n" if token_ignores else ""
+    (tmp_path / ".vale.ini").write_text(
+        "StylesPath = styles\nMinAlertLevel = suggestion\nVocab = T\n"
+        f"[*.md]\nBasedOnStyles = Vale\nVale.Spelling = NO\n{ignores}{levels}"
+    )
+    page = tmp_path / "page.md"
+    page.write_text(text + "\n")
+    out = subprocess.run(
+        ["vale", "--no-exit", "--output=JSON", "--config", str(tmp_path / ".vale.ini"), str(page)],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    hits = prose_eval.parse_hits(out)
+    return [alert["Check"] for alerts in hits.values() for alert in alerts]
+
+
+def _unwidened(entries: list[str], entry: str) -> list[str]:
+    assert entry in entries, f"{entry!r} is not in {ACCEPT}"
+    return [line.replace(r"\s", " ") if line == entry else line for line in entries]
+
+
+# Each multi-word accept entry: the rule it exempts, and the exempted text
+# split over two lines. The last two exempt Google.Headings, and a heading
+# is one line, so for them the split text is miscased: with `\s` Vale.Terms
+# reports it wherever the line wraps.
+SPLIT_ACCEPT = {
+    r"[Ii]t\sis": ("write-good.TooWordy", "The check passed. It\nis ordinary."),
+    r"[Ii]t\swas": ("write-good.TooWordy", "The check ran. It\nwas ordinary."),
+    r"Learn\sPrompting": ("Vale.Terms", "You learn\nprompting from a guide."),
+    r"Execute\sProgram": ("Vale.Terms", "You execute\nprogram steps."),
+}
+
+
+def test_every_multi_word_accept_entry_is_widened_and_has_a_split_case() -> None:
+    entries = _accept_entries()
+    assert not [entry for entry in entries if " " in entry], "write `\\s` between the words"
+    assert sorted(entry for entry in entries if r"\s" in entry) == sorted(SPLIT_ACCEPT)
+
+
+@pytest.mark.parametrize("entry", SPLIT_ACCEPT)
+def test_a_multi_word_accept_entry_applies_across_a_line_break(
+    tmp_path: pathlib.Path, entry: str
+) -> None:
+    rule, text = SPLIT_ACCEPT[entry]
+    rules = [] if rule == "Vale.Terms" else [rule]
+    entries = _accept_entries()
+    widened = _vale_with(tmp_path / "widened", rules, text, accept=entries)
+    old = _vale_with(tmp_path / "old", rules, text, accept=_unwidened(entries, entry))
+    if rule == "Vale.Terms":
+        assert widened == ["Vale.Terms"]
+        assert old == []
+    else:
+        assert widened == []
+        assert old == [rule]
+
+
+# The accepted spelling of each entry, on one line and split. Vale.Terms
+# must accept all of them, and Google.Headings must accept the names in a
+# heading.
+ACCEPTED_TEXT = [
+    "The check passed. It is ordinary. it is fine.",
+    "The check passed. It\nis ordinary. it\nis fine.",
+    "The check ran. It was ordinary. it was fine.",
+    "The check ran. It\nwas ordinary. it\nwas fine.",
+    "Read Learn Prompting and Execute Program.",
+    "Read Learn\nPrompting and Execute\nProgram.",
+    "## Notes on Learn Prompting\n\n## Notes on Execute Program",
+]
+
+
+@pytest.mark.parametrize("text", ACCEPTED_TEXT)
+def test_vale_terms_accepts_the_widened_entries(tmp_path: pathlib.Path, text: str) -> None:
+    rules = ["write-good.TooWordy", "Google.Headings"]
+    assert _vale_with(tmp_path, rules, text, accept=_accept_entries()) == []
+
+
+# Each `TokenIgnores` phrase with a space in it: the config section, the
+# pattern, the rule the ignore keeps quiet, and the phrase split over two
+# lines. The bibliography YAML is linted with `--ext=.md`, so a Markdown
+# page tests its section as well.
+SPLIT_IGNORES = {
+    "significant harm": (
+        "[site/src/content/docs/**/*.{md,mdx}]",
+        r'("significant\sharm")',
+        "ai-tells.OverusedVocabulary",
+        'Practices that cause "significant\nharm" are banned.',
+    ),
+    "Academy slug": (
+        "[*.{yaml,yml}]",
+        r"(Academy\s[a-z0-9-]+)",
+        "Vale.Terms",
+        "See Academy\nintroduction-to-claude-cowork for the course.",
+    ),
+}
+
+
+def _token_ignores(config: pathlib.Path, section: str) -> list[str]:
+    value = vale_configs.parse_ini(config.read_text(encoding="utf-8"))[section]["TokenIgnores"]
+    return [pattern.strip() for pattern in value.split(", ")]
+
+
+@pytest.mark.parametrize("config", [".vale.ini", ".vale-extended.ini"])
+def test_every_token_ignores_phrase_is_widened_and_has_a_split_case(config: str) -> None:
+    sections = vale_configs.parse_ini((REPO_ROOT / config).read_text(encoding="utf-8"))
+    patterns = {
+        (section, pattern)
+        for section, keys in sections.items()
+        if "TokenIgnores" in keys
+        for pattern in _token_ignores(REPO_ROOT / config, section)
+    }
+    assert not [p for p in patterns if " " in p[1]], "write `\\s` between the words"
+    widened = {p for p in patterns if r"\s" in p[1]}
+    assert widened == {(section, pattern) for section, pattern, _, _ in SPLIT_IGNORES.values()}
+
+
+@pytest.mark.parametrize("case", SPLIT_IGNORES)
+def test_a_token_ignores_phrase_applies_across_a_line_break(
+    tmp_path: pathlib.Path, case: str
+) -> None:
+    section, pattern, rule, text = SPLIT_IGNORES[case]
+    ignores = ", ".join(_token_ignores(REPO_ROOT / ".vale.ini", section))
+    rules = [] if rule == "Vale.Terms" else [rule]
+    accept = _accept_entries()
+    assert _vale_with(tmp_path / "widened", rules, text, accept=accept, token_ignores=ignores) == []
+    old = ignores.replace(pattern, pattern.replace(r"\s", " "))
+    assert old != ignores
+    assert _vale_with(tmp_path / "old", rules, text, accept=accept, token_ignores=old) == [rule]
