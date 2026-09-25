@@ -29,14 +29,16 @@ review-by: 2027-03-25
 notes: >-
   The fixture loop in site/examples/building-agents/traces-and-trajectories/ writes a trace with one
   record per model call and per tool call, with latency from fixed numbers and a fixed formula and
-  cost from made-up prices, so the output is deterministic. A fake model can't wander, so each of the
-  eight runs has its own scripted model and the tools are real functions over a small data table. The
-  invoice data, the account numbers and the eight paths are illustrative, written by the author. Run
-  r2 is the competency file's example (the payment lookup called three times with the wrong account).
-  The expected path in words (section three) is this course's rule for the lookup task, so it cites
-  AEC-09 only for what a trajectory check looks at. The OpenTelemetry GenAI span conventions page backs
-  the span names, the token attributes, the development status and the opt-in content capture, and
-  is why the lesson sets review-by. Brilliant VER and Academy building-with-the-claude-api from the
-  plan were dropped because the page cites no claim from them. The stretch check dates_grounded is
-  separate from expected_path, because the MultiChoice keeps answer checks out of the path rules. The short on trace formats and
-  tracing tools is still to write.
+  cost from made-up prices, so the output is deterministic. A fake model can't wander, so each of
+  the eight runs has its own scripted model and the tools are real functions over a small data
+  table. The invoice data, the account numbers and the eight paths are illustrative, written by the
+  author. Run r2 is the competency file's example (the payment lookup called three times with the
+  wrong account). The expected path in words (section three) is this course's rule for the lookup
+  task, so it cites AEC-09 only for what a trajectory check looks at. The OpenTelemetry GenAI span
+  conventions page backs the span names, the token attributes, the development status and the opt-in
+  content capture, and is why the lesson sets review-by. Brilliant VER and
+  Academy building-with-the-claude-api from the plan were dropped because the page cites no claim
+  from them.
+  The stretch check dates_grounded is separate from expected_path, because the MultiChoice keeps
+  answer checks out of the path rules. The short on trace formats and tracing tools is still to
+  write.
