@@ -23,7 +23,7 @@ the situation down the way most people would, in a few lines, as it feels
 to you today.
 
 > Offer A is a product analyst job at a software startup with about 40
-> people. The product is exciting, I clicked with the team in the
+> people. The product is exciting, I got along well with the team in the
 > interview, and the salary is 10 percent above my current salary. The work
 > is mostly remote.
 >
@@ -45,19 +45,20 @@ take?
 </Prompt>
 <Response>
 Based on what you describe, Offer A sounds like the better fit. You
-clicked with the team, the product excites you, and a 10 percent raise
+got along well with the team, the product excites you, and a 10 percent raise
 with mostly remote work is a real improvement. Offer B is stable, but a
-long commute three days a week and a slow, formal culture can wear you
-down over time. Go with Offer A, and ask the startup a few questions
+long commute three days a week and a slow, formal culture can tire you
+over time. Go with Offer A, and ask the startup a few questions
 about its plans before you sign.
 </Response>
 
 Read the reasons in the answer and look for them in the description.
-Every one is there, most of them in your own words: "clicked", "exciting",
+Every one is there, most of them in your own words: "got along well", "exciting",
 "slow and formal". The question didn't say "I've decided" or "right?",
-and the description still led the model. It gave Offer A the warm words
-and Offer B the costs, and the answer handed that selection back to you
-as advice. The model knows only what you wrote, and assistants often give
+and the description still led the model. The description gave Offer A
+the warm words and Offer B the costs, and the answer handed that
+selection back to you as advice. The model knows about your situation
+only what you wrote, and assistants often give
 feedback that matches the view the user has shown (@Sharma 2023).
 
 The answer also told you nothing new. You already knew you liked the
@@ -66,17 +67,16 @@ and a question that asks for a verdict doesn't ask for that.
 
 <Choice id="where-the-verdict-came-from" objective="using-agents/delegates-and-checks/writes-a-brief"
   concepts={['thought-partner', 'sycophancy']}
-  context="A learner described two job offers to a chat assistant, a startup job in warm words and an insurance job mostly through its costs, and asked which to take. The assistant recommended the startup, with reasons in the learner's own words."
-  title="Where did the verdict come from?" hint="What did the model have in front of it, and whose words are in its reasons?"
+  context="A learner described two job offers to a chat assistant in a few lines, the way they felt about them that day, and asked which to take. The assistant recommended the startup."
+  title="What would you change before asking again?" hint="Which words show which offer you prefer, and does each offer get the same kinds of facts?"
   options={[
-    { text: 'The model compared the two offers and found that a startup job suits most people better.', why: 'The model had only the description, and it compared nothing the description left out, such as pay beyond salary or the risk of a small company.' },
-    { text: 'The model knows that startups pay more, so it picked the offer with the higher salary.', why: 'The salary difference came from the description too. The answer repeats every point the description made for Offer A.' },
-    { text: 'The description gave one offer the warm words and the other the costs, and the model repeated that as advice.', correct: true },
-    { text: 'The model picked Offer A because it was listed first, and a model always favors the first option.', why: 'The reasons in the answer match the words of the description, which a rule about order does not explain.' },
+    { text: 'Add a few lines on why Offer A appeals to you, so the model understands your reasons better.', why: 'More reasons for Offer A give the model more of your own view to hand back as advice.' },
+    { text: 'Keep the description, and add a line asking the model to be honest and objective about both.', why: 'A request for objectivity leaves the facts as they were, and the model can only work from those facts.' },
+    { text: 'Give both offers the same kinds of facts, and drop words such as "exciting" or "slow and formal".', correct: true },
+    { text: 'Put Offer B first, so that the model gives the startup less weight than it did this time.', why: 'The reasons in the answer match the words used for each offer, which the order of the offers does not explain.' },
   ]}>
-A colleague reads the exchange and says the model must have good
-judgment about careers. What is the better explanation of the
-recommendation?
+The description got back its own framing as advice. Before you ask the
+assistant again, what is the best change to the description?
 </Choice>
 
 ## Ask for help thinking
@@ -87,9 +87,15 @@ decision. It gives the facts without the adjectives. It names your lean
 as a lean, so the model knows which option to test. Then it asks for the
 case against that option, for the questions your facts leave open, and
 for what each option costs. In the safety course you took your opinion
-out of the question to get an assessment. Here you state it on purpose,
-as a target, and ask for no verdict, so the model has nothing to agree
-with.
+out of the question to get an assessment. Here you name your lean on
+purpose, because the model needs to know which option to argue against.
+The brief still asks for no verdict.
+
+State the lean without your reasons for it, and ask for the case against
+it first. In the safety course, a request that included the user's
+reasons got an argument and then a rebuttal of that argument. The lean
+is still a view that the model can drift toward, so read the case
+against for places where it softens its own points.
 
 <Prompt model="illustrative" recorded="illustrative">
 I have two job offers and need to answer by Friday. I want help thinking
@@ -133,21 +139,22 @@ Offer B: about five hours of travel a week, and no raise now.
 
 The second answer ends without a verdict, because the brief said not to
 give one. Its useful part is the list of questions, and you answer them
-yourself. Some you can answer at once. Some you can't, such as how long the startup can pay its staff, and those tell you what to ask
-before Friday. The last question may matter most. If you want to leave
+yourself. Some you can answer at once. Some you can't, such as how long
+the startup can pay its staff, and those tell you what to ask before
+Friday. The last question may matter most. If you want to leave
 your current job because you have nothing more to learn there, the
 question of who you learn from matters more than the salary.
 
 The value of the session is in your own clearer thinking, and the model's
-text is the material for it. The challenge came because the brief asked
-for it. The first prompt got none, because it asked for none.
+text is the material for it. The first prompt got no challenge, and the
+second got one because the brief asked for it.
 
 <Choice id="open-a-thinking-session" objective="using-agents/delegates-and-checks/writes-a-brief"
   concepts={['thought-partner']}
   context="The learner wants a chat assistant to help them think through a choice between two venues for a team event, and is about to write the first message."
   title="Which opening sets up a thinking session?" hint="Which request says what you want from the conversation and asks for something you can't already see yourself?"
   options={[
-    { text: 'I want help thinking, not a verdict. I lean toward the new venue. Give me the case against it and what I have not told you.', correct: true },
+    { text: 'Here are the two venues. I want help thinking, not a verdict. I lean toward the new one. Give me the case against it and what I have not told you.', correct: true },
     { text: 'Here are the two venues with their prices. Please be honest and objective, and tell me which one you would book for us.', why: 'Asking for honesty still asks for a verdict, and the verdict follows whatever the description stressed.' },
     { text: 'Here are the two venues. I lean toward the new one, and I would like you to confirm that it is the better choice for us.', why: 'Naming the lean is fine. Asking the model to confirm it gets you back your own view, with reasons attached.' },
     { text: 'Act as an event planner with twenty years of experience. Here are the two venues, so tell me which one to choose.', why: 'A role changes the style of the answer, and the request is still for a decision based on your own description.' },
@@ -158,7 +165,7 @@ message makes the assistant a thought partner?
 
 <Pitfall title="Your own description, returned as advice">
 A team lead describes two suppliers to an assistant. One gets a
-paragraph of praise, copied from its sales call, and the other gets a
+paragraph of praise, taken from its sales call, and the other gets a
 line about its price. The assistant recommends the first, and the team
 lead forwards the reply to their manager as "I also checked with the AI".
 The recommendation was the team lead's own framing with reasons attached,
@@ -200,8 +207,8 @@ think the choice through.
 <Sort id="challenge-or-agreement" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
   concepts={['thought-partner']}
   context="The lesson shows a brief that asks a chat assistant to help think a decision through, and a plain request for a verdict that the assistant answered by repeating the description."
-  title="Challenge or agreement?" hint="Does the line ask for something you can't see yet, or does it tell the model which answer you want?"
-  buckets={['Asks for challenge', 'Invites agreement or a verdict']}
+  title="Challenge or agreement?" hint="Does the line help you think the choice through, or does it tell the model which answer you want or ask it to decide?"
+  buckets={['Sets up a thinking session', 'Invites agreement or a verdict']}
   items={[
     { text: 'Give me the strongest case against the option I lean toward.', bucket: 0 },
     { text: 'List what I have not told you that would matter for this choice.', bucket: 0 },
