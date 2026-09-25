@@ -11,7 +11,12 @@ the result.
 
 import sys
 
-from pricing import FREE_SHIPPING_FROM, SHIPPING, shipping, subtotal, total
+# Write no __pycache__ for pricing.py. Python checks a cached module against
+# the source file's time in whole seconds, so an edit made within a second of
+# the last run could otherwise run the old code.
+sys.dont_write_bytecode = True
+
+from pricing import FREE_SHIPPING_FROM, SHIPPING, shipping, subtotal, total  # noqa: E402
 
 ORDER = [(2, 12.50), (1, 20.00)]
 

@@ -49,7 +49,9 @@ ENV_BASE = {
 def make_copy(tmpdir: str) -> str:
     """Copy `shop/` into `tmpdir` and return the copy's path."""
     copy = os.path.join(tmpdir, "shop")
-    shutil.copytree(SHOP, copy, ignore=shutil.ignore_patterns(".*", "__pycache__"))
+    # shop/.gitignore is copied, so that __pycache__ stays out of `git add -A`
+    # in the copy, as it does in the learner's `cp -R`.
+    shutil.copytree(SHOP, copy, ignore=shutil.ignore_patterns("__pycache__", ".DS_Store"))
     return copy
 
 
