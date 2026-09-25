@@ -1,17 +1,19 @@
 """Git variables in the learner's shell don't change what the git fixtures print.
 
-Each of these fixtures builds a fresh repository and runs git in it with an
-allow-list environment: `GIT_ENV_BASE` in the coding-with-agents fixtures'
-`_common.py`, and `git_env` in testing-a-skill's `clones.py` and in
-attribution-and-review-norms' `trailers.py`, which runs
-`git interpret-trailers` in an empty directory and builds no repository.
-This runs every
-one of them twice, once plainly and once with variables that change what git
-does: a template directory whose pre-commit hook fails, extra config through
-GIT_CONFIG_PARAMETERS, an external diff program and GIT_DIFF_OPTS. The output
-must match byte for byte. The reversible-changes and testing-a-skill
-fixtures print no diff, so for them only the failing template hook shows a
-leak.
+Each of these fixtures runs git with an allow-list environment:
+`GIT_ENV_BASE` in the coding-with-agents fixtures' `_common.py`, and
+`git_env` in testing-a-skill's `clones.py` and in
+attribution-and-review-norms' `trailers.py`. Most of them build a fresh
+repository and run git in it. `trailers.py` runs `git interpret-trailers`
+in an empty directory and builds no repository. This runs every one of
+them twice, once plainly and once with variables that change what git
+does: a template directory whose pre-commit hook fails, extra config
+through GIT_CONFIG_PARAMETERS, an external diff program and GIT_DIFF_OPTS.
+The output must match byte for byte. The reversible-changes and
+testing-a-skill fixtures print no diff, so for them only the failing
+template hook shows a leak. The attribution-and-review-norms fixture makes
+no commit and prints no diff, so for it the extra config is the variable
+that could leak.
 
 The list is kept by hand, so that a new fixture that runs git without an
 allow-list environment fails here instead of being left out. A discovery

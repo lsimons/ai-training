@@ -13,6 +13,9 @@ assumes:
   - objective: safety/handles-data-safely/discloses-ai-use
     lesson: safety/saying-ai-helped
     section: the-three-parts-of-a-disclosure-line
+  - objective: coding-with-agents/verifies-agent-work/reviews-others-code
+    lesson: coding-with-agents/reviewing-the-diff
+    section: every-changed-file
 after:
   - coding-with-agents/reversible-changes
   - coding-with-agents/reviewing-the-diff
@@ -31,6 +34,7 @@ sources:
   - Linux coding assistants
   - Claude Code all settings
   - DCO
+issue: 183
 minutes: 10
 sources-checked: 2026-09-25
 review-by: 2027-03-25
