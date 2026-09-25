@@ -55,4 +55,4 @@ links:
   prerequisites: [building-agents/agent-loop]
   related: []
   specializations: []
-sources: [AEC-04, AEC-06, DLAI-11, Academy building-with-the-claude-api, Yao 2022, Madaan 2023, Huang 2023, Wang 2023]
+sources: [AEC-04, AEC-06, DLAI-11, Academy building-with-the-claude-api, Yao 2022, Madaan 2023, Huang 2023, Wang 2023, Anthropic effective agents]

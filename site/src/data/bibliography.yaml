@@ -1119,3 +1119,10 @@ Hardy 1988:
   author: Norm Hardy
   license: Copyright ACM
   url: https://doi.org/10.1145/54289.871709
+Anthropic effective agents:
+  type: reference
+  title: Building effective agents
+  container: Anthropic Engineering
+  author: Erik S., Barry Zhang
+  license: Proprietary
+  url: https://www.anthropic.com/engineering/building-effective-agents
