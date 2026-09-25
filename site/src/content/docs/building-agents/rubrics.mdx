@@ -36,7 +36,8 @@ course uses five **quality pillars** per run:
 
 An action the user didn't ask for is scored under safety of actions
 only. It doesn't also count against efficiency, or against adherence
-when an instruction rules it out. Each failure lowers one score.
+when an instruction rules it out. So the unasked ticket in run five
+lowers one score.
 
 Correctness and faithfulness are split because a retrieval agent fails
 them separately. An answer can be right from what the model learned in
@@ -180,10 +181,10 @@ Grounded (faithfulness)
 
 A 0-1-2 scale is enough here, because each point is a different decision
 for the reader: is every claim supported, is the answer supported with
-an extra claim that needs removing, or is the answer itself
-unsupported. A 1-to-5 scale without
-anchors gives different 3s from different graders, and a longer scale
-with anchors still needs an example for every point.
+an extra claim that needs removing, or is the answer itself unsupported.
+A 1-to-5 scale without anchors gives different 3s from different
+graders, and a longer scale with anchors still needs an example for
+every point.
 
 The anchored version agrees on 11 of 12, and the one disagreement is
 the useful part. Run six says "at least two weeks before you travel"
@@ -213,16 +214,15 @@ example for each point.
 
 ## Check the rubric with a judge
 
-A person can't read a thousand runs a day, and a rubric in daily use
-is applied by a grader that runs on its own. The grader can
-be code or a model (@AEC-09). Code checks
-what can be counted: the number of searches for efficiency, and whether
-the answer is exactly `not found` when it should be. A model reads the
-answer against the passages for a criterion such as Grounded. Before a
-model judge grades at scale, compare its scores with a person's on a
-sample (@AEC-09). Where they differ, fix the rubric before you fix the
-judge. Here the judge's
-scores are illustrative, like the rest of the grades.
+A person can't read a thousand runs a day, and a rubric in daily use is
+applied by a grader that runs on its own. The grader can be code or a
+model (@AEC-09). Code checks what can be counted: the number of searches
+for efficiency, and whether the answer is exactly `not found` when it
+should be. A model reads the answer against the passages for a criterion
+such as Grounded. Before a model judge grades at scale, compare its
+scores with a person's on a sample (@AEC-09). Where they differ, fix the
+rubric before you fix the judge. Here the judge's scores are
+illustrative, like the rest of the grades.
 
 <Predict id="show-judge" title="The judge against grader A"
   answer={`"Grounded", judge and A agree on 10 of 12
@@ -257,8 +257,9 @@ Both disagreements come from one missing sentence in the rubric: what
 With that line, run six scores 2 for every grader, and run eleven scores
 0. Rerun the judge on the sample after each change to the rubric. This
 course's rule is to start grading at scale only once the judge agrees
-with the person as often as two people agree with each other. A later lesson in this course, on
-using a model as the judge, picks up from here.
+with the person as often as two people agree with each other. A later
+lesson in this course, on using a model as the judge, picks up from
+here.
 
 <Pitfall title="A criterion written before reading a run">
 
