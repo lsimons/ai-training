@@ -50,6 +50,12 @@ BINARY_MEMBER = "mise/bin/mise"
 KEY_PATTERN = re.compile(r"minisign\s+-Vm\s+SHASUMS256\.txt\s+-P\s+(RW[A-Za-z0-9+/]{54})")
 VERSION_PATTERN = re.compile(r"\d{4}\.\d{1,2}\.\d+")
 
+MINISIGN_HINT = (
+    "Run `mise install` (minisign is pinned in .mise.toml). On a platform that the `os` list"
+    " of minisign in .mise.toml leaves out, install minisign 0.12 from"
+    " https://github.com/jedisct1/minisign/releases yourself."
+)
+
 # Fetches a URL and returns its body.
 Fetch = Callable[[str], bytes]
 
@@ -126,7 +132,7 @@ def verify_signature(
             check=False,
         )
     except FileNotFoundError as error:
-        msg = f"{minisign} is not on PATH. Run `mise install` (it is pinned in .mise.toml)."
+        msg = f"{minisign} is not on PATH. {MINISIGN_HINT}"
         raise RefreshError(msg) from error
     if result.returncode != 0:
         output = (result.stderr or result.stdout).strip()
@@ -156,7 +162,11 @@ def binary_sha256(archive: pathlib.Path) -> str:
 
 
 def parse_published_at(release_json: bytes) -> datetime.datetime:
-    data: object = json.loads(release_json)
+    try:
+        data: object = json.loads(release_json)
+    except ValueError as error:
+        msg = f"the GitHub releases API did not return JSON: {error}"
+        raise RefreshError(msg) from error
     published: object = None
     if isinstance(data, dict):
         published = cast("dict[str, object]", data).get("published_at")
@@ -211,7 +221,7 @@ def report(result: Refresh, today: datetime.date) -> str:
     )
 
 
-def http_fetch(url: str) -> bytes:  # pragma: no cover -- network
+def http_fetch(url: str) -> bytes:
     request = urllib.request.Request(url, headers={"User-Agent": "ai-training mise-refresh"})
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
@@ -219,12 +229,15 @@ def http_fetch(url: str) -> bytes:  # pragma: no cover -- network
             return body
     except urllib.error.URLError as error:
         msg = f"download of {url} failed: {error}"
+        # Unauthenticated calls to the GitHub REST API are limited per hour,
+        # and past the limit it answers 403 or 429 ("Rate limits for the
+        # REST API", https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api).
+        if isinstance(error, urllib.error.HTTPError) and error.code in {403, 429}:
+            msg += ". The GitHub API may be rate limiting this address, so try again later."
         raise RefreshError(msg) from error
 
 
-def main(
-    argv: list[str],
-) -> int:  # pragma: no cover -- network; tests call refresh() with a local fetch
+def main(argv: list[str]) -> int:
     if len(argv) != 1:
         print("usage: mise run mise-refresh <version>", file=sys.stderr)
         return 2

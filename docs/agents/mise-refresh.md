@@ -32,6 +32,15 @@ a line that names the step. The task doesn't apply the seven-day rule
 itself: check the printed date, then update the workflows and
 `.mise.toml` in one commit.
 
+The pinned `minisign` installs on Linux x64, macOS on Apple silicon and
+Windows, the platforms that the aqua registry entry for 0.12 lists.
+Upstream publishes an arm64 Linux binary that the entry doesn't map, and
+no Intel macOS binary. The `os` list on the pin makes `mise install` skip
+`minisign` on the other platforms, and `mise.lock` holds no checksum for
+them. There, the task and the signature tests in
+`tests/test_mise_refresh.py` fail with a message that says to install
+`minisign` 0.12 from its GitHub release by hand.
+
 With `sha256` set the action checks only that binary and skips its own
 check of the download against the signed `SHASUMS256.txt`, so the
 signature and checksum steps of the task replace it. The action fetches
