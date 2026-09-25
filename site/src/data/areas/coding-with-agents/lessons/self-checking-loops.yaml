@@ -1,11 +1,21 @@
 id: coding-with-agents/self-checking-loops
 title: Giving the agent a check it can run, with a limit
+description: >-
+  Turn the reproduction steps of the nightly sales import into a test the coding agent runs after
+  every change, brief the fix-and-rerun loop with a limit of five attempts and a read-only test
+  file, confirm with git that the test did not change, and tell the deterministic gates that can
+  block a merge from a second model's opinion.
 mode: tutorial
 covers: coding-with-agents/verification
 serves: [coding-with-agents/verifies-agent-work/automates-the-check]
 introduces: [bounded-self-checking-loops, deterministic-gates]
 assumes:
   - objective: safety/verifies-output/checks-claims
+    lesson: safety/spotting-hallucination
+    section: run-the-check
+  - objective: coding-with-agents/verifies-agent-work/observes-and-debugs
+    lesson: coding-with-agents/observing-and-debugging
+    section: reproduce-it-first
 after: [coding-with-agents/observing-and-debugging]
 shorts: [why a second model's review never replaces a test]
 exercise:
@@ -13,11 +23,27 @@ exercise:
   brief: >-
     Turn a manual check on the fixture into a test. Brief the agent to fix and rerun at most five
     times with the test file read-only, and confirm afterwards that the assertions did not change.
-sources: [Academy ai-native-sdlc-playbook, Academy claude-code-in-action, Brilliant VER]
+sources:
+  - Academy ai-native-sdlc-playbook
+  - Academy claude-code-in-action
+  - Brilliant VER
+  - Claude Code best practices
+  - Claude Code permissions
 issue: 174
 minutes: 15
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 notes: >-
   The plan named the topic safety/verification as assumed; taken as the objective
-  safety/verifies-output/checks-claims. Closes the "deterministic gates" gap from issue #13.
-  Sources: Brilliant VER-6, Academy claude-code-in-action (verification skills, paraphrased),
-  Academy ai-native-sdlc-playbook (a check the agent can run is run every iteration, paraphrased).
+  safety/verifies-output/checks-claims, taught where the learner runs a checker instead of trusting
+  a summary. The page opens from the previous lesson's reproduction steps, so it also assumes
+  observes-and-debugs. Closes the "deterministic gates" gap from issue #13. Sources: Brilliant
+  VER-6, Academy claude-code-in-action (gating on real test results, paraphrased from the public
+  course page), Academy ai-native-sdlc-playbook (a check the agent can run is run every iteration,
+  paraphrased), Claude Code best practices (a check that returns pass or fail, a Stop hook as a
+  gate, a reviewer that reports gaps even in sound work), Claude Code permissions (what an Edit
+  deny rule does and doesn't cover). The fixtures under
+  site/examples/coding-with-agents/self-checking-loops/ copy the observing-and-debugging nightly/
+  directory to a temporary place, add test_nights.py, tag a commit before-run, and apply either
+  the bounded run's fix with the CSV module or an unbounded run that skips bad rows and deletes the row check from
+  the test. The test counts the data rows itself so that a skip-the-row fix fails.
