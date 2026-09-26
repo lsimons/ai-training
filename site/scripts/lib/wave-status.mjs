@@ -123,11 +123,23 @@ export function normalizeBranch(name) {
 }
 
 /**
+ * The lines of a comment. Comments posted from the GitHub web page come back
+ * with `\r\n` line endings, so `\r\n` and a lone `\r` end a line too, and
+ * every rule that reads a line sees it without a trailing `\r`.
+ * @param {string} body
+ */
+function linesOf(body) {
+	return body.split(/\r\n?|\n/);
+}
+
+/**
  * The lines of a comment outside its code fences, so a quoted example
  * doesn't count as the comment's own `Branch:`, `Verdict:` or
  * `re-checked by lead` line. As in CommonMark, a fence closes on a line of
  * the same marker character, at least as long as the opening one, with
- * nothing after it. A fence that never closes hides the rest of the comment.
+ * nothing after it. A backtick marker with a backtick later on its line is
+ * inline code (```` ```mise run fast``` ````) and opens no fence. A fence
+ * that never closes hides the rest of the comment.
  * @param {string} body
  */
 function linesOutsideFences(body) {
@@ -135,11 +147,11 @@ function linesOutsideFences(body) {
 	const lines = [];
 	/** @type {string | null} */
 	let fence = null;
-	for (const line of body.split('\n')) {
+	for (const line of linesOf(body)) {
 		const match = FENCE_LINE.exec(line);
 		const marker = match?.[1];
 		if (fence === null) {
-			if (marker) fence = marker;
+			if (marker && !(marker[0] === '`' && match?.[2]?.includes('`'))) fence = marker;
 			else lines.push(line);
 		} else if (marker && marker[0] === fence[0] && marker.length >= fence.length && !match?.[2]?.trim()) {
 			fence = null;
@@ -171,7 +183,7 @@ export function branchOf(body) {
  * @param {string} body
  */
 export function isUnfinished(body) {
-	return UNFINISHED_LINE.test(body.split('\n', 1)[0] ?? '');
+	return UNFINISHED_LINE.test(linesOf(body)[0] ?? '');
 }
 
 /**
@@ -180,7 +192,7 @@ export function isUnfinished(body) {
  * @param {string} body
  */
 export function unfinishedBranchOf(body) {
-	const first = body.split('\n', 1)[0] ?? '';
+	const first = linesOf(body)[0] ?? '';
 	const match = UNFINISHED_LINE.exec(first)?.[1];
 	return match ? normalizeBranch(match) || null : null;
 }
@@ -217,8 +229,7 @@ export function appliesTo(body, branch, branches) {
  * @param {string} body
  */
 function leftOf(body) {
-	return body
-		.split('\n')
+	return linesOf(body)
 		.slice(1)
 		.filter((line) => !ATTRIBUTION_LINE.test(line))
 		.join('\n')
