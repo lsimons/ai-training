@@ -258,12 +258,12 @@ belong. What do you tell them?
     { text: 'name: Release-Notes', bucket: 1 },
     { text: 'name: release_notes', bucket: 1 },
     { text: 'name: notes', bucket: 1 },
-    { text: 'description: with nothing after the colon', bucket: 1 },
+    { text: 'A description line with no text after the colon', bucket: 1 },
   ]} />
 
 <MultiChoice id="a-step-that-can-fail" phase="review" objective="customizing-agents/writes-skill/packages-a-procedure"
   concepts={['writing-a-good-skill']}
-  context="A release skill's first step runs the tests. The lesson writes each step that can fail with what the agent does when it fails."
+  context="A release skill's first step runs the package's tests."
   title="The step that runs the tests" hint="What does the agent see when the step fails, what does it do, and what must it not do?"
   options={[
     { text: 'If a test fails, stop and report the name of the failing test.', correct: true },
@@ -278,7 +278,7 @@ Which two lines belong in that step?
 
 <Choice id="the-closing-check" phase="review" objective="customizing-agents/writes-skill/packages-a-procedure"
   concepts={['writing-a-good-skill']}
-  context="A release skill ends with a check the agent runs, so that the agent can tell a right release from a wrong one without asking."
+  context="A release skill for a small package is being written, and its last lines are still open."
   title="How the skill ends" hint="Which ending gives the agent a line to compare against?"
   options={[
     { text: 'Check that the version, the changelog and the tag all look good.', why: 'Looks good is a judgment the agent makes about its own work. It can\'t fail.' },
