@@ -310,7 +310,7 @@ articles yet. What do you change before you press go?
     { text: 'A web page the agent opens while it looks for venues.', correct: true },
     { text: 'The request you typed to start the task.', why: 'Your own request is the instruction you meant to give. Injection comes in through the data the agent reads.' },
     { text: 'A document a customer attached to an email.', correct: true },
-    { text: 'Nothing, as long as the agent runs on a model you trust.', why: 'A good model still reads the planted text as text it may follow. The risk is in what it reads, not in who made it.' },
+    { text: 'Nothing, as long as the agent runs on a model you trust.', why: 'A good model still reads the planted text as text it may follow. The risk comes from what it reads.' },
   ]}>
 
 An agent reads text while it works for you. Which two of these could
@@ -352,7 +352,7 @@ go?
 
 <Sort id="let-it-or-ask" phase="review" objective="safety/judges-agent-risk/chooses-human-in-loop"
   concepts={['human-in-the-loop']}
-  context="An agent organizes a team dinner for 40 guests. The lesson puts a human approval in front of steps that can't be undone or that reach other people, and lets the agent read, search, draft and propose freely."
+  context="An agent organizes a team dinner for 40 guests."
   title="Where does it stop and ask?" hint="Can the step be undone, and does it reach anyone other than you?"
   buckets={['Let the agent do it', 'Stop and ask you first']}
   items={[

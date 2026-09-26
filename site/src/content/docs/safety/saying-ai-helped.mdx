@@ -256,7 +256,7 @@ in the pull request?
   options={[
     { text: 'Keep the function, and keep the library\'s copyright and license notice with it.', correct: true },
     { text: 'Remove it and write your own, because any match with a library is copying.', why: 'That is the answer for a copyleft match. A permissive license allows the copy with its notice.' },
-    { text: 'Keep it without the notice, because a permissive license has no conditions.', why: 'The one condition is the notice, and a copy without it breaks the license.' },
+    { text: 'Keep it without the notice, because a permissive license has no conditions.', why: 'Its condition is the notice, and a copy without it breaks the license.' },
     { text: 'Rename the variables, so that the comparison no longer finds the match.', why: 'Renaming hides where the code came from, and the code is still the library\'s.' },
   ]}>
 
@@ -267,14 +267,14 @@ license. What do you do?
 
 <Sort id="notice-or-rewrite" phase="review" objective="safety/handles-data-safely/respects-licenses"
   concepts={['licensing-and-attribution']}
-  context="The product in each item is proprietary. A permissive license asks for its notice to stay with a copy, and a copyleft license asks that a program using the code is shared under the same license."
-  title="What happens to the match?" hint="What does the license of the matching source ask of a proprietary product?"
+  context="The product in each item is proprietary, and each item is generated code that matches an open-source project nearly line for line."
+  title="What happens to the match?" hint="Can a proprietary product meet what the license asks, and how?"
   buckets={['Keep it, with the notice', 'Replace it with your own work']}
   items={[
-    { text: 'A generated function that matches a library under a permissive license', bucket: 0 },
-    { text: 'A generated test helper that matches a permissive project, notice included', bucket: 0 },
-    { text: 'A generated function that matches a library under a copyleft license', bucket: 1 },
-    { text: 'A generated parser that matches a copyleft project, with the names changed', bucket: 1 },
+    { text: 'A function from a library whose license asks only that its copyright line stays with any copy', bucket: 0 },
+    { text: 'A test helper from a project under a permissive license, notice included', bucket: 0 },
+    { text: 'A function from a library whose license asks that any program using it is shared under the same license', bucket: 1 },
+    { text: 'A parser from a copyleft project, with the names changed', bucket: 1 },
   ]} />
 
 ## The rule of the place the work goes to

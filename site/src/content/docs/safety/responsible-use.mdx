@@ -220,16 +220,16 @@ customer, and it would be a perfect test. What do you do?
 
 <Match id="may-it-go-in" phase="review" objective="safety/handles-data-safely/decides-what-to-share"
   concepts={['data-privacy', 'confidentiality']}
-  context="The lesson sorts what may go into a general-purpose AI assistant at work by asking whose information it is. Information you hold for someone else is theirs to decide about, and some things stay out of every tool."
+  context="The lesson sorts what may go into a general-purpose AI assistant at work by asking whose information it is. Assume your organization approved the assistant for general work, and not for personal data."
   title="May it go in?" hint="Whose information is it, and could it ever be safe in a prompt?"
   options={['Yes', 'Only with their approval', 'Never']}
   rows={[
     { statement: 'Your own slide deck, for feedback on its structure', option: 0, why: 'Whose work is it?' },
     { statement: 'A price list a supplier shared with you under a confidentiality agreement', option: 1, why: 'Who decides where this list may go?' },
     { statement: 'The database password from the team\'s password vault', option: 2, why: 'What happens to a secret once it is in a prompt?' },
-    { statement: 'A scan of a colleague\'s passport', option: 2, why: 'Is an identity document ever needed for a task like this?' },
+    { statement: 'A scan of a colleague\'s passport', option: 2, why: 'Is the assistant approved for identity documents, and is the passport yours to share?' },
   ]}
-  rationale="Your own work may go in, what you hold for others goes in with their approval, and secrets and identity data stay out.">
+  rationale="Your own work may go in, what you hold for others goes in with their approval, and secrets and personal data the tool isn't approved for stay out.">
 Match each item to whether it may go into the assistant.
 </Match>
 
@@ -304,8 +304,8 @@ Disclosure means saying that AI was used, to the extent the audience
 expects to know. A reader of a report wants to know whether a machine
 drafted the text and who checked it. A code reviewer wants to know which
 parts were generated. A party to a contract wants to know that a person is
-accountable for the wording. Disclosure is about trust, so the useful form
-states what the AI did, what you did, and who is accountable. A line such
+accountable for the wording. Disclosure is about trust. The useful form states what the AI did, what
+you did, and who is accountable. A line such
 as "Drafted with an AI assistant and reviewed by the author" is enough
 for most documents, and it is the norm to expect from others.
 
@@ -317,8 +317,8 @@ from a client project, and the expectation is usually written down
 somewhere. Find out what the reader's setting expects before you decide how
 much to say.
 
-The reason disclosure sits in a safety lesson is the failure modes you met
-in the concepts course. The model is confident when it is wrong. Someone
+Disclosure belongs in a safety lesson because of the failure modes you
+met in the concepts course. The model is confident when it is wrong. Someone
 reading a text that was produced in seconds and checked by nobody deserves
 to know that, and you are accountable for the result whether or not the
 tool is mentioned.
@@ -354,7 +354,7 @@ needs to know that AI was involved, and how?
 
 The second output habit is checking what the model may have copied.
 
-Material you give a model and material it produces both carry
+Material you give a model and material it produces both come with
 obligations. Feeding in text or code you may not redistribute doesn't
 remove the restriction on it. Output that reproduces a source needs the attribution the
 source demands, and code output can reproduce public code closely enough
@@ -364,10 +364,9 @@ reproducing licensed code word for word, and the legal position of such
 output is unsettled. The honest summary is that nobody can promise you the
 output is free of other people's work, so the check is yours.
 
-The habit is small. Keep track of where your inputs came from. When output
-looks copied, when it is unusually specific or polished in a way the rest
-isn't, or when a block of code arrives complete with someone else's
-comments, search for a phrase from it. If it matches a source, credit it
+The habit is small. Keep track of where your inputs came from. Search for a phrase
+from any output that looks copied or more polished than the rest, and
+from a block of code that arrives with someone else's comments in it. If it matches a source, credit it
 as the source demands or replace it.
 
 <Choice id="the-suspiciously-complete-function" objective="safety/handles-data-safely/respects-licenses"
@@ -418,7 +417,7 @@ have been copied from.
 <Exercise stretch="Now do the same for a second tool you use, and compare the two answers side by side.">
 Take one AI tool you use at work. Find its terms, privacy page or trust
 page, and write down four facts as four short lines: its retention period for
-conversations, whether it may train on them (and where the setting is, if
+conversations, whether and how it may train on them (and where the setting is, if
 there is one), the regions for storing and processing data, and the
 subprocessors it lists. Spend no more than fifteen minutes. This
 is the lookup the lesson keeps pointing at, and once you have done it for
