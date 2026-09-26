@@ -1140,3 +1140,24 @@ Claude Code cli reference:
   author: Anthropic
   license: Proprietary
   url: https://code.claude.com/docs/en/cli-reference
+Claude docs prompt-caching:
+  type: reference
+  title: Prompt caching
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/build-with-claude/prompt-caching
+Claude docs rate-limits:
+  type: reference
+  title: Rate limits
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/api/rate-limits
+Claude docs errors:
+  type: reference
+  title: Claude API errors
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/api/errors
