@@ -228,7 +228,7 @@ class CallTimeoutError(Exception):
     pass
 
 
-RETRIABLE = {429, 500, 529}
+RETRIABLE = {429, 500, 504, 529}
 
 
 @dataclass
@@ -332,6 +332,11 @@ def quiet(line: str) -> None:
     pass
 
 
+def retries_only(line: str) -> None:
+    if line.endswith("and retry"):
+        print(line)
+
+
 def run(
     task: str,
     provider: Optional[Provider] = None,
@@ -406,7 +411,8 @@ def step_rate_limit() -> None:
     limited = Provider(
         refuse={3: ProviderError(429, "rate_limit_error", "rate limit exceeded", retry_after=2)}
     )
-    show(run("t1", provider=limited, log=print))
+    result = run("t1", provider=limited, log=retries_only)
+    print(f"calls: {result['calls']}, tokens: {result['tokens']}, cost: {result['cost']}")
 
 
 def step_errors() -> None:

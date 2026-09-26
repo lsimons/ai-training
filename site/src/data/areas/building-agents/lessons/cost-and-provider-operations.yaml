@@ -2,12 +2,15 @@ id: building-agents/cost-and-provider-operations
 title: Cost, caching and pinning the model
 description: >-
   Give an agent loop a cost record and a token budget, cache the prompt prefix that never changes,
-  retry the provider errors that pass and report the ones that don't, and pin the model id.
+  retry the provider errors that go away after a wait and report the others, and pin the model id.
 mode: tutorial
 covers: building-agents/production
 serves: [building-agents/runs-in-production/manages-cost-and-rollout]
 introduces: [cost, provider-operations]
-assumes: []
+assumes:
+  - objective: building-agents/builds-agent-loop/implements-the-loop
+    lesson: building-agents/agent-loop
+    section: the-loop
 after: [building-agents/eval-gated-deploys]
 shorts: [Retries and backoff]
 exercise:
@@ -38,12 +41,12 @@ notes: >-
   token budget checked before each call. The plan said the page predicts the cost of one task; the
   first run is an ungraded example, because a graded prediction of a dollar amount would test
   arithmetic, and the graded prediction is the return value of the budget stop, from the per-call
-  numbers of that first run. The fake provider refuses the third call with a 429 and retry_after=2. The
+  numbers of that first run. The fake provider refuses the third call with a 429 and retry_after=2, and its graded step prints only the retry line and the calls, tokens and cost, so the answer doesn't depend on the answer text. The
   plan said a dated model id: the Claude documentation now says that from the 4.6 generation on the
   dateless id is the fixed version and aliases exist only for earlier models, so the page says to pin
   an exact id and explains both forms. The planned after, eval-gated-deploys (#213), was written in the
-  same wave, so the page describes the staged rollout in one sentence and does not link it. The
+  same wave, so the page describes the staged rollout in one sentence and does not link it. The page builds on the loop from agent-loop, so assumes names that lesson's the-loop section. The
   exercise brief changed from adding cost accounting (the page already builds it) to a cost table over
-  the five tasks; the read_log task costs about three times the average of the other four. Academy
+  the five tasks; the read_log task costs $0.010635, more than twice the average of all five ($0.004804) and about three times the average of the other four. Academy
   claude-platform-101 is cited only for choosing a model on a cost, speed and quality trade-off, from
   its public outline.
