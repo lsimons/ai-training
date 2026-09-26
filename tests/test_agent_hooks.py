@@ -262,7 +262,7 @@ def test_guard_blocks_an_unknown_home_directory_and_names_it(
     assert agent_hooks.main(["agent_hooks.py", "guard-bash"], event, {}) == 2
     err = capsys.readouterr().err
     assert err.startswith("Blocked by .claude/hooks/guard-bash.sh:")
-    assert "`~user` directory that doesn't exist (`~nosuchuser" in err
+    assert "a `~` path it can't resolve (`~nosuchuser" in err
     assert "absolute path" in err
 
 
@@ -274,6 +274,14 @@ def test_guard_blocks_a_path_with_a_null_character(command: str, tmp_path: Path)
     code, message = agent_hooks.guard_bash(event, {})
     assert code == 2
     assert message.startswith("Blocked by .claude/hooks/guard-bash.sh:")
+    assert "text it can't read" in message or "`rm` of" in message
+
+
+@pytest.mark.parametrize("command", ["cd ~+ && git push", "cd ~- && git push", "cd ~2"])
+def test_guard_blocks_zsh_directory_stack_forms_with_the_tilde_message(command: str) -> None:
+    code, message = agent_hooks.guard_bash({"tool_input": {"command": command}}, {})
+    assert code == 2
+    assert "a `~` path it can't resolve (`~" in message
 
 
 def test_expand_user_keeps_known_homes_and_names_the_unknown_one() -> None:
@@ -802,8 +810,8 @@ def test_review_bash_rejects_a_substitution_that_runs_another_command(command: s
         ("for X in '*(e:touch pwn:)'; do ls ${^~X}; done", "zsh parameter flag"),
         ("ls ${=~X}", "zsh parameter flag"),
         ("ls ${+~X}", "zsh parameter flag"),
-        ("touch x; cd ~nosuchuser", "`~user` directory"),
-        ("git -C ~nosuchuser status", "`~user` directory"),
+        ("touch x; cd ~nosuchuser", "`~` path it can't resolve (`~nosuchuser`)"),
+        ("git -C ~nosuchuser status", "`~` path it can't resolve"),
         ("X=$'a/w pwn\\n/a'; sed -n \"/$~X/p\" f", "zsh parameter flag"),
         ("echo $((1+2))", "arithmetic expansion"),
         ("uniq names.txt{,.out}", "brace expansion"),
