@@ -116,6 +116,8 @@ these rules win.
 - Follow the filing rule in your prompt. A `/wave --no-filing` run lists
   follow-ups in the final text and files none.
 - When `mise run fast` fails on a file your change doesn't touch, run it
-  on `origin/main`. If it fails there too, stop, and name the failing
+  on `origin/main` in a `git worktree add --detach` checkout under
+  `../ai-training-wt/` with its own `mise run setup`, and remove that
+  worktree afterwards. If it fails there too, stop, and name the failing
   task, the file and the commit in your final text. Don't fix it on your
   branch, because the lead fixes it once.
