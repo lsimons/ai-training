@@ -134,6 +134,15 @@ def test_run_of_ignores_an_issue_whose_title_is_not_a_run_title() -> None:
     assert run_name.run_of(issue(362, "Run: capybara (lessons)", "")) is None
 
 
+def test_run_of_ignores_a_title_with_a_trailing_newline() -> None:
+    assert run_name.run_of(issue(363, "Run: Capybara (lessons)\n", "")) is None
+
+
+def test_check_rejects_a_name_with_a_trailing_newline() -> None:
+    errors = run_name.check_run_names([replaced(GOOD[0], 0, "Aone\n"), GOOD[1]])
+    assert 'run-names: first[0] "Aone\\n" is not one capitalized word' in errors
+
+
 # next_run_name
 
 
@@ -261,6 +270,7 @@ def test_parse_args_takes_no_arguments_or_check_with_an_issue_number() -> None:
         (["--check"], "run-name: --check needs an issue number, got undefined"),
         (["--check", "x"], 'run-name: --check needs an issue number, got "x"'),
         (["--check", "0"], 'run-name: --check needs an issue number, got "0"'),
+        (["--check", "513\n"], 'run-name: --check needs an issue number, got "513\\n"'),
         (["--resume", "Capybara"], "run-name: unknown arguments --resume Capybara"),
         (["--check", "1", "2"], "run-name: unknown arguments --check 1 2"),
     ],
