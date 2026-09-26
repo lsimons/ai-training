@@ -23,15 +23,15 @@ A sandbox is the environment the agent runs in, set up so that a wrong or
 hostile command reaches only what you put inside it. Each kind trades
 setup work for control:
 
-| Approach                              | For                                                                                                                                                                 | Against                                                                                                                                      |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| The agent's built-in sandbox          | It comes with the agent, and on macOS there is nothing to install                                                                                                   | It covers only the shell commands the agent runs. The agent's file tools, MCP (Model Context Protocol) servers and hooks run outside it      |
-| The vendor's sandbox runtime          | The whole agent process, file tools, MCP servers and hooks included, runs behind the same operating system isolation as the built-in sandbox, with no Docker needed | Still a beta preview, so its configuration can change between releases                                                                       |
-| A hardened container (Docker, Podman) | You decide what is mounted, which credentials and tokens are inside it and what its network policy allows                                                           | Medium to high setup effort                                                                                                                  |
-| A hardened dev container              | The editor starts and manages it, and the vendor's example comes with a firewall that blocks traffic to hosts it doesn't list                                       | The team keeps the image and the firewall's list current. The agent doesn't require the container, so someone can still start it on the host |
-| A hardened virtual machine            | A kernel of its own between the agent and your computer, which keeps the two further apart than any other option here                                               | High setup effort                                                                                                                            |
-| A vendor-hosted agent in the cloud    | Nothing to install. The vendor runs the isolation and keeps your forge token in a proxy outside it                                                                  | Your code is copied to the vendor's machines, and you work with the vendor's controls instead of your own. It needs a subscription           |
-| No isolation, permission prompts only | Nothing to set up                                                                                                                                                   | The agent has all of your access, and you are the only check                                                                                 |
+| Approach                              | For                                                                                                                                                             | Against                                                                                                                                                |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| The agent's built-in sandbox          | It comes with the agent, and on macOS there is nothing to install                                                                                               | Only the shell commands the agent runs are inside it. Hooks, MCP (Model Context Protocol) servers and the agent's own file tools stay on your computer |
+| The vendor's sandbox runtime          | Hooks and MCP servers are inside the boundary too, because the entire agent runs in the operating system isolation of the built-in sandbox. Docker isn't needed | It is an early beta, and the way you configure it may still change                                                                                     |
+| A hardened container (Docker, Podman) | You choose the mounts, the secrets that go in and the hosts it may reach                                                                                        | Medium to high setup effort                                                                                                                            |
+| A hardened dev container              | The editor starts and manages it, and the vendor's example comes with a firewall that blocks traffic to hosts it doesn't list                                   | The team keeps the image and the firewall's list current. Using it is a team habit, and a developer can still start the agent on the host              |
+| A hardened virtual machine            | A kernel of its own between the agent and your computer, which keeps the two further apart than any other option here                                           | High setup effort                                                                                                                                      |
+| A vendor-hosted agent in the cloud    | Nothing to install. The vendor runs the isolated machine, and your forge token stays with a proxy the agent can't reach                                         | Your code is copied to the vendor's machines, and you work with the vendor's controls instead of your own. It needs a subscription                     |
+| No isolation, permission prompts only | Nothing to set up                                                                                                                                               | The agent has all of your access, and you are the only check                                                                                           |
 
 The vendor's comparison of these options is the source for every row but
 the last (@Claude Code isolation). A container can also keep a credential
@@ -84,7 +84,7 @@ A network allowlist and a credential held by a sidecar both work this way:
     { text: 'A hook that blocks every command containing the word "secret"', bucket: 0 },
     { text: 'You approving each command at the permission prompt', bucket: 0 },
     { text: 'The sandbox\'s strict network allowlist, enforced by a proxy outside the sandbox', bucket: 1 },
-    { text: 'A forge token kept in a sidecar that adds it to requests on the way out', bucket: 1 },
+    { text: 'A forge token the container never holds, kept in a sidecar', bucket: 1 },
     { text: 'A container with only the project folder mounted', bucket: 1 },
   ]} />
 
@@ -247,7 +247,7 @@ still do with the forge token?
 <Choice id="the-fix-that-keeps-holding" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
   concepts={['trust-boundary', 'sandbox']}
   context="After a red-team session, a team found that its coding agent sent project data to an unlisted host, using a small script with a harmless name that the developer approved at the prompt. The team considers four changes."
-  title="The fix that keeps holding" hint="Which change looks at what the process can reach, and not at the words of the next command?"
+  title="The fix that keeps holding" hint="Which of these would still act if the next script had a different name?"
   options={[
     { text: 'A deny rule for the exact command the agent ran last time, so that the same script can\'t run again.', why: 'The rule matches that command\'s text. The next script has another name and passes.' },
     { text: 'The sandbox\'s strict network allowlist in your user settings, with unsandboxed retries turned off.', correct: true },
@@ -306,8 +306,8 @@ project, and what could the agent send there?
 
 ## Beyond the built-in sandbox
 
-Short summaries, each with a link, for when the built-in sandbox isn't
-enough.
+The summaries below each link to their source, for when the built-in
+sandbox isn't enough.
 
 **A hardened container with a written threat model.** The public
 [`schubergphilis/claude-docker`](https://github.com/schubergphilis/claude-docker)
