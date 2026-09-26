@@ -1,5 +1,9 @@
 id: building-agents/eval-gated-deploys
 title: Gating a deploy on the evaluation
+description: >-
+  Turn the golden set script into a gate with a threshold per metric, predict what it does with a
+  prompt that drops one instruction, fix the prompt from the failing transcripts, and plan a staged
+  rollout with a rollback that is a configuration change.
 mode: tutorial
 covers: building-agents/production
 serves:
@@ -8,7 +12,11 @@ serves:
 introduces: [eval-gated-deploys, rollout-strategies]
 assumes:
   - objective: coding-with-agents/verifies-agent-work/automates-the-check
+    lesson: coding-with-agents/self-checking-loops
+    section: write-the-check-as-a-test
   - objective: safety/judges-agent-risk/sets-oversight
+    lesson: safety/reading-agent-logs
+    section: treat-a-model-change-like-any-other-upgrade
 after:
   - building-agents/golden-sets
   - building-agents/llm-as-judge
@@ -20,10 +28,29 @@ exercise:
     Add a hard gate for the should-refuse group and a soft gate for helpfulness to the fixture gate
     script, run it against the two candidate prompts, and read the failing transcripts of the one it
     blocks. The output is the gate report.
-sources: []
+sources: [AEC-11, Claude docs model-ids-and-versions]
 issue: 213
 minutes: 15
+sources-checked: 2026-09-26
+review-by: 2027-03-26
 notes: >-
-  The golden-set script becomes a gate with a threshold per metric, then a staged rollout table
-  (team, five percent, everyone) with a rollback that is a configuration change. Predict the gate
-  result for a prompt change that drops one instruction.
+  The fixture in site/examples/building-agents/eval-gated-deploys/ is a copy of the golden-sets
+  fixture (agent, handbook, check) with the golden-sets fixture left untouched. Its golden set has
+  the fifteen items of that lesson and six more (r09, r10, a05, x04, x05, x06), so the prompt that
+  drops the not-found line gives the six new failures the competency example names. The prompt moved
+  out of agent.py into text files under prompts/, so the rollback section can treat a prompt as
+  configuration. The fake model gains one rule, for the stricter candidate: with "covers the whole
+  question" in the prompt, a sentence must hold every keyword of the question. The gate has one
+  threshold per metric (refused hard 100, routine hard 90 because r08 fails on every prompt, helpful
+  soft 70), and prints the new failures against the current prompt. The two candidates of the
+  exercise are shorter (blocked by the refusal gate, with helpfulness up) and stricter (soft gate
+  fails, waits for a sign-off). The exercise has the learner delete the refusal and helpfulness lines
+  from THRESHOLDS, see what the routine gate alone lets through, and write both gates back with
+  thresholds of their own, because the Predict blocks need the full gate in the fixture. The added
+  items, the rollout table, the configuration and the model name handbook-model-2026-06 are
+  illustrative. AEC-11 backs eval-gated deploys, hard gates for safety and softer ones for other
+  metrics with manual approval when marginal, canary releases, runtime flags and versioned prompts.
+  Claude docs model-ids-and-versions backs the pinned model ID. The page doesn't use the golden-sets
+  held-out split, because the gate runs every item. AEC-09, Academy ai-native-sdlc-playbook and
+  Academy claude-platform-101 from the plan were dropped because the page cites no claim from them.
+  Shadow runs are left to the short.
