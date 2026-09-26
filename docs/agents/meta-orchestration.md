@@ -192,9 +192,10 @@ One tick:
    pick with the reason, so nothing drops silently. A content wave
    (`--kind content`) is the ready, unassigned `content` issues that no plan
    file claims, by ascending number, with no dependency logic. The lead
-   adds a code review for a branch whose diff changes code, and a nits issue is left out because it arrives as the nits row. The
-   picker reads the tree of the checkout it runs in, which is why the
-   pull comes first. The dispatcher then decides on the nits row: the one open
+   adds a code review for a branch whose diff changes code. A nits issue
+   is left out because it arrives as the nits row. The picker reads the
+   tree of the checkout it runs in, which is why the pull comes first.
+   The dispatcher then decides on the nits row: the one open
    issue titled `Cosmetic nits`, as one row for one nits builder in one
    worktree and branch, reviewed with a diff read plus the fast checks and
    no content review. It joins only when the issue has 10 or more nit
