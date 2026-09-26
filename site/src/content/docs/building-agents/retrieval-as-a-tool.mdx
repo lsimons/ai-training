@@ -318,7 +318,7 @@ failures on their test set is the reason to add it?
 
 <Choice id="the-other-words" phase="review" objective="building-agents/builds-agent-loop/adds-retrieval"
   concepts={['when-basic-rag-suffices', 'agentic-rag-loop']}
-  context="A basic retrieval step searches a handbook once per question. On the test set, a question about holiday retrieves nothing, because the handbook only says annual leave. The lesson adds the retrieval loop only for failures that a better index can't fix."
+  context="A basic retrieval step searches a handbook once per question. On the test set, a question about holiday retrieves nothing, because the handbook only says annual leave."
   title="A question in other words" hint="Would searching again with the same index find a word that no document contains?"
   options={[
     { text: 'Yes, because a loop can search again until it finds the leave policy.', why: 'Each search uses the same index, and the word holiday is in no document.' },
