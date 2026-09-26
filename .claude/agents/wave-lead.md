@@ -166,14 +166,17 @@ stopped before it could report. Don't restart the wave:
    unreviewed). The two halves of a split issue can have different steps,
    so one half can wait in `revise` while the other joins.
 3. Rebuild the list of your wave's worktree paths from your prompt, as
-   "Finishing" describes. Reuse a listed worktree that is on that list and
-   on the branch you need, and re-create
+   "Finishing" describes. Reuse a worktree from that list that is on the
+   branch you need, and re-create
    the wave worktree (from `origin/<wave branch>` if it was pushed, else
    from `origin/main`) if it is missing. Never take over a worktree of an
    issue outside your wave or a review worktree of another run.
 4. Spawn only what is missing. A builder for a `revise` branch works in a
    fresh worktree checked out on the branch, and the review comment is its
-   whole brief.
+   whole brief. That worktree goes at the listed
+   `../ai-training-wt/feat/<issue>-<slug>` path, after you remove the old
+   one there with `git worktree remove --force <path>`, so "Finishing"
+   lists it.
 5. Continue from there. If a pull request for the wave branch is already
    open, update it instead of opening a second one.
 
@@ -183,7 +186,8 @@ After the merge, remove the worktrees of your own wave and no others.
 Build the list of paths from your prompt's table:
 `../ai-training-wt/feat/<issue>-<slug>` for each issue of the wave (both
 halves of a split issue), the `../ai-training-wt/review-<run>-<issue>`
-worktrees you created for those issues, and
+worktrees you created for those issues (`-1` and `-2` for the halves of a
+split issue), and
 `../ai-training-wt/<wave branch>`. Remove them with one
 `git worktree remove --force <path>` per listed path. Never remove by a
 glob, a prefix or a name pattern, and never by matching names from
