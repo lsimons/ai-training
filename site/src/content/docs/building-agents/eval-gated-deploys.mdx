@@ -28,10 +28,12 @@ Course puts this practice above all others when an agent goes to
 production. A version that hasn't passed its evaluations doesn't go out
 (@AEC-11).
 
-The golden set has grown since that lesson. It has 21 items now. Ten
-are routine and five are ambiguous. The other six ask about something the
-handbook doesn't cover, and the agent should refuse them. The prompt is no longer
-in the code. Each version is a text file in `prompts/`, one instruction
+The golden set has grown since that lesson. It has 21 items now, the
+fifteen of that lesson and six new ones: r09, r10, a05, x04, x05 and x06.
+Ten are routine and five are ambiguous. The other six ask about something
+the handbook doesn't cover, and the agent should refuse them. The gate
+runs just before a release, so it runs every item, the held-out ones
+too. The prompt is no longer in the code. Each version is a text file in `prompts/`, one instruction
 per line, and `prompts/current.txt` is the one users get today:
 
 ```text
@@ -62,7 +64,8 @@ gives the lowest share of its items, in percent, that passes.
   case is enough to stop the deploy (@AEC-11).
 - `routine` counts the routine items that pass the golden set check. One
   of the ten, r08, needs two lookups and fails on every prompt today, so
-  the threshold is nine of ten.
+  the threshold is nine of ten. When a change fixes r08, the team raises
+  this threshold to 100 in a change of its own.
 - `helpful` counts the routine and ambiguous items that get a good answer
   rather than "not found". Declining an ambiguous question passes the
   golden set, but it doesn't help the person who asked. This gate is
@@ -167,8 +170,8 @@ answers. The gate sees both results, and the hard gate on refusals decides.
 
 ## Read the failures, and fix the prompt
 
-A blocked gate tells you that something broke. The transcripts tell you
-what. The `transcripts` step prints each new failure: the question,
+A blocked gate tells you that something broke, and the transcripts tell
+you what. The `transcripts` step prints each new failure: the question,
 the page the search returned, and the answer on both prompts.
 
 <Predict id="show-the-transcripts" title="The six new failures"
@@ -231,8 +234,8 @@ python3 gate.py shorter-fixed
 </Predict>
 
 The thresholds didn't move. The fixed prompt is shorter, and it keeps the
-line that protected six items. Item a05 went back to "not found", so the
-gain in helpfulness was the price of the refusals. Making a05 helpful is a
+line that protected six items. Item a05 went back to "not found". Keeping
+the six refusals cost that one helpful answer. Making a05 helpful is a
 separate change, with its own gate run.
 
 A second candidate, `prompts/stricter.txt`, keeps all three lines and adds
@@ -257,8 +260,8 @@ python3 gate.py stricter
 
 </Predict>
 
-The golden set check passes all 21 items, because an ambiguous item may
-say "not found". But two staff questions that got a good answer today now get
+Every item that passed before still passes, because an ambiguous item
+may say "not found". But two staff questions that got a good answer today now get
 none. The soft gate stops the change until a person weighs that loss.
 
 <Scenario id="the-gate-blocks-a-release" objective="building-agents/runs-in-production/gates-on-evals"
@@ -294,14 +297,14 @@ was planned for this afternoon. What do you do?
 
 <MultiChoice id="read-a-soft-gate" phase="review" objective="building-agents/runs-in-production/gates-on-evals"
   concepts={['eval-gated-deploys']}
-  context="A handbook assistant is gated on three metrics: refusals (hard, 100 percent), routine answers (hard, 90 percent) and helpfulness (soft, 70 percent). A stricter prompt scores 6 of 6, 9 of 10 and 9 of 15. On the current prompt helpfulness is 11 of 15, and no item fails the golden set check on either prompt, because an ambiguous question may be answered with not found."
+  context="A handbook assistant is gated on three metrics: refusals (hard, 100 percent), routine answers (hard, 90 percent) and helpfulness (soft, 70 percent). A stricter prompt scores 6 of 6, 9 of 10 and 9 of 15. On the current prompt helpfulness is 11 of 15, and no item that passed on the current prompt fails on the stricter one, because an ambiguous question may be answered with not found."
   title="What does this report tell you?"
   hint="Which kind of gate failed, and what does that kind of gate ask for? What does a pass on the golden set check mean for an ambiguous item?"
   options={[
     { text: 'The deploy waits until a person signs off on the loss in helpfulness.', correct: true },
     { text: 'Two questions that got a good answer today now get not found.', correct: true },
     { text: 'The deploy is blocked, because one of the three metrics failed.', why: 'Only a hard gate blocks. Helpfulness is soft, so a person decides.' },
-    { text: 'The prompt is safe to ship unreviewed, because no item fails the golden set check.', why: 'The check lets an ambiguous item pass on not found. The soft gate is there to see the answers that stopped helping.' },
+    { text: 'The prompt is safe to ship unreviewed, because no item that passed before fails now.', why: 'The check lets an ambiguous item pass on not found. The soft gate is there to see the answers that stopped helping.' },
     { text: 'The helpfulness threshold should go down to 60 percent, so the report is clean.', why: 'Moving the threshold hides the loss the gate found, and the next change starts from a lower bar.' },
   ]}>
 
@@ -329,8 +332,9 @@ This is the team's plan for the fixed prompt:
 stage      who                     how long  watched                                   go on when
 team       the six people who run  two days  every answer, read by a person            no wrong answer found
            the assistant
-5 percent  staff picked at random  one week  "not found" rate, questions asked again,  each rate within one point
-                                             tickets to the service desk               of the other 95 percent
+5 percent  staff picked at random  one week  "not found" rate, questions asked again,  each rate within one
+                                             tickets to the service desk               percentage point of the
+                                                                                       other 95 percent
 everyone   all staff               ongoing   the same rates, with an alert on each     -
 ```
 
@@ -341,9 +345,9 @@ version on the rest of the traffic, and it goes back when they look worse.
 
 A rollback is only useful if it's fast. Agent failures show up as
 behavior, and a problem can take hours to notice, so by the time it's
-noticed the way back must take minutes. The team keeps each part it may
-change in configuration, so the on-call person reverts it without a new
-deploy. This is the assistant's configuration during the 5 percent stage:
+noticed the way back must take minutes. The prompt files are in version
+control like code, and the configuration names the one that is live. The
+on-call person changes the configuration and needs no new deploy. This is the assistant's configuration during the 5 percent stage:
 
 ```text
 prompt:         shorter-fixed
@@ -352,16 +356,19 @@ rollout:        5
 model:          handbook-model-2026-06
 ```
 
+The model name is an illustrative one.
+
 Setting `rollout` to 0 sends all traffic back to the previous prompt.
 The course recommends flags of this kind, read while the agent runs, so a
 feature can be turned off without deploying again (@AEC-11). Setting
-`prompt` back to `current` makes the previous version the only one. The
-course keeps prompts under version control for this reason, with every
-earlier version easy to restore (@AEC-11).
+`prompt` back to `current` makes the previous version the only one. That
+works because every earlier prompt file is still in version control, and
+the course keeps prompts there so an earlier version is easy to restore
+(@AEC-11).
 
 The `model` line pins one version of the model. Vendors differ in how
 they name versions. Each Claude model ID, for example, names one fixed
-version, and an updated model ships under a new ID. The short aliases
+version, and a new version of the model gets a new ID. The short aliases
 that some older models have are the exception, and the systems around a
 model can still change and shift its answers a little
 (@Claude docs model-ids-and-versions). With a pinned version, the model
@@ -388,10 +395,10 @@ showed what happens when a vendor moves the model and nobody notices.
 <Choice id="what-makes-rollback-fast" objective="building-agents/runs-in-production/manages-cost-and-rollout"
   concepts={['rollout-strategies']}
   context="A handbook assistant is in the 5 percent stage of a rollout of a new prompt. On a Friday evening, the on-call person sees that the rate of questions asked again within a day has doubled for the users on the new prompt."
-  title="What lets the on-call undo it in minutes?"
+  title="What lets the on-call person undo it in minutes?"
   hint="Which option needs no build, no review of new code and no deploy?"
   options={[
-    { text: 'The new prompt was reviewed in a pull request, so the on-call can revert the commit and run the release pipeline.', why: 'Reverting and releasing is a deploy with its builds and checks. It can take an hour, and it changes the code on a Friday evening.' },
+    { text: 'The new prompt was reviewed in a pull request, so the on-call person can revert the commit and run the release pipeline.', why: 'The review was right, but reverting and releasing is a deploy with its builds and checks. It can take an hour, and it changes the code on a Friday evening.' },
     { text: 'The golden set passed before the rollout, so the rise is noise and can wait until Monday.', why: 'The set is finite, and the stage exists to find what it missed. A doubled rate on real users is the signal the stage was built for.' },
     { text: 'The logs keep every answer the new prompt gave, so the team can find the cause first.', why: 'The logs help find the cause, but users keep getting the new prompt while the team reads them.' },
     { text: 'The share of traffic on the new prompt is a setting, so the on-call sets it to 0.', correct: true },
@@ -450,14 +457,15 @@ reason written down, and never in the change it would let through.
 
 </Pitfall>
 
-<Exercise stretch="Add a question the handbook doesn't cover to golden-set.csv as a refuse item, one you expect the shorter prompt to answer. Predict whether it appears in the new failures, run python3 gate.py shorter, and read its transcript.">
+<Exercise stretch="Add a question the handbook doesn't cover to golden-set.csv as a refuse item, one you expect the shorter prompt to answer. Predict whether it appears in the new failures, run python3 gate.py shorter, and read its transcript if it is a new failure.">
 
 Copy the `eval-gated-deploys` folder. In `gate.py`, delete the `refused`
 and `helpful` lines from `THRESHOLDS`, so only the routine gate is left,
 and run `python3 gate.py shorter` and `python3 gate.py stricter`. Write
 down what this gate lets through. Then add a hard gate for the
 should-refuse group and a soft gate for helpfulness back, with thresholds
-you choose, and write the reason for each threshold in a comment next to
+you choose. Use the metric names in `METRICS` (`refused` and
+`helpful`), and write the reason for each threshold in a comment next to
 it. Run the gate on both candidate prompts again, and run
 `python3 gate.py transcripts shorter` for the one it blocks. Taking the gates out and
 putting them back shows you what each one catches.
@@ -483,11 +491,12 @@ questions about pay?
    (@AEC-11).
 3. When the gate blocks, read the failing transcripts and fix the change.
    The threshold stays where it is.
-4. Roll a change out in stages, the team, then a small share of traffic,
-   then everyone, and compare the live metrics with the current version
-   at each stage (@AEC-11).
-5. Keep the prompt, the traffic share and a pinned model version in
-   configuration, so a rollback is a setting and takes minutes.
+4. Roll a change out in stages, starting with a small share of traffic,
+   and compare the live metrics with the current version before you widen
+   it (@AEC-11). This lesson's plan puts the team first.
+5. Keep the prompt files in version control, and name the live prompt,
+   the traffic share and a pinned model version in configuration, so a
+   rollback is a setting and takes minutes.
 
 </Recap>
 
