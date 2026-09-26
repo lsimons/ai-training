@@ -1,4 +1,4 @@
-import { Choice, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Pitfall, Exercise, Recap, Match, Order } from '@components/lesson';
 import Sampler from '@components/widgets/Sampler.astro';
 
 You type a question, and a paragraph comes back that reads like a person
@@ -88,6 +88,12 @@ returned it." Which correction is right?
 
 </Choice>
 
+<Order id="order-one-token" phase="review" objective="concepts/explains-models/explains-generation"
+  concepts={['token', 'training-vs-inference']}
+  context="The lesson explains what a model does during inference, when it writes an answer to a prompt."
+  title="Put the steps in order" hint="What does the model need before it can score anything, and what does it do with the token it picks?"
+  steps={['Read the prompt and the answer so far as tokens', 'Score each possible next token', 'Pick one token from those scores', 'Add the picked token to the answer', 'Start again with the longer text, until the answer ends']} />
+
 ## Failure modes, named
 
 Once you see generation as prediction, the famous failures stop being
@@ -134,6 +140,21 @@ month. The model answers with a specific date, stated confidently, and it
 is wrong. Which failure mode is the best name for this?
 
 </Choice>
+
+<Match id="match-the-failure" phase="review" objective="concepts/explains-models/names-failure-modes"
+  concepts={['hallucination', 'sycophancy', 'instruction-dilution', 'knowledge-cutoff']}
+  context="The lesson names four failure modes that follow from generation as prediction: hallucination, sycophancy, instruction dilution, and cutoff and staleness."
+  title="Name each failure" hint="Is the model filling a gap, agreeing with you, losing an old rule, or missing what came after training?"
+  options={['Hallucination', 'Sycophancy', 'Instruction dilution', 'Cutoff and staleness']}
+  rows={[
+    { statement: 'Asked for a quote from a speech, the model gives a line with quotation marks that the speaker never said.', option: 0, why: 'Which failure fills a gap with text of the right form?' },
+    { statement: 'You say you like your own plan, and the model finds only strengths in it.', option: 1, why: 'Which failure follows what the user hopes to hear?' },
+    { statement: 'You asked for short answers at the start of a long chat, and the answers have grown long again.', option: 2, why: 'Which failure is about an early rule that competes with everything said since?' },
+    { statement: 'With no search tool, the model says the newest version of a product is one that was replaced this spring.', option: 3, why: 'Which failure is about events after the training data was collected?' },
+  ]}
+  rationale="Each failure follows from the model predicting likely text from what is in its context and what it saw in training.">
+Match each reply to the failure mode it shows.
+</Match>
 
 <Exercise stretch="Ask the assistant to explain why it got one of them wrong, then decide whether you believe the explanation and why.">
 

@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, MultiChoice, Sort, Pitfall, Exercise, Recap, Scenario } from '@components/lesson';
 
 In the last lesson you read the transcript of a toy agent and named each
 turn of its loop. This lesson steps back and asks a question people get
@@ -188,6 +188,23 @@ A product page for a meeting assistant lists its tools as "web search,
 file read, calendar write". Which tool deserves the closest look before
 you turn the product on, and why?
 </Choice>
+
+<Scenario id="before-you-turn-it-on" phase="review" objective="concepts/recognizes-agents/tells-agent-from-assistant"
+  concepts={['model-vs-agent', 'tool']}
+  context="The lesson tells an assistant from an agent with one test: after one prompt, can the system only write text for a person to act on, or can it act through tools and choose its next step itself? It says to list an agent's tools before turning it on."
+  title="The helper in the ticket system" hint="After one prompt, what can this helper do without a person acting on its text?"
+  options={[
+    { text: 'Treat it as an assistant, because it runs inside a product the team already uses.', consequence: 'The helper refunds and closes tickets with nobody reading them first. The first wrong refund turns up at the end of the month.' },
+    { text: 'Check which model it runs on, because a newer model makes it safe to switch on.', consequence: 'The model version says nothing about its tools. The refund tool is still on after your check.' },
+    { text: 'Treat it as an agent, and ask who approves a refund before it goes live.', correct: true, consequence: 'You find the tool that acts on customer accounts, and the team adds an approval step for refunds before the helper goes live.' },
+    { text: 'Try it on one ticket and turn it on if the reply reads well.', consequence: 'The reply reads well, and that shows only its text. The refund and the closed ticket happened before you looked.' },
+  ]}>
+
+Your team wants to turn on a new helper in the ticket system. Its product
+page says it handles each new ticket on its own. It can refund up to 20
+euros, and then it closes the ticket. What do you do before you turn it on?
+
+</Scenario>
 
 <Pitfall title="A chat window with an email tool">
 A manager tries a new "AI assistant" that comes with the company's mail

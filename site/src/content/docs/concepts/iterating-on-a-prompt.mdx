@@ -1,4 +1,4 @@
-import { Choice, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response, MultiChoice, Match } from '@components/lesson';
 
 In this lesson we take a prompt that gets a wrong summary through three
 rounds. The first answer leaves out the decisions of a meeting, and the
@@ -273,6 +273,51 @@ When the template grows, it grows by one tested line at a time.
     { text: 'The answer meets every line of the prompt and the colleague used it as it was.', bucket: 2 },
     { text: 'You added the reader last round and the tone is fixed. The length is still wrong.', bucket: 0 },
   ]} />
+
+<Match id="after-the-run" phase="review" objective="concepts/prompts-reliably/iterates-on-output"
+  concepts={['iteration']}
+  context="A learner writes a weekly project update with a chat assistant from a saved prompt they paste in each week. Each row is something they notice after a run."
+  title="What do you do after this run?" hint="Is it a new gap, a correction you have made before, or no gap at all?"
+  options={['Change one line of the prompt', 'Move the line into the saved prompt', 'Keep the prompt as it is']}
+  rows={[
+    { statement: 'The update leaves out the risks, and the prompt never asks for them.', option: 0, why: 'Is this a gap the prompt left, seen for the first time?' },
+    { statement: 'For the third week you typed "put the deadline in the first line" after reading the answer.', option: 1, why: 'How many times have you made this correction by hand?' },
+    { statement: 'The update meets every line of the prompt, and the reader used it without changes.', option: 2, why: 'What would a change fix here?' },
+  ]}
+  rationale="A new gap gets one new line, a correction you made more than once goes into the saved prompt, and an answer that does its job needs no change.">
+Match each observation to what you do next.
+</Match>
+
+<MultiChoice id="two-good-next-steps" phase="review" objective="concepts/prompts-reliably/iterates-on-output"
+  concepts={['iteration', 'sampling-and-temperature']}
+  context="A chat assistant summarizes a project meeting from a prompt that asks for five bullets and never mentions who owns each action. The summary it gave has no owners."
+  title="The summary without owners" hint="Which steps change what the prompt makes likely, and which let you see what the change did?"
+  options={[
+    { text: 'Press regenerate until one of the runs happens to include the owners.', why: 'Each run is a draw from the same prompt, and the prompt makes owners unlikely. Next week the same gap comes back.' },
+    { text: 'Add one line that asks for the owner of each action.', correct: true },
+    { text: 'Rewrite the whole prompt with every rule you can think of at once.', why: 'When the next answer changes, you can\'t tell which of the new lines caused it.' },
+    { text: 'Compare the new summary with the last one before you change more.', correct: true },
+  ]}>
+
+The summary lists the actions and none of their owners. Which two steps
+are good ones?
+
+</MultiChoice>
+
+<Choice id="why-one-change" phase="review" objective="concepts/prompts-reliably/iterates-on-output"
+  concepts={['iteration']}
+  context="The lesson changes one line of a prompt per round and compares each answer with the one before."
+  title="One change per round" hint="After a round, what do you need to know in order to keep a line?"
+  options={[
+    { text: 'A model can only follow one new instruction in each message it reads.', why: 'A model follows many instructions in one message. The limit is on what you can learn from the result.' },
+    { text: 'A longer prompt costs more to run than a shorter one does.', why: 'The cost of a line is small. The reason is about telling cause from effect.' },
+    { text: 'The model learns each new line and keeps it for your later chats.', why: 'A chat model doesn\'t learn from your prompt. Each run starts from what is in its window.' },
+    { text: 'When the answer changes, you know which line caused the change.', correct: true },
+  ]}>
+
+Why does the lesson change only one line of the prompt in each round?
+
+</Choice>
 
 <Exercise stretch="Send the finished prompt with a second set of notes you write yourself. Which line of the template holds, and which one needs a fourth round?">
 

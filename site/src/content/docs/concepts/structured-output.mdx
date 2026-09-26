@@ -1,4 +1,4 @@
-import { Choice, Predict, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Predict, Pitfall, Exercise, Recap, Prompt, Response, MultiChoice, Scenario } from '@components/lesson';
 
 In the lesson on instruction, context, and format you asked for three
 bullets under 15 words, and a person read them. In this lesson the reader
@@ -278,6 +278,37 @@ one gives the tracker a file it can import without anyone editing it?
 The first result looks right. What do you do next?
 
 </Choice>
+
+<MultiChoice id="what-the-request-names" phase="review" objective="concepts/prompts-reliably/asks-for-structure"
+  concepts={['structured-output']}
+  context="A learner wants a chat assistant to turn meeting notes into lines that a spreadsheet imports. The spreadsheet has the columns owner, task and due date."
+  title="What belongs in the format request?" hint="Which lines could a program check, and which leave a choice to the model?"
+  options={[
+    { text: 'Make the result look neat and professional.', why: 'A spreadsheet can\'t check neat. The model picks a layout, and it can pick another one on the next run.' },
+    { text: 'Each line has three fields in this order: owner, task, due date.', correct: true },
+    { text: 'Use your best judgment for the layout of the lines.', why: 'This leaves the layout to the model, and the import needs the same layout every time.' },
+    { text: 'Write each due date as YYYY-MM-DD.', correct: true },
+  ]}>
+
+Which two of these lines belong in the request?
+
+</MultiChoice>
+
+<Scenario id="thirty-descriptions" phase="review" objective="concepts/prompts-reliably/asks-for-structure"
+  concepts={['structured-output']}
+  context="A learner asks a chat assistant for product descriptions as lines that a web shop imports, one line per product with a name, a price and a short text. There are 30 products, and the first answer looks right on the screen."
+  title="The first answer looks right" hint="What is the only reader whose opinion of the format counts?"
+  options={[
+    { text: 'Run the other 29 products with the same prompt, then import all of the lines at once.', consequence: 'The import rejects every line, because each price has a comma where the shop expects a point. You fix the prompt and run all 30 again.' },
+    { text: 'Ask the assistant whether its answer is valid for the web shop.', consequence: 'It says yes. It has never seen the shop, and the import later rejects the prices.' },
+    { text: 'Import the first answer now, and change the prompt if the shop rejects anything.', correct: true, consequence: 'The shop rejects the comma in the price. You add one line about the decimal point, and the other 29 import cleanly.' },
+    { text: 'Read the first answer again, slowly, to make sure the lines look the same.', consequence: 'The lines do look the same. The comma in each price looks fine to a person, and the import still rejects it.' },
+  ]}>
+
+The first of 30 product descriptions looks right on the screen. What do
+you do next?
+
+</Scenario>
 
 <Exercise stretch="Add a fifth field to the request, such as a status that is one of open, blocked or done, then extend the checker's FIELDS list and add an allowed set for it next to PRIORITIES, so it checks the values too.">
 

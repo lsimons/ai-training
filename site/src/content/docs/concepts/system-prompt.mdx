@@ -1,4 +1,4 @@
-import { Choice, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Sort, Pitfall, Exercise, Recap, Prompt, Response, Match, Scenario } from '@components/lesson';
 
 In the last lesson every part of the prompt went into one message: the
 instruction, the material, the reader, and the format. Some of those parts
@@ -167,6 +167,37 @@ every conversation it offers discounts it may not offer, and someone
 corrects it in the chat each time. Where does the fix go?
 
 </Choice>
+
+<Match id="where-the-line-goes" phase="review" objective="concepts/prompts-reliably/structures-a-prompt"
+  concepts={['role-and-system-prompt']}
+  context="A team sets up a chat assistant for the front desk of a small hotel. The team writes one system prompt for every conversation, and the staff type messages for single tasks."
+  title="System prompt or one message?" hint="Should this hold for every conversation, or only for this task?"
+  options={['The system prompt', 'This one message']}
+  rows={[
+    { statement: 'Answer every guest in the language they write in.', option: 0, why: 'Does this hold for every conversation?' },
+    { statement: 'Shorten the reply you just wrote to two sentences.', option: 1, why: 'Is this about one answer in one chat?' },
+    { statement: 'Never confirm a booking. Send the guest to the booking page.', option: 0, why: 'Should any conversation ever break this rule?' },
+    { statement: 'Translate the guest\'s letter below into French.', option: 1, why: 'Is this a task for today, or a rule for every day?' },
+  ]}
+  rationale="A rule that must hold every time goes where each conversation starts. A task for today goes in today's message.">
+Match each line to where it belongs.
+</Match>
+
+<Scenario id="the-morning-rule" phase="review" objective="concepts/prompts-reliably/structures-a-prompt"
+  concepts={['role-and-system-prompt']}
+  context="A team built a support assistant on a model's programming interface. Each morning a staff member types 'never share a customer's phone number' into the chat, and on some days they forget."
+  title="The rule typed each morning" hint="Where does text go that the model reads before every conversation?"
+  options={[
+    { text: 'Type the rule in capitals each morning so that the model gives it more weight.', consequence: 'On the mornings someone forgets, the rule is still missing, and capitals don\'t help a rule that isn\'t there.' },
+    { text: 'Ask the model at the end of each day to remember the rule for tomorrow.', consequence: 'Each conversation starts from its own window. Tomorrow\'s chat has no rule in it.' },
+    { text: 'Put a note on the screen that reminds the staff to type the rule.', consequence: 'The note helps on most days. A new colleague doesn\'t see it, and a number is shared.' },
+    { text: 'Add the rule to the system prompt of the application, and stop typing it.', correct: true, consequence: 'Every conversation now starts with the rule, whether or not anyone remembers it.' },
+  ]}>
+
+The rule about phone numbers only holds on the days someone types it.
+Where does it go?
+
+</Scenario>
 
 <Exercise stretch="Write a third system prompt that combines the brevity of the first with the question-back rule of the second, and predict where the two rules conflict.">
 

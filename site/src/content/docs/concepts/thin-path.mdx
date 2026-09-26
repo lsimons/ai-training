@@ -1,4 +1,4 @@
-import { Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response, Choice, Match } from '@components/lesson';
 
 The same model, in the same afternoon, gives you one answer you can use as
 it is and one that is wrong in a way you only find out about a week later.
@@ -163,6 +163,37 @@ journal. They search for it and find nothing. They ask you what went wrong
 and what to do instead. Which answer do you give?
 
 </Scenario>
+
+<Choice id="which-needs-checking" phase="review" objective="concepts/explains-models/names-failure-modes"
+  concepts={['hallucination', 'knowledge-cutoff']}
+  context="The lesson asks two questions about a task: how common it is in written text, and how much of the answer hinges on exact specifics such as names, numbers, dates and citations."
+  title="Which one needs every specific checked?" hint="Which task is rare in written text and hinges on exact facts?"
+  options={[
+    { text: 'A three-sentence summary of the customer letter you pasted in.', why: 'The material is in the prompt, and summaries are common. A spot-check against the letter is enough.' },
+    { text: 'A friendlier version of the email draft you wrote yourself.', why: 'Rewriting a tone is a common task, and every fact came from you.' },
+    { text: 'The dates and cities of three conferences in a narrow field next year.', correct: true },
+    { text: 'A plain explanation of what a spreadsheet pivot table does.', why: 'A textbook concept is written about thousands of times, so the prediction is well constrained.' },
+  ]}>
+
+Which of these answers needs a check of every specific before you pass it
+on?
+
+</Choice>
+
+<Match id="match-the-pair" phase="review" objective="concepts/explains-models/names-failure-modes"
+  concepts={['hallucination', 'knowledge-cutoff']}
+  context="The lesson explains a wrong answer as two properties meeting on one task: prediction, which always produces a likely next token, and something on the other side of the pair."
+  title="Name the other side of the pair" hint="What did the model lack, or what pulled its prediction the wrong way?"
+  options={['A knowledge gap', 'The knowledge cutoff', 'Sycophancy', 'Instruction dilution']}
+  rows={[
+    { statement: 'A confident name for the author of a rare local report that has no author named anywhere.', option: 0, why: 'Was the fact ever in the training text?' },
+    { statement: 'A confident but wrong price for a phone model that came out last month.', option: 1, why: 'When did the fact come into the world, compared with the training data?' },
+    { statement: 'A right answer that turns into a wrong one after you say you disagree.', option: 2, why: 'What moved the answer: a new fact or your reaction?' },
+    { statement: 'A rule from the first message that stops being followed late in a long chat.', option: 3, why: 'What else is in the context now, next to the rule?' },
+  ]}
+  rationale="Prediction can't be switched off, so the fix is on the other side of the pair: supply what is missing, or check what came out.">
+Match each failure to the property that met prediction.
+</Match>
 
 <Exercise stretch="Take one of the answers you marked wrong, close the gap the way the pair suggests (paste in the source, or give the recent document), and ask again. Note whether the specifics now match what you gave it.">
 
