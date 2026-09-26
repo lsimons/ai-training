@@ -345,7 +345,7 @@ Which of these belong in the pull request description for the
   options={['A git revert of its commit', 'A switch that turns it off', 'A person reads it before it runs']}
   rows={[
     { statement: 'A rename of a function across six files, in its own commit on a branch', option: 0, why: 'Is this all in the code, in one commit?' },
-    { statement: 'A new ranking of search results, shipped to every user', option: 1, why: 'What undoes it in seconds, without a deploy?' },
+    { statement: 'A new ranking of search results, shipped behind a feature flag', option: 1, why: 'What undoes it in seconds, without a deploy?' },
     { statement: 'Dropping a column from a production table', option: 2, why: 'Does a revert bring the data in the column back?' },
   ]}
   rationale="A change is safe to let an agent try when its way back is known before it runs.">
@@ -360,7 +360,7 @@ Match each change to its way back.
     { text: 'Make one commit per increment.', correct: true },
     { text: 'Commit all of the work at the end, in one commit.', why: 'One commit can only be reverted as a whole, so a bad increment takes the good ones with it.' },
     { text: 'Never run `git reset --hard`, `git push --force` or `git clean`.', correct: true },
-    { text: 'Work straight on `main`, so the history stays short.', why: 'Work on `main` reaches everyone at once, and a branch is what lets you drop it.' },
+    { text: 'Work straight on `main`, so the history stays short.', why: 'Work on `main` leaves no branch to drop when the work goes wrong.' },
   ]}>
 
 Which two lines in the brief keep the agent's work reversible?

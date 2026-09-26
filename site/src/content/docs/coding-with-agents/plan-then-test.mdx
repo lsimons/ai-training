@@ -395,7 +395,7 @@ sentence that says what "fixed" means.
   items={[
     { text: 'A wrong total whose cause could be in any of three modules', bucket: 0 },
     { text: 'A command that is slow, and nobody knows which part is slow', bucket: 0 },
-    { text: 'Move the settings code into its own module and update every import', bucket: 0 },
+    { text: 'A crash that shows up only with one customer\'s data', bucket: 0 },
     { text: 'Fix a typo in one error message', bucket: 1 },
     { text: 'Bump the version number for a release', bucket: 1 },
     { text: 'Add one log line in a function you already know', bucket: 1 },
@@ -422,7 +422,7 @@ Which two things do you check before you approve the plan?
   title="The new test passes" hint="Can a test that passes on the buggy code tell you when the bug is fixed?"
   options={[
     { text: 'Move on to the fix, since the test is written and it runs.', consequence: 'The fix goes in, the test still passes, and nobody knows whether the fix did anything.' },
-    { text: 'Conclude that the bug is gone, and close the task.', consequence: 'The bug is still there. The test uses a file with one row, and the export happens to keep that row.' },
+    { text: 'Conclude that the bug is gone, and close the task.', consequence: 'The bug is still there. The test checks only the first row, and the export keeps that row.' },
     { text: 'Ask the agent to change the test until it fails on the code as it is.', correct: true, consequence: 'The new test uses three rows and fails. After the fix it passes, and now it shows the bug is gone.' },
     { text: 'Delete the test and let the agent fix the code directly.', consequence: 'The fix has no test, and the bug can come back without anyone noticing.' },
   ]}>
