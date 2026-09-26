@@ -154,9 +154,9 @@ A cache hit needs an exact match of everything up to the cache breakpoint,
 and a cached prefix lasts five minutes by default
 (@Claude docs prompt-caching). For most models, the price of writing the
 prefix to the cache is 1.25 times the input price, and the price of
-reading it back is 0.1 times the input price (@Claude docs pricing). The API caches a prefix
-only above a minimum length, which depends on the model
-(@Claude docs prompt-caching).
+reading it back is 0.1 times the input price (@Claude docs pricing). The
+API caches a prefix only above a minimum length, which depends on the
+model (@Claude docs prompt-caching).
 
 The fake provider caches the system prompt and the tool list together
 when a run passes `cache=True`. The first call writes them to the cache,
@@ -221,8 +221,8 @@ wait (@Claude docs errors). A 429 for a rate limit comes with a
 every retry. So does a 429 that says the monthly spend cap is reached,
 which has no `retry-after` header (@Claude docs errors). The official
 software development kits (SDKs) already retry transient failures twice
-by default, with exponential backoff, and honor `retry-after` (@Claude docs errors). A loop you write
-yourself needs the same rules.
+by default, with exponential backoff, and honor `retry-after`
+(@Claude docs errors). A loop you write yourself needs the same rules.
 
 The fixture's `call_provider` wraps every call. It passes a timeout, so a
 call that hangs becomes an error the loop can handle. A timeout or a
@@ -372,18 +372,19 @@ and reaches everyone only when its numbers hold.
 Copy the folder and add a `table` step to `ops.py`. For each of the
 five tasks in `TASKS` it calls `run` and prints one row with the task id,
 the calls, the tokens and the cost. The last line is the average cost of
-the five tasks. Find the task whose cost is far above the others, and run it
-with `log=print` to see which call makes the difference. Name the tool
-that causes it. A cost table per task type is the view that finds this in
-production, where no one reads each run.
+the five tasks. Find the task whose cost is far above the others, and
+run it with `log=print` to see which call makes the difference. Name the
+tool that causes it. A cost table per task type is the view that finds
+this in production, where no one reads each run.
 
 A good result: the other four tasks cost between $0.002364 and
 $0.004323, one task costs $0.010635, and the average of the five is
 $0.004804. So the costly task is more than twice the average you printed,
 and about three times the average of the other four. Its trace shows a
-small first call and a much larger second call, because the tool returned a long result
-and the loop sent all of it to the model. Would a token budget have
-stopped that run, and what budget would you set for this agent?
+small first call and a much larger second call, because the tool
+returned a long result and the loop sent all of it to the model. Would a
+token budget have stopped that run, and what budget would you set for
+this agent?
 
 </Exercise>
 
@@ -411,7 +412,7 @@ stopped that run, and what budget would you set for this agent?
   items={[
     { text: 'The next run asks a different question', bucket: 0 },
     { text: 'A tool result is appended to the messages', bucket: 0 },
-    { text: 'A second run starts two minutes after the first one ended', bucket: 0 },
+    { text: 'On the Claude API, a second run starts two minutes after the first one ended', bucket: 0 },
     { text: 'The current time is added to the system prompt', bucket: 1 },
     { text: 'One word of a tool description is changed', bucket: 1 },
     { text: 'The next call comes ten minutes after the last one', bucket: 1 },
