@@ -236,7 +236,7 @@ checking does the task get before the team trusts the tool for it?
 
 <Choice id="how-the-slant-shows" phase="review" objective="safety/verifies-output/calibrates-trust"
   concepts={['bias']}
-  context="The lesson ran a shortlisting model on the same records twice, with the names from two lists swapped between the runs."
+  context="The lesson tested a simulated shortlisting model on twelve candidate records with names from two lists."
   title="How do you see the slant?" hint="Can one output show a slant, or only a comparison of many?"
   options={[
     { text: 'Read each shortlist and look for a reason that mentions a group.', why: 'A slanted shortlist gives reasons that look as fair as the reasons of a fair one.' },
@@ -252,7 +252,7 @@ you see whether it favors one group of names?
 
 <Match id="how-much-checking" phase="review" objective="safety/verifies-output/calibrates-trust"
   concepts={['bias']}
-  context="The lesson calls a task high stakes when its output affects people who can't correct it, and gives such a task a sampled comparison across groups before it is trusted."
+  context="The lesson compares how much checking different AI tasks get before a tool is trusted for them."
   title="How much checking?" hint="Does the output affect people who can't see or correct it?"
   options={['A spot-check is enough', 'A sampled comparison across groups']}
   rows={[

@@ -225,7 +225,7 @@ Match each organization to its role under the Act.
   options={[
     { text: 'A spam filter that learned from the messages people marked as spam.', correct: true },
     { text: 'A spreadsheet formula that adds 21 percent tax to each price.', why: 'The formula runs a rule a person wrote. It infers nothing from its input.' },
-    { text: 'A tool that suggests a reply to each support email from past replies.', correct: true },
+    { text: 'A tool trained on past replies that suggests a reply to each new support email.', correct: true },
     { text: 'A door lock that opens at 8:00 on weekdays, set on a timer.', why: 'A timer follows a schedule a person set. Nothing is inferred.' },
   ]}>
 
@@ -248,19 +248,19 @@ Which two of these are AI systems under Article 3(1)?
 Match each use to its tier under the Act.
 </Match>
 
-<Choice id="the-clinic-role" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+<Choice id="the-hr-team-role" phase="review" objective="safety/judges-agent-risk/sets-oversight"
   concepts={['regulation', 'policy']}
-  context="Under the EU AI Act a provider develops an AI system or has it developed and puts it on the market under its own name, and a deployer uses an AI system under its authority."
-  title="What is the hospital?" hint="Did the hospital build or brand the model, or does it use one that someone else supplied?"
+  context="The EU AI Act gives different duties to the provider of an AI system and to its deployer, and names the role of each organization by what it does with the system."
+  title="What is the HR team's company?" hint="Did the company build or brand the service, or does it use one that someone else supplied?"
   options={[
-    { text: 'A provider, because it runs the model on its own servers.', why: 'Where a system runs doesn\'t make an organization its provider. Who built it and whose name it carries does.' },
-    { text: 'Both, because the patients the model sorts are its own.', why: 'Affected people don\'t change the role. The hospital would become a provider only by changing the purpose or branding the system.' },
-    { text: 'A deployer, because it uses the vendor\'s model under its own authority.', correct: true },
-    { text: 'Neither, because the vendor carries every duty for the model.', why: 'A deployer has duties of its own under the Act. For a high-risk system they include human oversight and keeping the logs.' },
+    { text: 'A provider, because the service runs on the company\'s own servers.', why: 'Where a system runs doesn\'t make an organization its provider. Who built it and whose name it carries does.' },
+    { text: 'Both, because the applicants the service ranks apply to this company.', why: 'Affected people don\'t change the role. The company would become a provider only by branding the service, modifying it substantially, or changing its purpose into a high-risk use.' },
+    { text: 'A deployer, because it uses the vendor\'s service under its own authority.', correct: true },
+    { text: 'Neither, because the vendor carries every duty for the service.', why: 'A deployer has duties of its own under the Act. For a high-risk system they include human oversight and keeping the logs.' },
   ]}>
 
-A hospital uses a vendor's triage model exactly as the vendor delivered
-it. What is the hospital under the Act?
+A company's HR team runs a vendor's service that ranks job applications,
+unchanged and under the vendor's name. What is the company under the Act?
 
 </Choice>
 
@@ -394,7 +394,7 @@ duty that applies.
 <Sort id="duty-or-none" phase="review" objective="safety/handles-data-safely/discloses-ai-use"
   concepts={['regulation']}
   context="Article 50 of the EU AI Act puts transparency duties on systems that interact with people, on generated content, on deep fakes, and on AI-generated text published to inform the public, with an exception where a person holds editorial responsibility."
-  title="Does Article 50 apply?" hint="Does the output reach the public, and does a person answer for it?"
+  title="Does Article 50 apply?" hint="Is it a chatbot, a deep fake or published text, and did an editor take responsibility for the text?"
   buckets={['An Article 50 duty applies', 'No Article 50 duty']}
   items={[
     { text: 'A chatbot on a public website that answers customers', bucket: 0 },
@@ -468,7 +468,7 @@ fines (@EC AI Office). For your own country, look up which market
 surveillance authority your member state designated.
 [Article 70(2)](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_70)
 asks each member state to publish how its authorities can be contacted and
-to name one single point of contact (@AI Act).
+to name one point of contact (@AI Act).
 
 <Exercise stretch="Check whether the tool's use appears in Annex III. If it does, write down which of the deployer duties of Article 26 your organization already meets and which it does not.">
 Pick one AI tool used at your work. In two lines, decide whether your
