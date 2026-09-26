@@ -38,7 +38,7 @@ these same steps (@AEC-08).
 The search is the weak point. A model can only ground its answer in the
 passages the search gave it. When the search returns the wrong passage,
 the model answers from the wrong passage, with the same confidence
-(@AEC-05). So the first thing to know about any retrieval assistant is
+(@AEC-08). So the first thing to know about any retrieval assistant is
 how it searches.
 
 ## What a keyword search finds
@@ -120,7 +120,7 @@ Grounding narrows what the model can get wrong. It doesn't remove it.
 A grounded answer rests on the passage, and the passage can be the
 wrong one, as the third search below shows. The model can also misread
 a passage it was given, or answer a question the passage only half
-covers by adding a detail from training (@AEC-05). And a passage that
+covers by adding a detail from training. And a passage that
 is itself out of date grounds an out-of-date answer. Grounding makes an
 answer checkable, and checking is still yours to do.
 
@@ -238,7 +238,7 @@ this same check on one of its answers?
    (@AEC-08).
 2. The search bounds the answer. A keyword search finds a document only
    when the question uses the document's words, and a wrong passage
-   produces a confident wrong answer (@AEC-05).
+   produces a confident wrong answer (@AEC-08).
 3. A grounded answer points at its passage and says when the passages
    don't cover the question. Grounding makes an answer checkable and
    doesn't make it right: the passage can be wrong, old, or misread

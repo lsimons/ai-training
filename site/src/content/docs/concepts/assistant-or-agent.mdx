@@ -95,7 +95,9 @@ whether each is an assistant or an agent?
 
 The software around the model has a name: the **harness**. It is the
 part that makes a model into an agent, and it has more in it than the
-loop you watched. A harness holds (@AEC-01):
+loop you watched. The Agent Engineer Course calls it the orchestration
+layer, and lists the loop, the state, error handling, stop conditions and
+guardrails as its jobs (@AEC-01). A harness holds:
 
 - **The loop.** Call the model, read the reply, run the tool it asked
   for, feed the result back, repeat.
@@ -126,7 +128,7 @@ permission check that let it through. An agent that forgot the
 instruction you gave it twenty steps ago hit its context management. An
 agent that ran for an hour and produced nothing had no limit low enough
 to stop it. In each case the fix is in the harness: take a tool away, or
-add a check or a stop rule (@AEC-01). The
+add a check or a stop rule. The
 model's judgment matters too, and a better model helps with a wrong
 decision, but the reach and the guardrails are the harness's.
 
@@ -253,7 +255,7 @@ surprise about the interface or about the tools?
    definitions, the permission checks, the system prompt, context
    management and the stop rules. Agents on the same model differ
    because their harnesses differ, and the fix for a misbehaving agent
-   is most often in the harness (@AEC-01).
+   is most often in the harness.
 4. List an agent's tools before you judge what it can do. What it can
    touch is what its tools can touch, and the tool that acts on other
    people is the one to look at first.
