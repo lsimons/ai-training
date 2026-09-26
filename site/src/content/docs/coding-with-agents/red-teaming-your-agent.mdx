@@ -103,8 +103,8 @@ command that reads a file outside it ask you first (@Claude Code all settings).
 
 The `sandbox` part turns on the sandbox for shell commands, which the
 operating system enforces for each command and the programs it starts. The
-sandbox lets those commands write only in the working folder and a
-temporary folder of the session. With these settings, Claude Code refuses
+sandbox lets those commands write only in the working folder and a per-user
+temporary folder. With these settings, Claude Code refuses
 to start when the sandbox can't, and it can't retry a blocked command
 outside the sandbox. By default a command that runs in the sandbox runs
 without asking you (@Claude Code permissions). Setting `autoAllowBashIfSandboxed` to `false` turns
