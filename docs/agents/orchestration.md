@@ -294,10 +294,16 @@ The cases that come up:
 
 Every agent worktree goes under one directory next to the repository,
 `../ai-training-wt/<branch>`, so a builder for `feat/12-x` works in
-`../ai-training-wt/feat/12-x`. The wave lead removes the worktrees it and
-its agents created at the end of the wave (`git worktree remove --force`)
-and leaves the branches in place. A worktree left behind after a failed
-wave is found in one place.
+`../ai-training-wt/feat/12-x`. A reviewer's worktree has the run's name
+in it, `../ai-training-wt/review-<run>-<issue>` (`review-lemur-460`), so
+`git worktree list` shows which run created it. At the end of the wave the
+lead removes only the paths of its own wave, listed from its prompt, with
+one `git worktree remove --force <path>` per path, never by a pattern, and
+it leaves the branches in place. Its report names the paths the commands
+removed and any that failed. Every open run uses this directory, and one
+run's cleanup by the pattern `*/review-*` removed another run's review
+worktrees while its reviewers worked in them (#470). A worktree left behind after
+a failed wave is found in one place.
 
 An agent's scratch files go in `.scratch/` at the root of its own
 worktree. The directory is gitignored, the project allowlist lets any
