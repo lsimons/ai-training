@@ -1,4 +1,4 @@
-import { Choice, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Repair, Pitfall, Exercise, Recap, Prompt, Response, MultiChoice, Scenario } from '@components/lesson';
 
 In this lesson we use a chat assistant to find our way around a text we
 have never read. We paste it and ask the question a newcomer would ask,
@@ -229,6 +229,39 @@ A colleague asks an assistant "how many days do I have to submit an
 expense claim?" without pasting anything, and gets "30 days". What do you
 tell them to do before they rely on it?
 </Choice>
+
+<MultiChoice id="lines-that-make-it-checkable" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['finding-information']}
+  context="A learner pastes a company's travel guideline into a chat assistant and asks what a new hire must know before booking a train."
+  title="Which lines make it checkable?" hint="Which lines tie the answer to the pasted text, so that you can check it there?"
+  options={[
+    { text: 'Use only the guideline below.', correct: true },
+    { text: 'Read the guideline carefully and be accurate.', why: 'Asking for care doesn\'t change where the answer comes from, and it gives you nothing to check.' },
+    { text: 'Quote the sentence each point comes from.', correct: true },
+    { text: 'Keep your answer as short as you can.', why: 'A short answer is quicker to read. It is no easier to check against the guideline.' },
+  ]}>
+
+Which two lines in the ask give you an answer you can check against the
+guideline in a minute?
+
+</MultiChoice>
+
+<Scenario id="the-quote-not-in-the-text" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['finding-information', 'hallucination']}
+  context="A learner asked an assistant to answer from a pasted expense guideline and to quote the sentence behind each point. One quoted sentence isn't in the guideline, though the point it supports is right."
+  title="One quote isn't in the text" hint="What does a quote that isn't in the text tell you about how the answer was made?"
+  options={[
+    { text: 'Keep the point, because the fact is right whatever the quote says.', consequence: 'This time the fact holds. The next invented quote supports a wrong fact, and you keep that one too.' },
+    { text: 'Ask the assistant whether the quote is really in the guideline.', consequence: 'It says yes, and adds another sentence that isn\'t in the guideline either.' },
+    { text: 'Delete the quote and keep the point without a source.', consequence: 'The point now looks like the others, and nobody can see that it had no sentence behind it.' },
+    { text: 'Search the guideline for the point, and treat it as added by the model until you find the sentence.', correct: true, consequence: 'You find the real sentence in another section. You replace the quote, and you now check every quote the same way.' },
+  ]}
+  guessable="longest: the key names both the search and the rule for the meantime">
+
+One of the quotes in the answer isn't in the guideline, and the point it
+supports is right. What do you do?
+
+</Scenario>
 
 ## The rule
 

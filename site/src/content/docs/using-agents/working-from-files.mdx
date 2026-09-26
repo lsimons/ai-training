@@ -1,4 +1,4 @@
-import { Choice, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response, MultiChoice, Match } from '@components/lesson';
 
 In this lesson we hand an assistant a screenshot of a table and get the
 rows back for a spreadsheet. First we try to describe the table in words
@@ -254,6 +254,50 @@ two hundred rows of it. The sheet also has a column of names and a column
 of salaries. What do you attach?
 </Scenario>
 
+<MultiChoice id="lines-for-an-upload" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['working-with-files-and-images']}
+  context="A learner attaches a screenshot of a table of stock counts to a chat and writes the brief that asks for the rows."
+  title="The brief for an upload" hint="Which lines say where the values come from and what happens with a cell the model can't read?"
+  options={[
+    { text: 'Be careful with the numbers in the table.', why: 'Care is not something you can check. The brief needs to say what must stay exact.' },
+    { text: 'Use only the attached screenshot.', correct: true },
+    { text: 'Make the table look tidy.', why: 'Tidy is a matter of taste. It leaves the model to decide what to change.' },
+    { text: 'Write a question mark for any cell you can\'t read.', correct: true },
+  ]}>
+
+Which two lines belong in the brief?
+
+</MultiChoice>
+
+<Match id="attach-type-or-copy" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['working-with-files-and-images', 'giving-context']}
+  context="The lesson attaches a file when the exact values matter, and says that an attachment discloses its whole content, so the part the task needs is copied out first when the rest must not go in."
+  title="Attach, type or copy out?" hint="Do exact values matter, and is there anything in the file that the task doesn't need?"
+  options={['Attach the file as it is', 'Type it in the chat', 'Copy out the part the task needs first']}
+  rows={[
+    { statement: 'A screenshot of a price table with forty cells', option: 0, why: 'Would typing it out lose exact values?' },
+    { statement: 'One date that you want in another format', option: 1, why: 'Is there anything to lose by typing one value?' },
+    { statement: 'A spreadsheet with a sales column and a column of home addresses, for a chart of sales', option: 2, why: 'Does the chart need every column in the file?' },
+  ]}
+  rationale="Attach when exact values matter, type what is short, and copy out the part the task needs when the file holds more than that.">
+Match each task to how you give the assistant the material.
+</Match>
+
+<Scenario id="after-the-rows-come-back" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['working-with-files-and-images']}
+  context="An assistant turned an attached screenshot of a six-row stock count into rows for a spreadsheet. The rows are pasted, and there is no question mark in them."
+  title="The rows are in the sheet" hint="Where do the errors in a transcription show up, if they are there?"
+  options={[
+    { text: 'Trust the rows, because the assistant wrote no question marks.', consequence: 'One code has a 5 where the screenshot shows an S. The count for that item goes to the wrong part.' },
+    { text: 'Check each cell against the screenshot before you use the rows.', correct: true, consequence: 'You find the one code with a 5 in place of an S, and fix it in a minute.' },
+    { text: 'Ask the assistant to check its own rows against the screenshot.', consequence: 'It reads the image the same way again and confirms its rows, the wrong code included.' },
+    { text: 'Check only the totals, because an error in a row changes the total.', consequence: 'The totals match. The wrong code isn\'t a number, and no total shows it.' },
+  ]}>
+
+The six rows are in the spreadsheet. What do you do before you use them?
+
+</Scenario>
+
 ## When to upload and when to type
 
 Upload when the material is long, structured or visual: a table, a
@@ -263,8 +307,7 @@ Type when the material is one or two sentences, or when the file holds
 things the task doesn't need and you can't cut them out in a minute.
 
 Either way the brief is the one you wrote for the expense guideline in
-the previous lesson, with the attachment in place of the pasted text. Name the file as the source, say what
-must stay exact, give the model a way to say it can't read something, and
+the previous lesson, with the attachment in place of the pasted text. Name the file as the source, say which values must be copied exactly, give the model a way to say it can't read something, and
 check the result against the file. A read of a picture is a transcription,
 and a transcription error is silent until you look.
 
@@ -283,7 +326,7 @@ typed the table?
 
 <Recap>
 1. A description of a table is a lossy copy of it, and the loss is in the exact values. Attach the picture or the file, and let the model do the typing.
-2. The brief for an upload has the same four parts as any other. Name the attachment as the only source, say what must stay exact, and give the model a way to say it can't read a cell.
+2. The brief for an upload has the same four parts as any other. Name the attachment as the only source, say which values must be copied exactly, and give the model a way to say it can't read a cell.
 3. Check the result against the file, cell by cell. A model reads small, blurry or rotated text badly, and a transcription error is silent until you look (@Claude docs vision).
 4. When comparing two files, say which kinds of difference matter and where the rest should go, and ask for the quote from both versions behind each one.
 5. An attachment discloses its whole content, the same as pasted text. Crop or copy out the part the task needs before you attach.

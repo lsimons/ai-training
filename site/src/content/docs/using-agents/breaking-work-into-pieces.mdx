@@ -1,4 +1,4 @@
-import { MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response, Choice, Match } from '@components/lesson';
 
 In this lesson we hand an agent a task that's too big to check and read
 what comes back. Then we split the task into pieces, each with an input, an
@@ -230,6 +230,51 @@ taught. The riders and cost pieces are unchanged while you do that.
   ]}>
 Which of these pieces are ready to have a brief written for them?
 </MultiChoice>
+
+<Choice id="a-piece-without-a-check" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['task-decomposition', 'task-brief']}
+  context="The lesson splits a large task into pieces, each with an input, an output and a check you can tick, and briefs one piece at a time."
+  title="A piece without a check" hint="What does the brief use as its done-criteria?"
+  options={[
+    { text: 'Brief it now, and write the check when the result comes back.', why: 'Once the result is there, the check tends to describe the result. The agent has no done-criteria to aim at.' },
+    { text: 'Write the check first, and use it as the done-criteria of the brief.', correct: true },
+    { text: 'Ask the agent to decide how its result should be checked.', why: 'The check is how you judge the agent. It can\'t come from the agent\'s own choice.' },
+    { text: 'Merge it into the next piece, so that one check covers both of them.', why: 'A merged piece blends again, and a failure no longer tells you which part to redo.' },
+  ]}>
+
+A piece of the report has an input and an output and no check. What do
+you do before you brief it?
+
+</Choice>
+
+<Match id="name-the-part-of-the-piece" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['task-decomposition']}
+  context="A learner splits a report on a canteen survey into pieces. Each piece has an input (a source), an output (what the agent produces) and a check (what you tick afterwards)."
+  title="Input, output or check?" hint="Is it what the agent reads, what it produces, or what you tick afterwards?"
+  options={['Input', 'Output', 'Check']}
+  rows={[
+    { statement: 'The export of the 120 survey answers', option: 0, why: 'Does the agent read this, or write it?' },
+    { statement: 'A table with one row per question and the count for each answer', option: 1, why: 'Is this what the piece hands back?' },
+    { statement: 'The counts in each row add up to 120', option: 2, why: 'Is this something you can tick once the result is back?' },
+  ]}
+  rationale="A piece names all three, so you can hand it over on its own and check it on its own.">
+Match each line to the part of the piece it describes.
+</Match>
+
+<Scenario id="it-reads-well" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['task-decomposition', 'task-brief']}
+  context="A learner gave an agent a three-part report as one prompt, with three sources pasted in. The report came back, and it reads well."
+  title="The report reads well" hint="What can you tick in a report that was asked for in one prompt?"
+  options={[
+    { text: 'Send it, because a report that reads this well is ready.', consequence: 'One section mixes numbers from two sources, and the reader quotes the wrong one.' },
+    { text: 'Ask the agent to check its own report for mistakes before you send it.', consequence: 'The agent finds nothing, because it made the choices that it is now checking.' },
+    { text: 'Split the report into pieces with an input, an output and a check, and brief them one at a time.', correct: true, consequence: 'The usage piece fails its check on the total. You redo that piece, and the other two are unchanged.' },
+    { text: 'Read it once more, slowly, and fix what you notice.', consequence: 'You fix the tone and miss the gap the agent filled with its own choice.' },
+  ]}>
+
+What do you do with the report?
+
+</Scenario>
 
 <Pitfall title="A piece with an output but no check">
 A learner splits the report, writes "Riders: from the survey note, a short
