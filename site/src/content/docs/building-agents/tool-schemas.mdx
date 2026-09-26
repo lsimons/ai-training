@@ -1,4 +1,4 @@
-import { Predict, Repair, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Predict, Repair, Pitfall, Exercise, Recap, Choice, MultiChoice, Sort, Scenario } from '@components/lesson';
 
 In the first agent lesson the model had one tool, so its only choice was
 between calling it and answering. In this lesson the model gets two tools
@@ -292,6 +292,67 @@ account ids are integers. Rewrite the schema so the model can't invent a
 value for any of the three parameters.
 
 </Repair>
+
+<Choice id="the-vague-description" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool-schema-design']}
+  context="A tool named get_customer has the description 'Get customer.' Another tool, search_customers, says it matches a name, an email, a city or an account id. The model picks search_customers for a request with an exact account id."
+  title="The model picks the other tool" hint="What is the only prompt the model gets about a tool?"
+  options={[
+    { text: 'Rename get_customer to lookup_customer_by_id, and keep the description.', why: 'A better name helps a little. The description still doesn\'t say when to use it.' },
+    { text: 'Tell the model in the system prompt to prefer get_customer.', why: 'The rule is in the wrong place. The schema is what the model reads when it picks a tool.' },
+    { text: 'Remove search_customers, so that only one tool is left to pick.', why: 'Requests without an account id now have no tool that fits them.' },
+    { text: 'Say in get_customer\'s description what it takes, when to use it, and when not.', correct: true },
+  ]}>
+
+The model picks `search_customers` for "look up the customer with account id
+4711". What do you change?
+
+</Choice>
+
+<MultiChoice id="nothing-to-guess" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool-schema-design']}
+  context="A balance tool takes a currency parameter, and the service behind it accepts only the lowercase codes eur, usd and gbp."
+  title="A parameter with nothing to guess" hint="Which of these tell the model exactly which values are allowed?"
+  options={[
+    { text: 'An enum with the three codes the service accepts.', correct: true },
+    { text: 'A short parameter name such as c.', why: 'A short name tells the model less. It has to guess what c means and which values fit.' },
+    { text: 'A description that says the codes are lowercase.', correct: true },
+    { text: 'A plain string type with no description.', why: 'The model fills a free string with whatever looks right, such as EUR or euros.' },
+  ]}>
+
+Which two make the currency parameter leave the model nothing to guess?
+
+</MultiChoice>
+
+<Sort id="in-the-description" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool-schema-design', 'function-calling']}
+  context="The lesson says the schema is the only prompt the model gets about a tool, and lists what a tool description says."
+  title="Does it belong in the description?" hint="Does the model need this to choose the tool and use what it returns?"
+  buckets={['Belongs in the description', 'Leave it out']}
+  items={[
+    { text: 'What the tool does', bucket: 0 },
+    { text: 'When to use it', bucket: 0 },
+    { text: 'When to use another tool instead', bucket: 0 },
+    { text: 'What comes back', bucket: 0 },
+    { text: 'How the function is implemented', bucket: 1 },
+    { text: 'Who wrote the function', bucket: 1 },
+  ]} />
+
+<Scenario id="after-the-rewrite" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool-schema-design']}
+  context="A developer rewrote a tool's schema after the model misused it. The first request they tried after the rewrite went to the right tool."
+  title="Is the rewrite better?" hint="How many requests does it take to know that the change helped?"
+  options={[
+    { text: 'Ship it, because the request that failed before now works.', consequence: 'Two other kinds of request now go to the wrong tool, and you find out from users.' },
+    { text: 'Count the wrong calls over a set of requests, before and after the change.', correct: true, consequence: 'The wrong calls drop from seven in twenty to one, and you can see which request is left.' },
+    { text: 'Ask the model whether it finds the new description clearer.', consequence: 'It says yes. That is more text from the model, and it counts nothing.' },
+    { text: 'Add a third tool for the case that went wrong.', consequence: 'The model now has three descriptions to choose between, and the misuse you were fixing isn\'t measured.' },
+  ]}>
+
+The first request after the rewrite goes to the right tool. What do you
+do next?
+
+</Scenario>
 
 ## The description is a prompt
 

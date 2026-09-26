@@ -1,4 +1,4 @@
-import { Predict, Choice, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Predict, Choice, Pitfall, Exercise, Recap, MultiChoice, Match, Sort } from '@components/lesson';
 
 In this lesson the model asks for three things at once. The question
 "Compare the weather in Amsterdam, Lisbon and Oslo" needs three lookups
@@ -258,6 +258,65 @@ reply still holds one result per call, whichever way each call ran.
 The model asked for two tool calls in one reply. Which pair is safe to
 run at the same time?
 </Choice>
+
+<Choice id="rounds-for-three" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['parallel-calls']}
+  context="In the lesson, a question needs the weather for three cities. The lesson counts model rounds: each request to the model is one round, including the one that returns the answer."
+  title="How many rounds?" hint="How many requests does the model need: one for the calls, and one more for what?"
+  options={[
+    { text: 'Four: one for each city, and one more for the answer.', why: 'That is the count when the model asks for one city per reply.' },
+    { text: 'Three: one for each city, with the answer in the last one.', why: 'The model needs the results before it can answer, so the answer is a round of its own.' },
+    { text: 'One, because all three calls go out at the same time.', why: 'The model has to see the three results, and that takes a second request.' },
+    { text: 'Two: one that asks for all three calls, and one that answers.', correct: true },
+  ]}>
+
+The model asks for all three lookups in one reply, and the loop returns all
+three results in the next message. How many model rounds does the question
+take?
+
+</Choice>
+
+<MultiChoice id="one-result-per-call" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['parallel-calls', 'loop-from-scratch']}
+  context="A model reply held three tool calls, each with its own id. The loop runs them and builds the next message to the model."
+  title="The message after three calls" hint="How does the model tell which result answers which call?"
+  options={[
+    { text: 'It holds one result for each call.', correct: true },
+    { text: 'The results come in the order the tools finished.', why: 'The ids match results to calls, so the order in which the tools finished doesn\'t matter.' },
+    { text: 'Each result carries the id of the call it answers.', correct: true },
+    { text: 'Only the first result is needed, and the model infers the rest.', why: 'The model can\'t infer a lookup it never saw. Each call needs its result.' },
+  ]}>
+
+Which two are true of the next message?
+
+</MultiChoice>
+
+<Sort id="same-reply-or-next" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['parallel-calls']}
+  context="The lesson says a call whose argument is another call's result has to wait for the next round, and data flow decides what can share a reply."
+  title="Same reply, or the next round?" hint="Does this call need the result of another call as its argument?"
+  buckets={['Can share one reply', 'Waits for the next round']}
+  items={[
+    { text: 'The weather for Amsterdam and the weather for Lisbon', bucket: 0 },
+    { text: 'Two customer records, looked up by their ids', bucket: 0 },
+    { text: 'What to pack, from the Amsterdam weather result', bucket: 1 },
+    { text: 'Cancel the order whose id the create call returns', bucket: 1 },
+  ]} />
+
+<Match id="together-or-in-order" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['parallel-calls']}
+  context="The lesson's loop can run a batch of tool calls at the same time in a thread pool, or one after another in the order the model asked for them."
+  title="At the same time, or in order?" hint="Does any call in the pair write something that another call reads or writes?"
+  options={['At the same time', 'In order, one after another']}
+  rows={[
+    { statement: 'Read two different customer records', option: 0, why: 'Does either call change anything?' },
+    { statement: 'Append two lines to the same log file', option: 1, why: 'What happens if both writes land at once?' },
+    { statement: 'Write a setting, then read it back', option: 1, why: 'Does the read depend on the write finishing first?' },
+    { statement: 'Fetch three web pages', option: 0, why: 'Do these calls touch anything the others use?' },
+  ]}
+  rationale="Reads can run together. Writes run in order, and every result keeps its call's id either way.">
+Match each pair of calls to how the loop runs them.
+</Match>
 
 <Exercise stretch="Add a third strategy to the fixture, next to in_order and together: run every get_weather call in the thread pool and every other call one after another, in the same round. Check that the follow-up run's output stays the same.">
 

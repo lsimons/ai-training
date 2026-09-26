@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Match, Predict, Scenario, Pitfall, Exercise, Recap, MorePractice } from '@components/lesson';
+import { Choice, MultiChoice, Match, Predict, Scenario, Pitfall, Exercise, Recap, MorePractice, Sort } from '@components/lesson';
 
 In this lesson we take the weather agent from [The agent loop](/building-agents/agent-loop/)
 and rebuild it on an agent SDK (software development kit), the Claude Agent
@@ -301,6 +301,20 @@ A developer ships an SDK agent without setting `max_turns` or
 `max_budget_usd`. What ends a run?
 
 </Choice>
+
+<Sort id="sdk-or-your-code" phase="review" objective="building-agents/builds-agent-loop/uses-an-sdk"
+  concepts={['agent-sdk', 'stop-conditions']}
+  context="A developer moved a hand-written agent loop onto the Claude Agent SDK, which runs the loop inside the library. Some jobs moved into the SDK, and some stay with the developer."
+  title="Who does it now?" hint="Is it part of running the loop, or a decision about limits and records?"
+  buckets={['The SDK does it', 'Your code still does it']}
+  items={[
+    { text: 'Append each tool result to the conversation', bucket: 0 },
+    { text: 'Run the tools the model asks for', bucket: 0 },
+    { text: 'Retry a failed API call', bucket: 0 },
+    { text: 'Set max_turns and max_budget_usd', bucket: 1 },
+    { text: 'Read the result\'s subtype before its text', bucket: 1 },
+    { text: 'Record tool results for the evaluation from the message stream', bucket: 1 },
+  ]} />
 
 ### When to drop to the raw API
 

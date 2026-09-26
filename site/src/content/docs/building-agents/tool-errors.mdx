@@ -1,4 +1,4 @@
-import { Predict, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Predict, Sort, Pitfall, Exercise, Recap, Choice, Match, Scenario } from '@components/lesson';
 
 In this lesson we break a tool on purpose and watch what the loop from
 [Building your first agent](/building-agents/agent-loop/) does with it. A
@@ -148,6 +148,33 @@ show(run("What is the balance of account 4711?"))
 
 </Predict>
 
+<Choice id="what-the-tool-returns" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['error-handling', 'tool']}
+  context="In the lesson, a lookup tool is asked for an account id that doesn't exist, and a model reads whatever the tool returns."
+  title="An unknown account id" hint="What can the model read, and what does it do with each of these?"
+  options={[
+    { text: 'An empty string, so the tool says nothing that is wrong.', why: 'An empty result reads as success, and the model answers as if it had found something.' },
+    { text: 'An exception, so that the loop stops at once.', why: 'An exception that escapes ends the run, and the user hears nothing.' },
+    { text: 'A result marked as a failure, with an error that names the id.', correct: true },
+    { text: 'A balance of zero, so the model always has a number.', why: 'A made-up zero is a wrong answer the model passes on as fact.' },
+  ]}>
+
+The account id doesn't exist. What should the tool return?
+
+</Choice>
+
+<Sort id="can-the-model-tell" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['error-handling', 'tool']}
+  context="The lesson compares what a model sees when a tool fails in different ways."
+  title="Can the model tell it failed?" hint="Does the model get something to read that says the call failed?"
+  buckets={['The model can tell it failed', 'It reads as success, or ends the run']}
+  items={[
+    { text: 'A dict with ok set to False and an error string', bucket: 0 },
+    { text: 'A tool_result block with is_error set to true and the error text', bucket: 0 },
+    { text: 'An empty string', bucket: 1 },
+    { text: 'An exception that escapes the loop', bucket: 1 },
+  ]} />
+
 Same question, same missing account, and this time the user learns which
 account was missing. The stop reason is still `end_turn`, because the
 model chose to answer. The failure was handled, and the run ended the
@@ -274,6 +301,37 @@ clear as long as none of them takes over another's job (@AEC-13).
     { text: 'A good result resets the error count', bucket: 1 },
     { text: 'Read the timeout text and ask for the same rate call again', bucket: 2 },
   ]} />
+
+<Match id="tool-harness-or-model" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['error-handling', 'harness']}
+  context="The lesson's program has three parts: a tool that runs one attempt and returns a structured result, a harness loop that appends results and counts errors, and a model that reads results and either calls a tool or answers."
+  title="Which part decides?" hint="Is it about one attempt, about the run as a whole, or about what the user hears?"
+  options={['The tool', 'The harness', 'The model']}
+  rows={[
+    { statement: 'What went wrong, in words', option: 0, why: 'Which part saw the failure happen?' },
+    { statement: 'How many tries a step gets', option: 1, why: 'Which part counts errors across rounds?' },
+    { statement: 'What to tell the user', option: 2, why: 'Which part writes the answer?' },
+    { statement: 'Which limit ended the run', option: 1, why: 'Which part holds the stop rules?' },
+  ]}
+  rationale="The tool reports, the harness decides how many tries and when to stop, and the model decides what to say.">
+Match each decision to the part that makes it.
+</Match>
+
+<Scenario id="the-service-that-times-out" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['error-handling', 'stop-conditions']}
+  context="An agent's rate tool returns an error result each time the rate service times out, and the model asks for the same call again whenever it sees a timeout. The harness has a step limit of 50 and no count of errors."
+  title="The service is down" hint="Which part of the program should decide how many tries a step gets?"
+  options={[
+    { text: 'Add a line to the prompt that tells the model to stop after two timeouts.', consequence: 'The model stops on some runs. On others it retries until the step limit, and the run costs 50 rounds.' },
+    { text: 'Count errors in a row in the harness, and end the run with a named reason at two.', correct: true, consequence: 'The run ends after the second timeout with too_many_errors, and the report says why.' },
+    { text: 'Make the tool retry inside itself until the service answers.', consequence: 'The service stays down, the tool never returns, and the run hangs with nothing in the log.' },
+    { text: 'Make the tool raise an exception on a timeout, so that the run stops.', consequence: 'The run stops with a traceback on the first timeout, and a brief outage now ends every run.' },
+  ]}>
+
+The rate service is down, and the agent keeps asking for the same rate.
+What do you change?
+
+</Scenario>
 
 <Exercise stretch="Add a third stop reason: a budget of tool calls that counts every call, error or not, and fires before max_steps. Make one run end with it and check that the loop reports the limit it reached first.">
 

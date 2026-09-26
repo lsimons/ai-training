@@ -1,4 +1,4 @@
-import { Predict, Order, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Predict, Order, Pitfall, Exercise, Recap, Choice, MultiChoice, Match, Scenario } from '@components/lesson';
 
 An agent is a model in a loop with tools. That sentence is the whole
 architecture, and in this lesson we make it concrete. We define one tool,
@@ -47,6 +47,21 @@ print(TOOLS["get_weather"]["fn"]("Lisbon"))
 ```
 
 </Predict>
+
+<Choice id="what-the-model-sees-of-a-tool" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['tool', 'loop-from-scratch']}
+  context="In the lesson, TOOLS is a Python dict that maps each tool name to a description and to the plain function that runs it, and a hand-written loop calls the model with the messages and the tools."
+  title="What the model gets" hint="Which part of the tool is text for the model, and which part is code for your loop?"
+  options={[
+    { text: 'The source code of the function, so the model can run it itself.', why: 'The model never runs anything. The function stays in your code, and your loop calls it.' },
+    { text: 'The name and the description, and your loop runs the function.', correct: true },
+    { text: 'The result for every city, computed before the model is asked.', why: 'The loop runs the tool only when the model asks for it, with the arguments the model chose.' },
+    { text: 'Nothing, because the loop decides by itself which tool to use.', why: 'The model chooses the tool from its description. The loop runs what the model asked for.' },
+  ]}>
+
+What does the model get to see of `get_weather`?
+
+</Choice>
 
 The description matters as much as the code. The model chooses tools by
 reading descriptions, so a vague one ("weather stuff") gets called at the
@@ -183,6 +198,52 @@ once, you know which of those to check in the SDK's version.
 Put the steps of one iteration of the agent loop in order.
 
 </Order>
+
+<MultiChoice id="only-the-loop-does-it" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['loop-from-scratch', 'agent-loop']}
+  context="The lesson's hand-written agent loop sends messages to a model, runs the tools the model asks for and appends the results, until the model answers."
+  title="Which jobs are the loop's?" hint="Which of these can a model do by writing text, and which need code that runs?"
+  options={[
+    { text: 'Run the tool function with the chosen arguments.', correct: true },
+    { text: 'Choose which tool to ask for next, from the descriptions.', why: 'That is the model\'s choice, made from the tool descriptions.' },
+    { text: 'Append the tool result to the list of messages.', correct: true },
+    { text: 'Write the final answer that the user reads.', why: 'The model writes the answer. The loop returns it.' },
+  ]}>
+
+Which two of these does the loop do?
+
+</MultiChoice>
+
+<Scenario id="the-tool-raises" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['loop-from-scratch', 'stop-conditions']}
+  context="In the lesson's hand-written agent loop, get_weather raises LookupError for a city it has no data for."
+  title="The tool raises" hint="What can the model do with an exception it never sees?"
+  options={[
+    { text: 'Let the exception propagate, so that the failure is loud.', consequence: 'The run ends with a traceback, and the user gets no answer at all.' },
+    { text: 'Catch it and append a tool result that starts with error: and the message.', correct: true, consequence: 'The model reads the error and tells the user it couldn\'t check the weather for that city.' },
+    { text: 'Catch it and return an empty string as the result.', consequence: 'The model reads an empty result as success, and answers as if the tool had found something.' },
+    { text: 'Catch it and call the tool again until it returns a result.', consequence: 'The tool raises every time for that city, and the loop never ends.' },
+  ]}>
+
+The model asks for the weather in a city that `get_weather` has no data
+for, and the function raises. What does the loop do?
+
+</Scenario>
+
+<Match id="model-or-loop" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['agent-loop', 'loop-from-scratch']}
+  context="The lesson's agent loop is code that calls a model, runs tools and checks a budget. The model reads the messages and writes a reply."
+  title="Who does it?" hint="Is it text the model writes, or code that runs in your loop?"
+  options={['The model', 'Your loop']}
+  rows={[
+    { statement: 'Decide which tool to call', option: 0, why: 'Which of the two reads the tool descriptions and writes a request?' },
+    { statement: 'Run the tool', option: 1, why: 'Which of the two can execute code?' },
+    { statement: 'Stop when the step budget runs out', option: 1, why: 'Where do the safety controls go?' },
+    { statement: 'Write the answer to the user', option: 0, why: 'Which of the two writes text?' },
+  ]}
+  rationale="The model only writes text. Everything that runs, including every safety control, is in your loop.">
+Match each job to the part that does it.
+</Match>
 
 <Exercise stretch="Replace fake_model with a call to a real model API that supports tool use, keeping run unchanged. The only new work is translating the API's tool-call format into the shape the loop already understands.">
 
