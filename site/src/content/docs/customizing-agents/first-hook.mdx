@@ -1,4 +1,4 @@
-import { Choice, Match, Predict, Sort, Pitfall, Exercise, Recap, Habit, Prompt, Response } from '@components/lesson';
+import { Choice, Match, MultiChoice, Predict, Sort, Pitfall, Exercise, Recap, Habit, Prompt, Response } from '@components/lesson';
 
 In this lesson we write one hook for a coding agent and watch it block a commit. The
 hook runs before every commit the agent tries. When `package-lock.json`
@@ -441,6 +441,32 @@ Place each ending in the bucket it leads to.
     { text: 'The session was in a permission mode that runs commands without asking, which skips the hook.', why: 'A PreToolUse hook runs before the permission-mode check, in every mode.' },
   ]}>
 The hook existed and was registered. Why did the commit run?
+</Choice>
+
+<MultiChoice id="what-the-message-says" phase="review" objective="customizing-agents/configures-agent/adds-a-hook"
+  concepts={['hooks']}
+  context="A developer writes a Claude Code PreToolUse hook that blocks a commit with exit code 2 when a generated file changed and its source file did not. Claude sees only the text the hook writes to standard error, and nothing else about the rule."
+  title="What goes in the block message?" hint="After the block, what does the agent need to know to make a better move than the one that was refused?"
+  options={[
+    { text: 'Which file changed, and which source file did not change with it.', correct: true },
+    { text: 'The exit code of the hook and the event it is registered on.', why: 'The agent already knows that a hook blocked the call. The code and the event say nothing about which file is wrong or what to change.' },
+    { text: 'What to do next, such as the command that undoes the edit.', correct: true },
+    { text: 'A request to run the same commit again in a minute or two.', why: 'The rule still fails a minute later. Without a better move, the agent tries the same commit and gets the same block.' },
+  ]}>
+Which two parts should the message on standard error hold?
+</MultiChoice>
+
+<Choice id="the-hook-on-the-wrong-event" phase="review" objective="customizing-agents/configures-agent/adds-a-hook"
+  concepts={['hooks']}
+  context="A developer registers the lockfile check from this lesson in Claude Code with the same Bash matcher, but on PostToolUse instead of PreToolUse. PostToolUse runs after a tool call has succeeded. The script is unchanged: for a lockfile-only change it writes its message to standard error and exits with code 2."
+  title="The hook on the wrong event" hint="When does a PostToolUse hook run compared to the git command, and what can exit code 2 still do at that point?"
+  options={[
+    { text: 'Git never starts, because exit code 2 blocks the tool call on every event.', why: 'Not every event can block. A PostToolUse hook runs after the commit, so exit code 2 can only show the message to Claude.' },
+    { text: 'Git never starts, and Claude gets no reason, because only PreToolUse reaches Claude.', why: 'The hook runs after git has finished. Its exit code 2 does show the message to Claude, too late to stop the commit.' },
+    { text: 'The commit lands, and Claude never sees the message, since it reads standard error only on code 0.', why: 'It is the other way round. On exit code 0 Claude never sees standard error, and on exit code 2 it gets the text.' },
+    { text: "The commit lands, and exit code 2 then only shows the hook's message to Claude.", correct: true },
+  ]}>
+The agent commits a change to `package-lock.json` alone. What happens?
 </Choice>
 
 <Pitfall title="The instruction that held most of the time">
