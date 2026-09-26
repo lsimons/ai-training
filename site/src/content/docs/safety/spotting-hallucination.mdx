@@ -1,4 +1,4 @@
-import { Choice, Predict, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Predict, Pitfall, Exercise, Recap, Sort, Scenario } from '@components/lesson';
 
 In this lesson we read a one-paragraph summary that a chat assistant wrote
 from a council report and decide which details in it we would check. A
@@ -189,6 +189,36 @@ You have time to check one against the contract before the meeting. Which
 one first?
 
 </Choice>
+
+<Sort id="check-it-first" phase="review" objective="safety/verifies-output/checks-claims"
+  concepts={['hallucination-in-practice']}
+  context="A model summarized a council report on parking at a station. The lesson says invented details concentrate in the specifics, and the more precise a detail is, the earlier it is checked against the source."
+  title="Which claims come first?" hint="Is the claim an exact figure, a reference, a quote or a name?"
+  buckets={['Check it first', 'Check it after the specifics']}
+  items={[
+    { text: 'Article 12(2) requires a permit for more than 50 racks.', bucket: 0 },
+    { text: 'Theft fell by 41 percent between 2023 and 2025.', bucket: 0 },
+    { text: 'The mayor said, "Bikes first, cars second."', bucket: 0 },
+    { text: 'The report discusses parking at the station.', bucket: 1 },
+    { text: 'The council wants more people to cycle.', bucket: 1 },
+    { text: 'The station is busy in the morning.', bucket: 1 },
+  ]} />
+
+<Scenario id="the-real-article" phase="review" objective="safety/verifies-output/checks-claims"
+  concepts={['hallucination-in-practice']}
+  context="A model's summary of a council report says that Article 9 requires one bicycle rack per 40 passengers. The report has an Article 9, and it is about the opening hours of the bicycle shed."
+  title="The article exists" hint="Did you check that the article exists, or what it says?"
+  options={[
+    { text: 'Keep the claim, because Article 9 is really in the report.', consequence: 'The next reader cites Article 9 for a rule it doesn\'t contain.' },
+    { text: 'Ask the model which article the rule is really in, and use its answer.', consequence: 'The model gives another article number with the same confidence, and you still haven\'t read it.' },
+    { text: 'Take the claim out, or name the source that does give the rule.', correct: true, consequence: 'The summary now says only what its sources say, and the next reader can cite it safely.' },
+    { text: 'Keep the claim and add "see Article 9" so the reader can check it.', consequence: 'The reader who checks finds opening hours. The one who doesn\'t repeats the rule.' },
+  ]}>
+
+The summary cites Article 9 for a rule about racks. Article 9 exists and is
+about opening hours. What do you do with the claim?
+
+</Scenario>
 
 <Exercise stretch="Write a third summary of the report yourself, with one invented specific in it, and give it to a colleague with the checker. Did they pick the invented one before running it?">
 

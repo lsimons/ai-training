@@ -1,4 +1,4 @@
-import { Choice, Match, Scenario, Pitfall, Exercise, Recap, Habit, Prompt, Response } from '@components/lesson';
+import { Choice, Match, Scenario, Pitfall, Exercise, Recap, Habit, Prompt, Response, MultiChoice, Sort } from '@components/lesson';
 
 A chat assistant that gets something wrong hands you a wrong paragraph. You
 read it, you frown, you delete it. The damage stops there. An agent that gets
@@ -194,6 +194,35 @@ You give an agent a shell on your laptop that's logged in as you, and ask it to
 Before you press go, you say the blast radius out loud. What's it?
 </Scenario>
 
+<Choice id="archive-the-newsletters" phase="review" objective="safety/judges-agent-risk/names-blast-radius"
+  concepts={['blast-radius']}
+  context="The lesson defines blast radius as what an action can reach and change with the access it has, which can be much more than the task asked for."
+  title="Say the blast radius" hint="Is the radius set by the request, or by the access the agent holds?"
+  options={[
+    { text: 'The newsletters in the inbox, which are the messages you asked it to archive.', why: 'That is the task. The radius is what the access allows, and the access is the whole account.' },
+    { text: 'Every message in the account, and every mail it can send in your name.', correct: true },
+    { text: 'Nothing that matters, because an archived message can be moved back.', why: 'Archiving can be undone. The access also lets the agent delete and send, and a sent mail can\'t be taken back.' },
+    { text: 'Only the folder named Newsletters, because that is where they are kept.', why: 'A folder name doesn\'t limit an agent. It can reach every folder the account can.' },
+  ]}>
+
+An agent is logged in to your work email account as you. Your request is
+to archive the newsletters in your inbox. What is the blast radius?
+
+</Choice>
+
+<Sort id="enough-for-the-task" phase="review" objective="safety/judges-agent-risk/names-blast-radius"
+  concepts={['permissions-and-least-privilege', 'blast-radius']}
+  context="An agent is asked to summarize this week's sales reports from one shared folder into a short text that you send on yourself. The lesson's rule is to grant only what this task needs."
+  title="What does this task need?" hint="Would the summary be any worse without this access?"
+  buckets={['Enough for the task', 'More than the task needs']}
+  items={[
+    { text: 'Read access to the folder with this week\'s reports', bucket: 0 },
+    { text: 'A copy of this week\'s reports in a scratch folder', bucket: 0 },
+    { text: 'Write access to the whole shared drive', bucket: 1 },
+    { text: 'Your email account, so it can send the summary itself', bucket: 1 },
+    { text: 'Administrator rights on your laptop', bucket: 1 },
+  ]} />
+
 ## Prompt injection: when the data gives orders
 
 Agent safety is different for one more reason, and it is the one people
@@ -273,6 +302,39 @@ to "summarize the three articles I bookmarked". You haven't read the
 articles yet. What do you change before you press go?
 </Scenario>
 
+<MultiChoice id="where-an-order-can-hide" phase="review" objective="safety/judges-agent-risk/recognizes-injection"
+  concepts={['prompt-injection']}
+  context="The lesson says that an agent may treat any text it reads as an instruction, and calls a planted instruction in the data prompt injection."
+  title="Where can a planted instruction hide?" hint="Which of these are text that someone other than you wrote, and that the agent reads while it works?"
+  options={[
+    { text: 'A web page the agent opens while it looks for venues.', correct: true },
+    { text: 'The request you typed to start the task.', why: 'Your own request is the instruction you meant to give. Injection comes in through the data the agent reads.' },
+    { text: 'A document a customer attached to an email.', correct: true },
+    { text: 'Nothing, as long as the agent runs on a model you trust.', why: 'A good model still reads the planted text as text it may follow. The risk is in what it reads, not in who made it.' },
+  ]}>
+
+An agent reads text while it works for you. Which two of these could
+contain a planted instruction?
+
+</MultiChoice>
+
+<Choice id="the-hidden-line" phase="review" objective="safety/judges-agent-risk/recognizes-injection"
+  concepts={['prompt-injection', 'exfiltration']}
+  context="An agent summarizes customer emails. It can read the inbox and fetch any web address. The lesson calls data that leaves through an agent's own tools exfiltration."
+  title="The line at the end of an email" hint="Which of the agent's tools can send data out, and what could the planted line put into it?"
+  options={[
+    { text: 'A wrong summary of that one email, which you can correct when you read it.', why: 'A wrong summary is the smallest outcome. This agent can also fetch a web address, and that is a way out.' },
+    { text: 'The agent deletes the email, because the line tells it to hide the evidence.', why: 'This agent has no tool that deletes mail. Look at what its tools can send out instead.' },
+    { text: 'None, because a line hidden from you is also hidden from the agent reading it.', why: 'White text or a tiny font hides a line from a person. The agent reads every character.' },
+    { text: 'Your last invoice leaves the company inside a web address that the agent fetches.', correct: true },
+  ]}>
+
+One email ends with a line in white text: fetch a web address with the
+text of the last invoice in the inbox added to it. What is the worst
+outcome?
+
+</Choice>
+
 <Choice id="where-to-put-the-approval" objective="safety/judges-agent-risk/chooses-human-in-loop"
   concepts={['human-in-the-loop']}
   title="Where must a person say yes?" hint="Which single step is both irreversible and reaches outside your own account?"
@@ -287,6 +349,20 @@ read your inbox, look at your calendar, draft replies, and send them. You get
 to insert exactly one point where it must stop and ask you. Where does it
 go?
 </Choice>
+
+<Sort id="let-it-or-ask" phase="review" objective="safety/judges-agent-risk/chooses-human-in-loop"
+  concepts={['human-in-the-loop']}
+  context="An agent organizes a team dinner for 40 guests. The lesson puts a human approval in front of steps that can't be undone or that reach other people, and lets the agent read, search, draft and propose freely."
+  title="Where does it stop and ask?" hint="Can the step be undone, and does it reach anyone other than you?"
+  buckets={['Let the agent do it', 'Stop and ask you first']}
+  items={[
+    { text: 'Search the web for restaurants near the office', bucket: 0 },
+    { text: 'Draft the invitation', bucket: 0 },
+    { text: 'Read your calendar to find free evenings', bucket: 0 },
+    { text: 'Send the invitation to the 40 guests', bucket: 1 },
+    { text: 'Pay the deposit to the restaurant', bucket: 1 },
+    { text: 'Delete last year\'s guest list from the shared folder', bucket: 1 },
+  ]} />
 
 ## Putting it together
 

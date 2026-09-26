@@ -1,4 +1,4 @@
-import { Choice, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Scenario, Pitfall, Exercise, Recap, Order } from '@components/lesson';
 
 In this lesson we take a paragraph a chat assistant wrote for a briefing,
 with two references after its claims, and walk each reference back to the
@@ -171,6 +171,12 @@ team has a copy. What do you do with the claim?
 A reference in a model-written text names a real report. What does
 checking it end with?
 </Choice>
+
+<Order id="order-the-walk" phase="review" objective="safety/verifies-output/checks-claims"
+  concepts={['source-checking']}
+  context="The lesson calls source checking a walk from a cited claim in a model's text to the passage in the source that should support it."
+  title="Put the walk in order" hint="What do you need open before you can search it, and what do you compare at the end?"
+  steps={['Open the source itself', 'Find the passage with the number or the name', 'Read what the passage says', 'Compare it with what the text says it says']} />
 
 <Exercise stretch="Do the same walk for one reference in a document you or a colleague wrote with an assistant this month, and write the same two sentences.">
 Open the 2025 AI Index Report's public page (the References section below

@@ -1,4 +1,4 @@
-import { Choice, Match, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Match, Sort, Pitfall, Exercise, Recap, MultiChoice } from '@components/lesson';
 
 The European Union (EU) has one law about artificial intelligence that
 applies to every member state at once: Regulation (EU) 2024/1689, called
@@ -218,6 +218,52 @@ you brand a tool as yours, check which role the branding gives you.
 Match each organization to its role under the Act.
 </Match>
 
+<MultiChoice id="which-ones-infer" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['regulation']}
+  context="The EU AI Act defines an AI system in Article 3(1) as a machine-based system that infers from its input how to generate outputs such as predictions, content, recommendations or decisions."
+  title="Which are AI systems?" hint="Does the tool work out its output from what it learned, or follow a rule a person wrote?"
+  options={[
+    { text: 'A spam filter that learned from the messages people marked as spam.', correct: true },
+    { text: 'A spreadsheet formula that adds 21 percent tax to each price.', why: 'The formula runs a rule a person wrote. It infers nothing from its input.' },
+    { text: 'A tool that suggests a reply to each support email from past replies.', correct: true },
+    { text: 'A door lock that opens at 8:00 on weekdays, set on a timer.', why: 'A timer follows a schedule a person set. Nothing is inferred.' },
+  ]}>
+
+Which two of these are AI systems under Article 3(1)?
+
+</MultiChoice>
+
+<Match id="match-the-tier" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['regulation', 'risk-assessment']}
+  context="The EU AI Act sorts AI uses into prohibited practices (Article 5), high-risk systems (Article 6 with Annex I and Annex III), systems with a transparency duty (Article 50), and everything else, for which the Act sets no specific duty."
+  title="Which tier?" hint="Is the use banned, does it decide about people in an area the annexes list, does it talk to the public, or none of these?"
+  options={['Prohibited', 'High-risk', 'Transparency duty', 'No specific duty in the Act']}
+  rows={[
+    { statement: 'A shop\'s website chatbot that answers questions about opening hours', option: 2, why: 'Does it interact with members of the public?' },
+    { statement: 'A system that scores citizens on their social behavior and cuts benefits for low scorers', option: 0, why: 'Is this a practice the Act bans outright?' },
+    { statement: 'A tool that ranks job applicants for interviews', option: 1, why: 'Is employment one of the areas in Annex III?' },
+    { statement: 'A tool that suggests which products a shop should reorder', option: 3, why: 'Does it decide about people or talk to them?' },
+  ]}
+  rationale="The tier follows the use: what the system decides, about whom, and whether it deals with the public.">
+Match each use to its tier under the Act.
+</Match>
+
+<Choice id="the-clinic-role" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['regulation', 'policy']}
+  context="Under the EU AI Act a provider develops an AI system or has it developed and puts it on the market under its own name, and a deployer uses an AI system under its authority."
+  title="What is the hospital?" hint="Did the hospital build or brand the model, or does it use one that someone else supplied?"
+  options={[
+    { text: 'A provider, because it runs the model on its own servers.', why: 'Where a system runs doesn\'t make an organization its provider. Who built it and whose name it carries does.' },
+    { text: 'Both, because the patients the model sorts are its own.', why: 'Affected people don\'t change the role. The hospital would become a provider only by changing the purpose or branding the system.' },
+    { text: 'A deployer, because it uses the vendor\'s model under its own authority.', correct: true },
+    { text: 'Neither, because the vendor carries every duty for the model.', why: 'A deployer has duties of its own under the Act. For a high-risk system they include human oversight and keeping the logs.' },
+  ]}>
+
+A hospital uses a vendor's triage model exactly as the vendor delivered
+it. What is the hospital under the Act?
+
+</Choice>
+
 ## What each role owes
 
 For a high-risk system the duties are substantial, and this lesson only
@@ -344,6 +390,19 @@ For each situation, pick the
 [Article 50](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727#art_50)
 duty that applies.
 </Match>
+
+<Sort id="duty-or-none" phase="review" objective="safety/handles-data-safely/discloses-ai-use"
+  concepts={['regulation']}
+  context="Article 50 of the EU AI Act puts transparency duties on systems that interact with people, on generated content, on deep fakes, and on AI-generated text published to inform the public, with an exception where a person holds editorial responsibility."
+  title="Does Article 50 apply?" hint="Does the output reach the public, and does a person answer for it?"
+  buckets={['An Article 50 duty applies', 'No Article 50 duty']}
+  items={[
+    { text: 'A chatbot on a public website that answers customers', bucket: 0 },
+    { text: 'A realistic AI-made video of a real politician in an advertisement', bucket: 0 },
+    { text: 'An AI-written article about a local election, published with no human review', bucket: 0 },
+    { text: 'An internal memo you drafted with an assistant for your own team', bucket: 1 },
+    { text: 'An AI-drafted news article that an editor reviewed and takes responsibility for', bucket: 1 },
+  ]} />
 
 ## The timeline
 

@@ -1,4 +1,4 @@
-import { Choice, Scenario, Sort, Repair, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Scenario, Sort, Repair, Pitfall, Exercise, Recap, MultiChoice, Match } from '@components/lesson';
 
 Most people who use an AI tool at work picked it themselves. It was free,
 or a colleague recommended it, or it came with a product they already had.
@@ -218,6 +218,54 @@ reading a script. It works well. This afternoon you have a real call with a
 customer, and it would be a perfect test. What do you do?
 </Scenario>
 
+<Match id="may-it-go-in" phase="review" objective="safety/handles-data-safely/decides-what-to-share"
+  concepts={['data-privacy', 'confidentiality']}
+  context="The lesson sorts what may go into a general-purpose AI assistant at work by asking whose information it is. Information you hold for someone else is theirs to decide about, and some things stay out of every tool."
+  title="May it go in?" hint="Whose information is it, and could it ever be safe in a prompt?"
+  options={['Yes', 'Only with their approval', 'Never']}
+  rows={[
+    { statement: 'Your own slide deck, for feedback on its structure', option: 0, why: 'Whose work is it?' },
+    { statement: 'A price list a supplier shared with you under a confidentiality agreement', option: 1, why: 'Who decides where this list may go?' },
+    { statement: 'The database password from the team\'s password vault', option: 2, why: 'What happens to a secret once it is in a prompt?' },
+    { statement: 'A scan of a colleague\'s passport', option: 2, why: 'Is an identity document ever needed for a task like this?' },
+  ]}
+  rationale="Your own work may go in, what you hold for others goes in with their approval, and secrets and identity data stay out.">
+Match each item to whether it may go into the assistant.
+</Match>
+
+<Choice id="search-is-on" phase="review" objective="safety/handles-data-safely/decides-what-to-share"
+  concepts={['confidentiality']}
+  context="The lesson says that when an assistant searches the web, it sends a query based on the prompt to a separate search provider, under that provider's terms."
+  title="The assistant searches by default" hint="Where does the text of your question go when the assistant searches?"
+  options={[
+    { text: 'Turn search off, or write the question in general terms without the customer\'s name.', correct: true },
+    { text: 'Ask as planned, because the assistant\'s own terms cover what its search sends out.', why: 'The query goes to another provider with its own terms, which you haven\'t looked up.' },
+    { text: 'Ask as planned, and delete the chat afterwards so that nothing is kept.', why: 'Deleting the chat doesn\'t call back the query that already went to the search provider.' },
+    { text: 'Put the customer\'s name in quotation marks so that the search skips it.', why: 'Quotation marks change how a search matches. The name is still in the query.' },
+  ]}>
+
+You want to ask an assistant how to answer a customer whose data leaked, and
+your prompt names the customer. The assistant has web search on. What do you
+do?
+
+</Choice>
+
+<MultiChoice id="the-unassessed-tool" phase="review" objective="safety/handles-data-safely/decides-what-to-share"
+  concepts={['confidentiality', 'data-privacy']}
+  context="The lesson has a checklist for trying out a tool that nobody in the organization has assessed yet."
+  title="Trying a tool nobody assessed" hint="What kind of data may the tool see during a trial, and what ends the trial?"
+  options={[
+    { text: 'Test it on a recording of yourself reading a made-up script.', correct: true },
+    { text: 'Test it on one real customer call, and delete the file afterwards.', why: 'Real data ends the experiment, whatever happens to the file later.' },
+    { text: 'Use it on internal meetings only, because colleagues are not customers.', why: 'A recording of colleagues at work is real company data too.' },
+    { text: 'Write down what the tests showed, and name who would own it.', correct: true },
+  ]}>
+
+You want to try a transcription tool that nobody has assessed. Which two
+steps fit the checklist?
+
+</MultiChoice>
+
 ## Questions to ask your organization or a vendor
 
 At some point a tool moves from experimenting to real use, and someone has
@@ -289,6 +337,19 @@ customer. You edited it and checked the figures against the tracker. Who
 needs to know that AI was involved, and how?
 </Choice>
 
+<Sort id="line-or-no-line" phase="review" objective="safety/handles-data-safely/discloses-ai-use"
+  concepts={['disclosure']}
+  context="The lesson says to tell people that AI helped, to the extent the audience expects, when they would judge the work differently knowing it."
+  title="Does the reader need to know?" hint="Would the reader judge this work differently if they knew what the AI did?"
+  buckets={['Say that AI helped', 'No line needed']}
+  items={[
+    { text: 'A status report for a customer that an assistant drafted and you edited', bucket: 0 },
+    { text: 'A presentation whose images an AI tool generated', bucket: 0 },
+    { text: 'A letter to a customer that an AI tool translated', bucket: 0 },
+    { text: 'An email where you accepted the spelling suggestions', bucket: 1 },
+    { text: 'A list of notes for yourself that an assistant tidied up', bucket: 1 },
+  ]} />
+
 ## Where the output came from
 
 The second output habit is checking what the model may have copied.
@@ -322,6 +383,22 @@ header comment with an author name and a year that is not yours. It does
 exactly what you asked. What do you do?
 </Choice>
 
+<Scenario id="the-finished-config" phase="review" objective="safety/handles-data-safely/respects-licenses"
+  concepts={['licensing-and-attribution']}
+  context="A coding assistant returned a complete configuration file, far more finished than the request, with a comment at the top that names an open-source project and a license."
+  title="A file with someone else's header" hint="Where might this text have come from, and what would its license ask of you?"
+  options={[
+    { text: 'Delete the comment and use the file, because nobody can trace it without the comment.', consequence: 'The text is still the project\'s work under its license, and now the one clue to where it came from is gone.' },
+    { text: 'Use it as it is, because what an assistant produces for you is yours to use.', consequence: 'The tool\'s terms don\'t cancel the license of a source it reproduced. The file ships under terms you never read.' },
+    { text: 'Ask the assistant whether the file is original, and use it if it says yes.', consequence: 'The assistant can\'t know what it reproduced. Its yes is text, and it checks nothing.' },
+    { text: 'Search for a distinctive line, and follow the license of any match or write your own.', correct: true, consequence: 'The search finds the project. Its license asks for the notice to stay, so you keep the header and the file.' },
+  ]}>
+
+The assistant's configuration file has a header naming an open-source
+project and its license. What do you do?
+
+</Scenario>
+
 ## Putting it together
 
 Before a prompt goes in, run down the list.
@@ -340,10 +417,10 @@ have been copied from.
 
 <Exercise stretch="Now do the same for a second tool you use, and compare the two answers side by side.">
 Take one AI tool you use at work. Find its terms, privacy page or trust
-page, and write down four facts as four short lines: how long it retains
-conversations, whether and how it may train on them (and where the
-setting is, if there is one), where it stores and where it processes data,
-and which subprocessors it lists. Spend no more than fifteen minutes. This
+page, and write down four facts as four short lines: its retention period for
+conversations, whether it may train on them (and where the setting is, if
+there is one), the regions for storing and processing data, and the
+subprocessors it lists. Spend no more than fifteen minutes. This
 is the lookup the lesson keeps pointing at, and once you have done it for
 one tool you can do it for any tool.
 
