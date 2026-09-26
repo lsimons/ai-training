@@ -1,0 +1,310 @@
+import { Sort, Scenario, Choice, MultiChoice, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+The first lesson of this course ended on a cost. When every agent calls
+every tool in its own way, each pair of agent and tool needs its own
+adapter.
+[From one tool to many systems](/building-agents/how-a-model-calls-a-tool/#from-one-tool-to-many-systems)
+called this the N x M integration problem. In this lesson we look at the
+two kinds of shared protocol that answer it. The Model Context Protocol
+(MCP) connects an agent to tools and data. Agent-to-agent protocols, such
+as the Agent2Agent protocol (A2A), connect an agent to another agent, often
+one that another organization runs. Then we go back to the support agent
+of [Guardrails in layers](/building-agents/guardrails-in-layers/) and ask
+what its defense layers do for a connection that a protocol makes easy to
+add.
+
+## From N times M adapters to N plus M
+
+Take a shop with three agents: the support agent, an agent that writes
+product pages and an agent that plans stock. Between them they use eight
+systems, the order database and the ticket system among them. If each agent calls each system in its own way, the shop writes
+and maintains 3 x 8 = 24 adapters. When the ticket system changes its
+interface, three of those adapters change with it.
+
+With a shared protocol, each agent speaks the protocol once and each
+system is wrapped once. The shop builds 3 + 8 = 11 pieces. A new agent
+is one more piece and can use all eight systems. A new system is one more
+piece, and all three agents can reach it (@AEC-14).
+
+The things an agent connects to come in two kinds, with a protocol for
+each (@AEC-14). A tool takes a call with arguments and returns a result in
+one step, such as "look up order 4471". Another agent takes a goal, such
+as "find out why this parcel is late", and decides for itself how to reach
+it. It may work on the goal for minutes or days before it reports back. MCP is the standard for the first kind, and agent-to-agent
+protocols are the standard for the second (@A2A and MCP).
+
+## The Model Context Protocol for tools and data
+
+MCP has three roles (@MCP specification). The host is the application a
+person uses, such as a coding agent or a chat app. Inside the host, a
+client holds the connection to one server. A server wraps a system and
+offers what that system can do. They exchange JSON-RPC 2.0 messages, a
+standard format for a remote procedure call (RPC) and its response. A server can offer
+tools, which the model calls, resources, which are data for the model or
+the person to use, and prompts, which are message templates a person
+picks. A client can in turn offer the server features such as roots, the
+folders or addresses the server is meant to work in (@MCP specification).
+
+On the model's side, the loop you built in this course stays the same.
+The model asks for a tool with a `tool_use` block, and the loop sends back
+a `tool_result`. The tool now runs somewhere else. The client sends the
+call to the server with a `tools/call` request, and the server's answer
+becomes the result (@MCP specification). The eight tools of the support
+agent could come from two servers, one for the ticket system and one for
+the shop's orders. The other two agents in the shop could connect to the
+same two servers.
+
+[Connecting an agent to your systems with MCP](/customizing-agents/mcp/#the-protocol-in-short)
+and
+[Connecting your first tool server](/customizing-agents/mcp-first-server/)
+are the hands-on side of this section. One point from the specification
+matters for the rest of this lesson. MCP can't enforce its own security
+principles at the protocol level. It asks the host to get the person's
+consent before a tool runs and to treat a tool's description as
+untrusted unless the server is trusted, and the host decides how to do it
+(@MCP specification).
+
+## Agent-to-agent protocols for work across organizations
+
+A2A is an open protocol for agents that different teams built, with
+different frameworks, and that don't show each other how they work
+inside (@A2A specification). The agent that asks is the client, and the
+agent that carries out the task is the remote agent. A delegation over A2A goes
+through discovery, a task and its results.
+
+**Discovery.** A remote agent publishes an Agent Card, a JSON document
+with its name, its skills, the address to call and the authentication it
+requires. A client finds the card at a fixed path on the agent's domain,
+`/.well-known/agent-card.json`, in a registry of agents, or in its own
+configuration (@A2A specification).
+
+**The task.** The client sends a message made of parts, and a part is
+text, a file or structured data. The remote agent works on it as a task,
+which has an id and a state, such as working, waiting for input,
+completed or failed. A task can run for a long time. The client follows it
+over a stream, or the remote agent posts updates to an address the client
+gave it (@A2A specification).
+
+**The results.** What the task produces comes back as artifacts, such as a
+document or structured data, each made of parts (@A2A specification).
+
+The remote agent keeps its plan, its memory and its tools to itself
+(@A2A specification). You see its card and what it sends back. That is
+what makes it an agent you delegate to rather than a tool you call, and it
+is also why a delegation costs more than a tool call.
+[What every extra agent costs](/building-agents/orchestration-tax/)
+counted the tokens and steps that a handoff between agents adds inside one
+program. A handoff to another organization's agent adds its prices and its
+outages to that bill.
+
+Here is an Agent Card for a courier's agent. The courier, its addresses
+and its skills are invented for this lesson, and the field names follow
+version 1.0 of the A2A specification (@A2A specification).
+
+```json
+{
+  "name": "Parcel desk",
+  "description": "Answers questions about parcels that Example Parcels delivers.",
+  "supportedInterfaces": [
+    {"url": "https://agents.parcels.example/a2a", "protocolBinding": "JSONRPC", "protocolVersion": "1.0"}
+  ],
+  "provider": {"organization": "Example Parcels", "url": "https://parcels.example"},
+  "version": "2.3.0",
+  "capabilities": {"streaming": false, "pushNotifications": true},
+  "securitySchemes": {
+    "partnerKey": {"apiKeySecurityScheme": {"location": "header", "name": "X-Partner-Key"}}
+  },
+  "securityRequirements": [{"schemes": {"partnerKey": {"list": []}}}],
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "skills": [
+    {
+      "id": "track-parcel",
+      "name": "Track a parcel",
+      "description": "Give an order number and a postal code. Returns where the parcel is and when it arrives.",
+      "tags": ["tracking"]
+    },
+    {
+      "id": "answer-delivery-ticket",
+      "name": "Answer a delivery ticket",
+      "description": "Give the full text of a customer's ticket. Returns a reply you can post to the customer.",
+      "tags": ["support"]
+    }
+  ]
+}
+```
+
+The card says what the agent offers and how to call it. It says nothing
+about what the courier's agent does with a ticket once it has one.
+
+<Sort id="which-protocol-fits" objective="building-agents/runs-in-production/mitigates-agent-risks"
+  concepts={['protocols-mcp-a2a']}
+  context="A shop runs a support agent that needs four connections. Some are to a system that takes a call and returns a result, and some are to another agent that takes a goal, works on it with its own tools and reports back."
+  title="Which protocol fits each connection?"
+  hint="Does the other side answer one call in one step, or does it take a goal and decide for itself how to reach it?"
+  buckets={['The Model Context Protocol (MCP)', 'An agent-to-agent protocol such as A2A']}
+  items={[
+    { text: 'Look up an order by its number in the shop database', bucket: 0 },
+    { text: 'Read the product manuals while writing an answer', bucket: 0 },
+    { text: 'Ask the stock team\'s planning agent to plan next month and report back', bucket: 1 },
+    { text: 'Hand a late-parcel question to the courier\'s agent, which checks its own systems', bucket: 1 },
+  ]} />
+
+## Each connection is a trust decision
+
+A shared protocol makes a connection cheap to add. The support agent could
+reach the courier's agent with the address of one card and a key. That is
+the purpose of the protocol, and it is also the risk. Each connection
+brings text into the model's context that you didn't write, and each one
+is a way for data to leave (@AEC-14). The model reads the tool
+descriptions of an MCP server and the artifacts a remote agent returns as
+it read the recipe page, and a planted instruction in them works in the
+same way. The message you send to a remote agent is an outbound call, like
+`post_reply`. Once it is sent, what you put in it is out of your control.
+
+What the other side may do with your data is for you and the other side
+to decide, and the protocols leave it open. MCP leaves consent and access control to the host (@MCP specification). A2A
+requires the remote agent to authenticate every request, and it leaves
+the rules for what an authenticated caller may do to each agent's own
+authorization model (@A2A specification). An encrypted, authenticated
+connection tells you who is at the other end. It doesn't tell you what
+they do with a ticket.
+
+So the defense layers of the support agent apply to a protocol connection
+as they apply to any other tool. Picture the courier's agent as one more
+tool, `ask_courier`, in the loop of
+[Guardrails in layers](/building-agents/guardrails-in-layers/):
+
+- The permission check decides which skill the agent may call and what
+  goes into the message. A rule in the loop can allow `track-parcel` with
+  an order number and a postal code, and refuse everything else.
+- The output filter reads the message before it leaves, as it reads a
+  reply.
+- The approval gate can hold a delegation until a person has seen what it
+  sends.
+- The artifact that comes back is untrusted input, like a fetched page. A
+  planted line in it can steer the model, so every call the model makes
+  after reading it still meets the permission check and the gate.
+- Monitoring sees your side only. Your trace ends at the call, because the
+  remote agent keeps its steps to itself. What you log about the messages
+  you sent and the artifacts that came back is all the evidence you have.
+
+The system prompt still lowers the odds, and it is still the weakest
+layer. A line that says "never
+send a ticket to a partner" depends on the model following it, as it did
+for the recipe page.
+
+<Scenario id="partner-agent-reads-tickets" objective="building-agents/runs-in-production/mitigates-agent-risks"
+  concepts={['protocols-mcp-a2a', 'defense-layers', 'exfiltration']}
+  context="A shop's support agent answers customer tickets, which hold names, addresses and order numbers, and sometimes links to pages written by strangers. A partner offers its own agent over an agent-to-agent protocol, and proposes that the support agent sends it every delivery ticket in full. The partner's agent is run by the partner, and it shares only its public card and the results it returns."
+  title="A partner's agent wants your tickets"
+  hint="What would leave with each message, and which of your layers would still act once the text is on the partner's side?"
+  options={[
+    { text: 'Enable it, since the protocol requires encryption and an authenticated caller on every request.', consequence: 'The traffic is encrypted and the partner knows it is you. Every ticket still reaches the partner in full, with names and addresses, and nothing on your side limits what its agent keeps.' },
+    { text: 'Enable it, and add a line to the system prompt that forbids sending personal data to the partner.', consequence: 'A ticket with a planted paragraph asks the agent to put the whole order into the message. The model weighs the prompt against the ticket, and the order goes to the partner.' },
+    { text: 'Allow one skill with only the order number and postal code, log each message, and treat what returns as untrusted.', correct: true, consequence: 'The partner gets two fields per question. A planted line in a result reaches the model, and the calls it asks for still meet the permission check and the gate. The log shows every message and every result.' },
+    { text: 'Ask the partner for its agent\'s prompt and tool list, and enable it if both look safe to you.', consequence: 'The partner sends a document. The protocol shows you nothing of its agent, and next month the agent gets a new tool that you never hear about. Your side still sends every ticket in full.' },
+  ]}>
+A partner offers its agent over an agent-to-agent protocol. It can answer
+delivery questions, and the partner proposes that your support agent
+sends it every delivery ticket in full. What do you decide before you
+enable it?
+</Scenario>
+
+<Pitfall title="Enabling a connection because the protocol is standard">
+A team finds a partner agent that speaks A2A, sees an encrypted address
+and a key in its card, and connects it in an afternoon, with the full
+ticket as the message. The standard made the connection quick to add. It
+said nothing about what the partner's agent keeps or what it sends back.
+Treat each new server or remote agent as a new tool that reads and sends:
+list what crosses the connection, and put it behind the permission check,
+the filter and the gate before you enable it.
+</Pitfall>
+
+<Choice id="read-only-in-the-description" phase="review" objective="building-agents/runs-in-production/mitigates-agent-risks"
+  concepts={['protocols-mcp-a2a', 'permissions-and-least-privilege']}
+  context="The MCP specification lets a server describe each tool it offers, and the client passes those descriptions to the model. A team finds a server online, run by someone they don't know, that offers a tool called delete_records."
+  title="The description says it only archives"
+  hint="Who wrote the description, and what in the protocol checks it against what the server does?"
+  options={[
+    { text: 'A claim by the server\'s author, which you check against the access you give the server.', correct: true },
+    { text: 'A guarantee, because the protocol requires every server to describe its tools accurately.', why: 'The specification tells the host to treat a description as untrusted unless the server is trusted. Who wrote this one?' },
+    { text: 'A guarantee, because the client refuses any call that does more than the description says.', why: 'The client sends the call to the server. What in the protocol could see what the server does after that?' },
+    { text: 'Nothing that matters, because the model never reads the descriptions of tools.', why: 'The client passes the descriptions to the model so that it can pick a tool. What does a false one make the model do?' },
+  ]}>
+An MCP server from an author you don't know offers a tool called
+`delete_records`. Its description says it only archives records and never
+deletes them. What is that description?
+</Choice>
+
+<MultiChoice id="what-crosses-a-delegation" phase="review" objective="building-agents/runs-in-production/mitigates-agent-risks"
+  concepts={['protocols-mcp-a2a', 'defense-layers', 'exfiltration']}
+  context="A shop's support agent delegates a delivery question to a courier's agent over an agent-to-agent protocol. The courier's agent is run by the courier, and it shares only its card and the results it returns. The shop's loop has a permission check, an output filter, an approval gate and a monitor."
+  title="What must your own layers handle?"
+  hint="Your layers run in your loop. Which of these pass through your loop, and which stay on the courier's side?"
+  options={[
+    { text: 'The message you send the courier, which is out of your control once it leaves', correct: true },
+    { text: 'The result that comes back, which the model reads and which can hold a planted line', correct: true },
+    { text: 'The courier agent\'s own tool calls, which your permission check sees and refuses', why: 'The remote agent keeps its tools to itself. Where does your loop stop seeing what happens?' },
+    { text: 'The courier agent\'s own trace, which your monitor reads and raises alerts from', why: 'What does the remote agent share with you, besides its card and its results?' },
+  ]}>
+The support agent delegates a delivery question to a courier's agent over
+an agent-to-agent protocol. Which of these must your own defense layers
+handle?
+</MultiChoice>
+
+<Exercise stretch="Write the permission rule for ask_courier as a Python function in the style of permitted() in guardrails.py. It allows the track-parcel skill with exactly an order number and a postal code, and refuses any other skill or field.">
+
+Judge the connection the courier proposes, on paper. The courier offers
+the Agent Card in this lesson and proposes that the support agent sends
+every delivery ticket to `answer-delivery-ticket` and posts the reply that
+comes back to the customer. Deciding before you connect is cheaper than
+finding out from a log.
+
+Write a note of about ten lines in three parts. First, list what the
+connection can read and what it can send, in both directions. Second,
+take the layers in the fixture of Guardrails in layers,
+`site/examples/building-agents/guardrails-in-layers/`: the system prompt,
+the permission check, the output filter, the approval gate and the
+monitor in the `alerts` step. For each one, say whether it applies to
+this connection and where in the flow it acts. Third, write the one trust
+decision you would make before you enable the connection.
+
+A good note says that the courier would read everything in a ticket: the
+customer's name and address, the order, any link and any planted
+paragraph. It says that the courier sends back text that the model reads,
+and that the proposal posts that text to the customer with no check of
+yours in between, and that updates can arrive later at the address you
+give for notifications. It puts the permission check on the choice of
+skill and the fields in the message, the filter and the gate on the
+message and on the reply, and it says the monitor sees only your side. A
+good trust decision is concrete, such as "allow only `track-parcel`, with
+the order number and postal code, and write the reply ourselves". What
+would the courier have to show you before you allowed
+`answer-delivery-ticket`?
+
+</Exercise>
+
+<Recap>
+
+1. A shared protocol turns N x M adapters into N plus M: each agent speaks
+   the protocol once and each system is wrapped once (@AEC-14).
+2. The Model Context Protocol connects an agent to the tools, resources
+   and prompts that servers offer, and the loop still sends each tool call
+   and returns its result (@MCP specification).
+3. Agent-to-agent protocols such as A2A cover discovery through an Agent
+   Card, delegation as a task, and results as artifacts, between agents
+   that keep their internals to themselves (@A2A specification).
+4. Neither protocol decides what the other side may do with your data, so
+   each connection is a trust decision you make before you enable it.
+5. A remote agent is a tool that reads and sends. Its message goes through
+   the permission check, the filter and the gate, and what comes back is
+   untrusted input.
+
+</Recap>
+
+<Habit id="list-what-crosses-the-connection">
+The next time someone proposes connecting an agent to a new server or to
+another team's agent, write down what the connection will read and what
+it can send before anyone turns it on.
+</Habit>

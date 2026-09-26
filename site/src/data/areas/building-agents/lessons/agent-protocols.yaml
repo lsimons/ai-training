@@ -1,12 +1,20 @@
 id: building-agents/agent-protocols
 title: Protocols for tools and for other agents
+description: >-
+  See how the Model Context Protocol and agent-to-agent protocols such as A2A turn N x M integrations
+  into N plus M, what an Agent Card declares, and why each connection is a trust decision that the
+  defense layers of a support agent still have to cover.
 mode: explanation
 covers: building-agents/production
 serves: [building-agents/runs-in-production/mitigates-agent-risks]
 introduces: [protocols-mcp-a2a]
 assumes:
   - objective: customizing-agents/connects-tools-safely/adds-a-tool
+    lesson: customizing-agents/mcp-first-server
+    section: connect-the-real-server
   - objective: customizing-agents/connects-tools-safely/hardens-a-connection
+    lesson: customizing-agents/mcp-hardening
+    section: plant-an-instruction-and-read-the-log
 after:
   - building-agents/how-a-model-calls-a-tool
   - building-agents/guardrails-in-layers
@@ -18,10 +26,20 @@ exercise:
     For a proposed connection to an external agent over an agent-to-agent protocol, list what it can
     read and send, decide which of the fixture's defense layers apply to it, and write the one trust
     decision you would make before enabling it.
-sources: [Academy model-context-protocol-advanced-topics]
+sources: [AEC-14, MCP specification, A2A specification, A2A and MCP]
 issue: 215
 minutes: 12
+sources-checked: 2026-09-26
+review-by: 2027-03-26
 notes: >-
   Closes the N x M thread from the first lesson. The Model Context Protocol for tools and data,
   agent-to-agent protocols for delegation across organizations, and each connection as a trust
   decision (Academy model-context-protocol-advanced-topics). Checkpoints are choice and scenario.
+  When the page went live, the protocol claims were checked against the MCP specification
+  (2025-06-18) and version 1.0 of the A2A specification. The plan's choice on four connections
+  became a Sort with two buckets, because each connection has one protocol and a Sort shows that
+  with no repeated options. Academy model-context-protocol-advanced-topics was dropped from sources
+  because the page cites no claim from it, and AEC-14 (Apache-2.0) backs the N plus M count and the
+  split between tools and agents. The exercise refers to the layers of the guardrails-in-layers
+  fixture and adds no fixture of its own, because the learner judges a connection on paper. The
+  courier, its Agent Card and its addresses are invented.
