@@ -11,6 +11,7 @@ import {
 	liveCourseLessonIds,
 	liveLessons as liveLessonList,
 	liveTopicLessonIds,
+	pageAlternates,
 	pageCheckpoints,
 	pageExamples,
 } from '../scripts/lib/live-lessons.mjs';
@@ -47,6 +48,11 @@ export function liveTopicLessons(topic: string): string[] {
  */
 export function lessonCheckpoints(lesson: string): { id: string; kind: string; phase: string }[] {
 	return pageCheckpoints(CONTENT_DIR, lesson);
+}
+
+/** The ids of a lesson page's hidden `review` alternates, in page order, read from its MDX source. */
+export function lessonAlternates(lesson: string): string[] {
+	return pageAlternates(CONTENT_DIR, lesson);
 }
 
 /**

@@ -3,6 +3,7 @@ import { KIND_OF_TAG } from '../src/lib/checkpoint-rules';
 import {
 	drag,
 	expect,
+	lessonAlternates,
 	lessonCheckpoints,
 	lessonExamples,
 	orderByButtons,
@@ -265,13 +266,15 @@ test('More practice: graded and recorded apart, never needed to finish, never re
 	const shown = lessonCheckpoints(lesson);
 	const first = shown.filter((c) => c.phase === 'first');
 	const practice = shown.filter((c) => c.phase === 'practice');
+	const alternates = lessonAlternates(lesson);
 	expect(practice.length).toBeGreaterThan(0);
+	expect(alternates.length).toBeGreaterThan(0);
 	await page.goto(`${lesson}/`);
 
-	// The page shows the `first` and `practice` checkpoints; the `review` alternate is in the markup, hidden.
+	// The page shows the `first` and `practice` checkpoints; the `review` alternates are in the markup, hidden.
 	await expect(page.locator('[data-checkpoint]')).toHaveCount(shown.length);
-	await expect(page.locator('section[data-alternate][data-phase="review"]')).toHaveCount(1);
-	await expect(page.locator('section[data-alternate]')).toBeHidden();
+	await expect(page.locator('section[data-alternate][data-phase="review"]')).toHaveCount(alternates.length);
+	for (const alternate of await page.locator('section[data-alternate]').all()) await expect(alternate).toBeHidden();
 	await expect(page.locator('#exercise ~ #more-practice ~ #recap')).toHaveCount(1);
 	await expect(page.locator('#more-practice > h2')).toHaveText('More practice');
 

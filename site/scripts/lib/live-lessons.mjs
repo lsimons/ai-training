@@ -103,6 +103,25 @@ export function pageCheckpoints(contentDir, lesson) {
 }
 
 /**
+ * The ids of the hidden `review` alternates on the page of `lesson`, in page
+ * order: the checkpoints `pageCheckpoints` leaves out, which the review page
+ * may ask in place of a `first` checkpoint (spec S05).
+ * @param {string} contentDir
+ * @param {string} lesson `<area>/<lesson>`
+ * @returns {string[]}
+ */
+export function pageAlternates(contentDir, lesson) {
+	const src = readFileSync(join(contentDir, `${lesson}.mdx`), 'utf8');
+	return checkpointTagsOfSource(src, lesson)
+		.filter((t) => t.phase === 'review')
+		.map((t) => {
+			const id = checkpointTagId(t);
+			if (id === undefined) throw new Error(`${lesson}: <${t.tag}> without an id="..."`);
+			return id;
+		});
+}
+
+/**
  * The ungraded examples the page of `lesson` shows, in page order: every
  * `<Predict>` without an `objective`, as in the build (spec S03 "Examples"),
  * each with the `run` fixture CI verifies it from, or `undefined` when it
