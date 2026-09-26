@@ -173,18 +173,20 @@ One tick:
    run starts nothing. The wave branch has no date, so a next-day resume
    finds it.
 4. **Pick.** Run `mise run next-wave -- --size 6`, with `--kind` and the
-   remaining whitelist as `--only`. The picker is `scripts/next_wave.py`,
-   and it reads the lessons of the checkout as the JSON that
-   `mise run lesson-plan` (`site/scripts/lesson-plan.mjs`) prints. For a
-   lessons wave it lists the planned lessons whose issue is
-   `ready-for-agent` and unassigned, and drops the ones that assume an objective no live lesson on `main` serves. A plan
-   file's `assumes` entries name only the objective, the builder adds the
-   `lesson` and `section` that teach it when the page goes live, and the
-   build (`mise run site-build`, through `MarkdownContent.astro`) rejects a
+   remaining whitelist as `--only`. The picker is
+   `scripts/next_wave.py`, and it reads the lessons of the checkout as
+   the JSON that `mise run lesson-plan` (`site/scripts/lesson-plan.mjs`)
+   prints. For a lessons wave it lists the planned lessons whose issue
+   is `ready-for-agent` and unassigned, and drops the ones that assume
+   an objective no live lesson on `main` serves. A plan file's `assumes`
+   entries name only the objective, the builder adds the `lesson` and
+   `section` that teach it when the page goes live, and the build
+   (`mise run site-build`, through `MarkdownContent.astro`) rejects a
    page that names a lesson without a page, so such a lesson can't be
-   merged in this wave. Within an area it orders the rest with no planned
-   `after` first, then earliest-in-course, takes them round-robin across
-   the areas, and prints the wave as a table plus `--json` for the prompt.
+   merged in this wave. Within an area it orders the rest with no
+   planned `after` first, then earliest-in-course, takes them
+   round-robin across the areas, and prints the wave as a table plus
+   `--json` for the prompt.
    With `--unblockers-first`, each candidate is scored by how many blocked
    lessons it serves a missing objective for, the score sorts before the
    course position and after the planned `after` rule, and the table gains
