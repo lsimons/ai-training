@@ -50,7 +50,10 @@ a machine's name.
 
 Its body holds these sections, and you keep them current with
 `gh issue edit <run> --body-file .scratch/run-<name>.md` (`.scratch/` is
-gitignored):
+gitignored). Every dispatcher in this checkout shares `.scratch/`, so
+the file has the run's name only after the name check in "Starting a
+run" step 3 confirms it, and every edit passes "Before each body edit"
+below first:
 
 - `## Arguments`: the arguments of the run, as given.
 - `## Remaining --only`: the whitelist numbers not yet handled (only with
@@ -66,6 +69,32 @@ gitignored):
 
 Each wave report is a comment on the run issue. The issue closes when the
 run stops, with a last comment that names the stop condition.
+
+### Before each body edit
+
+Run this check right before every `gh issue edit <run> --body-file`, in
+the same Bash call, and post only when it passes. It compares the
+`## Arguments` section of the file with the same section of the run
+issue's current body. The section is the `## Arguments` heading line and
+every line after it up to the next level-two heading (`##`). The
+check removes carriage returns and drops blank lines in both. The file's
+section must equal the issue's section line for line, and it must hold
+at least one line besides the heading:
+
+```sh
+args() { tr -d '\r' | awk '/^## /{p=($0=="## Arguments")} p' | grep -v '^[[:space:]]*$'; }
+a=$(args < .scratch/run-<name>.md); b=$(gh issue view <run> --json body -q .body | args)
+if [ "$a" = "$b" ] && [ "$(printf '%s\n' "$a" | wc -l)" -gt 1 ]; then
+  gh issue edit <run> --body-file .scratch/run-<name>.md
+else
+  echo "STOP: Arguments differ"; diff <(printf '%s\n' "$b") <(printf '%s\n' "$a")
+fi
+```
+
+When it prints `STOP`, don't post, and don't repair the file from memory.
+Another session wrote the file, or the issue was edited by hand. Stop
+the run, and give the maintainer the run number and the file name with
+the diff the check printed.
 
 ## Starting a run
 
@@ -88,13 +117,25 @@ run stops, with a last comment that names the stop condition.
 3. **Resume or open.** With `--resume <Name>`, find the open run issue
    with that name among them, and stop when there is none. Its body gives
    the arguments, and its `In flight` line, if any, is the wave to resume
-   (step 4 of the loop). Without `--resume`, open the run issue:
-   `gh issue create --title "Run: <next> (<kind>)" --label dispatcher-run`
-   with the body sections above, then run
-   `mise run run-name -- --check <number>`. When its `takenBy` is not
-   null, an older open run got the same name first: close your issue with
-   a comment saying so, and open the next one with the name `run-name`
-   prints now.
+   (step 4 of the loop). Write its current body to the run's file,
+   `gh issue view <run> --json body -q .body > .scratch/run-<name>.md`,
+   so the file you edit from is the issue as it is now and never a file
+   an earlier session left. Without `--resume`, open the run issue:
+   1. Write the body sections above to a file whose name holds the time
+      to the second and this shell's process id, which no other session
+      has: `f=.scratch/run-new-$(date +%Y%m%dT%H%M%S)-$$.md`. Print the
+      path, and use that exact path in the later steps, since each Bash
+      call gets a new `$$` and a new time.
+   2. `gh issue create --title "Run: <next> (<kind>)" --label dispatcher-run --body-file <that path>`,
+      then run `mise run run-name -- --check <number>`.
+   3. When its `takenBy` isn't null, an older open run got the same name
+      first: close your issue with a comment saying so, and go back to
+      step 2 with the name `run-name` prints now and the same file. Never
+      write to `.scratch/run-<name>.md` for a name that failed the check,
+      because it is the other run's file.
+   4. When `takenBy` is null, the name is yours. Rename the file,
+      `mv <that path> .scratch/run-<name>.md`, and edit only that file
+      from here on.
 
 ## One tick of the loop
 
@@ -153,7 +194,8 @@ run stops, with a last comment that names the stop condition.
      (step 3), these three sentences: `You are RESUMING <NAME> wave <k> on branch <branch>.` `A previous lead stopped before reporting.` `Follow "Resuming a half-done wave" in your agent file before anything else.`
 7. **Mark the wave in flight, then spawn the lead.** Add
    `In flight: wave <k>, branch <b>, issues #a #b ...` to `## Waves` on
-   the run issue (on a resume the line is already there). Then spawn one
+   the run issue (on a resume the line is already there), with the check
+   in "Before each body edit". Then spawn one
    `wave-lead` agent (`.claude/agents/wave-lead.md`) with the filled text
    as its whole prompt. Wait for its notification and do nothing else in
    the meantime: end your turn, and the notification wakes you. Never
@@ -165,7 +207,8 @@ run stops, with a last comment that names the stop condition.
    about it and carry on.
 8. **Read the report and update the run issue.** The report is at most
    200 words plus the `Follow-ups` lines, in the form the template ends
-   with. Whatever the status, do this first:
+   with. Whatever the status, do this first, and make each body edit
+   below with the check in "Before each body edit":
    - Post the report as a comment on the run issue. On `merged` and
      `open`, replace the wave's `In flight` line with
      `wave <k>: <status>, PR #<n>`. On `failed`, leave the `In flight`
