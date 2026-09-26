@@ -173,7 +173,9 @@ One tick:
    run starts nothing. The wave branch has no date, so a next-day resume
    finds it.
 4. **Pick.** Run `mise run next-wave -- --size 6`, with `--kind` and the
-   remaining whitelist as `--only`. For a lessons wave it lists the planned
+   remaining whitelist as `--only`. The picker is `scripts/next_wave.py`,
+   and it reads the lessons of the checkout as the JSON that
+   `mise run lesson-plan` (`site/scripts/lesson-plan.mjs`) prints. For a lessons wave it lists the planned
    lessons whose issue is `ready-for-agent` and unassigned, and drops the
    ones that assume an objective no live lesson on `main` serves. A plan
    file's `assumes` entries name only the objective, the builder adds the

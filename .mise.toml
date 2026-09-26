@@ -158,11 +158,21 @@ depends = ["require-setup"]
 dir = "site"
 run = "bun scripts/check-data.mjs"
 
+# The wave picker (scripts/next_wave.py, #492). It reads the lessons of
+# this checkout from `lesson-plan` (so it needs the site install) and the
+# open issues from GitHub (network, gh).
 [tasks.next-wave]
 description = "Pick the next wave of issues for meta-orchestration (docs/agents/meta-orchestration.md), with -- --size N, --kind lessons|content, --only N,N,..., --unblockers-first and --json"
 depends = ["require-setup"]
+run = "uv run --locked python scripts/next_wave.py"
+
+# What the wave picker needs about the lessons, as JSON
+# (site/scripts/lesson-plan.mjs): the one place it reads the site.
+[tasks.lesson-plan]
+description = "The planned and live lessons the wave picker reads, as JSON"
+depends = ["require-setup"]
 dir = "site"
-run = "bun scripts/next-wave.mjs"
+run = "bun scripts/lesson-plan.mjs"
 
 # What a resuming wave lead needs (#351): per issue, the pushed
 # `feat/<issue>-*` branches and per branch the last `Verdict:` comment and
