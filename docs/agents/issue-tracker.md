@@ -41,8 +41,9 @@ orchestration skills. When several kinds fit, `harness` wins over
 `code`, and `code` wins over `content`. A fix to a hook that is Python
 code is `harness`, and a lesson change that also changes its fixture is
 `code`. The reviewers follow the branch's diff, whatever the label says.
-No picker selects `harness` issues, so the maintainer starts that work by
-hand, when no `dispatcher-run` issue is open.
+`/wave --kind harness` picks the `harness` issues, and a harness run
+starts only when no other `dispatcher-run` issue is open
+(`docs/agents/meta-orchestration.md`, "Harness runs").
 
 `dispatcher-run` marks the one issue per `/wave` run, titled
 `Run: <Name> (<kind>)`. The dispatcher opens it, keeps its body current

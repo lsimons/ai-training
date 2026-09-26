@@ -2,7 +2,7 @@
 """The wave picker (`mise run next-wave`, docs/agents/meta-orchestration.md,
 "The loop", step 1): which issues the next wave of builders should take on.
 
-Usage: mise run next-wave -- [--size N] [--kind lessons|content|code]
+Usage: mise run next-wave -- [--size N] [--kind lessons|content|code|harness]
        [--only N,N,...] [--unblockers-first] [--json]
 
 `main` reads the lessons of this checkout from `bun scripts/lesson-plan.mjs`
@@ -10,8 +10,8 @@ in site/ (the picker's one boundary with the site, #492) and the kind's
 issues from `gh issue list`, then prints the wave as markdown or, with
 `--json`, as JSON. The list is filtered on the server side (#493): every
 `-l` must match, so a lessons wave fetches the open `ready-for-agent`
-issues, and a content or code wave the open ones that also have the
-kind's label. A list
+issues, and a content, code or harness wave the open ones that also
+have the kind's label. A list
 that reaches the `-L` limit stops the picker, since it may be cut short.
 Any other issue the picker needs, a `Blocked by` target or an `--only`
 number outside the list, it looks up with `gh issue view`, once per
@@ -30,7 +30,7 @@ reports the line as unreadable. A blocked issue is listed under Blocked
 with the reason. For a lesson the lines come on top of its plan file's
 `assumes` entries.
 
-Three kinds of wave. A `lessons` wave (the default) picks planned lessons. A
+Four kinds of wave. A `lessons` wave (the default) picks planned lessons. A
 lesson is a candidate when its plan file names an `issue`, it has no page
 yet, and that issue is ready and unassigned. It is blocked when it assumes
 an objective that no live lesson serves. A plan file's `assumes` entries
@@ -67,6 +67,13 @@ issue number, which is the order run Emu (#362) chose by hand. The kind
 labels are exclusive (docs/agents/issue-tracker.md), so the `code` label
 alone selects them. It prints as a content wave does, with the kind in
 the heading.
+
+A `harness` wave (#365) picks the ready, unassigned issues with the
+`harness` label in ascending issue number, with the same dependency lines
+and the same nits rule, and prints as a code wave does. Its default size
+is 4, since every issue in it adds items to the one `After the restart`
+checklist the maintainer works through by hand. The other kinds default
+to 6.
 
 `only` narrows every kind to a set of issue numbers. Everything else is
 reported as skipped with the reason `not in --only`, and every listed
@@ -122,11 +129,14 @@ FENCE = re.compile(r" {0,3}(`{3,}(?=[^`]*$)|~{3,})")
 # may be cut short, so `main` stops with an error there.
 ISSUE_LIMIT = 1000
 
-type Kind = Literal["lessons", "content", "code"]
-KINDS: tuple[Kind, ...] = ("lessons", "content", "code")
+type Kind = Literal["lessons", "content", "code", "harness"]
+KINDS: tuple[Kind, ...] = ("lessons", "content", "code", "harness")
 
-# The kinds whose wave is issues by label, and so an `IssueWave`.
-type IssueKind = Literal["content", "code"]
+# The kinds whose wave is issues picked by their label, a `ContentWave`.
+type IssueKind = Literal["content", "code", "harness"]
+
+# The wave size when `--size` isn't given.
+DEFAULT_SIZE: dict[Kind, int] = {"lessons": 6, "content": 6, "code": 6, "harness": 4}
 
 
 class PlannedLesson(TypedDict):
@@ -253,7 +263,7 @@ class ContentBlockedEntry(TypedDict):
 
 
 class ContentWave(TypedDict):
-    """A wave of issues picked by their kind label: content or code."""
+    """A wave of issues picked by their kind label: content, code or harness."""
 
     kind: IssueKind
     size: int
@@ -405,7 +415,7 @@ def pick_wave(
     lessons: Sequence[PlannedLesson],
     ready_issues: Sequence[ReadyIssue],
     lookup: Lookup = no_lookup,
-    size: int = 6,
+    size: int | None = None,
     kind: str = "lessons",
     only: Iterable[int] | None = None,
     unblockers_first: bool = False,
@@ -415,14 +425,17 @@ def pick_wave(
 
     `ready_issues` is what `main` fetched for the kind (every one is open),
     and `lookup` gives the state of any other issue that a `Blocked by`
-    line or `only` names. `today` defaults to `today_utc()`.
+    line or `only` names. `size` defaults to the kind's `DEFAULT_SIZE`, and
+    `today` to `today_utc()`.
     """
     day = today if today is not None else today_utc()
-    if kind == "content" or kind == "code":
-        return pick_issue_wave(kind, lessons, ready_issues, lookup, size, only, day)
+    if kind == "content" or kind == "code" or kind == "harness":
+        n = size if size is not None else DEFAULT_SIZE[kind]
+        return pick_issue_wave(kind, lessons, ready_issues, lookup, n, only, day)
     if kind != "lessons":
         raise ValueError(f"next-wave: unknown kind {json.dumps(kind, ensure_ascii=False)}")
-    return pick_lessons_wave(lessons, ready_issues, lookup, size, only, unblockers_first, day)
+    n = size if size is not None else DEFAULT_SIZE["lessons"]
+    return pick_lessons_wave(lessons, ready_issues, lookup, n, only, unblockers_first, day)
 
 
 def pick_lessons_wave(
@@ -636,11 +649,23 @@ def pick_code_wave(
     return pick_issue_wave("code", lessons, ready_issues, lookup, size, only, today)
 
 
+def pick_harness_wave(
+    lessons: Sequence[PlannedLesson],
+    ready_issues: Sequence[ReadyIssue],
+    lookup: Lookup = no_lookup,
+    size: int = DEFAULT_SIZE["harness"],
+    only: Iterable[int] | None = None,
+    today: date | None = None,
+) -> ContentWave:
+    """Pick the next harness wave (`pick_issue_wave` with kind `harness`)."""
+    return pick_issue_wave("harness", lessons, ready_issues, lookup, size, only, today)
+
+
 def issue_order(kind: IssueKind) -> Callable[[ReadyIssue], tuple[int, int]]:
     """The sort key of a kind's candidates.
 
     A code wave puts the `bug` issues first, then ascending number. A
-    content wave goes by ascending number alone.
+    content or harness wave goes by ascending number alone.
     """
 
     def key(i: ReadyIssue) -> tuple[int, int]:
@@ -776,7 +801,7 @@ def format_wave(result: Wave) -> str:
 
     A lessons wave is a table (with an `Unblocks` column under
     `unblockersFirst`), then the blocked, skipped and waiting lists. A
-    content or code wave is a table of issue, title and labels, then the
+    content, code or harness wave is a table of issue, title and labels, then the
     skipped and waiting lists. Lesson ids are in code spans, so cspell
     skips them.
     """
@@ -859,8 +884,9 @@ def _quote(raw: str) -> str:
 def parse_args(argv: Sequence[str]) -> Args | str:
     """The options from the command line, or an error message.
 
-    `--size N` (default 6, a positive integer in plain digits), `--kind`
-    (`lessons`, the default, `content` or `code`), `--only N,N,...` (issue numbers,
+    `--size N` (a positive integer in plain digits, by default the kind's
+    `DEFAULT_SIZE`: 4 for `harness` and 6 for the others), `--kind`
+    (`lessons`, the default, `content`, `code` or `harness`), `--only N,N,...` (issue numbers,
     the whitelist), `--unblockers-first` (rank a lesson that unblocks other
     candidates ahead of the course order within its area) and `--json`. A
     flag that takes a value and comes last gets the empty string.
@@ -872,6 +898,7 @@ def parse_args(argv: Sequence[str]) -> Args | str:
         "unblockersFirst": False,
         "json": False,
     }
+    size_given = False
     i = 0
     while i < len(argv):
         arg = argv[i]
@@ -886,6 +913,7 @@ def parse_args(argv: Sequence[str]) -> Args | str:
                 if not POSITIVE_INTEGER.fullmatch(raw):
                     return f"next-wave: --size needs a positive integer, got {_quote(raw)}"
                 args["size"] = int(raw)
+                size_given = True
             elif arg == "--kind":
                 kind = read_kind(raw)
                 if kind is None:
@@ -901,6 +929,8 @@ def parse_args(argv: Sequence[str]) -> Args | str:
         else:
             return f"next-wave: unknown argument {arg}"
         i += 1
+    if not size_given:
+        args["size"] = DEFAULT_SIZE[args["kind"]]
     return args
 
 
@@ -913,7 +943,7 @@ def read_kind(raw: str) -> Kind | None:
 
 
 def kinds_text() -> str:
-    """Every kind, for the `--kind` error: `lessons, content or code`."""
+    """Every kind, for the `--kind` error: `lessons, content, code or harness`."""
     return f"{', '.join(KINDS[:-1])} or {KINDS[-1]}"
 
 
@@ -1031,7 +1061,8 @@ def issue_list_command(kind: Kind) -> list[str]:
 
     Every `-l` must match. A lessons wave fetches every `ready-for-agent`
     issue, since the plan files choose the lessons and a planned lesson's
-    issue can carry any kind label. A content or code wave adds `-l <kind>`.
+    issue can carry any kind label. A content, code or harness wave adds
+    `-l <kind>`.
     """
     labels = ["-l", "ready-for-agent"] + ([] if kind == "lessons" else ["-l", kind])
     return [

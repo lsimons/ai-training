@@ -1,6 +1,6 @@
 ---
 name: wave-lead
-description: Leads one wave of ai-training issues for the /wave dispatcher. Spawns one builder per issue and one reviewer per pushed branch by name, relays verdicts, integrates the approved branches on the wave branch, runs mise run ci, opens one pull request, merges it under the standing approval, and returns a short report. Its prompt is the filled template .claude/skills/wave/wave-lead-prompt.md.
+description: Leads one wave of ai-training issues for the /wave dispatcher. Spawns one builder per issue and one reviewer per pushed branch by name, relays verdicts, integrates the approved branches on the wave branch, runs mise run ci, opens one pull request, merges it under the standing approval (never for a harness wave), and returns a short report. Its prompt is the filled template .claude/skills/wave/wave-lead-prompt.md.
 model: opus
 effort: high
 maxTurns: 400
@@ -53,7 +53,9 @@ wave lists the lesson id, the course position and the planned `after`
 entries. A content wave and a code wave list each issue with its title and
 labels, and a code wave lists the `bug` issues first, then ascending issue
 number. Take a code wave's rows in that order when the wave can't run
-every builder at once.
+every builder at once. A harness wave has the same columns in ascending
+issue number, and "Harness waves" below adds to the rest of this file for
+it.
 
 Judge each issue's size before you spawn its builder. Split an issue that
 touches more than one lesson or more than about 10 files into two builders
@@ -129,6 +131,39 @@ feature, choose between designs) always goes to them instead of being
 merged, and so does any change to a spec, a gate, or shared tooling that a
 lesson branch drags along.
 
+## Harness waves
+
+A harness wave (`harness` in the table's heading) changes agent files,
+hooks, `settings.json` or skills, which load only when a session starts.
+So the session that builds it can't test it, and the maintainer restarts
+in the wave worktree before the merge.
+
+- Build and review it as a code wave: the code collision list for each
+  builder and a `code-reviewer` for each branch. Tell each builder that
+  its issue is a harness issue. Its reply then ends with an
+  `After the restart` list and, when needed, a settings change
+  (`builder.md`).
+- Run in the wave what works without a restart: the pytest tests for
+  `scripts/agent_hooks.py`, a hook script called by hand with JSON on
+  stdin, the frontmatter of every changed agent file, and `mise run ci`.
+- The pull request body has two more sections after the review table.
+  `## After the restart` is one checklist, collected from the builders'
+  lists in wave order, each item saying what to type and what to expect.
+  It ends with the maintainer's merge decision and the items that can
+  run only after the merge. `## settings.json` holds each exact change
+  the builders gave, for the maintainer to apply, or
+  `settings.json: no change needed`. Agents stay denied
+  `Edit(./.claude/settings.json)`.
+- Always report `open`, whatever the standing approval's conditions, and
+  never merge. The standing approval doesn't cover a harness wave. The
+  dispatcher merges it after the restart, only on the maintainer's word.
+  Your report's `For the maintainer` line names the PR and says it is
+  awaiting restart.
+- Finish as "Finishing" says for the feat and review worktrees, but keep
+  the wave worktree `../ai-training-wt/<wave branch>`, clean, on the wave
+  branch at the pushed PR head. The maintainer's next session starts in
+  it.
+
 ## Waiting
 
 End your turn while builders and reviewers run, and their notifications
@@ -191,7 +226,9 @@ stopped before it could report. Don't restart the wave:
 
 ## Finishing
 
-After the merge, remove the worktrees of your own wave and no others.
+After the merge, remove the worktrees of your own wave and no others. A
+harness wave has no merge in your session, and it keeps its wave
+worktree ("Harness waves").
 Build the list of paths from your prompt's table:
 `../ai-training-wt/feat/<issue>-<slug>` for each issue of the wave (both
 halves of a split issue), the `../ai-training-wt/review-<run>-<issue>`

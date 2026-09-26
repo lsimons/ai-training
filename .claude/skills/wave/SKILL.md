@@ -1,13 +1,15 @@
 ---
 name: wave
 description: Run the meta-orchestration dispatcher loop. Opens or resumes a named run issue, picks the next wave of ready issues, spawns one wave lead per wave, reads its report, keeps the run issue current, and repeats until a stop condition.
-argument-hint: "[size] [kind lessons|content|code] [only N,N,...] [no-filing] [resume Name]"
+argument-hint: "[size] [kind lessons|content|code|harness] [only N,N,...] [no-filing] [resume Name]"
 ---
 
 You are the DISPATCHER of `docs/agents/meta-orchestration.md`. You run in
-the main checkout, `/Users/lsimons/git/lsimons/ai-training`, on `main`. You
-don't edit code or run the site's checks, you commit nothing, and you hold
-one short report per wave. Read `docs/agents/meta-orchestration.md` once
+the main checkout, `/Users/lsimons/git/lsimons/ai-training`, on `main`,
+except when you resume a harness wave after the restart ("Resuming after a
+restart" below), which runs in the wave's worktree. You don't edit code or
+run the site's checks, you commit nothing outside that resume, and you
+hold one short report per wave. Read `docs/agents/meta-orchestration.md` once
 before the first wave. The wave lead prompt is the template next to this
 file, `.claude/skills/wave/wave-lead-prompt.md`, and its collision notes
 are the canonical list. You loop until a stop condition, and you never
@@ -15,17 +17,25 @@ spawn a second lead while one is running.
 
 ## Arguments
 
-`/wave [size]`, then any of `--kind lessons|content|code`, `--only N,N,...`,
+`/wave [size]`, then any of `--kind lessons|content|code|harness`, `--only N,N,...`,
 `--no-filing` and `--resume <Name>`. The hint in the frontmatter above
 shows the flags without their two leading dashes, because `mise run prose`
 reads the frontmatter as prose and rejects a double hyphen there. The
 flags themselves keep them.
 
-- `size`: how many issues per wave. Default 6.
+- `size`: how many issues per wave. The default depends on the kind: 6
+  for `lessons`, `content` and `code`, and 4 for `harness`, since every
+  issue of a harness wave adds items to the one checklist the maintainer
+  works through by hand. These are the picker's defaults, so pass
+  `--size` to the picker only when the run's arguments give a size.
 - `--kind`: `lessons` (planned lessons, the default), `content` (ready
-  `content` issues outside the lesson plans) or `code` (ready `code`
-  issues, `bug` issues first, then ascending number). Passed to the
-  picker, which rejects any other kind.
+  `content` issues outside the lesson plans), `code` (ready `code`
+  issues, `bug` issues first, then ascending number) or `harness` (ready
+  `harness` issues by ascending number, built and reviewed as code, and
+  merged only after a restart, see "Harness runs"). Passed to the picker.
+  Check the kind before anything else. For any other value, stop with
+  `--kind is lessons, content, code or harness, got "<value>"`, the
+  picker's own message, and do nothing more.
 - `--only N,N,...`: an issue whitelist for the whole run. The picker skips
   everything else and reports every listed number it didn't pick, with the
   reason. The run issue (below) holds the remaining list, and the run
@@ -67,7 +77,9 @@ below first:
 - `## Waves`: one line per finished wave, `wave <k>: <status>, PR #<n>`,
   and while a lead runs, one more line,
   `In flight: wave <k>, branch <b>, issues #a #b ...`. An `In flight` line
-  marks a wave to resume.
+  marks a wave to resume. A harness wave that waits for the restart has
+  the line `wave <k>: awaiting restart, PR #<n>`, and it counts as
+  unfinished until the merge replaces it with `wave <k>: merged, PR #<n>`.
 
 Each wave report is a comment on the run issue. The issue closes when the
 run stops, with a last comment that names the stop condition.
@@ -105,29 +117,55 @@ the diff the check printed.
 
 ## Starting a run
 
-1. **Preflight.** `git fetch origin`, then compare `main` with
-   `origin/main` (`git rev-list --left-right --count main...origin/main`).
+1. **List the open runs.** Run `mise run run-name`. It prints JSON: the
+   open `dispatcher-run` issues, each with its `kind`, and `next`, the
+   name the next run takes (the letter after the newest run's name,
+   skipping names an open run holds). Your first message to the
+   maintainer lists the open runs, or says there are none. Also run
+   `gh issue list -l harness-review -s all -L 1 --json number,createdAt`.
+   When the newest review issue is more than seven days old, or there is
+   none, add one line to that message: `The last harness review was <date> (#<n>). Run /harness-review when there is time.` The line is only a
+   reminder, and the run goes on (`docs/agents/harness-review.md`).
+
+   Then apply the harness exclusivity check to that list. The run you
+   resume with `--resume <Name>` doesn't count as another run, and its
+   kind is the one `run-name` prints for it. A new run's kind is its
+   `--kind`. Stop, with the message given, when:
+
+   - this run is a harness run and any other run is open:
+     `A harness run starts only when no other run is open. Open: Run <Name> (#<n>), ...`
+   - any other open run is a harness run:
+     `Run <Name> (#<n>) is a harness run. No other run starts while it is open.`
+
+   A harness wave edits `/wave` and the agent files, which every other
+   run reads. So `/wave --resume Ocelot` on an open harness run Ocelot
+   passes when no other run is open, and `/wave --kind code` while Ocelot
+   is open stops and names Ocelot. The check comes before the preflight,
+   so it gives the same answer in any checkout.
+
+2. **Preflight.** With `--resume <Name>`, first read that run's issue
+   (`gh issue view <run> --json body -q .body`). When the last line of
+   its `## Waves` section is `wave <k>: awaiting restart, PR #<n>`, skip
+   this step, since that session runs in the wave worktree on the wave
+   branch, and go on with step 3 and then "Resuming after a restart".
+   Otherwise, `git fetch origin`, then compare `main` with `origin/main`
+   (`git rev-list --left-right --count main...origin/main`).
    When `main` is behind or has diverged, stop and say so, with the two
    counts: the maintainer brings the checkout up to date. When it is only
    ahead, stop too, since the dispatcher commits nothing and the extra
    commits are someone's work that isn't pushed yet. Then `git pull --rebase` is a
    fast-forward from here on.
-2. **List the open runs.** Run `mise run run-name`. It prints JSON: the
-   open `dispatcher-run` issues and `next`, the name the next run takes
-   (the letter after the newest run's name, skipping names an open run
-   holds). Your first message to the maintainer lists the open runs, or
-   says there are none. Also run
-   `gh issue list -l harness-review -s all -L 1 --json number,createdAt`.
-   When the newest review issue is more than seven days old, or there is
-   none, add one line to that message: `The last harness review was <date> (#<n>). Run /harness-review when there is time.` The line is only a
-   reminder, and the run goes on (`docs/agents/harness-review.md`).
+
 3. **Resume or open.** With `--resume <Name>`, find the open run issue
    with that name among them, and stop when there is none. Its body gives
    the arguments, and its `In flight` line, if any, is the wave to resume
    (step 4 of the loop). Write its current body to the run's file,
-   `gh issue view <run> --json body -q .body > .scratch/run-<name>.md`,
+   `mkdir -p .scratch && gh issue view <run> --json body -q .body > .scratch/run-<name>.md`,
    so the file you edit from is the issue as it is now and never a file
-   an earlier session left. Without `--resume`, open the run issue:
+   an earlier session left. The file is in the `.scratch/` of the checkout
+   you run in, so a resume in a wave worktree rebuilds it there from the
+   run issue alone. Without `--resume`, open the run issue:
+
    1. Write the body sections above to a file whose name holds the time
       to the second and this shell's process id, which no other session
       has: `f=.scratch/run-new-$(date +%Y%m%dT%H%M%S)-$$.md`. Print the
@@ -160,7 +198,8 @@ the diff the check printed.
    from the `In flight` issues (as the picker would print them, or one row
    per issue with its title), and the resuming form of `{{RESUME}}`
    (below). Then go to step 7.
-4. **Pick.** Run `mise run next-wave -- --size <size> --kind <kind>`, and
+4. **Pick.** Run `mise run next-wave -- --kind <kind>`, add
+   `--size <size>` when the run's arguments give a size, and
    add `--only <remaining>` under `--only`, where `<remaining>` is the run
    issue's `Remaining --only` list. The picker also takes
    `--unblockers-first`, which scores each candidate by how many blocked
@@ -218,8 +257,9 @@ the diff the check printed.
    below with the check in "Before each body edit":
    - Post the report as a comment on the run issue. On `merged` and
      `open`, replace the wave's `In flight` line with
-     `wave <k>: <status>, PR #<n>`. On `failed`, leave the `In flight`
-     line in place.
+     `wave <k>: <status>, PR #<n>`, except for the `open` report of a
+     harness wave, whose line is `wave <k>: awaiting restart, PR #<n>`.
+     On `failed`, leave the `In flight` line in place.
    - Copy every line under `Add to collision notes` and
      `Remove from collision notes` into the `## Pending collision notes`
      section, each marked add or remove and with its list (lessons or
@@ -241,9 +281,91 @@ the diff the check printed.
    - `merged`: play `afplay /System/Library/Sounds/Glass.aiff` and go to
      step 1.
    - `open`: chime, report the lead's reason to the maintainer, and stop.
+   - `open` on a harness wave: chime and stop with the stop condition
+     "harness wave awaiting restart". Leave the run issue open, and end
+     with the message in "Harness runs", "The stop message".
    - `failed`: chime, report to the maintainer, and stop. The run issue is
      left open with its `In flight` line, so `/wave --resume <Name>`
      resumes the wave rather than restarting it.
+
+## Harness runs
+
+A harness run (`--kind harness`) builds and reviews like a code run, but
+the session that built a wave never merges it, because agent files,
+hooks, `settings.json` and skills load only when a session starts. The
+standing approval doesn't cover a harness wave. Its lead reports `open`
+even when the wave is green, with the PR's `After the restart` checklist,
+and the run stops at "harness wave awaiting restart" (step 8). No other
+run starts or resumes while a harness run is open ("Starting a run",
+step 1).
+
+### The stop message
+
+When a harness wave stops awaiting restart, your last message gives the
+PR number, says that the PR body's `After the restart` checklist is what
+the next session runs, and gives these lines to run, with the wave's
+values and today's date filled in:
+
+```text
+/exit
+cd /Users/lsimons/git/lsimons/ai-training-wt/wave/<name>-<k>
+claude -n "wave <name> harness <yyyy-mm-dd>"
+/wave --resume <Name>
+```
+
+It says what to expect: the new session loads the agent files and hooks
+of the wave branch. The resume then works through the PR's
+checklist without the `main` preflight, and asks whether to merge. When the wave worktree is missing, the line after `/exit` is
+`git -C /Users/lsimons/git/lsimons/ai-training worktree add ../ai-training-wt/wave/<name>-<k> wave/<name>-<k>`.
+
+### Resuming after a restart
+
+This is `/wave --resume <Name>` for a run whose `## Waves` section ends
+with `wave <k>: awaiting restart, PR #<n>`, in the session the stop
+message started. Do these steps in order and stop at the first that
+fails:
+
+1. **Place.** `git rev-parse --show-toplevel` is
+   `/Users/lsimons/git/lsimons/ai-training-wt/wave/<name>-<k>` and
+   `git branch --show-current` is `wave/<name>-<k>`. Otherwise stop and
+   repeat the lines of the stop message. Then `git fetch origin`, and
+   the branch's `HEAD` equals `origin/wave/<name>-<k>` and the PR's head
+   (`gh pr view <n> --json headRefOid,state`, with state `OPEN`). When
+   they differ, stop and say which.
+2. **The run file.** "Starting a run" step 3 has rebuilt
+   `.scratch/run-<name>.md` in this worktree from the run issue, and
+   every body edit passes "Before each body edit" as usual.
+3. **The checklist.** Read the `## After the restart` section of the PR
+   body (`gh pr view <n> --json body -q .body`) and run every item in
+   order, up to the item for the maintainer's merge decision. Run each
+   command yourself when your tools can. An item that only the
+   maintainer can do, such as a slash command typed into a new session,
+   goes to the maintainer as one line saying what to type and what to
+   expect, and you wait for the result. Then post the results on the PR
+   as one comment, one line per item with pass or fail and what you saw,
+   and the attribution lines.
+4. **A small gap.** When an item fails because of a small gap, such as a
+   missing sentence or a case the check misses, fix it on the wave
+   branch in this worktree: commit, run `mise run fast`, push, run the
+   item again, and add the fix and the new result to the PR comment.
+   For a bigger gap, fix nothing, and say so on the PR and to the
+   maintainer.
+5. **Ask.** Ask the maintainer one yes-or-no question: whether to merge
+   PR #<n>, with the results in one line. Merge only on the maintainer's
+   yes in this session, with
+   `AI_TRAINING_ROLE=dispatcher gh pr merge <n> --rebase`. On a no, stop
+   with "the maintainer says stop" and leave the run issue as it is.
+6. **After the merge.** Replace the wave's line with
+   `wave <k>: merged, PR #<n>`, do the `--only` and collision-note steps
+   of the loop's step 8, and close the run when a stop condition holds
+   (under `--only`, an empty `Remaining --only`). Then tell the
+   maintainer to quit and start again in the main checkout, with the
+   lines `/exit`, `cd /Users/lsimons/git/lsimons/ai-training`,
+   `git pull --rebase`,
+   `git worktree remove ../ai-training-wt/wave/<name>-<k>` and `claude`,
+   then `/wave --resume <Name>` when the run is still open. List the
+   checklist items after the merge decision for that new session, whose
+   results go on the PR as a comment.
 
 ## Filing paragraphs
 
@@ -309,6 +431,11 @@ Stop, and say which one it was, when:
   is blocked, waiting and not picked);
 - under `--only`, the `Remaining --only` list is empty;
 - the lead reports `open` or `failed`;
+- a harness wave is awaiting restart (the lead's `open` report on a
+  harness wave, step 8);
+- the harness exclusivity check refuses the run ("Starting a run"
+  step 1), or the `--kind` check refuses its kind;
+- a step of "Resuming after a restart" fails;
 - the maintainer says stop.
 
 The concurrent-agent cap is shared by every level, so run one wave at a

@@ -102,6 +102,7 @@ class Lookups:
 lessons_wave = nw.pick_lessons_wave
 content_wave = nw.pick_content_wave
 code_wave = nw.pick_code_wave
+harness_wave = nw.pick_harness_wave
 
 
 def ids(entries: Sequence[object]) -> list[str]:
@@ -779,6 +780,73 @@ def test_code_with_only_names_the_kind_in_every_reason() -> None:
     assert format_wave(r).startswith("## Wave (1 of 6, code)\n\n| Issue | Title | Labels |\n")
 
 
+# pickWave with kind harness
+
+
+def test_harness_picks_ready_harness_issues_by_number_and_leaves_out_other_kinds() -> None:
+    ready = [
+        issue(40, [], ["harness", "ready-for-agent"]),
+        issue(12, [], ["harness"]),
+        # No bug-first rule: a harness wave goes by number alone.
+        issue(35, [], ["harness", "bug"]),
+        issue(5, [], ["content"]),
+        issue(6, [], ["code", "bug"]),
+        issue(7),
+        titled(8, "Cosmetic nits in the agent files", ["harness"]),
+    ]
+    r = pick_wave(plan_lessons(), ready, kind="harness")
+    assert r == {
+        "kind": "harness",
+        "size": 4,
+        "only": None,
+        "wave": [
+            {"issue": 12, "title": "Lesson #12", "labels": ["harness"]},
+            {"issue": 35, "title": "Lesson #35", "labels": ["harness", "bug"]},
+            {"issue": 40, "title": "Lesson #40", "labels": ["harness", "ready-for-agent"]},
+        ],
+        "skipped": [],
+        "waiting": [],
+        "notPicked": [],
+        "blocked": [],
+    }
+
+
+def test_harness_defaults_the_size_to_four_and_the_other_kinds_to_six() -> None:
+    ready = [issue(n, [], ["harness"]) for n in range(1, 8)]
+    r = harness_wave(plan_lessons(), ready)
+    assert [w["issue"] for w in r["wave"]] == [1, 2, 3, 4]
+    assert [w["issue"] for w in r["waiting"]] == [5, 6, 7]
+    assert pick_wave(plan_lessons(), ready, kind="harness", size=2)["size"] == 2
+    assert pick_wave(plan_lessons(), [], kind="code")["size"] == 6
+    assert pick_wave(plan_lessons(), [], kind="content")["size"] == 6
+    assert pick_wave(plan_lessons(), [])["size"] == 6
+
+
+def test_harness_blocks_on_the_dependency_lines_and_names_the_kind_under_only() -> None:
+    ready = [
+        issue(30, labels=["harness"], body="Blocked by #40"),
+        issue(31, labels=["harness"], body="Not before 2026-10-01 UTC"),
+        issue(32, ["someone"], ["harness"]),
+        issue(33, labels=["harness"], body="Blocked by #41"),
+        issue(34, labels=["code"]),
+    ]
+    lookup = Lookups({40: state(), 41: state("CLOSED"), 999: state("CLOSED", ["harness"])})
+    r = harness_wave(plan_lessons(), ready, lookup, only=[30, 31, 32, 33, 34, 999], today=TODAY)
+    assert [w["issue"] for w in r["wave"]] == [33]
+    assert r["blocked"] == [
+        {"issue": 30, "title": "Lesson #30", "blockedByIssues": [40]},
+        {"issue": 31, "title": "Lesson #31", "unreadable": ["Not before 2026-10-01 UTC"]},
+    ]
+    assert r["notPicked"] == [
+        {"issue": 30, "reason": "blocked by #40"},
+        {"issue": 31, "reason": "unreadable dependency line `Not before 2026-10-01 UTC`"},
+        {"issue": 32, "reason": "assigned"},
+        {"issue": 34, "reason": "not a harness issue"},
+        {"issue": 999, "reason": "no such open issue"},
+    ]
+    assert format_wave(r).startswith("## Wave (1 of 4, harness)\n")
+
+
 # formatWave
 
 
@@ -1043,6 +1111,23 @@ def test_parse_args_defaults() -> None:
     }
 
 
+@pytest.mark.parametrize(
+    ("argv", "size"),
+    [
+        (["--kind", "harness"], 4),
+        (["--kind", "code"], 6),
+        (["--kind", "harness", "--size", "6"], 6),
+        (["--size", "2", "--kind", "harness"], 2),
+    ],
+)
+def test_parse_args_defaults_the_size_by_kind_unless_size_is_given(
+    argv: list[str], size: int
+) -> None:
+    args = parse_args(argv)
+    assert not isinstance(args, str)
+    assert args["size"] == size
+
+
 def test_parse_args_reads_every_flag() -> None:
     argv = ["--size", "3", "--kind", "content", "--only", "1,22", "--unblockers-first", "--json"]
     assert parse_args(argv) == {
@@ -1064,9 +1149,9 @@ def test_parse_args_reads_every_flag() -> None:
         # Python's `[0-9]` is ASCII here, and `int()` would take Arabic-Indic digits.
         (["--size", "٣"], 'next-wave: --size needs a positive integer, got "٣"'),
         (["--size"], 'next-wave: --size needs a positive integer, got ""'),
-        (["--kind", "nope"], 'next-wave: --kind is lessons, content or code, got "nope"'),
-        (["--kind"], 'next-wave: --kind is lessons, content or code, got ""'),
-        (["--kind", "Code"], 'next-wave: --kind is lessons, content or code, got "Code"'),
+        (["--kind", "nope"], 'next-wave: --kind is lessons, content, code or harness, got "nope"'),
+        (["--kind"], 'next-wave: --kind is lessons, content, code or harness, got ""'),
+        (["--kind", "Code"], 'next-wave: --kind is lessons, content, code or harness, got "Code"'),
         (
             ["--only", "1,,2"],
             'next-wave: --only needs issue numbers separated by commas, got "1,,2"',
@@ -1275,7 +1360,7 @@ def test_main_exits_2_on_a_bad_argument_before_running_anything(
     code, out, fake = run_main(monkeypatch, capsys, ["--kind", "nope"], {})
     assert code == 2
     assert out.stdout == ""
-    assert out.stderr == 'next-wave: --kind is lessons, content or code, got "nope"\n'
+    assert out.stderr == 'next-wave: --kind is lessons, content, code or harness, got "nope"\n'
     assert fake.calls == []
 
 
@@ -1650,6 +1735,33 @@ def test_main_fetches_a_code_wave_with_the_code_label(
         "| #31 | Issue 31 | `ready-for-agent`, `code`, `bug` |\n"
         "| #30 | Issue 30 | `ready-for-agent`, `code` |\n"
     )
+
+
+def test_main_fetches_a_harness_wave_with_the_harness_label_and_a_size_of_four(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    gh = json.dumps(
+        [
+            {
+                "number": n,
+                "title": f"Issue {n}",
+                "assignees": [],
+                "labels": [{"name": "ready-for-agent"}, {"name": "harness"}],
+                "body": "",
+            }
+            for n in range(30, 36)
+        ]
+    )
+    command = GH_CONTENT.replace("-l content", "-l harness")
+    code, out, fake = run_main(
+        monkeypatch, capsys, ["--kind", "harness", "--json"], {BUN: PLAN_JSON, command: gh}
+    )
+    assert code == 0
+    assert [" ".join(c) for c, _ in fake.calls] == [BUN, command]
+    result = json.loads(out.stdout)
+    assert (result["kind"], result["size"]) == ("harness", 4)
+    assert [w["issue"] for w in result["wave"]] == [30, 31, 32, 33]
+    assert [w["issue"] for w in result["waiting"]] == [34, 35]
 
 
 def test_main_exits_1_when_a_lookup_fails_or_is_unreadable(

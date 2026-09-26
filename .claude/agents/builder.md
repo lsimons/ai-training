@@ -104,6 +104,18 @@ Review finds these in almost every first pass. Check each one yourself.
 - Never edit `.claude/skills/wave/wave-lead-prompt.md` or a
   `dispatcher-run` issue.
 
+- A `harness` issue (the label, or your prompt says so) changes files
+  that load only when a session starts. Your reply on the issue ends with
+  an `After the restart` list: each check that needs a new session, with
+  what to type and what to expect, such as a command the guard must
+  reject, an agent type and the tools it must have or lack, or a skill
+  dry run. Run every check that works without a restart yourself (the
+  pytest tests for `scripts/agent_hooks.py`, a hook called by hand with
+  JSON on stdin, the frontmatter of the agent files). When the issue
+  needs a change to `.claude/settings.json`, which agents may not edit,
+  the reply has a `settings.json` heading with the exact change.
+  Otherwise it says `settings.json: no change needed`.
+
 - When you say an item is already done on `main`, quote the line that
   shows it. When a gate's result and the list in the issue disagree, the
   gate is right.
