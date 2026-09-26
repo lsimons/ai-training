@@ -99,14 +99,14 @@ difference is one sentence in the system prompt.
 ## Who writes it
 
 In a chat product, the vendor writes the system prompt, and in most
-products you do not see it. It names the assistant and sets its tone, and it often gives the model
-facts such as the current date (@Claude docs system-prompts). When two
-products built on the same model behave differently, much of the
-difference is in those prompts. Many products let you add standing text
-of your own: account-wide instructions on a settings page, often called
-"custom instructions", or a project with instructions that apply to every
-chat in it (@Claude support personalization) (@Claude support projects).
-That text applies to every conversation you start there.
+products you do not see it. It names the assistant and sets its tone,
+and it often gives the model facts such as the current date (@Claude
+docs system-prompts). When two products built on the same model behave
+differently, much of the difference is in those prompts. Many products
+let you add standing text of your own: account-wide instructions on a
+settings page, or a project with instructions that apply to every chat
+in it (@Claude support personalization) (@Claude support projects). That
+text applies to every conversation you start there.
 
 In an agent or a custom application, the developer writes it. The
 programming interface of every major model has a field for it, separate
@@ -186,7 +186,7 @@ Match each line to where it belongs.
 
 <Scenario id="the-morning-rule" phase="review" objective="concepts/prompts-reliably/structures-a-prompt"
   concepts={['role-and-system-prompt']}
-  context="A team built a support assistant on a model's programming interface. Each morning a staff member types 'never share a customer's phone number' into the chat, and on some days they forget."
+  context="A team built a support assistant on a model's programming interface. Each morning a staff member adds 'never share a customer's phone number' to the first conversation of the day, and on some days they forget."
   title="The rule typed each morning" hint="Where does text go that the model reads before every conversation?"
   options={[
     { text: 'Type the rule in capitals each morning so that the model gives it more weight.', consequence: 'On the mornings someone forgets, the rule is still missing, and capitals don\'t help a rule that isn\'t there.' },
@@ -231,8 +231,8 @@ did you misjudge?
 2. Two assistants on the same model with different system prompts give
    different answers to the same message, in length and in what they
    refuse.
-3. In a chat product the vendor writes it and you can add to it through
-   custom instructions. In an agent or a custom application the developer
+3. In a chat product the vendor writes it, and you can add standing
+   instructions of your own. In an agent or a custom application the developer
    writes it, and that is where recurring behavior gets fixed (@AEC-02).
 4. A rule typed into the chat lasts one conversation. A rule that should
    hold every time goes where the conversation starts.
