@@ -166,15 +166,12 @@ run = "bun scripts/next-wave.mjs"
 
 # What a resuming wave lead needs (#351): per issue, the pushed
 # `feat/<issue>-*` branches and per branch the last `Verdict:` comment and
-# next step (#417), counting only
-# the accounts in TRUSTED_VERDICT_AUTHORS (site/scripts/lib/wave-status.mjs),
-# plus the wave branch and the local worktrees, as JSON. Network (git
-# ls-remote, gh).
+# next step (#417), counting only the accounts in TRUSTED_VERDICT_AUTHORS
+# (scripts/wave_status.py), plus the wave branch and the local worktrees,
+# as JSON. Network (git ls-remote, gh).
 [tasks.wave-status]
 description = "State of a wave for a resuming lead, as JSON: mise run wave-status -- <wave-branch> <issue>..."
-depends = ["require-setup"]
-dir = "site"
-run = "bun scripts/wave-status.mjs"
+run = "uv run --locked python scripts/wave_status.py"
 
 # The numbers of a harness review (#355, docs/agents/harness-review.md):
 # tokens, tool calls, sleeps, human messages and more, from the Claude Code
