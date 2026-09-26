@@ -9,11 +9,12 @@ rank at most five components to build first.
 ## Introduction
 
 This site has two families of interactive parts. A checkpoint is graded
-and has one of the kinds in [S01 "Interaction types"](S01-dictionary.md#interaction-types).
-A widget teaches and never grades ([S03 "Widgets"](S03-lesson-authoring.md#widgets)).
-Two widgets exist today: `Sampler` (next-token sampling with a
-temperature slider) and `InstructionsBuilder` (tick facts about a
-project and see the instructions file it produces).
+and has one of the kinds in [S01 "Interaction
+types"](S01-dictionary.md#interaction-types). A widget teaches and never
+grades ([S03 "Widgets"](S03-lesson-authoring.md#widgets)). Two widgets
+exist today: `Sampler` (next-token sampling with a temperature slider)
+and `InstructionsBuilder` (tick facts about a project and see the
+instructions file it produces).
 
 Lessons in the `foundations` group can't show terminal work (S03
 "Foundations audience"), so their hands-on step is a widget or a prompt
@@ -22,21 +23,26 @@ than the engineering areas do, and this spec says where they could come
 from.
 
 Claude Academy is a citation source only (S02 "Source material"). Its
-text, quiz questions, images and data are never copied. This spec follows
-the same rule for its interface. It describes mechanics in our own words:
-what the learner does and what the page does in reply. It doesn't name Academy prose, questions, options, labels, characters or example companies.
+text, quiz questions, images and data are never copied. This spec
+follows the same rule for its interface. It describes mechanics in our
+own words: what the learner does and what the page does in reply. It
+doesn't name Academy prose, questions, options, labels, characters or
+example companies.
 
 ## Survey
 
 ### Method
 
 The survey read 15 lessons from three courses. The human-agent teams
-course exists only on Claude Academy and is marked beta, and the other
-two have a widget in most lessons. Every lesson was read from a saved copy of its
-public page, captured on 2026-09-19. The copy keeps each widget's
-controls, labels and before-state as text, but it doesn't run the widget.
-The named example was also opened live, without an account, on
-2026-09-26.
+course exists only on Claude Academy and is marked beta. The other two
+were chosen because most of their lessons have a widget. Every lesson
+was read from a saved copy of its public page, captured on 2026-09-19.
+L1 to L4 were saved from `academy.claude.com`. L5 to L15 were saved
+from the same courses on Anthropic's earlier course site,
+`anthropic.skilljar.com`, and the table gives their `academy.claude.com`
+addresses. The copy keeps each widget's controls, labels and
+before-state as text, but it doesn't run the widget. The L4 widget
+was also opened live, without an account, on 2026-09-26.
 
 So the survey records what a widget shows before the learner acts, what
 inputs it takes and what the lesson says it does in reply. It could
@@ -82,11 +88,11 @@ for the learner to act.
 | C3  | Switch a factor off                           | L2            | Three switches, all on, and a five-step timeline, all good                  | Turn any switch off or on                                                       | Each step of the timeline is marked good or bad from the switches                                             | Not stated                                                 | Not stated   | The marked timeline, one line per step                            | No                    |
 | C4  | Assign, then run                              | L3            | Four jobs, each set to the most manual level, and an empty day log          | One of three levels per job, then a run button                                  | Fills a five-day log, each day marked with one of three outcomes                                              | Not stated; has a reset button                             | Not stated   | The log with a legend for the three outcomes                      | No                    |
 | C5  | Rating scale to prompt                        | L4            | Five statements with a five-point agreement scale, and a prompt with blanks | One rating per statement                                                        | Fills each rating into the prompt as it is given, and asks for all five before the prompt is complete         | The page says nothing is saved                             | Starts empty | A prompt, and a button that opens it in the vendor's chat product | No                    |
-| C6  | Prompt card                                   | L1 to L4      | A prompt with bracketed blanks for the learner's own facts                  | None on the page                                                                | A button opens the prompt in the vendor's chat product                                                        | None                                                       | Same         | The chat product, outside the lesson                              | No                    |
+| C6  | Prompt card                                   | L1 to L3      | A prompt with bracketed blanks for the learner's own facts                  | None on the page                                                                | A button opens the prompt in the vendor's chat product                                                        | None                                                       | Same         | The chat product, outside the lesson                              | No                    |
 | C7  | Reflection questions                          | L1 to L4, L10 | Two questions at the end of the lesson                                      | None                                                                            | None                                                                                                          | None                                                       | Same         | None                                                              | No                    |
 | C8  | Commit a guess, then compare                  | L5            | A scale with a few stops and a lock button                                  | One stop, then lock                                                             | Shows where the guess sits against a typical placement                                                        | Not stated                                                 | Not stated   | The guess and the reference on one scale                          | Yes                   |
 | C9  | Next-word game                                | L6            | A sentence start and three candidate words                                  | Pick a word, or start over                                                      | Appends the word and offers the next candidates, later with percentages                                       | Not stated                                                 | Not stated   | The growing sentence                                              | No                    |
-| C10 | Build a table step by step                    | L6            | An empty table and a button to add the next input                           | Add one input at a time, or 1, 10 or 50 at once                                 | Adds rows and updates four counters                                                                           | Not stated                                                 | Not stated   | The table and the counters                                        | No                    |
+| C10 | Build a table step by step                    | L6            | An empty table and a button to add the next input                           | Add one input at a time, or 1, 10, 50 or all at once                            | Adds rows and updates five counters                                                                           | Not stated                                                 | Not stated   | The table and the counters                                        | No                    |
 | C11 | Pick a rule, then open the controls           | L6            | Six candidate rules as a single choice, controls hidden                     | One rule, then a button that shows the controls                                 | Shows sliders and a three-way choice that change the sampling, and says which control matches the picked rule | Not stated                                                 | Not stated   | Generated text and a mapping from rule to control                 | Yes, for the controls |
 | C12 | Place points on a plane                       | L7            | A grid with two labeled axes and three item chips                           | Select a chip and click a spot; later place a query and set a count             | Draws each point; highlights the nearest items to the query; a third axis in a view the learner can rotate    | Not stated                                                 | Not stated   | The plotted points and the nearest items                          | No                    |
 | C13 | Timed recall test                             | L8            | A start button and an empty text box                                        | Watch words appear one at a time, then type what you recall                     | Counts correct words, lists invented ones, and charts recall by position                                      | Not stated; a replay button is marked as spoiling the test | Not stated   | A score out of the total, a list, a chart                         | No                    |
@@ -100,7 +106,8 @@ for the learner to act.
 ### Notes on the components
 
 **C1, narrated scene player.** Every lesson of the human-agent teams
-course opens with one. It is an animated diagram with a transcript, used in place of a short video. The learner only watches it.
+course opens with one. It is an animated diagram with a transcript, used
+in place of a short video. The learner only watches it.
 
 **C2 and C3, explorers.** The learner changes an input and every output
 changes at once. There is no right setting. The lesson text before the
@@ -111,15 +118,15 @@ grade.
 sees the effect of all of them together. The per-day outcome is feedback
 on each choice, and the widget doesn't mark the whole run right or wrong.
 
-**C5, rating scale to prompt (L4, named in the survey brief).** The learner rates five
-statements about their own team on a five-point scale. Each rating is
-written into a prompt under the scale as soon as it is given, and a rated
-statement shows its number in place of a blank. The prompt asks the chat
-assistant to start with the lowest-rated statements and to make a short
-plan. Until all five are rated, a line under the scale asks for the rest.
-A button opens the finished prompt in the vendor's chat product. The page
-says there is no score and nothing is saved. The result is the prompt,
-which the learner takes into a conversation with the assistant.
+**C5, rating scale to prompt (L4).** The learner rates five statements
+about their own team on a five-point scale. Each rating is written into
+a prompt under the scale as soon as it is given, and a rated statement
+shows its number in place of a blank. The prompt refers to the
+statements with the lowest ratings. Until all five are rated, a line
+under the scale asks for the rest. A button opens the finished prompt in
+the vendor's chat product. The page says there is no score and nothing
+is saved. The result is the prompt, which the learner takes into a
+conversation with the assistant.
 
 ```text
 +-----------------------------------------------------------+
@@ -129,19 +136,20 @@ which the learner takes into a conversation with the assistant.
 |  rate the rest to finish the prompt                       |
 +-----------------------------------------------------------+
 | prompt:  ... statement 1: 4 ... statement 2: 2 ...        |
-|          statement 3: (not answered) ...                  |
+|          statement 3: - ...                               |
 |                                   [ open in assistant ]   |
 +-----------------------------------------------------------+
 ```
 
-**C6 and C7, prompt cards and reflection.** Each lesson ends with an
-exercise that is a prompt card and with two reflection questions. The
-reflection has no text box, so it is a heading and two questions.
+**C6 and C7, prompt cards and reflection.** L1 to L3 end with an
+exercise that is a prompt card, and L1 to L4 and L10 end with two
+reflection questions. The reflection has no text box, so it is a heading
+and two questions.
 
 **C8, commit a guess.** The only mechanic in the survey that gates the
-page: the rest of the lesson is hidden until the learner locks a guess. The widget compares the guess with a typical answer and marks
-nothing wrong, so a far guess only tells the learner how far off they
-were.
+page: the rest of the lesson is hidden until the learner locks a guess.
+The widget compares the guess with a typical answer and marks nothing
+wrong, so a far guess only tells the learner how far off they were.
 
 **C9 to C11, the sampling lesson.** One lesson builds the idea in steps: a
 game with suggested words, a table that fills one input at a time, a
@@ -213,8 +221,9 @@ Build them in this order.
 3. **`Explorer` widget.** Covers C2 and C3, and lets a foundations lesson
    show what a fixture computes (pages per context window, cost at a
    volume) as inputs and outputs on the page.
-4. **`reflection`.** S01 already defines it and nothing implements it, and
-   every surveyed lesson ends with reflection questions.
+4. **`reflection`.** S01 already defines it and nothing implements it,
+   and five of the fifteen surveyed lessons (L1 to L4 and L10) end with
+   reflection questions.
 5. **`Plot` widget.** Covers C12 and fits the retrieval and embeddings
    lessons, where placing by meaning is the idea being taught.
 
@@ -223,8 +232,8 @@ Build them in this order.
 An ungraded widget. It writes nothing to the progress record, like
 every widget.
 
-- **Props:** `statements` (a list of strings), `scale` (a list of labels,
-  from two to five, for example `['Not yet', 'In place']` or five
+- **Props:** `statements` (a list of strings), `scale` (a list of
+  labels, from two to five, for example `['Missing', 'Done']` or five
   agreement labels), and `template` (the text of the result, with
   `{{ratings}}` where the rated statements go and an optional
   `{{lowest}}` for the statements with the lowest rating). An optional
@@ -249,13 +258,13 @@ every widget.
 
 ```text
 +------------------------------------------------------------+
-| We check the agent's work before it ships.  ( )1 ... (•)5  |
+| Every release has a rollback plan.          ( )1 ... (•)5  |
 | Our data rules are written down.            (•)1 ... ( )5  |
 |  1 statement left                                          |
 +------------------------------------------------------------+
 | Prompt for your assistant                          [copy]  |
 |  I rated my team on these statements, 1 to 5:              |
-|  - We check the agent's work before it ships: 5            |
+|  - Every release has a rollback plan: 5                     |
 |  - Our data rules are written down: 1                      |
 |  Start with the lowest: Our data rules are written down.   |
 +------------------------------------------------------------+
@@ -341,9 +350,9 @@ distance. It has no 3D view and keeps no state between visits.
 
 ## Open questions
 
-1. Whether the rating scale to prompt (C5) should become a graded kind. Leaning: no.
-   A self-rating has no defensible answer, and the review page couldn't
-   grade it, so `SelfCheck` is a widget.
+1. Whether the rating scale to prompt (C5) should become a graded kind.
+   Leaning: no. A self-rating has no defensible answer, and the review
+   page couldn't grade it, so `SelfCheck` is a widget.
 2. Whether `Estimate` should take `run` and assert its answer against a
    fixture. Leaning: yes, because it gives foundations pages a fixture
    proof on the page's own number.
