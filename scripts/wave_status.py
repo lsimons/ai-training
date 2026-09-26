@@ -107,6 +107,8 @@ LINE_END = re.compile(r"\r\n?|\n")
 ORIGIN_PREFIX = re.compile(r"\Aorigin/")
 TRAILING_PUNCTUATION = re.compile(r"[.,;:!?)\]]+\Z")
 ISSUE_NUMBER = re.compile(r"[1-9][0-9]*", _FLAGS)
+# A lone UTF-16 surrogate, which JSON.stringify writes as a `\uXXXX` escape.
+LONE_SURROGATE = re.compile("[\ud800-\udfff]")
 
 type VerdictWord = Literal["approve", "needs changes"]
 type CommentKind = Literal["verdict", "unfinished", "lead-re-check", "reply"]
@@ -318,6 +320,8 @@ def trusted_in_order(
     comments: Sequence[IssueComment], trusted: Sequence[str]
 ) -> list[IssueComment]:
     """The comments from trusted accounts, oldest first. Other accounts are dropped."""
+    # gh's `createdAt` is fixed-width ISO-8601 UTC, so a plain string compare gives
+    # the same order as the JavaScript tool's `localeCompare`.
     return sorted((c for c in comments if c["author"] in trusted), key=lambda c: c["createdAt"])
 
 
@@ -563,9 +567,6 @@ def issue_comments(issue: int) -> list[IssueComment]:
         return parse_comments(output)
     except (ValueError, KeyError, TypeError, AttributeError) as e:
         fail(command, f"unreadable output: {e!r}")
-
-
-LONE_SURROGATE = re.compile("[\ud800-\udfff]")
 
 
 def to_json(value: object) -> str:
