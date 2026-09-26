@@ -203,7 +203,7 @@ though the task didn't change.
 
 <Scenario id="the-first-invoices" phase="review" objective="using-agents/delegates-and-checks/chooses-autonomy"
   concepts={['choosing-a-degree-of-autonomy']}
-  context="The lesson picks a degree of autonomy by how bad a wrong action is and how easily it is undone, and for the first runs of a new kind of task it starts one step lower and moves up as reviewed results pass."
+  context="The lesson picks a degree of autonomy for a task by how bad a wrong action is and how easily it is undone."
   title="The first week of invoice filing" hint="How easily is a wrong filing undone, and is this the first run of the task?"
   options={[
     { text: 'Let the agent file them and review the folders at the end of each week.', consequence: 'On the first runs you learn about its mistakes a week late, and nobody had seen how it files.' },
@@ -268,7 +268,7 @@ the brief?
   context="An agent returned a summary of a memo. The brief it ran from has done-criteria that can be ticked."
   title="Reviewing against the brief" hint="Which steps use the done-criteria, and which use only your impression?"
   options={[
-    { text: 'Tick each done-criterion and note which ones fail.', correct: true },
+    { text: 'Go through the criteria one by one, and mark the ones that fail.', correct: true },
     { text: 'Accept the summary once it reads well from top to bottom.', why: 'A result that reads well has told you nothing about the criteria yet.' },
     { text: 'Send a failed criterion back to the agent to fix.', correct: true },
     { text: 'Ask the agent whether it met the brief, and accept a yes.', why: 'The agent\'s yes is more text from the same run. The criteria are yours to tick.' },
