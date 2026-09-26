@@ -2,7 +2,7 @@
 """The wave picker (`mise run next-wave`, docs/agents/meta-orchestration.md,
 "The loop", step 1): which issues the next wave of builders should take on.
 
-Usage: mise run next-wave -- [--size N] [--kind lessons|content]
+Usage: mise run next-wave -- [--size N] [--kind lessons|content|code]
        [--only N,N,...] [--unblockers-first] [--json]
 
 `main` reads the lessons of this checkout from `bun scripts/lesson-plan.mjs`
@@ -10,7 +10,8 @@ in site/ (the picker's one boundary with the site, #492) and the kind's
 issues from `gh issue list`, then prints the wave as markdown or, with
 `--json`, as JSON. The list is filtered on the server side (#493): every
 `-l` must match, so a lessons wave fetches the open `ready-for-agent`
-issues and a content wave the open ones that also have `content`. A list
+issues, and a content or code wave the open ones that also have the
+kind's label. A list
 that reaches the `-L` limit stops the picker, since it may be cut short.
 Any other issue the picker needs, a `Blocked by` target or an `--only`
 number outside the list, it looks up with `gh issue view`, once per
@@ -29,7 +30,7 @@ reports the line as unreadable. A blocked issue is listed under Blocked
 with the reason. For a lesson the lines come on top of its plan file's
 `assumes` entries.
 
-Two kinds of wave. A `lessons` wave (the default) picks planned lessons. A
+Three kinds of wave. A `lessons` wave (the default) picks planned lessons. A
 lesson is a candidate when its plan file names an `issue`, it has no page
 yet, and that issue is ready and unassigned. It is blocked when it assumes
 an objective that no live lesson serves. A plan file's `assumes` entries
@@ -59,7 +60,15 @@ give it a code review too.
 A nits issue (title starting `Nits` or `Cosmetic nits`) is left out, since
 the dispatcher adds those to a wave as the nits row.
 
-`only` narrows either kind to a set of issue numbers. Everything else is
+A `code` wave (#494) picks the ready, unassigned issues with the `code`
+label, with the same dependency lines and the same nits rule. The issues
+with the `bug` label come first, then the rest, each part in ascending
+issue number, which is the order run Emu (#362) chose by hand. The kind
+labels are exclusive (docs/agents/issue-tracker.md), so the `code` label
+alone selects them. It prints as a content wave does, with the kind in
+the heading.
+
+`only` narrows every kind to a set of issue numbers. Everything else is
 reported as skipped with the reason `not in --only`, and every listed
 number that did not make the wave is reported under `notPicked` with the
 reason, so an unattended run never drops a number silently. A number
@@ -113,7 +122,11 @@ FENCE = re.compile(r" {0,3}(`{3,}(?=[^`]*$)|~{3,})")
 # may be cut short, so `main` stops with an error there.
 ISSUE_LIMIT = 1000
 
-type Kind = Literal["lessons", "content"]
+type Kind = Literal["lessons", "content", "code"]
+KINDS: tuple[Kind, ...] = ("lessons", "content", "code")
+
+# The kinds whose wave is issues by label, and so an `IssueWave`.
+type IssueKind = Literal["content", "code"]
 
 
 class PlannedLesson(TypedDict):
@@ -240,7 +253,9 @@ class ContentBlockedEntry(TypedDict):
 
 
 class ContentWave(TypedDict):
-    kind: Literal["content"]
+    """A wave of issues picked by their kind label: content or code."""
+
+    kind: IssueKind
     size: int
     only: list[int] | None
     wave: list[ContentEntry]
@@ -403,8 +418,8 @@ def pick_wave(
     line or `only` names. `today` defaults to `today_utc()`.
     """
     day = today if today is not None else today_utc()
-    if kind == "content":
-        return pick_content_wave(lessons, ready_issues, lookup, size, only, day)
+    if kind == "content" or kind == "code":
+        return pick_issue_wave(kind, lessons, ready_issues, lookup, size, only, day)
     if kind != "lessons":
         raise ValueError(f"next-wave: unknown kind {json.dumps(kind, ensure_ascii=False)}")
     return pick_lessons_wave(lessons, ready_issues, lookup, size, only, unblockers_first, day)
@@ -605,10 +620,50 @@ def pick_content_wave(
     only: Iterable[int] | None = None,
     today: date | None = None,
 ) -> ContentWave:
-    """Pick the next content wave.
+    """Pick the next content wave (`pick_issue_wave` with kind `content`)."""
+    return pick_issue_wave("content", lessons, ready_issues, lookup, size, only, today)
 
-    Ready, unassigned `content` issues that no plan file names as its
-    `issue`, by ascending number. The first `size` are the wave and the rest
+
+def pick_code_wave(
+    lessons: Sequence[PlannedLesson],
+    ready_issues: Sequence[ReadyIssue],
+    lookup: Lookup = no_lookup,
+    size: int = 6,
+    only: Iterable[int] | None = None,
+    today: date | None = None,
+) -> ContentWave:
+    """Pick the next code wave (`pick_issue_wave` with kind `code`)."""
+    return pick_issue_wave("code", lessons, ready_issues, lookup, size, only, today)
+
+
+def issue_order(kind: IssueKind) -> Callable[[ReadyIssue], tuple[int, int]]:
+    """The sort key of a kind's candidates.
+
+    A code wave puts the `bug` issues first, then ascending number. A
+    content wave goes by ascending number alone.
+    """
+
+    def key(i: ReadyIssue) -> tuple[int, int]:
+        first = 0 if kind == "code" and "bug" in i["labels"] else 1
+        return (first, i["number"])
+
+    return key
+
+
+def pick_issue_wave(
+    kind: IssueKind,
+    lessons: Sequence[PlannedLesson],
+    ready_issues: Sequence[ReadyIssue],
+    lookup: Lookup = no_lookup,
+    size: int = 6,
+    only: Iterable[int] | None = None,
+    today: date | None = None,
+) -> ContentWave:
+    """Pick the next wave of issues with the label `kind`.
+
+    Ready, unassigned issues with the kind's label, in `issue_order`, and
+    for content only the ones that no plan file names as its `issue`. A
+    nits issue is left out. The first `size` are the wave and the rest
     wait. An assigned issue, or one outside `only`, is skipped with the
     reason. One that its dependency lines hold is blocked.
     """
@@ -617,13 +672,18 @@ def pick_content_wave(
     is_open = open_checker(ready, lookup)
     only_list = list(only) if only is not None else None
     only_set = set(only_list) if only_list is not None else None
-    planned = {lesson["issue"] for lesson in lessons if lesson["issue"] is not None}
+    # A planned lesson's issue is a lessons-wave issue, and only content leaves it out.
+    planned = (
+        {lesson["issue"] for lesson in lessons if lesson["issue"] is not None}
+        if kind == "content"
+        else set[int]()
+    )
     skipped: list[SkippedEntry] = []
     blocked: list[ContentBlockedEntry] = []
     candidates: list[ContentEntry] = []
-    for i in sorted(ready_issues, key=lambda x: x["number"]):
+    for i in sorted(ready_issues, key=issue_order(kind)):
         labels = i["labels"]
-        if "content" not in labels or i["number"] in planned or NITS_TITLE.match(i["title"]):
+        if kind not in labels or i["number"] in planned or NITS_TITLE.match(i["title"]):
             continue
         if only_set is not None and i["number"] not in only_set:
             skipped.append({"issue": i["number"], "reason": NOT_IN_ONLY})
@@ -648,11 +708,11 @@ def pick_content_wave(
             continue
         issue = ready.get(n)
         if issue is None:
-            reason = content_reason_outside(n, lookup(n), planned)
+            reason = issue_reason_outside(kind, n, lookup(n), planned)
         elif n in planned:
             reason = "a planned lesson (use --kind lessons)"
-        elif "content" not in issue["labels"]:
-            reason = "not a content issue"
+        elif kind not in issue["labels"]:
+            reason = f"not a {kind} issue"
         elif NITS_TITLE.match(issue["title"]):
             reason = "a nits issue (the dispatcher adds it as the nits row)"
         elif issue["assignees"]:
@@ -663,7 +723,7 @@ def pick_content_wave(
             reason = "waiting (wave full)"
         not_picked.append({"issue": n, "reason": reason})
     return {
-        "kind": "content",
+        "kind": kind,
         "size": size,
         "only": only_list,
         "wave": wave,
@@ -674,7 +734,7 @@ def pick_content_wave(
     }
 
 
-def content_reason_outside(n: int, state: IssueState, planned: set[int]) -> str:
+def issue_reason_outside(kind: IssueKind, n: int, state: IssueState, planned: set[int]) -> str:
     """The `notPicked` reason of an `only` number outside the fetched set, from its lookup."""
     if not is_open_issue(state):
         return "no such open issue"
@@ -682,9 +742,9 @@ def content_reason_outside(n: int, state: IssueState, planned: set[int]) -> str:
         return "not ready-for-agent"
     if n in planned:
         return "a planned lesson (use --kind lessons)"
-    if "content" not in state["labels"]:
-        return "not a content issue"
-    # Open, ready and content, yet not fetched: its labels changed since the list call.
+    if kind not in state["labels"]:
+        return f"not a {kind} issue"
+    # Open, ready and of the kind, yet not fetched: its labels changed since the list call.
     return "not in the fetched issues (run the picker again)"
 
 
@@ -716,10 +776,11 @@ def format_wave(result: Wave) -> str:
 
     A lessons wave is a table (with an `Unblocks` column under
     `unblockersFirst`), then the blocked, skipped and waiting lists. A
-    content wave is a table of issue, title and labels, then the skipped and
-    waiting lists. Lesson ids are in code spans, so cspell skips them.
+    content or code wave is a table of issue, title and labels, then the
+    skipped and waiting lists. Lesson ids are in code spans, so cspell
+    skips them.
     """
-    if result["kind"] == "content":
+    if result["kind"] != "lessons":
         return format_content_wave(result)
     lines = [f"## Wave ({len(result['wave'])} of {result['size']})", ""]
     unblocks = result["unblockersFirst"]
@@ -771,7 +832,7 @@ def not_picked_lines(result: Wave) -> list[str]:
 
 
 def format_content_wave(result: ContentWave) -> str:
-    lines = [f"## Wave ({len(result['wave'])} of {result['size']}, content)", ""]
+    lines = [f"## Wave ({len(result['wave'])} of {result['size']}, {result['kind']})", ""]
     lines += ["| Issue | Title | Labels |", "| ----- | ----- | ------ |"]
     for w in result["wave"]:
         labels = ", ".join(code(label) for label in w["labels"])
@@ -799,7 +860,7 @@ def parse_args(argv: Sequence[str]) -> Args | str:
     """The options from the command line, or an error message.
 
     `--size N` (default 6, a positive integer in plain digits), `--kind`
-    (`lessons`, the default, or `content`), `--only N,N,...` (issue numbers,
+    (`lessons`, the default, `content` or `code`), `--only N,N,...` (issue numbers,
     the whitelist), `--unblockers-first` (rank a lesson that unblocks other
     candidates ahead of the course order within its area) and `--json`. A
     flag that takes a value and comes last gets the empty string.
@@ -826,9 +887,10 @@ def parse_args(argv: Sequence[str]) -> Args | str:
                     return f"next-wave: --size needs a positive integer, got {_quote(raw)}"
                 args["size"] = int(raw)
             elif arg == "--kind":
-                if raw not in ("lessons", "content"):
-                    return f"next-wave: --kind is lessons or content, got {_quote(raw)}"
-                args["kind"] = raw
+                kind = read_kind(raw)
+                if kind is None:
+                    return f"next-wave: --kind is {kinds_text()}, got {_quote(raw)}"
+                args["kind"] = kind
             else:
                 if not ISSUE_LIST.fullmatch(raw):
                     return (
@@ -840,6 +902,19 @@ def parse_args(argv: Sequence[str]) -> Args | str:
             return f"next-wave: unknown argument {arg}"
         i += 1
     return args
+
+
+def read_kind(raw: str) -> Kind | None:
+    """The kind that `raw` names exactly, or None."""
+    for kind in KINDS:
+        if kind == raw:
+            return kind
+    return None
+
+
+def kinds_text() -> str:
+    """Every kind, for the `--kind` error: `lessons, content or code`."""
+    return f"{', '.join(KINDS[:-1])} or {KINDS[-1]}"
 
 
 def run(command: Sequence[str], cwd: Path | None = None) -> str:
@@ -956,9 +1031,9 @@ def issue_list_command(kind: Kind) -> list[str]:
 
     Every `-l` must match. A lessons wave fetches every `ready-for-agent`
     issue, since the plan files choose the lessons and a planned lesson's
-    issue can carry any kind label. A content wave adds `-l content`.
+    issue can carry any kind label. A content or code wave adds `-l <kind>`.
     """
-    labels = ["-l", "ready-for-agent"] + (["-l", "content"] if kind == "content" else [])
+    labels = ["-l", "ready-for-agent"] + ([] if kind == "lessons" else ["-l", kind])
     return [
         "gh",
         "issue",

@@ -48,6 +48,13 @@ Spawn agents by name and by nothing else:
   which run created a review worktree. Its
   prompt is the issue, the branch, that worktree and the risks to probe.
 
+The table in your prompt has the format of the wave's kind. A lessons
+wave lists the lesson id, the course position and the planned `after`
+entries. A content wave and a code wave list each issue with its title and
+labels, and a code wave lists the `bug` issues first, then ascending issue
+number. Take a code wave's rows in that order when the wave can't run
+every builder at once.
+
 Judge each issue's size before you spawn its builder. Split an issue that
 touches more than one lesson or more than about 10 files into two builders
 with disjoint files, on branches `feat/<issue>-<slug>-1` and `-2`, and say
