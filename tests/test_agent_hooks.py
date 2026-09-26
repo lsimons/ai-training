@@ -739,6 +739,21 @@ def test_review_bash_rejects_what_it_cannot_read(command: str, what: str) -> Non
     assert what in message
 
 
+@pytest.mark.parametrize("command", ["touch x; cd ~nosuchuser", "git -C ~nosuchuser status"])
+def test_review_bash_gives_the_unknown_user_case_its_own_hint(command: str) -> None:
+    code, message = agent_hooks.review_bash({"tool_input": {"command": command}})
+    assert code == 2
+    assert "use an absolute path." in message
+    assert "quote a" not in message
+
+
+def test_review_bash_keeps_the_quoting_hint_for_other_cases() -> None:
+    code, message = agent_hooks.review_bash({"tool_input": {"command": "ls *(+f)"}})
+    assert code == 2
+    assert "quote a `(`, `)` or `{` that is text" in message
+    assert "absolute path" not in message
+
+
 def test_review_bash_rejects_a_command_shlex_cannot_split() -> None:
     # The scanner accepts `$'...'` with an escaped quote, but shlex doesn't
     # know that quoting and raises on the quote it reads as unclosed.
