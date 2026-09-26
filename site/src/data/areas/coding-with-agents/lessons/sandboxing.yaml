@@ -30,6 +30,8 @@ sources:
   - Claude Code permissions
   - Claude Code all settings
   - Claude Code settings
+  - Claude Code memory
+  - Claude Code security
   - claude-docker
   - Codex approvals
   - Pi security
@@ -37,27 +39,33 @@ sources:
   - pnpm supply chain
   - RFC 2606
 issue: 18
-minutes: 15
+minutes: 25
 sources-checked: 2026-09-26
 review-by: 2027-03-26
 notes: >-
   Issue #18, reduced on 2026-09-26 to the base lesson; the network trace is a separate issue and is not
   named on the page. It covers first-session because that topic owns `sandbox` and `trust boundary`
   (issue #13; the area is at its seven-topic cap). Into is the .env case: a file read in the working
-  folder needs no prompt and goes to the provider in the next request. Through has the isolation table,
-  checked against the Claude Code isolation page, the rule "enforce outside the trust
-  boundary" with two controls (a network allowlist enforced by a proxy, a credential held by a
-  sidecar), and Claude Code's built-in sandbox (files, hosts, what happens when a command can't run in
-  it). The fixture site/examples/coding-with-agents/sandboxing/ holds `sandbox-settings.json` (one allowed
-  host, strict allowlist, the same setting names as the red-teaming fixture plus allowedDomains) and
-  commands.txt with three curl commands. check_allowlist.py makes no network call and applies the
-  documented matching rules (settings reference, sandbox.network). The JSON block on the page is a copy
-  of `sandbox-settings.json`, so update the two together. The live run with a real agent is marked as not
+  folder needs no prompt and goes to the provider with the next request. Through has the isolation table
+  (every row but the last from the Claude Code isolation page, with the sandbox runtime as its own row),
+  the trust boundary as the topic defines it, with harness checks on the request set against limits on
+  the running process, and Claude Code's built-in sandbox (files, hosts, what happens when a command
+  can't run in it). The fixture site/examples/coding-with-agents/sandboxing/ holds
+  `sandbox-settings.json` (one allowed host, strict allowlist, the same setting names as the red-teaming
+  fixture plus allowedDomains) and commands.txt with three curl commands. check_allowlist.py makes no
+  network call and applies the documented matching rules. The port rule is from the settings reference,
+  sandbox.network.allowedDomains, checked 2026-09-26: "an optional `:port` suffix limits an entry to one
+  port; an entry without a port matches every port". The JSON block on the page is a copy of
+  `sandbox-settings.json`, so update the two together. The live run with a real agent is marked as not
   asserted. The Academy key is cited only for the idea on the course's public page (check an
   unsupervised run in proportion to how little you watched it); the lessons behind sign-in weren't
-  read. Beyond summarizes schubergphilis/claude-docker (Apache-2.0, own words, no text adapted), the
-  layered containment pattern, unsupervised mode with Codex's three axes, and Pi (the repository
-  badlogic/pi-mono now redirects to earendil-works/pi, MIT). The optional practices from a team that ran
-  agents in containers were left out for time. The checkpoints all serve runs-a-session: a Sort of
-  controls inside the harness and outside the trust boundary, a Scenario on where a forge token lives,
-  and a graded Predict on the fixture's allowlist, each with one review alternate.
+  read. Beyond is kept to short summaries of schubergphilis/claude-docker (Apache-2.0, own words, no
+  text adapted), the layered containment pattern, unsupervised mode with Codex's layers, and Pi (the
+  plan named badlogic/pi-mono; the citation uses earendil-works/pi, MIT). The optional practices from a
+  team that ran agents in containers were left out. Minutes is 25 because the page has about 2,400 words,
+  four graded interactions, a script run and a five-minute live exercise, for readers with English as a
+  second language. The three first checkpoints (a Sort of controls that check the request against
+  controls that limit the running process, a Scenario on where a forge token lives, a graded Predict on
+  the fixture's allowlist) all serve runs-a-session. The three review alternates are Choices on the idea
+  the first checkpoints share, that a limit enforced on the running process holds whatever the agent
+  asks for.
