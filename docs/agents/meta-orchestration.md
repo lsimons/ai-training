@@ -72,8 +72,9 @@ pulls `main`, runs the picker, fills the wave lead template at
 `.claude/skills/wave/wave-lead-prompt.md`, spawns the lead, reads the
 report, updates the run issue, and repeats until a stop condition, with
 no further instruction from the maintainer. Its arguments: `/wave [size]`,
-default 6, then any of `--kind lessons|content|code` (what the picker
-selects, planned lessons by default), `--only N,N,...` (an issue whitelist for the
+default 6, or 4 for a harness run, then any of
+`--kind lessons|content|code|harness` (what the picker selects, planned
+lessons by default), `--only N,N,...` (an issue whitelist for the
 run, and the picker skips everything else), `--no-filing` and
 `--resume <Name>`. The skill loops on its own and waits for each lead in
 the foreground. An optional watchdog is the maintainer's choice, and a
@@ -124,7 +125,9 @@ call it `CAPYBARA wave <k>`. The count starts at 1 in every run.
 ## Concurrent runs
 
 More than one run may be open at once, for example a lessons run and a
-code run on two machines. One set of rules covers one run or several:
+code run on two machines. A harness run is the exception: it starts only
+when no other run is open, and no other run starts or resumes while it is
+open ("Harness runs"). One set of rules covers one run or several:
 
 - **Preflight.** Before the first wave the dispatcher runs `git fetch` and
   stops when the local `main` is behind, ahead of or diverged from
@@ -197,9 +200,11 @@ One tick:
    (`--kind content`) is the ready, unassigned `content` issues that no plan
    file claims, by ascending number. A code wave (`--kind code`) is the
    ready, unassigned `code` issues, the `bug` issues first and then
-   ascending number, the order run Emu (#362) chose by hand. For every kind
+   ascending number, the order run Emu (#362) chose by hand. A harness
+   wave (`--kind harness`) is the ready, unassigned `harness` issues by
+   ascending number, 4 by default. For every kind
    the picker asks GitHub only for the open `ready-for-agent` issues, plus
-   the kind's label for a content or code wave, and it blocks an issue whose body has a `Blocked by #N` line
+   the kind's label for the other three kinds, and it blocks an issue whose body has a `Blocked by #N` line
    for an open #N or a `Not before` line with a later date (`triage.md`,
    "Dependency lines"). The lead adds a code review for a branch whose diff
    changes code, which is every branch of a code wave. A nits issue is left
@@ -227,7 +232,9 @@ One tick:
    never picks them again. The wave lead never edits the run issue's
    body. Then, on `merged`, play the chime and go to step 1. On `open`,
    the lead has hit the standing-approval exception (below). Report it to
-   the maintainer and stop. On `failed`, the `In flight` line stays,
+   the maintainer and stop. On a harness wave's `open`, the line is
+   `wave <k>: awaiting restart, PR #<n>` and the run stops at "harness
+   wave awaiting restart" ("Harness runs"). On `failed`, the `In flight` line stays,
    report to the maintainer and stop. The next `/wave --resume <Name>`
    finds the wave in step 3 and resumes it.
 7. **File the follow-ups.** Every item on the report's maintainer line,
@@ -246,8 +253,11 @@ One tick:
    run ends.
 
 The dispatcher edits no code, commits nothing and runs no check of the
-site. The loop ends on a failed preflight, an empty wave, an exhausted
-whitelist, an `open` or `failed` report, or the maintainer saying stop,
+site, except for a small fix on a harness wave branch after the restart.
+The loop ends on a failed preflight, a refusal by the harness
+exclusivity check, an empty wave, an exhausted whitelist, an `open` or
+`failed` report (for a harness wave, "harness wave awaiting restart"), a
+failed step after a restart, or the maintainer saying stop,
 and the dispatcher reports which, comments it on the run issue and closes
 it (except on `failed`).
 
@@ -264,7 +274,8 @@ trip. A wave that doesn't meet every condition stays open, and the lead
 returns `open` with the reason. A review finding that needs the
 maintainer's decision (strike a spec feature, choose between two designs)
 always goes to them instead of being merged, and so does any change to a
-spec, a gate, or shared tooling that a lesson branch drags along.
+spec, a gate, or shared tooling that a lesson branch drags along. The
+standing approval never covers a harness wave ("Harness runs").
 
 The maintainer withdraws the standing approval by saying so in the
 session or in a comment on the run issue. From the next wave on, the
@@ -357,3 +368,57 @@ by it. Each issue has exactly one kind label (`issue-tracker.md`,
   standing approval applies as for any wave. A code run can be open next
   to a lessons or content run, and "Files the other run touches" under
   "Concurrent runs" keeps the two apart.
+- `harness`: the `harness` issues, 4 per wave by default, since every
+  issue adds items to the one checklist the maintainer works through by
+  hand. It builds and reviews like a code run and merges only after a
+  restart, as the next section describes.
+
+## Harness runs
+
+Agent files, hooks, `settings.json` and skills load when a session
+starts, so a harness change can only be tested in a new session. PR #357
+resolved 12 `harness` issues in one session this way by hand. A harness
+wave is never merged in the session that built it:
+
+1. **Pick.** The ready, unassigned `harness` issues, with the dependency
+   lines, by ascending number.
+2. **Build and review.** One `builder` and one `code-reviewer` per issue,
+   with the code collision notes. The checks that work without a restart
+   run in the wave: the pytest tests for `scripts/agent_hooks.py`, a hook
+   script called by hand with JSON on stdin, the frontmatter of the agent
+   files, and `mise run ci`. Each builder's reply on its issue ends with
+   an `After the restart` list of the checks that need a new session,
+   each with what to type and what to expect.
+3. **`settings.json`.** Agents are denied `Edit(./.claude/settings.json)`,
+   and that control stays. A builder whose issue needs a settings change
+   puts the exact change in its issue reply. The lead copies it into the
+   PR body under `settings.json`, and the maintainer applies it.
+4. **Stop.** The lead opens the pull request with the collected
+   `After the restart` checklist and reports `open`, whatever the other
+   conditions. The dispatcher chimes, writes
+   `wave <k>: awaiting restart, PR #<n>` on the run issue, and stops with
+   "harness wave awaiting restart". Its last message gives the PR number
+   and the lines to run: quit, then
+   `cd ../ai-training-wt/wave/<name>-<k>`,
+   `claude -n "wave <name> harness <yyyy-mm-dd>"` and
+   `/wave --resume <Name>`.
+5. **Restart in the wave worktree.** The new session loads the harness
+   from the wave branch, so no untested harness reaches `main`.
+   `/wave --resume <Name>` sees the `awaiting restart` line, skips the
+   preflight that compares `main` with `origin/main`, and rebuilds its
+   run file in the worktree's `.scratch/` from the run issue alone. It
+   runs every item on the PR's checklist, posts the results on the PR,
+   fixes a small gap on the wave branch, and asks the maintainer whether
+   to merge. It merges only on the maintainer's word.
+6. **After the merge**, the dispatcher runs the checklist items that
+   need the merge, closes the run when a stop condition holds, and tells
+   the maintainer to quit and start again in the main checkout. The run
+   goes on there with `/wave --resume <Name>`, or it has closed.
+
+A harness run starts only when no other `dispatcher-run` issue is open,
+and while it is open, `/wave` refuses to start any other run and names
+the harness run. The check reads each open run's `kind` from
+`mise run run-name` and leaves out the run being resumed, so the
+restarted session's own `/wave --resume <Name>` passes. The
+`harness-review` reminder at preflight stays, since a harness run is
+where the issues a review files get done.
