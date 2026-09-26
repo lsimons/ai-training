@@ -734,6 +734,20 @@ MCP filesystem server:
   author: Anthropic and the MCP contributors
   license: MIT
   url: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+A2A specification:
+  type: reference
+  title: Agent2Agent (A2A) Protocol Specification, version 1.0.0
+  container: a2a-protocol.org
+  author: The A2A project contributors
+  license: Apache-2.0
+  url: https://a2a-protocol.org/v1.0.0/specification/
+A2A and MCP:
+  type: reference
+  title: "A2A and MCP: Detailed Comparison"
+  container: a2a-protocol.org
+  author: The A2A project contributors
+  license: Apache-2.0
+  url: https://a2a-protocol.org/v1.0.0/topics/a2a-and-mcp/
 Claude docs memory-tool:
   type: reference
   title: Memory tool
