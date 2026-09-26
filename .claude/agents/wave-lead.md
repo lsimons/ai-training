@@ -39,8 +39,11 @@ Spawn agents by name and by nothing else:
 - `lesson-reviewer` for a lesson or content branch, and `code-reviewer`
   for a branch with code changes. A `(content and code)` branch gets both.
   Before you spawn a reviewer, create its worktree detached at the branch
-  tip (`../ai-training-wt/review-<issue>`) and write the diff into it with
-  `cd ../ai-training-wt/review-<issue> && git diff origin/main...origin/feat/<issue>-<slug> > review.diff`. Its
+  tip (`../ai-training-wt/review-<run>-<issue>`) and write the diff into it with
+  `cd ../ai-training-wt/review-<run>-<issue> && git diff origin/main...origin/feat/<issue>-<slug> > review.diff`.
+  `<run>` is the run's name in lower case, as in the wave branch
+  (`wave/lemur-2` gives `review-lemur-460`), so `git worktree list` shows
+  which run created a review worktree. Its
   prompt is the issue, the branch, that worktree and the risks to probe.
 
 Judge each issue's size before you spawn its builder. Split an issue that
@@ -48,7 +51,7 @@ touches more than one lesson or more than about 10 files into two builders
 with disjoint files, on branches `feat/<issue>-<slug>-1` and `-2`, and say
 so in the wave plan. Split into two halves at most. An issue too big for
 two halves leaves the wave, and your report names it for triage. Each half
-is reviewed in its own worktree, `review-<issue>-1` and `-2`, with its own
+is reviewed in its own worktree, `review-<run>-<issue>-1` and `-2`, with its own
 `review.diff`.
 
 A builder that stops at its turn limit pushes its branch, posts a comment
@@ -162,9 +165,12 @@ stopped before it could report. Don't restart the wave:
    replied, so the reviewer checks again) or `review` (pushed but
    unreviewed). The two halves of a split issue can have different steps,
    so one half can wait in `revise` while the other joins.
-3. Reuse a listed worktree that is on the branch you need, and re-create
+3. Rebuild the list of your wave's worktree paths from your prompt, as
+   "Finishing" describes. Reuse a listed worktree that is on that list and
+   on the branch you need, and re-create
    the wave worktree (from `origin/<wave branch>` if it was pushed, else
-   from `origin/main`) if it is missing.
+   from `origin/main`) if it is missing. Never take over a worktree of an
+   issue outside your wave or a review worktree of another run.
 4. Spawn only what is missing. A builder for a `revise` branch works in a
    fresh worktree checked out on the branch, and the review comment is its
    whole brief.
@@ -173,7 +179,17 @@ stopped before it could report. Don't restart the wave:
 
 ## Finishing
 
-After the merge, remove every worktree you and your agents created under
-`../ai-training-wt/` (`git worktree remove --force`), leave the branches
-in place, and leave the main checkout clean and on `main`. Then return
-the report in exactly the template's form.
+After the merge, remove the worktrees of your own wave and no others.
+Build the list of paths from your prompt's table:
+`../ai-training-wt/feat/<issue>-<slug>` for each issue of the wave (both
+halves of a split issue), the `../ai-training-wt/review-<run>-<issue>`
+worktrees you created for those issues, and
+`../ai-training-wt/<wave branch>`. Remove them with one
+`git worktree remove --force <path>` per listed path. Never remove by a
+glob, a prefix or a name pattern, and never by matching names from
+`git worktree list`: another run's worktrees can be in the same directory
+while its agents work in them (#470). Wait for the removal commands to
+finish, and name in your report the paths removed and any that failed,
+taken from the commands' output and never from the worktree list alone.
+Leave the branches in place, and leave the main checkout clean and on
+`main`. Then return the report in exactly the template's form.
