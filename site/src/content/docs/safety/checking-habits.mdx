@@ -1,4 +1,4 @@
-import { Choice, Match, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Match, Pitfall, Exercise, Recap, Order } from '@components/lesson';
 
 In this lesson we find the row that doesn't add up in a table a chat
 assistant wrote from three months of ticket counts. The check that finds
@@ -42,6 +42,12 @@ adds up wrong. Before reading on, add up the rows yourself and decide which.
   ]}>
 Which row's total isn't the sum of its three months?
 </Choice>
+
+<Order id="order-the-routine" phase="review" objective="safety/verifies-output/checks-claims"
+  concepts={['checking-habits']}
+  context="The lesson gives a routine of four checks that run together, in one order, on every model output that leaves your desk."
+  title="Put the routine in order" hint="What do you compare the output with first, and which check needs a number to redo?"
+  steps={['Read the output against the request', 'Mark the claims you did not supply', 'Open one link or source it cites', 'Redo one calculation by hand']} />
 
 A short program written for this lesson adds every row again and compares
 the sum with the total the assistant wrote. This is what it prints.

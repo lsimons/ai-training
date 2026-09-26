@@ -1,4 +1,4 @@
-import { Predict, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Predict, Scenario, Pitfall, Exercise, Recap, Prompt, Response, MultiChoice, Sort } from '@components/lesson';
 
 A customer writes to support about a dishwasher that leaks again after a
 repair. You want an assistant to draft the reply. The email holds the
@@ -219,6 +219,35 @@ reads "Dear Person 1", and below the body is the customer's full
 signature block: name, job title, employer, mobile number, and office
 address. What do you tell them?
 </Scenario>
+
+<MultiChoice id="what-still-points-at-them" phase="review" objective="safety/handles-data-safely/decides-what-to-share"
+  concepts={['data-privacy']}
+  context="A colleague redacted a customer email about a water leak before pasting it into an assistant. They replaced the name in the greeting with Person 1 and removed the phone number. Everything else stayed as it was."
+  title="What still points at the customer?" hint="Read the subject line and the signature as a stranger would. What could they look up?"
+  options={[
+    { text: 'The account number in the subject line.', correct: true },
+    { text: 'The night the leak started.', why: 'The reply needs this fact, and on its own it points at nobody.' },
+    { text: 'The city and employer in the signature.', correct: true },
+    { text: 'The words Person 1 in the greeting.', why: 'That is the placeholder. It keeps the role and says nothing about who it is.' },
+  ]}>
+
+Which two details in the redacted email still point at the customer?
+
+</MultiChoice>
+
+<Sort id="needs-it-or-placeholder" phase="review" objective="safety/handles-data-safely/decides-what-to-share"
+  concepts={['data-privacy', 'confidentiality']}
+  context="A learner asks a general-purpose assistant to draft a reply to a tenant's email about a leak in their flat. The lesson splits a document into the facts the task uses and the details that say who is involved."
+  title="Keep it or replace it?" hint="Would the reply be any different if this detail were a placeholder?"
+  buckets={['The task needs it', 'Replace it with a placeholder']}
+  items={[
+    { text: 'The leak started on Monday night', bucket: 0 },
+    { text: 'Water came through the kitchen ceiling', bucket: 0 },
+    { text: 'The plumber can come on Thursday morning', bucket: 0 },
+    { text: 'The tenant\'s full name', bucket: 1 },
+    { text: 'The street and number of the flat', bucket: 1 },
+    { text: 'The tenant\'s mobile number', bucket: 1 },
+  ]} />
 
 ## Send what the task needs
 
