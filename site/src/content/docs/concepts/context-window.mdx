@@ -205,7 +205,7 @@ answer?
   context="The lesson explains that a model writes each answer from the tokens in its context window for that response, and that a long chat can push early messages out of it. The chat in this item has no memory features turned on."
   title="What can the next answer use?" hint="Which of these reach the window for this one response?"
   options={[
-    { text: 'The file you attached earlier in this chat, which is still short.', correct: true },
+    { text: 'The file you attached earlier in this short chat.', correct: true },
     { text: 'The notes you keep in another tab of your browser.', why: 'The model only has what reaches its window. A tab it was never given does not exist for it.' },
     { text: 'The message you just sent.', correct: true },
     { text: 'What you told the same assistant in a chat yesterday.', why: 'With memory features off, yesterday\'s chat never enters today\'s window.' },
@@ -223,7 +223,7 @@ of these can the model use for its next answer?
   options={[
     { text: 'Tell the assistant it made a mistake and ask it to try harder this time.', consequence: 'The budget is still outside the window. The next plan misses it too, and the chat grows longer.' },
     { text: 'Ask the assistant which budget you gave it at the start of the chat.', consequence: 'The model can only answer from its window. It gives a number that sounds right, and you can\'t tell a guess from a memory.' },
-    { text: 'Switch to a model with a bigger vocabulary so that it keeps numbers.', consequence: 'The vocabulary decides how text splits into tokens, not how many fit. The first message is still gone.' },
+    { text: 'Switch to a model with a bigger vocabulary so that it keeps numbers.', consequence: 'The vocabulary decides how text splits into tokens. The number of tokens that fit is the same, and the first message is still gone.' },
     { text: 'Restate the budget in your next message and ask for the plan again.', correct: true, consequence: 'The budget is back among the tokens the model reads, and the new plan stays under 5,000 euros.' },
   ]}>
 
