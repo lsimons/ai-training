@@ -185,14 +185,12 @@ description = "Harness review numbers from session transcripts: mise run harness
 run = "uv run --locked python scripts/harness_metrics.py"
 
 # Names for dispatcher runs (#353): the open `dispatcher-run` issues and the
-# name the next run takes, from .claude/skills/wave/run-names.yaml, as JSON.
+# name the next run takes, from .claude/skills/wave/run-names.txt, as JSON.
 # `-- --check N` also says whether an older open run holds the name of run
-# issue #N. The rules are in site/scripts/lib/run-names.mjs. Network (gh).
+# issue #N. The rules are in scripts/run_name.py. Network (gh).
 [tasks.run-name]
 description = "Open dispatcher runs and the next run name, as JSON: mise run run-name [-- --check <issue>]"
-depends = ["require-setup"]
-dir = "site"
-run = "bun scripts/run-name.mjs"
+run = "uv run --locked python scripts/run_name.py"
 
 # The build writes the checkpoint export (spec S03 "Checkpoint export") to
 # site/dist/data/checkpoints.json from src/pages/data/checkpoints.json.ts.

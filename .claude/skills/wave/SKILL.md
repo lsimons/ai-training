@@ -45,7 +45,7 @@ A run is one GitHub issue with the `dispatcher-run` label, titled
 `Run: <Name> (<kind>)`, for example `Run: Capybara (lessons)`. It is the
 run's memory, so the history is in the issue and never in your context,
 and nothing of the run is committed to git. Names are animals in
-alphabetical order, from `.claude/skills/wave/run-names.yaml`, and never
+alphabetical order, from `.claude/skills/wave/run-names.txt`, and never
 a machine's name.
 
 Its body holds these sections, and you keep them current with
