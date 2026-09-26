@@ -1166,3 +1166,28 @@ def test_main_exits_1_on_output_it_cannot_read(
     assert code == 1
     assert out.stdout == ""
     assert out.stderr.startswith(f"next-wave: {name} failed: unreadable output: ")
+
+
+def test_main_writes_a_lone_surrogate_in_the_markdown_as_u_fffd_as_javascript_did(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    gh = json.dumps(
+        [
+            {
+                "number": 30,
+                "title": "Odd \ud800 title",
+                "assignees": [],
+                "labels": [{"name": "ready-for-agent"}, {"name": "content"}],
+            }
+        ]
+    )
+    code, out, _ = run_main(monkeypatch, capsys, ["--kind", "content"], {BUN: PLAN_JSON, GH: gh})
+    assert code == 0
+    assert "| #30 | Odd \ufffd title | `ready-for-agent`, `content` |" in out.stdout
+
+
+def test_parse_lesson_plan_keeps_only_string_after_entries() -> None:
+    plan_json = json.loads(PLAN_JSON)
+    plan_json["lessons"][1]["after"] = ["a/1", 7, None]
+    lessons = nw.parse_lesson_plan(json.dumps(plan_json))
+    assert lessons[1]["after"] == ["a/1"]

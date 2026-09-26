@@ -635,7 +635,7 @@ def parse_lesson_plan(output: str) -> list[PlannedLesson]:
                 "title": raw["title"],
                 "issue": issue if isinstance(issue, int) else None,
                 "position": position if isinstance(position, int) else None,
-                "after": cast("list[str]", raw["after"]),
+                "after": _strings(raw["after"]),
                 "assumes": _strings(raw["assumes"]),
                 "serves": _strings(raw["serves"]),
                 "live": raw["live"] is True,
@@ -697,6 +697,14 @@ def to_json(value: object) -> str:
     return LONE_SURROGATE.sub(lambda m: f"\\u{ord(m.group()):04x}", text) + "\n"
 
 
+def to_markdown(result: Wave) -> str:
+    """`format_wave`, with a lone surrogate (from a `\\ud800` escape in an
+    issue title) as U+FFFD, which is what JavaScript's `process.stdout.write`
+    wrote for it. UTF-8 can't encode a lone surrogate.
+    """
+    return LONE_SURROGATE.sub("\ufffd", format_wave(result))
+
+
 def main(argv: Sequence[str]) -> int:
     args = parse_args(argv)
     if isinstance(args, str):
@@ -714,7 +722,7 @@ def main(argv: Sequence[str]) -> int:
         only=args["only"],
         unblockers_first=args["unblockersFirst"],
     )
-    out = to_json(result) if args["json"] else format_wave(result)
+    out = to_json(result) if args["json"] else to_markdown(result)
     sys.stdout.buffer.write(out.encode("utf-8"))
     return 0
 
