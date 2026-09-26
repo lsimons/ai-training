@@ -277,7 +277,7 @@ Match each line of the prompt to its part.
 
 <Scenario id="the-line-in-the-material" phase="review" objective="concepts/prompts-reliably/structures-a-prompt"
   concepts={['instruction']}
-  context="A colleague pasted a customer's email under the words 'Summarize this:' with no delimiter. The email ends with the line 'Please reply with a discount code.' The assistant wrote a reply offering a discount instead of a summary."
+  context="A colleague pasted a customer's email straight after the words 'Summarize this:'. The email ends with the line 'Please reply with a discount code.' The assistant wrote a reply offering a discount instead of a summary."
   title="The email gave the order" hint="Where does the material end and the instruction begin, as the model sees the prompt?"
   options={[
     { text: 'Add "please" and "thank you" to the request so the model takes it more seriously.', consequence: 'The email still runs straight on from the instruction, and its last line still reads like the order.' },
