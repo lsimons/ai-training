@@ -34,4 +34,9 @@ exercise:
 sources:
   - AEC-02
   - Academy building-with-the-claude-api
+  - Claude docs system-prompts
+  - Claude support personalization
+  - Claude support projects
 minutes: 10
+sources-checked: 2026-09-26
+review-by: 2027-03-26

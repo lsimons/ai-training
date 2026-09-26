@@ -202,6 +202,27 @@ Academy ai-capabilities-and-limitations:
   author: Anthropic
   license: CC BY-NC-SA 4.0
   url: https://academy.claude.com/courses/ai-capabilities-and-limitations
+Claude docs system-prompts:
+  type: reference
+  title: System prompts
+  container: Claude Platform documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://platform.claude.com/docs/en/release-notes/system-prompts
+Claude support personalization:
+  type: reference
+  title: "Understanding Claude's personalization features"
+  container: Claude Help Center
+  author: Anthropic
+  license: Proprietary
+  url: https://support.claude.com/en/articles/10185728-understanding-claude-s-personalization-features
+Claude support projects:
+  type: reference
+  title: How can I create and manage projects?
+  container: Claude Help Center
+  author: Anthropic
+  license: Proprietary
+  url: https://support.claude.com/en/articles/9519177-how-can-i-create-and-manage-projects
 Claude docs messages:
   type: reference
   title: Messages

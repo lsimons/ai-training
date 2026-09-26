@@ -99,13 +99,14 @@ difference is one sentence in the system prompt.
 ## Who writes it
 
 In a chat product, the vendor writes the system prompt, and in most
-products you do not see it. It names the assistant and sets its tone, and
-it often gives the model the current date and the topics to decline. When
-two products built on the same model behave differently, much of the
-difference is in those prompts. Many products let you add to it: a
-settings page for "custom instructions", or a project with instructions
-that apply to every chat in it. That text is added to the vendor's prompt,
-and it holds for every conversation you start there.
+products you do not see it. It names the assistant and sets its tone, and it often gives the model
+facts such as the current date (@Claude docs system-prompts). When two
+products built on the same model behave differently, much of the
+difference is in those prompts. Many products let you add standing text
+of your own: account-wide instructions on a settings page, often called
+"custom instructions", or a project with instructions that apply to every
+chat in it (@Claude support personalization) (@Claude support projects).
+That text applies to every conversation you start there.
 
 In an agent or a custom application, the developer writes it. The
 programming interface of every major model has a field for it, separate
