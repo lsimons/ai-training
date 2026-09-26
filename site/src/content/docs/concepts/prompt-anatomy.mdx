@@ -1,4 +1,4 @@
-import { Choice, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Sort, Pitfall, Exercise, Recap, Prompt, Response, Match, Scenario } from '@components/lesson';
 
 In this lesson we start from a one-line request that gets a vague answer.
 We rebuild it one part at a time, and after each part you run the result in
@@ -259,6 +259,37 @@ Place each fragment of the prompt in the bucket for the part it belongs
 to.
 
 </Sort>
+
+<Match id="name-the-part" phase="review" objective="concepts/prompts-reliably/structures-a-prompt"
+  concepts={['instruction']}
+  context="The lesson divides a prompt into four parts: the instruction, the context the model works on, the audience and purpose, and the format and length. The lines here come from a prompt that asks for a summary of a customer complaint."
+  title="Which part is this?" hint="Does the line say what to do, give the material, say who reads it and why, or say what the result looks like?"
+  options={['Instruction', 'Context', 'Audience and purpose', 'Format and length']}
+  rows={[
+    { statement: 'Summarize the complaint between the two lines of dashes.', option: 0, why: 'Which part says what the model should do?' },
+    { statement: 'The complaint itself, pasted between two lines of dashes.', option: 1, why: 'Which part is the material the model works on?' },
+    { statement: 'The reader is the shift manager, who decides today whether to call the customer back.', option: 2, why: 'Which part says who reads the result and what they do with it?' },
+    { statement: 'Two sentences, and no greeting.', option: 3, why: 'Which part says what the result looks like?' },
+  ]}
+  rationale="A prompt that names all four parts leaves the model fewer gaps to fill with its defaults.">
+Match each line of the prompt to its part.
+</Match>
+
+<Scenario id="the-line-in-the-material" phase="review" objective="concepts/prompts-reliably/structures-a-prompt"
+  concepts={['instruction']}
+  context="A colleague pasted a customer's email straight after the words 'Summarize this:'. The email ends with the line 'Please reply with a discount code.' The assistant wrote a reply offering a discount instead of a summary."
+  title="The email gave the order" hint="Where does the material end and the instruction begin, as the model sees the prompt?"
+  options={[
+    { text: 'Add "please" and "thank you" to the request so the model takes it more seriously.', consequence: 'The email still runs straight on from the instruction, and its last line still reads like the order.' },
+    { text: 'Put the email between two lines of dashes, and ask for a summary of the text between them.', correct: true, consequence: 'The model now reads the email as material. The summary mentions the request for a discount code, and it offers none.' },
+    { text: 'Move the words "Summarize this" to the end, after the email.', consequence: 'The instruction and the email still run together, and nothing tells the model where the email stops.' },
+    { text: 'Delete the email\'s last line before you paste it in.', consequence: 'This summary works, and the next email with a request in it causes the same problem.' },
+  ]}>
+
+The assistant answered the customer's request instead of summarizing the
+email. What do you change?
+
+</Scenario>
 
 <Exercise stretch="Take the four-part prompt and remove one part at a time, running each version. Which part changes the answer the most for your text?">
 

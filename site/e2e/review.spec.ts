@@ -5,12 +5,17 @@ const TODAY = new Date().toISOString().slice(0, 10);
 const ITEM = 'concepts/how-models-work#what-the-model-does';
 const OTHER = 'concepts/how-models-work#name-the-failure';
 
+// Each item's one `review` alternate, already asked once, so a review asks the item's own checkpoint.
+const ITEM_ALTERNATE = 'order-one-token';
+const OTHER_ALTERNATE = 'match-the-failure';
+
 function scheduled(due: string) {
+	const served = (alternate: string) => [{ at: '2000-01-01', result: 'pass' as const, served: alternate }];
 	return {
 		lessons: { 'concepts/how-models-work': { state: 'finished' as const, at: TODAY } },
 		reviews: {
-			[ITEM]: { stage: 1, due, last: null, history: [], revision: 1 },
-			[OTHER]: { stage: 1, due, last: null, history: [], revision: 1 },
+			[ITEM]: { stage: 1, due, last: null, history: served(ITEM_ALTERNATE), revision: 1 },
+			[OTHER]: { stage: 1, due, last: null, history: served(OTHER_ALTERNATE), revision: 1 },
 		},
 	};
 }
@@ -75,7 +80,8 @@ test('the review page records one result per item: pass on Check, fail on Give U
 	const histories = Object.entries(record.reviews ?? {})
 		.filter(([id]) => id.startsWith('concepts/'))
 		.map(([, x]) => (x as { history: unknown[] }).history.length);
-	expect(histories).toEqual([1, 1]);
+	// One seeded answer each, plus the one recorded here.
+	expect(histories).toEqual([2, 2]);
 
 	await page.getByRole('button', { name: 'Next item' }).click();
 	await expect(page.locator('[data-status]')).toHaveText('Done: 2 items reviewed. 0 more remain due.');
@@ -83,9 +89,15 @@ test('the review page records one result per item: pass on Check, fail on Give U
 
 test('the review page clones an order checkpoint that drags like the lesson copy', async ({ page, seed }) => {
 	const item = 'building-agents/agent-loop#order-the-loop';
+	// The item's `review` alternates were each asked once, so the review asks the order checkpoint itself.
+	const history = ['only-the-loop-does-it', 'the-tool-raises', 'model-or-loop'].map((served) => ({
+		at: '2000-01-01',
+		result: 'pass' as const,
+		served,
+	}));
 	await seed({
 		lessons: { 'building-agents/agent-loop': { state: 'finished', at: TODAY } },
-		reviews: { [item]: { stage: 1, due: '2000-01-01', last: null, history: [], revision: 1 } },
+		reviews: { [item]: { stage: 1, due: '2000-01-01', last: null, history, revision: 1 } },
 	});
 	await page.goto('building-agents/review/');
 	const cp = page.locator('.review [data-checkpoint]');
@@ -98,16 +110,18 @@ test('the review page clones an order checkpoint that drags like the lesson copy
 	await expect(cp.locator('.cp-feedback')).toHaveText('Correct order.');
 	await expect(cp.locator('.cp-stage-label')).toHaveText('stage 2 of 5');
 	const record = await storedRecord(page);
-	const history = (record.reviews?.[item] as { history: { result: string }[] } | undefined)?.history ?? [];
-	expect(history.map((h) => h.result)).toEqual(['pass']);
+	const recorded =
+		(record.reviews?.[item] as { history: { result: string; served?: string }[] } | undefined)?.history ?? [];
+	expect(recorded.map((h) => h.served ?? h.result)).toEqual([...history.map((h) => h.served), 'pass']);
 });
 
-// The worked example of review alternates (spec S05 "Which checkpoint a review asks"): one `review` alternate,
-// a multi-choice, shares the objective of this choice checkpoint.
+// The worked example of review alternates (spec S05 "Which checkpoint a review asks"): two `review` alternates,
+// a multi-choice and then a sort in page order, share the objective of this choice checkpoint.
 const ALT_LESSON = 'concepts/straight-answer';
 const OWN_ID = 'hide-the-preference';
 const OWN = `${ALT_LESSON}#${OWN_ID}`;
 const ALTERNATE = 'spot-the-sycophancy';
+const SECOND_ALTERNATE = 'shows-or-hides';
 
 function dueWith(history: { at: string; result: 'pass' | 'fail'; served?: string }[]) {
 	return {
@@ -144,7 +158,12 @@ test('the review page asks an alternate never asked before in place of the item,
 });
 
 test("once every alternate was asked, the review page asks the item's own checkpoint", async ({ page, seed }) => {
-	await seed(dueWith([{ at: '2000-01-01', result: 'pass', served: ALTERNATE }]));
+	await seed(
+		dueWith([
+			{ at: '2000-01-01', result: 'pass', served: ALTERNATE },
+			{ at: '2000-01-02', result: 'pass', served: SECOND_ALTERNATE },
+		]),
+	);
 	await page.goto('concepts/review/');
 	const cp = page.locator('.review [data-checkpoint]');
 	await expect(cp).toBeVisible();
@@ -157,11 +176,11 @@ test("once every alternate was asked, the review page asks the item's own checkp
 	const record = await storedRecord(page);
 	const history =
 		(record.reviews?.[OWN] as { history: { result: string; served?: string }[] } | undefined)?.history ?? [];
-	expect(history.map((h) => h.served ?? null)).toEqual([ALTERNATE, null]);
+	expect(history.map((h) => h.served ?? null)).toEqual([ALTERNATE, SECOND_ALTERNATE, null]);
 });
 
 test('one review session never asks the same alternate for two items', async ({ page, seed }) => {
-	// Both checkpoints of the objective are due, and the one alternate matches both by objective.
+	// Both checkpoints of the objective are due, and both alternates match both items by objective.
 	const other = `${ALT_LESSON}#reversal-under-pushback`;
 	const item = { stage: 1, due: '2000-01-01', last: null, history: [], revision: 1 };
 	await seed({
@@ -176,7 +195,7 @@ test('one review session never asks the same alternate for two items', async ({ 
 	await cp.locator('.cp-check').first().click();
 	await page.getByRole('button', { name: 'Next item' }).click();
 	await expect(page.locator('[data-status]')).toHaveText('Item 2 of 2');
-	// The alternate is taken, so the second item asks its own checkpoint.
-	await expect(cp).toHaveAttribute('id', 'reversal-under-pushback');
-	await expect(cp).not.toHaveAttribute('data-served');
+	// The first alternate is taken, so the second item asks the other one.
+	await expect(cp).toHaveAttribute('id', SECOND_ALTERNATE);
+	await expect(cp).toHaveAttribute('data-progress-id', other);
 });

@@ -1,0 +1,1 @@
+src/api/generated/ is generated from the billing API spec, and a hand edit is lost at the next regeneration. Run /regenerate-api-client to update the client, or change the spec in the billing API.

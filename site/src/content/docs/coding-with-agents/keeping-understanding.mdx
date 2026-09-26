@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response, Match } from '@components/lesson';
 
 In this lesson we look at what happens to your own understanding of a
 system when an agent writes most of the code. The earlier lessons in this
@@ -274,6 +274,36 @@ A fresh agent session proposes replacing the in-process queue with a
 broker. You remember the team deciding against a broker months ago. What
 do you do?
 </Scenario>
+
+<Match id="what-to-do-when" phase="review" objective="coding-with-agents/ships-with-agent/keeps-understanding"
+  concepts={['working-increments', 'project-instructions']}
+  context="An engineer builds a feature with a coding agent in merged increments and wants to keep their own understanding of the system as the agent writes more of it."
+  title="What do you do at this moment?" hint="Is it a line you can't explain, a merged increment, or a decision the next session must know about?"
+  options={['Ask for a plain-language explanation and a test', 'Explain from memory how it fits, then check the code', 'Write the decision and its reason in the decisions folder']}
+  rows={[
+    { statement: 'A line in the diff that you can\'t explain', option: 0, why: 'What would let you read this line next time?' },
+    { statement: 'An increment has just been merged', option: 1, why: 'How do you find out whether you can still explain the system?' },
+    { statement: 'The team chose an in-process queue over a broker', option: 2, why: 'Where does the next agent session look before it proposes to change this?' },
+  ]}
+  rationale="Each habit closes one leak: a line you can't read, a system you can no longer explain, or a reason the next session never sees.">
+Match each moment to the habit it calls for.
+</Match>
+
+<MultiChoice id="signs-of-a-leak" phase="review" objective="coding-with-agents/ships-with-agent/keeps-understanding"
+  concepts={['working-increments']}
+  context="The lesson says understanding leaks when the agent writes the code and the engineer only runs the tests."
+  title="Signs your understanding leaked" hint="Which of these show that the reading stopped, and which are the habits that keep it going?"
+  options={[
+    { text: 'You have to look up why a module is built the way it is.', correct: true },
+    { text: 'You asked the agent to explain one regular expression.', why: 'Asking for an explanation of a line you can\'t read is the habit that keeps understanding.' },
+    { text: 'You merged the last increments after a glance at the green diff.', correct: true },
+    { text: 'You wrote the reason for a design choice in the decisions folder.', why: 'Writing the reason down keeps it for you and for the next session.' },
+  ]}>
+
+Which two of these are signs that your own understanding of the code has
+leaked?
+
+</MultiChoice>
 
 <Exercise stretch="Do the same after the third increment, date validation. Then compare your two decision files: does the second one contradict anything in the first, and if so, which of the two changes?">
 Take a copy of the to-do fixture from *Working from a spec in small

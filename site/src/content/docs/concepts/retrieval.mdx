@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, MultiChoice, Scenario, Pitfall, Exercise, Recap, Match } from '@components/lesson';
 
 A product assistant on a web shop is asked what the yearly plan costs,
 and it answers with last year's price. The price went up in January,
@@ -36,9 +36,9 @@ decides when to search and searches again after a poor result, builds on
 these same steps (@AEC-08).
 
 The search is the weak point. A model can only ground its answer in the
-passages the search gave it. When the search returns the wrong passage,
-the model answers from the wrong passage, with the same confidence
-(@AEC-05). So the first thing to know about any retrieval assistant is
+passages the search gave it. When the search returns the wrong passage, the model answers from the
+wrong passage, and the answer is wrong (@AEC-08). It reads as sure of
+itself as a right answer does. So the first thing to know about any retrieval assistant is
 how it searches.
 
 ## What a keyword search finds
@@ -120,7 +120,7 @@ Grounding narrows what the model can get wrong. It doesn't remove it.
 A grounded answer rests on the passage, and the passage can be the
 wrong one, as the third search below shows. The model can also misread
 a passage it was given, or answer a question the passage only half
-covers by adding a detail from training (@AEC-05). And a passage that
+covers by adding a detail from training. And a passage that
 is itself out of date grounds an out-of-date answer. Grounding makes an
 answer checkable, and checking is still yours to do.
 
@@ -178,6 +178,20 @@ instruction to answer from the passages and say when they don't cover
 the question. Which of these does grounding take care of?
 </MultiChoice>
 
+<Match id="where-to-look" phase="review" objective="concepts/explains-models/explains-grounding"
+  concepts={['retrieval-rag', 'grounding']}
+  context="An assistant answers staff questions from a folder of policy documents through retrieval: a search picks passages, pastes them into the prompt, and the model answers from them and points at the passage it used."
+  title="Where did it go wrong?" hint="Compare the answer with the passage it points at. Is the passage missing, wrong, or right and misread?"
+  options={['The search found no matching passage', 'The passage itself is wrong or old', 'The model misread a passage it had']}
+  rows={[
+    { statement: 'The answer gives last year\'s opening hours, and the passage it points at shows last year\'s hours.', option: 1, why: 'Does the answer match the passage it points at?' },
+    { statement: 'The assistant says the documents don\'t cover parking, and the travel policy has a paragraph about car parks.', option: 0, why: 'Did the question use the words that the document uses?' },
+    { statement: 'The answer says refunds are possible for 60 days, and the passage it points at says 30 days.', option: 2, why: 'Is the passage right, and does the answer say what the passage says?' },
+  ]}
+  rationale="A grounded answer can be checked against its passage, and the check tells you whether to fix the search, the document or nothing but the answer.">
+Match each wrong answer to where it went wrong.
+</Match>
+
 <Pitfall title="Two clauses, one sentence">
 An assistant is asked what the company pays for working from home. The
 search returns two passages, because the remote work policy and the
@@ -224,7 +238,7 @@ this same check on one of its answers?
    (@AEC-08).
 2. The search bounds the answer. A keyword search finds a document only
    when the question uses the document's words, and a wrong passage
-   produces a confident wrong answer (@AEC-05).
+   produces a wrong answer (@AEC-08).
 3. A grounded answer points at its passage and says when the passages
    don't cover the question. Grounding makes an answer checkable and
    doesn't make it right: the passage can be wrong, old, or misread

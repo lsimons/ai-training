@@ -1,4 +1,4 @@
-import { Choice, Match, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Match, Pitfall, Exercise, Recap, Prompt, Response, Sort, Scenario } from '@components/lesson';
 
 In the previous lesson you stated the format in words and in numbers, and
 that worked because "three bullets, each under 15 words" is a format words
@@ -249,6 +249,36 @@ it has no arrow by mistake. The output leaves the arrow off its `OPEN` line
 too. What is the right fix?
 
 </Choice>
+
+<Sort id="show-or-say" phase="review" objective="concepts/prompts-reliably/structures-a-prompt"
+  concepts={['few-shot-example']}
+  context="The lesson shows that one worked input and output pair gets a format that a paragraph of rules couldn't, and says when to describe a requirement in words instead."
+  title="Show it or say it?" hint="Does the requirement have a layout, a tone or an edge case in it, or is it one number or word?"
+  buckets={['Show one worked example', 'Describe it in words']}
+  items={[
+    { text: 'Invoice lines in the finance team\'s layout, empty fields included', bucket: 0 },
+    { text: 'The tone of the team\'s earlier replies', bucket: 0 },
+    { text: 'A date range as the booking system prints it, one-day ranges too', bucket: 0 },
+    { text: 'No more than 80 words in the whole answer', bucket: 1 },
+    { text: 'Written in Spanish', bucket: 1 },
+    { text: 'Exactly three bullets, one for each decision', bucket: 1 },
+  ]} />
+
+<Scenario id="the-example-with-a-slip" phase="review" objective="concepts/prompts-reliably/structures-a-prompt"
+  concepts={['few-shot-example']}
+  context="A prompt shows the model one worked example of a team's format for a list of open tickets. In the example, one ticket number was typed without its leading zero."
+  title="The example had a slip" hint="What does the model copy most closely: the rules or the example?"
+  options={[
+    { text: 'Correct the ticket number in the example and run the prompt again.', correct: true, consequence: 'The model copies the corrected example, and every ticket number keeps its leading zero.' },
+    { text: 'Add a rule under the example that says to keep the leading zeros.', consequence: 'The example still shows a number without its zero, and the model follows the example on some runs.' },
+    { text: 'Remove the example and describe the whole format in rules.', consequence: 'The layout the example showed gets lost, and the rules don\'t bring it back.' },
+    { text: 'Ask the model to explain why it dropped the zeros.', consequence: 'The model writes a plausible reason, and the example with the slip is still in the prompt.' },
+  ]}>
+
+The output drops the leading zero from some ticket numbers, the same way
+your one example does by mistake. What do you do?
+
+</Scenario>
 
 <Exercise stretch="Add a deliberate mistake to your example, such as a wrong date format or a missing field, and run again. Did the output copy it? Then fix the example and confirm the copy is gone.">
 

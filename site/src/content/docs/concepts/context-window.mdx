@@ -1,4 +1,4 @@
-import { Choice, Sort, Predict, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Sort, Predict, Pitfall, Exercise, Recap, Prompt, Response, MultiChoice, Scenario } from '@components/lesson';
 
 You have been working with a chat assistant on a report for two hours. In
 your first message you said the report is for the finance team and must
@@ -199,6 +199,38 @@ team. Which explanation fits what you know about how a model produces an
 answer?
 
 </Choice>
+
+<MultiChoice id="what-the-next-answer-sees" phase="review" objective="concepts/explains-models/explains-generation"
+  concepts={['context-window']}
+  context="The lesson explains that a model writes each answer from the tokens in its context window for that response, and that a long chat can push early messages out of it. The chat in this item has no memory features turned on."
+  title="What can the next answer use?" hint="Which of these reach the window for this one response?"
+  options={[
+    { text: 'The file you attached earlier in this short chat.', correct: true },
+    { text: 'The notes you keep in another tab of your browser.', why: 'The model only has what reaches its window. A tab it was never given does not exist for it.' },
+    { text: 'The message you just sent.', correct: true },
+    { text: 'What you told the same assistant in a chat yesterday.', why: 'With memory features off, yesterday\'s chat never enters today\'s window.' },
+  ]}>
+
+You are in a chat with an assistant that has no memory features. Which two
+of these can the model use for its next answer?
+
+</MultiChoice>
+
+<Scenario id="the-budget-it-dropped" phase="review" objective="concepts/explains-models/explains-generation"
+  concepts={['context-window', 'token']}
+  context="In the first message of a long chat, the learner gave a budget of 5,000 euros. Many messages later the assistant proposes a plan that costs 9,000 euros."
+  title="The budget from the first message" hint="Is the first message still among the tokens the model reads for this answer?"
+  options={[
+    { text: 'Tell the assistant it made a mistake and ask it to try harder this time.', consequence: 'The budget is still outside the window. The next plan misses it too, and the chat grows longer.' },
+    { text: 'Ask the assistant which budget you gave it at the start of the chat.', consequence: 'The model can only answer from its window. It gives a number that sounds right, and you can\'t tell a guess from a memory.' },
+    { text: 'Switch to a model with a bigger vocabulary so that it keeps numbers.', consequence: 'The vocabulary decides how text splits into tokens. The number of tokens that fit is the same, and the first message is still gone.' },
+    { text: 'Restate the budget in your next message and ask for the plan again.', correct: true, consequence: 'The budget is back among the tokens the model reads, and the new plan stays under 5,000 euros.' },
+  ]}>
+
+Many messages ago you said the budget is 5,000 euros. The assistant now
+proposes a plan for 9,000 euros. What do you do?
+
+</Scenario>
 
 <Exercise stretch="Paste the same page into a chat assistant and ask it how many tokens the page is. Compare its answer with the script, and decide which one you trust and why.">
 

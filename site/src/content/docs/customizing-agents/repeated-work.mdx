@@ -1,0 +1,424 @@
+import { Choice, MultiChoice, Match, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+This lesson closes the course with one decision. We read three sessions in
+which a coding agent works on the same small project, and we find what the
+user had to explain in more than one of them. Each repeated explanation
+then moves to the project instructions, a skill, a hook or a context file,
+where the agent finds it next time. Last, we cut the lines of the
+instructions file that a hook and a skill now cover. The file gets shorter,
+because the hook and the skill hold what it used to say.
+
+The files are in the course repository at
+`site/examples/customizing-agents/repeated-work/`. The session logs
+are in `sessions/`, and `instructions-before.md` is the project's
+instructions file as it was during the sessions. The course wrote the logs
+for this lesson, and no model produced them. `find_repeats.py` is a short
+Python script that only reads the logs. Where the lesson describes Claude
+Code, the facts were checked against the vendor's documentation on the date
+at the end of the lesson. Other coding agents have the same mechanisms
+under other names.
+
+## The same explanation in three sessions
+
+The project is the frontend of a small web shop. Its pages get their data
+from a billing API through a client that a generator writes into
+`src/api/generated/`. In each of the three sessions the billing API has a
+new field, so the agent must regenerate the client before it can use the
+field. Each session works out again how to do that. The user corrects the
+agent in each session, and some of the corrections are the same each time.
+
+The script compares the three logs. It prints each message the user sent
+in more than one session, and each command the agent ran in all three.
+
+<Predict id="find-the-repeats" title="What came up more than once"
+  answer={`Said by the user in more than one session:
+    sessions 1, 2, 3: Don't edit files in src/api/generated/ by hand. Change the spec or regenerate the client.
+    sessions 1, 2, 3: Set SPEC_URL to https://billing.example.com/staging/openapi.json, that's the staging spec.
+    sessions 1, 3: Amounts from the billing API are in cents. Use formatMoney() from src/lib/money.ts, it divides by 100 and adds the currency.
+    sessions 2, 3: Call the billing API the way this snippet does, through useApi(), so the page gets the loading and error states:
+  Run by the agent in every session:
+    npm run generate
+    make api-client
+    SPEC_URL=https://billing.example.com/staging/openapi.json make api-client
+    npm run lint
+    npm run format -- src/api/generated
+    npm test -- src/api
+    npm test`}
+  run="customizing-agents/repeated-work/find_repeats.py">
+Run this in `site/examples/customizing-agents/repeated-work/`, and compare
+with the output below.
+
+```sh
+python3 find_repeats.py
+```
+
+</Predict>
+
+Read the output as a list of costs. Each line under the first heading is
+something the user typed again that a file could have said once. The
+commands under the second heading are the agent's search for the
+procedure. The first attempt is `npm run generate`, a script that doesn't
+exist. The `make` target comes next, without the variable it needs, and
+only after that the command that works. A lint error then shows that the
+generated files must be formatted. The same search happens in each of the
+three sessions.
+
+That's the symptom to look for in your own sessions: the same
+explanation, given twice. The fix is **turning repeated work into reusable
+knowledge**. You move the explanation to a place the agent reads without
+being told, so that no later session needs it. The Agent Engineer Course
+calls knowledge of how to do a task procedural memory, and it is often
+written into the agent's instructions (@AEC-05). Claude Code's guide to
+its extensions treats such moments as the signs that a project needs one
+more piece of setup (@Claude Code features). When the agent has broken
+the same convention twice, add the convention to `CLAUDE.md`. When you
+have given the agent the same steps three times, write them as a skill.
+And when something has to happen on every occasion, with no exception,
+use a hook.
+
+One line of the output needs a closer look. The instructions file already
+says "Never edit files under `src/api/generated/`", and the user still had
+to say it in all three sessions. Claude Code reads the project's
+instructions file at the start of every session (@Claude Code memory), so
+the agent had the rule. It still started a hand edit in each session.
+
+## A place for each repeated step
+
+Each kind of repeated step has its own place. The choice depends
+on what the step is and what one miss costs.
+
+- **A fact that every task needs goes into the project instructions.**
+  The instructions file is loaded at the start of every session, so its
+  lines cost context in every session (@Claude Code features). "Amounts
+  from the billing API are integer cents" is such a fact. It matters on
+  any page that shows money, whatever the task is.
+- **A procedure goes into a skill.** Steps that must happen in order are
+  a procedure. A skill puts only its description in the context, and the
+  steps load when a task matches the description or when you type the
+  skill's name after a slash (@Claude Code skills). The regeneration is
+  three commands in a fixed order, and the agent needs them only when the
+  client must change.
+- **A rule where one miss costs too much goes into a hook.** An
+  instruction is a request. The agent weighs it against everything else in
+  its context. A hook runs on its event every time, whatever the model
+  remembers (@Claude Code features). A hand edit under `src/api/generated/`
+  is lost the next time anyone regenerates the client, and nobody notices
+  when it disappears.
+- **An example to copy goes into a context file.** **Context files** are
+  files the team keeps for the agent to read, reviewed like code. The
+  `useApi()` snippet is a pattern to copy. It belongs in a short file such
+  as `docs/examples/billing-call.md`, with one line in the instructions
+  that says when to read it. This placement is the convention of this
+  course, from [the lesson on reviewing memory](/customizing-agents/memory-review/).
+  The best-practices page gives similar advice for prompts: point the
+  agent to an example of the pattern in your code
+  (@Claude Code best practices).
+
+Claude Code also lets a skill hold reference material, such as a style
+guide (@Claude Code features). This lesson keeps skills for procedures and
+context files for examples, so the question "what's this?" has one
+answer.
+
+The staging URL is a fact that the regeneration needs and other tasks
+don't. The best-practices page lists required environment variables among
+the things to put in the instructions file (@Claude Code best practices),
+and that suits a variable that many tasks use. Only one command uses
+`SPEC_URL`, the first step of the regeneration. So the URL goes into that
+step, and a change to the URL is one edit in one file. A default in the
+`Makefile` itself (`SPEC_URL ?= ...`) is the other good fix, because then
+nobody has to know the URL.
+
+Here is the skill, as `.claude/skills/regenerate-api-client/SKILL.md` in the
+project (@Claude Code skills):
+
+```markdown
+---
+name: regenerate-api-client
+description: Regenerate the billing API client in src/api/generated/. Use when the billing API has changed, or when a field the API returns is missing from the client.
+---
+
+1. Run `SPEC_URL=https://billing.example.com/staging/openapi.json make api-client`.
+2. Run `npm run format -- src/api/generated`. The generator's output fails the lint rules until it is formatted.
+3. Run `npm test -- src/api`. If a test fails, stop and report the failure.
+
+Done when `npm run lint` reports no problems and the API tests pass.
+```
+
+The hook is a `PreToolUse` hook with the matcher `Edit|Write`, so Claude
+Code runs it before each call to its Edit and Write tools. The hook gets
+the tool call as JSON, and for these tools `tool_input.file_path` is
+always the absolute path of the file. For a path with
+`/src/api/generated/` in it, the hook writes a message to standard error
+and exits with code 2, which stops the edit and gives Claude the message
+as the reason (@Claude Code hooks). The matcher compares tool names, so
+this hook sees only those two tools. A shell
+command that writes the file, such as `sed -i` or `cat >`, goes through
+the Bash tool, and this hook never sees it. [Writing a hook that blocks a
+mistake](/customizing-agents/first-hook/) builds a hook of this kind step
+by step. The message is all the agent learns about the rule when it is
+blocked, so it says what to do:
+
+```text
+src/api/generated/ is generated from the billing API spec, and a hand edit is lost at the next regeneration. Run /regenerate-api-client to update the client, or change the spec in the billing API.
+```
+
+The user in the logs was a human approval step for this rule. They stopped
+the agent three times, and the answer was the same each time. [Human in
+the loop](/safety/agent-risk/#human-in-the-loop) says to keep approvals for
+the few moments that matter, so that each one gets your attention. A rule
+with one fixed answer doesn't need your judgment, and the hook can give
+that answer. Your attention stays on the steps that do need judgment, such
+as reading the diff of the regenerated client before it is committed.
+
+<Sort id="place-each-step" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['turning-repeated-work-into-reusable-knowledge', 'context-files']}
+  context="The lesson places repeated steps from coding sessions by what they are: a fact every task needs goes into the project instructions, a procedure into a skill, a rule where one miss costs too much into a hook, and an example to copy into a context file."
+  title="Where does each step go?" hint="Is it a fact for most tasks, steps in an order, a rule that must hold every time, or a pattern to copy?"
+  buckets={['Project instructions', 'Skill', 'Hook', 'Context file']}
+  items={[
+    { text: 'Amounts from the billing API are integer cents, shown with formatMoney()', bucket: 0 },
+    { text: 'The three commands that regenerate the API client, in their order', bucket: 1 },
+    { text: 'No edit to a file under src/api/generated/, on any task', bucket: 2 },
+    { text: 'The useApi() snippet that shows how a page calls the billing API', bucket: 3 },
+    { text: 'The tests run with npm test, and the API tests with npm test -- src/api', bucket: 0 },
+    { text: 'No commit of a file named .env, which holds the local secrets', bucket: 2 },
+  ]} />
+
+<Choice id="where-the-url-goes" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['turning-repeated-work-into-reusable-knowledge']}
+  context="In three coding sessions the user told the agent the staging spec URL that the API client regeneration needs. The agent needs the URL only when it regenerates the client, and the team is writing a skill for the regeneration."
+  title="Where does the staging URL go?" hint="Which tasks need the URL, and which place loads only for those tasks?"
+  options={[
+    { text: 'Into the first step of the regeneration skill, as part of the command.', correct: true },
+    { text: 'Into the project instructions, so every session, regeneration or not, starts with the URL.', why: 'The instructions suit a variable that many tasks use. Only one command uses this one, and most sessions never run it.' },
+    { text: 'Into the agent\'s auto-memory, which it saves after the user says it.', why: 'An auto-memory note is on one machine and nobody reviews it. A teammate\'s agent still has to ask.' },
+    { text: 'Nowhere, so the user states it in the chat whenever the agent asks.', why: 'That is the repeated explanation the lesson is removing. Each session pays for the question and waits for the answer.' },
+  ]}>
+The team writes the regeneration skill. Where should the staging spec URL
+go?
+</Choice>
+
+<Choice id="the-rule-it-had" objective="customizing-agents/configures-agent/adds-a-hook"
+  concepts={['turning-repeated-work-into-reusable-knowledge', 'hooks']}
+  context="A project's instructions file says never to edit files under src/api/generated/, because they are generated from an API spec. In three sessions the agent still started a hand edit there, and the user stopped it each time. A hand edit that slips through is lost at the next regeneration."
+  title="The rule was in the file" hint="Which of these still depends on the model choosing to follow a line of text?"
+  options={[
+    { text: 'Put IMPORTANT in front of the line in the instructions file, so the agent gives the rule more weight.', why: 'Emphasis can help with one skipped line, and it is still a request the agent weighs. This rule has to hold on every edit.' },
+    { text: 'Move the line into the regeneration skill, next to the steps that regenerate the client.', why: 'The skill loads when a task matches its description. The agent can start a hand edit on a task that never asks for a regeneration, so the skill never loads.' },
+    { text: 'Add a hook that blocks the agent\'s file edits under src/api/generated/ and says what to do.', correct: true },
+    { text: 'Write the reason next to the rule in the instructions file, so the agent knows why it matters.', why: 'A reason makes a rule easier to follow. It is still text in the context, and the agent can still skip it late in a long session.' },
+  ]}>
+The instructions file already had the rule, and the agent started a hand
+edit in all three sessions. What do you change?
+</Choice>
+
+## Cut what the hook and the skill now hold
+
+The best-practices page suggests removing any line of the instructions
+file that the agent doesn't need to avoid a mistake
+(@Claude Code best practices). The same page warns that a long
+instructions file makes the agent miss the rules that matter.
+
+Apply this to the long regeneration paragraph first. The skill holds
+the procedure now, with each step on its own line, and its description is
+in the context of every session (@Claude Code skills). Without the
+paragraph the agent still finds the steps, so the paragraph goes.
+
+The line "Never edit files under `src/api/generated/`" is different. The
+hook blocks the agent's Edit and Write calls on those files, and its
+message says what to do. It doesn't see a shell command, and an agent
+that is blocked on one tool may try the same change through another. So
+the hook covers only part of the rule, and a line for the rest stays. It
+can be short, and it can say where the change goes instead:
+
+```text
+- Change files under `src/api/generated/` only by regenerating the client. A hook blocks direct edits.
+```
+
+The line also helps the agent plan. Without it, the agent learns the rule
+only when a hook blocks an edit it has already planned, and it loses a
+turn to plan again. The skill's description helps there too, because it
+names the case of a missing field.
+
+The fact about amounts in cents and the pointer to the example file come
+in. Here is the change to the instructions file:
+
+```diff
+ - Run the tests with `npm test`, and `npm run lint` before you commit.
+ - Commit messages follow Conventional Commits.
+-- Never edit files under `src/api/generated/`. They are generated from the billing API spec.
+-- The API client is generated from the billing API's OpenAPI spec, and when the billing API changes you need to regenerate it, which is done with the api-client target in the Makefile, but that target needs the SPEC_URL variable set to the spec of the right environment (usually staging), and afterwards the generated files don't pass our lint rules, so format them with the format script before you run the API tests, and don't commit until those pass.
++- Change files under `src/api/generated/` only by regenerating the client. A hook blocks direct edits.
++- Amounts from the billing API are integer cents. Show them with `formatMoney()` from `src/lib/money.ts`.
++- Before a page calls the billing API, read `docs/examples/billing-call.md` and follow it.
+ - Pages live in `src/pages/`, shared components in `src/components/`.
+```
+
+Delete a rule from the file only when a hook enforces the whole rule, and
+shorten it when a hook enforces a part. The lint line stays whole,
+because no hook in this project runs the linter. A line you cut in favor
+of a hook also depends on that hook being registered on each machine. A
+hook in the project's `.claude/settings.json` is committed with the code,
+and each clone runs it once the folder is trusted (@Claude Code hooks). A
+hook in your personal settings protects only your sessions, so keep the
+full line until the hook is shared.
+
+<MultiChoice id="which-lines-go" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['turning-repeated-work-into-reusable-knowledge']}
+  context="A project now has a skill with the steps to regenerate the API client, and a hook in its shared settings that blocks the agent's Edit and Write calls under src/api/generated/. A shell command that writes those files doesn't reach the hook. No hook runs the linter."
+  title="What happens to each line?" hint="For each line, what holds it or enforces it now, and does that cover all of it?"
+  options={[
+    { text: 'The regeneration paragraph can go, because the skill holds its steps.', correct: true },
+    { text: 'The generated-files line can go, because the hook blocks each change there.', why: 'The hook sees only the Edit and Write tools. A sed command through the shell still changes the files, so a short line has to cover the rest.' },
+    { text: 'The generated-files line stays as a short line, for the part the hook misses.', correct: true },
+    { text: 'The lint line can go, because the skill runs the linter at its end.', why: 'The skill runs the linter only when it regenerates the client. Every other task still needs the line.' },
+  ]}>
+Which two of these are right for the instructions file now?
+</MultiChoice>
+
+<Scenario id="the-message-it-reads" objective="customizing-agents/configures-agent/adds-a-hook"
+  concepts={['turning-repeated-work-into-reusable-knowledge', 'hooks']}
+  context="A team cut its instructions line about files under src/api/generated/ down to one short sentence, because a hook now blocks the agent's edits there. The reason is gone from the file. The hook's message on standard error is what the agent receives when it is blocked. A skill named regenerate-api-client holds the regeneration steps."
+  title="What does the hook say?" hint="The reason is gone from the file. Where does the agent now learn why, and what to do instead?"
+  options={[
+    { text: 'src/api/generated/ is generated code, and a hand edit there is lost the next time the client is regenerated.', consequence: 'The agent learns why it was blocked, and the message doesn\'t name the skill. It may find the skill from its description, or it may try the same change through a shell command that the hook never sees.' },
+    { text: 'This folder is protected. Ask the user for permission before you edit anything under src/api/generated/.', consequence: 'The agent asks, and the answer is no every time. The user is back to being the approval step the hook was meant to replace.' },
+    { text: 'Error: the PreToolUse hook exited with code 2 for an Edit call on a file in src/api/generated/.', consequence: 'The message names the mechanism and says nothing about the rule. The agent tries a Write call on the same file, and the hook blocks it again.' },
+    { text: 'src/api/generated/ is generated from the billing API spec. Run /regenerate-api-client to update the client, or change the spec.', correct: true, consequence: 'The agent runs the skill, the client gets the new field, and the edit never happens. Nobody had to say anything.' },
+  ]}>
+The instructions file now says only that generated files change by
+regeneration. The hook blocks a hand edit under `src/api/generated/`
+when the agent tries one. Which message should it write?
+</Scenario>
+
+<Match id="step-to-place" phase="review" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['turning-repeated-work-into-reusable-knowledge', 'context-files']}
+  context="Each row is something a user had to tell a coding agent in more than one session. The lesson places a repeated step by what it is: a fact for most tasks goes into the project instructions, a procedure into a skill, a rule where one miss costs too much into a hook, and an example to copy into a context file. It keeps skills for procedures."
+  title="Where does it move?" hint="Is it a fact for most tasks, steps in an order, a rule that must hold every time, or a pattern to copy?"
+  options={['Project instructions', 'Skill', 'Hook', 'Context file']}
+  rows={[
+    { statement: 'The project uses pnpm as its package manager', option: 0, why: 'Does this apply to most tasks, and is it a single fact?' },
+    { statement: 'The five steps to add a new language to the site, in order', option: 1, why: 'Is this a list of steps that only some tasks need?' },
+    { statement: 'No change to a file under migrations/, which another team owns', option: 2, why: 'What happens if the agent skips this once?' },
+    { statement: 'A complete test file that shows how the team mocks the payment service', option: 3, why: 'Is this steps to follow or a pattern to copy?' },
+  ]}
+  rationale="A fact for most tasks goes into the instructions, steps into a skill, a rule that must hold every time into a hook, and a pattern to copy into a context file.">
+Match each repeated explanation to the place it moves to.
+</Match>
+
+<Choice id="after-the-env-hook" phase="review" objective="customizing-agents/configures-agent/adds-a-hook"
+  concepts={['turning-repeated-work-into-reusable-knowledge', 'hooks']}
+  context="A team's instructions file says never to commit the .env file, which holds local secrets. The agent committed it once anyway. The team is deciding what to do with the rule."
+  title="The rule about the secrets file" hint="Which option stops the commit whatever the agent remembers, and tells it what to do?"
+  options={[
+    { text: 'Keep the line and add a second line that repeats it in capitals.', why: 'Two copies of a request are still a request. One miss puts the secrets in the history.' },
+    { text: 'Add a shared hook that blocks a commit with .env in it and says to unstage the file.', correct: true },
+    { text: 'Move the rule into a skill for commits, so it loads when the agent commits.', why: 'The agent decides when a skill applies, and it may commit without deciding that the skill does.' },
+    { text: 'Delete the line and rely on reviewers to spot the file in the pull request.', why: 'By the time a reviewer sees it, the secrets are in the history of a pushed branch.' },
+  ]}>
+What should the team do with the rule?
+</Choice>
+
+<Sort id="hook-or-line" phase="review" objective="customizing-agents/configures-agent/adds-a-hook"
+  concepts={['turning-repeated-work-into-reusable-knowledge', 'hooks']}
+  context="The lesson puts a rule into a hook that blocks the action when one miss costs too much, and keeps a rule as a line in the project instructions when it is guidance the agent may weigh against the task."
+  title="Hook, or a line in the instructions?" hint="If the agent broke this rule once, what would it cost, and who would have to undo it?"
+  buckets={['A hook that blocks the action', 'A line in the instructions']}
+  items={[
+    { text: 'No commit that contains the .env file with the local secrets', bucket: 0 },
+    { text: 'No change to a file under migrations/, which another team owns', bucket: 0 },
+    { text: 'Push only to feature branches, because main deploys on each push', bucket: 0 },
+    { text: 'No abbreviations in the names of public functions', bucket: 1 },
+    { text: 'Write the text that users see in plain English', bucket: 1 },
+    { text: 'Explain each change in two or three sentences in the pull request', bucket: 1 },
+  ]} />
+
+<Scenario id="the-third-time" phase="review" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['turning-repeated-work-into-reusable-knowledge']}
+  context="A developer has told a coding agent in three sessions that the staging database refuses writes from the agent's account, and that reports read from the replica. A write attempt fails with a permission error and does no harm. Almost every task in the project touches the database. The team shares one project instructions file in the repository."
+  title="The same fact, a third time" hint="Which tasks need the fact, and which place does every teammate's agent read in every session?"
+  options={[
+    { text: 'Let the agent save it as an auto-memory note on your machine.', consequence: 'Your agent stops asking. A teammate\'s agent on another machine doesn\'t have the note. Its first write to staging fails, and it stops to ask why.' },
+    { text: 'Write a skill named staging-database with the fact in its body.', consequence: 'The skill loads only when a task matches its description. Most data tasks never mention staging, and on those the agent works without the fact.' },
+    { text: 'Add one line with the fact to the project instructions, and commit it.', correct: true, consequence: 'Each session on each clone starts with the fact. Nobody types it again, and a change to it goes through review like the code.' },
+    { text: 'Keep telling the agent in the chat, because the replica may move.', consequence: 'Every session pays for the explanation again. On the day you forget, the agent\'s first write fails, and you explain it once more.' },
+  ]}>
+You are about to type the same explanation about the staging database for
+the third time. What do you do with it?
+</Scenario>
+
+<Choice id="the-five-steps" phase="review" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['turning-repeated-work-into-reusable-knowledge']}
+  context="The lesson places a repeated step by what it is: a fact for most tasks goes into the project instructions, a procedure into a skill, a rule where one miss costs too much into a hook, and an example to copy into a context file."
+  title="The same five steps again" hint="Is it a fact for most tasks, steps in an order, a rule, or an example?"
+  options={[
+    { text: 'Into the project instructions, so every session starts with the steps.', why: 'Every session would pay for steps that only some tasks need.' },
+    { text: 'Into a hook, so the steps run every time a file changes.', why: 'A hook enforces a rule on an event. Adding a language is a task you ask for now and then.' },
+    { text: 'Into the agent\'s auto-memory, which it saves from this session.', why: 'The note stays on your machine, and nobody reviews it. A teammate\'s agent still asks.' },
+    { text: 'Into a skill, with one step per line and a description of when to use it.', correct: true },
+  ]}>
+
+In four sessions you told the agent the same five steps for adding a new
+language to the site. Where do the steps go?
+
+</Choice>
+
+<Pitfall title="The procedure written as one long line">
+The instructions file in this lesson had the whole regeneration in one
+sentence: the `make` target, the variable, the formatting and the tests.
+The agent had that sentence in its context in all three sessions, and in
+each one it still tried `npm run generate`, a script that doesn't exist. A procedure in a long
+line of prose is easy to skim, and nothing in it tells the agent when it
+applies. Put steps in a skill, one step per line, with a description that
+says when to use it (@Claude Code skills), and keep the instructions file
+for short facts (@Claude Code best practices).
+</Pitfall>
+
+<Exercise stretch="Do the same for a project of your own. Read the last three sessions you had with an agent on it, list what you said in more than one of them, sort each item the same way, and write the new instructions file. Try any hook in a branch you can throw away first.">
+Copy `instructions-before.md` and the three logs to a folder of your own,
+so you can change the copy freely. Read the three logs. Make a list of each
+step that came up in more than one session, and next to each step write
+where it goes (instructions, skill, hook or context file) and a one-line
+reason. Then edit your copy of the instructions file: delete or shorten
+the lines that a hook or a skill now covers, and add the lines that point
+to the new places. Write the skill's description and the hook's message as well. This
+is work on paper, and it takes about ten minutes. It practices the question
+to ask the next time you type an explanation you have typed before.
+
+A good result places the repeated steps as this lesson did: the
+regeneration and its staging URL, the rule about generated files, the
+amounts in cents and the `useApi()` example. Your file keeps the lines for
+Node, the tests and the linter, the commit messages and the folders, and a
+short line about generated files.
+Compare with the files in `model-answer/`. Your wording will differ, and
+the places should be the same. If you placed a step somewhere else, write
+the reason down and check it against the four rules in "A place for each
+repeated step". Which
+explanation did you give an agent more than once this week, and where
+would it go?
+</Exercise>
+
+<Recap>
+1. The sign to look for is the same explanation given twice. Each one can
+   move to a place the agent reads without being told, so no later session
+   needs it (@Claude Code features).
+2. A fact that most tasks need goes into the project instructions, and a
+   procedure goes into a skill, which loads only when a task needs it
+   (@Claude Code skills).
+3. A rule where one miss costs too much goes into a hook, which runs every
+   time. An instruction is a request, even one the agent has read
+   (@Claude Code features).
+4. In this course, an example to copy goes into a context file, with one
+   line in the instructions that says when to read it.
+5. A hook enforces only the tool calls it sees. Delete a line that a
+   shared hook or a skill holds in full, and shorten a line that a hook
+   covers in part, such as a rule a shell command can still break. The
+   instructions file gets shorter, and the rules left in it stand out
+   (@Claude Code best practices).
+</Recap>
+
+<Habit id="the-second-time">
+The next time you type an explanation you have typed to an agent before,
+stop and decide where it goes: the instructions, a skill, a hook or a
+context file. Move it there before the session ends.
+</Habit>

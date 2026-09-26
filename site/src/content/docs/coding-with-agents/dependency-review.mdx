@@ -1,4 +1,4 @@
-import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap, MultiChoice, Match } from '@components/lesson';
 
 An agent spent an afternoon on a feature and the pull request is green.
 Somewhere in the diff the lockfile grew, because the agent added a package
@@ -306,6 +306,98 @@ forty lines, one maintainer, no tests, last commit three years ago,
 `Maintained` at 0. The agent imported it for one function, which pads a
 number with leading zeros. The function
 works. What's your verdict?
+</Scenario>
+
+<Match id="classify-the-change" phase="review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['dependency-hygiene']}
+  context="The lesson starts a dependency review from the lockfile diff and classifies each changed package as a new direct dependency, a new transitive dependency or a version bump."
+  title="What kind of change?" hint="Is the package in the root entry, only under another package, or there before with another version?"
+  options={['New direct dependency', 'New transitive dependency', 'Version bump']}
+  rows={[
+    { statement: 'A package appears in the root entry of the new lockfile, and not in the old one', option: 0, why: 'Who asked for this package: your project, or another package?' },
+    { statement: 'A package appears only as a dependency of a new direct dependency', option: 1, why: 'Which package pulled this one in?' },
+    { statement: 'A package in both lockfiles goes from 3.2.0 to 3.4.1', option: 2, why: 'Was the package there before?' },
+  ]}
+  rationale="Each kind of change gets its own review, so the classification comes first.">
+Match each lockfile change to its kind.
+</Match>
+
+<Sort id="dimensions-for-a-bump" phase="review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['dependency-hygiene']}
+  context="The lesson reviews a new dependency on six dimensions: architecture, quality, governance and support, security, code, and license. A version bump of a package you already use keeps only some of them."
+  title="Which dimensions does a bump get?" hint="Which dimensions change when only the installed code changes?"
+  buckets={['Review it for a version bump', 'Skip it for a version bump']}
+  items={[
+    { text: 'Security', bucket: 0 },
+    { text: 'Code', bucket: 0 },
+    { text: 'License, when the license changed', bucket: 0 },
+    { text: 'Architecture', bucket: 1 },
+    { text: 'Quality', bucket: 1 },
+    { text: 'Governance and support', bucket: 1 },
+  ]} />
+
+<MultiChoice id="signs-of-open-governance" phase="review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['dependency-hygiene']}
+  context="The lesson says a project has open governance when it is clear how the project decides what gets merged, and that process is visible to outsiders."
+  title="Which signs show open governance?" hint="Which of these show how decisions are made, and which only show size or backing?"
+  options={[
+    { text: 'A published process for proposing a change.', correct: true },
+    { text: 'More than two hundred contributors.', why: 'Contributor count is a support signal. Many people can contribute to a project whose decisions nobody can see.' },
+    { text: 'A public record of who decided each change, and why.', correct: true },
+    { text: 'A foundation\'s name on the project page.', why: 'A foundation is a support signal, and on its own it doesn\'t show how the project decides.' },
+  ]}>
+
+Which two of these are signs of open governance?
+
+</MultiChoice>
+
+<Match id="question-and-dimension" phase="review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['dependency-hygiene']}
+  context="The lesson reviews a new dependency on six dimensions, each with its own short list of questions. Each question here comes from exactly one list."
+  title="Which dimension asks it?" hint="Is the question about fit, maintainability, who runs the project, attack surface, what to read, or legal terms?"
+  options={['Architecture', 'Quality', 'Governance and support', 'Security', 'Code', 'License']}
+  rows={[
+    { statement: 'How many sub-dependencies does it bring, and how large are they?', option: 0, why: 'Is this about how the package fits into your codebase?' },
+    { statement: 'Are there real tests, and do they pass in CI?', option: 1, why: 'Is this about whether you could maintain it yourselves?' },
+    { statement: 'Is there more than one maintainer?', option: 2, why: 'Is this about who runs the project?' },
+    { statement: 'Does the package run code when it is installed?', option: 3, why: 'Is this about what an attacker could do through it?' },
+    { statement: 'Is there cryptography in it that needs a specialist to read?', option: 4, why: 'Is this about which parts you must read?' },
+    { statement: 'Must we share our changes under the same terms?', option: 5, why: 'Is this about the terms you ship under?' },
+  ]}
+  rationale="Each question belongs to one dimension, so the written answers add up to one line per dimension.">
+Match each question to its dimension.
+</Match>
+
+<Choice id="a-low-score" phase="review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['supply-chain-risk']}
+  context="The lesson runs or looks up the OpenSSF Scorecard checks for a new dependency before a verdict."
+  title="A zero on one check" hint="Is a low score a verdict, or a question for the review?"
+  options={[
+    { text: 'Reject the package, because a zero on any check fails the review.', why: 'A low score is a question to answer. Some zeros matter for your use and some don\'t.' },
+    { text: 'Write down what unsigned releases mean for you, and how you will check a release instead.', correct: true },
+    { text: 'Ignore it, because the other checks score high enough to make up for it.', why: 'An average hides the one gap. The review answers each low score on its own.' },
+    { text: 'Make no decision until the maintainer signs the releases.', why: 'The pull request needs a verdict now, and the maintainer may never add signing.' },
+  ]}>
+
+A new dependency scores 0 on `Signed-Releases` and high on the other
+checks. What do you do with the zero?
+
+</Choice>
+
+<Scenario id="the-trim-package" phase="review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
+  concepts={['dependency-hygiene', 'supply-chain-risk']}
+  context="A coding agent imported a small package with one maintainer and no tests, for one function that removes spaces from both ends of a string. The language's standard library already has a function that does this."
+  title="A package for one function" hint="What does the team own after this merge, and what does the language already give you?"
+  options={[
+    { text: 'Accept it, because the function works and the tests pass.', consequence: 'The team now patches and reviews a package with one maintainer, for a function it already had.' },
+    { text: 'Accept it, and pin the exact version so that nothing changes without a review.', consequence: 'The pin stops surprise updates. The package with one maintainer is still part of the supply chain.' },
+    { text: 'Reject the whole pull request until every new dependency is gone.', consequence: 'The other changes in the pull request wait for a reason that has nothing to do with them.' },
+    { text: 'Reject the import, and ask for the standard library function with a test.', correct: true, consequence: 'The dependency disappears from the lockfile, and one test covers the behavior.' },
+  ]}>
+
+The agent imported a package for one function that trims spaces from a
+string. What is your verdict on that change?
+
 </Scenario>
 
 ## Automation, and giving back

@@ -1,4 +1,4 @@
-import { Predict, Order, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Predict, Order, Pitfall, Exercise, Recap, Choice, Match } from '@components/lesson';
 
 In this lesson we take the loop from [When a tool fails](/building-agents/tool-errors/)
 and give it every reason it needs to stop. The loop so far ends when the
@@ -271,6 +271,37 @@ Put the steps of one iteration of the loop in order, from the model call
 to the decision to go round again.
 
 </Order>
+
+<Match id="which-rule-ends-it" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['stop-conditions', 'unbounded-loop-pitfalls']}
+  context="The lesson's agent loop has a step limit, an error budget of errors in a row, a check for a repeated round and a character budget. Each stop rule ends the run with its own named reason."
+  title="Which rule ends the run?" hint="What does each run do that the other rules don't see?"
+  options={['The step limit', 'The error budget', 'The repeated-round check', 'The character budget']}
+  rows={[
+    { statement: 'The model asks for a new file in every round and never answers, and every read succeeds', option: 0, why: 'Nothing repeats and nothing fails. What still grows?' },
+    { statement: 'Two different calls fail in a row', option: 1, why: 'Which rule counts failures?' },
+    { statement: 'The model sends the same request with the same arguments again', option: 2, why: 'Which rule compares a round with an earlier one?' },
+    { statement: 'One tool returns a very long page, and the messages pass the size limit', option: 3, why: 'Which rule measures the messages themselves?' },
+  ]}
+  rationale="Each rule misses something the others catch, so the harness combines them and reports which one ended the run.">
+Match each run to the rule that ends it.
+</Match>
+
+<Choice id="a-b-a-b" phase="review" objective="building-agents/builds-agent-loop/implements-the-loop"
+  concepts={['unbounded-loop-pitfalls', 'stop-conditions']}
+  context="The lesson says a loop runs in circles by repeating a round or by alternating between two rounds, and names the checks that end each."
+  title="Two rounds, over and over" hint="Is any round the same as the one just before it?"
+  options={[
+    { text: 'A check that compares each round with the one just before it.', why: 'A and B differ, so each round differs from the one before it, and that check never fires.' },
+    { text: 'A check that compares each round with every earlier round.', correct: true },
+    { text: 'The error budget, because a loop in circles is a kind of error.', why: 'Every call succeeds, so the error count stays at zero.' },
+    { text: 'None of them, because only a person can see that it is stuck.', why: 'The harness can see it: the third round is the same as the first.' },
+  ]}>
+
+The model alternates between two calls, A, B, A, B, and every call
+succeeds. Which check would end the run at round 3?
+
+</Choice>
 
 <Exercise stretch="Add a passing check as a stop rule: give run a done parameter, a function of the message list, and stop with the reason done when it returns True. Make a fake model whose second fix makes the tests pass, and check that the run ends with done before the model gets to say so.">
 

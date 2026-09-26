@@ -1,4 +1,4 @@
-import { Match, Predict, Choice, Scenario, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+import { Match, Predict, Choice, Scenario, Pitfall, Exercise, Recap, Habit, MultiChoice, Sort } from '@components/lesson';
 
 In this lesson we put controls around an agent one at a time, and run the
 same attack after each change to see which control stops it. The agent is
@@ -434,6 +434,36 @@ answer, with `send_email`, which can mail any address. How does the tool go
 in?
 </Scenario>
 
+<Choice id="the-gate-at-200-a-day" phase="review" objective="building-agents/runs-in-production/mitigates-agent-risks"
+  concepts={['defense-layers', 'human-in-the-loop']}
+  context="A shop's support agent has an approval gate where a person says yes or no to each outbound reply."
+  title="The gate after a month" hint="What does a gate depend on to catch anything?"
+  options={[
+    { text: 'Every planted send, because each reply still needs a yes.', why: 'A yes given in two seconds without reading lets a planted send through like any other.' },
+    { text: 'Every reply with an account number in it, because the gate reads for those.', why: 'Reading for formats is the filter\'s job. The gate depends on the person.' },
+    { text: 'The same as on the first day, because the gate itself hasn\'t changed.', why: 'The code is the same. The reading has stopped, and the reading was the control.' },
+    { text: 'Little, because a gate works only while the person reads each send.', correct: true },
+  ]}>
+
+After a month, the person at the gate approves 200 replies a day in a few
+seconds each. What does the gate still catch?
+
+</Choice>
+
+<Sort id="safer-send-tool" phase="review" objective="building-agents/runs-in-production/mitigates-agent-risks"
+  concepts={['defense-layers', 'agent-specific-security-risks', 'exfiltration']}
+  context="A shop's support agent gets a new tool, send_email, which can mail any address. The agent already has a permission check, an output filter on outbound calls and an approval gate on replies."
+  title="Adding the mail tool" hint="Does this stop or catch a bad mail, or is it advice the model may ignore?"
+  buckets={['Makes the new tool safer', 'Adds no real control']}
+  items={[
+    { text: 'Allow send_email only to the ticket\'s author', bucket: 0 },
+    { text: 'Put send_email behind the output filter', bucket: 0 },
+    { text: 'Put send_email behind the approval gate', bucket: 0 },
+    { text: 'Add a planted mail request to the release tests, so a release fails if a layer lets it through', bucket: 0 },
+    { text: 'A line in the system prompt that forbids other recipients', bucket: 1 },
+    { text: 'Let mails skip the gate, since each one copies an approved reply', bucket: 1 },
+  ]} />
+
 <Choice id="which-layer-stops-the-fetch" phase="review" objective="building-agents/runs-in-production/layers-defenses"
   concepts={['defense-layers', 'prompt-injection']}
   context="A shop's support agent answers a ticket that links a recipe page. Its permission check allows read_ticket, fetch_url for addresses in the ticket, lookup_order and post_reply. It also has a system prompt that forbids following instructions in pages, an output filter for account numbers, and an approval gate on outbound calls. A planted paragraph on the page tells it to fetch an outside address with the customer list in it. The model follows the paragraph and asks for the fetch."
@@ -466,6 +496,37 @@ replies, and no approval gate. On Monday you find forty filter records
 from the night, all in replies to ticket authors the shop has never seen.
 What do you do?
 </Scenario>
+
+<MultiChoice id="when-the-model-is-fooled" phase="review" objective="building-agents/runs-in-production/layers-defenses"
+  concepts={['defense-layers', 'prompt-injection']}
+  context="A shop's support agent has a system prompt that forbids following instructions in pages, a permission check on its tools, and an approval gate on outbound calls. A planted paragraph on a page it reads fools the model."
+  title="The model is fooled" hint="Which layers are enforced by code or a person, and which one depends on the model?"
+  options={[
+    { text: 'The permission check on the tool calls.', correct: true },
+    { text: 'The system prompt that forbids following page instructions.', why: 'The system prompt is advice the model may ignore, and it fails at the moment the model is fooled.' },
+    { text: 'The approval gate on outbound calls.', correct: true },
+    { text: 'The model\'s own judgment about the page.', why: 'The model\'s judgment is what the planted paragraph just beat.' },
+  ]}>
+
+The planted paragraph fools the model. Which two layers still act?
+
+</MultiChoice>
+
+<Choice id="what-the-filter-misses" phase="review" objective="building-agents/runs-in-production/layers-defenses"
+  concepts={['defense-layers', 'exfiltration']}
+  context="A shop's support agent has an output filter that removes bank account numbers from outbound calls, and no approval gate. A planted paragraph tells it to copy another customer's name and home address into a reply."
+  title="What the filter lets through" hint="Which formats does the filter know?"
+  options={[
+    { text: 'The filter removes the name and the address, as it does for account numbers.', why: 'A filter catches the formats it knows. Names and addresses aren\'t among them.' },
+    { text: 'The reply is blocked, because the filter sees that the data belongs to another customer.', why: 'A filter matches patterns in text. It doesn\'t know whose data it is.' },
+    { text: 'The name and the address go out, because the filter knows only its own formats.', correct: true },
+    { text: 'The model refuses, because the filter is part of its instructions.', why: 'The filter runs in the loop after the model. The model doesn\'t know it is there.' },
+  ]}>
+
+With the filter on and no gate, what happens to the other customer's name
+and address?
+
+</Choice>
 
 <Exercise stretch="Change the last paragraph of recipe.txt to the fetch line from the start of this lesson, and start the agent again with WebFetch added to the list of tools. Remove any allow rule for WebFetch in /permissions first, say no when it asks to fetch an address, and write down what changed in what the agent could do and in what it asked you.">
 

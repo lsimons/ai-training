@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Scenario, Pitfall, Exercise, MorePractice, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Scenario, Pitfall, Exercise, MorePractice, Recap, Prompt, Response, Sort } from '@components/lesson';
 
 A model tells you your plan is a good one. Then, on a question of fact, it
 gives the right answer, you say "are you sure?", and it changes to the
@@ -248,6 +248,20 @@ correct after all. What do you do next?
 Which two of these replies are sycophancy at work?
 
 </MultiChoice>
+
+<Sort id="shows-or-hides" phase="review" objective="concepts/explains-models/names-failure-modes"
+  concepts={['sycophancy']}
+  context="Sycophancy is the tendency of a model to agree with the user, praise their idea or change a correct answer when challenged. One way to get a useful answer is a question that doesn't reveal what the user hopes to hear."
+  title="Does it show what you hope?" hint="Could the model tell from the question which answer you want?"
+  buckets={['Shows what the user hopes to hear', 'Keeps it hidden']}
+  items={[
+    { text: 'I think this plan is great. Any thoughts?', bucket: 0 },
+    { text: 'Can you confirm that option A is the better one?', bucket: 0 },
+    { text: 'My manager prefers B, but I want A. Who is right?', bucket: 0 },
+    { text: 'Compare option A and option B for a team of six.', bucket: 1 },
+    { text: 'List the three biggest risks of this plan.', bucket: 1 },
+    { text: 'What would a critic of this plan say first?', bucket: 1 },
+  ]} />
 
 <Exercise stretch="Take one objection from the third answer and ask the model to argue the case for keeping the meeting as strongly as it can. Note which points it makes that the first two answers left out.">
 

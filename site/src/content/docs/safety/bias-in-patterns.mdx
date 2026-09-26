@@ -1,4 +1,4 @@
-import { Predict, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Predict, Scenario, Pitfall, Exercise, Recap, Choice, Match } from '@components/lesson';
 
 In this lesson we read two shortlists that a ranker drew from the same
 twelve candidate records, and each shortlist looks fair on its own. Then we
@@ -233,6 +233,37 @@ candidates from three hundred internship applications. Time is short. What
 checking does the task get before the team trusts the tool for it?
 
 </Scenario>
+
+<Choice id="how-the-slant-shows" phase="review" objective="safety/verifies-output/calibrates-trust"
+  concepts={['bias']}
+  context="The lesson tested a simulated shortlisting model on twelve candidate records with names from two lists."
+  title="How do you see the slant?" hint="Can one output show a slant, or only a comparison of many?"
+  options={[
+    { text: 'Read each shortlist and look for a reason that mentions a group.', why: 'A slanted shortlist gives reasons that look as fair as the reasons of a fair one.' },
+    { text: 'Swap the names on the same records, run both, and count per group.', correct: true },
+    { text: 'Ask the model whether it treats both groups in the same way.', why: 'The answer is more text from the same model, and it says nothing about the counts.' },
+    { text: 'Check that each shortlist has people from both groups on it.', why: 'A shortlist can include both groups and still favor one of them over many runs.' },
+  ]}>
+
+A shortlisting model picks candidates from records with names on them. How do
+you see whether it favors one group of names?
+
+</Choice>
+
+<Match id="how-much-checking" phase="review" objective="safety/verifies-output/calibrates-trust"
+  concepts={['bias']}
+  context="The lesson compares how much checking different AI tasks get before a tool is trusted for them."
+  title="How much checking?" hint="Does the output affect people who can't see or correct it?"
+  options={['A spot-check is enough', 'A sampled comparison across groups']}
+  rows={[
+    { statement: 'Rewrite your own meeting notes in a friendlier tone', option: 0, why: 'Who is affected if the tone is a little off, and can they fix it?' },
+    { statement: 'Rank loan applicants for a call back', option: 1, why: 'Can the applicants who never get a call see why?' },
+    { statement: 'List ideas for the team day out', option: 0, why: 'Who reads this list, and can they ignore a bad idea?' },
+    { statement: 'Sort job applications into interview or no interview', option: 1, why: 'Can a rejected applicant correct the decision?' },
+  ]}
+  rationale="A slant is invisible in one output, so a task that decides about people who can't correct it gets a comparison across groups.">
+Match each task to the checking it needs before you trust the tool for it.
+</Match>
 
 <Exercise stretch="Change the bonus constant in rank.py to 0 and run it again. Then set it back to 2 and change one record so the totals come out equal anyway. What does that tell you about how many records a check needs?">
 

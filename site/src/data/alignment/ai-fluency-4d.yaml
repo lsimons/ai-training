@@ -25,6 +25,7 @@ rows:
       - concepts/recognizes-agents/places-on-autonomy-scale
       - using-agents/chooses-tool-and-autonomy/picks-chat-agent-or-automation
       - using-agents/chooses-tool-and-autonomy/keeps-the-human-steps
+      - using-agents/chooses-tool-and-autonomy/picks-a-model-by-fit
       - using-agents/delegates-and-checks/chooses-autonomy
       - coding-with-agents/specifies-work/judges-worth-building
   - code: Diligence

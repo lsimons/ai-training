@@ -1,4 +1,4 @@
-import { Choice, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Sort, Pitfall, Exercise, Recap, Prompt, Response, Match, Scenario } from '@components/lesson';
 
 In the last lesson every part of the prompt went into one message: the
 instruction, the material, the reader, and the format. Some of those parts
@@ -99,13 +99,14 @@ difference is one sentence in the system prompt.
 ## Who writes it
 
 In a chat product, the vendor writes the system prompt, and in most
-products you do not see it. It names the assistant and sets its tone, and
-it often gives the model the current date and the topics to decline. When
-two products built on the same model behave differently, much of the
-difference is in those prompts. Many products let you add to it: a
-settings page for "custom instructions", or a project with instructions
-that apply to every chat in it. That text is added to the vendor's prompt,
-and it holds for every conversation you start there.
+products you do not see it. It names the assistant and sets its tone,
+and it often gives the model facts such as the current date (@Claude
+docs system-prompts). When two products built on the same model behave
+differently, much of the difference is in those prompts. Many products
+let you add standing text of your own: account-wide instructions on a
+settings page, or a project with instructions that apply to every chat
+in it (@Claude support personalization) (@Claude support projects). That
+text applies to every conversation you start there.
 
 In an agent or a custom application, the developer writes it. The
 programming interface of every major model has a field for it, separate
@@ -168,6 +169,37 @@ corrects it in the chat each time. Where does the fix go?
 
 </Choice>
 
+<Match id="where-the-line-goes" phase="review" objective="concepts/prompts-reliably/structures-a-prompt"
+  concepts={['role-and-system-prompt']}
+  context="A team sets up a chat assistant for the front desk of a small hotel. The team writes one system prompt for every conversation, and the staff type messages for single tasks."
+  title="System prompt or one message?" hint="Should this hold for every conversation, or only for this task?"
+  options={['The system prompt', 'This one message']}
+  rows={[
+    { statement: 'Answer every guest in the language they write in.', option: 0, why: 'Does this hold for every conversation?' },
+    { statement: 'Shorten the reply you just wrote to two sentences.', option: 1, why: 'Is this about one answer in one chat?' },
+    { statement: 'Never confirm a booking. Send the guest to the booking page.', option: 0, why: 'Should any conversation ever break this rule?' },
+    { statement: 'Translate the guest\'s letter below into French.', option: 1, why: 'Is this a task for today, or a rule for every day?' },
+  ]}
+  rationale="A rule that must hold every time goes where each conversation starts. A task for today goes in today's message.">
+Match each line to where it belongs.
+</Match>
+
+<Scenario id="the-morning-rule" phase="review" objective="concepts/prompts-reliably/structures-a-prompt"
+  concepts={['role-and-system-prompt']}
+  context="A team built a support assistant on a model's programming interface. Each morning a staff member adds 'never share a customer's phone number' to the first conversation of the day, and on some days they forget."
+  title="The rule typed each morning" hint="Where does text go that the model reads before every conversation?"
+  options={[
+    { text: 'Type the rule in capitals each morning so that the model gives it more weight.', consequence: 'On the mornings someone forgets, the rule is still missing, and capitals don\'t help a rule that isn\'t there.' },
+    { text: 'Ask the model at the end of each day to remember the rule for tomorrow.', consequence: 'Each conversation starts from its own window. Tomorrow\'s chat has no rule in it.' },
+    { text: 'Put a note on the screen that reminds the staff to type the rule.', consequence: 'The note helps on most days. A new colleague doesn\'t see it, and a number is shared.' },
+    { text: 'Add the rule to the system prompt of the application, and stop typing it.', correct: true, consequence: 'Every conversation now starts with the rule, whether or not anyone remembers it.' },
+  ]}>
+
+The rule about phone numbers only holds on the days someone types it.
+Where does it go?
+
+</Scenario>
+
 <Exercise stretch="Write a third system prompt that combines the brevity of the first with the question-back rule of the second, and predict where the two rules conflict.">
 
 Copy the two system prompts from this lesson into a text file, one above
@@ -199,8 +231,8 @@ did you misjudge?
 2. Two assistants on the same model with different system prompts give
    different answers to the same message, in length and in what they
    refuse.
-3. In a chat product the vendor writes it and you can add to it through
-   custom instructions. In an agent or a custom application the developer
+3. In a chat product the vendor writes it, and you can add standing
+   instructions of your own. In an agent or a custom application the developer
    writes it, and that is where recurring behavior gets fixed (@AEC-02).
 4. A rule typed into the chat lasts one conversation. A rule that should
    hold every time goes where the conversation starts.

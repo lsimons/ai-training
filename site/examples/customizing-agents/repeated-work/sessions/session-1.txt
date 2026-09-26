@@ -1,0 +1,56 @@
+Session 1, September 8: show the refund status on the order page
+
+This log was written for the lesson "Turning repeated work into something the
+agent keeps". No model produced it. The project is a small web shop frontend.
+Its instructions file is instructions-before.md, one folder up. A line that
+starts with "User:" or "Agent:" is a message. A line that starts with "$ " is
+a command the agent ran, and the lines under it are its output.
+
+User: The billing API now returns a refund status on each order. Show it on the order page, next to the total.
+
+Agent: The order page gets its data from the generated API client in `src/api/generated/`. The client doesn't know the new field yet, so I'll regenerate it first.
+
+$ npm run generate
+npm error Missing script: "generate"
+
+Agent: There is no `generate` script. I'll look for another way.
+
+$ grep -n "api-client" Makefile
+14:api-client:
+15:	openapi-generator generate -i $(SPEC_URL) -g typescript-fetch -o src/api/generated
+
+$ make api-client
+make: *** [api-client] Error 1: SPEC_URL is not set
+
+Agent: The make target needs `SPEC_URL`. I can't find the value in the repository. It's faster to add the field to the generated type by hand, so I'll edit `src/api/generated/models/Order.ts` and add `refundStatus`.
+
+User: Don't edit files in src/api/generated/ by hand. Change the spec or regenerate the client.
+
+Agent: Understood, I'll regenerate. Where is the spec?
+
+User: Set SPEC_URL to https://billing.example.com/staging/openapi.json, that's the staging spec.
+
+$ SPEC_URL=https://billing.example.com/staging/openapi.json make api-client
+Generated 41 files in src/api/generated
+
+$ npm run lint
+src/api/generated/apis/OrdersApi.ts
+  12:1  error  Expected indentation of 2 spaces  indent
+✖ 1 problem (1 error, 0 warnings)
+
+Agent: The generated files don't pass the lint rules. I'll format them.
+
+$ npm run format -- src/api/generated
+Formatted 41 files
+
+$ npm test -- src/api
+Tests: 18 passed, 18 total
+
+Agent: The client is regenerated and has `refundStatus`. I'll add it to the order page and show the refunded amount with `(order.refundAmount).toFixed(2)`.
+
+User: Amounts from the billing API are in cents. Use formatMoney() from src/lib/money.ts, it divides by 100 and adds the currency.
+
+Agent: Changed it to `formatMoney(order.refundAmount, order.currency)`.
+
+$ npm test
+Tests: 112 passed, 112 total

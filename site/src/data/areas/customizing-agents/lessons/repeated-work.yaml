@@ -1,5 +1,9 @@
 id: customizing-agents/repeated-work
 title: Turning repeated work into something the agent keeps
+description: >-
+  Read three coding sessions that each work out how to regenerate an API client, place each
+  repeated explanation in the instructions, a skill, a hook or a context file, and cut the
+  instruction lines that a hook and a skill now cover.
 mode: explanation
 covers: customizing-agents/memory
 serves:
@@ -8,6 +12,8 @@ serves:
 introduces: [turning-repeated-work-into-reusable-knowledge]
 assumes:
   - objective: safety/judges-agent-risk/chooses-human-in-loop
+    lesson: safety/agent-risk
+    section: human-in-the-loop
 after: [customizing-agents/session-handoff, customizing-agents/first-hook]
 shorts:
   - Hooks as approval gates in a team's delivery pipeline (Academy ai-native-sdlc-playbook)
@@ -16,11 +22,38 @@ exercise:
   brief: >-
     Read three session transcripts that each work out how to regenerate the API client and repeat
     two corrections, decide for each repeated step whether it becomes an instruction, a skill, a
-    hook or a context file entry, and delete the instruction lines a hook now enforces.
-sources: []
+    hook or a context file entry, and delete or shorten the instruction lines that a hook and a
+    skill now cover.
+sources:
+  - AEC-05
+  - Claude Code features
+  - Claude Code memory
+  - Claude Code skills
+  - Claude Code hooks
+  - Claude Code best practices
+sources-checked: 2026-09-25
+review-by: 2027-03-25
 issue: 197
 minutes: 15
 notes: >-
   This is the one lesson where the learner makes the full instruction, skill, hook or context file
   decision; it serves adds-a-hook through its first behavior, a hook for a rule that must hold every
-  time.
+  time. The fixtures are in `site/examples/customizing-agents/repeated-work/`: three session logs
+  written for the lesson in `sessions/`, the project's instructions file as `instructions-before.md`
+  (not named AGENTS.md, so no agent working in this repository loads it as instructions),
+  `find_repeats.py`, which lists the user messages that recur across sessions (the share of shared
+  words at least 0.5) and the commands run in every session, and one answer to the exercise in
+  `model-answer/`. On these logs the matching pairs score 0.69 to 0.94 and the highest other pair
+  0.33. The hook matches `Edit|Write` and doesn't see a shell write, so the page keeps a short line
+  for the generated-files rule and deletes only the regeneration paragraph. The page describes the
+  hook in prose and doesn't ship hook code, because
+  first-hook builds one. The lesson keeps skills for procedures and context files for examples and
+  says so, because Claude Code also allows reference skills. The page doesn't link to or mention
+  session-handoff, which may go live after this lesson. The Academy courses named in the short and
+  the topic's sources are not cited, and none of their text is used. Vendor facts to re-check by
+  review-by: the "build your setup over time" triggers, the hook-versus-instruction contrast,
+  reference skills and per-feature context cost (features-overview page); the PreToolUse matcher
+  `Edit|Write`, the absolute `tool_input.file_path`, exit code 2 with standard error as the reason,
+  and the shared `.claude/settings.json` (hooks page); skill location, description loading and
+  `/name` (skills page); instructions loaded every session (memory page); pruning advice and
+  pointing at example code (best-practices page).

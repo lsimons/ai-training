@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Match, Predict, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, MultiChoice, Match, Predict, Pitfall, Exercise, Recap, Order } from '@components/lesson';
 
 In the concepts course you named the turns of the agent loop: observe,
 think, act. This lesson shows what the think step looks like when it
@@ -274,6 +274,12 @@ The loop has run the function and builds the next request. Which of these does t
   ]}>
 You define `get_weather` for a real model API. Which part of the tool is sent in the request?
 </Choice>
+
+<Order id="order-the-round-trip" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
+  concepts={['function-calling', 'tool']}
+  context="The lesson follows one tool call through the Claude API: the request with the tool definitions, the model's reply, the result the loop sends back, and the model's answer."
+  title="Put the round trip in order" hint="What does the model need before it can ask, and what does your reply have to quote?"
+  steps={['Send the messages with the tool definitions', 'The model replies with a `tool_use` block and `stop_reason` `tool_use`', 'Your loop runs the function with the block\'s input', 'Send a `user` message with a `tool_result` that quotes the id', 'The model replies with text and `stop_reason` `end_turn`']} />
 
 <Pitfall title="Dropping the assistant message from the history">
 A first loop often stores only the user's question and the tool result,

@@ -1,4 +1,4 @@
-import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response, MultiChoice, Order } from '@components/lesson';
 
 In this lesson we connect one tool server to a coding agent and read what
 happened. The server is the reference file-system server from the Model
@@ -343,6 +343,58 @@ meets real data.
   ]}>
 A teammate added an issue-tracker server to the project's `.mcp.json`.
 Your client has just asked you to approve it. What do you do first?
+</Scenario>
+
+<Order id="order-the-messages" phase="review" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['server', 'client', 'transport']}
+  context="A local MCP server runs over stdio as a child process of the agent, and the client and server exchange messages defined by the MCP specification."
+  title="Put the exchange in order" hint="What must the client know before it can call a tool, and when does a refusal show?"
+  steps={['The agent starts the server as a child process over stdio', 'The client asks `tools/list` once', 'The client sends `tools/call` for each use of a tool', 'The server returns a result, with `isError` set if it refused']} />
+
+<Choice id="what-comes-back" phase="review" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['server', 'mcp-security']}
+  context="A file-system MCP server is scoped to one handbook directory. The model calls list_directory on the handbook's parent directory."
+  title="A call outside the scope" hint="How does a server refuse, as far as the protocol goes?"
+  options={[
+    { text: 'An error that ends the whole session, so that no other call can run.', why: 'A refusal is an ordinary result. The session goes on, and the model can try another call.' },
+    { text: 'A result whose text says access denied, with `isError` set.', correct: true },
+    { text: 'An empty listing, with `isError` not set.', why: 'An empty listing would hide the refusal. The server says why and marks the result as an error.' },
+    { text: 'The listing of the parent, because the client allowed the call.', why: 'The scope is enforced by the server, whatever the client allowed.' },
+  ]}>
+
+What does the server send back for the call on the parent directory?
+
+</Choice>
+
+<MultiChoice id="confirm-which-file-tools" phase="review" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['mcp-security', 'client']}
+  context="The reference file-system MCP server has read tools and write tools. The client can require a confirmation before each call of a named tool."
+  title="Which tools need a confirmation?" hint="Which of these change something on disk?"
+  options={[
+    { text: '`create_directory`', correct: true },
+    { text: '`directory_tree`', why: 'A tree listing changes nothing on disk.' },
+    { text: '`edit_file`', correct: true },
+    { text: '`search_files`', why: 'A search reads names and changes nothing, and the scope bounds what it can see.' },
+  ]}>
+
+Which two tools do you set to confirm before each call?
+
+</MultiChoice>
+
+<Scenario id="a-new-wiki-server" phase="review" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['mcp-security', 'tool-cost']}
+  context="A learner has just added a wiki MCP server to their coding agent and hasn't used it yet."
+  title="The first task" hint="Which task lets you check each call against an answer you already have?"
+  options={[
+    { text: 'Ask the agent to tidy up the wiki\'s page structure, since that is what the server is for.', consequence: 'The first calls you see are writes to pages you haven\'t read, from a tool you haven\'t watched.' },
+    { text: 'Leave it until a real task needs it, because the server came from a known vendor.', consequence: 'The first time you see its calls is in the middle of work that matters.' },
+    { text: 'Ask the agent to list the tools and edit one page, to see both kinds of call.', consequence: 'The edit is the first write through a server you haven\'t checked, on a page that others read.' },
+    { text: 'Ask it to read back one page you know, and check each call in the transcript.', correct: true, consequence: 'You see one read call with the arguments you expected, and you know how the server behaves before it writes anything.' },
+  ]}>
+
+You have just added a wiki server. What is the first task you give the
+agent through it?
+
 </Scenario>
 
 <Exercise stretch="Grant a second directory with /add-dir, ask the same question about both, and check that every path in the transcript is under one of the two.">

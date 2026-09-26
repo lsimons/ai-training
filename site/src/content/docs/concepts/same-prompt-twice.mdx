@@ -1,4 +1,4 @@
-import { Choice, Predict, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Predict, Scenario, Pitfall, Exercise, Recap, MultiChoice, Sort } from '@components/lesson';
 
 In the lesson on how a model works you saw the widget score five candidate
 tokens and pick one, and you saw that the pick is where the randomness is.
@@ -43,6 +43,22 @@ python3 sample.py --temperature 0 --runs 10 --quiet
 ```
 
 </Predict>
+
+<Choice id="ten-runs-at-zero" phase="review" objective="concepts/explains-models/explains-generation"
+  concepts={['sampling-and-temperature', 'non-determinism']}
+  context="The lesson shows that a model scores its candidate answers and that temperature decides how the pick is drawn from those scores."
+  title="Ten runs at temperature 0" hint="At temperature 0, which candidate gets all of the probability?"
+  options={[
+    { text: 'Ten different answers, because each run picks at random from all of the candidates.', why: 'That describes a high temperature. At 0, the probability is on one candidate.' },
+    { text: 'The same answer on all or almost all of the runs, because each takes the top candidate.', correct: true },
+    { text: 'An error, because a model needs some randomness before it can write anything.', why: 'A model can always take the top candidate. Temperature 0 is a normal setting.' },
+    { text: 'The same answer that any other model gives at temperature 0 for this prompt.', why: 'Another model has other scores, so its top candidate can be a different answer.' },
+  ]}>
+
+You set the temperature to 0 and send one prompt ten times. What do you
+expect?
+
+</Choice>
 
 Drop `--quiet` and the program lists the ten answers above the summary.
 Every line reads `Canberra`, because with all the probability on one
@@ -241,6 +257,36 @@ The ticket workflow from the pitfall needs a check. Which one does the
 job?
 
 </Choice>
+
+<Sort id="accept-or-reject" phase="review" objective="concepts/explains-models/names-failure-modes"
+  concepts={['non-determinism']}
+  context="A workflow asks a model to put each support ticket into one of four queues: billing, access, outage or other. Its check strips spaces and ignores case, then accepts an answer only when it is exactly one of the four queue names."
+  title="What does the check do?" hint="After spaces and case are removed, is the answer exactly one of the four names?"
+  buckets={['The check accepts it', 'The check rejects it']}
+  items={[
+    { text: 'Billing', bucket: 0 },
+    { text: 'access, with a space in front', bucket: 0 },
+    { text: 'OUTAGE', bucket: 0 },
+    { text: 'refunds', bucket: 1 },
+    { text: 'billing, because the customer mentions an invoice', bucket: 1 },
+    { text: 'billing or access', bucket: 1 },
+  ]} />
+
+<MultiChoice id="what-one-run-shows" phase="review" objective="concepts/explains-models/names-failure-modes"
+  concepts={['non-determinism']}
+  context="A colleague ran a prompt that pulls the order number out of a customer email once, and the order number was right."
+  title="What does one good run show?" hint="How many runs would you need before you know the share of right answers?"
+  options={[
+    { text: 'The right answer can come up for this prompt and this email.', correct: true },
+    { text: 'The prompt is ready to go into the process that handles orders.', why: 'One run can\'t show how often the prompt fails. A process sees the bad runs as well.' },
+    { text: 'The run doesn\'t show what share of runs gives the right answer.', correct: true },
+    { text: 'At temperature 0 the same email would give this answer on every run.', why: 'Temperature 0 removes most of the variation and not all of it, because near ties can still swap.' },
+  ]}>
+
+The prompt gave the right order number on its one run. Which two of these
+are true?
+
+</MultiChoice>
 
 <Exercise stretch="Change the check in sample.py so that only the bare word Canberra passes, run the ten temperature-1 runs again, and decide whether the stricter check helped the workflow or hurt it.">
 

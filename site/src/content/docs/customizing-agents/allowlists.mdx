@@ -1,4 +1,4 @@
-import { Predict, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Predict, Sort, Pitfall, Exercise, Recap, Choice, MultiChoice, Match } from '@components/lesson';
 
 In this lesson we give a coding agent one small task twice more, in the
 same to-do fixture as the last lesson. The first run has nothing
@@ -259,6 +259,51 @@ evaluates the deny rules of every file before the allow rules of any
 Place each action from the fixture task in the list it belongs in, or in
 no list.
 </Sort>
+
+<Match id="how-wide-each-rule" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['allowlists']}
+  context="In Claude Code, a Bash allow rule with no wildcard matches one exact command, a trailing wildcard after a space also matches the bare command and any continuation, and a wildcard right after the program name approves every subcommand."
+  title="How much does the rule approve?" hint="Where is the wildcard, and what can follow it?"
+  options={['One exact command', 'One subcommand, with any arguments', 'Every subcommand of the program']}
+  rows={[
+    { statement: '`Bash(git status)`', option: 0, why: 'Is there a wildcard in the rule at all?' },
+    { statement: '`Bash(git log *)`', option: 1, why: 'Which words come before the wildcard?' },
+    { statement: '`Bash(git *)`', option: 2, why: 'What can come after `git` here, `push` included?' },
+  ]}
+  rationale="The wildcard's position sets the width, and a wildcard right after the program name covers commands you never thought of.">
+Match each allow rule to how much it approves.
+</Match>
+
+<Choice id="the-unused-rules" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['allowlists']}
+  context="After a task with a coding agent, the learner compares the allowlist in the settings file with the tally of commands that stopped for a prompt during the run."
+  title="Two rules nobody used" hint="What does a rule that answered no prompt do on the next task?"
+  options={[
+    { text: 'Keep them, because the next task might need the same commands.', why: 'A rule the task didn\'t need only widens what the agent may run unasked on every later task.' },
+    { text: 'Move them to the deny list, so the commands can never run again.', why: 'A deny rule is for what the brief forbids. These commands may be fine with a prompt.' },
+    { text: 'Delete them, because a rule the task never needed only widens the list.', correct: true },
+    { text: 'Keep them, because read-only commands can do no harm in the file.', why: 'A rule for a command on the built-in read-only list does nothing, so it only adds noise to review.' },
+  ]}>
+
+The allowlist has five rules, and the tally shows that only three of them
+answered a prompt in this run. What do you do with the other two?
+
+</Choice>
+
+<MultiChoice id="the-rule-order" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['allowlists', 'permissions']}
+  context="Claude Code keeps permission rules in three lists in a settings file: allow, ask and deny."
+  title="Which rule decides?" hint="In which order are the three lists read, and what stops the reading?"
+  options={[
+    { text: 'A matching deny rule blocks the call, whatever the allow rules say.', correct: true },
+    { text: 'A narrower allow rule wins against a broader deny rule.', why: 'Deny is read first, and a match there decides. Width doesn\'t come into it.' },
+    { text: 'The first match decides, reading deny, then ask, then allow.', correct: true },
+    { text: 'The rule that was added to the file last wins.', why: 'The order in the file doesn\'t matter. The order of the three lists does.' },
+  ]}>
+
+Which two of these are true?
+
+</MultiChoice>
 
 <Pitfall title="The wildcard that approved a push">
 A developer is prompted for `git commit -m "add clear"` and, wanting no

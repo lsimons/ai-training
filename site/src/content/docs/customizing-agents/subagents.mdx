@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Predict, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Predict, Sort, Pitfall, Exercise, Recap, Prompt, Response, Match, Scenario } from '@components/lesson';
 
 In this lesson we hand a code review to a second agent that can read and
 nothing else. A short file defines it, and the main agent delegates the
@@ -306,6 +306,36 @@ of these lines make that true whatever the subagent decides to do?
 Which of these is a reason the vendor gives to delegate the search to a
 subagent?
 </Choice>
+
+<Match id="what-it-gets" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['subagents']}
+  context="In Claude Code a subagent is a Markdown file whose frontmatter can have a tools field that keeps only the named tools, or a disallowedTools field that removes tools from what it inherits. The main agent here has Read, Grep, Glob, Bash, Edit and Write."
+  title="Which tools does it get?" hint="Does the field keep, remove, or leave the inherited list alone?"
+  options={['Only the tools named', 'Every inherited tool but the one named', 'Every tool it would inherit']}
+  rows={[
+    { statement: '`tools: Read, Grep, Glob`', option: 0, why: 'Does `tools` add to the list or replace it?' },
+    { statement: '`disallowedTools: Write`', option: 1, why: 'What does the subagent start from before Write is removed?' },
+    { statement: 'No `tools` and no `disallowedTools` line', option: 2, why: 'What does a subagent inherit when nothing narrows it?' },
+  ]}
+  rationale="The frontmatter decides what the subagent can do, and the body can only ask.">
+Match each frontmatter line to the tools the subagent gets.
+</Match>
+
+<Scenario id="the-reviewer-says-it-fixed" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['subagents', 'permissions']}
+  context="A reviewer subagent is defined with tools: Read, Grep, Glob, and a system prompt that tells it to review a diff and report. Its report ends: I also fixed the typo in todo.py."
+  title="The reviewer's report" hint="Which of its tools could change a file?"
+  options={[
+    { text: 'Thank it and move on, since its report says the typo is fixed.', consequence: 'The typo is still in the file, and it ships.' },
+    { text: 'Check the file, and fix the typo from the main agent if it\'s still there.', correct: true, consequence: 'The typo is still there, because the reviewer had no tool that edits. The main agent fixes it, and the report\'s claim is noted as wrong.' },
+    { text: 'Give the reviewer the Edit tool, so that its reports match what it does.', consequence: 'The reviewer can now change the code it reviews, and a review is no longer a second look.' },
+    { text: 'Delete the reviewer, since a report that was wrong once can\'t be trusted.', consequence: 'You lose the review. The report was wrong about one line, and its tools line held.' },
+  ]}>
+
+The reviewer can only read and search, and its report says it fixed a
+typo. What do you do?
+
+</Scenario>
 
 <Pitfall title="The reviewer that fixed the code">
 A developer writes `.claude/agents/reviewer.md` with a `name`, a

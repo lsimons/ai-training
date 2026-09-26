@@ -1,4 +1,4 @@
-import { Choice, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Sort, Scenario, Pitfall, Exercise, Recap, MultiChoice, Match } from '@components/lesson';
 
 A team of four adopts a coding agent. In the first month they notice
 three things it keeps getting wrong. It commits with a message format the
@@ -190,6 +190,36 @@ command doesn't.
     { text: 'Post a summary of a merged change to a chat service that has no command-line client', bucket: 2 },
     { text: 'Run the linter before proposing a change', bucket: 0 },
   ]} />
+
+<Match id="which-mechanism" phase="review" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
+  concepts={['skill-vs-tool-vs-instruction']}
+  context="The lesson chooses between an instruction, a skill and a tool by asking whether a rule always applies, whether the agent knows how but is inconsistent, whether it lacks the ability, and first whether it can already do the task."
+  title="Which mechanism?" hint="Does the rule always apply, does the agent know how but slip, does it lack the ability, or can it do this now?"
+  options={['Instruction', 'Skill', 'Tool', 'Already possible']}
+  rows={[
+    { statement: 'Every new file starts with the license header', option: 0, why: 'Does this apply on every task?' },
+    { statement: 'The nine steps of the team\'s release, which the agent does out of order', option: 1, why: 'Does the agent know how, and slip on the order?' },
+    { statement: 'Read the open incidents from a paging service that has no command-line client', option: 2, why: 'Can the agent reach this service at all?' },
+    { statement: 'Find every caller of a function with `grep`', option: 3, why: 'Could the agent do this today with a shell?' },
+  ]}
+  rationale="Ask first whether the agent can already do it. Then the rule, the procedure or the missing ability decides.">
+Match each need to the mechanism that fits it.
+</Match>
+
+<MultiChoice id="cost-and-access" phase="review" objective="customizing-agents/writes-skill/chooses-skill-over-tool"
+  concepts={['skill-vs-tool-vs-instruction', 'tool-cost']}
+  context="The lesson compares instructions, skills and tools by what they cost in context and what access they add."
+  title="What each one costs" hint="Which of these add access, and which spend context on every turn?"
+  options={[
+    { text: 'Instructions and skills add no new access.', correct: true },
+    { text: 'A skill costs no context until it is used.', why: 'The skill\'s description is in context on every turn, so the agent can decide to load it.' },
+    { text: 'A tool adds an ability with whatever access its credentials carry.', correct: true },
+    { text: 'A tool costs context only on the turns that call it.', why: 'At least a tool\'s name is in context on every turn, called or not, and in many clients its full description too.' },
+  ]}>
+
+Which two of these are true?
+
+</MultiChoice>
 
 <Pitfall title="The rule that never fired">
 A team writes a skill called `no-secrets` whose body says "never commit

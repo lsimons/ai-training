@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Sort, Scenario, Repair, Pitfall, Exercise, MorePractice, Recap } from '@components/lesson';
+import { Choice, MultiChoice, Sort, Scenario, Repair, Pitfall, Exercise, MorePractice, Recap, Match } from '@components/lesson';
 
 An organization publishes its AI policy. It is one line: "Use AI
 responsibly." The finance team reads it and decides it means "never
@@ -226,6 +226,52 @@ usable policy have you do first?
 This is the escalation section of a policy as drafted. Rewrite it so a
 new team member who notices a problem knows what to do without asking.
 </Repair>
+
+<Match id="which-heading" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['policy']}
+  context="The lesson's one-page AI policy has five headings: allowed tasks, data, approvals, logging and escalation."
+  title="Which heading does it go under?" hint="Is the line about what the agent may do, what goes in, who says yes first, who reads the record, or what happens when it goes wrong?"
+  options={['Allowed tasks', 'Data', 'Approvals', 'Logging', 'Escalation']}
+  rows={[
+    { statement: 'Agents may draft replies to claimants and may not send them.', option: 0, why: 'Does this line say what the agent may do?' },
+    { statement: 'No medical records go into any agent.', option: 1, why: 'Is this about what may go in?' },
+    { statement: 'The claims manager approves each new kind of write access.', option: 2, why: 'Does this name who says yes before an action?' },
+    { statement: 'The team lead reads a sample of the agent log every Friday.', option: 3, why: 'Is this about the record of what the agent did?' },
+    { statement: 'When an agent sends anything to the wrong person, stop it and call the claims manager.', option: 4, why: 'Is this about what happens after something goes wrong?' },
+  ]}
+  rationale="Each heading answers one question, so a reader finds the rule for their situation in one place.">
+Match each policy line to its heading.
+</Match>
+
+<Sort id="same-call-or-not" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['policy']}
+  context="The lesson calls a policy line useful when two team members who read it alone make the same call."
+  title="Would two readers agree?" hint="Could two people read this line and make different calls?"
+  buckets={['Two readers make the same call', 'Each reader decides alone']}
+  items={[
+    { text: 'Agents never send mail to customers. A named person sends each reply.', bucket: 0 },
+    { text: 'Agents start with read access, and the claims manager approves each write access.', bucket: 0 },
+    { text: 'The team lead reads the agent log every Friday.', bucket: 0 },
+    { text: 'Use AI responsibly.', bucket: 1 },
+    { text: 'Apply good judgment with customer data.', bucket: 1 },
+    { text: 'Agents are used where they add value.', bucket: 1 },
+  ]} />
+
+<Scenario id="whose-account" phase="review" objective="safety/judges-agent-risk/sets-oversight"
+  concepts={['permissions-and-least-privilege', 'policy']}
+  context="The lesson says an agent that connects through a person's account inherits that person's access, and gives the agent an account with what its task needs."
+  title="The agent's account" hint="What could the agent reach through each account, compared with what the task needs?"
+  options={[
+    { text: 'Let it use the team lead\'s account for the first month, then move it.', consequence: 'For a month the agent can do everything the team lead can, including approving claims.' },
+    { text: 'Give it an account of its own that can only read the claim files.', correct: true, consequence: 'The agent can summarize claims and can\'t change or send anything. A write access is added later, as its own grant.' },
+    { text: 'Let it use the team lead\'s account and tell it to be careful in its instructions.', consequence: 'An instruction is text the agent weighs. The account still allows every action the team lead has.' },
+    { text: 'Let it use the IT administrator\'s account, because that one is monitored.', consequence: 'Monitoring records the damage after it happens. The agent can now reach every system.' },
+  ]}>
+
+The team wants the new claims agent to log in with the team lead's account,
+because that account already reaches every claim file. What do you do?
+
+</Scenario>
 
 ## Enterprise tiers sell governance
 

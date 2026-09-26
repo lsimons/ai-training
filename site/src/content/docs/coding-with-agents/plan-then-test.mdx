@@ -1,4 +1,4 @@
-import { Choice, Predict, Order, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Predict, Order, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response, MultiChoice, Match } from '@components/lesson';
 
 In this lesson we fix one bug with a coding agent, in two halves. In the
 first half the agent may read and may not edit: it works out where the bug
@@ -386,6 +386,82 @@ sentence that says what "fixed" means.
     { text: 'The clear command should print the text of each item it removed', bucket: 0 },
     { text: 'Sync the list with a calendar service', bucket: 1 },
   ]} />
+
+<Sort id="plan-or-go" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['plan-mode']}
+  context="Plan mode puts a coding agent in a read-only mode: it reads, explores and proposes steps, and it edits nothing until the plan is approved. The lesson uses it for a change you can't place in one file."
+  title="Plan first, or go?" hint="Could you write the diff in one sentence before the agent starts?"
+  buckets={['Start in plan mode', 'Skip the plan']}
+  items={[
+    { text: 'A wrong total whose cause could be in any of three modules', bucket: 0 },
+    { text: 'A command that is slow, and nobody knows which part is slow', bucket: 0 },
+    { text: 'A crash that shows up only with one customer\'s data', bucket: 0 },
+    { text: 'Fix a typo in one error message', bucket: 1 },
+    { text: 'Bump the version number for a release', bucket: 1 },
+    { text: 'Add one log line in a function you already know', bucket: 1 },
+  ]} />
+
+<MultiChoice id="reading-the-plan" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['plan-mode']}
+  context="A coding agent in plan mode has proposed a plan that names the cause of a bug and lists the steps to fix it. Nothing is edited until the learner approves."
+  title="Reading the plan" hint="What does each step have to follow from?"
+  options={[
+    { text: 'Whether each step follows from the cause the plan names.', correct: true },
+    { text: 'Whether the plan is long enough to look thorough.', why: 'Length says nothing about whether a step belongs. A short plan can be the right one.' },
+    { text: 'Whether the agent sounds sure about the cause.', why: 'Confidence is in the wording. The cause is something you check against the code.' },
+    { text: 'Whether the plan changes only files that the cause needs.', correct: true },
+  ]}>
+
+Which two things do you check before you approve the plan?
+
+</MultiChoice>
+
+<Scenario id="the-test-already-green" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['test-driven-change']}
+  context="A learner drives a bug fix from a failing test. The bug: the export command drops the last row. The agent has written a test for it and run it before changing anything else."
+  title="The new test passes" hint="Can a test that passes on the buggy code tell you when the bug is fixed?"
+  options={[
+    { text: 'Move on to the fix, since the test is written and it runs.', consequence: 'The fix goes in, the test still passes, and nobody knows whether the fix did anything.' },
+    { text: 'Conclude that the bug is gone, and close the task.', consequence: 'The bug is still there. The test checks only the first row, and the export keeps that row.' },
+    { text: 'Ask the agent to change the test until it fails on the code as it is.', correct: true, consequence: 'The new test uses three rows and fails. After the fix it passes, and now it shows the bug is gone.' },
+    { text: 'Delete the test and let the agent fix the code directly.', consequence: 'The fix has no test, and the bug can come back without anyone noticing.' },
+  ]}>
+
+The agent writes the test for the missing last row, runs it, and it
+passes. No other file has changed. What do you do?
+
+</Scenario>
+
+<Choice id="what-comes-first" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['test-driven-change']}
+  context="The lesson drives a change from a failing test that captures the wanted behavior, and the learner runs the checks and reads the diff at the end."
+  title="Before the code changes" hint="What does the test have to do on the code as it is now?"
+  options={[
+    { text: 'The agent writes the fix, and then a test that passes on it.', why: 'A test written after the fix may only describe the fix. It never had the chance to fail on the bug.' },
+    { text: 'You read the diff, to see which files the fix will touch.', why: 'There is no diff yet. Reading it comes at the end.' },
+    { text: 'The agent writes a test, and you see it fail on the code as it is.', correct: true },
+    { text: 'You run the whole suite and see that every test passes.', why: 'That check comes after the fix. Before it, the new test has to fail.' },
+  ]}>
+
+In a change driven by a failing test, what happens before the agent
+changes the code?
+
+</Choice>
+
+<Match id="start-from" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['test-driven-change', 'spec-driven-change']}
+  context="A test-driven change starts from a failing test and suits a bug fix or a bounded behavior change. A spec-driven change starts from a written specification with success criteria and suits a change where the design matters more than any single test."
+  title="A test or a spec?" hint="Is it one behavior you can pin down in a test, or a design with several parts?"
+  options={['Start from a failing test', 'Start from a spec']}
+  rows={[
+    { statement: 'The export command drops the last row', option: 0, why: 'Can one test show this behavior?' },
+    { statement: 'The add command should refuse an item longer than 200 characters', option: 0, why: 'Is this one bounded change?' },
+    { statement: 'Tags on items, with a command that lists the items for a tag', option: 1, why: 'How many decisions does this feature need before anyone writes a test?' },
+    { statement: 'Move the storage from a JSON file to a database', option: 1, why: 'Is this about one behavior, or about the design?' },
+  ]}
+  rationale="A test pins one behavior. A spec holds the design decisions that the tests then check.">
+Match each change to where it starts.
+</Match>
 
 <Exercise stretch="Now do the same for a change you choose, for example making `done` accept several numbers at once. Decide first whether it starts from a test or a spec, and say why in one line.">
 In a fresh session, with the fixture reset, run the whole bug fix with
