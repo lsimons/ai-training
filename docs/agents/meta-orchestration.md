@@ -257,9 +257,14 @@ site, except for a small fix on a harness wave branch after the restart.
 The loop ends on a failed preflight, a refusal by the harness
 exclusivity check, an empty wave, an exhausted whitelist, an `open` or
 `failed` report (for a harness wave, "harness wave awaiting restart"), a
-failed step after a restart, or the maintainer saying stop,
-and the dispatcher reports which, comments it on the run issue and closes
-it (except on `failed`).
+failed step after a restart, the maintainer declining a harness merge,
+or the maintainer saying stop, and the dispatcher reports which. On most
+stops it comments the stop condition on the run issue, files the
+`--no-filing` follow-ups and closes it. It leaves the run open, with
+nothing filed, on `failed`, on "harness wave awaiting restart", on a failed step
+after a restart, on the maintainer's no to a harness merge, and when the
+exclusivity check refuses a resumed run, since a later
+`/wave --resume <Name>` continues it.
 
 ## Standing approval
 
