@@ -191,9 +191,8 @@ One tick:
    for a later wave, and, under `--only`, every listed number it didn't
    pick with the reason, so nothing drops silently. A content wave
    (`--kind content`) is the ready, unassigned `content` issues that no plan
-   file claims, by ascending number, with no dependency logic. An issue
-   that has the `code` label too is marked so the lead adds a code review,
-   and a nits issue is left out because it arrives as the nits row. The
+   file claims, by ascending number, with no dependency logic. The lead
+   adds a code review for a branch whose diff changes code, and a nits issue is left out because it arrives as the nits row. The
    picker reads the tree of the checkout it runs in, which is why the
    pull comes first. The dispatcher then decides on the nits row: the one open
    issue titled `Cosmetic nits`, as one row for one nits builder in one
@@ -336,7 +335,7 @@ everything below.
 ## What stays by hand
 
 `next-wave` picks lesson issues from their plan files, and content issues
-by label. Code and tooling issues (`code` label alone) still go through
+by label. Code and tooling issues (`code` label) still go through
 `orchestration.md` directly, one pull request each, since their review and
 their CI run are what protect the lesson branches. Run those between waves,
 or as the first wave of the day with `main` frozen, as the "What collides"

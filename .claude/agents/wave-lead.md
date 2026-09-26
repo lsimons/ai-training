@@ -32,12 +32,14 @@ Spawn agents by name and by nothing else:
   number, the branch `feat/<issue>-<slug>`, the worktree
   `../ai-training-wt/feat/<issue>-<slug>`, the collision list that matches
   the issue (the lessons list for a lesson or content issue and the nits
-  row, the code list for a code issue, both for `(content and code)`), the
+  row, the code list for a code issue, both when the issue changes lesson
+  or content files and code), the
   filing paragraph, the files a sibling also edits (test files and import
   blocks included), and, when an `assumes` teaching lesson isn't live, the
   stand-in it records in the plan file's `notes`.
 - `lesson-reviewer` for a lesson or content branch, and `code-reviewer`
-  for a branch with code changes. A `(content and code)` branch gets both.
+  for a branch with code changes, whatever the issue's label says. A
+  branch that changes lesson prose and code gets both.
   Before you spawn a reviewer, create its worktree detached at the branch
   tip (`../ai-training-wt/review-<run>-<issue>`) and write the diff into it with
   `cd ../ai-training-wt/review-<run>-<issue> && git diff origin/main...origin/feat/<issue>-<slug> > review.diff`.

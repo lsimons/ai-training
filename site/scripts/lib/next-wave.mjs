@@ -58,7 +58,7 @@ export const NITS_TITLE = /^(nits|cosmetic nits)\b/i;
  * @typedef {{ area: string, lessons: WaveEntry[] }} WaitingArea
  * @typedef {{ issue: number, reason: string }} NotPickedEntry A number from `only` that is not in the wave, and why.
  * @typedef {{ kind: 'lessons', size: number, only: number[] | null, unblockersFirst: boolean, wave: WaveEntry[], blocked: BlockedEntry[], skipped: SkippedEntry[], waiting: WaitingArea[], notPicked: NotPickedEntry[] }} LessonsWave
- * @typedef {{ issue: number, title: string, labels: string[], mixed: boolean }} ContentEntry `mixed` is true when the issue has both `content` and `code`.
+ * @typedef {{ issue: number, title: string, labels: string[] }} ContentEntry
  * @typedef {{ kind: 'content', size: number, only: number[] | null, wave: ContentEntry[], skipped: SkippedEntry[], waiting: ContentEntry[], notPicked: NotPickedEntry[] }} ContentWave
  * @typedef {LessonsWave | ContentWave} Wave
  * @typedef {{ tree: import('./area-tree.mjs').AreaTree, livePageIds: Iterable<string>, readyIssues: ReadyIssue[], openIssues?: Iterable<number> | null, size?: number, kind?: 'lessons' | 'content', only?: Iterable<number> | null, unblockersFirst?: boolean }} PickInput
@@ -279,7 +279,7 @@ function pickContentWave({ tree, readyIssues, openIssues = null, size = 6, only 
 			skipped.push({ issue: i.number, reason: `issue is assigned to ${i.assignees.join(', ')}` });
 			continue;
 		}
-		candidates.push({ issue: i.number, title: i.title, labels, mixed: labels.includes('code') });
+		candidates.push({ issue: i.number, title: i.title, labels });
 	}
 	const wave = candidates.slice(0, size);
 	const waiting = candidates.slice(size);
@@ -378,12 +378,12 @@ function formatContentWave(result) {
 	const lines = [`## Wave (${result.wave.length} of ${result.size}, content)`, ''];
 	lines.push('| Issue | Title | Labels |', '| ----- | ----- | ------ |');
 	for (const w of result.wave) {
-		const labels = w.labels.map(code).join(', ') + (w.mixed ? ' (content and code)' : '');
+		const labels = w.labels.map(code).join(', ');
 		lines.push(`| #${w.issue} | ${w.title.replaceAll('|', '\\|')} | ${labels} |`);
 	}
 	lines.push('', `## Skipped (${result.skipped.length})`, '', ...skippedLines(result.skipped));
 	lines.push('', `## Waiting for a later wave (${result.waiting.length})`, '');
-	for (const w of result.waiting) lines.push(`- #${w.issue} ${w.title}${w.mixed ? ' (content and code)' : ''}`);
+	for (const w of result.waiting) lines.push(`- #${w.issue} ${w.title}`);
 	lines.push(...notPickedLines(result));
 	return `${lines.join('\n')}\n`;
 }
