@@ -6,6 +6,7 @@ import {
 	liveCourseLessonIds,
 	liveLessons,
 	liveTopicLessonIds,
+	pageAlternates,
 	pageCheckpoints,
 	pageExamples,
 } from '../../scripts/lib/live-lessons.mjs';
@@ -121,6 +122,27 @@ describe('pageCheckpoints', () => {
 	it('is empty for a page without checkpoints', () => {
 		const { content } = tree();
 		expect(pageCheckpoints(content, 'a/y')).toEqual([]);
+	});
+});
+
+describe('pageAlternates', () => {
+	it('lists the hidden review alternates in page order, and no first or practice checkpoint', () => {
+		const { content } = tree({
+			'content/a/y.mdx': [
+				'<Choice id="one" objective="o" title="T" hint="h" concepts={[\'c1\']} options={[]}>S</Choice>',
+				'<Choice id="alt" phase="review" objective="o" title="T" hint="h" concepts={[\'c1\']} options={[]}>S</Choice>',
+				'<Sort id="alt-two" phase="review" objective="o" title="T" hint="h" concepts={[\'c1\']} buckets={[]} items={[]} />',
+				'<Exercise>\nDo it.\n</Exercise>',
+				'<MorePractice>\n<Choice id="more" phase="practice" objective="o" title="T" hint="h" concepts={[\'c1\']} options={[]}>S</Choice>\n</MorePractice>',
+				'',
+			].join('\n\n'),
+		});
+		expect(pageAlternates(content, 'a/y')).toEqual(['alt', 'alt-two']);
+	});
+
+	it('is empty for a page without alternates', () => {
+		const { content } = tree();
+		expect(pageAlternates(content, 'a/x')).toEqual([]);
 	});
 
 	it('throws on a checkpoint without a string id', () => {
