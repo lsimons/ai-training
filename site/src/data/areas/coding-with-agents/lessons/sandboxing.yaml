@@ -1,26 +1,63 @@
 id: coding-with-agents/sandboxing
 title: Sandboxing a coding agent
+description: >-
+  Compare the ways to contain a coding agent, put the controls that matter outside its trust boundary,
+  and set up Claude Code's built-in sandbox with a network allowlist whose effect you predict.
 mode: tutorial
 covers: coding-with-agents/first-session
 serves: [coding-with-agents/ships-with-agent/runs-a-session]
 introduces: [sandbox, trust-boundary]
 assumes:
   - objective: safety/judges-agent-risk/names-blast-radius
+    lesson: safety/agent-risk
+    section: blast-radius
   - objective: safety/judges-agent-risk/sets-oversight
+    lesson: safety/reading-agent-logs
+    section: what-the-log-must-hold-and-who-reads-it
 after: [coding-with-agents/keys-and-secrets]
-shorts:
-  - what your agent sends home (the trace, for everyone), permission modes
+shorts: [permission modes]
 exercise:
   kind: do
   brief: >-
-    Enable the agent's built-in sandbox in the fixture and block one network destination, then
-    predict and confirm which hosts the agent still reaches. Stretch goal: run the hardened
-    container and add a proxy allowlist.
-sources: [Academy claude-code-in-action]
+    Read the fixture's sandbox settings, which allow one host, predict which of three commands reach the
+    network, check the prediction with the fixture's script, then run Claude Code in a copy of the
+    fixture with those settings and confirm. Stretch goal: run the hardened container and add a proxy
+    allowlist.
+sources:
+  - Academy claude-code-in-action
+  - Claude Code sandboxing
+  - Claude Code isolation
+  - Claude Code permissions
+  - Claude Code all settings
+  - Claude Code settings
+  - claude-docker
+  - Codex approvals
+  - Pi security
+  - Gitleaks
+  - pnpm supply chain
+  - RFC 2606
 issue: 18
 minutes: 15
+sources-checked: 2026-09-26
+review-by: 2027-03-26
 notes: >-
-  Issue #18, low priority, so it sits late in the course. It covers first-session because that topic
-  owns `sandbox` and `trust boundary` (issue #13; the area is at its seven-topic cap). The network
-  allowlist that the #65 Academy pass names is taught here, cited as Academy claude-code-in-action
-  (trusting unsupervised runs, paraphrased).
+  Issue #18, reduced on 2026-09-26 to the base lesson; the network trace is a separate issue and is not
+  named on the page. It covers first-session because that topic owns `sandbox` and `trust boundary`
+  (issue #13; the area is at its seven-topic cap). Into is the .env case: a file read in the working
+  folder needs no prompt and goes to the provider in the next request. Through has the isolation table,
+  checked against the Claude Code isolation page, the rule "enforce outside the trust
+  boundary" with two controls (a network allowlist enforced by a proxy, a credential held by a
+  sidecar), and Claude Code's built-in sandbox (files, hosts, what happens when a command can't run in
+  it). The fixture site/examples/coding-with-agents/sandboxing/ holds `sandbox-settings.json` (one allowed
+  host, strict allowlist, the same setting names as the red-teaming fixture plus allowedDomains) and
+  commands.txt with three curl commands. check_allowlist.py makes no network call and applies the
+  documented matching rules (settings reference, sandbox.network). The JSON block on the page is a copy
+  of `sandbox-settings.json`, so update the two together. The live run with a real agent is marked as not
+  asserted. The Academy key is cited only for the idea on the course's public page (check an
+  unsupervised run in proportion to how little you watched it); the lessons behind sign-in weren't
+  read. Beyond summarizes schubergphilis/claude-docker (Apache-2.0, own words, no text adapted), the
+  layered containment pattern, unsupervised mode with Codex's three axes, and Pi (the repository
+  badlogic/pi-mono now redirects to earendil-works/pi, MIT). The optional practices from a team that ran
+  agents in containers were left out for time. The checkpoints all serve runs-a-session: a Sort of
+  controls inside the harness and outside the trust boundary, a Scenario on where a forge token lives,
+  and a graded Predict on the fixture's allowlist, each with one review alternate.

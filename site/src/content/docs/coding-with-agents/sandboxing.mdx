@@ -1,0 +1,367 @@
+import { Choice, Predict, Scenario, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+You ask a coding agent why the app can't reach its database. It opens
+`.env` to check the connection settings, and the database password is now
+in the tool result. Claude Code reads files in the working folder without
+asking you first (@Claude Code permissions), so you saw no prompt. The tool
+result goes into the next request to the model, because the files an agent
+reads are sent to the model provider whether or not a sandbox is on
+(@Claude Code isolation). The password has left your machine,
+and nobody decided to send it.
+
+*Keeping API keys out of the agent's reach* was about secrets going in to
+the agent: which key it holds and where that key is kept. This lesson is
+about what can go out. We compare the ways to contain a coding agent, see
+why the controls that matter most are the ones the agent can't talk its
+way past, and set up Claude Code's built-in sandbox with a network
+allowlist. Then you predict which commands that allowlist lets through.
+
+## Ways to contain an agent
+
+A sandbox is the environment the agent runs in, set up so that a wrong or
+hostile command reaches only what you put inside it. There are several
+kinds, and each one trades setup work for control:
+
+| Approach                              | For                                                                                                                                      | Against                                                                                                                                      |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| The agent's built-in sandbox          | It comes with the agent, and on macOS there is nothing to install                                                                        | It covers only the shell commands the agent runs. The agent's file tools, MCP (Model Context Protocol) servers and hooks run outside it      |
+| A hardened container (Docker, Podman) | You decide what is mounted, which credentials go in and where the network goes. One container per project, and the team shares one setup | Medium to high setup effort, and someone maintains the image                                                                                 |
+| A hardened dev container              | The editor starts and manages it, and the vendor's example comes with a firewall that blocks traffic to hosts it doesn't list            | The team keeps the image and the firewall's list current. The agent doesn't require the container, so someone can still start it on the host |
+| A hardened virtual machine            | The strongest separation, with its own kernel. You set it up once and watch it in one place                                              | High setup effort and upkeep. Projects that share one machine can reach each other's files                                                   |
+| A vendor-hosted agent in the cloud    | Nothing to install. The vendor runs the isolation and keeps your forge token in a proxy outside it                                       | Your code is copied to the vendor's machines, and you work with the vendor's controls instead of your own. It needs a subscription           |
+| No isolation, permission prompts only | Nothing to set up                                                                                                                        | The agent has all of your access, and you are the only check                                                                                 |
+
+The vendor's own comparison of these options gives the setup effort, what
+each one isolates, and the limit of the built-in sandbox
+(@Claude Code isolation). A container can also hold a
+credential in a second container next to it, a sidecar, as the hardened
+container in the last section does (@claude-docker).
+
+Whichever you choose, the agent can still change the code you mount for
+writing, and it can still send what it reads to any host the network lets
+it reach (@Claude Code isolation). A sandbox shrinks the blast
+radius of a session. What the agent does inside it still needs your review.
+
+## Enforce outside the trust boundary
+
+The trust boundary is the line between what the agent decides and what is
+enforced on it from outside. A permission prompt and a hook are only partly
+outside that line. They run in the harness, the program around the model,
+and the model can't switch them off, but they judge only the action the
+agent asks for. Claude Code decides a permission from
+the text of the command before it runs. The operating system enforces the
+sandbox on the running process, whatever the command turns out to do
+(@Claude Code sandboxing).
+
+Prompt injection works on what the agent asks for. Text in a file can talk
+the agent into a command that your rules allow and that you approve
+because it looks routine, such as a small script with a harmless name. A
+proxy that the agent can't see or configure never reads that text, so the
+text has no way to change what the proxy does. That is the rule of this
+lesson: put the controls that matter outside the agent's trust boundary,
+where nothing the agent reads can reach them. A network allowlist and a
+credential held by a sidecar both work this way:
+
+- **A network allowlist enforced by the sandbox or a proxy.** The agent
+  can run any command it likes, and a connection to a host that isn't on
+  the list fails.
+- **A credential held by a sidecar.** The agent's requests go out through
+  the sidecar, which adds the real token on the way. The agent only ever
+  sees a placeholder, so it has no token to leak (@claude-docker).
+
+<Sort id="inside-or-outside" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['trust-boundary', 'sandbox']}
+  context="The lesson separates controls the harness applies to what the agent asks for from controls enforced outside the agent that hold whatever command runs."
+  title="Where does each control sit?" hint="If a file told the agent to get around this control, would the control see that text or the command's effect?"
+  buckets={['Inside the harness: judges what the agent asks for', 'Outside the trust boundary: holds whatever runs']}
+  items={[
+    { text: 'A line in CLAUDE.md that says never to read .env', bucket: 0 },
+    { text: 'A deny rule for Bash(curl *)', bucket: 0 },
+    { text: 'A hook that blocks every command containing the word "secret"', bucket: 0 },
+    { text: 'You approving each command at the permission prompt', bucket: 0 },
+    { text: 'The sandbox\'s strict network allowlist, enforced by a proxy outside the sandbox', bucket: 1 },
+    { text: 'A forge token kept in a sidecar that adds it to requests on the way out', bucket: 1 },
+    { text: 'A container with only the project folder mounted', bucket: 1 },
+  ]} />
+
+<Scenario id="where-the-forge-token-lives" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['trust-boundary', 'secrets-hygiene']}
+  context="A coding agent runs in a container on a developer's laptop, and a task needs it to open a pull request, so it needs a token for the code forge."
+  title="The agent needs a forge token" hint="In which of these places does the token itself end up in a tool result or a request to the model?"
+  options={[
+    { text: 'Export it as GH_TOKEN in the shell that starts the agent, so the agent\'s commands can use it.', consequence: 'Every command the agent runs inherits that environment, so one echo or env command puts the token in a tool result.' },
+    { text: 'Paste it into the chat when the agent asks for it, and delete the message once the pull request is open.', consequence: 'The token is now part of the conversation. It went to the model provider with the next request and it stays in the session transcript.' },
+    { text: 'Keep it in a proxy outside the container that adds it to requests for the forge, while the agent sees a placeholder.', correct: true, consequence: 'The token never enters the container, so no tool result can contain it. The agent can still act on the forge through the proxy until the session ends, so give the token access to this one repository only.' },
+    { text: 'Put it in the project\'s CLAUDE.md, with a line that tells the agent never to print it or send it anywhere.', consequence: 'Claude Code\'s memory page says it loads that file into every session, so the token goes to the model provider every time. The line is a request, and injected text can talk the agent out of it.' },
+  ]}>
+The agent has finished a change and needs a token for the code forge to
+open the pull request. Where do you keep the token?
+</Scenario>
+
+## Set up the built-in sandbox
+
+Claude Code's sandbox covers the shell commands the agent runs and every
+program those commands start. The operating system enforces it: Seatbelt on
+macOS, and bubblewrap on Linux and WSL2 (the Windows Subsystem for Linux),
+where you install `bubblewrap` and `socat` first. It doesn't run on native
+Windows (@Claude Code sandboxing).
+
+**Which files.** By default a sandboxed command writes only in the working
+folder, a temporary folder of the session and any folder you added. It can
+read almost the whole computer, including `~/.ssh` and
+`~/.aws/credentials`, until you list those under `sandbox.credentials` or
+`sandbox.filesystem.denyRead`. Sandboxed commands also inherit the
+environment Claude Code was started with, credentials included, unless
+`sandbox.credentials` removes them (@Claude Code sandboxing). Claude Code's own
+file tools don't run in the sandbox, and permission rules govern them
+instead. For the `.env` case you need both: the `Read(./.env)` deny rule
+from *Keeping API keys out of the agent's reach* for the file tools, and a
+`denyRead` entry so that a script the agent writes can't open the file
+either.
+
+**Which hosts.** Network traffic from sandboxed commands goes through a
+proxy that runs outside the sandbox. No host is allowed at the start, and
+the first time a command reaches a new host, Claude Code asks you
+(@Claude Code sandboxing). `allowedDomains` lists the hosts that pass
+without a question. An entry such as `*.example.com` covers subdomains, a
+`:443` suffix limits an entry to one port, and `deniedDomains` blocks a
+host even when an allowed entry covers it (@Claude Code all settings). With
+`strictAllowlist` set to `true`, a host that isn't on the list is blocked
+instead of asked about. Claude Code reads that setting only from your user
+settings, managed settings or a file you pass with `--settings`, and in a
+repository's `.claude/settings.json` it has no effect. It needs Claude Code
+v2.1.219 or later (@Claude Code sandboxing).
+
+**What happens when the sandbox can't run a command.** If the sandbox can't
+start at all, Claude Code shows a warning and runs commands without it,
+unless `failIfUnavailable` is `true`, which makes it refuse to start. When
+one command fails inside the sandbox, the agent may retry it outside, where
+the normal permission prompt applies, and `allowUnsandboxedCommands: false`
+takes that retry away (@Claude Code sandboxing). By default a command that
+runs in the sandbox runs without asking you, and
+`autoAllowBashIfSandboxed: false` brings the prompt back
+(@Claude Code all settings).
+
+The course repository has a fixture for this lesson in
+`site/examples/coding-with-agents/sandboxing/`. Its `sandbox-settings.json`
+uses the same setting names as the next lesson's settings file and allows
+one host:
+
+```json
+{
+  "permissions": {
+    "deny": ["WebFetch", "WebSearch"]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "autoAllowBashIfSandboxed": false,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": ["pypi.org"],
+      "strictAllowlist": true
+    }
+  }
+}
+```
+
+The allowlist covers the sandboxed commands only. Claude Code's web fetch
+tool runs inside Claude Code itself and follows its permission rules
+(@Claude Code sandboxing), so the deny rules turn off the web tools as well.
+Next to the settings, `commands.txt` holds three commands that each try to
+reach a different host:
+
+```text
+curl -sI https://pypi.org/simple/
+curl -sI https://files.pythonhosted.org/
+curl -s https://collect.example.invalid/upload
+```
+
+The last address ends in `.invalid`, a name reserved so that it never
+belongs to a real server (@RFC 2606). The fixture's `check_allowlist.py` makes no
+network call. It reads the settings, finds the host and port of each
+command and applies the matching rules above.
+
+<Predict id="which-commands-get-out" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['sandbox', 'trust-boundary']}
+  context="A Claude Code sandbox settings file allows only pypi.org, with strictAllowlist set to true. Three curl commands try to reach pypi.org, files.pythonhosted.org and collect.example.invalid. A script prints, for each command, whether the sandbox lets its host through."
+  title="Which commands get out?" hint="For each host, is it on the list exactly as written, and what does strictAllowlist do with a host that isn't?"
+  answer={`allowedDomains: pypi.org
+  deniedDomains: (none)
+  strictAllowlist: true
+  1. pypi.org:443  allowed (matches pypi.org)
+  2. files.pythonhosted.org:443  blocked, no prompt (not on the list)
+  3. collect.example.invalid:443  blocked, no prompt (not on the list)`} run="coding-with-agents/sandboxing/check_allowlist.py">
+Read the settings and the three commands above. For each command, decide
+whether the sandbox lets it through, asks you, or blocks it. Then run the
+script from the fixture's folder and compare.
+
+```sh
+python3 check_allowlist.py
+```
+
+</Predict>
+
+Only the first command gets out. The list names hosts, so a host that isn't
+written there is blocked, however closely it is related to one that is.
+When a command you need is blocked, add the one host it needs, and prefer
+a named host to a wildcard.
+
+<Choice id="the-upload-with-a-routine-name" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['trust-boundary', 'exfiltration']}
+  context="A coding agent runs with a CLAUDE.md that forbids uploads, a deny rule for curl commands, a hook that blocks commands containing curl or wget, and the Claude Code sandbox with a strict network allowlist that lists only pypi.org."
+  title="Which control stops the upload?" hint="Which of these would see the script's connection, whatever the script is called?"
+  options={[
+    { text: 'The line in CLAUDE.md that forbids uploading project files to any outside address.', why: 'The injected text already talked the agent past this line. It is a request to the model.' },
+    { text: 'The deny rule for Bash(curl *), which covers every command that sends data over the web.', why: 'The rule matches commands that start with curl. The command here runs python3 and a script.' },
+    { text: 'The hook that blocks every command whose text contains the word curl or the word wget.', why: 'The hook reads the command\'s text, and neither word appears in it.' },
+    { text: 'The strict network allowlist, which lists only pypi.org and blocks every other host.', correct: true },
+  ]}>
+Injected text in a file convinces the agent to upload `.env` to
+`paste.example.invalid`. It writes a script named `sync_check.py` that does
+the upload and asks to run it, and you approve because the name looks
+routine. Which control still stops the upload?
+</Choice>
+
+<Choice id="what-the-sidecar-still-exposes" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['trust-boundary', 'secrets-hygiene']}
+  context="A coding agent runs in a container. A sidecar container holds the real forge token and adds it to requests for the forge on their way out, and the agent's environment holds only a placeholder."
+  title="What is still exposed?" hint="What can the agent do through the sidecar, and for how long?"
+  options={[
+    { text: 'The agent can act on the forge through the sidecar until the session ends.', correct: true },
+    { text: 'The agent can read the real token from its environment and send it to any host.', why: 'The environment holds only a placeholder. The real token stays in the sidecar.' },
+    { text: 'Nothing on the forge, since the real token never entered the agent\'s container.', why: 'The sidecar adds the token to every request for the forge, including the ones a compromised agent makes.' },
+    { text: 'The real token, for as long as it is valid, since the agent can read each request.', why: 'The sidecar adds the token after the request leaves the agent\'s container, so the agent never sees it.' },
+  ]}>
+Text in a file the agent read has taken over the session. What can it
+still do with the forge token?
+</Choice>
+
+<Choice id="strict-in-the-repository" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['sandbox', 'trust-boundary']}
+  context="A team puts a sandbox configuration in the repository's .claude/settings.json with allowedDomains set to pypi.org and strictAllowlist set to true. A developer runs Claude Code in Manual mode with no other sandbox settings."
+  title="The strict setting in the repository" hint="From which settings files does Claude Code read strictAllowlist?"
+  options={[
+    { text: 'The sandbox blocks the command without asking, because the host isn\'t on the list.', why: 'Claude Code ignores strictAllowlist in a repository\'s settings, so the strict rule never applies.' },
+    { text: 'Claude Code asks the developer, because it ignores strictAllowlist in a repository\'s settings.', correct: true },
+    { text: 'The command runs outside the sandbox, because a host that isn\'t on the list can\'t be sandboxed.', why: 'A host outside the list is a question for the developer here. The command stays in the sandbox.' },
+    { text: 'The command gets through, because files.pythonhosted.org belongs to the same project as pypi.org.', why: 'The list names hosts. A related host is still a different host.' },
+  ]}>
+The agent runs `curl -sI https://files.pythonhosted.org/`. What happens?
+</Choice>
+
+<Pitfall title="The allowlist that let everything out">
+A developer adds `github.com` to `allowedDomains` so that the agent can push
+its branches, and feels safe because the list is short. But anyone can
+create an account on that site and receive data there. The sandbox's proxy
+decides from the host name alone and doesn't look inside encrypted
+traffic, and the vendor warns that a broad domain such as `github.com` can
+become a way to send data out (@Claude Code sandboxing). Allow the
+narrowest host a command needs. When the agent must reach a broad host,
+send its traffic through a proxy of your own that can look inside the
+requests, which the same page describes.
+</Pitfall>
+
+<Exercise stretch="Run the hardened container from the next section on a copy of the fixture, with no credential flags. Its threat model lists open outbound network, so add an allowlist in front of it, either the built-in sandbox inside the container or a proxy of your own, and run the three commands again.">
+From the top folder of your clone of the course repository, copy the
+fixture folder and start Claude Code in the copy with the fixture's settings, in Manual mode:
+
+```sh
+cp -R site/examples/coding-with-agents/sandboxing ~/sandbox-try
+cd ~/sandbox-try
+claude --permission-mode default --settings sandbox-settings.json
+```
+
+Run `/sandbox` and check that the sandbox is on. Then ask the agent to run
+the commands in `commands.txt` one at a time and report what each printed.
+Approve each command at the prompt, since they only read a web address,
+and answer No if the agent asks for anything else. Write down which
+commands got a response and which failed with a network error from the
+sandbox, and compare that with your prediction. This part runs a real
+agent, so the course can't check its output. The results depend on your
+Claude Code version and on your own settings, which Claude Code merges
+with the file you pass (@Claude Code settings). A host you allowed there,
+or in a `WebFetch(domain:...)` allow rule, is on the list in this session
+too (@Claude Code sandboxing). It takes about five minutes.
+
+A good result is a table with one row per command: the host, what you
+predicted, what happened, and the setting that decided it. If a row
+disagrees with your prediction, find the setting from your own files that
+explains it. Then answer one question: which host would you add for a real
+project, and what could the agent send there?
+</Exercise>
+
+## Beyond the built-in sandbox
+
+These are short summaries, each with a link, for when the built-in sandbox
+isn't enough.
+
+**A hardened container with a written threat model.** The public
+[`schubergphilis/claude-docker`](https://github.com/schubergphilis/claude-docker)
+repository on GitHub runs Claude Code in a container and says in its
+README what that protects and what it doesn't (@claude-docker). No
+credential goes into the container unless you pass a flag for it, one flag
+per cloud or forge. With the forge flag, a sidecar started for that session
+holds the token, and the agent's container gets a placeholder. The agent
+can still use the token through the sidecar for as long as the session
+runs. For a repository you don't trust, you can combine a session that
+keeps nothing afterwards with a read-only workspace. The threat model lists
+what is protected, what one session exposes and what is exposed across
+sessions. It also names the risk of code fetched at run time: tools such as
+`npx`, `uvx`, `pnpm dlx` and toolchain installers download and run code the
+first time you use them. Its advice after a compromised session is to
+assume the data has already left, and to rotate every credential that
+entered the container.
+
+**A layered containment pattern.** Some teams stack several controls, each
+from a different project. No single source documents the stack as a whole:
+
+| Layer                                  | What it does                                                                                                                                                                                                                                  | Public building blocks               |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| Isolation                              | One container per agent, on its own network, with the development tools inside and nothing mounted except the workspace                                                                                                                       | Docker, Podman, dev containers       |
+| Enforcement outside the trust boundary | A wrapper starts the agent as a child process and points its proxy variables at itself. It allows listed hosts and listed shell commands with path checks, blocks the rest, and removes secrets from tool results before they go to the model | mitmproxy, a small proxy of your own |
+| Review gate                            | The agent pushes to a local git server, a person reviews there, and only then does a change reach the real remote                                                                                                                             | Forgejo, Gitea, a bare repository    |
+| Supply-chain hygiene                   | A secret scan before each commit, and a minimum age for new package releases so that a version published an hour ago is never installed                                                                                                       | Gitleaks, pnpm's `minimumReleaseAge` |
+| Observation                            | Rules that watch network, file, process and privilege events around the container, and record everything without blocking                                                                                                                     | Tetragon, Falco                      |
+
+Gitleaks scans a repository for secrets (@Gitleaks), and pnpm's
+`minimumReleaseAge` setting holds back a package version until it has been
+published for a set time, one day by default (@pnpm supply chain).
+
+**Running with every prompt switched off.** Claude Code's flag for this is
+`--dangerously-skip-permissions`, and nothing takes the place of the
+prompts it removes (@Claude Code sandboxing). The agent then runs commands
+it wrote itself, which can be wrong or come from text it read online,
+without review. The vendor says to run such sessions only in a container,
+a virtual machine or its sandbox runtime, so that the file tools, MCP
+servers and hooks are inside the boundary too
+(@Claude Code isolation). A container limits what the agent
+reaches, but the workspace, every credential you passed in and an open
+network stay exposed (@claude-docker). Check such a run more closely the
+less of it you watched, which is how Anthropic's course on unsupervised
+runs frames verification (@Academy claude-code-in-action). OpenAI's Codex
+shows that there is room between all prompts and none. It sets three
+things apart: where commands may write, when the agent stops to ask you,
+and whether commands may use the network, which is off by default in its
+usual mode (@Codex approvals). Those three settings are worth separating
+in any agent.
+
+**The model brings no guardrails.** Pi, an open-source coding agent, has no
+approval step before each tool call, and its tools act with all the rights
+of the user who launched it. Its documentation puts safety in limiting
+what Pi can reach, and names running it wholly inside a container, virtual
+machine or sandbox as usually the best choice in practice (@Pi security).
+The same model can run behind a harness with prompts or one with none. The limits come from the
+harness and the environment around it.
+
+<Recap>
+1. A file the agent reads goes to the model provider in the next request, whether or not a sandbox is on. A sandbox limits which files it can read and which hosts it can send them to (@Claude Code isolation).
+2. The ways to contain an agent run from the built-in sandbox, quick to start and limited to shell commands, through containers, dev containers and virtual machines, to a vendor-hosted agent that needs no setup and gives you only the vendor's controls.
+3. Controls in the harness judge what the agent asks for, and injected text can steer that. Put the controls that matter outside the trust boundary: a network allowlist enforced by a proxy, and credentials held by a sidecar.
+4. In Claude Code, `allowedDomains` lists the hosts, `strictAllowlist` blocks the rest without asking when it comes from your own or a passed settings file, and `allowUnsandboxedCommands: false` with `failIfUnavailable: true` stops the agent's commands from running outside the sandbox (@Claude Code sandboxing).
+5. Keep a token the agent needs in a proxy or sidecar that adds it on the way out, and assume the agent can use it for the whole session.
+</Recap>
+
+<Habit id="name-the-hosts-first">
+Before you let an agent run commands in a new project, write down the hosts those commands really need, and check that your allowlist names those hosts and nothing wider.
+</Habit>

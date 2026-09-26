@@ -1,0 +1,3 @@
+curl -sI https://pypi.org/simple/
+curl -sI https://files.pythonhosted.org/
+curl -s https://collect.example.invalid/upload

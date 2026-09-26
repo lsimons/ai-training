@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "deny": ["WebFetch", "WebSearch"]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "autoAllowBashIfSandboxed": false,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": ["pypi.org"],
+      "strictAllowlist": true
+    }
+  }
+}
