@@ -29,7 +29,7 @@ from typing import Optional
 from urllib.parse import urlsplit
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-URL = re.compile(r"https?://[^\s\"']+")
+URL = re.compile(r"https?://[^\s\"']+", re.IGNORECASE)
 DEFAULT_PORTS = {"http": 80, "https": 443}
 
 
@@ -71,12 +71,18 @@ def decide(network: dict, host: str, port: int) -> str:
 
 
 def target(command: str) -> tuple[str, int]:
-    """The host and port of the first URL in a command."""
+    """The host and port of the first URL in a command.
+
+    A host written with a trailing dot, such as `pypi.org.`, is the same host
+    as `pypi.org`, so one trailing dot is removed.
+    """
     found = URL.search(command)
     if found is None:
         raise ValueError(f"no URL in command: {command}")
     parts = urlsplit(found.group(0))
     host = (parts.hostname or "").lower()
+    if host.endswith("."):
+        host = host[:-1]
     port = parts.port or DEFAULT_PORTS[parts.scheme]
     return host, port
 
