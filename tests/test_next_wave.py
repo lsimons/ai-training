@@ -21,7 +21,6 @@ from next_wave import (
     NOT_IN_ONLY,
     IssueState,
     LessonsWave,
-    Lookup,
     PlannedLesson,
     ReadyIssue,
     WaveEntry,
@@ -1282,15 +1281,30 @@ def test_dependency_lines_reads_whole_trimmed_lines_in_the_case_as_written() -> 
             "Not before 2026-10-01",
             "blocked by #14",
             "Blocked By #15",
-            "Blocked by #16, #17",
-            "Blocked by #18 (the spec)",
-            "Blocked by #019",
             "Split from #1. Blocked by #19.",
             "not before 2026-10-02",
-            "Not before the next release",
+            "Blocked by the spec",
         ]
     )
-    assert nw.dependency_lines(body) == ([12, 13], ["2026-10-01"])
+    assert nw.dependency_lines(body) == ([12, 13], ["2026-10-01"], [])
+
+
+def test_dependency_lines_reports_a_near_miss_of_either_form_as_unreadable() -> None:
+    near_misses = [
+        "Not before 2026-10-01 UTC",
+        "Not before: 2026-10-01",
+        "Not before the next release",
+        "Not before 2026-9-27",
+        "Blocked by #5 and #6",
+        "Blocked by #16, #17",
+        "Blocked by #18 (the spec)",
+        "Blocked by #019",
+    ]
+    body = "\n".join(["Blocked by #4", *(f"  {x}" for x in near_misses)])
+    assert nw.dependency_lines(body) == ([4], [], near_misses)
+    d = nw.dependencies(body, lambda n: False, TODAY)
+    assert d["unreadable"] == near_misses
+    assert nw.held(d)
 
 
 def test_dependency_lines_skips_code_fences_and_quotes() -> None:
@@ -1310,11 +1324,29 @@ def test_dependency_lines_skips_code_fences_and_quotes() -> None:
         ]
     )
     # The `~~~` inside the `~~~~` fence is too short to close it.
-    assert nw.dependency_lines(body) == ([4], [])
+    assert nw.dependency_lines(body) == ([4], [], [])
 
 
-def is_open_in(numbers: Sequence[int]) -> Lookup:
-    return lambda n: state("OPEN" if n in numbers else "CLOSED")
+def test_dependency_lines_opens_a_fence_only_as_commonmark_does() -> None:
+    body = "\n".join(
+        [
+            # Four spaces of indent, or a tab, is no fence (an indented code block).
+            "    ```",
+            "Blocked by #1",
+            "\t~~~",
+            "Blocked by #2",
+            # A backtick fence's info string holds no backtick, so this is inline code.
+            "```Blocked by #5```",
+            "Blocked by #3",
+            # Up to three spaces open a fence, and a tilde line doesn't close a backtick one.
+            "   ```sh",
+            "~~~",
+            "Blocked by #6",
+            "```",
+            "Blocked by #7",
+        ]
+    )
+    assert nw.dependency_lines(body) == ([1, 2, 3, 7], [], [])
 
 
 def test_dependencies_holds_an_issue_while_a_blocker_is_open_and_lists_two_blockers() -> None:
@@ -1337,7 +1369,7 @@ def test_dependencies_waits_for_a_future_date_and_frees_the_issue_on_that_date()
     assert not_before("Not before 2026-09-01\nNot before 2026-12-24") == "2026-12-24"
 
 
-@pytest.mark.parametrize("value", ["2026-13-01", "2026-9-27", "2026-09-27.", "27-09-2026"])
+@pytest.mark.parametrize("value", ["2026-13-01", "2026-02-30", "0000-01-01"])
 def test_dependencies_reports_an_unreadable_date_and_holds_the_issue(value: str) -> None:
     d = nw.dependencies(f"Not before {value}", lambda n: True, TODAY)
     assert d == {"blockedByIssues": [], "notBefore": None, "unreadable": [f"Not before {value}"]}
@@ -1394,7 +1426,9 @@ def test_lessons_blocks_on_an_open_blocker_a_future_date_and_an_unreadable_date(
         {"issue": 2, "reason": "not before 2026-10-01"},
         {
             "issue": 3,
-            "reason": "blocked by a/5; blocked by #40; unreadable date in `Not before 2026-02-30`",
+            "reason": (
+                "blocked by a/5; blocked by #40; unreadable dependency line `Not before 2026-02-30`"
+            ),
         },
     ]
     out = format_wave(r)
@@ -1402,7 +1436,7 @@ def test_lessons_blocks_on_an_open_blocker_a_future_date_and_an_unreadable_date(
     assert "- #2 `a/2`: not before 2026-10-01\n" in out
     assert (
         "- #3 `a/3`: assumes `a/c/o1` (served by `a/5`); blocked by #40;"
-        " unreadable date in `Not before 2026-02-30`\n"
+        " unreadable dependency line `Not before 2026-02-30`\n"
     ) in out
 
 

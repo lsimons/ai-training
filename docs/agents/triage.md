@@ -80,6 +80,10 @@ body and its decision comment together hold:
 - Its blocker, if any, as a dependency line (below), and the issue it
   was split from.
 
+Stale paths in an old body (`docs/src/` where the code is under `site/src/`)
+get corrected in the triage comment rather than left for the builder to
+discover.
+
 ## Dependency lines
 
 The wave picker (`mise run next-wave`, `scripts/next_wave.py`) reads two
@@ -95,23 +99,25 @@ Not before 2026-10-01
   blocks too.
 - `Not before YYYY-MM-DD` blocks the issue until that date, read in UTC.
   On the date itself the issue is free. With two lines the later date
-  counts. The picker reports a date it can't read, such as `2026-9-1` or
-  a date with a trailing period, and blocks the issue until it's fixed.
+  counts.
 - Each goes on its own line near the top of the body, before the prose,
-  with the words and case as shown and nothing else on the line. A
-  sentence such as "Blocked by #123, confirm it merged" doesn't count, and
-  neither does a line inside a code fence or a quote (`>`), so an issue can
-  show the forms, as this section does.
+  with the words and case as shown and nothing else on the line.
+- A line that starts with `Blocked by #` or `Not before` but isn't the
+  form whole blocks the issue until it's fixed, and the picker reports it
+  as unreadable. `Not before 2026-10-01 UTC`, `Not before: 2026-10-01`,
+  `Not before 2026-9-1`, a date that doesn't exist and
+  `Blocked by #5 and #6` all read this way. Write a sentence about a
+  blocker so that it doesn't start with those words ("Confirm #123 has
+  merged").
+- A line inside a fenced code block or a quote (`>`) doesn't count, so an
+  issue can show the forms, as this section does. A fence opens as
+  CommonMark says: at most three spaces before it.
 - For a lesson the lines come on top of its plan file's `assumes` entries.
 - The picker looks up a blocker that isn't in its list with
   `gh issue view`, and a number that doesn't exist stops it, so a typo
   shows up at the next pick.
 - When a blocker closes, the line can stay. Remove it when you edit the
   body anyway.
-
-Stale paths in an old body (`docs/src/` where the code is under `site/src/`)
-get corrected in the triage comment rather than left for the builder to
-discover.
 
 ## What stays with the maintainer
 
