@@ -401,7 +401,7 @@ showed what happens when a vendor moves the model and nobody notices.
     { text: 'The new prompt was reviewed in a pull request, so the on-call person can revert the commit and run the release pipeline.', why: 'The review was right, but reverting and releasing is a deploy with its builds and checks. It can take an hour, and it changes the code on a Friday evening.' },
     { text: 'The golden set passed before the rollout, so the rise is noise and can wait until Monday.', why: 'The set is finite, and the stage exists to find what it missed. A doubled rate on real users is the signal the stage was built for.' },
     { text: 'The logs keep every answer the new prompt gave, so the team can find the cause first.', why: 'The logs help find the cause, but users keep getting the new prompt while the team reads them.' },
-    { text: 'The share of traffic on the new prompt is a setting, so the on-call sets it to 0.', correct: true },
+    { text: 'The share of traffic on the new prompt is a setting, so the on-call person sets it to 0.', correct: true },
   ]}>
 
 What makes the rollback take minutes?
@@ -493,7 +493,7 @@ questions about pay?
    The threshold stays where it is.
 4. Roll a change out in stages, starting with a small share of traffic,
    and compare the live metrics with the current version before you widen
-   it (@AEC-11). This lesson's plan puts the team first.
+   it (@AEC-11). This lesson's plan adds a team stage before it.
 5. Keep the prompt files in version control, and name the live prompt,
    the traffic share and a pinned model version in configuration, so a
    rollback is a setting and takes minutes.
