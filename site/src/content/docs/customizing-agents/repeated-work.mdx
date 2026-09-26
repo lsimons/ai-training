@@ -215,11 +215,11 @@ edit in all three sessions. What do you change?
 ## Cut what the hook and the skill now hold
 
 The best-practices page suggests removing any line of the instructions
-file that the agent would get right without it
+file that the agent doesn't need to avoid a mistake
 (@Claude Code best practices). The same page warns that a long
 instructions file makes the agent miss the rules that matter.
 
-Apply the test to the long regeneration paragraph first. The skill holds
+Apply this to the long regeneration paragraph first. The skill holds
 the procedure now, with each step on its own line, and its description is
 in the context of every session (@Claude Code skills). Without the
 paragraph the agent still finds the steps, so the paragraph goes.
@@ -281,7 +281,7 @@ Which two of these are right for the instructions file now?
   context="A team cut its instructions line about files under src/api/generated/ down to one short sentence, because a hook now blocks the agent's edits there. The reason is gone from the file. The hook's message on standard error is what the agent receives when it is blocked. A skill named regenerate-api-client holds the regeneration steps."
   title="What does the hook say?" hint="The reason is gone from the file. Where does the agent now learn why, and what to do instead?"
   options={[
-    { text: 'src/api/generated/ is generated code, and a hand edit there is lost the next time the client is regenerated.', consequence: 'The agent learns why it was blocked and not what to do next. It may find the skill from its description, or it may try the same change through a shell command that the hook never sees.' },
+    { text: 'src/api/generated/ is generated code, and a hand edit there is lost the next time the client is regenerated.', consequence: 'The agent learns why it was blocked, and the message doesn\'t name the skill. It may find the skill from its description, or it may try the same change through a shell command that the hook never sees.' },
     { text: 'This folder is protected. Ask the user for permission before you edit anything under src/api/generated/.', consequence: 'The agent asks, and the answer is no every time. The user is back to being the approval step the hook was meant to replace.' },
     { text: 'Error: the PreToolUse hook exited with code 2 for an Edit call on a file in src/api/generated/.', consequence: 'The message names the mechanism and says nothing about the rule. The agent tries a Write call on the same file, and the hook blocks it again.' },
     { text: 'src/api/generated/ is generated from the billing API spec. Run /regenerate-api-client to update the client, or change the spec.', correct: true, consequence: 'The agent runs the skill, the client gets the new field, and the edit never happens. Nobody had to say anything.' },
