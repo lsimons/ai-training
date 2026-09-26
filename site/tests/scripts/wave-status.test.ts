@@ -93,10 +93,14 @@ describe('lastTrustedVerdict', () => {
 		expect(lastTrustedVerdict(comments, 'feat/1-x-1', SPLIT)?.commentsAfter).toBe(0);
 	});
 
-	it('applies a verdict that names no branch to every branch', () => {
-		const comments = [comment('lsimons', 'Verdict: approve', '2026-09-24T10:00:00Z')];
-		expect(lastTrustedVerdict(comments, 'feat/1-x-1', SPLIT)?.verdict).toBe('approve');
-		expect(lastTrustedVerdict(comments, 'feat/1-x-2', SPLIT)?.verdict).toBe('approve');
+	it('applies a verdict that names no branch to every branch, except an approve on a split issue', () => {
+		const needsChanges = [comment('lsimons', 'Verdict: needs changes', '2026-09-24T10:00:00Z')];
+		expect(lastTrustedVerdict(needsChanges, 'feat/1-x-1', SPLIT)?.verdict).toBe('needs changes');
+		expect(lastTrustedVerdict(needsChanges, 'feat/1-x-2', SPLIT)?.verdict).toBe('needs changes');
+		const approve = [comment('lsimons', 'Verdict: approve', '2026-09-24T10:00:00Z')];
+		expect(lastTrustedVerdict(approve, 'feat/1-x', ONE)?.verdict).toBe('approve');
+		expect(lastTrustedVerdict(approve, 'feat/1-x-1', SPLIT)).toBeNull();
+		expect(lastTrustedVerdict(approve, 'feat/1-x-2', SPLIT)).toBeNull();
 	});
 
 	it('counts only the replies after a verdict that apply to the branch', () => {
@@ -142,7 +146,15 @@ describe('branchOf', () => {
 	it('applies a comment to the branch it names, or to every branch when it names none', () => {
 		expect(appliesTo('Branch: feat/1-x-1', 'feat/1-x-1', SPLIT)).toBe(true);
 		expect(appliesTo('Branch: feat/1-x-1', 'feat/1-x-2', SPLIT)).toBe(false);
-		expect(appliesTo('Verdict: approve', 'feat/1-x-2', SPLIT)).toBe(true);
+		expect(appliesTo('Verdict: needs changes', 'feat/1-x-2', SPLIT)).toBe(true);
+		expect(appliesTo('Fixed.', 'feat/1-x-2', SPLIT)).toBe(true);
+		expect(appliesTo('Verdict: approve', 'feat/1-x', ONE)).toBe(true);
+		expect(appliesTo('re-checked by lead: abc', 'feat/1-x', ONE)).toBe(true);
+	});
+
+	it('applies an approve or a lead re-check that names no branch to no half of a split issue', () => {
+		expect(appliesTo('Verdict: approve', 'feat/1-x-1', SPLIT)).toBe(false);
+		expect(appliesTo('re-checked by lead: abc', 'feat/1-x-2', SPLIT)).toBe(false);
 	});
 });
 
@@ -413,7 +425,9 @@ describe('waveStatus with an approve and its fix commit', () => {
 		const reply2 = comment('lsimons', 'Fixed in abc.\n\nBranch: feat/17-x-2', '2026-09-24T11:00:00Z');
 		const reply1 = comment('lsimons', 'Fixed in def.\n\nBranch: feat/17-x-1', '2026-09-24T11:30:00Z');
 		const reCheck1 = comment('lsimons', 're-checked by lead: def\n\nBranch: feat/17-x-1', '2026-09-24T12:00:00Z');
-		expect(next([approve, reply2, reply1, reCheck1], heads)).toEqual([
+		const approve1 = comment('lsimons', 'Branch: feat/17-x-1\nVerdict: approve', '2026-09-24T10:00:00Z');
+		const approve2 = comment('lsimons', 'Branch: feat/17-x-2\nVerdict: approve', '2026-09-24T10:00:00Z');
+		expect(next([approve1, approve2, reply2, reply1, reCheck1], heads)).toEqual([
 			['feat/17-x-1', 'join'],
 			['feat/17-x-2', 'lead-re-check'],
 		]);
@@ -469,24 +483,101 @@ describe('waveStatus with near-miss branch names', () => {
 
 	it('applies a reply or Unfinished comment that names no pushed branch to every branch', () => {
 		const heads = ['feat/18-x-1', 'feat/18-x-2'];
-		const unscopedApprove = comment('lsimons', 'Verdict: approve', '2026-09-24T10:00:00Z');
-		expect(next([unscopedApprove, at('Fixed.\n\nBranch: feat/18-typo')], heads)).toEqual([
+		const approve1 = comment('lsimons', 'Branch: feat/18-x-1\nVerdict: approve', '2026-09-24T10:00:00Z');
+		const approve2 = comment('lsimons', 'Branch: feat/18-x-2\nVerdict: approve', '2026-09-24T10:00:00Z');
+		expect(next([approve1, approve2, at('Fixed.\n\nBranch: feat/18-typo')], heads)).toEqual([
 			['feat/18-x-1', 'lead-re-check'],
 			['feat/18-x-2', 'lead-re-check'],
 		]);
-		expect(next([unscopedApprove, at('Unfinished: feat/18-typo\n- tests')], heads)).toEqual([
+		expect(next([approve1, approve2, at('Unfinished: feat/18-typo\n- tests')], heads)).toEqual([
 			['feat/18-x-1', 'build'],
 			['feat/18-x-2', 'build'],
 		]);
 	});
 
-	it('applies a verdict or lead re-check that names no pushed branch to none', () => {
+	it('applies a needs changes that names no pushed branch to every branch, so an earlier approve does not join', () => {
+		const needsChanges = comment('lsimons', 'Branch: feat/18-typo\nVerdict: needs changes', '2026-09-24T11:00:00Z');
+		expect(next([approve, needsChanges])).toEqual([['feat/18-x', 'revise']]);
+	});
+
+	it('applies an approve or lead re-check that names no pushed branch to none', () => {
 		expect(next([comment('lsimons', 'Branch: feat/18-typo\nVerdict: approve', '2026-09-24T10:00:00Z')])).toEqual([
 			['feat/18-x', 'review'],
 		]);
 		const reply = at('Fixed.\n\nBranch: feat/18-x');
 		const reCheck = comment('lsimons', 're-checked by lead: abc\n\nBranch: feat/18-typo', '2026-09-24T12:00:00Z');
 		expect(next([approve, reply, reCheck])).toEqual([['feat/18-x', 'lead-re-check']]);
+	});
+});
+
+describe('waveStatus for every comment kind and every way it names a branch', () => {
+	// Each row: a comment kind, the comments before it, and the step it gives
+	// for each way of naming a branch. A comment that fails to match gives
+	// more work, never `join`, unless an approve (or a lead re-check of one)
+	// really applies to the branch.
+	type Naming = 'branch' | 'origin/' | 'period' | 'other half' | 'typo' | 'nothing';
+	const at = (minute: number, body: string) =>
+		comment('lsimons', body, `2026-09-24T10:${String(minute).padStart(2, '0')}:00Z`);
+	const branchLine = (name: string) => (name ? `\n\nBranch: ${name}` : '');
+
+	function matrix(heads: string[], branch: string) {
+		const other = heads.find((h) => h !== branch) ?? '';
+		const names: Record<Naming, string> = {
+			branch,
+			'origin/': `origin/${branch}`,
+			period: `${branch}.`,
+			'other half': other,
+			typo: 'feat/19-typo',
+			nothing: '',
+		};
+		const approveAll = heads.map((h, i) => at(i, `Findings.${branchLine(h)}\nVerdict: approve`));
+		const needsChangesAll = heads.map((h, i) => at(i, `Findings.${branchLine(h)}\nVerdict: needs changes`));
+		const replyAll = heads.map((h, i) => at(10 + i, `Fixed in abc.${branchLine(h)}`));
+		const kinds = {
+			approve: { before: needsChangesAll, body: (n: string) => `Findings.${branchLine(n)}\nVerdict: approve` },
+			'needs changes': { before: approveAll, body: (n: string) => `Findings.${branchLine(n)}\nVerdict: needs changes` },
+			'Unfinished:': { before: approveAll, body: (n: string) => `Unfinished: ${n}\n- the tests` },
+			're-checked by lead': {
+				before: [...approveAll, ...replyAll],
+				body: (n: string) => `re-checked by lead: https://example.test/commit/abc${branchLine(n)}`,
+			},
+			reply: { before: approveAll, body: (n: string) => `Fixed in def.${branchLine(n)}` },
+		};
+		return (kind: keyof typeof kinds, naming: Naming) => {
+			const { before, body } = kinds[kind];
+			const status = waveStatus({
+				waveBranch: 'wave/capybara-3',
+				issues: [19],
+				heads,
+				commentsByIssue: new Map([[19, [...before, at(30, body(names[naming]))]]]),
+				worktrees: [],
+			});
+			return status.issues[0]?.branches.find((b) => b.name === branch)?.next;
+		};
+	}
+
+	const split = matrix(['feat/19-x-1', 'feat/19-x-2'], 'feat/19-x-1');
+	it.each([
+		['approve', ['join', 'join', 'join', 'revise', 'revise', 'revise']],
+		['needs changes', ['revise', 'revise', 'revise', 'join', 'revise', 'revise']],
+		['Unfinished:', ['build', 'build', 'build', 'join', 'build', 'build']],
+		['re-checked by lead', ['join', 'join', 'join', 'lead-re-check', 'lead-re-check', 'lead-re-check']],
+		['reply', ['lead-re-check', 'lead-re-check', 'lead-re-check', 'join', 'lead-re-check', 'lead-re-check']],
+	] as const)('on a split issue, a %s comment gives %j', (kind, steps) => {
+		const namings: Naming[] = ['branch', 'origin/', 'period', 'other half', 'typo', 'nothing'];
+		expect(namings.map((naming) => split(kind, naming))).toEqual(steps);
+	});
+
+	const one = matrix(['feat/19-x'], 'feat/19-x');
+	it.each([
+		['approve', ['join', 'revise', 'join']],
+		['needs changes', ['revise', 'revise', 'revise']],
+		['Unfinished:', ['build', 'build', 'build']],
+		['re-checked by lead', ['join', 'lead-re-check', 'join']],
+		['reply', ['lead-re-check', 'lead-re-check', 'lead-re-check']],
+	] as const)('on an issue with one branch, a %s comment gives %j', (kind, steps) => {
+		const namings: Naming[] = ['branch', 'typo', 'nothing'];
+		expect(namings.map((naming) => one(kind, naming))).toEqual(steps);
 	});
 });
 
