@@ -1,0 +1,59 @@
+# Names for dispatcher runs (/wave, #353): two lists of 26 animals, one
+# name per line, one per letter from A to Z. A blank line ends the first
+# list and starts the second. Lines that start with # are comments. The
+# rules for picking a name are at the top of scripts/run_name.py, and its
+# test checks this file.
+
+Axolotl
+Badger
+Capybara
+Dingo
+Emu
+Ferret
+Gecko
+Heron
+Ibis
+Jackal
+Koala
+Lemur
+Marmot
+Narwhal
+Ocelot
+Panda
+Quokka
+Raven
+Seal
+Tapir
+Urchin
+Vole
+Walrus
+Xerus
+Yak
+Zebra
+
+Alpaca
+Bison
+Camel
+Dolphin
+Eagle
+Falcon
+Gibbon
+Hedgehog
+Iguana
+Jaguar
+Kiwi
+Llama
+Moose
+Newt
+Otter
+Puffin
+Quail
+Rabbit
+Sloth
+Toucan
+Umbrellabird
+Vulture
+Wombat
+Xenops
+Yellowjacket
+Zebu

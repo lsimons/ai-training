@@ -110,7 +110,7 @@ Badger (#359, waves 1 to 5) to Ferret (#363).
 
 Runs are named after animals in alphabetical order, like hurricanes:
 Axolotl, then Badger, Capybara and so on, from the two lists in
-`.claude/skills/wave/run-names.yaml`. `mise run run-name` prints the open
+`.claude/skills/wave/run-names.txt`. `mise run run-name` prints the open
 runs and the next name, the letter after the newest run's name, skipping
 a name an open run still holds. After Z the second list starts at A, and
 after its Z the first list comes back. A name never says which machine
