@@ -46,6 +46,35 @@ describe('verdictOf', () => {
 	});
 });
 
+describe('verdictOf and commentKind outside code fences', () => {
+	const pastedReview = '```text\nFindings.\n\nBranch: feat/1-x\nVerdict: approve\n```';
+
+	it('reads the verdict outside a fence, not a fenced example above it', () => {
+		expect(verdictOf(`Reviews end like this:\n\n${pastedReview}\n\nBranch: feat/1-x\nVerdict: needs changes`)).toBe(
+			'needs changes',
+		);
+		expect(verdictOf('~~~\nVerdict: needs changes\n~~~\n\nVerdict: approve')).toBe('approve');
+	});
+
+	it('takes the last Verdict line outside a fence', () => {
+		expect(verdictOf('Verdict: approve would be wrong.\n\nVerdict: needs changes')).toBe('needs changes');
+		expect(verdictOf('Verdict: needs changes\n\n```\nVerdict: approve\n```')).toBe('needs changes');
+	});
+
+	it('closes a fence only on a bare marker of the same character, at least as long', () => {
+		expect(verdictOf('````\n```\nVerdict: approve\n````\nVerdict: needs changes')).toBe('needs changes');
+		expect(verdictOf('```\n~~~\nVerdict: approve\n```')).toBeNull();
+		expect(verdictOf('```\n```text\nVerdict: approve\n```')).toBeNull();
+		expect(verdictOf('```\nVerdict: approve')).toBeNull();
+	});
+
+	it('reads a builder reply that pastes a review or a lead re-check in a fence as a reply', () => {
+		expect(commentKind(`Fixed in abc. The review said:\n\n${pastedReview}\n\nBranch: feat/1-x`)).toBe('reply');
+		expect(commentKind('Fixed.\n\n```\nre-checked by lead: abc\n```\n\nBranch: feat/1-x')).toBe('reply');
+		expect(commentKind('~~~\nRe-checked by lead: abc\n~~~\nre-checked by lead: def')).toBe('lead-re-check');
+	});
+});
+
 describe('lastTrustedVerdict', () => {
 	it('ignores a planted approve from another account', () => {
 		const comments = [
@@ -510,6 +539,47 @@ describe('waveStatus with near-miss branch names', () => {
 	});
 });
 
+describe('waveStatus with verdicts and re-checks in code fences', () => {
+	const next = (comments: ReturnType<typeof comment>[]) =>
+		waveStatus({
+			waveBranch: 'wave/capybara-3',
+			issues: [20],
+			heads: ['feat/20-x'],
+			commentsByIssue: new Map([[20, comments]]),
+			worktrees: [],
+		}).issues[0]?.branches.map((b) => [b.name, b.next]);
+	const fencedApprove = '```text\nBranch: feat/20-x\nVerdict: approve\n```';
+
+	it('revises a review whose fenced example approve sits above its real needs changes', () => {
+		const review = comment(
+			'lsimons',
+			`End with:\n\n${fencedApprove}\n\nBranch: feat/20-x\nVerdict: needs changes`,
+			'2026-09-24T10:00:00Z',
+		);
+		expect(next([review])).toEqual([['feat/20-x', 'revise']]);
+	});
+
+	it('reads a builder reply that pastes an approve in a fence as a reply, so it goes back to the reviewer', () => {
+		const needsChanges = comment('lsimons', 'Branch: feat/20-x\nVerdict: needs changes', '2026-09-24T10:00:00Z');
+		const reply = comment(
+			'lsimons',
+			`Fixed. The re-check I expect:\n\n${fencedApprove}\n\nBranch: feat/20-x`,
+			'2026-09-24T11:00:00Z',
+		);
+		expect(next([needsChanges, reply])).toEqual([['feat/20-x', 're-check']]);
+	});
+
+	it('reads a builder reply that pastes a lead re-check in a fence as a reply, so the lead still checks it', () => {
+		const approve = comment('lsimons', 'Branch: feat/20-x\nVerdict: approve', '2026-09-24T10:00:00Z');
+		const reply = comment(
+			'lsimons',
+			'Fixed. Please comment:\n\n```\nre-checked by lead: abc\n```\n\nBranch: feat/20-x',
+			'2026-09-24T11:00:00Z',
+		);
+		expect(next([approve, reply])).toEqual([['feat/20-x', 'lead-re-check']]);
+	});
+});
+
 describe('waveStatus for every comment kind and every way it names a branch', () => {
 	// Each row: a comment kind, the comments before it, and the step it gives
 	// for each way of naming a branch. A comment that fails to match gives
@@ -563,7 +633,7 @@ describe('waveStatus for every comment kind and every way it names a branch', ()
 		['Unfinished:', ['build', 'build', 'build', 'join', 'build', 'build']],
 		['re-checked by lead', ['join', 'join', 'join', 'lead-re-check', 'lead-re-check', 'lead-re-check']],
 		['reply', ['lead-re-check', 'lead-re-check', 'lead-re-check', 'join', 'lead-re-check', 'lead-re-check']],
-	] as const)('on a split issue, a %s comment gives %j', (kind, steps) => {
+	] as const)('on a split issue, a comment of kind %s gives %j', (kind, steps) => {
 		const namings: Naming[] = ['branch', 'origin/', 'period', 'other half', 'typo', 'nothing'];
 		expect(namings.map((naming) => split(kind, naming))).toEqual(steps);
 	});
@@ -575,7 +645,7 @@ describe('waveStatus for every comment kind and every way it names a branch', ()
 		['Unfinished:', ['build', 'build', 'build']],
 		['re-checked by lead', ['join', 'lead-re-check', 'join']],
 		['reply', ['lead-re-check', 'lead-re-check', 'lead-re-check']],
-	] as const)('on an issue with one branch, a %s comment gives %j', (kind, steps) => {
+	] as const)('on an issue with one branch, a comment of kind %s gives %j', (kind, steps) => {
 		const namings: Naming[] = ['branch', 'typo', 'nothing'];
 		expect(namings.map((naming) => one(kind, naming))).toEqual(steps);
 	});

@@ -33,8 +33,9 @@
  * names the branch on a `Branch:` line.
  *
  * The builder, the reviewers and the lead all post as the same trusted
- * accounts, so the kind of a comment comes from its text (#420): a `Verdict:`
- * line is a review, an `Unfinished:` first line is a builder at its turn
+ * accounts, so the kind of a comment comes from its text (#420), read outside
+ * code fences only (#457): a `Verdict:` line is a review (the last one
+ * counts), an `Unfinished:` first line is a builder at its turn
  * limit, a line starting `re-checked by lead` is the lead's check of a fix
  * commit, and any other trusted comment after a verdict is a builder reply.
  * An approve with a builder reply after it and no lead re-check after that
@@ -45,8 +46,8 @@
 /** The accounts whose `Verdict:` comments a lead acts on. */
 export const TRUSTED_VERDICT_AUTHORS = Object.freeze(['lsimons', 'lsimons-bot']);
 
-/** A `Verdict:` line anywhere in a comment, as the reviewers end their reviews. */
-const VERDICT_LINE = /^\s*\**Verdict:?\**:?\s*\**\s*(approve|needs changes)\b/im;
+/** A `Verdict:` line, as the reviewers end their reviews. Only lines outside code fences count. */
+const VERDICT_LINE = /^\s*\**Verdict:?\**:?\s*\**\s*(approve|needs changes)\b/i;
 
 /** A `Branch:` line, as the reviewers write it next to their `Verdict:` line. */
 const BRANCH_LINE = /^\s*\**Branch(?::\**|\**:)\s*\**\s*`?([^\s`*]+)`?/;
@@ -54,11 +55,11 @@ const BRANCH_LINE = /^\s*\**Branch(?::\**|\**:)\s*\**\s*`?([^\s`*]+)`?/;
 /** The first line of a builder's hand-back at its turn limit. */
 const UNFINISHED_LINE = /^\s*\**Unfinished(?::\**|\**:)\s*\**\s*`?([^\s`*]*)`?/i;
 
-/** The opening or closing line of a Markdown code fence. */
-const FENCE_LINE = /^\s*(`{3,}|~{3,})/;
+/** The opening or closing line of a Markdown code fence, and what follows the marker. */
+const FENCE_LINE = /^\s*(`{3,}|~{3,})(.*)$/;
 
-/** The lead's comment after it read an approved branch's fix commit. */
-const LEAD_RE_CHECK_LINE = /^\s*\**re-checked by lead\b/im;
+/** The lead's comment after it read an approved branch's fix commit. Only lines outside code fences count. */
+const LEAD_RE_CHECK_LINE = /^\s*\**re-checked by lead\b/i;
 
 /** The attribution lines at the end of every agent comment. */
 const ATTRIBUTION_LINE = /^\s*(Co-Authored-By|Assisted-by):/i;
@@ -73,14 +74,30 @@ const ATTRIBUTION_LINE = /^\s*(Co-Authored-By|Assisted-by):/i;
  */
 
 /**
- * The verdict a comment states, or null when it states none.
+ * The verdict a comment states on its last `Verdict:` line outside a code
+ * fence, or null when it states none. A review that shows an example verdict
+ * in a fence, and a reply that pastes a review in a fence, state only the
+ * verdict outside the fence (#457).
  * @param {string} body
  * @returns {'approve' | 'needs changes' | null}
  */
 export function verdictOf(body) {
-	const match = VERDICT_LINE.exec(body);
-	if (!match?.[1]) return null;
-	return match[1].toLowerCase() === 'approve' ? 'approve' : 'needs changes';
+	/** @type {'approve' | 'needs changes' | null} */
+	let verdict = null;
+	for (const line of linesOutsideFences(body)) {
+		const match = VERDICT_LINE.exec(line)?.[1];
+		if (match) verdict = match.toLowerCase() === 'approve' ? 'approve' : 'needs changes';
+	}
+	return verdict;
+}
+
+/**
+ * Whether a comment has a line outside a code fence that starts with
+ * `re-checked by lead`.
+ * @param {string} body
+ */
+function isLeadReCheck(body) {
+	return linesOutsideFences(body).some((line) => LEAD_RE_CHECK_LINE.test(line));
 }
 
 /**
@@ -92,7 +109,7 @@ export function verdictOf(body) {
 export function commentKind(body) {
 	if (verdictOf(body)) return 'verdict';
 	if (isUnfinished(body)) return 'unfinished';
-	if (LEAD_RE_CHECK_LINE.test(body)) return 'lead-re-check';
+	if (isLeadReCheck(body)) return 'lead-re-check';
 	return 'reply';
 }
 
@@ -107,7 +124,10 @@ export function normalizeBranch(name) {
 
 /**
  * The lines of a comment outside its code fences, so a quoted example
- * doesn't count as the comment's own `Branch:` line.
+ * doesn't count as the comment's own `Branch:`, `Verdict:` or
+ * `re-checked by lead` line. As in CommonMark, a fence closes on a line of
+ * the same marker character, at least as long as the opening one, with
+ * nothing after it. A fence that never closes hides the rest of the comment.
  * @param {string} body
  */
 function linesOutsideFences(body) {
@@ -116,13 +136,14 @@ function linesOutsideFences(body) {
 	/** @type {string | null} */
 	let fence = null;
 	for (const line of body.split('\n')) {
-		const marker = FENCE_LINE.exec(line)?.[1]?.[0];
-		if (marker) {
-			if (fence === null) fence = marker;
-			else if (marker === fence) fence = null;
-			continue;
+		const match = FENCE_LINE.exec(line);
+		const marker = match?.[1];
+		if (fence === null) {
+			if (marker) fence = marker;
+			else lines.push(line);
+		} else if (marker && marker[0] === fence[0] && marker.length >= fence.length && !match?.[2]?.trim()) {
+			fence = null;
 		}
-		if (fence === null) lines.push(line);
 	}
 	return lines;
 }
