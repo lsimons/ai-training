@@ -1175,3 +1175,38 @@ Claude docs errors:
   author: Anthropic
   license: Proprietary
   url: https://platform.claude.com/docs/en/api/errors
+Claude Code isolation:
+  type: reference
+  title: Choose a sandbox environment
+  container: Claude Code documentation
+  author: Anthropic
+  license: Proprietary
+  url: https://code.claude.com/docs/en/sandbox-environments
+claude-docker:
+  type: reference
+  title: "claude-docker: hardened Docker container for running Claude Code"
+  container: schubergphilis/claude-docker on GitHub
+  author: claude-docker contributors
+  license: Apache-2.0
+  url: https://github.com/schubergphilis/claude-docker
+Codex approvals:
+  type: reference
+  title: Agent approvals & security
+  container: Codex documentation
+  author: OpenAI
+  license: Proprietary
+  url: https://learn.chatgpt.com/docs/agent-approvals-security
+Pi security:
+  type: reference
+  title: Run Pi safely
+  container: earendil-works/pi on GitHub
+  author: Mario Zechner and contributors
+  license: MIT
+  url: https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/security.md
+pnpm supply chain:
+  type: reference
+  title: Mitigating supply chain attacks
+  container: pnpm documentation
+  author: Zoltan Kochan and contributors
+  license: MIT
+  url: https://pnpm.io/supply-chain-security
