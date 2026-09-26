@@ -1,8 +1,8 @@
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { lessonPlan } from '../../scripts/lesson-plan.mjs';
 import type { AreaTree } from '../../scripts/lib/area-tree.mjs';
+import { lessonPlan } from '../../scripts/lib/lesson-plan.mjs';
 
 type Area = { dir: string; courses: unknown[]; lessons: unknown[] };
 

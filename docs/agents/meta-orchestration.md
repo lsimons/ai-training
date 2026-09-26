@@ -175,9 +175,9 @@ One tick:
 4. **Pick.** Run `mise run next-wave -- --size 6`, with `--kind` and the
    remaining whitelist as `--only`. The picker is `scripts/next_wave.py`,
    and it reads the lessons of the checkout as the JSON that
-   `mise run lesson-plan` (`site/scripts/lesson-plan.mjs`) prints. For a lessons wave it lists the planned
-   lessons whose issue is `ready-for-agent` and unassigned, and drops the
-   ones that assume an objective no live lesson on `main` serves. A plan
+   `mise run lesson-plan` (`site/scripts/lesson-plan.mjs`) prints. For a
+   lessons wave it lists the planned lessons whose issue is
+   `ready-for-agent` and unassigned, and drops the ones that assume an objective no live lesson on `main` serves. A plan
    file's `assumes` entries name only the objective, the builder adds the
    `lesson` and `section` that teach it when the page goes live, and the
    build (`mise run site-build`, through `MarkdownContent.astro`) rejects a
