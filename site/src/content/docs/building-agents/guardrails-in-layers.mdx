@@ -436,7 +436,7 @@ in?
 
 <Choice id="the-gate-at-200-a-day" phase="review" objective="building-agents/runs-in-production/mitigates-agent-risks"
   concepts={['defense-layers', 'human-in-the-loop']}
-  context="A shop's support agent has an approval gate where a person says yes or no to each outbound reply. The lesson says an approval gate catches sends nobody expected, while the person reads each one."
+  context="A shop's support agent has an approval gate where a person says yes or no to each outbound reply."
   title="The gate after a month" hint="What does a gate depend on to catch anything?"
   options={[
     { text: 'Every planted send, because each reply still needs a yes.', why: 'A yes given in two seconds without reading lets a planted send through like any other.' },
@@ -452,14 +452,14 @@ seconds each. What does the gate still catch?
 
 <Sort id="safer-send-tool" phase="review" objective="building-agents/runs-in-production/mitigates-agent-risks"
   concepts={['defense-layers', 'agent-specific-security-risks', 'exfiltration']}
-  context="A shop's support agent gets a new tool, send_email, which can mail any address. The agent already has a permission check, an output filter on outbound calls, an approval gate on replies, and tests that include a page with a planted instruction."
-  title="Adding the mail tool" hint="Is this enforced by code or a person, or is it advice the model may ignore?"
+  context="A shop's support agent gets a new tool, send_email, which can mail any address. The agent already has a permission check, an output filter on outbound calls and an approval gate on replies."
+  title="Adding the mail tool" hint="Does this stop or catch a bad mail, or is it advice the model may ignore?"
   buckets={['Makes the new tool safer', 'Adds no real control']}
   items={[
     { text: 'Allow send_email only to the ticket\'s author', bucket: 0 },
     { text: 'Put send_email behind the output filter', bucket: 0 },
     { text: 'Put send_email behind the approval gate', bucket: 0 },
-    { text: 'Run the planted page through the agent before each release', bucket: 0 },
+    { text: 'Add a planted mail request to the release tests, so a release fails if a layer lets it through', bucket: 0 },
     { text: 'A line in the system prompt that forbids other recipients', bucket: 1 },
     { text: 'Let mails skip the gate, since each one copies an approved reply', bucket: 1 },
   ]} />

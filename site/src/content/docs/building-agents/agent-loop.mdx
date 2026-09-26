@@ -50,7 +50,7 @@ print(TOOLS["get_weather"]["fn"]("Lisbon"))
 
 <Choice id="what-the-model-sees-of-a-tool" phase="review" objective="building-agents/builds-agent-loop/defines-a-tool"
   concepts={['tool', 'loop-from-scratch']}
-  context="In the lesson, TOOLS is a Python dict that maps each tool name to a description and to the plain function that runs it, and a hand-written loop calls the model with the messages and the tools."
+  context="In the lesson, TOOLS is a Python dict that maps each tool name to a description and to the plain function that runs it. A real model API receives the tool definitions with every request."
   title="What the model gets" hint="Which part of the tool is text for the model, and which part is code for your loop?"
   options={[
     { text: 'The source code of the function, so the model can run it itself.', why: 'The model never runs anything. The function stays in your code, and your loop calls it.' },

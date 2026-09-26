@@ -279,7 +279,7 @@ to the decision to go round again.
   options={['The step limit', 'The error budget', 'The repeated-round check', 'The character budget']}
   rows={[
     { statement: 'The model asks for a new file in every round and never answers, and every read succeeds', option: 0, why: 'Nothing repeats and nothing fails. What still grows?' },
-    { statement: 'The same call fails twice in a row', option: 1, why: 'Which rule counts failures?' },
+    { statement: 'Two different calls fail in a row', option: 1, why: 'Which rule counts failures?' },
     { statement: 'The model sends the same request with the same arguments again', option: 2, why: 'Which rule compares a round with an earlier one?' },
     { statement: 'One tool returns a very long page, and the messages pass the size limit', option: 3, why: 'Which rule measures the messages themselves?' },
   ]}
@@ -299,7 +299,7 @@ Match each run to the rule that ends it.
   ]}>
 
 The model alternates between two calls, A, B, A, B, and every call
-succeeds. Which check ends the run?
+succeeds. Which check would end the run at round 3?
 
 </Choice>
 
