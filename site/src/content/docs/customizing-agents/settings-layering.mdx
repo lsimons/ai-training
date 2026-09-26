@@ -1,4 +1,4 @@
-import { Order, Predict, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Order, Predict, Sort, Pitfall, Exercise, Recap, Choice, MultiChoice, Match } from '@components/lesson';
 
 In this lesson we find out why a setting seems ignored. You add a rule to
 a settings file and the agent prompts anyway. Or a command you never
@@ -207,6 +207,53 @@ overrides a managed permission rule (@Claude Code permissions).
     { text: 'Start this one run in plan mode', bucket: 3 },
     { text: 'Your own read-only git rules for every project', bucket: 0 },
   ]} />
+
+<Choice id="the-ignored-setting" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['settings-layering']}
+  context="Claude Code reads its settings from five levels, and a key with one value takes the highest level that sets it."
+  title="A setting that seems ignored" hint="Which levels are higher than the user file?"
+  options={[
+    { text: 'Restart the agent, because it reads the user file only once a day.', why: 'The file is read when a session starts. The value is set, and something higher wins.' },
+    { text: 'Look for the same key in the project\'s local and committed files.', correct: true },
+    { text: 'Write the key twice in the user file, so that it counts for more.', why: 'A second copy in the same file changes nothing. The winner is decided by level.' },
+    { text: 'Delete the user file, because it is broken, and start a new one.', why: 'The file works in other projects. This project has a layer above it.' },
+  ]}>
+
+Your user file sets `defaultMode` to `acceptEdits`, and sessions in one
+project still start in `default`. What do you do?
+
+</Choice>
+
+<MultiChoice id="rules-merge" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['settings-layering', 'allowlists']}
+  context="In Claude Code the permission rule lists merge across the settings files, and the merged lists are read deny, then ask, then allow."
+  title="An allow here, a deny there" hint="Does one file remove another's rules, and which list is read first?"
+  options={[
+    { text: 'The push is blocked, because a deny in any file blocks it.', correct: true },
+    { text: 'Your allow wins, because the user file holds your own settings.', why: 'A rule list has no winner by file. The merged deny list is read first.' },
+    { text: 'Both rules are in the merged lists that the agent checks.', correct: true },
+    { text: 'The project file removes your allow rule when the session starts.', why: 'No file removes another\'s entries. Every file adds to the lists.' },
+  ]}>
+
+Your user file allows `Bash(git push *)`, and the committed project file
+denies it. Which two of these are true?
+
+</MultiChoice>
+
+<Match id="which-file-holds-it" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['settings-layering']}
+  context="A coding agent reads settings from a user file in the home directory for every project, a committed project file for everyone who clones it, an uncommitted local project file for one person, and flags for one session."
+  title="Which file holds it?" hint="Who needs the setting, in which projects, and for how long?"
+  options={['User file', 'Committed project file', 'Project local file', 'Session flag']}
+  rows={[
+    { statement: 'Your preferred output style, in every project you open', option: 0, why: 'Is this yours, for every project?' },
+    { statement: 'A deny rule for reading `secrets/`, for the whole team', option: 1, why: 'Who needs this rule, and who reviews it?' },
+    { statement: 'An allow rule you are trying out in one project before you propose it', option: 2, why: 'Should this reach your teammates yet?' },
+    { statement: 'Plan mode for this one run', option: 3, why: 'Should this last longer than one session?' },
+  ]}
+  rationale="Each file has its own reach: you everywhere, the team, you in one project, or one session.">
+Match each setting to the file or flag that holds it.
+</Match>
 
 <Pitfall title="The committed allowlist that grew in the dark">
 A team reviews its committed `.claude/settings.json` and agrees that the

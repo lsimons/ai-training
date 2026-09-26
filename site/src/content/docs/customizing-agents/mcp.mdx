@@ -1,4 +1,4 @@
-import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Predict, Sort, Scenario, Pitfall, Exercise, Recap, MultiChoice, Match } from '@components/lesson';
 
 You ask a coding agent to "bring the onboarding wiki up to date with the
 new deploy process". It reads twelve pages, and then it proposes forty
@@ -149,6 +149,22 @@ print(f"{len(reads)} read, {len(writes)} write, {len(CANNOT)} cannot")
 ```
 
 </Predict>
+
+<MultiChoice id="what-the-inventory-shows" phase="review" objective="customizing-agents/connects-tools-safely/weighs-tool-cost"
+  concepts={['tool-cost', 'server']}
+  context="The lesson inventories an MCP server before connecting it, sorting its tools into read and write and listing what the server can't do."
+  title="What does the inventory tell you?" hint="Which of these can you read off a list of the tools and what they can't do?"
+  options={[
+    { text: 'The worst case, set by what it can\'t do.', correct: true },
+    { text: 'Whether the answers it gives will be right.', why: 'A list of tools says what calls are possible, not whether their results are correct.' },
+    { text: 'The context cost of its tool descriptions on every turn.', correct: true },
+    { text: 'How fast the platform answers a call.', why: 'Speed is a property of the running service. The inventory is about capability and cost.' },
+  ]}>
+
+Which two things does the inventory tell you before you connect the
+server?
+
+</MultiChoice>
 
 Reading a server's descriptions also tells you how well it was designed.
 Two of the `teamdocs` write tools say what to call first
@@ -342,6 +358,53 @@ made.
     { text: 'Audit log entries under the user\'s name', bucket: 1 },
   ]} />
 
+<Choice id="the-rate-limit" phase="review" objective="customizing-agents/connects-tools-safely/hardens-a-connection"
+  concepts={['mcp-security']}
+  context="A wiki's MCP server has a rate limit of 100 calls a minute. The lesson separates what protects the platform from what protects your data."
+  title="Does the rate limit protect the pages?" hint="Whose problem is a limit of 100 calls a minute designed to solve?"
+  options={[
+    { text: 'Yes, because a runaway agent hits the limit after 100 calls and stops there.', why: 'A hundred bad edits a minute is a lot of damage before any limit applies.' },
+    { text: 'Yes, as long as version history is on, because every edit can then be undone.', why: 'Version history makes recovery possible. It doesn\'t stop the edits.' },
+    { text: 'No. It protects the platform, and a write cap or a confirmation protects the pages.', correct: true },
+    { text: 'No, because a rate limit only counts reads and never counts writes.', why: 'A rate limit counts every call. The question is what it is set to protect.' },
+  ]}>
+
+Does the server's rate limit protect the wiki's pages from a runaway
+agent?
+
+</Choice>
+
+<Match id="what-each-layer-does" phase="review" objective="customizing-agents/connects-tools-safely/hardens-a-connection"
+  concepts={['mcp-security']}
+  context="The lesson hardens an agent's connection to a wiki server in layers. Each control does one of three jobs."
+  title="What does each control do?" hint="Does it keep the service up, stop a bad write, or help you after one?"
+  options={['Protects the platform', 'Protects your data', 'Makes recovery possible']}
+  rows={[
+    { statement: 'The server\'s rate limit', option: 0, why: 'Who set this limit, and for whose sake?' },
+    { statement: 'A write cap in a proxy', option: 1, why: 'Does this stop a write before it happens?' },
+    { statement: 'Confirmation before each write', option: 1, why: 'When does the person see the write?' },
+    { statement: 'Version history on the wiki', option: 2, why: 'Does this act before or after the bad edit?' },
+  ]}
+  rationale="Only the layers that act before a write protect your data. The others keep the service up or help you clean up.">
+Match each control to its job.
+</Match>
+
+<Scenario id="only-the-prompt-block" phase="review" objective="customizing-agents/connects-tools-safely/hardens-a-connection"
+  concepts={['mcp-security']}
+  context="An agent connected to a wiki server has a block of five rules in its system prompt about careful writes, and a proxy with a write cap. The lesson says the prompt block stops accidents and naive attacks and can fail."
+  title="Is the prompt block enough?" hint="What happens on the day the prompt block fails?"
+  options={[
+    { text: 'Keep both, because the prompt block is one layer that can fail.', correct: true, consequence: 'The day the prompt block fails, the cap refuses every write past its limit.' },
+    { text: 'Remove the write cap, since the prompt block already covers the same case.', consequence: 'A page with a planted instruction talks the agent past the rules, and nothing limits the writes.' },
+    { text: 'Remove the prompt block, since the write cap already stops everything.', consequence: 'The cap limits how many writes go through. The accidental writes under the cap now get through too.' },
+    { text: 'Replace both with version history, so you can undo anything later.', consequence: 'Nothing stops a bad write any more. You find the damage later and restore pages by hand.' },
+  ]}>
+
+A colleague says the five rules in the system prompt are enough, so the
+write cap can go. What do you do?
+
+</Scenario>
+
 ## CLI or MCP?
 
 For many systems there is a second way to connect: the system's own
@@ -398,6 +461,37 @@ A coding agent needs to open pull requests on a repository whose forge has
 both a command-line client and an MCP server. Which connection do you set
 up?
 </Choice>
+
+<Match id="confirm-the-calendar" phase="review" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['mcp-security', 'client']}
+  context="A fictional calendar MCP server offers the tools below. The MCP client can require a confirmation before each call of a named tool."
+  title="Confirm or not?" hint="Does the call change anything, or only read?"
+  options={['Runs without confirmation', 'Confirm before each call']}
+  rows={[
+    { statement: '`events_list`', option: 0, why: 'Does listing events change the calendar?' },
+    { statement: '`events_create`', option: 1, why: 'Who sees the event once it exists?' },
+    { statement: '`events_delete`', option: 1, why: 'Can a deleted event be taken back?' },
+    { statement: '`rooms_search`', option: 0, why: 'Does a search reserve anything?' },
+  ]}
+  rationale="Reads run freely, and every call that changes the calendar waits for a person.">
+Match each tool to its approval setting.
+</Match>
+
+<Scenario id="the-tracker-has-a-cli" phase="review" objective="customizing-agents/connects-tools-safely/adds-a-tool"
+  concepts={['mcp-vs-cli', 'tool-cost']}
+  context="A coding agent needs to read tickets and add comments in a tracker that has both a command-line client and an MCP server. The lesson prefers a CLI with command-pattern permissions when one exists and does the job."
+  title="CLI or server?" hint="Which connection lets you allow exactly the commands the task needs, without adding tool descriptions to every turn?"
+  options={[
+    { text: 'Install the MCP server with a token that can do everything, in case the task grows.', consequence: 'Every turn carries the server\'s tool descriptions, and the token can close and delete tickets too.' },
+    { text: 'Install the MCP server and turn off every tool except reading.', consequence: 'The agent can\'t add the comments the task needs, and you add the tools back one by one.' },
+    { text: 'Give the agent no tracker access, and paste the tickets into the chat.', consequence: 'You spend the session copying tickets by hand, and the comments never reach the tracker.' },
+    { text: 'Use the CLI, allow its read and comment commands, and deny the rest.', correct: true, consequence: 'The agent reads and comments, and a command to close a ticket stops at the deny rule.' },
+  ]}>
+
+The agent needs to read tickets and comment on them. The tracker has a
+CLI and an MCP server. What do you set up?
+
+</Scenario>
 
 ## Installation hygiene
 

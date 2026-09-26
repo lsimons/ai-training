@@ -347,6 +347,22 @@ You are about to type the same explanation about the staging database for
 the third time. What do you do with it?
 </Scenario>
 
+<Choice id="the-five-steps" phase="review" objective="customizing-agents/configures-agent/manages-memory"
+  concepts={['turning-repeated-work-into-reusable-knowledge']}
+  context="The lesson places a repeated step by what it is: a fact for most tasks goes into the project instructions, a procedure into a skill, a rule where one miss costs too much into a hook, and an example to copy into a context file."
+  title="The same five steps again" hint="Is it a fact for most tasks, steps in an order, a rule, or an example?"
+  options={[
+    { text: 'Into the project instructions, so every session starts with the steps.', why: 'Every session would pay for steps that only some tasks need.' },
+    { text: 'Into a hook, so the steps run every time a file changes.', why: 'A hook enforces a rule on an event. Adding a language is a task you ask for now and then.' },
+    { text: 'Into the agent\'s auto-memory, which it saves from this session.', why: 'The note stays on your machine, and nobody reviews it. A teammate\'s agent still asks.' },
+    { text: 'Into a skill, with one step per line and a description of when to use it.', correct: true },
+  ]}>
+
+In four sessions you told the agent the same five steps for adding a new
+language to the site. Where do the steps go?
+
+</Choice>
+
 <Pitfall title="The procedure written as one long line">
 The instructions file in this lesson had the whole regeneration in one
 sentence: the `make` target, the variable, the formatting and the tests.
