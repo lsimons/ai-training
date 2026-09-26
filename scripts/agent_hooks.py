@@ -932,12 +932,12 @@ def review_reason(command: str) -> str | None:
     return None
 
 
-def unreadable(what: str) -> str:
+QUOTING_HINT = "quote a `(`, `)` or `{` that is text, and run the commands one by one."
+
+
+def unreadable(what: str, hint: str = QUOTING_HINT) -> str:
     """The block message for a command the review checks can't read."""
-    return (
-        f"the hook can't check a command with {what}. Write the command without it: "
-        "quote a `(`, `)` or `{` that is text, and run the commands one by one."
-    )
+    return f"the hook can't check a command with {what}. Write the command without it: {hint}"
 
 
 def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
@@ -958,7 +958,7 @@ def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
         reason = unreadable(str(error))
     except RuntimeError:
         # `Path.expanduser` raises it for an unknown user (`cd ~nosuchuser`).
-        reason = unreadable("a `~user` directory that doesn't exist")
+        reason = unreadable("a `~user` directory that doesn't exist", "use an absolute path.")
     if reason:
         return 2, f"Blocked by the code-reviewer hook: {reason}"
     return 0, ""
