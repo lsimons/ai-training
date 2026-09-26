@@ -1,4 +1,4 @@
-import { Choice, Match, Predict, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, Match, MultiChoice, Predict, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
 
 In this lesson we harden one tool connection and then try to break it. The
 connection is a small Model Context Protocol (MCP) server that serves a
@@ -270,6 +270,19 @@ The token can already only read. Why give it one hour of life as well?
   ]}>
 The task was "summarize each note in one line". Place each log line.
 </Sort>
+
+<MultiChoice id="a-token-per-person" phase="review" objective="customizing-agents/connects-tools-safely/hardens-a-connection"
+  concepts={['mcp-security', 'logging-and-audit']}
+  context="A team used one notes server token issued to notes-bot and shared it in a common configuration. They replace it with one token per developer, each issued in that developer's name, with the same scope and the same life as before."
+  title="What does a token per person change?" hint="For each option, ask whether the name on the token takes something away from a threat, or only from the model."
+  options={[
+    { text: "The log shows which developer's session made an odd call.", correct: true },
+    { text: 'The model can no longer follow a planted line that asks for a send.', why: "The name on a token doesn't change what the model decides. The scope decides what a call can do, and it is the same as before." },
+    { text: 'Revoking a leaked token cuts off one developer and nobody else.', correct: true },
+    { text: 'A copied token stops working sooner, because it names its owner.', why: "The owner's name doesn't limit how long a copy works. A copy in a backup works until the token expires." },
+  ]}>
+Which two things does the change give the team?
+</MultiChoice>
 
 <Exercise stretch="Connect a second time with a read+share token and answer yes at the client's question, then read the log line and name the one control left between the planted line and a send.">
 Harden the connection on a copy, then attack it. After this exercise you
