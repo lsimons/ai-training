@@ -23,7 +23,10 @@ Three entry points, each reading the hook's JSON event on stdin:
 The guard matches shell text, so it catches mistakes and not an agent that
 works around it on purpose. It splits the command at `&&`, `||`, `;`, `|`
 and newlines outside quotes, skips here-document bodies (a commit message
-is data), follows `cd`, and reads `git -C <dir>`.
+is data), follows `cd`, and reads `git -C <dir>`. A command it can't
+follow, with a `~user` directory that doesn't exist or a path with a null
+character, exits 2 as well: Claude Code runs a command after a hook's
+exit 1 (#449).
 
 Besides pushes, merges and discarding commands, it rejects a long `sleep`,
 polling (a `gh` loop, or a `sleep` before `tail`, `cat` or `ls`),
@@ -74,6 +77,26 @@ class Segment:
     words: list[str]
     role: str | None
     cwd: str
+
+
+class UnknownHomeError(RuntimeError):
+    """A `~user` path whose user doesn't exist, so the hook can't tell where it points."""
+
+    def __init__(self, word: str) -> None:
+        super().__init__(f"no home directory for `{word}`")
+        self.word = word
+
+
+def expand_user(word: str) -> Path:
+    """`Path(word).expanduser()`, raising `UnknownHomeError` for an unknown `~user` (#449).
+
+    `Path.expanduser` raises a bare `RuntimeError` then. An uncaught one makes
+    a hook exit 1, and Claude Code runs the command after a hook's exit 1.
+    """
+    try:
+        return Path(word).expanduser()
+    except RuntimeError as error:
+        raise UnknownHomeError(word) from error
 
 
 def strip_heredocs(command: str) -> str:
@@ -139,7 +162,7 @@ def split_segments(
         if not words:
             continue
         if words[0] == "cd" and len(words) > 1:
-            here = str(Path(here, Path(words[1]).expanduser()))
+            here = str(Path(here, expand_user(words[1])))
         segments.append(Segment(words, role, here))
     return segments
 
@@ -175,7 +198,7 @@ def git_args(words: Sequence[str], cwd: str) -> tuple[list[str], str] | None:
     while rest and rest[0].startswith("-"):
         flag = rest.pop(0)
         if flag == "-C" and rest:
-            here = str(Path(here, Path(rest.pop(0)).expanduser()))
+            here = str(Path(here, expand_user(rest.pop(0))))
         elif flag in {"-c", "--git-dir", "--work-tree", "--namespace"} and rest:
             rest.pop(0)
     return rest, here
@@ -376,8 +399,8 @@ def rm_leaves_scratch(words: Sequence[str], cwd: str) -> str | None:
         if "$" in target or "`" in target:
             return target
         try:
-            resolved = Path(cwd, Path(target).expanduser()).resolve()
-        except RuntimeError, OSError:
+            resolved = Path(cwd, expand_user(target)).resolve()
+        except RuntimeError, OSError, ValueError:
             return target
         if SCRATCH not in resolved.parts:
             return target
@@ -505,7 +528,13 @@ def guard_bash(event: Mapping[str, Any], env: Mapping[str, str]) -> tuple[int, s
     if not isinstance(command, str):
         return 0, ""
     cwd = event.get("cwd")
-    reason = check_command(command, cwd if isinstance(cwd, str) else str(Path.cwd()), env)
+    try:
+        reason = check_command(command, cwd if isinstance(cwd, str) else str(Path.cwd()), env)
+    except UnknownHomeError as error:
+        reason = unknown_home(error)
+    except ValueError as error:
+        # A path with a null character, which `os` and `subprocess` refuse.
+        reason = unreadable(f"a path the system can't use ({error})", "remove the character.")
     if reason:
         return 2, f"Blocked by .claude/hooks/guard-bash.sh: {reason}"
     return 0, ""
@@ -940,6 +969,13 @@ def unreadable(what: str, hint: str = QUOTING_HINT) -> str:
     return f"the hook can't check a command with {what}. Write the command without it: {hint}"
 
 
+def unknown_home(error: UnknownHomeError) -> str:
+    """The block message for a `cd` or `git -C` into the home of a user that doesn't exist."""
+    return unreadable(
+        f"a `~user` directory that doesn't exist (`{error.word}`)", "use an absolute path."
+    )
+
+
 def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
     """Exit code and message for the code reviewer's PreToolUse event on Bash.
 
@@ -956,9 +992,8 @@ def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
         reason = unreadable("substitutions nested too deep")
     except ValueError as error:
         reason = unreadable(str(error))
-    except RuntimeError:
-        # `Path.expanduser` raises it for an unknown user (`cd ~nosuchuser`).
-        reason = unreadable("a `~user` directory that doesn't exist", "use an absolute path.")
+    except UnknownHomeError as error:
+        reason = unknown_home(error)
     if reason:
         return 2, f"Blocked by the code-reviewer hook: {reason}"
     return 0, ""

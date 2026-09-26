@@ -8,6 +8,7 @@ repository with a linked worktree.
 
 import json
 import os
+import random
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
@@ -239,6 +240,93 @@ def test_main_rejects_a_bad_mode_and_ignores_bad_json(capsys: pytest.CaptureFixt
     assert "usage" in capsys.readouterr().err
     assert agent_hooks.main(["agent_hooks.py", "guard-bash"], "not json", {}) == 0
     assert agent_hooks.main(["agent_hooks.py", "guard-bash"], "[1]", {}) == 0
+
+
+# Input the guard can't read blocks the command with exit 2, since Claude
+# Code runs a command after a hook's exit 1 (#449).
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git push origin main; cd ~nosuchuser",
+        "git -C ~nosuchuser push origin main",
+        "cd ~nosuchuser/sub && git status",
+        "git -C ~nosuchuser/sub -C x status",
+    ],
+)
+def test_guard_blocks_an_unknown_home_directory_and_names_it(
+    command: str, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    event = json.dumps({"tool_input": {"command": command}, "cwd": str(tmp_path)})
+    assert agent_hooks.main(["agent_hooks.py", "guard-bash"], event, {}) == 2
+    err = capsys.readouterr().err
+    assert err.startswith("Blocked by .claude/hooks/guard-bash.sh:")
+    assert "`~user` directory that doesn't exist (`~nosuchuser" in err
+    assert "absolute path" in err
+
+
+@pytest.mark.parametrize(
+    "command", ["cd a\x00b; git push", "git -C a\x00b reset --hard", "rm -rf .scratch/a\x00b"]
+)
+def test_guard_blocks_a_path_with_a_null_character(command: str, tmp_path: Path) -> None:
+    event = {"tool_input": {"command": command}, "cwd": str(tmp_path)}
+    code, message = agent_hooks.guard_bash(event, {})
+    assert code == 2
+    assert message.startswith("Blocked by .claude/hooks/guard-bash.sh:")
+
+
+def test_expand_user_keeps_known_homes_and_names_the_unknown_one() -> None:
+    assert agent_hooks.expand_user("~") == Path.home()
+    assert agent_hooks.expand_user("a/~b") == Path("a/~b")
+    with pytest.raises(agent_hooks.UnknownHomeError) as raised:
+        agent_hooks.expand_user("~nosuchuser/x")
+    assert raised.value.word == "~nosuchuser/x"
+
+
+ODD_WORDS = [
+    "~nosuchuser",
+    "~nosuchuser/x",
+    "~+",
+    "~-",
+    "~2",
+    "~",
+    "~/x",
+    "'~nosuchuser'",
+    '"~nosuchuser',
+    "'unclosed",
+    '"unclosed',
+    "'a\"b'\"c'",
+    "$(cd ~nosuchuser)",
+    "$(echo `cd ~x`)",
+    "`echo $(ls`",
+    "$((1+2))",
+    "${(e)X}",
+    "$=X",
+    "*(e:touch pwn:)",
+    "{~nosuchuser,x}",
+    "{a,b}",
+    "a\x00b",
+    "\\",
+    "<<EOF",
+    "-C",
+    "--",
+    "",
+]
+ODD_COMMANDS = ["cd", "git -C", "git push origin main; cd", "rm -rf .scratch/x", "echo"]
+
+
+@pytest.mark.parametrize("prefix", ODD_COMMANDS)
+def test_guard_exits_0_or_2_and_never_1_on_odd_input(
+    prefix: str, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    for first in ODD_WORDS:
+        for second in ["", *ODD_WORDS[::3]]:
+            command = f"{prefix} {first} {second}"
+            event = json.dumps({"tool_input": {"command": command}, "cwd": str(tmp_path)})
+            code = agent_hooks.main(["agent_hooks.py", "guard-bash"], event, {})
+            assert code in {0, 2}, command
+            assert "Traceback" not in capsys.readouterr().err, command
 
 
 # Polling a background command, skipped git hooks, deletes on GitHub, and
@@ -836,3 +924,38 @@ def test_split_segments_keeps_assignments_only_when_asked() -> None:
 def test_review_bash_blocks_an_unknown_home_directory_with_exit_2(command: str) -> None:
     # `Path.expanduser` raises `RuntimeError`, and exit 1 wouldn't block.
     assert agent_hooks.review_bash({"tool_input": {"command": command}})[0] == 2
+
+
+def test_guard_hook_script_blocks_the_unknown_home_of_449(tmp_path: Path) -> None:
+    hook = Path(__file__).resolve().parents[1] / ".claude" / "hooks" / "guard-bash.sh"
+    event = {
+        "tool_input": {"command": "git push origin main; cd ~nosuchuser"},
+        "cwd": str(tmp_path),
+    }
+    run = subprocess.run(
+        [str(hook)], input=json.dumps(event), capture_output=True, text=True, check=False
+    )
+    assert run.returncode == 2
+    assert "Traceback" not in run.stderr
+    assert "`~nosuchuser`" in run.stderr
+
+
+FUZZ_PIECES = [
+    *("git", "-C", "cd", "push", "main", "rm", "-rf", ".scratch/", "..", "sleep", "900"),
+    *("while", "gh", "do", "done", "stash", "reset", "--hard", "~nosuchuser", "~", "~+"),
+    *(";", "&&", "||", "|", "\n", "'", '"', "\\", "$(", ")", "`", "(", "{", "}", ","),
+    *("<<E", "E", "$=X", "*(.)", "\x00", "=", "AI_TRAINING_ROLE=lead"),
+]
+
+
+def test_guard_exits_0_or_2_on_random_shell_text(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    rng = random.Random(449)
+    for _ in range(3000):
+        pieces = rng.choices(FUZZ_PIECES, k=rng.randint(1, 12))
+        command = "".join(p + rng.choice(["", " ", " "]) for p in pieces)
+        event = json.dumps({"tool_input": {"command": command}, "cwd": str(tmp_path)})
+        code = agent_hooks.main(["agent_hooks.py", "guard-bash"], event, {})
+        assert code in {0, 2}, repr(command)
+        assert "Traceback" not in capsys.readouterr().err, repr(command)
