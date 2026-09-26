@@ -139,8 +139,11 @@ stopped before it could report. Don't restart the wave:
    comment from a trusted account (`lsimons` or `lsimons-bot`) that
    applies to it and a `next` step, and the local worktrees. A comment
    with a `Branch:` line applies to that branch only, and one without
-   applies to every branch of the issue. The tool tells the comment kinds
-   apart by their text, because every agent posts as the same accounts:
+   applies to every branch of the issue. When a comment names no pushed
+   branch, or an approve or a lead re-check on a split issue names none,
+   the tool picks the step with more work and never `join`. The tool tells
+   the comment kinds apart by their text, because every agent posts as the
+   same accounts:
    a `Verdict:` line, an `Unfinished:` first line, a line starting
    `re-checked by lead`, and any other comment after a verdict counts as a
    builder reply. A comment of any kind from any other account doesn't

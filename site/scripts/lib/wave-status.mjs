@@ -15,10 +15,16 @@
  * two halves of a split issue (`feat/<issue>-<slug>-1` and `-2`) each get
  * their own verdict. A comment without one applies to every branch of the
  * issue. The last `Branch:` line outside a code fence counts, with a leading
- * `origin/` and trailing punctuation dropped. A name that matches no pushed
- * branch of the issue errs toward more work (review): a builder reply or an
- * `Unfinished:` comment then applies to every branch, and a verdict or a lead
- * re-check to none.
+ * `origin/` and trailing punctuation dropped.
+ *
+ * Every rule for a comment that names no pushed branch, or names none on a
+ * split issue, errs toward more work and never toward `join`. A builder
+ * reply, an `Unfinished:` comment and a `needs changes` verdict then apply to
+ * every branch. An approve and a lead re-check apply to none, so the branch
+ * keeps its earlier step (`review`, `revise`, `re-check` or `lead-re-check`).
+ * An approve or a lead re-check that names no branch applies to every branch
+ * only when the issue has one pushed branch, as every comment did before
+ * reviewers wrote `Branch:` lines.
  *
  * A builder that stops at its turn limit posts a comment whose first line is
  * `Unfinished: <branch>`, then the list of what is left (#418). The branch is
@@ -46,7 +52,7 @@ const VERDICT_LINE = /^\s*\**Verdict:?\**:?\s*\**\s*(approve|needs changes)\b/im
 const BRANCH_LINE = /^\s*\**Branch(?::\**|\**:)\s*\**\s*`?([^\s`*]+)`?/;
 
 /** The first line of a builder's hand-back at its turn limit. */
-const UNFINISHED_LINE = /^\s*\**Unfinished(?::\**|\**:)\s*\**\s*`?([^\s`*]+)`?/i;
+const UNFINISHED_LINE = /^\s*\**Unfinished(?::\**|\**:)\s*\**\s*`?([^\s`*]*)`?/i;
 
 /** The opening or closing line of a Markdown code fence. */
 const FENCE_LINE = /^\s*(`{3,}|~{3,})/;
@@ -85,7 +91,7 @@ export function verdictOf(body) {
  */
 export function commentKind(body) {
 	if (verdictOf(body)) return 'verdict';
-	if (unfinishedBranchOf(body) !== null) return 'unfinished';
+	if (isUnfinished(body)) return 'unfinished';
 	if (LEAD_RE_CHECK_LINE.test(body)) return 'lead-re-check';
 	return 'reply';
 }
@@ -139,33 +145,49 @@ export function branchOf(body) {
 }
 
 /**
+ * Whether a comment starts with an `Unfinished:` line, with or without a
+ * branch name after it.
+ * @param {string} body
+ */
+export function isUnfinished(body) {
+	return UNFINISHED_LINE.test(body.split('\n', 1)[0] ?? '');
+}
+
+/**
  * The branch an `Unfinished: <branch>` first line names, or null when the
- * comment doesn't start with one.
+ * comment doesn't start with one or its first line names no branch.
  * @param {string} body
  */
 export function unfinishedBranchOf(body) {
 	const first = body.split('\n', 1)[0] ?? '';
 	const match = UNFINISHED_LINE.exec(first)?.[1];
-	return match ? normalizeBranch(match) : null;
+	return match ? normalizeBranch(match) || null : null;
 }
 
 /**
  * Whether a comment applies to a branch. It does when it names that branch
- * on its `Unfinished:` or `Branch:` line, or names none. A comment that names
- * a branch the issue has no pushed branch for errs toward more work: a reply
- * or an `Unfinished:` comment applies to every branch (so a branch goes to
- * `re-check`, `lead-re-check` or `build`), and a verdict or a lead re-check to
- * none (so it stays in `review` or `lead-re-check`).
+ * on its `Unfinished:` or `Branch:` line. The other cases err toward more
+ * work, never toward `join`:
+ *
+ * - A comment that names a branch the issue has no pushed branch for: a
+ *   reply, an `Unfinished:` comment or a `needs changes` applies to every
+ *   branch (`re-check`, `lead-re-check`, `build` or `revise`), and an approve
+ *   or a lead re-check to none (the branch keeps its earlier step).
+ * - A comment that names no branch applies to every branch, except an
+ *   approve or a lead re-check on an issue with more than one pushed branch,
+ *   which applies to none, so a missing `Branch:` line can't join both halves
+ *   of a split issue.
  * @param {string} body
  * @param {string} branch
  * @param {readonly string[]} branches the pushed branches of the issue
  */
 export function appliesTo(body, branch, branches) {
-	const named = unfinishedBranchOf(body) ?? branchOf(body);
-	if (named === null) return true;
-	if (branches.includes(named)) return named === branch;
 	const kind = commentKind(body);
-	return kind === 'reply' || kind === 'unfinished';
+	const named = (kind === 'unfinished' ? unfinishedBranchOf(body) : null) ?? branchOf(body);
+	const clears = kind === 'lead-re-check' || verdictOf(body) === 'approve';
+	if (named === null) return !clears || branches.length === 1;
+	if (branches.includes(named)) return named === branch;
+	return !clears;
 }
 
 /**
@@ -188,7 +210,7 @@ function leftOf(body) {
  * to it, or a reply that names it on a `Branch:` line. A reply that names no
  * branch leaves it unfinished, so a stray note can't send a half-built branch
  * to review. An `Unfinished:` comment that names no pushed branch of the
- * issue opens every branch.
+ * issue, or names none, opens every branch.
  * @param {IssueComment[]} comments
  * @param {string} branch
  * @param {readonly string[]} branches the pushed branches of the issue
