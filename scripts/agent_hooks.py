@@ -24,8 +24,9 @@ The guard matches shell text, so it catches mistakes and not an agent that
 works around it on purpose. It splits the command at `&&`, `||`, `;`, `|`
 and newlines outside quotes, skips here-document bodies (a commit message
 is data), follows `cd`, and reads `git -C <dir>`. A command it can't
-follow, with a `~user` directory that doesn't exist or a path with a null
-character, exits 2 as well: Claude Code runs a command after a hook's
+follow, with a `~` path it can't resolve (an unknown user, a zsh
+directory-stack entry such as `~+` or a named directory) or a path with a
+null character, exits 2 as well: Claude Code runs a command after a hook's
 exit 1 (#449).
 
 Besides pushes, merges and discarding commands, it rejects a long `sleep`,
@@ -80,7 +81,7 @@ class Segment:
 
 
 class UnknownHomeError(RuntimeError):
-    """A `~user` path whose user doesn't exist, so the hook can't tell where it points."""
+    """A `~` path Python reads as an unknown user, so the hook can't tell where it points."""
 
     def __init__(self, word: str) -> None:
         super().__init__(f"no home directory for `{word}`")
@@ -533,8 +534,8 @@ def guard_bash(event: Mapping[str, Any], env: Mapping[str, str]) -> tuple[int, s
     except UnknownHomeError as error:
         reason = unknown_home(error)
     except ValueError as error:
-        # A path with a null character, which `os` and `subprocess` refuse.
-        reason = unreadable(f"a path the system can't use ({error})", "remove the character.")
+        # Such as a null character in a path, which `os` and `subprocess` refuse.
+        reason = unreadable(f"text it can't read ({error})", "remove any unusual character.")
     if reason:
         return 2, f"Blocked by .claude/hooks/guard-bash.sh: {reason}"
     return 0, ""
@@ -970,10 +971,12 @@ def unreadable(what: str, hint: str = QUOTING_HINT) -> str:
 
 
 def unknown_home(error: UnknownHomeError) -> str:
-    """The block message for a `cd` or `git -C` into the home of a user that doesn't exist."""
-    return unreadable(
-        f"a `~user` directory that doesn't exist (`{error.word}`)", "use an absolute path."
-    )
+    """The block message for a `~` path that `Path.expanduser` can't resolve.
+
+    That is a user that doesn't exist, and also zsh forms Python reads as a
+    user name: `~+`, `~-`, `~2` and named directories (`hash -d`).
+    """
+    return unreadable(f"a `~` path it can't resolve (`{error.word}`)", "use an absolute path.")
 
 
 def review_bash(event: Mapping[str, Any]) -> tuple[int, str]:
