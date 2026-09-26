@@ -48,10 +48,12 @@ USAGE = "usage: mise run run-name [-- --check <issue>]"
 type Gh = Callable[[Sequence[str]], object]
 """Runs gh with the arguments and returns its parsed JSON output."""
 
-# `Run: Capybara (lessons)`: a capitalized name and a lowercase kind.
-RUN_TITLE = re.compile(r"^Run: ([A-Z][a-z]+) \(([a-z]+)\)$")
-NAME = re.compile(r"^[A-Z][a-z]+$")
-ISSUE_NUMBER = re.compile(r"^[1-9][0-9]*$")
+# `Run: Capybara (lessons)`: a capitalized name and a lowercase kind. These
+# are used with fullmatch, because `$` in Python also matches before a
+# trailing newline, and the JavaScript `^...$` they replace did not.
+RUN_TITLE = re.compile(r"Run: ([A-Z][a-z]+) \(([a-z]+)\)")
+NAME = re.compile(r"[A-Z][a-z]+")
+ISSUE_NUMBER = re.compile(r"[1-9][0-9]*")
 LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 LIST_NAMES = ("first", "second")
 
@@ -120,7 +122,7 @@ def check_run_names(lists: Sequence[Sequence[str]]) -> list[str]:
             errors.append(f"run-names: {key} has {len(names)} names, not 26")
         for i, name in enumerate(names):
             letter = LETTERS[i] if i < len(LETTERS) else None
-            if not NAME.match(name):
+            if not NAME.fullmatch(name):
                 errors.append(
                     f"run-names: {key}[{i}] {json.dumps(name)} is not one capitalized word"
                 )
@@ -147,7 +149,7 @@ def run_name_sequence(text: str) -> list[str]:
 
 def run_of(issue: RunIssue) -> Run | None:
     """The run a `dispatcher-run` issue records, or None when its title isn't a run title."""
-    match = RUN_TITLE.match(issue["title"])
+    match = RUN_TITLE.fullmatch(issue["title"])
     if match is None:
         return None
     return {
@@ -240,7 +242,7 @@ def parse_args(argv: Sequence[str]) -> int | None:
         raise UsageError("run-name: --check needs an issue number, got undefined")
     raw = argv[1]
     number = raw.removeprefix("#")
-    if not ISSUE_NUMBER.match(number):
+    if not ISSUE_NUMBER.fullmatch(number):
         raise UsageError(f"run-name: --check needs an issue number, got {json.dumps(raw)}")
     return int(number)
 
