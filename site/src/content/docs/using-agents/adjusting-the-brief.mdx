@@ -1,4 +1,4 @@
-import { Choice, Scenario, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Scenario, Repair, Pitfall, Exercise, Recap, Prompt, Response, Match, Sort } from '@components/lesson';
 
 In this lesson we give an agent a brief with a gap in it and watch what the
 agent does with the gap. Then we answer the agent's question in two places,
@@ -265,6 +265,33 @@ The agent is halfway through the update, and the "Done" section shows you
 the director wanted the decisions she has to take, and the brief asks for
 a list of work done. What do you do?
 </Scenario>
+
+<Sort id="chat-or-brief" phase="review" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['task-brief']}
+  context="A learner runs the same written brief with an agent every week to produce a status update. The lesson says an answer in the chat fixes this run, and an answer in the brief fixes every later run, because a new session starts from the files."
+  title="Chat or brief?" hint="Will the same gap come back in next week's run?"
+  buckets={['Answer it in the chat', 'Change the brief']}
+  items={[
+    { text: 'This week only, the director wants the update a day early', bucket: 0 },
+    { text: 'You want this week\'s update to mention a colleague\'s leave, which ends on Friday', bucket: 0 },
+    { text: 'The agent asks which of two templates to use, and it will need the same one every week', bucket: 1 },
+    { text: 'The agent guessed a folder, because the brief never names one', bucket: 1 },
+    { text: 'The word limit changed for good, and the brief still has the old one', bucket: 1 },
+  ]} />
+
+<Match id="steer-or-stop" phase="review" objective="using-agents/delegates-and-checks/adjusts-mid-task"
+  concepts={['task-brief', 'checking-results']}
+  context="A learner watches an agent run a written brief. The lesson stops a run and rewrites the brief when the first result shows the goal or a source was wrong, and steers in the chat when the answer is only for this run."
+  title="Steer it, or stop it?" hint="Is the problem in this run only, or in the goal or the source the brief gives?"
+  options={['Answer in the chat and let it go on', 'Stop the run, fix the brief, and restart']}
+  rows={[
+    { statement: 'The first section shows that the reader wanted decisions to take, and the brief asks for work done', option: 1, why: 'Does the result go wrong because of the goal the brief states?' },
+    { statement: 'The agent asks whether to spell out one abbreviation in this update', option: 0, why: 'Does the answer matter beyond this run?' },
+    { statement: 'The agent is using last month\'s figures, because the brief names last month\'s file', option: 1, why: 'Where does the wrong source come from?' },
+  ]}
+  rationale="A wrong goal or source costs the whole run, so the fix goes into the brief before the run goes again. A question for this run gets its answer in the chat.">
+Match each moment to what you do.
+</Match>
 
 ## The loop
 

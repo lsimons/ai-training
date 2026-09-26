@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Sort, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Sort, Repair, Pitfall, Exercise, Recap, Prompt, Response, Scenario } from '@components/lesson';
 
 In this lesson we delegate one small task to an agent and get a result
 we can check. We write the brief and decide how much the agent may do
@@ -130,6 +130,20 @@ made-up "see you on the new floor!" at the end. Rewrite the brief so it
 states goal, context, limits and done-criteria.
 </Repair>
 
+<Sort id="tick-or-adjective" phase="review" objective="using-agents/delegates-and-checks/writes-a-brief"
+  concepts={['task-brief']}
+  context="A learner writes the done-criteria for a brief that asks an agent to draft a reply to a customer email, using the price list."
+  title="Can you tick it?" hint="Could two people check this line and agree whether it passes?"
+  buckets={['A criterion you can tick', 'An adjective you can\'t tick']}
+  items={[
+    { text: 'Every date in the email appears in the reply', bucket: 0 },
+    { text: 'The reply has at most five sentences', bucket: 0 },
+    { text: 'No price appears that isn\'t in the price list', bucket: 0 },
+    { text: 'The reply is friendly', bucket: 1 },
+    { text: 'The reply sounds professional', bucket: 1 },
+    { text: 'The reply is the right length', bucket: 1 },
+  ]} />
+
 <Pitfall title="Trusting the agent to know what 'done' means">
 A learner sends "summarize the memo, keep it short" and gets three tidy
 bullets that omit the locker deadline. The summary reads well, so they
@@ -187,6 +201,23 @@ though the task didn't change.
     { text: 'Rename a folder of your own photos by date', bucket: 2 },
   ]} />
 
+<Scenario id="the-first-invoices" phase="review" objective="using-agents/delegates-and-checks/chooses-autonomy"
+  concepts={['choosing-a-degree-of-autonomy']}
+  context="The lesson picks a degree of autonomy by how bad a wrong action is and how easily it is undone, and for the first runs of a new kind of task it starts one step lower and moves up as reviewed results pass."
+  title="The first week of invoice filing" hint="How easily is a wrong filing undone, and is this the first run of the task?"
+  options={[
+    { text: 'Let the agent file them and review the folders at the end of each week.', consequence: 'On the first runs you learn about its mistakes a week late, and nobody had seen how it files.' },
+    { text: 'Let the agent file them with nobody reviewing, because a file can be moved back.', consequence: 'A wrong filing sits unnoticed until someone looks for the invoice and can\'t find it.' },
+    { text: 'File every invoice yourself and let the agent watch how you do it.', consequence: 'The agent does nothing useful, and you do all of the work you wanted to hand over.' },
+    { text: 'Let the agent propose each filing and approve it yourself, then move up as they pass.', correct: true, consequence: 'You see how it files in the first week. After two weeks without a wrong proposal, you let it file and review afterwards.' },
+  ]}>
+
+An agent will file incoming invoices into folders that you can move them
+out of again. It is the first week you use it for this. Which degree of
+autonomy do you give it?
+
+</Scenario>
+
 ## Reviewing against the brief
 
 You now have a summary in front of you. The temptation is to read it, feel
@@ -202,8 +233,8 @@ down which criteria fail, if any.
 Most agents will pass most of these on the first try. The ones that fail are
 usually the same ones: a deadline folded into a vaguer phrase, or a helpful
 addition ("bring a box for anything that does not fit") that the memo never
-said. Both read as perfectly reasonable, which is exactly why a feeling
-would have let them through.
+said. Both read as perfectly reasonable, which is exactly why a review by
+feeling would have missed them.
 
 When a criterion fails, the fix is not to rewrite the summary yourself. Send
 the failing criterion back: "The locker deadline is missing; add it and
@@ -214,7 +245,7 @@ A failure also tells you something about the brief. If the same criterion
 fails on the second try, the brief left a gap. One agent asks about the gap
 before it starts, and another fills it with a guess, and either way the gap
 is yours to close (@Academy introduction-to-claude-cowork). Close it in the
-brief itself, so the next task starts from a better one. The brief gives the
+brief itself. The next task then starts from a better one. The brief gives the
 review something to check, and the review shows what the next brief has to
 say (@Academy ai-fluency-framework-foundations).
 
@@ -231,6 +262,21 @@ say (@Academy ai-fluency-framework-foundations).
 The agent returns a summary of the memo. Which of these is a review against
 the brief?
 </Choice>
+
+<MultiChoice id="review-steps" phase="review" objective="using-agents/delegates-and-checks/reviews-against-brief"
+  concepts={['checking-results']}
+  context="An agent returned a summary of a memo. The brief it ran from has done-criteria that can be ticked."
+  title="Reviewing against the brief" hint="Which steps use the done-criteria, and which use only your impression?"
+  options={[
+    { text: 'Tick each done-criterion and note which ones fail.', correct: true },
+    { text: 'Accept the summary once it reads well from top to bottom.', why: 'A result that reads well has told you nothing about the criteria yet.' },
+    { text: 'Send a failed criterion back to the agent to fix.', correct: true },
+    { text: 'Ask the agent whether it met the brief, and accept a yes.', why: 'The agent\'s yes is more text from the same run. The criteria are yours to tick.' },
+  ]}>
+
+Which two of these are part of reviewing the summary against the brief?
+
+</MultiChoice>
 
 <Exercise stretch="Now delegate the same memo with the wrong format on purpose (a paragraph, no bullets) and see whether your done-criteria still catch a missing deadline.">
 Pick a short text of your own that you do not mind sharing with an agent:

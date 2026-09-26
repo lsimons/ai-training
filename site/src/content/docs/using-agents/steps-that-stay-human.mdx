@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Match, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, MultiChoice, Match, Scenario, Pitfall, Exercise, Recap, Sort } from '@components/lesson';
 
 In this lesson we read the eight steps of one everyday process, hiring a
 contractor, twice. The first reading asks which steps an agent could do,
@@ -191,6 +191,36 @@ who chooses. What do you do?
 Which of these are reasons a step stays with a person even when an agent
 could do it?
 </MultiChoice>
+
+<Sort id="person-or-agent" phase="review" objective="using-agents/chooses-tool-and-autonomy/keeps-the-human-steps"
+  concepts={['what-to-keep-human']}
+  context="A team hires an assistant with the help of an agent. The lesson keeps a step with a person when someone has to answer for it, when the information is in no system the agent can reach, or when doing it keeps the person able to judge the agent's work."
+  title="Who keeps the step?" hint="Does someone have to answer for the step, does it need what only a person knows, or does it keep you able to judge?"
+  buckets={['A person keeps it', 'The agent may do it']}
+  items={[
+    { text: 'Choosing which candidate gets the offer', bucket: 0 },
+    { text: 'Deciding the salary in the offer', bucket: 0 },
+    { text: 'Reading a sample of the applications before the shortlist', bucket: 0 },
+    { text: 'Finding free slots in the calendars for the interviews', bucket: 1 },
+    { text: 'Summarizing the reference letters', bucket: 1 },
+    { text: 'Sending the standard confirmation of an interview time', bucket: 1 },
+  ]} />
+
+<Choice id="the-step-nobody-named" phase="review" objective="using-agents/chooses-tool-and-autonomy/keeps-the-human-steps"
+  concepts={['what-to-keep-human']}
+  context="A team writes down what its agent does in a process and names no step that stays with a person."
+  title="No human step on the list" hint="What happens to a step that no list gives to anyone?"
+  options={[
+    { text: 'The agent asks before it takes on a step that nobody named.', why: 'An agent doesn\'t know which steps you meant to keep, so it has nothing to ask about.' },
+    { text: 'Nothing changes, because the agent does only what the list says.', why: 'The list says what the agent does and doesn\'t say what it must leave alone.' },
+    { text: 'Busy weeks move each unnamed step to the agent, one at a time.', correct: true },
+    { text: 'The team notices at once, because the agent reports each step.', why: 'A report of each step is easy to skim in a busy week, and nobody decided who should keep it.' },
+  ]}>
+
+What happens over the next months to the steps that nobody named as a
+person's?
+
+</Choice>
 
 <Pitfall title="Being careful as the boundary">
 A team agrees that the agent may do the whole hiring process "as long as
