@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Predict, Order, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Predict, Order, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response, Match } from '@components/lesson';
 
 In this lesson the agent commits the three increments of the due-dates
 spec one by one on a branch, and then we take the middle one out again
@@ -336,6 +336,35 @@ author read every diff. Their time goes to the code itself.
   ]}>
 Which of these belong in the pull request description for the
 `due-dates` branch?
+</MultiChoice>
+
+<Match id="the-way-back" phase="review" objective="coding-with-agents/ships-with-agent/keeps-change-reversible"
+  concepts={['reversibility']}
+  context="The lesson plans the way back for each change a coding agent makes: a revert of a small commit, a switch that turns new behavior off, or a person who reads a step with no way back before it runs."
+  title="What is the way back?" hint="Can git undo it, can a switch turn it off, or is there no way back at all?"
+  options={['A git revert of its commit', 'A switch that turns it off', 'A person reads it before it runs']}
+  rows={[
+    { statement: 'A rename of a function across six files, in its own commit on a branch', option: 0, why: 'Is this all in the code, in one commit?' },
+    { statement: 'A new ranking of search results, shipped to every user', option: 1, why: 'What undoes it in seconds, without a deploy?' },
+    { statement: 'Dropping a column from a production table', option: 2, why: 'Does a revert bring the data in the column back?' },
+  ]}
+  rationale="A change is safe to let an agent try when its way back is known before it runs.">
+Match each change to its way back.
+</Match>
+
+<MultiChoice id="lines-that-keep-it-reversible" phase="review" objective="coding-with-agents/ships-with-agent/keeps-change-reversible"
+  concepts={['reversibility', 'commits-and-prs']}
+  context="A learner writes the brief for a coding agent that will build a feature on a branch in several increments."
+  title="The brief keeps it reversible" hint="Which lines make each part revertible on its own, and which rule out a step with no way back?"
+  options={[
+    { text: 'Make one commit per increment.', correct: true },
+    { text: 'Commit all of the work at the end, in one commit.', why: 'One commit can only be reverted as a whole, so a bad increment takes the good ones with it.' },
+    { text: 'Never run `git reset --hard`, `git push --force` or `git clean`.', correct: true },
+    { text: 'Work straight on `main`, so the history stays short.', why: 'Work on `main` reaches everyone at once, and a branch is what lets you drop it.' },
+  ]}>
+
+Which two lines in the brief keep the agent's work reversible?
+
 </MultiChoice>
 
 <Exercise stretch="Then have the agent put the `overdue` command back with `git revert` of the revert, and check that the description still tells the truth. Which lines had to change?">

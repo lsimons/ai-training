@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Predict, Order, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Predict, Order, Sort, Scenario, Pitfall, Exercise, Recap, Prompt, Response, Match } from '@components/lesson';
 
 In this lesson we add a feature to a small program with a coding agent,
 and the agent works from a written specification instead of from a chat
@@ -390,6 +390,36 @@ and its criterion.
 A team puts the increment that stores a new field and shows it in the
 output first, before the command that computes from the field. Why?
 </Choice>
+
+<Match id="increment-or-not" phase="review" objective="coding-with-agents/ships-with-agent/works-in-increments"
+  concepts={['working-increments']}
+  context="A learner asks a coding agent to land a tags feature as increments. The lesson counts a step as an increment when it leaves the program working and tested and adds one thing you can run."
+  title="Is it an increment?" hint="After this step, is the program working, tested, and does it do one new thing you can run?"
+  options={['An increment', 'Not an increment yet']}
+  rows={[
+    { statement: 'The `tag` command stores a tag, and `list` shows it. Tests pass.', option: 0, why: 'Can you run something new, and does everything else still work?' },
+    { statement: 'A tag parser with no command wired to it. Tests pass.', option: 1, why: 'What can you run after this step that you couldn\'t before?' },
+    { statement: '`list --tag` works, and plain `list` fails until the next step.', option: 1, why: 'Does the program still work after this step?' },
+  ]}
+  rationale="Each increment leaves the program working and adds one thing you can run, so you can stop after any of them.">
+Match each step to whether it is an increment.
+</Match>
+
+<Scenario id="between-increments" phase="review" objective="coding-with-agents/ships-with-agent/works-in-increments"
+  concepts={['working-increments', 'spec-driven-change']}
+  context="A coding agent is building a feature from a spec, one increment at a time. It reports that the first increment is done, that the tests pass, and asks whether to go on with the second."
+  title="The first increment is done" hint="Whose check counts before the next increment starts?"
+  options={[
+    { text: 'Say yes, because the tests pass and the work keeps moving.', consequence: 'The second increment builds on the first. When a criterion fails later, you can\'t tell which increment broke it.' },
+    { text: 'Let it do all of the remaining increments, and review them at the end.', consequence: 'You get one large diff after all, which is what the increments were meant to avoid.' },
+    { text: 'Run the tests and the criteria yourself, commit, and then brief the next one.', correct: true, consequence: 'A criterion fails, and you fix it in the first increment while it is small. The second starts from a working commit.' },
+    { text: 'Ask it to keep the increments uncommitted until the feature is finished.', consequence: 'No increment can be reverted on its own, and a mistake in one reaches all of them.' },
+  ]}>
+
+The agent says the first increment is done and the tests pass, and asks
+whether to continue. What do you do?
+
+</Scenario>
 
 <Exercise stretch="Now do the same for a feature you choose, for example tags on items with a `tag` command and a `list` filter. Write the spec first, and say in one line which increment is the least certain and why.">
 In a fresh copy of the fixture, land increment 2 from the spec with your
