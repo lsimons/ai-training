@@ -507,22 +507,13 @@ describe('pickWave with kind content', () => {
 			size: 6,
 			only: null,
 			wave: [
-				{ issue: 5, title: 'Lesson #5', labels: ['content'], mixed: false },
-				{ issue: 30, title: 'Lesson #30', labels: ['content', 'ready-for-agent'], mixed: false },
+				{ issue: 5, title: 'Lesson #5', labels: ['content'] },
+				{ issue: 30, title: 'Lesson #30', labels: ['content', 'ready-for-agent'] },
 			],
 			skipped: [],
 			waiting: [],
 			notPicked: [],
 		});
-	});
-
-	it('includes and marks an issue with both content and code labels', () => {
-		const ready = [issue(40, [], ['content', 'code']), issue(41, [], ['code', 'content', 'ready-for-agent'])];
-		const r = pickWave({ tree: planTree, livePageIds: [], readyIssues: ready, kind: 'content' });
-		expect(r.wave.map((w) => [w.issue, w.mixed])).toEqual([
-			[40, true],
-			[41, true],
-		]);
 	});
 
 	it('caps at size, skips assigned issues, and applies only', () => {
@@ -728,20 +719,20 @@ describe('formatWave', () => {
 		);
 	});
 
-	it('renders a content wave as an issue table with the mixed mark, then the skipped and waiting lists', () => {
+	it('renders a content wave as an issue table then the skipped and waiting lists', () => {
 		const out = formatWave({
 			kind: 'content',
 			size: 2,
 			only: [5, 6, 7, 8],
 			notPicked: [{ issue: 7, reason: 'assigned' }],
 			wave: [
-				{ issue: 5, title: 'Fix the | table', labels: ['content'], mixed: false },
-				{ issue: 6, title: 'Widget', labels: ['content', 'code'], mixed: true },
+				{ issue: 5, title: 'Fix the | table', labels: ['content'] },
+				{ issue: 6, title: 'Widget', labels: ['content', 'ready-for-agent'] },
 			],
 			skipped: [{ issue: 7, reason: 'issue is assigned to someone' }],
 			waiting: [
-				{ issue: 8, title: 'Later', labels: ['content'], mixed: false },
-				{ issue: 9, title: 'Later too', labels: ['code', 'content'], mixed: true },
+				{ issue: 8, title: 'Later', labels: ['content'] },
+				{ issue: 9, title: 'Later too', labels: ['content'] },
 			],
 		});
 		expect(out).toBe(
@@ -751,7 +742,7 @@ describe('formatWave', () => {
 				'| Issue | Title | Labels |',
 				'| ----- | ----- | ------ |',
 				'| #5 | Fix the \\| table | `content` |',
-				'| #6 | Widget | `content`, `code` (content and code) |',
+				'| #6 | Widget | `content`, `ready-for-agent` |',
 				'',
 				'## Skipped (1)',
 				'',
@@ -760,7 +751,7 @@ describe('formatWave', () => {
 				'## Waiting for a later wave (2)',
 				'',
 				'- #8 Later',
-				'- #9 Later too (content and code)',
+				'- #9 Later too',
 				'',
 				'## Not picked from --only (1)',
 				'',

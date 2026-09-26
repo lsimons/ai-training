@@ -33,13 +33,15 @@ gh issue edit <number> --add-label ready-for-agent --remove-label needs-triage
 GitHub's default labels (`duplicate`, `good first issue`, `help wanted`,
 `invalid`, `question`, `accessibility`) also exist and may be used.
 
-Every open issue has `content`, `code` or `harness`, or more than one,
+Every open issue has exactly one of `content`, `code` and `harness`,
 saying what kind of change it asks for. A lesson issue (title
-`Lesson: ...`) is `content`. An issue that touches both a lesson and the
-code behind it (a fixture and its lesson page, a schema field and the spec
-row) gets both. `harness` is for changes to how agents work on this repo:
-`AGENTS.md`, `.claude/`, `docs/agents/` and the orchestration skills. No
-picker selects `harness` issues, so the maintainer starts that work by
+`Lesson: ...`) is `content`. `harness` is for changes to how agents work
+on this repo: `AGENTS.md`, `.claude/`, `docs/agents/` and the
+orchestration skills. When several kinds fit, `harness` wins over
+`code`, and `code` wins over `content`. A fix to a hook that is Python
+code is `harness`, and a lesson change that also changes its fixture is
+`code`. The reviewers follow the branch's diff, whatever the label says.
+No picker selects `harness` issues, so the maintainer starts that work by
 hand, when no `dispatcher-run` issue is open.
 
 `dispatcher-run` marks the one issue per `/wave` run, titled
