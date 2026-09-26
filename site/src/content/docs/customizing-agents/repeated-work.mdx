@@ -150,8 +150,8 @@ the tool call as JSON, and for these tools `tool_input.file_path` is
 always the absolute path of the file. For a path with
 `/src/api/generated/` in it, the hook writes a message to standard error
 and exits with code 2, which stops the edit and gives Claude the message
-as the reason (@Claude Code hooks). The matcher compares tool names
-(@Claude Code hooks). This hook sees only those two tools. A shell
+as the reason (@Claude Code hooks). The matcher compares tool names, so
+this hook sees only those two tools. A shell
 command that writes the file, such as `sed -i` or `cat >`, goes through
 the Bash tool, and this hook never sees it. [Writing a hook that blocks a
 mistake](/customizing-agents/first-hook/) builds a hook of this kind step
@@ -190,7 +190,7 @@ as reading the diff of the regenerated client before it is committed.
   title="Where does the staging URL go?" hint="Which tasks need the URL, and which place loads only for those tasks?"
   options={[
     { text: 'Into the first step of the regeneration skill, as part of the command.', correct: true },
-    { text: 'Into the project instructions, so every session, regeneration or not, starts with the URL.', why: 'The instructions suit a variable that many tasks use. Only the first step of the regeneration uses this one, so the URL goes into that step, and a change to it is one edit.' },
+    { text: 'Into the project instructions, so every session, regeneration or not, starts with the URL.', why: 'The instructions suit a variable that many tasks use. Only one command uses this one, and most sessions never run it.' },
     { text: 'Into the agent\'s auto-memory, which it saves after the user says it.', why: 'An auto-memory note is on one machine and nobody reviews it. A teammate\'s agent still has to ask.' },
     { text: 'Nowhere, so the user states it in the chat whenever the agent asks.', why: 'That is the repeated explanation the lesson is removing. Each session pays for the question and waits for the answer.' },
   ]}>
@@ -214,9 +214,9 @@ edit in all three sessions. What do you change?
 
 ## Cut what the hook and the skill now hold
 
-The best-practices page gives one test for each line of the instructions
-file: would the agent make mistakes without it? If it wouldn't, cut the
-line (@Claude Code best practices). The same page warns that a long
+The best-practices page suggests removing any line of the instructions
+file that the agent would get right without it
+(@Claude Code best practices). The same page warns that a long
 instructions file makes the agent miss the rules that matter.
 
 Apply the test to the long regeneration paragraph first. The skill holds
@@ -278,17 +278,17 @@ Which two of these are right for the instructions file now?
 
 <Scenario id="the-message-it-reads" objective="customizing-agents/configures-agent/adds-a-hook"
   concepts={['turning-repeated-work-into-reusable-knowledge', 'hooks']}
-  context="A team cut its instructions line about files under src/api/generated/ down to one short sentence, because a hook now blocks the agent's edits there. The long reason is gone from the file. The hook's message on standard error is what the agent receives when it is blocked. A skill named regenerate-api-client holds the regeneration steps."
+  context="A team cut its instructions line about files under src/api/generated/ down to one short sentence, because a hook now blocks the agent's edits there. The reason is gone from the file. The hook's message on standard error is what the agent receives when it is blocked. A skill named regenerate-api-client holds the regeneration steps."
   title="What does the hook say?" hint="The reason is gone from the file. Where does the agent now learn why, and what to do instead?"
   options={[
-    { text: 'src/api/generated/ is generated code, and a hand edit there is lost the next time the client is regenerated.', consequence: 'The agent learns why it was blocked and not what to do next. It tries to patch the page code around the missing field, and the user has to step in.' },
+    { text: 'src/api/generated/ is generated code, and a hand edit there is lost the next time the client is regenerated.', consequence: 'The agent learns why it was blocked and not what to do next. It may find the skill from its description, or it may try the same change through a shell command that the hook never sees.' },
     { text: 'This folder is protected. Ask the user for permission before you edit anything under src/api/generated/.', consequence: 'The agent asks, and the answer is no every time. The user is back to being the approval step the hook was meant to replace.' },
     { text: 'Error: the PreToolUse hook exited with code 2 for an Edit call on a file in src/api/generated/.', consequence: 'The message names the mechanism and says nothing about the rule. The agent tries a Write call on the same file, and the hook blocks it again.' },
     { text: 'src/api/generated/ is generated from the billing API spec. Run /regenerate-api-client to update the client, or change the spec.', correct: true, consequence: 'The agent runs the skill, the client gets the new field, and the edit never happens. Nobody had to say anything.' },
   ]}>
 The instructions file now says only that generated files change by
-regeneration. The hook blocks a hand edit under `src/api/generated/`,
-right when the agent has planned one. Which message should it write?
+regeneration. The hook blocks a hand edit under `src/api/generated/`
+when the agent tries one. Which message should it write?
 </Scenario>
 
 <Match id="step-to-place" phase="review" objective="customizing-agents/configures-agent/manages-memory"
@@ -327,21 +327,21 @@ What should the team do with the rule?
   items={[
     { text: 'No commit that contains the .env file with the local secrets', bucket: 0 },
     { text: 'No change to a file under migrations/, which another team owns', bucket: 0 },
-    { text: 'No push straight to the main branch, which deploys on each push', bucket: 0 },
-    { text: 'Prefer small functions to long ones', bucket: 1 },
+    { text: 'Push only to feature branches, because main deploys on each push', bucket: 0 },
+    { text: 'No abbreviations in the names of public functions', bucket: 1 },
     { text: 'Write the text that users see in plain English', bucket: 1 },
     { text: 'Explain each change in two or three sentences in the pull request', bucket: 1 },
   ]} />
 
 <Scenario id="the-third-time" phase="review" objective="customizing-agents/configures-agent/manages-memory"
   concepts={['turning-repeated-work-into-reusable-knowledge']}
-  context="A developer has told a coding agent in three sessions that the staging database is read-only for agents, and that reports use the read replica. Almost every task in the project touches the database. The team shares one project instructions file in the repository."
+  context="A developer has told a coding agent in three sessions that the staging database refuses writes from the agent's account, and that reports read from the replica. A write attempt fails with a permission error and does no harm. Almost every task in the project touches the database. The team shares one project instructions file in the repository."
   title="The same fact, a third time" hint="Which tasks need the fact, and which place does every teammate's agent read in every session?"
   options={[
-    { text: 'Let the agent save it as an auto-memory note on your machine.', consequence: 'Your agent stops asking. A teammate\'s agent on another machine doesn\'t have the note, and it tries to write to staging on its first data task.' },
+    { text: 'Let the agent save it as an auto-memory note on your machine.', consequence: 'Your agent stops asking. A teammate\'s agent on another machine doesn\'t have the note. Its first write to staging fails, and it stops to ask why.' },
     { text: 'Write a skill named staging-database with the fact in its body.', consequence: 'The skill loads only when a task matches its description. Most data tasks never mention staging, and on those the agent works without the fact.' },
     { text: 'Add one line with the fact to the project instructions, and commit it.', correct: true, consequence: 'Each session on each clone starts with the fact. Nobody types it again, and a change to it goes through review like the code.' },
-    { text: 'Keep telling the agent in the chat, because the replica may move.', consequence: 'Every session pays for the explanation again, and on the day you forget, the agent writes to staging.' },
+    { text: 'Keep telling the agent in the chat, because the replica may move.', consequence: 'Every session pays for the explanation again. On the day you forget, the agent\'s first write fails, and you explain it once more.' },
   ]}>
 You are about to type the same explanation about the staging database for
 the third time. What do you do with it?
