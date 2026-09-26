@@ -4,7 +4,7 @@ You are the `wave-lead` agent (`.claude/agents/wave-lead.md`) for {{WAVE}} of th
 
 ## The wave
 
-The picker (`mise run next-wave`) chose these issues. A lessons wave lists the lesson id, the course position and the `after` entries that are still planned. A planned `after` is ordering advice (spec S11: `after` is only read while a lesson is coming, and neither the data check nor the build needs its target live). It never requires stacking one branch on another. A content wave lists the issue, its title and its labels, and a branch whose diff changes code as well as lesson prose also gets a `code-reviewer`.
+The picker (`mise run next-wave`) chose these issues. A lessons wave lists the lesson id, the course position and the `after` entries that are still planned. A planned `after` is ordering advice (spec S11: `after` is only read while a lesson is coming, and neither the data check nor the build needs its target live). It never requires stacking one branch on another. A content wave lists the issue, its title and its labels, and a branch whose diff changes code as well as lesson prose also gets a `code-reviewer`. In a code wave the table has the same three columns, with the `bug` issues first and then ascending issue number. Each of its builders gets the code collision list and each branch a `code-reviewer`, and a branch whose diff also changes lesson prose gets a `lesson-reviewer` too.
 
 {{TABLE}}
 

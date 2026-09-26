@@ -72,8 +72,8 @@ pulls `main`, runs the picker, fills the wave lead template at
 `.claude/skills/wave/wave-lead-prompt.md`, spawns the lead, reads the
 report, updates the run issue, and repeats until a stop condition, with
 no further instruction from the maintainer. Its arguments: `/wave [size]`,
-default 6, then any of `--kind lessons|content` (what the picker selects,
-planned lessons by default), `--only N,N,...` (an issue whitelist for the
+default 6, then any of `--kind lessons|content|code` (what the picker
+selects, planned lessons by default), `--only N,N,...` (an issue whitelist for the
 run, and the picker skips everything else), `--no-filing` and
 `--resume <Name>`. The skill loops on its own and waits for each lead in
 the foreground. An optional watchdog is the maintainer's choice, and a
@@ -195,12 +195,15 @@ One tick:
    for a later wave, and, under `--only`, every listed number it didn't pick
    with the reason, so nothing drops silently. A content wave
    (`--kind content`) is the ready, unassigned `content` issues that no plan
-   file claims, by ascending number. For both kinds the picker asks GitHub
-   only for the open `ready-for-agent` issues, plus the `content` label for a
-   content wave, and it blocks an issue whose body has a `Blocked by #N` line
+   file claims, by ascending number. A code wave (`--kind code`) is the
+   ready, unassigned `code` issues, the `bug` issues first and then
+   ascending number, the order run Emu (#362) chose by hand. For every kind
+   the picker asks GitHub only for the open `ready-for-agent` issues, plus
+   the kind's label for a content or code wave, and it blocks an issue whose body has a `Blocked by #N` line
    for an open #N or a `Not before` line with a later date (`triage.md`,
    "Dependency lines"). The lead adds a code review for a branch whose diff
-   changes code. A nits issue is left out because it arrives as the nits row.
+   changes code, which is every branch of a code wave. A nits issue is left
+   out because it arrives as the nits row.
    The picker reads the tree of the checkout it runs in, which is why the
    pull comes first.
    The dispatcher then decides on the nits row: the one open
@@ -341,11 +344,16 @@ everything below.
 - The rule not to ask questions. The lead makes the call, states it in the
   pull request body, and puts the decision in the report's maintainer line.
 
-## What stays by hand
+## Kinds of run
 
-`next-wave` picks lesson issues from their plan files, and content issues
-by label. Code and tooling issues (`code` label) still go through
-`orchestration.md` directly, one pull request each, since their review and
-their CI run are what protect the lesson branches. Run those between waves,
-or as the first wave of the day with `main` frozen, as the "What collides"
-section says.
+A run has one kind, the `--kind` it started with, and the picker selects
+by it. Each issue has exactly one kind label (`issue-tracker.md`,
+"Labels").
+
+- `lessons`: the planned lessons, from their plan files.
+- `content`: the `content` issues that no plan file claims.
+- `code`: the `code` issues, `bug` issues first. Each builder gets the
+  code collision notes and each branch a `code-reviewer`, and the
+  standing approval applies as for any wave. A code run can be open next
+  to a lessons or content run, and "Files the other run touches" under
+  "Concurrent runs" keeps the two apart.

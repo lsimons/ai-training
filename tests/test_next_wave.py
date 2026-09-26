@@ -101,6 +101,7 @@ class Lookups:
 # The typed pickers behind `pick_wave`, for the tests that read one kind's fields.
 lessons_wave = nw.pick_lessons_wave
 content_wave = nw.pick_content_wave
+code_wave = nw.pick_code_wave
 
 
 def ids(entries: Sequence[object]) -> list[str]:
@@ -691,6 +692,93 @@ def test_content_with_only_reports_every_listed_number_that_is_not_in_the_wave()
     assert lookup.asked == [75, 77, 78, 10, 79, 999]
 
 
+# pickWave with kind code
+
+
+def test_code_puts_bugs_first_then_ascending_numbers_and_leaves_out_other_kinds() -> None:
+    ready = [
+        issue(40, [], ["code", "ready-for-agent"]),
+        issue(12, [], ["code"]),
+        issue(35, [], ["code", "bug"]),
+        issue(8, [], ["bug", "code"]),
+        issue(5, [], ["content"]),
+        issue(6, [], ["harness", "bug"]),
+        issue(7),
+        # A planned lesson's issue with the code label is a code issue too.
+        issue(10, [], ["code"]),
+    ]
+    r = pick_wave(plan_lessons(), ready, kind="code", size=6)
+    assert r == {
+        "kind": "code",
+        "size": 6,
+        "only": None,
+        "wave": [
+            {"issue": 8, "title": "Lesson #8", "labels": ["bug", "code"]},
+            {"issue": 35, "title": "Lesson #35", "labels": ["code", "bug"]},
+            {"issue": 10, "title": "Lesson #10", "labels": ["code"]},
+            {"issue": 12, "title": "Lesson #12", "labels": ["code"]},
+            {"issue": 40, "title": "Lesson #40", "labels": ["code", "ready-for-agent"]},
+        ],
+        "skipped": [],
+        "waiting": [],
+        "notPicked": [],
+        "blocked": [],
+    }
+
+
+def test_code_leaves_out_a_nits_issue_and_caps_the_wave_in_the_bug_first_order() -> None:
+    ready = [
+        titled(1, "Cosmetic nits left open on wave 8 branches", ["code", "bug"]),
+        titled(2, "Fix the picker", ["code"]),
+        titled(3, "Crash in the hook", ["code", "bug"]),
+    ]
+    r = code_wave(plan_lessons(), ready, size=1)
+    assert [w["issue"] for w in r["wave"]] == [3]
+    assert [w["issue"] for w in r["waiting"]] == [2]
+
+
+def test_code_blocks_on_the_dependency_lines_and_skips_assigned_issues() -> None:
+    ready = [
+        issue(30, labels=["code", "bug"], body="Blocked by #40"),
+        issue(31, labels=["code"], body="Not before 2027-01-01"),
+        issue(32, ["someone"], ["code"]),
+        issue(33, labels=["code"], body="Blocked by #41"),
+    ]
+    lookup = Lookups({40: state(), 41: state("CLOSED")})
+    r = code_wave(plan_lessons(), ready, lookup, today=TODAY)
+    assert [w["issue"] for w in r["wave"]] == [33]
+    assert r["blocked"] == [
+        {"issue": 30, "title": "Lesson #30", "blockedByIssues": [40]},
+        {"issue": 31, "title": "Lesson #31", "notBefore": "2027-01-01"},
+    ]
+    assert r["skipped"] == [{"issue": 32, "reason": "issue is assigned to someone"}]
+
+
+def test_code_with_only_names_the_kind_in_every_reason() -> None:
+    ready = [
+        issue(70, [], ["code"]),
+        issue(71, [], ["content"]),
+        titled(72, "Nits: two typos", ["code"]),
+    ]
+    lookup = Lookups(
+        {
+            75: state(labels=["ready-for-agent", "harness"]),
+            76: state(labels=["ready-for-agent", "code"]),
+            999: state("CLOSED", ["ready-for-agent", "code"]),
+        }
+    )
+    r = code_wave(plan_lessons(), ready, lookup, only=[70, 71, 72, 75, 76, 999])
+    assert [w["issue"] for w in r["wave"]] == [70]
+    assert r["notPicked"] == [
+        {"issue": 71, "reason": "not a code issue"},
+        {"issue": 72, "reason": "a nits issue (the dispatcher adds it as the nits row)"},
+        {"issue": 75, "reason": "not a code issue"},
+        {"issue": 76, "reason": "not in the fetched issues (run the picker again)"},
+        {"issue": 999, "reason": "no such open issue"},
+    ]
+    assert format_wave(r).startswith("## Wave (1 of 6, code)\n\n| Issue | Title | Labels |\n")
+
+
 # formatWave
 
 
@@ -976,8 +1064,9 @@ def test_parse_args_reads_every_flag() -> None:
         # Python's `[0-9]` is ASCII here, and `int()` would take Arabic-Indic digits.
         (["--size", "٣"], 'next-wave: --size needs a positive integer, got "٣"'),
         (["--size"], 'next-wave: --size needs a positive integer, got ""'),
-        (["--kind", "nope"], 'next-wave: --kind is lessons or content, got "nope"'),
-        (["--kind"], 'next-wave: --kind is lessons or content, got ""'),
+        (["--kind", "nope"], 'next-wave: --kind is lessons, content or code, got "nope"'),
+        (["--kind"], 'next-wave: --kind is lessons, content or code, got ""'),
+        (["--kind", "Code"], 'next-wave: --kind is lessons, content or code, got "Code"'),
         (
             ["--only", "1,,2"],
             'next-wave: --only needs issue numbers separated by commas, got "1,,2"',
@@ -1186,7 +1275,7 @@ def test_main_exits_2_on_a_bad_argument_before_running_anything(
     code, out, fake = run_main(monkeypatch, capsys, ["--kind", "nope"], {})
     assert code == 2
     assert out.stdout == ""
-    assert out.stderr == 'next-wave: --kind is lessons or content, got "nope"\n'
+    assert out.stderr == 'next-wave: --kind is lessons, content or code, got "nope"\n'
     assert fake.calls == []
 
 
@@ -1533,6 +1622,34 @@ def test_main_fetches_a_content_wave_with_both_labels_and_looks_up_a_blocker_onc
     assert [" ".join(c) for c, _ in fake.calls] == [BUN, GH_CONTENT, view(90)]
     assert "| #30 | Issue 30 |" in out.stdout
     assert "| #31 | Issue 31 |" in out.stdout
+
+
+def test_main_fetches_a_code_wave_with_the_code_label(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    gh = json.dumps(
+        [
+            {
+                "number": n,
+                "title": f"Issue {n}",
+                "assignees": [],
+                "labels": [{"name": "ready-for-agent"}, {"name": "code"}, *extra],
+                "body": "",
+            }
+            for n, extra in ((30, []), (31, [{"name": "bug"}]))
+        ]
+    )
+    command = GH_CONTENT.replace("-l content", "-l code")
+    code, out, fake = run_main(
+        monkeypatch, capsys, ["--kind", "code"], {BUN: PLAN_JSON, command: gh}
+    )
+    assert code == 0
+    assert [" ".join(c) for c, _ in fake.calls] == [BUN, command]
+    assert out.stdout.startswith(
+        "## Wave (2 of 6, code)\n\n| Issue | Title | Labels |\n| ----- | ----- | ------ |\n"
+        "| #31 | Issue 31 | `ready-for-agent`, `code`, `bug` |\n"
+        "| #30 | Issue 30 | `ready-for-agent`, `code` |\n"
+    )
 
 
 def test_main_exits_1_when_a_lookup_fails_or_is_unreadable(

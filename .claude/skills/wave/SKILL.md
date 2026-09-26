@@ -1,7 +1,7 @@
 ---
 name: wave
 description: Run the meta-orchestration dispatcher loop. Opens or resumes a named run issue, picks the next wave of ready issues, spawns one wave lead per wave, reads its report, keeps the run issue current, and repeats until a stop condition.
-argument-hint: "[size] [kind lessons|content] [only N,N,...] [no-filing] [resume Name]"
+argument-hint: "[size] [kind lessons|content|code] [only N,N,...] [no-filing] [resume Name]"
 ---
 
 You are the DISPATCHER of `docs/agents/meta-orchestration.md`. You run in
@@ -15,15 +15,17 @@ spawn a second lead while one is running.
 
 ## Arguments
 
-`/wave [size]`, then any of `--kind lessons|content`, `--only N,N,...`,
+`/wave [size]`, then any of `--kind lessons|content|code`, `--only N,N,...`,
 `--no-filing` and `--resume <Name>`. The hint in the frontmatter above
 shows the flags without their two leading dashes, because `mise run prose`
 reads the frontmatter as prose and rejects a double hyphen there. The
 flags themselves keep them.
 
 - `size`: how many issues per wave. Default 6.
-- `--kind`: `lessons` (planned lessons, the default) or `content` (ready
-  `content` issues outside the lesson plans). Passed to the picker.
+- `--kind`: `lessons` (planned lessons, the default), `content` (ready
+  `content` issues outside the lesson plans) or `code` (ready `code`
+  issues, `bug` issues first, then ascending number). Passed to the
+  picker, which rejects any other kind.
 - `--only N,N,...`: an issue whitelist for the whole run. The picker skips
   everything else and reports every listed number it didn't pick, with the
   reason. The run issue (below) holds the remaining list, and the run
@@ -168,7 +170,7 @@ the diff the check printed.
    the nits row. There is at most one open nits issue, titled
    `Cosmetic nits` (`gh issue list -s open --search "Cosmetic nits in:title"`;
    the repo has no nits label, so the title is the marker, and the
-   `content` picker leaves it out for this reason). Add it as ONE extra row
+   `content` and `code` pickers leave it out for this reason). Add it as ONE extra row
    appended to the picker's table, marked `(nits row)`, for one nits
    builder in one worktree and branch, only when its body has 10 or more
    nit lines or the picker's table is otherwise empty. Under `--only`, add
@@ -248,9 +250,9 @@ the diff the check printed.
 Default (no `--no-filing`):
 
 > Before you report, file a GitHub issue (per `docs/agents/triage.md`,
-> labeled `code` or `content` plus `ready-for-agent` when every decision is
-> made, or `ready-for-human` when one is the maintainer's) for every
-> follow-up a review named. A `ready-for-human` body holds what
+> labeled with exactly one of `code`, `content` or `harness`, plus
+> `ready-for-agent` when every decision is made, or `ready-for-human` when
+> one is the maintainer's) for every follow-up a review named. A `ready-for-human` body holds what
 > `triage.md`, "What a maintainer decision needs", lists. Fix cheap nits
 > in the branch. Every cosmetic nit you leave open on a merged branch
 > becomes one line, naming the file and the change, appended to the body
@@ -269,7 +271,9 @@ Under `--no-filing`:
 > follow-up and nit they'd have filed, one line each with the file and the
 > change, in their final report to you. For every follow-up a review named
 > or a builder reported, write the issue you would have filed, as a
-> `## <title>` heading with the body and labels under it, in ONE comment
+> `## <title>` heading with the body and labels under it (exactly one of
+> `code`, `content` or `harness`, plus `ready-for-agent` or
+> `ready-for-human`), in ONE comment
 > on the run issue #<run>, headed `Follow-ups from <NAME> wave <k>`. The
 > body of one that needs the maintainer's decision holds what
 > `triage.md`, "What a maintainer decision needs", lists.
