@@ -1,0 +1,431 @@
+import { Predict, Choice, Sort, Pitfall, Exercise, Recap, Habit } from '@components/lesson';
+
+In this lesson we give an agent loop a bill. The loop is the one from
+[Building your first agent](/building-agents/agent-loop/): send the
+message list to the model, run the tool it asks for, append the result,
+and go round again until it answers. This time every call to the model
+goes through a provider that counts tokens and charges for them. We add a
+cost record per run and a token budget that stops a run. Then we cache the
+part of the prompt that never changes, and retry a call that the
+provider turns down with a rate limit. The last section pins the model, so that its behavior changes only
+on a date you choose.
+
+The provider is fake. It runs inside the program and never reaches the
+network, and no application programming interface (API) key is needed.
+Its token counter treats every word and every punctuation mark as one
+token, which is a rough stand-in for a real tokenizer. The prices are made
+up, and the cache prices follow the Claude API's rule for most models,
+which is described below. The files are in
+`site/examples/building-agents/cost-and-provider-operations/`. Copy the
+folder, and run each step from inside the copy as
+`python3 ops.py <step>`.
+
+## What one run costs
+
+The agent is a help desk assistant for a small office, with three tools:
+`get_ticket`, `search_kb` for the knowledge base and `read_log` for last
+night's log of an office service. Task `t1` is a question about a laptop
+that will not start. The run makes three calls: the model asks for the ticket, then for the
+knowledge base article, and then it answers.
+
+A real provider reports the tokens of each call in its response. The
+Claude API returns `input_tokens` and `output_tokens`, and two more
+fields for the prompt cache, `cache_creation_input_tokens` and
+`cache_read_input_tokens` (@Claude docs prompt-caching). The price is per
+million tokens, output tokens cost several times as much as input
+tokens, and the tool definitions you send count as input
+(@Claude docs pricing). The fake provider returns the same four fields,
+and one function turns them into dollars:
+
+```python
+PRICE_INPUT = 3.00  # dollars per million tokens, made up
+PRICE_OUTPUT = 15.00
+PRICE_CACHE_WRITE = PRICE_INPUT * 1.25
+PRICE_CACHE_READ = PRICE_INPUT * 0.1
+
+def dollars(usage: dict) -> float:
+    return (
+        usage["input_tokens"] * PRICE_INPUT
+        + usage["cache_creation_input_tokens"] * PRICE_CACHE_WRITE
+        + usage["cache_read_input_tokens"] * PRICE_CACHE_READ
+        + usage["output_tokens"] * PRICE_OUTPUT
+    ) / 1_000_000
+```
+
+The loop keeps a `CostRecord` per run, with the number of calls, the
+tokens and the dollars, and adds each response's usage to it. With
+`log=print` it prints one line per call.
+
+<Predict id="run-cost" title="The bill of one run"
+  answer={`call 1: input 260, output 23, $0.001125
+  call 2: input 353, output 26, $0.001449
+  call 3: input 443, output 28, $0.001749
+  stop: end_turn
+  answer: Ticket 311 is open. Hold the power button for 15 seconds, then charge it for 10 minutes.
+  calls: 3
+  tokens: 1133
+  cost: $0.004323`} run="building-agents/cost-and-provider-operations/cost.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 ops.py cost
+```
+
+</Predict>
+
+The input grows with every call. Call 2 sends everything call 1 sent, plus
+the model's tool request and the ticket, and call 3 adds the article. A
+loop pays for its whole history again on every turn, so the number of
+turns and the size of each tool result decide the bill. The system prompt
+and the tool list are 226 of the 260 input tokens of call 1, and they are
+in every call. A run costs less than half a cent here, and the number
+that matters is that cost times the runs per day. Track it per run and
+per task type, and alert on it, so a change in cost shows up the day it
+happens (@AEC-11).
+
+## A budget that stops the run
+
+A step limit catches a loop that goes round too often. When a run has few
+turns and one of them is large, such as a tool result much longer than
+expected, only a token budget stops it. The source course sets a hard token
+cap per session for this reason (@AEC-11). The loop checks the budget
+before each call, and when the record has reached it, the run stops with
+its own reason:
+
+```python
+for _ in range(max_steps):
+    if budget is not None and record.tokens >= budget:
+        return outcome("budget_spent", None)
+    try:
+        response = call_provider(provider, model, messages, cache, no_sleep, log, record.calls + 1)
+    except ProviderError as err:
+        return outcome("provider_error", None, f"{err.status} {err.kind}: {err.message}")
+    record.add(response["usage"])
+    reply = response["reply"]
+    if "answer" in reply:
+        return outcome("end_turn", reply["answer"])
+    ...
+```
+
+`outcome` returns a dict with the stop reason, the answer, and the
+record's calls, tokens and cost. `call_provider` and the `provider_error`
+stop are the subject of a later section. `record.tokens` counts every token of
+every call, input and output.
+
+<Predict id="predict-budget-stop" objective="building-agents/runs-in-production/manages-cost-and-rollout"
+  concepts={['cost']}
+  context="In the lesson, an agent loop keeps a cost record per run: calls, tokens and dollars. Before each model call it checks whether the tokens so far have reached the budget, and if so it returns the stop reason budget_spent with no answer. Without a budget, task t1 makes three calls: call 1 uses 260 input and 23 output tokens for $0.001125, call 2 uses 353 input and 26 output tokens for $0.001449, and call 3 uses 443 input and 28 output tokens for $0.001749, then answers."
+  title="What does the budget stop return?"
+  hint="How many tokens has the record counted after call 1, and after call 2? The check runs before a call, never in the middle of one."
+  answer={`{'stop': 'budget_spent', 'answer': None, 'calls': 2, 'tokens': 662, 'cost': '$0.002574'}`}
+  run="building-agents/cost-and-provider-operations/budget.py">
+
+Task `t1` runs again, now with `budget=600`. Use the per-call numbers
+from the run above, and predict what this prints. Then run it.
+
+```python
+print(run("t1", budget=600))
+```
+
+</Predict>
+
+The run spent 662 tokens, more than the budget of 600, because the check
+runs before a call and a call can't be stopped halfway. Set the budget
+with that in mind. The caller gets the stop reason, and the tokens and
+the cost it has already paid for, and can decide what to tell the user.
+
+## Caching the part that never changes
+
+The system prompt and the tool list are the same on every call of every
+run. Prompt caching lets the provider process that prefix once and read
+it back on later calls. On the Claude API the cache follows the order of
+the request, the tools first, then the system prompt, then the messages.
+A cache hit needs an exact match of everything up to the cache breakpoint,
+and a cached prefix lasts five minutes by default
+(@Claude docs prompt-caching). For most models, the price of writing the prefix to the
+cache is 1.25 times the input price, and the price of reading it back is
+0.1 times the input price (@Claude docs pricing). The API caches a prefix
+only above a minimum length, which depends on the model
+(@Claude docs prompt-caching).
+
+The fake provider caches the system prompt and the tool list together
+when a run passes `cache=True`. The first call writes them to the cache,
+and later calls read them.
+
+<Predict id="run-cache" title="The same run with the prefix cached"
+  answer={`call 1: input 34, cache write 226, output 23, $0.001295
+  call 2: input 127, cache read 226, output 26, $0.000839
+  call 3: input 217, cache read 226, output 28, $0.001139
+  stop: end_turn
+  answer: Ticket 311 is open. Hold the power button for 15 seconds, then charge it for 10 minutes.
+  calls: 3
+  tokens: 1133
+  cost: $0.003272`} run="building-agents/cost-and-provider-operations/cache.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 ops.py cache
+```
+
+</Predict>
+
+Compared with the first run, call 1 is dearer by the extra price of the
+cache write, while calls 2 and 3 cost less, and the run drops from $0.004323 to
+$0.003272. The token count stays 1133: caching changes the price of the
+tokens, and the model still reads all of them. The more calls share one
+prefix, the more a run saves. On the Claude API, a run that starts while
+the cached prefix is still alive reads it on its first call as well. On the Claude API, tokens read from the
+cache also don't count toward the input-tokens-per-minute rate limit for
+most models (@Claude docs rate-limits).
+
+<Choice id="timestamp-in-prefix" objective="building-agents/runs-in-production/manages-cost-and-rollout"
+  concepts={['provider-operations']}
+  context="In the lesson, a fake provider caches the system prompt and the tool list together as one prefix. The first call with a new prefix writes it to the cache at 1.25 times the input price, and a later call with the exact same prefix reads it back at 0.1 times the input price."
+  title="The time in the system prompt"
+  hint="What does a cache hit need from the prefix, and is that true of any two calls here?"
+  options={[
+    { text: 'Only the first call of each run writes the prefix, and later calls in the run read it back.', why: 'The later calls in the run have a different time in their prompt too. Which call has a prefix that matches one already in the cache?' },
+    { text: 'The fake provider still reads the prefix from the cache, because it looks the prefix up by model id.', why: 'Look at what a hit needs: the whole prefix, text included, must match exactly.' },
+    { text: 'Every call writes the prefix to the cache again, so the prefix costs more than it did without caching.', correct: true },
+    { text: 'The calls fail, because a cached prefix must not change between calls of one run.', why: 'A prefix that does not match is a miss. The provider writes the new prefix and the call goes ahead.' },
+  ]}>
+
+A teammate adds the current time, to the second, at the start of the
+system prompt, so that the model knows when it answers. Caching is on.
+What happens to the cost of the prefix?
+
+</Choice>
+
+## Calling the provider reliably
+
+A provider refuses calls, and the loop must know which refusals to wait
+out. The Claude API names its errors by HTTP status and type. Retry a 429
+`rate_limit_error`, a 500 `api_error` and a 529 `overloaded_error`
+after a wait (@Claude docs errors). A 429 for a rate limit comes with a
+`retry-after` header that says how many seconds to wait
+(@Claude docs rate-limits). Report the rest to the caller: a 400
+`invalid_request_error` or a 401 `authentication_error` fails again on
+every retry. So does a 429 that says the monthly spend cap is reached,
+which has no `retry-after` header (@Claude docs errors). The official
+SDKs already retry transient failures twice by default, with exponential
+backoff, and honor `retry-after` (@Claude docs errors). A loop you write
+yourself needs the same rules.
+
+The fixture's `call_provider` wraps every call. It passes a timeout, so a
+call that hangs becomes an error the loop can handle. A timeout or a
+retriable status leads to a retry. Before the retry the loop waits for
+the `retry-after` seconds when the provider sends them, or for 1, 2 and
+then 4 seconds when it doesn't. Any other error goes back to the caller.
+
+```python
+RETRIABLE = {429, 500, 529}
+
+def call_provider(provider, model, messages, cache, sleep, log, number, max_retries=3, timeout=30.0):
+    attempt = 1
+    while True:
+        try:
+            return provider.create(model, SYSTEM, TOOL_LIST, messages, cache=cache, timeout=timeout)
+        except CallTimeoutError as err:
+            status, text, wait_for = "timeout", str(err), None
+        except ProviderError as err:
+            if err.status not in RETRIABLE:
+                raise
+            status, text, wait_for = f"{err.status} {err.kind}", err.message, err.retry_after
+        if attempt > max_retries:
+            raise ProviderError(0, "gave_up", f"{status} after {attempt} attempts")
+        wait = float(wait_for) if wait_for is not None else 1.0 * 2 ** (attempt - 1)
+        log(f"call {number}: {status}: {text}; wait {wait:.1f}s and retry")
+        sleep(wait)
+        attempt += 1
+```
+
+`run` turns a `ProviderError` into the stop reason `provider_error`, with
+the error in the result. The fixture never really waits: its `sleep`
+does nothing, and the log line says how long a real loop would wait. The
+fake provider bills nothing for a call it refuses.
+
+<Predict id="predict-rate-limit" objective="building-agents/runs-in-production/manages-cost-and-rollout"
+  concepts={['provider-operations']}
+  context="In the lesson, every model call goes through call_provider, which retries a timeout and the statuses 429, 500 and 529 up to three times. It waits the retry-after seconds when the provider sends them, and 1, 2 and 4 seconds otherwise, and logs one line per retry. Other errors go back to the caller as the stop reason provider_error. The fake provider bills nothing for a refused call. Without errors, task t1 prints three call lines (260, 353 and 443 input tokens), stops with end_turn, and costs $0.004323 for 1133 tokens."
+  title="A rate limit on the third call"
+  hint="Is 429 in the retriable set? Which wait does the loop use when the provider sends retry-after? Does a refused call add anything to the record?"
+  answer={`call 1: input 260, output 23, $0.001125
+  call 2: input 353, output 26, $0.001449
+  call 3: 429 rate_limit_error: rate limit exceeded; wait 2.0s and retry
+  call 3: input 443, output 28, $0.001749
+  stop: end_turn
+  answer: Ticket 311 is open. Hold the power button for 15 seconds, then charge it for 10 minutes.
+  calls: 3
+  tokens: 1133
+  cost: $0.004323`} run="building-agents/cost-and-provider-operations/rate_limit.py">
+
+The fake provider now refuses the third call once with a 429
+`rate_limit_error` and `retry_after=2`. Predict what the `rate_limit`
+step prints, starting from the output of the first run on this page.
+Then run it.
+
+```sh
+python3 ops.py rate_limit
+```
+
+</Predict>
+
+The run ends with the same answer, calls and cost as the run without the
+error, with one log line in between. A person reading the log sees that
+the limit was hit, and the user sees nothing. The `errors` step shows the
+other two paths. The second call times out once and is retried after the
+default wait of one second. Then the provider refuses the third call with
+a 400, and the loop stops at once.
+
+<Predict id="run-errors" title="A timeout, then a terminal error"
+  answer={`call 1: input 260, output 23, $0.001125
+  call 2: timeout: no reply within 30s; wait 1.0s and retry
+  call 2: input 353, output 26, $0.001449
+  stop: provider_error
+  answer: None
+  calls: 2
+  tokens: 662
+  cost: $0.002574
+  error: 400 invalid_request_error: messages: bad format`} run="building-agents/cost-and-provider-operations/errors.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 ops.py errors
+```
+
+</Predict>
+
+The 400 is not retried, because the same request would fail the same way
+three more times. The caller gets the error, the 662 tokens and the cost
+already spent, and can report the problem to a person.
+
+## Pinning the model
+
+Each Claude model id names one fixed version of the model. From the 4.6
+generation on, an id such as `claude-sonnet-4-6` is itself that version,
+and an updated model ships under a new id. Earlier models also have
+aliases on the Claude API: `claude-sonnet-4-5` points to the newest dated
+version with that number, such as `claude-sonnet-4-5-20250929`. The same
+page notes that the serving systems around a model can change over time,
+so small differences can appear even on a fixed id
+(@Claude docs model-ids-and-versions). A fixed id doesn't last forever
+either. Each id has its own retirement date, with at least 60 days'
+notice for a public model, and after that date requests to it fail
+(@Claude docs model-deprecations). Pinning lets you choose when the model
+changes and plan the move, while the move itself still comes.
+
+Choosing which model to pin is a trade between cost, speed and quality,
+and a simple step can go to a smaller, cheaper model
+(@Academy claude-platform-101) (@AEC-11). The fixture pins
+`fake-helper-2-1`. It also has an alias, `fake-helper-latest`, which the
+fake provider moved to `fake-helper-3-0` on 2026-06-01. The `alias` step
+runs task `t1` on the alias one day before that date and on that date.
+
+<Predict id="run-alias" title="The same code on two dates"
+  answer={`2026-05-31: fake-helper-2-1, calls 3, cost $0.004323
+  2026-06-01: fake-helper-3-0, calls 4, cost $0.006597`}
+  run="building-agents/cost-and-provider-operations/alias.py">
+
+Run this, and compare what you see with the output below.
+
+```sh
+python3 ops.py alias
+```
+
+</Predict>
+
+Nobody changed the code or the prompt. The newer model makes one more
+call and writes a longer answer, and the run costs about half as much
+again.
+
+<Pitfall title="An alias in the configuration">
+A team writes an alias such as `fake-helper-latest` into its agent's
+configuration, because it always gives them the newest model. On a date
+the provider chose, the alias moves. The agent's answers get longer, it
+makes an extra call on some tasks, and the cost per run jumps, with
+nothing in the team's own history to explain it. Rule: pin an exact
+model id, and treat a new model as a change like a new prompt. It passes
+the evaluation suite first, then goes to a small share of the traffic,
+and reaches everyone only when its numbers hold.
+</Pitfall>
+
+<Exercise stretch="Change read_log so that it returns only the lines that report a stop or an error, and run the table again. How far does that task's cost drop, and what could the model no longer see?">
+
+Copy the folder and add a `table` step to `ops.py`. For each of the
+five tasks in `TASKS` it calls `run` and prints one row with the task id,
+the calls, the tokens and the cost. The last line is the average cost of
+the five. Find the task whose cost is far above the others, and run it
+with `log=print` to see which call makes the difference. Name the tool
+that causes it. A cost table per task type is the view that finds this in
+production, where no one reads each run.
+
+A good result: four tasks cost about the same, and one costs about three
+times the average of the other four. Its trace shows a small first call
+and a much larger second call, because the tool returned a long result
+and the loop sent all of it to the model. Would a token budget have
+stopped that run, and what budget would you set for this agent?
+
+</Exercise>
+
+<Sort id="retry-or-report" phase="review" objective="building-agents/runs-in-production/manages-cost-and-rollout"
+  concepts={['provider-operations']}
+  context="The lesson's agent loop retries some provider errors after a wait and reports the others to its caller. The errors are those of the Claude API, named by HTTP status and error type."
+  title="Retry or report?"
+  hint="Would the same request succeed if it were sent again a little later?"
+  buckets={['Retry after a wait', 'Report to the caller']}
+  items={[
+    { text: '429 rate_limit_error with a retry-after header of 5 seconds', bucket: 0 },
+    { text: '529 overloaded_error', bucket: 0 },
+    { text: 'No reply within the call timeout', bucket: 0 },
+    { text: '400 invalid_request_error about the message format', bucket: 1 },
+    { text: '401 authentication_error for a revoked key', bucket: 1 },
+    { text: '429 saying the monthly spend cap is reached, with no retry-after header', bucket: 1 },
+  ]} />
+
+<Choice id="cut-the-costly-task" phase="review" objective="building-agents/runs-in-production/manages-cost-and-rollout"
+  concepts={['cost']}
+  context="In the lesson's fixture, a help desk agent runs five tasks. Each task makes two or three model calls. One task costs about three times the others, because its one tool call returns a log of 145 lines, and the loop sends that result to the model on the next call. The system prompt and the tool list are about 226 tokens."
+  title="Which change cuts the costly task?"
+  hint="Where in that task's calls are most of the tokens, and which change touches them?"
+  options={[
+    { text: 'Cache the system prompt and the tool list, so that later calls read them at the lower price.', why: 'The prefix is a small part of that task. Where is most of the input of its second call?' },
+    { text: 'Raise the token budget, so that the run is never stopped before its answer.', why: 'A budget stops a run. It never makes a run cheaper.' },
+    { text: 'Make the log tool return only the lines that report a stop or an error.', correct: true },
+    { text: 'Switch to the alias of the model, so that the agent always runs on the newest version.', why: 'An alias changes the model on a date you do not choose, and a newer model can cost more.' },
+  ]}>
+
+The cost table shows one task at about three times the others. Which
+change lowers that task's cost the most?
+
+</Choice>
+
+<Recap>
+
+1. A loop sends its whole history again on every call, so the number of
+   turns and the size of each tool result decide what a run costs. Keep a
+   cost record per run from the usage the provider reports
+   (@Claude docs prompt-caching) (@AEC-11).
+2. A token budget stops a run with a named reason, and the caller still
+   gets the tokens and the cost already spent. The check runs before a
+   call, so a run can end a little over the budget.
+3. Prompt caching writes the unchanging prefix once and reads it back at
+   a fraction of the input price, but only while the prefix matches
+   exactly (@Claude docs prompt-caching) (@Claude docs pricing).
+4. Retry rate limits, overload and timeouts with a wait, and use
+   `retry-after` when the provider sends it. Report every other error to
+   the caller (@Claude docs errors) (@Claude docs rate-limits).
+5. Pin an exact model id, and roll out a new model like any other change.
+   An alias moves on the provider's date, and a pinned id retires on a
+   date you are told about in advance (@Claude docs model-ids-and-versions)
+   (@Claude docs model-deprecations).
+
+</Recap>
+
+<Habit id="look-at-one-tool-result">
+Before an agent gets a new tool, look at the size of one real result from
+it. The loop sends that result to the model again on every later call of
+the run.
+</Habit>
