@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, MultiChoice, Sort, Scenario, Pitfall, Exercise, Recap, Match } from '@components/lesson';
 
 A feature request arrives for the to-do program from the first lesson:
 "Add due dates. I want to type `todo add "Renew the domain" due friday`
@@ -116,6 +116,36 @@ add an `undo` command. I keep marking the wrong item done." What do you
 do first?
 </Scenario>
 
+<Choice id="the-export-request" phase="review" objective="coding-with-agents/specifies-work/judges-worth-building"
+  concepts={['what-is-worth-building']}
+  context="A team of four uses a small command-line to-do program. The lesson finds the problem behind a request, and the person who has it, before it proposes a change."
+  title="A request for an export" hint="What does the request name: the problem, or one solution to it?"
+  options={[
+    { text: 'Ask the agent to add a CSV export with every field, so any chart is possible.', why: 'That builds the named solution. You still don\'t know which chart they need, or whether a file is the way to get it.' },
+    { text: 'Add a charting library, so the program can draw the chart itself.', why: 'That adds a dependency the team owns for years, for a problem you haven\'t heard yet.' },
+    { text: 'Decline, because the data is already in a JSON file they can open.', why: 'Declining is one outcome, and you can\'t pick it before you know the problem behind the request.' },
+    { text: 'Ask which chart they want to make, and who reads it, before proposing anything.', correct: true },
+  ]}>
+
+A colleague writes: "Please add a CSV export, so I can make a chart." What
+do you do first?
+
+</Choice>
+
+<Match id="three-outcomes" phase="review" objective="coding-with-agents/specifies-work/judges-worth-building"
+  concepts={['what-is-worth-building']}
+  context="The lesson says that building as asked is one outcome of a request. A request can also be shrunk to the part that solves the stated problem, or answered without code."
+  title="Build, shrink or answer?" hint="Does the problem need all of what was asked for, some of it, or none of it?"
+  options={['Build it as asked', 'Shrink it to the part that solves the problem', 'Answer it without code']}
+  rows={[
+    { statement: 'All four colleagues lose track of deadlines, and the request is a stored due date shown in the list.', option: 0, why: 'Does the request match the problem as it is?' },
+    { statement: 'A colleague asks for a full undo history, and the only problem is marking the wrong item done now and then.', option: 1, why: 'Which part of the request solves the problem that was stated?' },
+    { statement: 'A colleague asks how to see only open items, and `todo list --open` already does that but the README never mentions it.', option: 2, why: 'Is anything missing from the program itself?' },
+  ]}
+  rationale="A request names a solution. The problem behind it decides how much of that solution the team builds and owns.">
+Match each request to the outcome that fits its problem.
+</Match>
+
 ## Writing down what success requires
 
 Suppose due dates pass both questions, in the shrunk form: a date is
@@ -179,6 +209,36 @@ means?
 Which of these lines belong in the success criteria for the due-date
 change?
 </MultiChoice>
+
+<Sort id="in-the-criteria-or-not" phase="review" objective="coding-with-agents/specifies-work/defines-success"
+  concepts={['success-criteria']}
+  context="An author writes success criteria for a coding agent that will add tags to a small command-line to-do program. The lesson's criteria are observable outcomes that a person other than the author could check, including what must keep working, and they end with an out-of-scope line."
+  title="Does it belong in the criteria?" hint="Could someone other than the author check this line, and is it an outcome or a way to build it?"
+  buckets={['Belongs in the success criteria', 'Leave it out']}
+  items={[
+    { text: 'After `todo tag 2 home`, `todo list` shows `#home` after item 2', bucket: 0 },
+    { text: '`python3 -m unittest -q` passes, and an item without tags prints as it did before', bucket: 0 },
+    { text: 'Not in scope: tag colors, nested tags, renaming a tag', bucket: 0 },
+    { text: 'The tag code is clean and easy to extend', bucket: 1 },
+    { text: 'Store the tags as a comma-separated string in `todos.json`', bucket: 1 },
+    { text: 'Odd tag names are handled gracefully', bucket: 1 },
+  ]} />
+
+<Scenario id="the-extras" phase="review" objective="coding-with-agents/specifies-work/defines-success"
+  concepts={['success-criteria']}
+  context="An author gave a coding agent success criteria for due dates in a to-do program, with no out-of-scope line. The branch meets every criterion and also adds weekday names, relative dates and colored output."
+  title="More than was asked for" hint="What filled the gap between done and everything the agent could improve?"
+  options={[
+    { text: 'Merge it all, because every criterion passes and the extras work.', consequence: 'The team now maintains three features nobody asked for, and the colors break the output a script reads.' },
+    { text: 'Add an out-of-scope line to the criteria, and ask the agent to take the extras out.', correct: true, consequence: 'The branch shrinks to the due dates. The next brief starts with the out-of-scope line, and the agent stops at done.' },
+    { text: 'Revert the whole branch and write the feature by hand instead.', consequence: 'The due dates that met every criterion are lost, and the gap in the criteria is still there for the next task.' },
+    { text: 'Keep the extras and describe them in the README so that people know they exist.', consequence: 'The README documents features nobody decided to own, and the criteria still leave the same gap.' },
+  ]}>
+
+The agent's branch meets every criterion and adds three features nobody
+asked for. What do you do?
+
+</Scenario>
 
 <Exercise stretch="For the request you shrank, write the one-paragraph note to the person who asked, saying what you are building instead and why.">
 Three requests have come in for the to-do program from the first lesson.

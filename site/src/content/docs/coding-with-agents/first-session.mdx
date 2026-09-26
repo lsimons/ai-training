@@ -1,4 +1,4 @@
-import { Choice, Predict, Repair, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Predict, Repair, Scenario, Sort, Pitfall, Exercise, Recap, Prompt, Response, Match } from '@components/lesson';
 
 In this lesson we run one complete session with a coding agent. We open
 it in a small repository and ask it to explain the code. We point it at a
@@ -159,6 +159,21 @@ task.
     { text: 'The git history of the fixture', bucket: 2 },
     { text: 'Your guess at how long the fix should take', bucket: 2 },
   ]} />
+
+<Match id="where-it-comes-from" phase="review" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['first-change', 'task-brief']}
+  context="A learner is about to brief a coding agent to fix a bug that a failing unit test shows, in a small project with a short AGENTS.md file that the agent loads at start."
+  title="Brief, agent, or neither?" hint="Can the agent read this in the repository, does only you know it, or does the task not need it?"
+  options={['Goes in the brief', 'The agent finds this itself', 'Leave it out']}
+  rows={[
+    { statement: 'The command that shows the task is done', option: 0, why: 'Who decides what done means?' },
+    { statement: 'The contents of the test file', option: 1, why: 'Can the agent open this file on its own?' },
+    { statement: 'The file the agent must not touch', option: 0, why: 'Would the agent know this limit without being told?' },
+    { statement: 'What you think of the previous developer\'s style', option: 2, why: 'Does the fix need this?' },
+  ]}
+  rationale="The brief holds what only you know: the limits and the check that shows the task is done. The agent reads the code itself.">
+Match each item to where it comes from.
+</Match>
 
 <Repair id="repair-the-brief" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
   concepts={['first-change', 'task-brief']}
@@ -380,6 +395,65 @@ The fix is in, you have read the diff, and the tests pass. Now you want the
 agent to replace the done-mark strings in `todo.py` with a constant. Where
 do you ask for it?
 </Choice>
+
+<Choice id="the-settings-file" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['permissions', 'first-change']}
+  context="A learner briefed a coding agent to fix a bug in a small program. The brief says not to touch settings.toml. The agent stops at the permissions prompt before every edit."
+  title="An edit the brief ruled out" hint="What does the prompt give you the chance to do before the edit happens?"
+  options={[
+    { text: 'Allow it, because the agent has read more of the code than you have.', why: 'Reading more code doesn\'t change the brief. The prompt is where your judgment enters.' },
+    { text: 'Deny the edit, and ask why it needs a file the brief ruled out.', correct: true },
+    { text: 'Allow it, and put the file back with git after the session.', why: 'By then the test passed because of the edit, and you have learned nothing about the bug.' },
+    { text: 'End the session, and start again with the same brief.', why: 'The same brief leads to the same question. Asking why tells you what the brief is missing.' },
+  ]}>
+
+The agent asks to edit `settings.toml` "so the test passes". The brief says
+to leave that file alone. What do you do?
+
+</Choice>
+
+<Match id="mode-per-task" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['permissions']}
+  context="A coding agent offers four permission modes: read-only, ask before each action, accept edits and ask before commands, and skip every check. The lesson picks a mode per task."
+  title="Which mode for this task?" hint="Does the task change anything, is it your first change in the project, can git undo it, and is it inside a sandbox?"
+  options={['Read-only', 'Ask before each action', 'Accept edits, ask before commands', 'Skip every check']}
+  rows={[
+    { statement: 'Ask the agent to explain how the storage module works', option: 0, why: 'Does this task need to change anything?' },
+    { statement: 'Your first change in a project you have never opened', option: 1, why: 'How much do you know about what an edit here can reach?' },
+    { statement: 'Routine edits in your own project, where git can restore what you did not read', option: 2, why: 'What undoes an edit here, and what doesn\'t?' },
+    { statement: 'A throwaway task in a sandbox that holds nothing else', option: 3, why: 'What can the agent reach from inside the sandbox?' },
+  ]}
+  rationale="The mode follows from what the task changes and from what can undo a mistake.">
+Match each task to its permission mode.
+</Match>
+
+<Scenario id="fixed-all-green" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['first-change', 'codebase-understanding']}
+  context="A learner briefed a coding agent to make a failing test pass by changing the program's code and not the test. The agent reports: fixed, all tests pass."
+  title="The agent says it is done" hint="Is the agent's summary evidence, or a claim?"
+  options={[
+    { text: 'Accept it. The done-criterion was a passing test run.', consequence: 'The diff also changed the test\'s expected value. The bug is still in the code, and the test no longer looks for it.' },
+    { text: 'Read the diff, then run the check you named yourself.', correct: true, consequence: 'You see that the diff changed only the program, and your own test run passes. Now it is done.' },
+    { text: 'Ask the agent to confirm that it didn\'t touch the test.', consequence: 'It confirms. Its answer is a second claim, and you still haven\'t looked.' },
+    { text: 'Run the test suite yourself, and accept when it passes.', consequence: 'It passes, because the agent edited the test. You needed the diff to see that.' },
+  ]}>
+
+The agent reports that the bug is fixed and all tests pass. What do you do
+before you accept?
+
+</Scenario>
+
+<Sort id="same-session-or-fresh" phase="review" objective="coding-with-agents/ships-with-agent/runs-a-session"
+  concepts={['session-and-context']}
+  context="A learner has just finished a bug fix with a coding agent and has read the diff. Everything the agent read and was told about that task is still in the session's context window. The lesson gives each task its own session."
+  title="Same session, or a new one?" hint="Is this still the task you just finished, or a new task?"
+  buckets={['Same session', 'A new session']}
+  items={[
+    { text: 'Ask why the fix changed one line in the way it did', bucket: 0 },
+    { text: 'Fix the typo the fix left in the same line', bucket: 0 },
+    { text: 'Replace the done-mark strings with a constant', bucket: 1 },
+    { text: 'Add a new command to the program', bucket: 1 },
+  ]} />
 
 If you do want a second change in the same repository, reset first so the
 next session starts from a known state.

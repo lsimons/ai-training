@@ -1,4 +1,4 @@
-import { Choice, Match, MultiChoice, Predict, Repair, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, Match, MultiChoice, Predict, Repair, Pitfall, Exercise, Recap, Prompt, Response, Sort } from '@components/lesson';
 
 In this lesson we give a coding agent the same small task twice. The first
 brief is one sentence, and we watch which files the agent reads to make
@@ -346,6 +346,19 @@ be done at all.
   ]}>
 Which of these do the work of a scoped brief?
 </MultiChoice>
+
+<Sort id="instructions-or-brief" phase="review" objective="coding-with-agents/ships-with-agent/gives-the-right-context"
+  concepts={['scoping-a-task', 'referencing-files']}
+  context="The lesson puts a boundary that holds for every task in the project's instruction file, and the boundary and references for one task in that task's brief. The project has a legacy/ folder that nothing imports."
+  title="Instruction file or brief?" hint="Does this line hold for every task in the project, or only for this one?"
+  buckets={['The project instruction file', 'This task\'s brief']}
+  items={[
+    { text: 'Never change files under `legacy/`', bucket: 0 },
+    { text: 'Run the tests with `python3 -m unittest -q`', bucket: 0 },
+    { text: 'Change nothing in `export.py` for this fix', bucket: 1 },
+    { text: 'Add the new command next to `done` in `todo.py`', bucket: 1 },
+    { text: 'The message format is in the `undo` row of `docs/SPEC.md`', bucket: 1 },
+  ]} />
 
 <Exercise stretch="Do the same for a task you choose in a repository of your own. Write the vague brief first, then the scoped one, and count the files the agent reads for each.">
 Reset the copy of the fixture and run both sessions yourself with your

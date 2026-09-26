@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Predict, Scenario, Pitfall, Exercise, Recap, Prompt, Response } from '@components/lesson';
+import { Choice, MultiChoice, Predict, Scenario, Pitfall, Exercise, Recap, Prompt, Response, Order } from '@components/lesson';
 
 In this lesson you review a branch a coding agent made and you didn't
 watch it make. The branch implements the due-dates spec from *Working
@@ -282,6 +282,12 @@ because the suite is green. What do you tell them?
 The branch is in front of you with its summary and a green suite. What
 do you do before approving?
 </Scenario>
+
+<Order id="order-the-review" phase="review" objective="coding-with-agents/verifies-agent-work/reviews-others-code"
+  concepts={['reviewing-code-you-did-not-write', 'verifying-against-the-specification']}
+  context="A coding agent finished a branch for a feature with a written brief and spec, a set of tests and a summary. The lesson reviews the branch in a fixed order."
+  title="Put the review in order" hint="What do you need to know before you can judge the tests, and the tests before the diff?"
+  steps={['Read the brief and the spec', 'Read the tests on the branch', 'Read the diff, starting with the list of changed files', 'Run the command each success criterion names']} />
 
 <Exercise stretch="Then brief your own coding agent to fix the branch: name the two failing criteria, the deleted test and the two files to leave alone. Review the fix the same way, and count what the second review finds.">
 Build the branch into a directory of your own with the course's
