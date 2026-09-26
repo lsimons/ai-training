@@ -159,7 +159,7 @@ the diff the check printed.
 3. **Resume or open.** With `--resume <Name>`, find the open run issue
    with that name among them, and stop when there is none. Its body gives
    the arguments, and its `In flight` line, if any, is the wave to resume
-   (step 4 of the loop). Write its current body to the run's file,
+   (step 3 of the loop). Write its current body to the run's file,
    `mkdir -p .scratch && gh issue view <run> --json body -q .body > .scratch/run-<name>.md`,
    so the file you edit from is the issue as it is now and never a file
    an earlier session left. The file is in the `.scratch/` of the checkout
@@ -209,7 +209,7 @@ the diff the check printed.
    the nits row. There is at most one open nits issue, titled
    `Cosmetic nits` (`gh issue list -s open --search "Cosmetic nits in:title"`;
    the repo has no nits label, so the title is the marker, and the
-   `content` and `code` pickers leave it out for this reason). Add it as ONE extra row
+   `content`, `code` and `harness` pickers leave it out for this reason). Add it as ONE extra row
    appended to the picker's table, marked `(nits row)`, for one nits
    builder in one worktree and branch, only when its body has 10 or more
    nit lines or the picker's table is otherwise empty. Under `--only`, add
@@ -354,11 +354,16 @@ fails:
    PR #<n>, with the results in one line. Merge only on the maintainer's
    yes in this session, with
    `AI_TRAINING_ROLE=dispatcher gh pr merge <n> --rebase`. On a no, stop
-   with "the maintainer says stop" and leave the run issue as it is.
+   with "the maintainer declines the merge" and leave the run issue open
+   as it is ("When the run ends").
 6. **After the merge.** Replace the wave's line with
-   `wave <k>: merged, PR #<n>`, do the `--only` and collision-note steps
-   of the loop's step 8, and close the run when a stop condition holds
-   (under `--only`, an empty `Remaining --only`). Then tell the
+   `wave <k>: merged, PR #<n>`. There is no new report, so the merged
+   issues are the ones the merged PR closes
+   (`gh pr view <n> --json closingIssuesReferences -q '.closingIssuesReferences[].number'`).
+   Under `--only`, remove them from `Remaining --only`. The collision
+   notes were copied when the `open` report came. Close the run when a
+   stop condition holds (under `--only`, an empty `Remaining --only`), as
+   "When the run ends" says. Then tell the
    maintainer to quit and start again in the main checkout, with the
    lines `/exit`, `cd /Users/lsimons/git/lsimons/ai-training`,
    `git pull --rebase`,
@@ -405,6 +410,16 @@ Under `--no-filing`:
 
 ## When the run ends
 
+A run ends at every stop except the ones below. At those, leave the run
+issue open and skip this section, because `/wave --resume <Name>`
+continues the run later:
+
+- `failed`;
+- "harness wave awaiting restart";
+- a failed step of "Resuming after a restart", such as the wrong checkout;
+- the maintainer's no to the merge in that section's step 5;
+- the exclusivity check refusing a resumed run ("Starting a run", step 1).
+
 Under `--no-filing`, before the final report, file what the leads wrote.
 For each follow-ups comment on the run issue, check every entry once
 against `main` as it is now, and drop the ones already done or made
@@ -416,8 +431,8 @@ maintainer's decision, the final report quotes its options and its
 recommendation (`triage.md`, "What a maintainer decision needs").
 Nothing is left in a record for the maintainer to reconcile by hand.
 
-Then, on every stop but `failed`, comment the stop condition on the run
-issue and close it (`gh issue close <run> --comment ...`). Your final
+Then, on every stop that ends the run, comment the stop condition on the
+run issue and close it (`gh issue close <run> --comment ...`). Your final
 report repeats the run's pending collision notes for the maintainer to
 read.
 
@@ -435,7 +450,8 @@ Stop, and say which one it was, when:
   harness wave, step 8);
 - the harness exclusivity check refuses the run ("Starting a run"
   step 1), or the `--kind` check refuses its kind;
-- a step of "Resuming after a restart" fails;
+- a step of "Resuming after a restart" fails, or the maintainer declines
+  the merge there;
 - the maintainer says stop.
 
 The concurrent-agent cap is shared by every level, so run one wave at a
