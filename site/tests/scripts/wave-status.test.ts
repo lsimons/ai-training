@@ -580,6 +580,50 @@ describe('waveStatus with verdicts and re-checks in code fences', () => {
 	});
 });
 
+describe('waveStatus with CRLF line endings and inline triple backticks', () => {
+	const next = (comments: ReturnType<typeof comment>[]) =>
+		waveStatus({
+			waveBranch: 'wave/capybara-3',
+			issues: [21],
+			heads: ['feat/21-x'],
+			commentsByIssue: new Map([[21, comments]]),
+			worktrees: [],
+		}).issues[0]?.branches.map((b) => [b.name, b.next]);
+	const crlf = (text: string) => text.replaceAll('\n', '\r\n');
+	const approve = comment('lsimons', 'Branch: feat/21-x\nVerdict: approve', '2026-09-24T10:00:00Z');
+
+	it('reads fences in a comment posted with CRLF line endings', () => {
+		const review = crlf(
+			'Reviews end like this:\n```\nBranch: feat/21-x\nVerdict: approve\n```\n\nBranch: feat/21-x\nVerdict: needs changes',
+		);
+		expect(verdictOf(review)).toBe('needs changes');
+		expect(next([comment('lsimons', review, '2026-09-24T10:00:00Z')])).toEqual([['feat/21-x', 'revise']]);
+		expect(branchOf(crlf('Fixed.\n~~~\nBranch: feat/21-x\n~~~'))).toBeNull();
+		expect(commentKind(crlf('Fixed.\n```\nre-checked by lead: abc\n```'))).toBe('reply');
+		expect(verdictOf('```\rVerdict: approve\r```\rVerdict: needs changes')).toBe('needs changes');
+	});
+
+	it('reads the Unfinished line, the Branch name and what is left without a trailing CR', () => {
+		const open = crlf('Unfinished: feat/21-x\n- the tests\n\nCo-Authored-By: lsimons-bot <bot@leosimons.com>');
+		expect(unfinishedBranchOf(open)).toBe('feat/21-x');
+		expect(openUnfinished([comment('lsimons', open, '2026-09-24T11:00:00Z')], 'feat/21-x', ['feat/21-x'])?.left).toBe(
+			'- the tests',
+		);
+		expect(branchOf(crlf('Fixed.\n\nBranch: feat/21-x\n'))).toBe('feat/21-x');
+	});
+
+	it('reads a line of inline code between triple backticks as text, not as a fence', () => {
+		const reCheck = comment(
+			'lsimons',
+			'The fix breaks the gate:\n\n```mise run fast```\n\nBranch: feat/21-x\nVerdict: needs changes',
+			'2026-09-24T12:00:00Z',
+		);
+		const reply = comment('lsimons', 'Fixed in abc.\n\nBranch: feat/21-x', '2026-09-24T11:00:00Z');
+		expect(next([approve, reply, reCheck])).toEqual([['feat/21-x', 'revise']]);
+		expect(verdictOf('~~~mise run fast~~~\nVerdict: approve')).toBeNull();
+	});
+});
+
 describe('waveStatus for every comment kind and every way it names a branch', () => {
 	// Each row: a comment kind, the comments before it, and the step it gives
 	// for each way of naming a branch. A comment that fails to match gives
