@@ -217,7 +217,7 @@ stdio
 npx
 modelcontextprotocol
 
-# Animal names for dispatcher runs (.claude/skills/wave/run-names.yaml)
+# Animal names for dispatcher runs (.claude/skills/wave/run-names.txt)
 Xerus
 Umbrellabird
 Xenops
