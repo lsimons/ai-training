@@ -57,17 +57,18 @@ worktree, with that list as its brief. Marking an unfinished branch is
 issue #418.
 
 A reviewer returns its review as its final text, ending in a `Verdict:`
-line and the attribution lines. Post that text on the ISSUE yourself with `gh issue comment`, then
-send the builder one message: the required findings, the suggested
-rewrites to apply unless they read worse, and the findings to skip. The
-builder makes one commit, runs `mise run fast`, pushes and replies on the
-issue. After `Verdict: needs changes`, the same reviewer re-checks. After
-`Verdict: approve`, read the fix commit with `git show`, run `mise run fast`
-on the branch, comment `re-checked by lead: <commit link>` on the issue,
-and link that comment in the review table's re-check column. A fix that
-changes more than the findings named, or a finding too big to check
-yourself, goes back to the same reviewer. Cheap nits from a re-check go
-back as one more one-line commit that you read yourself.
+line and the attribution lines. Post that text on the ISSUE yourself
+with `gh issue comment`, then send the builder one message: the required
+findings, the suggested rewrites to apply unless they read worse, and the
+findings to skip. The builder makes one commit, runs `mise run fast`,
+pushes and replies on the issue. After `Verdict: needs changes`, the same
+reviewer re-checks. After `Verdict: approve`, read the fix commit with
+`git show`, run `mise run fast` on the branch, comment
+`re-checked by lead: <commit link>` on the issue, and link that comment in
+the review table's re-check column. A fix that changes more than the
+findings named, or a finding too big to check yourself, goes back to the
+same reviewer. Cheap nits from a re-check go back as one more one-line
+commit that you read yourself.
 
 A branch gets at most two revision rounds. After the second
 `Verdict: needs changes`, leave the branch out of the wave and report it
@@ -81,10 +82,11 @@ doesn't linger in the maintainer's agent list.
 Keep the wave branch in `../ai-training-wt/<wave branch>`, created from
 `origin/main`, and rebase each approved branch `--onto` it exactly as
 `orchestration.md` shows. Start every command for a worktree with
-`cd <worktree> && <command>`, or name the worktree in it (`git -C <worktree> ...`,
-absolute paths): in a subagent a `cd` doesn't carry over to the next
-Bash call (`orchestration.md`, "Working with the platform"). `cspell-words.txt` and the bibliography merge
-with git's union driver. Resolve add/add conflicts in the S02 source table
+`cd <worktree> && <command>`, or name the worktree in it
+(`git -C <worktree> ...`, absolute paths): in a subagent a `cd` doesn't
+carry over to the next Bash call (`orchestration.md`, "Working with the
+platform"). `cspell-words.txt` and the bibliography merge with git's
+union driver. Resolve add/add conflicts in the S02 source table
 yourself by keeping every line in course order, and after the rebases drop
 a duplicate bibliography key that `mise run data` reports. Any other
 conflict goes back to the builder whose branch came second. If an e2e
