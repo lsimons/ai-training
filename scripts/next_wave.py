@@ -6,11 +6,26 @@ Usage: mise run next-wave -- [--size N] [--kind lessons|content]
        [--only N,N,...] [--unblockers-first] [--json]
 
 `main` reads the lessons of this checkout from `bun scripts/lesson-plan.mjs`
-in site/ (the picker's one boundary with the site, #492) and every open
-issue from `gh issue list`, then prints the wave as markdown or, with
-`--json`, as JSON. The functions between are pure, so tests/test_next_wave.py
-can feed them planted lessons and issues. The output is byte-identical to
-the JavaScript tool this replaces (#492).
+in site/ (the picker's one boundary with the site, #492) and the kind's
+issues from `gh issue list`, then prints the wave as markdown or, with
+`--json`, as JSON. The list is filtered on the server side (#493): every
+`-l` must match, so a lessons wave fetches the open `ready-for-agent`
+issues and a content wave the open ones that also have `content`. A list
+that reaches the `-L` limit stops the picker, since it may be cut short.
+Any other issue the picker needs, a `Blocked by` target or an `--only`
+number outside the list, it looks up with `gh issue view`, once per
+number, and a lookup that fails (for a number that doesn't exist too)
+stops it with exit 1. The functions between are pure apart from that
+lookup, which the tests pass in, so tests/test_next_wave.py can feed them
+planted lessons and issues.
+
+Every kind reads the dependency lines of an issue body (docs/agents/triage.md,
+"Dependency lines"). A `Blocked by #N` line blocks the issue while #N is
+open, an issue or a pull request. A `Not before YYYY-MM-DD` line blocks it
+while the date is after today, read in UTC, so on that date it is free. A
+`Not before` line whose date can't be read blocks it too, and says so. A
+blocked issue is listed under Blocked with the reason. For a lesson the
+lines come on top of its plan file's `assumes` entries.
 
 Two kinds of wave. A `lessons` wave (the default) picks planned lessons. A
 lesson is a candidate when its plan file names an `issue`, it has no page
@@ -34,17 +49,20 @@ reported and the order stays earliest-in-course.
 
 A `content` wave picks the ready, unassigned issues with the `content`
 label that no plan file claims as its lesson issue, in ascending issue
-number, with no dependency logic. An issue that also has the `code`
-label is included and marked, so the lead can give it a code review too.
+number, leaving out the ones its dependency lines block. Its Blocked list
+is printed only when it has an entry, and in JSON it is the last key, so
+a wave without dependency lines prints as it did before them. An issue
+that also has the `code` label is included and marked, so the lead can
+give it a code review too.
 A nits issue (title starting `Nits` or `Cosmetic nits`) is left out, since
 the dispatcher adds those to a wave as the nits row.
 
 `only` narrows either kind to a set of issue numbers. Everything else is
 reported as skipped with the reason `not in --only`, and every listed
 number that did not make the wave is reported under `notPicked` with the
-reason, so an unattended run never drops a number silently. `open_issues`
-(every open issue number) tells `no such open issue` from
-`not ready-for-agent`, and defaults to the ready issues when absent.
+reason, so an unattended run never drops a number silently. A number
+outside the fetched set is looked up to tell `no such open issue` (closed,
+or a pull request) from `not ready-for-agent`.
 """
 
 import json
@@ -53,6 +71,7 @@ import re
 import subprocess
 import sys
 from collections.abc import Callable, Iterable, Sequence
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Literal, NoReturn, NotRequired, TypedDict, cast
 
@@ -73,6 +92,21 @@ ISSUE_LIST = re.compile(r"[1-9][0-9]*(,[1-9][0-9]*)*", re.ASCII)
 
 # A lone UTF-16 surrogate, which JSON.stringify writes as a `\uXXXX` escape.
 LONE_SURROGATE = re.compile("[\ud800-\udfff]")
+
+# The dependency lines of an issue body (docs/agents/triage.md, "Dependency
+# lines"). Each is matched whole against a trimmed line, case as written. A
+# `Blocked by` line names one issue. A line that starts `Not before ` and has
+# one word after it is a `Not before` line, and that word must be a
+# YYYY-MM-DD date, or the line is reported as unreadable.
+BLOCKED_BY_LINE = re.compile(r"Blocked by #([1-9][0-9]*)", re.ASCII)
+NOT_BEFORE_LINE = re.compile(r"Not before (\S+)")
+ISO_DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", re.ASCII)
+# The opening of a fenced code block: three or more backticks or tildes.
+FENCE = re.compile(r"(`{3,}|~{3,})")
+
+# `gh issue list` returns at most this many issues. A list that reaches it
+# may be cut short, so `main` stops with an error there.
+ISSUE_LIMIT = 1000
 
 type Kind = Literal["lessons", "content"]
 
@@ -96,6 +130,33 @@ class ReadyIssue(TypedDict):
     title: str
     assignees: list[str]
     labels: list[str]
+    body: str
+
+
+class IssueState(TypedDict):
+    """One issue as `gh issue view --json state,labels,assignees,url` gives it."""
+
+    # OPEN or CLOSED, and MERGED for a merged pull request.
+    state: str
+    labels: list[str]
+    assignees: list[str]
+    pullRequest: bool
+
+
+# Looks up one issue that is not in the fetched set. `main` passes one that
+# runs `gh issue view` and exits 1 when that fails.
+type Lookup = Callable[[int], IssueState]
+
+
+class Dependencies(TypedDict):
+    """What an issue's dependency lines hold it back by."""
+
+    # The `Blocked by` issues that are still open, in body order.
+    blockedByIssues: list[int]
+    # The latest `Not before` date when it is after today, as YYYY-MM-DD.
+    notBefore: str | None
+    # The `Not before` lines whose date can't be read, trimmed.
+    unreadable: list[str]
 
 
 class WaveEntry(TypedDict):
@@ -119,7 +180,13 @@ class Blocker(TypedDict):
 class BlockedEntry(TypedDict):
     issue: int
     id: str
+    # The assumed objectives no live lesson serves. Empty when only the
+    # issue's dependency lines hold it back.
     blockedBy: list[Blocker]
+    # The three dependency fields, each present only when it holds something.
+    blockedByIssues: NotRequired[list[int]]
+    notBefore: NotRequired[str]
+    unreadable: NotRequired[list[str]]
 
 
 class SkippedEntry(TypedDict):
@@ -159,6 +226,14 @@ class ContentEntry(TypedDict):
     labels: list[str]
 
 
+class ContentBlockedEntry(TypedDict):
+    issue: int
+    title: str
+    blockedByIssues: NotRequired[list[int]]
+    notBefore: NotRequired[str]
+    unreadable: NotRequired[list[str]]
+
+
 class ContentWave(TypedDict):
     kind: Literal["content"]
     size: int
@@ -167,6 +242,8 @@ class ContentWave(TypedDict):
     skipped: list[SkippedEntry]
     waiting: list[ContentEntry]
     notPicked: list[NotPickedEntry]
+    # Last, so the keys before it keep the order they had without it.
+    blocked: list[ContentBlockedEntry]
 
 
 type Wave = LessonsWave | ContentWave
@@ -180,30 +257,154 @@ class Args(TypedDict):
     json: bool
 
 
+def today_utc() -> date:
+    """Today's date in UTC, the one clock a `Not before` line is read by."""
+    return datetime.now(UTC).date()
+
+
+def no_lookup(number: int) -> IssueState:
+    """The default `lookup`: a caller that needs one must pass it."""
+    raise ValueError(f"next-wave: issue #{number} is not in the fetched set and there is no lookup")
+
+
+def dependency_lines(body: str) -> tuple[list[int], list[str]]:
+    """The `Blocked by` issue numbers and the `Not before` values of a body.
+
+    A line counts when, trimmed, it matches the form whole, with the case
+    as written. Lines inside a fenced code block (three or more backticks
+    or tildes) and quoted lines (starting with `>`) don't count, since they
+    show a line rather than state one. A `Not before` value is the one word
+    after the words, unchecked here.
+    """
+    blocked_by: list[int] = []
+    not_before: list[str] = []
+    fence: str | None = None
+    for raw in body.splitlines():
+        line = raw.strip()
+        opening = FENCE.match(line)
+        if fence is not None:
+            # A fence closes on a line of only its character, at least as long as the opening.
+            if line.strip(fence[0]) == "" and len(line) >= len(fence):
+                fence = None
+            continue
+        if opening:
+            fence = opening.group(1)
+            continue
+        if line.startswith(">"):
+            continue
+        if m := BLOCKED_BY_LINE.fullmatch(line):
+            blocked_by.append(int(m.group(1)))
+        elif m := NOT_BEFORE_LINE.fullmatch(line):
+            not_before.append(m.group(1))
+    return blocked_by, not_before
+
+
+def read_date(value: str) -> date | None:
+    """A YYYY-MM-DD date, or None when `value` isn't one."""
+    if not ISO_DATE.fullmatch(value):
+        return None
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def dependencies(body: str, is_open: Callable[[int], bool], today: date) -> Dependencies:
+    """What an issue body's dependency lines hold the issue back by.
+
+    A `Blocked by #N` line holds it while #N is open. Two lines name two
+    blockers, and the same number twice counts once. A `Not before` line
+    holds it while its date is after `today`, so on that date it is free.
+    With two, the later date counts. An unreadable `Not before` date holds
+    the issue too, since the picker can't tell when it is free.
+    """
+    blocked_by, not_before = dependency_lines(body)
+    open_blockers = [n for n in dict.fromkeys(blocked_by) if is_open(n)]
+    dates: list[date] = []
+    unreadable: list[str] = []
+    for value in not_before:
+        d = read_date(value)
+        if d is None:
+            unreadable.append(f"Not before {value}")
+        else:
+            dates.append(d)
+    latest = max(dates, default=None)
+    return {
+        "blockedByIssues": open_blockers,
+        "notBefore": latest.isoformat() if latest is not None and latest > today else None,
+        "unreadable": unreadable,
+    }
+
+
+def held(d: Dependencies) -> bool:
+    return bool(d["blockedByIssues"] or d["notBefore"] or d["unreadable"])
+
+
+def add_dependency_fields(entry: BlockedEntry | ContentBlockedEntry, d: Dependencies) -> None:
+    """Add the dependency fields to a blocked entry, each only when it holds something."""
+    if d["blockedByIssues"]:
+        entry["blockedByIssues"] = d["blockedByIssues"]
+    if d["notBefore"] is not None:
+        entry["notBefore"] = d["notBefore"]
+    if d["unreadable"]:
+        entry["unreadable"] = d["unreadable"]
+
+
+def dependency_reasons(entry: BlockedEntry | ContentBlockedEntry) -> list[str]:
+    """The dependency fields of a blocked entry as words, in field order."""
+    reasons: list[str] = []
+    if "blockedByIssues" in entry:
+        reasons.append(f"blocked by {', '.join(f'#{n}' for n in entry['blockedByIssues'])}")
+    if "notBefore" in entry:
+        reasons.append(f"not before {entry['notBefore']}")
+    if "unreadable" in entry:
+        reasons.append(f"unreadable date in {', '.join(code(x) for x in entry['unreadable'])}")
+    return reasons
+
+
+def open_checker(known_open: Iterable[int], lookup: Lookup) -> Callable[[int], bool]:
+    """Whether an issue is open: every number in `known_open` is, and any
+    other is looked up. A pull request counts by its state too."""
+    known = set(known_open)
+
+    def is_open(number: int) -> bool:
+        return number in known or lookup(number)["state"] == "OPEN"
+
+    return is_open
+
+
 def pick_wave(
     lessons: Sequence[PlannedLesson],
     ready_issues: Sequence[ReadyIssue],
-    open_issues: Iterable[int] | None = None,
+    lookup: Lookup = no_lookup,
     size: int = 6,
     kind: str = "lessons",
     only: Iterable[int] | None = None,
     unblockers_first: bool = False,
+    today: date | None = None,
 ) -> Wave:
-    """Pick the next wave of the given `kind`."""
+    """Pick the next wave of the given `kind`.
+
+    `ready_issues` is what `main` fetched for the kind (every one is open),
+    and `lookup` gives the state of any other issue that a `Blocked by`
+    line or `only` names. `today` defaults to `today_utc()`.
+    """
+    day = today if today is not None else today_utc()
     if kind == "content":
-        return pick_content_wave(lessons, ready_issues, open_issues, size, only)
+        return pick_content_wave(lessons, ready_issues, lookup, size, only, day)
     if kind != "lessons":
         raise ValueError(f"next-wave: unknown kind {json.dumps(kind, ensure_ascii=False)}")
-    return pick_lessons_wave(lessons, ready_issues, open_issues, size, only, unblockers_first)
+    return pick_lessons_wave(lessons, ready_issues, lookup, size, only, unblockers_first, day)
 
 
 def pick_lessons_wave(
     lessons: Sequence[PlannedLesson],
     ready_issues: Sequence[ReadyIssue],
-    open_issues: Iterable[int] | None = None,
+    lookup: Lookup = no_lookup,
     size: int = 6,
     only: Iterable[int] | None = None,
     unblockers_first: bool = False,
+    today: date | None = None,
 ) -> LessonsWave:
     """Pick the next lessons wave.
 
@@ -215,13 +416,14 @@ def pick_lessons_wave(
     area in turn, in area order, until `size` is reached or the areas run
     out, so every area gets progress. Every candidate ends up in exactly one
     of the four lists: `wave`, `blocked` (it assumes an objective no live
-    lesson serves), `skipped` (the issue is not ready, is assigned, or is
-    not in `only`) or `waiting` (fit for a wave, but this one is full),
-    grouped by area.
+    lesson serves, or its issue's dependency lines hold it), `skipped` (the
+    issue is not ready, is assigned, or is not in `only`) or `waiting` (fit
+    for a wave, but this one is full), grouped by area.
     """
+    day = today if today is not None else today_utc()
     live = {lesson["id"] for lesson in lessons if lesson["live"]}
     ready = {i["number"]: i for i in ready_issues}
-    open_set = set(open_issues if open_issues is not None else ready)
+    is_open = open_checker(ready, lookup)
     only_list = list(only) if only is not None else None
     only_set = set(only_list) if only_list is not None else None
     # Planned lesson issue to its lesson id, live pages included.
@@ -271,8 +473,11 @@ def pick_lessons_wave(
             for o in dict.fromkeys(lesson["assumes"])
             if o not in served_live
         ]
-        if blocked_by:
-            blocked.append({"issue": number, "id": lesson_id, "blockedBy": blocked_by})
+        deps = dependencies(issue["body"], is_open, day)
+        if blocked_by or held(deps):
+            entry: BlockedEntry = {"issue": number, "id": lesson_id, "blockedBy": blocked_by}
+            add_dependency_fields(entry, deps)
+            blocked.append(entry)
             continue
         candidate_serves[lesson_id] = lesson["serves"]
         candidates.append(
@@ -328,13 +533,13 @@ def pick_lessons_wave(
         if lesson_id is None:
             reason = (
                 "not a planned lesson (use --kind content)"
-                if n in open_set
+                if n in ready or is_open_issue(lookup(n))
                 else "no such open issue"
             )
         elif lesson_id in live:
             reason = f"lesson {lesson_id} is live"
         elif b is not None:
-            reason = f"blocked by {blocked_by_text(b)}"
+            reason = blocked_by_text(b)
         elif s is not None:
             reason = (
                 "assigned" if s["reason"].startswith("issue is assigned") else "not ready-for-agent"
@@ -355,37 +560,53 @@ def pick_lessons_wave(
     }
 
 
-def blocked_by_text(b: BlockedEntry) -> str:
-    """The lessons that serve a blocked lesson's missing objectives.
+def is_open_issue(state: IssueState) -> bool:
+    """An open issue, where a pull request doesn't count."""
+    return state["state"] == "OPEN" and not state["pullRequest"]
 
-    When no lesson serves them, the objectives themselves.
+
+def blocked_by_text(b: BlockedEntry) -> str:
+    """Why a lesson is blocked, for its `notPicked` reason.
+
+    The lessons that serve its missing objectives or, when no lesson serves
+    them, the objectives themselves, after `blocked by`. Then its dependency
+    reasons. A lesson blocked by objectives alone reads as it did before
+    the dependency lines.
     """
-    lessons = list(dict.fromkeys(lesson for x in b["blockedBy"] for lesson in x["servedBy"]))
-    if lessons:
-        return ", ".join(lessons)
-    objectives = ", ".join(x["objective"] for x in b["blockedBy"])
-    return f"objective {objectives} (no lesson serves it)"
+    reasons: list[str] = []
+    if b["blockedBy"]:
+        lessons = list(dict.fromkeys(lesson for x in b["blockedBy"] for lesson in x["servedBy"]))
+        if lessons:
+            reasons.append(f"blocked by {', '.join(lessons)}")
+        else:
+            objectives = ", ".join(x["objective"] for x in b["blockedBy"])
+            reasons.append(f"blocked by objective {objectives} (no lesson serves it)")
+    return "; ".join(reasons + dependency_reasons(b))
 
 
 def pick_content_wave(
     lessons: Sequence[PlannedLesson],
     ready_issues: Sequence[ReadyIssue],
-    open_issues: Iterable[int] | None = None,
+    lookup: Lookup = no_lookup,
     size: int = 6,
     only: Iterable[int] | None = None,
+    today: date | None = None,
 ) -> ContentWave:
     """Pick the next content wave.
 
     Ready, unassigned `content` issues that no plan file names as its
     `issue`, by ascending number. The first `size` are the wave and the rest
-    wait. An assigned issue, or one outside `only`, is skipped with the reason.
+    wait. An assigned issue, or one outside `only`, is skipped with the
+    reason. One that its dependency lines hold is blocked.
     """
+    day = today if today is not None else today_utc()
     ready = {i["number"]: i for i in ready_issues}
-    open_set = set(open_issues if open_issues is not None else ready)
+    is_open = open_checker(ready, lookup)
     only_list = list(only) if only is not None else None
     only_set = set(only_list) if only_list is not None else None
     planned = {lesson["issue"] for lesson in lessons if lesson["issue"] is not None}
     skipped: list[SkippedEntry] = []
+    blocked: list[ContentBlockedEntry] = []
     candidates: list[ContentEntry] = []
     for i in sorted(ready_issues, key=lambda x: x["number"]):
         labels = i["labels"]
@@ -398,6 +619,12 @@ def pick_content_wave(
             reason = f"issue is assigned to {', '.join(i['assignees'])}"
             skipped.append({"issue": i["number"], "reason": reason})
             continue
+        deps = dependencies(i["body"], is_open, day)
+        if held(deps):
+            entry: ContentBlockedEntry = {"issue": i["number"], "title": i["title"]}
+            add_dependency_fields(entry, deps)
+            blocked.append(entry)
+            continue
         candidates.append({"issue": i["number"], "title": i["title"], "labels": labels})
     wave = candidates[:size]
     waiting = candidates[size:]
@@ -407,10 +634,8 @@ def pick_content_wave(
         if n in in_wave:
             continue
         issue = ready.get(n)
-        if n not in open_set:
-            reason = "no such open issue"
-        elif issue is None:
-            reason = "not ready-for-agent"
+        if issue is None:
+            reason = content_reason_outside(n, lookup(n), planned)
         elif n in planned:
             reason = "a planned lesson (use --kind lessons)"
         elif "content" not in issue["labels"]:
@@ -419,6 +644,8 @@ def pick_content_wave(
             reason = "a nits issue (the dispatcher adds it as the nits row)"
         elif issue["assignees"]:
             reason = "assigned"
+        elif (b := next((x for x in blocked if x["issue"] == n), None)) is not None:
+            reason = "; ".join(dependency_reasons(b))
         else:
             reason = "waiting (wave full)"
         not_picked.append({"issue": n, "reason": reason})
@@ -430,7 +657,22 @@ def pick_content_wave(
         "skipped": skipped,
         "waiting": waiting,
         "notPicked": not_picked,
+        "blocked": blocked,
     }
+
+
+def content_reason_outside(n: int, state: IssueState, planned: set[int]) -> str:
+    """The `notPicked` reason of an `only` number outside the fetched set, from its lookup."""
+    if not is_open_issue(state):
+        return "no such open issue"
+    if "ready-for-agent" not in state["labels"]:
+        return "not ready-for-agent"
+    if n in planned:
+        return "a planned lesson (use --kind lessons)"
+    if "content" not in state["labels"]:
+        return "not a content issue"
+    # Open, ready and content, yet not fetched: its labels changed since the list call.
+    return "not in the fetched issues (run the picker again)"
 
 
 def code(s: str) -> str:
@@ -493,7 +735,9 @@ def format_wave(result: Wave) -> str:
             + ")"
             for x in b["blockedBy"]
         ]
-        lines.append(f"- #{b['issue']} {code(b['id'])}: assumes {'; '.join(why)}")
+        reasons = [f"assumes {'; '.join(why)}"] if why else []
+        reasons += dependency_reasons(b)
+        lines.append(f"- #{b['issue']} {code(b['id'])}: {'; '.join(reasons)}")
     lines += ["", f"## Skipped ({len(result['skipped'])})", "", *skipped_lines(result["skipped"])]
     count = sum(len(w["lessons"]) for w in result["waiting"])
     lines += ["", f"## Waiting for a later wave ({count})", ""]
@@ -520,6 +764,11 @@ def format_content_wave(result: ContentWave) -> str:
         labels = ", ".join(code(label) for label in w["labels"])
         title = w["title"].replace("|", "\\|")
         lines.append(f"| #{w['issue']} | {title} | {labels} |")
+    # Only when there is one, so a wave without dependency lines prints as it did before them.
+    if result["blocked"]:
+        lines += ["", f"## Blocked ({len(result['blocked'])})", ""]
+        for b in result["blocked"]:
+            lines.append(f"- #{b['issue']} {b['title']}: {'; '.join(dependency_reasons(b))}")
     lines += ["", f"## Skipped ({len(result['skipped'])})", "", *skipped_lines(result["skipped"])]
     lines += ["", f"## Waiting for a later wave ({len(result['waiting'])})", ""]
     for w in result["waiting"]:
@@ -645,37 +894,108 @@ def parse_lesson_plan(output: str) -> list[PlannedLesson]:
 
 
 def parse_issues(output: str) -> list[ReadyIssue]:
-    """The issues from `gh issue list --json number,title,assignees,labels` output,
-    with assignees as login names and labels as names."""
+    """The issues from `gh issue list --json number,title,assignees,labels,body`
+    output, with assignees as login names and labels as names."""
     issues: list[ReadyIssue] = []
     for raw in cast("list[dict[str, object]]", json.loads(output)):
         assignees = cast("list[dict[str, str]]", raw.get("assignees") or [])
         labels = cast("list[dict[str, str]]", raw.get("labels") or [])
+        body = raw["body"]
+        if not isinstance(body, str):
+            raise TypeError(f"issue #{raw['number']} has body {body!r}")
         issues.append(
             {
                 "number": cast("int", raw["number"]),
                 "title": cast("str", raw["title"]),
                 "assignees": [a["login"] for a in assignees],
                 "labels": [label["name"] for label in labels],
+                "body": body,
             }
         )
     return issues
 
 
+def parse_issue_state(output: str) -> IssueState:
+    """One issue from `gh issue view --json state,labels,assignees,url` output.
+
+    `gh issue view` gives a pull request too, and its `url` has `/pull/`.
+    """
+    raw = cast("dict[str, object]", json.loads(output))
+    state = raw["state"]
+    url = raw["url"]
+    if not isinstance(state, str) or not isinstance(url, str):
+        raise TypeError(f"state {state!r}, url {url!r}")
+    assignees = cast("list[dict[str, str]]", raw.get("assignees") or [])
+    labels = cast("list[dict[str, str]]", raw.get("labels") or [])
+    return {
+        "state": state,
+        "labels": [label["name"] for label in labels],
+        "assignees": [a["login"] for a in assignees],
+        "pullRequest": "/pull/" in url,
+    }
+
+
 LESSON_PLAN = ["bun", "scripts/lesson-plan.mjs"]
-ISSUE_LIST_COMMAND = [
-    "gh",
-    "issue",
-    "list",
-    "-R",
-    REPO,
-    "-s",
-    "open",
-    "-L",
-    "1000",
-    "--json",
-    "number,title,assignees,labels",
-]
+
+
+def issue_list_command(kind: Kind) -> list[str]:
+    """The `gh issue list` call that fetches a kind's issues on the server side.
+
+    Every `-l` must match. A lessons wave fetches every `ready-for-agent`
+    issue, since the plan files choose the lessons and a planned lesson's
+    issue can carry any kind label. A content wave adds `-l content`.
+    """
+    labels = ["-l", "ready-for-agent"] + (["-l", "content"] if kind == "content" else [])
+    return [
+        "gh",
+        "issue",
+        "list",
+        "-R",
+        REPO,
+        "-s",
+        "open",
+        *labels,
+        "-L",
+        str(ISSUE_LIMIT),
+        "--json",
+        "number,title,assignees,labels,body",
+    ]
+
+
+def issue_view_command(number: int) -> list[str]:
+    return [
+        "gh",
+        "issue",
+        "view",
+        str(number),
+        "-R",
+        REPO,
+        "--json",
+        "state,labels,assignees,url",
+    ]
+
+
+def gh_lookup() -> Lookup:
+    """A `Lookup` that runs `gh issue view` once per number and exits 1 when
+    it fails, for a number that doesn't exist too."""
+    cache: dict[int, IssueState] = {}
+
+    def lookup(number: int) -> IssueState:
+        if number not in cache:
+            cache[number] = read_json(issue_view_command(number), parse_issue_state)
+        return cache[number]
+
+    return lookup
+
+
+def fetch_issues(kind: Kind) -> list[ReadyIssue]:
+    """The kind's issues, or exit 1 when the list reaches `ISSUE_LIMIT`,
+    since then it may be cut short."""
+    command = issue_list_command(kind)
+    issues = read_json(command, parse_issues)
+    if len(issues) >= ISSUE_LIMIT:
+        fail(command, f"{len(issues)} issues reach the -L limit, so the list may be cut short")
+    return issues
 
 
 def read_json[T](command: Sequence[str], parse: Callable[[str], T], cwd: Path | None = None) -> T:
@@ -711,16 +1031,16 @@ def main(argv: Sequence[str]) -> int:
         print(args, file=sys.stderr)
         return 2
     lessons = read_json(LESSON_PLAN, parse_lesson_plan, cwd=SITE)
-    issues = read_json(ISSUE_LIST_COMMAND, parse_issues)
-    ready = [i for i in issues if "ready-for-agent" in i["labels"]]
+    ready = fetch_issues(args["kind"])
     result = pick_wave(
         lessons,
         ready,
-        open_issues=[i["number"] for i in issues],
+        lookup=gh_lookup(),
         size=args["size"],
         kind=args["kind"],
         only=args["only"],
         unblockers_first=args["unblockersFirst"],
+        today=today_utc(),
     )
     out = to_json(result) if args["json"] else to_markdown(result)
     sys.stdout.buffer.write(out.encode("utf-8"))

@@ -10,7 +10,8 @@ course position now.
 import io
 import json
 import subprocess
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from datetime import date
 from typing import NotRequired, TypedDict, cast
 
 import next_wave as nw
@@ -18,7 +19,9 @@ import pytest
 from next_wave import (
     NITS_TITLE,
     NOT_IN_ONLY,
+    IssueState,
     LessonsWave,
+    Lookup,
     PlannedLesson,
     ReadyIssue,
     WaveEntry,
@@ -66,13 +69,34 @@ def plan(areas: Sequence[Area], live: Sequence[str] = ()) -> list[PlannedLesson]
     return out
 
 
-def issue(number: int, assignees: Sequence[str] = (), labels: Sequence[str] = ()) -> ReadyIssue:
+def issue(
+    number: int, assignees: Sequence[str] = (), labels: Sequence[str] = (), body: str = ""
+) -> ReadyIssue:
     return {
         "number": number,
         "title": f"Lesson #{number}",
         "assignees": list(assignees),
         "labels": list(labels),
+        "body": body,
     }
+
+
+def state(
+    value: str = "OPEN", labels: Sequence[str] = (), pull_request: bool = False
+) -> IssueState:
+    return {"state": value, "labels": list(labels), "assignees": [], "pullRequest": pull_request}
+
+
+class Lookups:
+    """A `Lookup` over planted states that records each number it was asked for."""
+
+    def __init__(self, states: Mapping[int, IssueState]) -> None:
+        self.states = states
+        self.asked: list[int] = []
+
+    def __call__(self, number: int) -> IssueState:
+        self.asked.append(number)
+        return self.states[number]
 
 
 # The typed pickers behind `pick_wave`, for the tests that read one kind's fields.
@@ -370,13 +394,8 @@ def test_with_only_reports_every_listed_number_that_is_not_in_the_wave_with_a_re
         live=["a/live"],
     )
     ready = [issue(1), issue(3, ["someone"]), issue(4), issue(5), issue(6), issue(50)]
-    r = lessons_wave(
-        lessons,
-        ready,
-        open_issues=[1, 2, 3, 4, 5, 6, 9, 50, 51],
-        only=[1, 2, 3, 4, 5, 6, 9, 50, 51, 999],
-        size=1,
-    )
+    lookup = Lookups({51: state(), 52: state(pull_request=True), 999: state("CLOSED")})
+    r = lessons_wave(lessons, ready, lookup, only=[1, 2, 3, 4, 5, 6, 9, 50, 51, 52, 999], size=1)
     assert ids(r["wave"]) == ["a/1"]
     assert r["notPicked"] == [
         {"issue": 2, "reason": "not ready-for-agent"},
@@ -387,8 +406,11 @@ def test_with_only_reports_every_listed_number_that_is_not_in_the_wave_with_a_re
         {"issue": 9, "reason": "lesson a/live is live"},
         {"issue": 50, "reason": "not a planned lesson (use --kind content)"},
         {"issue": 51, "reason": "not a planned lesson (use --kind content)"},
+        {"issue": 52, "reason": "no such open issue"},
         {"issue": 999, "reason": "no such open issue"},
     ]
+    # Only the numbers outside the fetched set that no plan file names are looked up.
+    assert lookup.asked == [51, 52, 999]
 
 
 # unblocks. Course order puts `a/first` before the two unblockers. `a/loop`
@@ -535,13 +557,12 @@ def test_unblocks_with_the_flag_and_no_blocked_lesson_the_order_is_the_course_or
     assert [(w["id"], w["unblocks"]) for w in r["wave"]] == [("a/1", 0), ("a/2", 0)]
 
 
-def test_without_open_issues_treats_the_ready_issues_as_the_open_set() -> None:
+def test_without_a_lookup_a_number_outside_the_fetched_set_is_an_error() -> None:
     lessons = plan([{"dir": "a", "course": ["a/1"], "lessons": [{"id": "a/1", "issue": 1}]}])
-    r = lessons_wave(lessons, [issue(1), issue(2)], only=[1, 2, 3])
-    assert r["notPicked"] == [
-        {"issue": 2, "reason": "not a planned lesson (use --kind content)"},
-        {"issue": 3, "reason": "no such open issue"},
-    ]
+    r = lessons_wave(lessons, [issue(1), issue(2)], only=[1, 2])
+    assert r["notPicked"] == [{"issue": 2, "reason": "not a planned lesson (use --kind content)"}]
+    with pytest.raises(ValueError, match="#3 is not in the fetched set"):
+        lessons_wave(lessons, [issue(1)], only=[3])
 
 
 # pickWave with kind content
@@ -564,7 +585,7 @@ def plan_lessons() -> list[PlannedLesson]:
 
 
 def titled(number: int, title: str, labels: Sequence[str] = ("content",)) -> ReadyIssue:
-    return {"number": number, "title": title, "assignees": [], "labels": list(labels)}
+    return {"number": number, "title": title, "assignees": [], "labels": list(labels), "body": ""}
 
 
 def test_content_picks_ready_content_issues_by_number_leaving_out_planned_lessons() -> None:
@@ -587,6 +608,7 @@ def test_content_picks_ready_content_issues_by_number_leaving_out_planned_lesson
         "skipped": [],
         "waiting": [],
         "notPicked": [],
+        "blocked": [],
     }
 
 
@@ -635,11 +657,21 @@ def test_content_with_only_reports_every_listed_number_that_is_not_in_the_wave()
         issue(76),
         titled(74, "Nits: two typos"),
     ]
+    lookup = Lookups(
+        {
+            75: state(),
+            77: state(labels=["ready-for-agent", "code"]),
+            78: state(labels=["ready-for-agent", "content"]),
+            10: state(labels=["ready-for-agent", "content"]),
+            79: state("OPEN", ["ready-for-agent", "content"], pull_request=True),
+            999: state("CLOSED", ["ready-for-agent", "content"]),
+        }
+    )
     r = content_wave(
         plan_lessons(),
         ready,
-        open_issues=[70, 71, 72, 73, 74, 75, 76, 20],
-        only=[70, 71, 72, 73, 74, 75, 76, 20, 999],
+        lookup,
+        only=[70, 71, 72, 73, 74, 75, 76, 20, 77, 78, 10, 79, 999],
         size=1,
     )
     assert [w["issue"] for w in r["wave"]] == [70]
@@ -651,8 +683,13 @@ def test_content_with_only_reports_every_listed_number_that_is_not_in_the_wave()
         {"issue": 75, "reason": "not ready-for-agent"},
         {"issue": 76, "reason": "not a content issue"},
         {"issue": 20, "reason": "a planned lesson (use --kind lessons)"},
+        {"issue": 77, "reason": "not a content issue"},
+        {"issue": 78, "reason": "not in the fetched issues (run the picker again)"},
+        {"issue": 10, "reason": "a planned lesson (use --kind lessons)"},
+        {"issue": 79, "reason": "no such open issue"},
         {"issue": 999, "reason": "no such open issue"},
     ]
+    assert lookup.asked == [75, 77, 78, 10, 79, 999]
 
 
 # formatWave
@@ -876,6 +913,7 @@ def test_format_renders_a_content_wave_as_an_issue_table_then_the_lists() -> Non
                 {"issue": 8, "title": "Later", "labels": ["content"]},
                 {"issue": 9, "title": "Later too", "labels": ["content"]},
             ],
+            "blocked": [],
         }
     )
     assert out == "\n".join(
@@ -977,7 +1015,30 @@ class FakeCommands:
 
 
 BUN = "bun scripts/lesson-plan.mjs"
-GH = "gh issue list -R lsimons/ai-training -s open -L 1000 --json number,title,assignees,labels"
+GH = (
+    "gh issue list -R lsimons/ai-training -s open -l ready-for-agent -L 1000"
+    " --json number,title,assignees,labels,body"
+)
+GH_CONTENT = (
+    "gh issue list -R lsimons/ai-training -s open -l ready-for-agent -l content -L 1000"
+    " --json number,title,assignees,labels,body"
+)
+
+
+def view(number: int) -> str:
+    return f"gh issue view {number} -R lsimons/ai-training --json state,labels,assignees,url"
+
+
+def view_json(value: str = "OPEN", labels: Sequence[str] = (), kind: str = "issues") -> str:
+    return json.dumps(
+        {
+            "assignees": [],
+            "labels": [{"name": label} for label in labels],
+            "state": value,
+            "url": f"https://github.com/lsimons/ai-training/{kind}/1",
+        }
+    )
+
 
 PLAN_JSON = json.dumps(
     {
@@ -1014,14 +1075,15 @@ GH_JSON = json.dumps(
             "title": "Lesson 11",
             "assignees": [],
             "labels": [{"name": "ready-for-agent"}],
+            "body": "",
         },
         {
             "number": 12,
             "title": "Lesson é 12",
             "assignees": [{"login": "someone"}],
             "labels": [{"name": "ready-for-agent"}],
+            "body": "Blocked by #99",
         },
-        {"number": 13, "title": "Not ready", "assignees": [], "labels": []},
     ]
 )
 
@@ -1059,11 +1121,20 @@ def test_main_runs_lesson_plan_in_site_and_prints_the_wave_as_markdown(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     code, out, fake = run_main(
-        monkeypatch, capsys, ["--only", "11,12,13"], {BUN: PLAN_JSON, GH: GH_JSON}
+        monkeypatch,
+        capsys,
+        ["--only", "11,12,13"],
+        {BUN: PLAN_JSON, GH: GH_JSON, view(13): view_json()},
     )
     assert code == 0
     assert out.stderr == ""
-    assert [(" ".join(c), cwd) for c, cwd in fake.calls] == [(BUN, nw.SITE), (GH, None)]
+    # #12 is assigned, so its `Blocked by #99` line is never looked up. #13
+    # is outside the fetched set, so `--only` looks it up.
+    assert [(" ".join(c), cwd) for c, cwd in fake.calls] == [
+        (BUN, nw.SITE),
+        (GH, None),
+        (view(13), None),
+    ]
     assert (nw.SITE / "scripts" / "lesson-plan.mjs").is_file()
     assert out.stdout == "\n".join(
         [
@@ -1154,6 +1225,8 @@ def test_main_exits_1_when_lesson_plan_fails_or_cannot_start(
         ({BUN: "not json"}, BUN),
         ({BUN: "{}"}, BUN),
         ({BUN: PLAN_JSON, GH: '[{"number": 1}]'}, "gh issue list"),
+        # A body of null is unreadable, and never read as an empty body.
+        ({BUN: PLAN_JSON, GH: '[{"number": 1, "title": "t", "body": null}]'}, "gh issue list"),
     ],
 )
 def test_main_exits_1_on_output_it_cannot_read(
@@ -1178,10 +1251,13 @@ def test_main_writes_a_lone_surrogate_in_the_markdown_as_u_fffd_as_javascript_di
                 "title": "Odd \ud800 title",
                 "assignees": [],
                 "labels": [{"name": "ready-for-agent"}, {"name": "content"}],
+                "body": "",
             }
         ]
     )
-    code, out, _ = run_main(monkeypatch, capsys, ["--kind", "content"], {BUN: PLAN_JSON, GH: gh})
+    code, out, _ = run_main(
+        monkeypatch, capsys, ["--kind", "content"], {BUN: PLAN_JSON, GH_CONTENT: gh}
+    )
     assert code == 0
     assert "| #30 | Odd \ufffd title | `ready-for-agent`, `content` |" in out.stdout
 
@@ -1191,3 +1267,268 @@ def test_parse_lesson_plan_keeps_only_string_after_entries() -> None:
     plan_json["lessons"][1]["after"] = ["a/1", 7, None]
     lessons = nw.parse_lesson_plan(json.dumps(plan_json))
     assert lessons[1]["after"] == ["a/1"]
+
+
+# Dependency lines (#493): `Blocked by #N` and `Not before YYYY-MM-DD`.
+
+TODAY = date(2026, 9, 26)
+
+
+def test_dependency_lines_reads_whole_trimmed_lines_in_the_case_as_written() -> None:
+    body = "\r\n".join(
+        [
+            "Blocked by #12",
+            "  Blocked by #13  ",
+            "Not before 2026-10-01",
+            "blocked by #14",
+            "Blocked By #15",
+            "Blocked by #16, #17",
+            "Blocked by #18 (the spec)",
+            "Blocked by #019",
+            "Split from #1. Blocked by #19.",
+            "not before 2026-10-02",
+            "Not before the next release",
+        ]
+    )
+    assert nw.dependency_lines(body) == ([12, 13], ["2026-10-01"])
+
+
+def test_dependency_lines_skips_code_fences_and_quotes() -> None:
+    body = "\n".join(
+        [
+            "```text",
+            "Blocked by #1",
+            "```",
+            "~~~~",
+            "Not before 2030-01-01",
+            "~~~",
+            "Blocked by #2",
+            "~~~~",
+            "> Blocked by #3",
+            "  > Not before 2030-01-01",
+            "Blocked by #4",
+        ]
+    )
+    # The `~~~` inside the `~~~~` fence is too short to close it.
+    assert nw.dependency_lines(body) == ([4], [])
+
+
+def is_open_in(numbers: Sequence[int]) -> Lookup:
+    return lambda n: state("OPEN" if n in numbers else "CLOSED")
+
+
+def test_dependencies_holds_an_issue_while_a_blocker_is_open_and_lists_two_blockers() -> None:
+    body = "Blocked by #5\nBlocked by #6\nBlocked by #7\nBlocked by #5"
+    d = nw.dependencies(body, lambda n: n in (5, 7), TODAY)
+    assert d == {"blockedByIssues": [5, 7], "notBefore": None, "unreadable": []}
+    assert nw.held(d)
+    closed = nw.dependencies("Blocked by #6", lambda n: False, TODAY)
+    assert not nw.held(closed)
+
+
+def test_dependencies_waits_for_a_future_date_and_frees_the_issue_on_that_date() -> None:
+    def not_before(body: str) -> str | None:
+        return nw.dependencies(body, lambda n: True, TODAY)["notBefore"]
+
+    assert not_before("Not before 2026-09-27") == "2026-09-27"
+    assert not_before("Not before 2026-09-26") is None
+    assert not_before("Not before 2026-09-01") is None
+    # With two lines the later date counts.
+    assert not_before("Not before 2026-09-01\nNot before 2026-12-24") == "2026-12-24"
+
+
+@pytest.mark.parametrize("value", ["2026-13-01", "2026-9-27", "2026-09-27.", "27-09-2026"])
+def test_dependencies_reports_an_unreadable_date_and_holds_the_issue(value: str) -> None:
+    d = nw.dependencies(f"Not before {value}", lambda n: True, TODAY)
+    assert d == {"blockedByIssues": [], "notBefore": None, "unreadable": [f"Not before {value}"]}
+    assert nw.held(d)
+
+
+def dependency_plan() -> list[PlannedLesson]:
+    return plan(
+        [
+            {
+                "dir": "a",
+                "course": ["a/1", "a/2", "a/3", "a/4", "a/5"],
+                "lessons": [
+                    {"id": "a/1", "issue": 1},
+                    {"id": "a/2", "issue": 2},
+                    {"id": "a/3", "issue": 3, "assumes": ["a/c/o1"]},
+                    {"id": "a/4", "issue": 4},
+                    {"id": "a/5", "issue": 5, "serves": ["a/c/o1"]},
+                ],
+            }
+        ]
+    )
+
+
+def test_lessons_blocks_on_an_open_blocker_a_future_date_and_an_unreadable_date() -> None:
+    ready = [
+        # #2 is fetched, so it is open without a lookup. #40 is looked up and open.
+        issue(1, body="Blocked by #2\nBlocked by #40\nBlocked by #41"),
+        issue(2, body="Not before 2026-10-01"),
+        issue(3, body="Blocked by #40\nNot before 2026-02-30"),
+        issue(4, body="Blocked by #41\nNot before 2026-09-26"),
+        issue(5),
+    ]
+    lookup = Lookups({40: state(), 41: state("CLOSED")})
+    r = lessons_wave(dependency_plan(), ready, lookup, only=[1, 2, 3, 4, 5], today=TODAY)
+    assert ids(r["wave"]) == ["a/4", "a/5"]
+    assert r["blocked"] == [
+        {"issue": 1, "id": "a/1", "blockedBy": [], "blockedByIssues": [2, 40]},
+        {"issue": 2, "id": "a/2", "blockedBy": [], "notBefore": "2026-10-01"},
+        {
+            "issue": 3,
+            "id": "a/3",
+            "blockedBy": [{"objective": "a/c/o1", "servedBy": ["a/5"]}],
+            "blockedByIssues": [40],
+            "unreadable": ["Not before 2026-02-30"],
+        },
+    ]
+    # Each number outside the fetched set is looked up once per mention.
+    assert sorted(set(lookup.asked)) == [40, 41]
+    # A dependency-only block counts for no candidate's `unblocks`.
+    assert [w["unblocks"] for w in r["wave"]] == [0, 1]
+    assert r["notPicked"] == [
+        {"issue": 1, "reason": "blocked by #2, #40"},
+        {"issue": 2, "reason": "not before 2026-10-01"},
+        {
+            "issue": 3,
+            "reason": "blocked by a/5; blocked by #40; unreadable date in `Not before 2026-02-30`",
+        },
+    ]
+    out = format_wave(r)
+    assert "- #1 `a/1`: blocked by #2, #40\n" in out
+    assert "- #2 `a/2`: not before 2026-10-01\n" in out
+    assert (
+        "- #3 `a/3`: assumes `a/c/o1` (served by `a/5`); blocked by #40;"
+        " unreadable date in `Not before 2026-02-30`\n"
+    ) in out
+
+
+def test_lessons_does_not_read_the_lines_of_a_skipped_issue() -> None:
+    ready = [issue(1, ["someone"], body="Blocked by #40"), issue(2, body="Blocked by #40")]
+    lookup = Lookups({40: state()})
+    r = lessons_wave(dependency_plan(), ready, lookup, only=[2], today=TODAY)
+    assert r["blocked"] == [{"issue": 2, "id": "a/2", "blockedBy": [], "blockedByIssues": [40]}]
+    assert lookup.asked == [40]
+
+
+def test_the_default_today_is_the_utc_date(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(nw, "today_utc", lambda: date(2026, 9, 30))
+    ready = [issue(2, body="Not before 2026-09-30"), issue(4, body="Not before 2026-10-01")]
+    r = lessons_wave(dependency_plan(), ready)
+    assert [b["issue"] for b in r["blocked"]] == [4]
+    assert nw.pick_wave(dependency_plan(), ready)["wave"][0]["issue"] == 2
+
+
+def test_today_utc_reads_the_clock_in_utc(monkeypatch: pytest.MonkeyPatch) -> None:
+    from datetime import UTC, datetime, tzinfo
+
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz: tzinfo | None = None) -> Clock:
+            assert tz is UTC
+            return cls(2026, 9, 26, 23, 30, tzinfo=UTC)
+
+    monkeypatch.setattr(nw, "datetime", Clock)
+    assert nw.today_utc() == date(2026, 9, 26)
+
+
+def test_content_blocks_on_the_lines_and_prints_the_blocked_section_only_then() -> None:
+    ready = [
+        issue(30, labels=["content"], body="Blocked by #40"),
+        issue(31, labels=["content"], body="Blocked by #41\nNot before 2026-09-20"),
+        issue(32, labels=["content"], body="Not before 2027-01-01"),
+        issue(33, ["someone"], ["content"], body="Blocked by #40"),
+    ]
+    lookup = Lookups({40: state(), 41: state("CLOSED")})
+    r = content_wave(plan_lessons(), ready, lookup, only=[30, 31, 32, 33], today=TODAY)
+    assert [w["issue"] for w in r["wave"]] == [31]
+    assert r["blocked"] == [
+        {"issue": 30, "title": "Lesson #30", "blockedByIssues": [40]},
+        {"issue": 32, "title": "Lesson #32", "notBefore": "2027-01-01"},
+    ]
+    assert r["notPicked"] == [
+        {"issue": 30, "reason": "blocked by #40"},
+        {"issue": 32, "reason": "not before 2027-01-01"},
+        {"issue": 33, "reason": "assigned"},
+    ]
+    out = format_wave(r)
+    assert (
+        "| #31 | Lesson #31 | `content` |\n\n## Blocked (2)\n\n"
+        "- #30 Lesson #30: blocked by #40\n"
+        "- #32 Lesson #32: not before 2027-01-01\n\n## Skipped (1)\n"
+    ) in out
+    # The JSON keeps the keys it had and adds `blocked` last.
+    assert list(r) == ["kind", "size", "only", "wave", "skipped", "waiting", "notPicked", "blocked"]
+    free = content_wave(plan_lessons(), [issue(31, labels=["content"])], lookup, today=TODAY)
+    assert "## Blocked" not in format_wave(free)
+
+
+def test_parse_issue_state_tells_a_pull_request_from_an_issue() -> None:
+    assert nw.parse_issue_state(view_json("MERGED", kind="pull")) == state(
+        "MERGED", pull_request=True
+    )
+    assert nw.parse_issue_state(view_json(labels=["content"])) == state(labels=["content"])
+
+
+def test_main_fetches_a_content_wave_with_both_labels_and_looks_up_a_blocker_once(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    gh = json.dumps(
+        [
+            {
+                "number": n,
+                "title": f"Issue {n}",
+                "assignees": [],
+                "labels": [{"name": "ready-for-agent"}, {"name": "content"}],
+                "body": "Blocked by #90",
+            }
+            for n in (30, 31)
+        ]
+    )
+    monkeypatch.setattr(nw, "today_utc", lambda: TODAY)
+    outputs: dict[str, str | int | OSError] = {
+        BUN: PLAN_JSON,
+        GH_CONTENT: gh,
+        view(90): view_json("CLOSED"),
+    }
+    code, out, fake = run_main(monkeypatch, capsys, ["--kind", "content"], outputs)
+    assert code == 0
+    assert [" ".join(c) for c, _ in fake.calls] == [BUN, GH_CONTENT, view(90)]
+    assert "| #30 | Issue 30 |" in out.stdout
+    assert "| #31 | Issue 31 |" in out.stdout
+
+
+def test_main_exits_1_when_a_lookup_fails_or_is_unreadable(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # `gh issue view` exits 1 for a number that doesn't exist.
+    outputs: dict[str, str | int | OSError] = {BUN: PLAN_JSON, GH: "[]", view(5): 1}
+    code, out, _ = run_main(monkeypatch, capsys, ["--only", "5"], outputs)
+    assert code == 1
+    assert out.stdout == ""
+    assert out.stderr == f"next-wave: gh issue view failed: Command failed: {view(5)}\n"
+    for unreadable in ('{"state": "OPEN"}', '{"state": null, "url": "u"}'):
+        outputs[view(5)] = unreadable
+        code, out, _ = run_main(monkeypatch, capsys, ["--only", "5"], outputs)
+        assert code == 1
+        assert out.stderr.startswith("next-wave: gh issue view failed: unreadable output: ")
+
+
+def test_main_exits_1_when_the_list_reaches_the_limit(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(nw, "ISSUE_LIMIT", 2)
+    gh = json.dumps(
+        [{"number": n, "title": "t", "assignees": [], "labels": [], "body": ""} for n in (1, 2)]
+    )
+    limited = GH.replace("-L 1000", "-L 2")
+    code, out, _ = run_main(monkeypatch, capsys, [], {BUN: PLAN_JSON, limited: gh})
+    assert code == 1
+    assert out.stdout == ""
+    assert out.stderr == (
+        "next-wave: gh issue list failed: 2 issues reach the -L limit,"
+        " so the list may be cut short\n"
+    )
