@@ -23,9 +23,11 @@ Every kind reads the dependency lines of an issue body (docs/agents/triage.md,
 "Dependency lines"). A `Blocked by #N` line blocks the issue while #N is
 open, an issue or a pull request. A `Not before YYYY-MM-DD` line blocks it
 while the date is after today, read in UTC, so on that date it is free. A
-`Not before` line whose date can't be read blocks it too, and says so. A
-blocked issue is listed under Blocked with the reason. For a lesson the
-lines come on top of its plan file's `assumes` entries.
+line that starts with `Blocked by #` or `Not before` but isn't the form
+whole, or names a date that doesn't exist, blocks it too, and the picker
+reports the line as unreadable. A blocked issue is listed under Blocked
+with the reason. For a lesson the lines come on top of its plan file's
+`assumes` entries.
 
 Two kinds of wave. A `lessons` wave (the default) picks planned lessons. A
 lesson is a candidate when its plan file names an `issue`, it has no page
@@ -95,14 +97,17 @@ LONE_SURROGATE = re.compile("[\ud800-\udfff]")
 
 # The dependency lines of an issue body (docs/agents/triage.md, "Dependency
 # lines"). Each is matched whole against a trimmed line, case as written. A
-# `Blocked by` line names one issue. A line that starts `Not before ` and has
-# one word after it is a `Not before` line, and that word must be a
-# YYYY-MM-DD date, or the line is reported as unreadable.
+# `Blocked by` line names one issue. A trimmed line that starts with one of
+# the two prefixes but isn't the form whole, or whose date isn't a real
+# date, is reported as unreadable, so a near miss never drops silently.
 BLOCKED_BY_LINE = re.compile(r"Blocked by #([1-9][0-9]*)", re.ASCII)
-NOT_BEFORE_LINE = re.compile(r"Not before (\S+)")
-ISO_DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", re.ASCII)
-# The opening of a fenced code block: three or more backticks or tildes.
-FENCE = re.compile(r"(`{3,}|~{3,})")
+NOT_BEFORE_LINE = re.compile(r"Not before ([0-9]{4}-[0-9]{2}-[0-9]{2})", re.ASCII)
+DEPENDENCY_PREFIXES = ("Blocked by #", "Not before")
+# The opening of a fenced code block, CommonMark 0.31.2, "Fenced code
+# blocks" (https://spec.commonmark.org/0.31.2/#fenced-code-blocks): three or
+# more backticks or tildes after at most three spaces, and a backtick
+# fence's info string holds no backtick.
+FENCE = re.compile(r" {0,3}(`{3,}(?=[^`]*$)|~{3,})")
 
 # `gh issue list` returns at most this many issues. A list that reaches it
 # may be cut short, so `main` stops with an error there.
@@ -155,7 +160,7 @@ class Dependencies(TypedDict):
     blockedByIssues: list[int]
     # The latest `Not before` date when it is after today, as YYYY-MM-DD.
     notBefore: str | None
-    # The `Not before` lines whose date can't be read, trimmed.
+    # The dependency lines the picker can't read, trimmed.
     unreadable: list[str]
 
 
@@ -267,24 +272,32 @@ def no_lookup(number: int) -> IssueState:
     raise ValueError(f"next-wave: issue #{number} is not in the fetched set and there is no lookup")
 
 
-def dependency_lines(body: str) -> tuple[list[int], list[str]]:
-    """The `Blocked by` issue numbers and the `Not before` values of a body.
+def dependency_lines(body: str) -> tuple[list[int], list[str], list[str]]:
+    """The `Blocked by` issue numbers, the `Not before` dates (unchecked
+    YYYY-MM-DD text) and the unreadable dependency lines of a body.
 
     A line counts when, trimmed, it matches the form whole, with the case
-    as written. Lines inside a fenced code block (three or more backticks
-    or tildes) and quoted lines (starting with `>`) don't count, since they
-    show a line rather than state one. A `Not before` value is the one word
-    after the words, unchecked here.
+    as written. A trimmed line that starts with `Blocked by #` or
+    `Not before` and doesn't match is unreadable. Lines inside a fenced code
+    block and quoted lines (starting with `>`) don't count, since they show
+    a line rather than state one.
     """
     blocked_by: list[int] = []
     not_before: list[str] = []
+    unreadable: list[str] = []
     fence: str | None = None
     for raw in body.splitlines():
         line = raw.strip()
-        opening = FENCE.match(line)
+        opening = FENCE.match(raw.rstrip())
         if fence is not None:
-            # A fence closes on a line of only its character, at least as long as the opening.
-            if line.strip(fence[0]) == "" and len(line) >= len(fence):
+            # A fence closes on a line of only its character, at least as long
+            # as the opening, after at most three spaces.
+            if (
+                opening
+                and opening.group(1)[0] == fence[0]
+                and line == opening.group(1)
+                and len(line) >= len(fence)
+            ):
                 fence = None
             continue
         if opening:
@@ -296,13 +309,13 @@ def dependency_lines(body: str) -> tuple[list[int], list[str]]:
             blocked_by.append(int(m.group(1)))
         elif m := NOT_BEFORE_LINE.fullmatch(line):
             not_before.append(m.group(1))
-    return blocked_by, not_before
+        elif line.startswith(DEPENDENCY_PREFIXES):
+            unreadable.append(line)
+    return blocked_by, not_before, unreadable
 
 
 def read_date(value: str) -> date | None:
-    """A YYYY-MM-DD date, or None when `value` isn't one."""
-    if not ISO_DATE.fullmatch(value):
-        return None
+    """The date of YYYY-MM-DD text, or None when it isn't a real date."""
     try:
         return date.fromisoformat(value)
     except ValueError:
@@ -315,13 +328,12 @@ def dependencies(body: str, is_open: Callable[[int], bool], today: date) -> Depe
     A `Blocked by #N` line holds it while #N is open. Two lines name two
     blockers, and the same number twice counts once. A `Not before` line
     holds it while its date is after `today`, so on that date it is free.
-    With two, the later date counts. An unreadable `Not before` date holds
-    the issue too, since the picker can't tell when it is free.
+    With two, the later date counts. An unreadable line holds the issue
+    too, since the picker can't tell what it asks for.
     """
-    blocked_by, not_before = dependency_lines(body)
+    blocked_by, not_before, unreadable = dependency_lines(body)
     open_blockers = [n for n in dict.fromkeys(blocked_by) if is_open(n)]
     dates: list[date] = []
-    unreadable: list[str] = []
     for value in not_before:
         d = read_date(value)
         if d is None:
@@ -358,7 +370,8 @@ def dependency_reasons(entry: BlockedEntry | ContentBlockedEntry) -> list[str]:
     if "notBefore" in entry:
         reasons.append(f"not before {entry['notBefore']}")
     if "unreadable" in entry:
-        reasons.append(f"unreadable date in {', '.join(code(x) for x in entry['unreadable'])}")
+        lines = ", ".join(code(x) for x in entry["unreadable"])
+        reasons.append(f"unreadable dependency line {lines}")
     return reasons
 
 
