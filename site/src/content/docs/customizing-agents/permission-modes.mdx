@@ -1,4 +1,4 @@
-import { Predict, Scenario, Sort, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Predict, Scenario, Sort, Pitfall, Exercise, Recap, Choice, MultiChoice, Match } from '@components/lesson';
 
 In this lesson we give a coding agent the same small task twice. The first
 time it asks before every edit and every command. The second time it edits
@@ -236,6 +236,52 @@ action there would cost.
   ]}>
 Place each task in the mode you would start it in.
 </Sort>
+
+<Match id="what-each-mode-does" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['permission-modes']}
+  context="Claude Code has four permission modes that this lesson compares: default, acceptEdits, plan and bypassPermissions."
+  title="What does each mode do?" hint="Which actions go through without a prompt in each mode?"
+  options={['default', 'acceptEdits', 'plan', 'bypassPermissions']}
+  rows={[
+    { statement: 'Prompts before every edit and every command', option: 0, why: 'Which mode asks about everything?' },
+    { statement: 'Approves edits inside the working directory and still prompts for other commands', option: 1, why: 'Which mode lets edits through and not commands?' },
+    { statement: 'Blocks edits until you approve a plan', option: 2, why: 'Which mode is for reading and proposing?' },
+    { statement: 'Skips the permission prompts, except for your own ask rules', option: 3, why: 'Which mode is meant for an isolated container?' },
+  ]}
+  rationale="The mode sets the baseline of what the agent may do unasked, and the rules refine it per command.">
+Match each description to its mode.
+</Match>
+
+<MultiChoice id="rules-and-modes" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['permission-modes', 'permissions']}
+  context="In Claude Code the permission mode sets the baseline, and allow, ask and deny rules in the settings refine it per command."
+  title="Modes and rules together" hint="Which rules still count when the mode skips the prompts?"
+  options={[
+    { text: 'Deny rules hold in every mode.', correct: true },
+    { text: 'A git worktree is enough isolation for bypassPermissions.', why: 'A worktree shares the machine, the credentials and the network. It is not a sandbox.' },
+    { text: 'Allow rules do nothing in bypassPermissions.', correct: true },
+    { text: 'acceptEdits approves every shell command as well.', why: 'acceptEdits approves edits inside the working directory. Other commands still prompt.' },
+  ]}>
+
+Which two of these are true?
+
+</MultiChoice>
+
+<Choice id="where-to-skip-prompts" phase="review" objective="customizing-agents/configures-agent/sets-permissions"
+  concepts={['permission-modes', 'blast-radius']}
+  context="The lesson chooses a mode by what a mistake would cost where the agent works, and steps a mode up only inside a sandbox or a container."
+  title="An overnight run without prompts" hint="What can the agent reach from where it runs, if a step goes wrong at 3 a.m.?"
+  options={[
+    { text: 'On your laptop, in a separate git worktree of the repository.', why: 'The worktree shares your laptop, your credentials and your other work. It isn\'t isolation.' },
+    { text: 'On a feature branch, so that main stays safe from its changes.', why: 'A branch limits where commits go. The agent can still run anything on the machine.' },
+    { text: 'In a container that holds a copy of the repository and no credentials.', correct: true },
+    { text: 'On the build server, because it already has the deploy keys it may need.', why: 'Deploy keys make the blast radius production. That is the last place to skip prompts.' },
+  ]}>
+
+You want an overnight task to run with the permission prompts skipped.
+Where does it run?
+
+</Choice>
 
 <Exercise stretch="Run the task a third time in plan mode and note where the agent stops: it reads and proposes, and the edits wait until you approve the plan.">
 Do the two runs from this lesson, if you haven't already, in a fresh

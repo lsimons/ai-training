@@ -1,4 +1,4 @@
-import { Choice, MultiChoice, Order, Predict, Pitfall, Exercise, Recap } from '@components/lesson';
+import { Choice, MultiChoice, Order, Predict, Pitfall, Exercise, Recap, Sort, Scenario } from '@components/lesson';
 
 The last lesson's rule was that a procedure the agent can already do,
 but does differently each time, belongs in a skill. This lesson writes
@@ -223,7 +223,7 @@ Which three lines earn their place in the release skill?
 
 <Choice id="which-description-fires" objective="customizing-agents/writes-skill/packages-a-procedure"
   concepts={['skill-spec', 'writing-a-good-skill']}
-  context="A skill's name and description are what the agent sees before deciding whether to load the body, and the description should name the requests that should fire the skill and no others."
+  context="A skill's name and description are what the agent sees before deciding whether to load the body, and the description should name the requests that should load the skill and no others."
   title="Which description is the right trigger?" hint="Which requests should load a release skill, and which of these descriptions names those and only those?"
   options={[
     { text: '"Helps with the notes package, its version, its changelog, and its releases."', why: 'Every task in the package matches this, so the skill is loaded for work it has nothing to say about, and its body is then in context on the turns that follow.' },
@@ -247,6 +247,66 @@ A colleague writes a release skill and asks where the numbered steps
 belong. What do you tell them?
 </Choice>
 
+<Sort id="valid-front-matter" phase="review" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['skill-spec']}
+  context="A skill sits in a directory named release-notes, with a SKILL.md file inside. The Agent Skills specification asks for a name of lowercase letters, digits and single hyphens that equals the directory name, and a description that isn't empty."
+  title="Does the line pass the spec?" hint="Check the case, the characters, the directory name and whether the description is empty."
+  buckets={['Passes the spec', 'Breaks the spec']}
+  items={[
+    { text: 'name: release-notes', bucket: 0 },
+    { text: 'description: Draft the release notes. Use when asked for release notes.', bucket: 0 },
+    { text: 'name: Release-Notes', bucket: 1 },
+    { text: 'name: release_notes', bucket: 1 },
+    { text: 'name: notes', bucket: 1 },
+    { text: 'description: with nothing after the colon', bucket: 1 },
+  ]} />
+
+<MultiChoice id="a-step-that-can-fail" phase="review" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill']}
+  context="A release skill's first step runs the tests. The lesson writes each step that can fail with what the agent does when it fails."
+  title="The step that runs the tests" hint="What does the agent see when the step fails, what does it do, and what must it not do?"
+  options={[
+    { text: 'If a test fails, stop and report the name of the failing test.', correct: true },
+    { text: 'Run the tests carefully and make sure they are fine.', why: 'Careful says nothing about what to do when a test fails, which is the surprise to plan for.' },
+    { text: 'Don\'t edit a test to make it pass.', correct: true },
+    { text: 'The tests pass most days, so move on quickly.', why: 'That skips the case the step exists for. The failure is when the agent needs the line.' },
+  ]}>
+
+Which two lines belong in that step?
+
+</MultiChoice>
+
+<Choice id="the-closing-check" phase="review" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill']}
+  context="A release skill ends with a check the agent runs, so that the agent can tell a right release from a wrong one without asking."
+  title="How the skill ends" hint="Which ending gives the agent a line to compare against?"
+  options={[
+    { text: 'Check that the version, the changelog and the tag all look good.', why: 'Looks good is a judgment the agent makes about its own work. It can\'t fail.' },
+    { text: 'Tell the user the release is done and list what changed.', why: 'A report is a claim. Nothing in it tells the agent whether the release is right.' },
+    { text: 'Run the release check if there is time left after the tag.', why: 'An optional check doesn\'t run on the day it matters, and it comes after the tag.' },
+    { text: 'Run `python3 release_check.py`, and the release is right when it prints ok.', correct: true },
+  ]}>
+
+Which ending lets the agent know that the release is right?
+
+</Choice>
+
+<Scenario id="the-skill-that-never-loads" phase="review" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['skill-spec', 'writing-a-good-skill']}
+  context="A team's code review skill has the description 'Code review helper.' The agent reads the name and description on every turn, and it loads the body only when a task matches the description."
+  title="The skill never loads" hint="What does the agent read before it decides to load the body?"
+  options={[
+    { text: 'Rewrite the description to name the requests that should load it, such as reviewing a pull request.', correct: true, consequence: 'The next "review my pull request" matches the description, and the body loads.' },
+    { text: 'Move the review steps up into the description, so the agent sees them on every turn.', consequence: 'Every turn now pays for the steps in context, and the description still doesn\'t say when to use them.' },
+    { text: 'Make the body longer and more detailed, so that the agent takes the skill seriously.', consequence: 'The agent never reads the body, because the description still doesn\'t match the request.' },
+    { text: 'Add an instruction to the project file that tells the agent to load every skill it has.', consequence: 'Every skill\'s body is loaded on every task, and the context fills with procedures nobody asked for.' },
+  ]}>
+
+Colleagues ask the agent to "review my pull request", and the agent doesn't
+load the review skill. What do you change?
+
+</Scenario>
+
 <Pitfall title="The description that fires on everything">
 A team writes a skill for updating the changelog and describes it as "Use
 when working on the notes package". For a week every session in the
@@ -264,8 +324,8 @@ and the one that ships with the fixture deleted, start your coding agent
 in the package directory and ask it to cut release 0.4.0. Run the skill
 by typing `/release 0.4.0` if your agent supports that, or ask in
 plain words and watch whether the description fires. The skill changes
-files: it edits `notes.py` and `CHANGELOG.md`, and it makes a commit and
-a tag, so run it only in the copy, and never in the course repository.
+files: it edits `notes.py` and `CHANGELOG.md` and makes a commit and a
+tag. Run it only in the copy, and never in the course repository.
 If the copy isn't a git repository, run `git init` and commit the
 package first, so steps 3 and 5 have something to work with.
 
@@ -284,13 +344,13 @@ from the skill, and the next lesson is about finding those lines.
    the body is loaded when a task matches it or you invoke the skill,
    and remains on later turns until compaction (@Claude Code skills).
    Name the requests
-   that should fire it and no others.
+   that should load it and no others.
 3. The body says when to use the skill, gives the steps in order with
    exact commands and file names, and ends with a check the agent can
    run, with the line that means the result is right.
 4. Each step that can fail says what the agent sees, what it does about
-   it, and what it must not do, so the procedure survives its first
-   surprise.
+   it, and what it must not do. The agent then knows what to do at the
+   first surprise.
 5. A skill is done when someone else's agent runs it from a fresh
    session without asking. Running it that way is the next lesson.
 </Recap>

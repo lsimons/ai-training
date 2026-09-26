@@ -1,4 +1,4 @@
-import { Choice, Match, Predict, Sort, Pitfall, Exercise, Recap, Habit, Prompt, Response } from '@components/lesson';
+import { Choice, Match, Predict, Sort, Pitfall, Exercise, Recap, Habit, Prompt, Response, Order } from '@components/lesson';
 
 The last lesson ended with a release skill that works in the directory it
 was written in. This lesson runs it somewhere else: a clean clone, and a
@@ -341,6 +341,12 @@ An agent tagged `v0.4.0` one commit before the release commit. Which
   ]}>
 You are revising the skill after that run. Which line do you add?
 </Choice>
+
+<Order id="order-the-test" phase="review" objective="customizing-agents/writes-skill/packages-a-procedure"
+  concepts={['writing-a-good-skill']}
+  context="The lesson tests a skill so that the conversation the author had while writing it can't fill a gap for the agent."
+  title="Put the test in order" hint="What has to be fresh before the run, and what do you do with what you read afterwards?"
+  steps={['Make a clean clone of the repository', 'Start a new session with auto memory off', 'Run the skill as a colleague would ask for it', 'Read the transcript for each place the agent hesitated', 'Add a line for each one, and rerun in a new session']} />
 
 <Pitfall title="The skill that only worked at home">
 An engineer writes a release skill in their own clone, runs it three times
