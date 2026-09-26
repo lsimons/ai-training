@@ -139,9 +139,9 @@ its normative definition (@A2A specification).
 ```
 
 The card says what the agent offers and how to call it. The skills
-describe what the courier offers, and a request doesn't name one. The
-client sends a message, and the courier's agent decides how to answer it
-(@A2A specification). The card says nothing about what the courier's
+describe the courier's services, and a request doesn't name one
+(@A2A specification). The client sends a message, and the courier's agent
+decides how to answer it. The card says nothing about what the courier's
 agent does with a ticket once it has one.
 
 <Sort id="which-protocol-fits" objective="building-agents/runs-in-production/mitigates-agent-risks"
@@ -188,9 +188,10 @@ fixed tracking question as text, with the order number and postal code as
 a structured data part. The model can't add anything else to it.
 
 - The permission check looks at the arguments before the message is
-  written. A rule in the loop can allow an order of the ticket's author
-  and a postal code, and refuse everything else. Because the courier's
-  agent picks how to answer, the control is on what you send.
+  written. A rule in the loop can allow an order that belongs to the
+  ticket's author and a postal code, and refuse everything else. Because
+  the courier's agent picks how to answer, the control is on what you
+  send.
 - The output filter reads the message before it leaves, as it reads a
   reply.
 - The approval gate can hold a delegation until a person has seen what it
@@ -226,11 +227,11 @@ enable it?
 <Pitfall title="Enabling a connection because the protocol is standard">
 A team finds a partner agent that speaks A2A, sees an HTTPS address and
 a key requirement in its card, and connects it in an afternoon, with the
-full ticket as the message. The standard made the connection quick to add. It
-said nothing about what the partner's agent keeps or what it sends back.
-Treat each new server or remote agent as a new tool that reads and sends:
-list what crosses the connection, and put it behind the permission check,
-the filter and the gate before you enable it.
+full ticket as the message. The standard made the connection quick to
+add. It said nothing about what the partner's agent keeps or what it
+sends back. Treat each new server or remote agent as a new tool that
+reads and sends: list what crosses the connection, and put it behind the
+permission check, the filter and the gate before you enable it.
 </Pitfall>
 
 <Choice id="read-only-in-the-description" phase="review" objective="building-agents/runs-in-production/mitigates-agent-risks"
@@ -270,8 +271,8 @@ handle?
 Judge the connection the courier proposes, on paper. The courier offers
 the Agent Card in this lesson, points at its `answer-delivery-ticket`
 skill, and proposes that the support agent sends every delivery ticket in
-full and posts the reply that comes back to the customer. Deciding before you connect is cheaper than
-finding out from a log.
+full and posts the reply that comes back to the customer. Deciding
+before you connect is cheaper than finding out from a log.
 
 Write a note of about ten lines in three parts. First, list what the
 connection can read and what it can send, in both directions. Second,
@@ -289,13 +290,12 @@ and that the proposal posts that text to the customer with no check of
 yours in between, and that updates can arrive later at the address you
 give for notifications. It notes that a request names no skill, so the
 skill on the card doesn't limit what the courier's agent does with a
-full ticket. It puts the permission check on what the loop
-sends, the filter and the gate on the message and on the reply, and it
-says the monitor sees only your side. A good trust decision is concrete,
-such as "send only a fixed tracking question with the order number and
-postal code, and write the reply ourselves". What
-would the courier have to show you before you allowed
-`answer-delivery-ticket`?
+full ticket. It puts the permission check on what the loop sends, the
+filter and the gate on the message and on the reply, and it says the
+monitor sees only your side. A good trust decision is concrete, such as
+"send only a fixed tracking question with the order number and postal
+code, and write the reply ourselves". What would the courier have to
+show you before you sent it full tickets?
 
 </Exercise>
 
