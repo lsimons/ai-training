@@ -195,7 +195,11 @@ One tick:
    for a later wave, and, under `--only`, every listed number it didn't
    pick with the reason, so nothing drops silently. A content wave
    (`--kind content`) is the ready, unassigned `content` issues that no plan
-   file claims, by ascending number, with no dependency logic. The lead
+   file claims, by ascending number. For both kinds the picker asks
+   GitHub only for the open `ready-for-agent` issues, plus the `content`
+   label for a content wave, and it blocks an issue whose body has a
+   `Blocked by #N` line for an open #N or a `Not before` line with a later
+   date (`triage.md`, "Dependency lines"). The lead
    adds a code review for a branch whose diff changes code. A nits issue
    is left out because it arrives as the nits row. The picker reads the
    tree of the checkout it runs in, which is why the pull comes first.

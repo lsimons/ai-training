@@ -15,6 +15,8 @@ leave an issue "for later" without saying what later means.
    triaging, then read each body and every comment in one batch. Earlier
    triage comments are often already there and only the label was missed.
    Check the state of every issue a body or comment names as a blocker.
+   When a `ready-for-agent` issue states a blocker or a start date in
+   free text, add the dependency line for it (below).
 
 2. **One issue at a time, with the maintainer.** For each issue, say in a
    few sentences what it is and where it came from, then give one
@@ -75,7 +77,37 @@ body and its decision comment together hold:
 - Which tests or checks prove it: the e2e flow to extend, the build check
   to add, the `mise run ci` gate.
 - What is out of scope, when a reader could reasonably assume otherwise.
-- Its blocker, if any, and the issue it was split from.
+- Its blocker, if any, as a dependency line (below), and the issue it
+  was split from.
+
+## Dependency lines
+
+The wave picker (`mise run next-wave`, `scripts/next_wave.py`) reads two
+line forms in an issue body, for every kind of wave:
+
+```text
+Blocked by #123
+Not before 2026-10-01
+```
+
+- `Blocked by #N` blocks the issue while #N is open. One line names one
+  issue, so an issue with two blockers has two lines. An open pull request
+  blocks too.
+- `Not before YYYY-MM-DD` blocks the issue until that date, read in UTC.
+  On the date itself the issue is free. With two lines the later date
+  counts. The picker reports a date it can't read, such as `2026-9-1` or
+  a date with a trailing period, and blocks the issue until it's fixed.
+- Each goes on its own line near the top of the body, before the prose,
+  with the words and case as shown and nothing else on the line. A
+  sentence such as "Blocked by #123, confirm it merged" doesn't count, and
+  neither does a line inside a code fence or a quote (`>`), so an issue can
+  show the forms, as this section does.
+- For a lesson the lines come on top of its plan file's `assumes` entries.
+- The picker looks up a blocker that isn't in its list with
+  `gh issue view`, and a number that doesn't exist stops it, so a typo
+  shows up at the next pick.
+- When a blocker closes, the line can stay. Remove it when you edit the
+  body anyway.
 
 Stale paths in an old body (`docs/src/` where the code is under `site/src/`)
 get corrected in the triage comment rather than left for the builder to
