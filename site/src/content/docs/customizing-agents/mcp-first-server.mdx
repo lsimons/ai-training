@@ -369,12 +369,12 @@ What does the server send back for the call on the parent directory?
 <MultiChoice id="confirm-which-file-tools" phase="review" objective="customizing-agents/connects-tools-safely/adds-a-tool"
   concepts={['mcp-security', 'client']}
   context="The reference file-system MCP server has read tools and write tools. The client can require a confirmation before each call of a named tool."
-  title="Which tools need a confirmation?" hint="Which of these change a file?"
+  title="Which tools need a confirmation?" hint="Which of these change something on disk?"
   options={[
-    { text: '`write_file`', correct: true },
-    { text: '`read_text_file`', why: 'Reading changes nothing, and the scope already bounds what it can read.' },
-    { text: '`move_file`', correct: true },
-    { text: '`list_directory`', why: 'A listing changes nothing on disk.' },
+    { text: '`create_directory`', correct: true },
+    { text: '`directory_tree`', why: 'A tree listing changes nothing on disk.' },
+    { text: '`edit_file`', correct: true },
+    { text: '`search_files`', why: 'A search reads names and changes nothing, and the scope bounds what it can see.' },
   ]}>
 
 Which two tools do you set to confirm before each call?
@@ -383,7 +383,7 @@ Which two tools do you set to confirm before each call?
 
 <Scenario id="a-new-wiki-server" phase="review" objective="customizing-agents/connects-tools-safely/adds-a-tool"
   concepts={['mcp-security', 'tool-cost']}
-  context="A learner has just added a wiki MCP server to their coding agent. The lesson's first task for a new server is one whose answer the learner already knows."
+  context="A learner has just added a wiki MCP server to their coding agent and hasn't used it yet."
   title="The first task" hint="Which task lets you check each call against an answer you already have?"
   options={[
     { text: 'Ask the agent to tidy up the wiki\'s page structure, since that is what the server is for.', consequence: 'The first calls you see are writes to pages you haven\'t read, from a tool you haven\'t watched.' },

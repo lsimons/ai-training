@@ -360,7 +360,7 @@ made.
 
 <Choice id="the-rate-limit" phase="review" objective="customizing-agents/connects-tools-safely/hardens-a-connection"
   concepts={['mcp-security']}
-  context="A wiki's MCP server has a rate limit of 100 calls a minute. The lesson separates what protects the platform from what protects your data."
+  context="A wiki's MCP server has a rate limit of 100 calls a minute."
   title="Does the rate limit protect the pages?" hint="Whose problem is a limit of 100 calls a minute designed to solve?"
   options={[
     { text: 'Yes, because a runaway agent hits the limit after 100 calls and stops there.', why: 'A hundred bad edits a minute is a lot of damage before any limit applies.' },
@@ -391,7 +391,7 @@ Match each control to its job.
 
 <Scenario id="only-the-prompt-block" phase="review" objective="customizing-agents/connects-tools-safely/hardens-a-connection"
   concepts={['mcp-security']}
-  context="An agent connected to a wiki server has a block of five rules in its system prompt about careful writes, and a proxy with a write cap. The lesson says the prompt block stops accidents and naive attacks and can fail."
+  context="An agent connected to a wiki server has a block of five rules in its system prompt about careful writes, and a proxy with a write cap."
   title="Is the prompt block enough?" hint="What happens on the day the prompt block fails?"
   options={[
     { text: 'Keep both, because the prompt block is one layer that can fail.', correct: true, consequence: 'The day the prompt block fails, the cap refuses every write past its limit.' },
