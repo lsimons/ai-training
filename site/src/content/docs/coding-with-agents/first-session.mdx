@@ -168,7 +168,7 @@ task.
   rows={[
     { statement: 'The command that shows the task is done', option: 0, why: 'Who decides what done means?' },
     { statement: 'The contents of the test file', option: 1, why: 'Can the agent open this file on its own?' },
-    { statement: 'The file the agent must not touch', option: 0, why: 'Would the agent know this limit without being told?' },
+    { statement: 'The test file the agent must not change for this fix', option: 0, why: 'Would the agent know this limit without being told?' },
     { statement: 'What you think of the previous developer\'s style', option: 2, why: 'Does the fix need this?' },
   ]}
   rationale="The brief holds what only you know: the limits and the check that shows the task is done. The agent reads the code itself.">
@@ -433,7 +433,7 @@ Match each task to its permission mode.
   title="The agent says it is done" hint="Is the agent's summary evidence, or a claim?"
   options={[
     { text: 'Accept it. The done-criterion was a passing test run.', consequence: 'The diff also changed the test\'s expected value. The bug is still in the code, and the test no longer looks for it.' },
-    { text: 'Read the diff, then run the check you named yourself.', correct: true, consequence: 'You see that the diff changed only the program, and your own test run passes. Now it is done.' },
+    { text: 'Read the diff, then run the check you named yourself.', correct: true, consequence: 'The diff shows that the agent also changed the test\'s expected value. You send the change back before you accept anything.' },
     { text: 'Ask the agent to confirm that it didn\'t touch the test.', consequence: 'It confirms. Its answer is a second claim, and you still haven\'t looked.' },
     { text: 'Run the test suite yourself, and accept when it passes.', consequence: 'It passes, because the agent edited the test. You needed the diff to see that.' },
   ]}>

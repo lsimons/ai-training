@@ -370,13 +370,13 @@ Match each question to its dimension.
 
 <Choice id="a-low-score" phase="review" objective="coding-with-agents/verifies-agent-work/screens-for-security"
   concepts={['supply-chain-risk']}
-  context="The lesson runs or looks up the OpenSSF Scorecard checks for a new dependency, and treats a low score as a question to answer in writing."
+  context="The lesson runs or looks up the OpenSSF Scorecard checks for a new dependency before a verdict."
   title="A zero on one check" hint="Is a low score a verdict, or a question for the review?"
   options={[
     { text: 'Reject the package, because a zero on any check fails the review.', why: 'A low score is a question to answer. Some zeros matter for your use and some don\'t.' },
     { text: 'Write down what unsigned releases mean for you, and how you will check a release instead.', correct: true },
     { text: 'Ignore it, because the other checks score high enough to make up for it.', why: 'An average hides the one gap. The review answers each low score on its own.' },
-    { text: 'Wait with any decision until the maintainer signs the releases.', why: 'The pull request needs a verdict now, and the maintainer may never add signing.' },
+    { text: 'Make no decision until the maintainer signs the releases.', why: 'The pull request needs a verdict now, and the maintainer may never add signing.' },
   ]}>
 
 A new dependency scores 0 on `Signed-Releases` and high on the other
