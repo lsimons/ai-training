@@ -79,21 +79,26 @@ issue's current body. The section is the `## Arguments` heading line and
 every line after it up to the next level-two heading (`##`). The
 check removes carriage returns and drops blank lines in both. The file's
 section must equal the issue's section line for line, and it must hold
-at least one line besides the heading:
+at least one line besides the heading. The snippet needs bash or zsh
+(the Bash tool here runs zsh):
 
-```sh
+```bash
 args() { tr -d '\r' | awk '/^## /{p=($0=="## Arguments")} p' | grep -v '^[[:space:]]*$'; }
 a=$(args < .scratch/run-<name>.md); b=$(gh issue view <run> --json body -q .body | args)
 if [ "$a" = "$b" ] && [ "$(printf '%s\n' "$a" | wc -l)" -gt 1 ]; then
   gh issue edit <run> --body-file .scratch/run-<name>.md
 else
-  echo "STOP: Arguments differ"; diff <(printf '%s\n' "$b") <(printf '%s\n' "$a")
+  echo "STOP: Arguments check failed"; diff <(printf '%s\n' "$b") <(printf '%s\n' "$a")
 fi
 ```
 
 When it prints `STOP`, don't post, and don't repair the file from memory.
-Another session wrote the file, or the issue was edited by hand. Stop
-the run, and give the maintainer the run number and the file name with
+The check fails when the two sections differ, when the section is
+missing from the file or the issue, when it holds only the heading, and
+when `gh issue view` failed, which leaves the issue's side empty. The
+diff shows which one it was. A difference can mean that another session
+wrote the file or that someone edited the issue by hand. Stop the run,
+and give the maintainer the run number and the file name with
 the diff the check printed.
 
 ## Starting a run
