@@ -1,9 +1,7 @@
-# Notices
+# Third party content
 
-Content in this repository is licensed under CC BY-SA 4.0 and code under the
-Apache License 2.0. See [LICENSE](./LICENSE) and [LICENSE-CODE](./LICENSE-CODE).
-Material incorporated from third parties is listed here with its origin and
-terms. Add an entry whenever you bring in content from elsewhere.
+CC BY-SA 4.0 material incorporated from third parties is listed here with its
+origin and terms. Add an entry whenever you bring in content from elsewhere.
 
 - **agent-engineer-course** (<https://github.com/lsimons/agent-engineer-course>),
   a fork of Addy Osmani's *agent-engineer*
