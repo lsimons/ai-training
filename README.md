@@ -1,4 +1,4 @@
-# AI training
+# SBP Open Content AI training
 
 An open training suite for getting started with AI: concepts, safety, using
 AI agents, AI-assisted software engineering, and customizing and building AI
@@ -20,17 +20,6 @@ site are written by people working with AI agents, and reviewed by people.
 
 The design is in [`docs/spec/`](./docs/spec/) and the open work is in the
 [issue tracker](https://github.com/schubergphilis/ai-training/issues).
-
-## Origins
-
-This is a rebuild of
-[agent-engineer-course](https://github.com/lsimons/agent-engineer-course), a
-fork of Addy Osmani's [agent-engineer](https://github.com/addyosmani/agent-engineer)
-course with a Starlight setup from Ivar Soares Urdalen. It adopts the
-pedagogy of Harvard's [CS50](https://cs50.harvard.edu/x/) and references the
-public courses on [Claude Academy](https://academy.claude.com/). See
-[`NOTICE.md`](./NOTICE.md) and spec [S02](./docs/spec/S02-topic-map.md) for
-what's reused from where and under which terms.
 
 ## Development
 
@@ -81,10 +70,6 @@ ai-training/
 ├── NOTICE.md                     # third-party material and its terms
 └── README.md
 ```
-
-`CLAUDE.md` is a git symlink (mode `120000`). A Windows clone needs
-`core.symlinks` enabled to get a real link rather than a text file containing
-the target path.
 
 ## Publishing
 
